@@ -4,8 +4,8 @@
  * Polls REST APIs with configurable pagination and authentication.
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { PullConnector } from '../base-connector';
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { PullConnector } from "../base-connector";
 import type {
   ConnectorManifest,
   ConnectorConfig,
@@ -13,17 +13,17 @@ import type {
   ConnectorResult,
   ConnectorEntity,
   AuthMethod,
-} from '../types';
+} from "../types";
 
 export interface RestPullConnectorConfig {
   baseUrl: string;
   path: string;
-  method?: 'GET' | 'POST';
+  method?: "GET" | "POST";
   headers?: Record<string, string>;
   queryParams?: Record<string, string>;
   authMethod?: AuthMethod;
   pagination?: {
-    type: 'offset' | 'cursor' | 'page';
+    type: "offset" | "cursor" | "page";
     limitParam?: string;
     offsetParam?: string;
     cursorParam?: string;
@@ -41,46 +41,46 @@ export interface RestPullConnectorConfig {
  */
 export class RestPullConnector extends PullConnector {
   readonly manifest: ConnectorManifest = {
-    id: 'rest-pull-connector',
-    name: 'REST API Pull Connector',
-    version: '1.0.0',
-    description: 'Polls REST APIs with pagination support',
-    status: 'stable',
-    category: 'api',
-    capabilities: ['pull', 'incremental'],
-    entityTypes: ['GenericRecord'],
+    id: "rest-pull-connector",
+    name: "REST API Pull Connector",
+    version: "1.0.0",
+    description: "Polls REST APIs with pagination support",
+    status: "stable",
+    category: "api",
+    capabilities: ["pull", "incremental"],
+    entityTypes: ["GenericRecord"],
     relationshipTypes: [],
-    authentication: ['none', 'basic', 'api-key', 'bearer'],
+    authentication: ["none", "basic", "api-key", "bearer"],
     requiredSecrets: [],
-    license: 'MIT',
-    maintainer: 'IntelGraph Team',
-    documentationUrl: 'https://docs.intelgraph.io/connectors/rest-pull',
-    tags: ['rest', 'api', 'http', 'polling'],
+    license: "MIT",
+    maintainer: "IntelGraph Team",
+    documentationUrl: "https://docs.intelgraph.io/connectors/rest-pull",
+    tags: ["rest", "api", "http", "polling"],
     rateLimit: {
       requestsPerMinute: 60,
       burstLimit: 10,
     },
     configSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        baseUrl: { type: 'string' },
-        path: { type: 'string' },
-        method: { type: 'string', enum: ['GET', 'POST'], default: 'GET' },
-        headers: { type: 'object' },
-        queryParams: { type: 'object' },
-        authMethod: { type: 'string', enum: ['none', 'basic', 'api-key', 'bearer'] },
+        baseUrl: { type: "string" },
+        path: { type: "string" },
+        method: { type: "string", enum: ["GET", "POST"], default: "GET" },
+        headers: { type: "object" },
+        queryParams: { type: "object" },
+        authMethod: { type: "string", enum: ["none", "basic", "api-key", "bearer"] },
         pagination: {
-          type: 'object',
+          type: "object",
           properties: {
-            type: { type: 'string', enum: ['offset', 'cursor', 'page'] },
-            pageSize: { type: 'number', default: 100 },
-            maxPages: { type: 'number' },
+            type: { type: "string", enum: ["offset", "cursor", "page"] },
+            pageSize: { type: "number", default: 100 },
+            maxPages: { type: "number" },
           },
         },
-        responseDataPath: { type: 'string', default: 'data' },
-        entityType: { type: 'string', default: 'GenericRecord' },
+        responseDataPath: { type: "string", default: "data" },
+        entityType: { type: "string", default: "GenericRecord" },
       },
-      required: ['baseUrl', 'path'],
+      required: ["baseUrl", "path"],
     },
   };
 
@@ -90,11 +90,11 @@ export class RestPullConnector extends PullConnector {
   protected async onInitialize(config: ConnectorConfig): Promise<void> {
     // Validate and cast config
     const cfg = config.config as Record<string, unknown>;
-    if (!cfg.baseUrl || typeof cfg.baseUrl !== 'string') {
-      throw new Error('baseUrl is required and must be a string');
+    if (!cfg.baseUrl || typeof cfg.baseUrl !== "string") {
+      throw new Error("baseUrl is required and must be a string");
     }
-    if (!cfg.path || typeof cfg.path !== 'string') {
-      throw new Error('path is required and must be a string');
+    if (!cfg.path || typeof cfg.path !== "string") {
+      throw new Error("path is required and must be a string");
     }
 
     this.restConfig = cfg as unknown as RestPullConnectorConfig;
@@ -107,18 +107,22 @@ export class RestPullConnector extends PullConnector {
     };
 
     // Add authentication
-    if (this.restConfig.authMethod === 'basic' && config.secrets.username && config.secrets.password) {
+    if (
+      this.restConfig.authMethod === "basic" &&
+      config.secrets.username &&
+      config.secrets.password
+    ) {
       axiosConfig.auth = {
         username: config.secrets.username,
         password: config.secrets.password,
       };
-    } else if (this.restConfig.authMethod === 'bearer' && config.secrets.token) {
+    } else if (this.restConfig.authMethod === "bearer" && config.secrets.token) {
       axiosConfig.headers = {
         ...axiosConfig.headers,
         Authorization: `Bearer ${config.secrets.token}`,
       };
-    } else if (this.restConfig.authMethod === 'api-key' && config.secrets.apiKey) {
-      const apiKeyHeader = config.secrets.apiKeyHeader || 'X-API-Key';
+    } else if (this.restConfig.authMethod === "api-key" && config.secrets.apiKey) {
+      const apiKeyHeader = config.secrets.apiKeyHeader || "X-API-Key";
       axiosConfig.headers = {
         ...axiosConfig.headers,
         [apiKeyHeader]: config.secrets.apiKey,
@@ -131,12 +135,12 @@ export class RestPullConnector extends PullConnector {
   async testConnection(): Promise<{ success: boolean; message: string }> {
     try {
       const response = await this.httpClient.request({
-        method: this.restConfig.method || 'GET',
+        method: this.restConfig.method || "GET",
         url: this.restConfig.path,
         params: {
           ...this.restConfig.queryParams,
           // Limit to 1 record for test
-          [this.restConfig.pagination?.limitParam || 'limit']: 1,
+          [this.restConfig.pagination?.limitParam || "limit"]: 1,
         },
       });
 
@@ -162,15 +166,15 @@ export class RestPullConnector extends PullConnector {
     try {
       const {
         path,
-        method = 'GET',
+        method = "GET",
         queryParams = {},
         pagination,
-        responseDataPath = 'data',
-        entityType = 'GenericRecord',
+        responseDataPath = "data",
+        entityType = "GenericRecord",
         rateLimitDelay = 0,
       } = this.restConfig;
 
-      context.logger.info('Starting REST API ingestion', {
+      context.logger.info("Starting REST API ingestion", {
         baseUrl: this.restConfig.baseUrl,
         path,
         method,
@@ -188,7 +192,7 @@ export class RestPullConnector extends PullConnector {
 
         // Check pagination limits
         if (pagination?.maxPages && page > pagination.maxPages) {
-          context.logger.info('Reached max pages limit', { maxPages: pagination.maxPages });
+          context.logger.info("Reached max pages limit", { maxPages: pagination.maxPages });
           break;
         }
 
@@ -204,15 +208,22 @@ export class RestPullConnector extends PullConnector {
         const params: Record<string, any> = { ...queryParams };
 
         if (pagination) {
-          const { type, limitParam = 'limit', offsetParam = 'offset', cursorParam = 'cursor', pageParam = 'page', pageSize = 100 } = pagination;
+          const {
+            type,
+            limitParam = "limit",
+            offsetParam = "offset",
+            cursorParam = "cursor",
+            pageParam = "page",
+            pageSize = 100,
+          } = pagination;
 
-          if (type === 'offset') {
+          if (type === "offset") {
             params[limitParam] = pageSize;
             params[offsetParam] = offset;
-          } else if (type === 'cursor' && cursor) {
+          } else if (type === "cursor" && cursor) {
             params[cursorParam] = cursor;
             params[limitParam] = pageSize;
-          } else if (type === 'page') {
+          } else if (type === "page") {
             params[pageParam] = page;
             params[limitParam] = pageSize;
           }
@@ -232,7 +243,7 @@ export class RestPullConnector extends PullConnector {
             throw new Error(`Response data is not an array. Path: ${responseDataPath}`);
           }
 
-          context.logger.debug('Received records from API', {
+          context.logger.debug("Received records from API", {
             count: data.length,
             page,
             offset,
@@ -260,17 +271,17 @@ export class RestPullConnector extends PullConnector {
               await context.emitter.emitEntity(entity);
               entitiesProcessed++;
 
-              context.metrics.increment('rest.records.processed', 1, {
+              context.metrics.increment("rest.records.processed", 1, {
                 connector: this.manifest.id,
               });
             } catch (error) {
-              context.logger.error('Error processing API record', error as Error, {
+              context.logger.error("Error processing API record", error as Error, {
                 page,
                 recordIndex: entitiesProcessed,
               });
 
               errors.push({
-                code: 'RECORD_PROCESSING_ERROR',
+                code: "RECORD_PROCESSING_ERROR",
                 message: (error as Error).message,
                 recordId: `page_${page}_record_${entitiesProcessed}`,
                 retryable: false,
@@ -282,9 +293,9 @@ export class RestPullConnector extends PullConnector {
           if (data.length < (pagination?.pageSize || 100)) {
             hasMore = false;
           } else {
-            if (pagination?.type === 'offset') {
+            if (pagination?.type === "offset") {
               offset += data.length;
-            } else if (pagination?.type === 'cursor') {
+            } else if (pagination?.type === "cursor") {
               // Extract next cursor from response
               cursor = this.extractCursor(response.data);
               if (!cursor) {
@@ -292,18 +303,18 @@ export class RestPullConnector extends PullConnector {
               } else {
                 await context.stateStore.setCursor(cursor);
               }
-            } else if (pagination?.type === 'page') {
+            } else if (pagination?.type === "page") {
               page++;
             }
           }
         } catch (error) {
-          context.logger.error('Error fetching from API', error as Error, {
+          context.logger.error("Error fetching from API", error as Error, {
             page,
             offset,
           });
 
           errors.push({
-            code: 'API_REQUEST_ERROR',
+            code: "API_REQUEST_ERROR",
             message: (error as Error).message,
             retryable: true,
             cause: error as Error,
@@ -316,14 +327,14 @@ export class RestPullConnector extends PullConnector {
       await context.emitter.flush();
 
       const durationMs = Date.now() - startTime;
-      context.logger.info('REST API ingestion completed', {
+      context.logger.info("REST API ingestion completed", {
         entitiesProcessed,
         errorCount: errors.length,
         durationMs,
         pagesProcessed: page,
       });
 
-      context.metrics.timing('rest.ingestion.duration', durationMs, {
+      context.metrics.timing("rest.ingestion.duration", durationMs, {
         connector: this.manifest.id,
       });
 
@@ -342,7 +353,7 @@ export class RestPullConnector extends PullConnector {
       };
     } catch (error) {
       const durationMs = Date.now() - startTime;
-      context.logger.error('REST API ingestion failed', error as Error);
+      context.logger.error("REST API ingestion failed", error as Error);
 
       return this.failureResult(error as Error, entitiesProcessed, 0, durationMs);
     }
@@ -352,11 +363,11 @@ export class RestPullConnector extends PullConnector {
    * Extract data array from response using JSONPath-like syntax
    */
   private extractData(responseData: any, path: string): any {
-    const parts = path.split('.');
+    const parts = path.split(".");
     let current = responseData;
 
     for (const part of parts) {
-      if (current && typeof current === 'object' && part in current) {
+      if (current && typeof current === "object" && part in current) {
         current = current[part];
       } else {
         throw new Error(`Cannot find path "${path}" in response`);
@@ -370,11 +381,11 @@ export class RestPullConnector extends PullConnector {
    * Extract next cursor from response (looks for common cursor field names)
    */
   private extractCursor(responseData: any): string | null {
-    const cursorFields = ['next_cursor', 'nextCursor', 'cursor', 'next', 'pagination.next'];
+    const cursorFields = ["next_cursor", "nextCursor", "cursor", "next", "pagination.next"];
 
     for (const field of cursorFields) {
       const cursor = this.extractData(responseData, field);
-      if (cursor && typeof cursor === 'string') {
+      if (cursor && typeof cursor === "string") {
         return cursor;
       }
     }

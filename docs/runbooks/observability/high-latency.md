@@ -22,6 +22,7 @@ This runbook guides you through troubleshooting high latency alerts. High latenc
 **Dashboard**: [Summit - Golden Signals](http://localhost:3001/d/summit-golden-signals)
 
 Check:
+
 - [ ] Current P95/P99 latency values
 - [ ] Latency trend over last 1h, 6h, 24h
 - [ ] Which services are affected (API, Gateway, both)
@@ -67,6 +68,7 @@ ORDER BY elapsedTimeMillis DESC
 **Grafana Dashboard**: Neo4j Performance (if exists)
 
 Check:
+
 - [ ] Query duration P99
 - [ ] Transaction throughput
 - [ ] Heap usage
@@ -96,6 +98,7 @@ SELECT count(*) as connections FROM pg_stat_activity;
 **Jaeger**: Find a slow trace
 
 Steps:
+
 1. Go to [Jaeger UI](http://localhost:16686)
 2. Select service: `summit-api`
 3. Set Min Duration: `500ms` (or your threshold)
@@ -103,6 +106,7 @@ Steps:
 5. Click on a slow trace
 
 **Look for**:
+
 - [ ] Which span is slowest?
 - [ ] Is it a database call?
 - [ ] Is it an external API call?
@@ -124,6 +128,7 @@ rate(node_disk_io_time_seconds_total[5m])
 ```
 
 Check:
+
 - [ ] Is CPU > 80%?
 - [ ] Is memory > 85%?
 - [ ] Is disk I/O saturated?
@@ -152,6 +157,7 @@ Expected: < 1ms for internal Docker network
 **Symptom**: Specific Cypher or SQL queries taking > 1s
 
 **Fix**:
+
 ```cypher
 // Neo4j: Add missing indexes
 CREATE INDEX entity_name_idx FOR (e:Entity) ON (e.name);
@@ -177,6 +183,7 @@ CREATE INDEX idx_investigations_status ON investigations(status);
 **Symptom**: Periodic latency spikes every few minutes
 
 **Fix**:
+
 ```bash
 # Increase Node.js heap size
 export NODE_OPTIONS="--max-old-space-size=4096"
@@ -191,6 +198,7 @@ environment:
 **Symptom**: Latency spikes when traffic increases
 
 **Fix**:
+
 ```typescript
 // Increase connection pool size
 const pool = new Pool({
@@ -204,12 +212,14 @@ const pool = new Pool({
 **Symptom**: Trace shows long span for external HTTP call
 
 **Fix**:
+
 - Add timeouts
 - Implement circuit breakers
 - Cache responses
 - Make calls asynchronous (background job)
 
 **Example**:
+
 ```typescript
 // Add timeout
 const response = await fetch(url, {
@@ -255,6 +265,7 @@ await redis.setex(cacheKey, 300, JSON.stringify(result)); // 5min TTL
 After implementing fixes:
 
 1. **Check metrics** (wait 5-10 minutes for new data):
+
 ```promql
 histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service="api"}[5m])) by (le))
 ```
@@ -268,6 +279,7 @@ histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service="
 ## Escalation
 
 Escalate if:
+
 - [ ] Latency remains > 2x SLO after 30 minutes of investigation
 - [ ] Root cause is unclear after investigation steps
 - [ ] Mitigation actions don't improve latency

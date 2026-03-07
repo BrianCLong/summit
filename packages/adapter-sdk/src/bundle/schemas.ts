@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { z } from 'zod';
+import { z } from "zod";
 
 export const compatibilitySchema = z.object({
   companyOs: z.string().min(1),

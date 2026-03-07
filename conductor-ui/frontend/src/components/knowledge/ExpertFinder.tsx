@@ -1,19 +1,19 @@
 // conductor-ui/frontend/src/components/knowledge/ExpertFinder.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const findExpert = async (filePath: string): Promise<any> => {
-  const res = await fetch('/api/knowledge/query/structural', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const res = await fetch("/api/knowledge/query/structural", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      structural_query: { type: 'find_owner', path: filePath },
+      structural_query: { type: "find_owner", path: filePath },
     }),
   });
   return res.json();
 };
 
 export const ExpertFinder = () => {
-  const [filePath, setFilePath] = useState('services/lsc-service/src/index.ts');
+  const [filePath, setFilePath] = useState("services/lsc-service/src/index.ts");
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,10 +31,10 @@ export const ExpertFinder = () => {
         type="text"
         value={filePath}
         onChange={(e) => setFilePath(e.target.value)}
-        style={{ width: '300px' }}
+        style={{ width: "300px" }}
       />
       <button onClick={handleFind} disabled={isLoading}>
-        {isLoading ? 'Finding...' : 'Find Expert'}
+        {isLoading ? "Finding..." : "Find Expert"}
       </button>
       {result && (
         <div>

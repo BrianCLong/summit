@@ -8,15 +8,15 @@
  * @module services/plugin-api
  */
 
-const API_BASE = '/api/plugins';
+const API_BASE = "/api/plugins";
 
 /**
  * Get auth headers
  */
 const getHeaders = () => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem("auth_token");
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
@@ -26,7 +26,7 @@ const getHeaders = () => {
  */
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    const error = await response.json().catch(() => ({ error: "Unknown error" }));
     throw new Error(error.error || error.message || `HTTP ${response.status}`);
   }
   return response.json();
@@ -41,11 +41,11 @@ export const PluginAPI = {
    */
   async listPlugins(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.category) queryParams.set('category', params.category);
-    if (params.status) queryParams.set('status', params.status);
-    if (params.search) queryParams.set('search', params.search);
-    if (params.page) queryParams.set('page', String(params.page));
-    if (params.pageSize) queryParams.set('pageSize', String(params.pageSize));
+    if (params.category) queryParams.set("category", params.category);
+    if (params.status) queryParams.set("status", params.status);
+    if (params.search) queryParams.set("search", params.search);
+    if (params.page) queryParams.set("page", String(params.page));
+    if (params.pageSize) queryParams.set("pageSize", String(params.pageSize));
 
     const response = await fetch(`${API_BASE}?${queryParams}`, {
       headers: getHeaders(),
@@ -68,7 +68,7 @@ export const PluginAPI = {
    */
   async enablePlugin(id, config = {}) {
     const response = await fetch(`${API_BASE}/${id}/enable`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ config }),
     });
@@ -80,7 +80,7 @@ export const PluginAPI = {
    */
   async disablePlugin(id) {
     const response = await fetch(`${API_BASE}/${id}/disable`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -91,7 +91,7 @@ export const PluginAPI = {
    */
   async executeAction(id, action, params = {}, simulation = false) {
     const response = await fetch(`${API_BASE}/${id}/execute`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ action, params, simulation }),
     });
@@ -113,7 +113,7 @@ export const PluginAPI = {
    */
   async updateConfig(id, config, enabled = true) {
     const response = await fetch(`${API_BASE}/${id}/config`, {
-      method: 'PUT',
+      method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify({ config, enabled }),
     });
@@ -135,7 +135,7 @@ export const PluginAPI = {
    */
   async uninstallPlugin(id) {
     const response = await fetch(`${API_BASE}/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: getHeaders(),
     });
     return handleResponse(response);

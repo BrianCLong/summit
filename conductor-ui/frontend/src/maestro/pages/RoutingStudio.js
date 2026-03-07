@@ -1,6 +1,6 @@
-import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
-import React from 'react';
-import { api } from '../api';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from "react";
+import { api } from "../api";
 export default function RoutingStudio() {
   const {
     routingPreview,
@@ -14,14 +14,14 @@ export default function RoutingStudio() {
     putWatchdogConfigs,
     getWatchdogEvents,
   } = api();
-  const [task, setTask] = React.useState('Build and package IntelGraph');
+  const [task, setTask] = React.useState("Build and package IntelGraph");
   const [latency, setLatency] = React.useState(3000);
   const [resp, setResp] = React.useState(null);
   const [err, setErr] = React.useState(null);
   const [pins, setPins] = React.useState({});
-  const [route, setRoute] = React.useState('');
-  const [model, setModel] = React.useState('');
-  const [note, setNote] = React.useState('');
+  const [route, setRoute] = React.useState("");
+  const [model, setModel] = React.useState("");
+  const [note, setNote] = React.useState("");
   const refreshPins = React.useCallback(() => {
     getRoutingPins()
       .then(setPins)
@@ -30,44 +30,44 @@ export default function RoutingStudio() {
   React.useEffect(() => {
     refreshPins();
   }, []);
-  return _jsxs('div', {
-    className: 'space-y-3',
+  return _jsxs("div", {
+    className: "space-y-3",
     children: [
-      _jsx('h2', {
-        className: 'text-lg font-semibold',
-        children: 'Routing Studio',
+      _jsx("h2", {
+        className: "text-lg font-semibold",
+        children: "Routing Studio",
       }),
-      _jsxs('section', {
-        className: 'rounded border bg-white p-3',
+      _jsxs("section", {
+        className: "rounded border bg-white p-3",
         children: [
-          _jsx('div', {
-            className: 'mb-2 text-sm font-semibold text-slate-700',
-            children: 'Dry-run simulation',
+          _jsx("div", {
+            className: "mb-2 text-sm font-semibold text-slate-700",
+            children: "Dry-run simulation",
           }),
-          _jsx('div', {
-            className: 'mb-2 flex items-center gap-2',
-            children: _jsx('textarea', {
-              className: 'h-24 w-full rounded border p-2',
+          _jsx("div", {
+            className: "mb-2 flex items-center gap-2",
+            children: _jsx("textarea", {
+              className: "h-24 w-full rounded border p-2",
               value: task,
               onChange: (e) => setTask(e.target.value),
             }),
           }),
-          _jsxs('div', {
-            className: 'mb-2 flex items-center gap-2 text-sm',
+          _jsxs("div", {
+            className: "mb-2 flex items-center gap-2 text-sm",
             children: [
-              _jsx('label', {
-                htmlFor: 'latency',
-                children: 'Max Latency (ms)',
+              _jsx("label", {
+                htmlFor: "latency",
+                children: "Max Latency (ms)",
               }),
-              _jsx('input', {
-                id: 'latency',
-                className: 'w-32 rounded border px-2 py-1',
-                type: 'number',
+              _jsx("input", {
+                id: "latency",
+                className: "w-32 rounded border px-2 py-1",
+                type: "number",
                 value: latency,
                 onChange: (e) => setLatency(Number(e.target.value)),
               }),
-              _jsx('button', {
-                className: 'rounded border px-2 py-1',
+              _jsx("button", {
+                className: "rounded border px-2 py-1",
                 onClick: async () => {
                   try {
                     setErr(null);
@@ -77,173 +77,165 @@ export default function RoutingStudio() {
                     });
                     setResp(r);
                   } catch (e) {
-                    setErr(e?.message || 'Failed');
+                    setErr(e?.message || "Failed");
                   }
                 },
-                children: 'Preview',
+                children: "Preview",
               }),
             ],
           }),
-          err &&
-            _jsx('div', { className: 'text-sm text-red-700', children: err }),
+          err && _jsx("div", { className: "text-sm text-red-700", children: err }),
           resp &&
-            _jsxs('div', {
-              className: 'text-sm',
+            _jsxs("div", {
+              className: "text-sm",
               children: [
-                _jsxs('div', {
+                _jsxs("div", {
                   children: [
-                    'Decision:',
-                    ' ',
-                    _jsx('span', {
-                      className: 'font-semibold',
-                      children:
-                        resp.decision?.model ||
-                        resp.decision?.expert ||
-                        'unknown',
+                    "Decision:",
+                    " ",
+                    _jsx("span", {
+                      className: "font-semibold",
+                      children: resp.decision?.model || resp.decision?.expert || "unknown",
                     }),
-                    ' ',
-                    '\u2022 conf ',
-                    resp.decision?.confidence ?? '—',
+                    " ",
+                    "\u2022 conf ",
+                    resp.decision?.confidence ?? "—",
                   ],
                 }),
-                _jsx('div', {
-                  className: 'mt-2 text-slate-700',
-                  children: 'Candidates',
+                _jsx("div", {
+                  className: "mt-2 text-slate-700",
+                  children: "Candidates",
                 }),
-                _jsx('ul', {
-                  className: 'list-disc pl-5',
+                _jsx("ul", {
+                  className: "list-disc pl-5",
                   children: (resp.candidates || []).map((c, i) =>
                     _jsxs(
-                      'li',
+                      "li",
                       {
-                        children: [
-                          c.model || c.expert,
-                          ': ',
-                          c.score || c.confidence,
-                        ],
+                        children: [c.model || c.expert, ": ", c.score || c.confidence],
                       },
-                      i,
-                    ),
+                      i
+                    )
                   ),
                 }),
               ],
             }),
         ],
       }),
-      _jsxs('section', {
-        className: 'rounded border bg-white p-3',
-        'aria-label': 'Routing pins',
+      _jsxs("section", {
+        className: "rounded border bg-white p-3",
+        "aria-label": "Routing pins",
         children: [
-          _jsx('div', {
-            className: 'mb-2 text-sm font-semibold text-slate-700',
-            children: 'Pin route to model',
+          _jsx("div", {
+            className: "mb-2 text-sm font-semibold text-slate-700",
+            children: "Pin route to model",
           }),
-          _jsxs('div', {
-            className: 'grid grid-cols-1 gap-3 md:grid-cols-3',
+          _jsxs("div", {
+            className: "grid grid-cols-1 gap-3 md:grid-cols-3",
             children: [
-              _jsx('input', {
-                className: 'rounded border px-2 py-1',
-                placeholder: 'Route',
-                'aria-label': 'Route',
+              _jsx("input", {
+                className: "rounded border px-2 py-1",
+                placeholder: "Route",
+                "aria-label": "Route",
                 value: route,
                 onChange: (e) => setRoute(e.target.value),
               }),
-              _jsx('input', {
-                className: 'rounded border px-2 py-1',
-                placeholder: 'Model',
-                'aria-label': 'Model',
+              _jsx("input", {
+                className: "rounded border px-2 py-1",
+                placeholder: "Model",
+                "aria-label": "Model",
                 value: model,
                 onChange: (e) => setModel(e.target.value),
               }),
-              _jsx('input', {
-                className: 'rounded border px-2 py-1',
-                placeholder: 'Audit note',
-                'aria-label': 'Audit note',
+              _jsx("input", {
+                className: "rounded border px-2 py-1",
+                placeholder: "Audit note",
+                "aria-label": "Audit note",
                 value: note,
                 onChange: (e) => setNote(e.target.value),
               }),
             ],
           }),
-          _jsx('div', {
-            className: 'mt-2 flex gap-2',
-            children: _jsx('button', {
-              className: 'rounded border px-2 py-1 text-sm',
+          _jsx("div", {
+            className: "mt-2 flex gap-2",
+            children: _jsx("button", {
+              className: "rounded border px-2 py-1 text-sm",
               onClick: async () => {
                 const ex = await postPolicyExplain({
-                  input: { action: 'route.pin', route, model, note },
+                  input: { action: "route.pin", route, model, note },
                 });
                 const allow = !!ex?.allowed || !!ex?.result?.allow;
                 if (!allow) {
                   const proceed = window.confirm(
-                    'Policy would DENY. Proceed anyway (will be audited)?',
+                    "Policy would DENY. Proceed anyway (will be audited)?"
                   );
                   if (!proceed) return;
                 }
                 await putRoutingPin({ route, model, note });
-                setRoute('');
-                setModel('');
-                setNote('');
+                setRoute("");
+                setModel("");
+                setNote("");
                 refreshPins();
               },
               disabled: !route || !model,
-              children: 'Pin',
+              children: "Pin",
             }),
           }),
-          _jsx('div', {
-            className: 'mt-3 rounded border',
-            children: _jsxs('table', {
-              className: 'w-full text-sm',
+          _jsx("div", {
+            className: "mt-3 rounded border",
+            children: _jsxs("table", {
+              className: "w-full text-sm",
               children: [
-                _jsx('thead', {
-                  children: _jsxs('tr', {
+                _jsx("thead", {
+                  children: _jsxs("tr", {
                     children: [
-                      _jsx('th', {
-                        className: 'px-2 py-1 text-left',
-                        children: 'Route',
+                      _jsx("th", {
+                        className: "px-2 py-1 text-left",
+                        children: "Route",
                       }),
-                      _jsx('th', {
-                        className: 'px-2 py-1 text-left',
-                        children: 'Model',
+                      _jsx("th", {
+                        className: "px-2 py-1 text-left",
+                        children: "Model",
                       }),
-                      _jsx('th', {
-                        className: 'px-2 py-1 text-left',
-                        children: 'Actions',
+                      _jsx("th", {
+                        className: "px-2 py-1 text-left",
+                        children: "Actions",
                       }),
                     ],
                   }),
                 }),
-                _jsxs('tbody', {
+                _jsxs("tbody", {
                   children: [
                     Object.entries(pins).map(([r, m]) =>
                       _jsxs(
-                        'tr',
+                        "tr",
                         {
-                          className: 'border-t',
+                          className: "border-t",
                           children: [
-                            _jsx('td', { className: 'px-2 py-1', children: r }),
-                            _jsx('td', { className: 'px-2 py-1', children: m }),
-                            _jsx('td', {
-                              className: 'px-2 py-1',
-                              children: _jsx('button', {
-                                className: 'text-blue-600 underline',
+                            _jsx("td", { className: "px-2 py-1", children: r }),
+                            _jsx("td", { className: "px-2 py-1", children: m }),
+                            _jsx("td", {
+                              className: "px-2 py-1",
+                              children: _jsx("button", {
+                                className: "text-blue-600 underline",
                                 onClick: async () => {
                                   await deleteRoutingPin(r);
                                   refreshPins();
                                 },
-                                children: 'Unpin',
+                                children: "Unpin",
                               }),
                             }),
                           ],
                         },
-                        r,
-                      ),
+                        r
+                      )
                     ),
                     !Object.keys(pins).length &&
-                      _jsx('tr', {
-                        children: _jsx('td', {
+                      _jsx("tr", {
+                        children: _jsx("td", {
                           colSpan: 3,
-                          className: 'p-3 text-center text-slate-500',
-                          children: 'No pins',
+                          className: "p-3 text-center text-slate-500",
+                          children: "No pins",
                         }),
                       }),
                   ],
@@ -266,7 +258,7 @@ export default function RoutingStudio() {
   });
 }
 function AutoRollbackSection({ apiFns }) {
-  const [route, setRoute] = React.useState('codegen');
+  const [route, setRoute] = React.useState("codegen");
   const [cfg, setCfg] = React.useState({ enabled: false, routes: {} });
   const [events, setEvents] = React.useState([]);
   const cur = cfg.routes?.[route] || {
@@ -296,41 +288,40 @@ function AutoRollbackSection({ apiFns }) {
   React.useEffect(() => {
     apiFns.getPinHistory(route).then((r) => setHistory(r.history || []));
   }, [route]);
-  return _jsxs('div', {
-    className: 'space-y-3 rounded-2xl border bg-white p-3',
+  return _jsxs("div", {
+    className: "space-y-3 rounded-2xl border bg-white p-3",
     children: [
-      _jsx('h2', {
-        className: 'font-medium',
-        children: 'Auto-Rollback Watchdog',
+      _jsx("h2", {
+        className: "font-medium",
+        children: "Auto-Rollback Watchdog",
       }),
-      _jsxs('label', {
-        className: 'flex items-center gap-2',
+      _jsxs("label", {
+        className: "flex items-center gap-2",
         children: [
-          _jsx('input', {
-            type: 'checkbox',
+          _jsx("input", {
+            type: "checkbox",
             checked: !!cfg.enabled,
-            onChange: (e) =>
-              setCfg((x) => ({ ...x, enabled: e.target.checked })),
+            onChange: (e) => setCfg((x) => ({ ...x, enabled: e.target.checked })),
           }),
-          ' ',
-          'Enable watchdog',
+          " ",
+          "Enable watchdog",
         ],
       }),
-      _jsxs('div', {
-        className: 'grid grid-cols-1 gap-3 md:grid-cols-4',
+      _jsxs("div", {
+        className: "grid grid-cols-1 gap-3 md:grid-cols-4",
         children: [
-          _jsx('input', {
-            className: 'rounded border px-2 py-1',
-            'aria-label': 'Route',
+          _jsx("input", {
+            className: "rounded border px-2 py-1",
+            "aria-label": "Route",
             value: route,
             onChange: (e) => setRoute(e.target.value),
           }),
-          _jsxs('label', {
-            className: 'flex items-center gap-2',
+          _jsxs("label", {
+            className: "flex items-center gap-2",
             children: [
-              'Enabled',
-              _jsx('input', {
-                type: 'checkbox',
+              "Enabled",
+              _jsx("input", {
+                type: "checkbox",
                 checked: !!cur.enabled,
                 onChange: (e) => {
                   cur.enabled = e.target.checked;
@@ -339,13 +330,13 @@ function AutoRollbackSection({ apiFns }) {
               }),
             ],
           }),
-          _jsxs('label', {
-            className: 'flex items-center gap-2',
+          _jsxs("label", {
+            className: "flex items-center gap-2",
             children: [
-              'Max cost z',
-              _jsx('input', {
-                type: 'number',
-                className: 'w-24 rounded border px-2 py-1',
+              "Max cost z",
+              _jsx("input", {
+                type: "number",
+                className: "w-24 rounded border px-2 py-1",
                 value: cur.maxCostZ,
                 onChange: (e) => {
                   cur.maxCostZ = Number(e.target.value);
@@ -354,13 +345,13 @@ function AutoRollbackSection({ apiFns }) {
               }),
             ],
           }),
-          _jsxs('label', {
-            className: 'flex items-center gap-2',
+          _jsxs("label", {
+            className: "flex items-center gap-2",
             children: [
-              'Max DLQ (10m)',
-              _jsx('input', {
-                type: 'number',
-                className: 'w-24 rounded border px-2 py-1',
+              "Max DLQ (10m)",
+              _jsx("input", {
+                type: "number",
+                className: "w-24 rounded border px-2 py-1",
                 value: cur.maxDLQ10m,
                 onChange: (e) => {
                   cur.maxDLQ10m = Number(e.target.value);
@@ -371,67 +362,67 @@ function AutoRollbackSection({ apiFns }) {
           }),
         ],
       }),
-      _jsxs('div', {
-        className: 'flex gap-2',
+      _jsxs("div", {
+        className: "flex gap-2",
         children: [
-          _jsx('button', {
-            className: 'rounded bg-blue-600 px-3 py-2 text-white',
+          _jsx("button", {
+            className: "rounded bg-blue-600 px-3 py-2 text-white",
             onClick: save,
-            children: 'Save',
+            children: "Save",
           }),
-          _jsx('button', {
-            className: 'rounded border px-3 py-2',
-            onClick: () => apiFns.postRollback(route, 'manual rollback'),
-            children: 'Rollback now',
+          _jsx("button", {
+            className: "rounded border px-3 py-2",
+            onClick: () => apiFns.postRollback(route, "manual rollback"),
+            children: "Rollback now",
           }),
         ],
       }),
-      _jsxs('div', {
-        className: 'rounded-2xl border p-3',
+      _jsxs("div", {
+        className: "rounded-2xl border p-3",
         children: [
-          _jsxs('div', {
-            className: 'mb-2 text-sm font-medium',
-            children: ['Pin history (', route, ')'],
+          _jsxs("div", {
+            className: "mb-2 text-sm font-medium",
+            children: ["Pin history (", route, ")"],
           }),
-          _jsxs('table', {
-            className: 'w-full text-sm',
+          _jsxs("table", {
+            className: "w-full text-sm",
             children: [
-              _jsx('thead', {
-                children: _jsxs('tr', {
+              _jsx("thead", {
+                children: _jsxs("tr", {
                   children: [
-                    _jsx('th', { children: 'Time' }),
-                    _jsx('th', { children: 'Action' }),
-                    _jsx('th', { children: 'From' }),
-                    _jsx('th', { children: 'To' }),
-                    _jsx('th', { children: 'Note' }),
+                    _jsx("th", { children: "Time" }),
+                    _jsx("th", { children: "Action" }),
+                    _jsx("th", { children: "From" }),
+                    _jsx("th", { children: "To" }),
+                    _jsx("th", { children: "Note" }),
                   ],
                 }),
               }),
-              _jsxs('tbody', {
+              _jsxs("tbody", {
                 children: [
                   history.map((h) =>
                     _jsxs(
-                      'tr',
+                      "tr",
                       {
                         children: [
-                          _jsx('td', {
+                          _jsx("td", {
                             children: new Date(h.ts).toLocaleString(),
                           }),
-                          _jsx('td', { children: h.action }),
-                          _jsx('td', { children: h.prevModel || '-' }),
-                          _jsx('td', { children: h.newModel }),
-                          _jsx('td', { children: h.note || '-' }),
+                          _jsx("td", { children: h.action }),
+                          _jsx("td", { children: h.prevModel || "-" }),
+                          _jsx("td", { children: h.newModel }),
+                          _jsx("td", { children: h.note || "-" }),
                         ],
                       },
-                      h.ts,
-                    ),
+                      h.ts
+                    )
                   ),
                   !history.length &&
-                    _jsx('tr', {
-                      children: _jsx('td', {
+                    _jsx("tr", {
+                      children: _jsx("td", {
                         colSpan: 5,
-                        className: 'p-3 text-center text-gray-500',
-                        children: 'No history',
+                        className: "p-3 text-center text-gray-500",
+                        children: "No history",
                       }),
                     }),
                 ],
@@ -440,50 +431,50 @@ function AutoRollbackSection({ apiFns }) {
           }),
         ],
       }),
-      _jsxs('div', {
-        className: 'rounded-2xl border p-3',
+      _jsxs("div", {
+        className: "rounded-2xl border p-3",
         children: [
-          _jsx('div', {
-            className: 'mb-2 text-sm font-medium',
-            children: 'Watchdog events',
+          _jsx("div", {
+            className: "mb-2 text-sm font-medium",
+            children: "Watchdog events",
           }),
-          _jsxs('table', {
-            className: 'w-full text-sm',
+          _jsxs("table", {
+            className: "w-full text-sm",
             children: [
-              _jsx('thead', {
-                children: _jsxs('tr', {
+              _jsx("thead", {
+                children: _jsxs("tr", {
                   children: [
-                    _jsx('th', { children: 'Time' }),
-                    _jsx('th', { children: 'Route' }),
-                    _jsx('th', { children: 'Kind' }),
-                    _jsx('th', { children: 'Reason' }),
+                    _jsx("th", { children: "Time" }),
+                    _jsx("th", { children: "Route" }),
+                    _jsx("th", { children: "Kind" }),
+                    _jsx("th", { children: "Reason" }),
                   ],
                 }),
               }),
-              _jsxs('tbody', {
+              _jsxs("tbody", {
                 children: [
                   (events || []).map((e) =>
                     _jsxs(
-                      'tr',
+                      "tr",
                       {
                         children: [
-                          _jsx('td', {
+                          _jsx("td", {
                             children: new Date(e.ts).toLocaleString(),
                           }),
-                          _jsx('td', { children: e.route }),
-                          _jsx('td', { children: e.kind }),
-                          _jsx('td', { children: e.reason }),
+                          _jsx("td", { children: e.route }),
+                          _jsx("td", { children: e.kind }),
+                          _jsx("td", { children: e.reason }),
                         ],
                       },
-                      e.ts,
-                    ),
+                      e.ts
+                    )
                   ),
                   !events.length &&
-                    _jsx('tr', {
-                      children: _jsx('td', {
+                    _jsx("tr", {
+                      children: _jsx("td", {
                         colSpan: 4,
-                        className: 'p-3 text-center text-gray-500',
-                        children: 'No events',
+                        className: "p-3 text-center text-gray-500",
+                        children: "No events",
                       }),
                     }),
                 ],

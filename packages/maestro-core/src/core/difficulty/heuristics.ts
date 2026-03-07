@@ -18,15 +18,22 @@ export function extractDifficultyFeatures(query: string): Record<string, number>
   const len = q.length;
   const wordCount = tokens.length;
 
-  const verbs = (q.match(/\b(analyze|compare|synthesize|evaluate|design|implement|optimi[sz]e|prove|debug)\b/gi) ?? []).length;
-  const constraints = (q.match(/\b(must|should|cannot|avoid|required|acceptance criteria|test|benchmark)\b/gi) ?? []).length;
+  const verbs = (
+    q.match(
+      /\b(analyze|compare|synthesize|evaluate|design|implement|optimi[sz]e|prove|debug)\b/gi
+    ) ?? []
+  ).length;
+  const constraints = (
+    q.match(/\b(must|should|cannot|avoid|required|acceptance criteria|test|benchmark)\b/gi) ?? []
+  ).length;
 
   const hasLists = /(\n-|\n\d+\.)/.test(q) ? 1 : 0;
   const hasCode = /```|function\s*\(|class\s+\w+|import\s+.+from/.test(q) ? 1 : 0;
   const hasMultiStep = /\b(step|phase|roadmap|plan|milestone|pr\s*\d+)\b/i.test(q) ? 1 : 0;
 
   // crude entropy proxy: more unique tokens & punctuation tends to correlate with complexity
-  const uniqueRatio = wordCount > 0 ? new Set(tokens.map(t => t.toLowerCase())).size / wordCount : 0;
+  const uniqueRatio =
+    wordCount > 0 ? new Set(tokens.map((t) => t.toLowerCase())).size / wordCount : 0;
   const punctuationDensity = len > 0 ? (q.match(/[,:;()[\]{}]/g) ?? []).length / len : 0;
 
   return {
@@ -44,16 +51,16 @@ export function extractDifficultyFeatures(query: string): Record<string, number>
 
 export function scoreDifficultyFromFeatures(f: Record<string, number>): number {
   // Normalize-ish inputs
-  const lenScore = Math.min(f.len / 1500, 1);          // long prompts → harder
+  const lenScore = Math.min(f.len / 1500, 1); // long prompts → harder
   const wordScore = Math.min(f.wordCount / 250, 1);
   const verbScore = Math.min(f.verbs / 6, 1);
   const constraintScore = Math.min(f.constraints / 10, 1);
 
   const structureBonus = 0.12 * (f.hasLists ?? 0) + 0.18 * (f.hasMultiStep ?? 0);
-  const codeBonus = 0.20 * (f.hasCode ?? 0);
+  const codeBonus = 0.2 * (f.hasCode ?? 0);
 
   const varietyBonus = 0.15 * Math.min(f.uniqueRatio ?? 0, 1);
-  const punctBonus = 0.10 * Math.min((f.punctuationDensity ?? 0) * 20, 1);
+  const punctBonus = 0.1 * Math.min((f.punctuationDensity ?? 0) * 20, 1);
 
   // Weighted sum
   const raw =
@@ -71,10 +78,10 @@ export function scoreDifficultyFromFeatures(f: Record<string, number>): number {
 
 export function recommendedDepth(score: number): number {
   // 1..6
-  if (score < 0.20) return 1;
-  if (score < 0.40) return 2;
-  if (score < 0.60) return 3;
+  if (score < 0.2) return 1;
+  if (score < 0.4) return 2;
+  if (score < 0.6) return 3;
   if (score < 0.75) return 4;
-  if (score < 0.90) return 5;
+  if (score < 0.9) return 5;
   return 6;
 }

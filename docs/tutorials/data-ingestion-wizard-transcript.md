@@ -32,4 +32,4 @@
 
 ---
 
-*Use this transcript to generate captions or localized subtitles. Update timestamps after the final recording if pacing changes.*
+_Use this transcript to generate captions or localized subtitles. Update timestamps after the final recording if pacing changes._

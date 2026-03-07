@@ -1,12 +1,12 @@
 /**
  * Scenario Builder Component for Adversarial Misinformation Defense Platform Web UI
  */
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { Formik, Form, Field, FieldArray } from 'formik';
-import * as Yup from 'yup';
-import { FiPlus, FiTrash2, FiSave, FiPlay } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { Formik, Form, Field, FieldArray } from "formik";
+import * as Yup from "yup";
+import { FiPlus, FiTrash2, FiSave, FiPlay } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 // Styled components
 const Container = styled.div`
@@ -28,7 +28,7 @@ const Title = styled.h1`
 `;
 
 const Button = styled.button`
-  background-color: ${(props) => (props.primary ? '#3498db' : '#95a5a6')};
+  background-color: ${(props) => (props.primary ? "#3498db" : "#95a5a6")};
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -146,21 +146,19 @@ const IconButton = styled.button`
 
 // Validation schema
 const scenarioSchema = Yup.object().shape({
-  name: Yup.string().required('Scenario name is required'),
-  description: Yup.string().required('Description is required'),
-  exercise_type: Yup.string().required('Exercise type is required'),
-  difficulty: Yup.string().required('Difficulty level is required'),
+  name: Yup.string().required("Scenario name is required"),
+  description: Yup.string().required("Description is required"),
+  exercise_type: Yup.string().required("Exercise type is required"),
+  difficulty: Yup.string().required("Difficulty level is required"),
   objectives: Yup.array()
-    .of(Yup.string().required('Objective cannot be empty'))
-    .min(1, 'At least one objective is required'),
+    .of(Yup.string().required("Objective cannot be empty"))
+    .min(1, "At least one objective is required"),
   constraints: Yup.array().of(Yup.string()),
   success_criteria: Yup.array().of(Yup.string()),
   estimated_duration: Yup.number()
-    .min(1, 'Duration must be at least 1 minute')
-    .required('Estimated duration is required'),
-  team_roles: Yup.array()
-    .of(Yup.string())
-    .min(1, 'At least one team role is required'),
+    .min(1, "Duration must be at least 1 minute")
+    .required("Estimated duration is required"),
+  team_roles: Yup.array().of(Yup.string()).min(1, "At least one team role is required"),
   threat_actors_involved: Yup.array().of(Yup.string()),
   detection_methods_to_test: Yup.array().of(Yup.string()),
   mitigation_strategies: Yup.array().of(Yup.string()),
@@ -168,30 +166,30 @@ const scenarioSchema = Yup.object().shape({
 
 // Exercise types
 const exerciseTypes = [
-  { value: 'social_engineering', label: 'Social Engineering' },
-  { value: 'deepfake_detection', label: 'Deepfake Detection' },
-  { value: 'meme_campaign', label: 'Meme Campaign' },
-  { value: 'narrative_control', label: 'Narrative Control' },
-  { value: 'coordination_disruption', label: 'Coordination Disruption' },
-  { value: 'information_warfare', label: 'Information Warfare' },
-  { value: 'psychological_operations', label: 'Psychological Operations' },
+  { value: "social_engineering", label: "Social Engineering" },
+  { value: "deepfake_detection", label: "Deepfake Detection" },
+  { value: "meme_campaign", label: "Meme Campaign" },
+  { value: "narrative_control", label: "Narrative Control" },
+  { value: "coordination_disruption", label: "Coordination Disruption" },
+  { value: "information_warfare", label: "Information Warfare" },
+  { value: "psychological_operations", label: "Psychological Operations" },
 ];
 
 // Difficulty levels
 const difficultyLevels = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
-  { value: 'expert', label: 'Expert' },
-  { value: 'custom', label: 'Custom' },
+  { value: "beginner", label: "Beginner" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+  { value: "expert", label: "Expert" },
+  { value: "custom", label: "Custom" },
 ];
 
 // Team roles
 const teamRoles = [
-  { value: 'red_team_attacker', label: 'Red Team Attacker' },
-  { value: 'blue_team_defender', label: 'Blue Team Defender' },
-  { value: 'white_team_observer', label: 'White Team Observer' },
-  { value: 'gray_team_moderator', label: 'Gray Team Moderator' },
+  { value: "red_team_attacker", label: "Red Team Attacker" },
+  { value: "blue_team_defender", label: "Blue Team Defender" },
+  { value: "white_team_observer", label: "White Team Observer" },
+  { value: "gray_team_moderator", label: "Gray Team Moderator" },
 ];
 
 // Scenario Builder component
@@ -210,54 +208,53 @@ const ScenarioBuilder = () => {
       // In a real implementation, this would fetch from the API
       const mockScenarios = [
         {
-          scenario_id: '1',
-          name: 'Basic Social Engineering Test',
-          description: 'Test defenses against basic social engineering tactics',
-          exercise_type: 'social_engineering',
-          difficulty: 'beginner',
+          scenario_id: "1",
+          name: "Basic Social Engineering Test",
+          description: "Test defenses against basic social engineering tactics",
+          exercise_type: "social_engineering",
+          difficulty: "beginner",
         },
         {
-          scenario_id: '2',
-          name: 'Intermediate Meme Campaign Simulation',
-          description:
-            'Simulate a coordinated meme-based misinformation campaign',
-          exercise_type: 'meme_campaign',
-          difficulty: 'intermediate',
+          scenario_id: "2",
+          name: "Intermediate Meme Campaign Simulation",
+          description: "Simulate a coordinated meme-based misinformation campaign",
+          exercise_type: "meme_campaign",
+          difficulty: "intermediate",
         },
       ];
       setScenarios(mockScenarios);
     } catch (error) {
-      toast.error('Failed to load scenarios');
+      toast.error("Failed to load scenarios");
     } finally {
       setLoading(false);
     }
   };
 
   const initialValues = {
-    name: '',
-    description: '',
-    exercise_type: 'social_engineering',
-    difficulty: 'intermediate',
-    objectives: [''],
-    constraints: [''],
-    success_criteria: [''],
+    name: "",
+    description: "",
+    exercise_type: "social_engineering",
+    difficulty: "intermediate",
+    objectives: [""],
+    constraints: [""],
+    success_criteria: [""],
     estimated_duration: 60,
-    team_roles: ['red_team_attacker', 'blue_team_defender'],
-    threat_actors_involved: [''],
-    detection_methods_to_test: [''],
-    mitigation_strategies: [''],
-    created_by: 'Web UI User',
+    team_roles: ["red_team_attacker", "blue_team_defender"],
+    threat_actors_involved: [""],
+    detection_methods_to_test: [""],
+    mitigation_strategies: [""],
+    created_by: "Web UI User",
   };
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       // In a real implementation, this would POST to the API
-      console.log('Submitting scenario:', values);
-      toast.success('Scenario created successfully!');
+      console.log("Submitting scenario:", values);
+      toast.success("Scenario created successfully!");
       resetForm();
       loadScenarios(); // Refresh scenario list
     } catch (error) {
-      toast.error('Failed to create scenario');
+      toast.error("Failed to create scenario");
     } finally {
       setSubmitting(false);
     }
@@ -267,7 +264,7 @@ const ScenarioBuilder = () => {
     <Container>
       <Header>
         <Title>🛡️ Scenario Builder</Title>
-        <Button onClick={() => toast.info('Scenario templates coming soon')}>
+        <Button onClick={() => toast.info("Scenario templates coming soon")}>
           <FiPlus /> Load Template
         </Button>
       </Header>
@@ -291,9 +288,7 @@ const ScenarioBuilder = () => {
                   placeholder="Enter a descriptive name for your scenario"
                 />
                 {errors.name && touched.name && (
-                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
-                    {errors.name}
-                  </div>
+                  <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>{errors.name}</div>
                 )}
               </FormGroup>
 
@@ -305,17 +300,15 @@ const ScenarioBuilder = () => {
                   placeholder="Provide a detailed description of the scenario"
                 />
                 {errors.description && touched.description && (
-                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
-                    {errors.description}
-                  </div>
+                  <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>{errors.description}</div>
                 )}
               </FormGroup>
 
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '1rem',
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1rem",
                 }}
               >
                 <FormGroup>
@@ -328,7 +321,7 @@ const ScenarioBuilder = () => {
                     ))}
                   </Select>
                   {errors.exercise_type && touched.exercise_type && (
-                    <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                    <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>
                       {errors.exercise_type}
                     </div>
                   )}
@@ -344,7 +337,7 @@ const ScenarioBuilder = () => {
                     ))}
                   </Select>
                   {errors.difficulty && touched.difficulty && (
-                    <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                    <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>
                       {errors.difficulty}
                     </div>
                   )}
@@ -361,9 +354,9 @@ const ScenarioBuilder = () => {
                       <FormGroup key={index}>
                         <div
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
                           }}
                         >
                           <Input
@@ -372,25 +365,19 @@ const ScenarioBuilder = () => {
                             placeholder={`Objective ${index + 1}`}
                           />
                           {values.objectives.length > 1 && (
-                            <IconButton
-                              type="button"
-                              onClick={() => remove(index)}
-                            >
+                            <IconButton type="button" onClick={() => remove(index)}>
                               <FiTrash2 />
                             </IconButton>
                           )}
                         </div>
-                        {errors.objectives?.[index] &&
-                          touched.objectives?.[index] && (
-                            <div
-                              style={{ color: '#e74c3c', marginTop: '0.25rem' }}
-                            >
-                              {errors.objectives[index]}
-                            </div>
-                          )}
+                        {errors.objectives?.[index] && touched.objectives?.[index] && (
+                          <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>
+                            {errors.objectives[index]}
+                          </div>
+                        )}
                       </FormGroup>
                     ))}
-                    <Button type="button" onClick={() => push('')}>
+                    <Button type="button" onClick={() => push("")}>
                       <FiPlus /> Add Objective
                     </Button>
                   </div>
@@ -407,9 +394,9 @@ const ScenarioBuilder = () => {
                       <FormGroup key={index}>
                         <div
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
                           }}
                         >
                           <Input
@@ -418,17 +405,14 @@ const ScenarioBuilder = () => {
                             placeholder={`Constraint ${index + 1}`}
                           />
                           {values.constraints.length > 1 && (
-                            <IconButton
-                              type="button"
-                              onClick={() => remove(index)}
-                            >
+                            <IconButton type="button" onClick={() => remove(index)}>
                               <FiTrash2 />
                             </IconButton>
                           )}
                         </div>
                       </FormGroup>
                     ))}
-                    <Button type="button" onClick={() => push('')}>
+                    <Button type="button" onClick={() => push("")}>
                       <FiPlus /> Add Constraint
                     </Button>
                   </div>
@@ -445,9 +429,9 @@ const ScenarioBuilder = () => {
                       <FormGroup key={index}>
                         <div
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
                           }}
                         >
                           <Input
@@ -456,17 +440,14 @@ const ScenarioBuilder = () => {
                             placeholder={`Success Criterion ${index + 1}`}
                           />
                           {values.success_criteria.length > 1 && (
-                            <IconButton
-                              type="button"
-                              onClick={() => remove(index)}
-                            >
+                            <IconButton type="button" onClick={() => remove(index)}>
                               <FiTrash2 />
                             </IconButton>
                           )}
                         </div>
                       </FormGroup>
                     ))}
-                    <Button type="button" onClick={() => push('')}>
+                    <Button type="button" onClick={() => push("")}>
                       <FiPlus /> Add Success Criterion
                     </Button>
                   </div>
@@ -478,9 +459,7 @@ const ScenarioBuilder = () => {
               <h2>Team Configuration</h2>
 
               <FormGroup>
-                <Label htmlFor="estimated_duration">
-                  Estimated Duration (minutes) *
-                </Label>
+                <Label htmlFor="estimated_duration">Estimated Duration (minutes) *</Label>
                 <Input
                   id="estimated_duration"
                   name="estimated_duration"
@@ -489,7 +468,7 @@ const ScenarioBuilder = () => {
                   placeholder="60"
                 />
                 {errors.estimated_duration && touched.estimated_duration && (
-                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                  <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>
                     {errors.estimated_duration}
                   </div>
                 )}
@@ -501,22 +480,15 @@ const ScenarioBuilder = () => {
                   {({ push, remove }) => (
                     <div>
                       {teamRoles.map((role) => (
-                        <div
-                          key={role.value}
-                          style={{ marginBottom: '0.5rem' }}
-                        >
+                        <div key={role.value} style={{ marginBottom: "0.5rem" }}>
                           <label>
-                            <Field
-                              type="checkbox"
-                              name="team_roles"
-                              value={role.value}
-                            />{' '}
+                            <Field type="checkbox" name="team_roles" value={role.value} />{" "}
                             {role.label}
                           </label>
                         </div>
                       ))}
                       {errors.team_roles && touched.team_roles && (
-                        <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                        <div style={{ color: "#e74c3c", marginTop: "0.25rem" }}>
                           {errors.team_roles}
                         </div>
                       )}
@@ -538,9 +510,9 @@ const ScenarioBuilder = () => {
                         <FormGroup key={index}>
                           <div
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
                             }}
                           >
                             <Input
@@ -549,17 +521,14 @@ const ScenarioBuilder = () => {
                               placeholder={`Threat Actor ${index + 1}`}
                             />
                             {values.threat_actors_involved.length > 1 && (
-                              <IconButton
-                                type="button"
-                                onClick={() => remove(index)}
-                              >
+                              <IconButton type="button" onClick={() => remove(index)}>
                                 <FiTrash2 />
                               </IconButton>
                             )}
                           </div>
                         </FormGroup>
                       ))}
-                      <Button type="button" onClick={() => push('')}>
+                      <Button type="button" onClick={() => push("")}>
                         <FiPlus /> Add Threat Actor
                       </Button>
                     </div>
@@ -576,9 +545,9 @@ const ScenarioBuilder = () => {
                         <FormGroup key={index}>
                           <div
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
                             }}
                           >
                             <Input
@@ -587,17 +556,14 @@ const ScenarioBuilder = () => {
                               placeholder={`Detection Method ${index + 1}`}
                             />
                             {values.detection_methods_to_test.length > 1 && (
-                              <IconButton
-                                type="button"
-                                onClick={() => remove(index)}
-                              >
+                              <IconButton type="button" onClick={() => remove(index)}>
                                 <FiTrash2 />
                               </IconButton>
                             )}
                           </div>
                         </FormGroup>
                       ))}
-                      <Button type="button" onClick={() => push('')}>
+                      <Button type="button" onClick={() => push("")}>
                         <FiPlus /> Add Detection Method
                       </Button>
                     </div>
@@ -614,9 +580,9 @@ const ScenarioBuilder = () => {
                         <FormGroup key={index}>
                           <div
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
                             }}
                           >
                             <Input
@@ -625,17 +591,14 @@ const ScenarioBuilder = () => {
                               placeholder={`Mitigation Strategy ${index + 1}`}
                             />
                             {values.mitigation_strategies.length > 1 && (
-                              <IconButton
-                                type="button"
-                                onClick={() => remove(index)}
-                              >
+                              <IconButton type="button" onClick={() => remove(index)}>
                                 <FiTrash2 />
                               </IconButton>
                             )}
                           </div>
                         </FormGroup>
                       ))}
-                      <Button type="button" onClick={() => push('')}>
+                      <Button type="button" onClick={() => push("")}>
                         <FiPlus /> Add Mitigation Strategy
                       </Button>
                     </div>
@@ -646,13 +609,13 @@ const ScenarioBuilder = () => {
 
             <div
               style={{
-                display: 'flex',
-                gap: '1rem',
-                justifyContent: 'flex-end',
+                display: "flex",
+                gap: "1rem",
+                justifyContent: "flex-end",
               }}
             >
               <Button type="submit" disabled={isSubmitting || !isValid} primary>
-                <FiSave /> {isSubmitting ? 'Saving...' : 'Save Scenario'}
+                <FiSave /> {isSubmitting ? "Saving..." : "Save Scenario"}
               </Button>
               <Button type="button" disabled={isSubmitting || !isValid}>
                 <FiPlay /> Run Exercise
@@ -672,29 +635,29 @@ const ScenarioBuilder = () => {
               <ListItem key={scenario.scenario_id}>
                 <div>
                   <strong>{scenario.name}</strong>
-                  <div style={{ fontSize: '0.9rem', color: '#7f8c8d' }}>
+                  <div style={{ fontSize: "0.9rem", color: "#7f8c8d" }}>
                     {scenario.description.substring(0, 100)}...
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
                   <span
                     style={{
-                      backgroundColor: '#3498db',
-                      color: 'white',
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
+                      backgroundColor: "#3498db",
+                      color: "white",
+                      padding: "0.25rem 0.5rem",
+                      borderRadius: "4px",
+                      fontSize: "0.8rem",
                     }}
                   >
-                    {scenario.exercise_type.replace('_', ' ')}
+                    {scenario.exercise_type.replace("_", " ")}
                   </span>
                   <span
                     style={{
-                      backgroundColor: '#2ecc71',
-                      color: 'white',
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
+                      backgroundColor: "#2ecc71",
+                      color: "white",
+                      padding: "0.25rem 0.5rem",
+                      borderRadius: "4px",
+                      fontSize: "0.8rem",
                     }}
                   >
                     {scenario.difficulty}

@@ -45,17 +45,17 @@ version: latest
 **`scripts/docs/contributors.js`**
 
 ```js
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require("child_process");
+const fs = require("fs");
 const list = execSync(
   'git log --since="30 days ago" --pretty=%aN -- docs docs-site | sort | uniq',
-  { encoding: 'utf8' },
+  { encoding: "utf8" }
 )
   .trim()
-  .split('\n')
+  .split("\n")
   .filter(Boolean);
-const md = `---\ntitle: Docs Contributors (Last 30 days)\nowner: docs\n---\n\n${list.map((n) => `- ${n}`).join('\n')}\n`;
-fs.writeFileSync('docs/CONTRIBUTORS.md', md);
+const md = `---\ntitle: Docs Contributors (Last 30 days)\nowner: docs\n---\n\n${list.map((n) => `- ${n}`).join("\n")}\n`;
+fs.writeFileSync("docs/CONTRIBUTORS.md", md);
 ```
 
 **CI (monthly)** `.github/workflows/docs-contributors.yml`
@@ -63,7 +63,7 @@ fs.writeFileSync('docs/CONTRIBUTORS.md', md);
 ```yaml
 name: Docs Contributors Rollup
 on:
-  schedule: [{ cron: '0 8 1 * *' }]
+  schedule: [{ cron: "0 8 1 * *" }]
   workflow_dispatch:
 jobs:
   rollup:
@@ -136,10 +136,10 @@ body:
 **`scripts/docs/filter-by-visibility.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const mode = process.env.DOCS_VISIBILITY || 'public';
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const mode = process.env.DOCS_VISIBILITY || "public";
 function walk(dir) {
   for (const f of fs.readdirSync(dir)) {
     const p = path.join(dir, f);
@@ -147,15 +147,14 @@ function walk(dir) {
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
       const g = matter.read(p);
-      const vis = g.data.visibility || 'public';
-      if (mode === 'public' && vis !== 'public') fs.unlinkSync(p);
-      if (mode === 'partner' && !['public', 'partner'].includes(vis))
-        fs.unlinkSync(p);
+      const vis = g.data.visibility || "public";
+      if (mode === "public" && vis !== "public") fs.unlinkSync(p);
+      if (mode === "partner" && !["public", "partner"].includes(vis)) fs.unlinkSync(p);
     }
   }
 }
-walk('docs');
-console.log('Filtered docs for', mode);
+walk("docs");
+console.log("Filtered docs for", mode);
 ```
 
 ## B3) Two builds, one repo
@@ -201,13 +200,13 @@ jobs:
 **`scripts/docs/readability.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const TextStatistics = require('text-statistics');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const TextStatistics = require("text-statistics");
 let fail = false;
 function body(md) {
-  return md.replace(/```[\s\S]*?```/g, '').replace(/<[^>]+>/g, '');
+  return md.replace(/```[\s\S]*?```/g, "").replace(/<[^>]+>/g, "");
 }
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -219,12 +218,12 @@ function body(md) {
       const txt = body(g.content);
       const ts = new TextStatistics(txt);
       const grade = ts.fleschKincaidGradeLevel();
-      if (grade > 10 && (g.data.type || '') !== 'reference') {
+      if (grade > 10 && (g.data.type || "") !== "reference") {
         console.warn(`High grade level (${grade.toFixed(1)}): ${p}`);
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail ? 1 : 0);
 ````
 
@@ -242,8 +241,8 @@ process.exit(fail ? 1 : 0);
 **`scripts/docs/asset-budget.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 let fail = false;
 function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -258,7 +257,7 @@ function walk(d) {
     }
   }
 }
-walk('docs');
+walk("docs");
 process.exit(fail ? 1 : 0);
 ```
 
@@ -275,13 +274,10 @@ npmjs.com
 **`scripts/docs/check-external-links.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const allowed = new Set(
-  fs
-    .readFileSync('docs/_meta/allowed-domains.txt', 'utf8')
-    .split(/\r?\n/)
-    .filter(Boolean),
+  fs.readFileSync("docs/_meta/allowed-domains.txt", "utf8").split(/\r?\n/).filter(Boolean)
 );
 let fail = false;
 (function walk(d) {
@@ -290,9 +286,9 @@ let fail = false;
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      const md = fs.readFileSync(p, 'utf8');
+      const md = fs.readFileSync(p, "utf8");
       for (const m of md.matchAll(/\]\((https?:\/\/[^)]+)\)/g)) {
-        const host = new URL(m[1]).host.replace(/^www\./, '');
+        const host = new URL(m[1]).host.replace(/^www\./, "");
         if (![...allowed].some((d) => host.endsWith(d))) {
           console.error(`Disallowed external link in ${p}: ${m[1]}`);
           fail = true;
@@ -300,7 +296,7 @@ let fail = false;
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail ? 1 : 0);
 ```
 
@@ -320,7 +316,7 @@ process.exit(fail ? 1 : 0);
 **`src/components/Variant.tsx`**
 
 ```tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 export default function Variant({
   a,
   b,
@@ -330,23 +326,22 @@ export default function Variant({
   b: React.ReactNode;
   id: string;
 }) {
-  const [v, setV] = useState<'a' | 'b'>('a');
+  const [v, setV] = useState<"a" | "b">("a");
   useEffect(() => {
     const key = `exp:${id}`;
     const cur =
-      (localStorage.getItem(key) as 'a' | 'b' | null) ||
-      (Math.random() < 0.5 ? 'a' : 'b');
+      (localStorage.getItem(key) as "a" | "b" | null) || (Math.random() < 0.5 ? "a" : "b");
     localStorage.setItem(key, cur);
     setV(cur);
   }, [id]);
-  return <>{v === 'a' ? a : b}</>;
+  return <>{v === "a" ? a : b}</>;
 }
 ```
 
 **Usage** in MDX:
 
 ```mdx
-import Variant from '@site/src/components/Variant';
+import Variant from "@site/src/components/Variant";
 
 <Variant
   id="quickstart-callout"

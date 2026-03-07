@@ -1,9 +1,7 @@
 {
   "evidence_id": "EVD-REPLITAGENT-AUTOM-001",
   "item_slug": "replit-agent-automations",
-  "claims": [
-    "Automations runner remains gated and reports queued execution metadata."
-  ],
+  "claims": ["Automations runner remains gated and reports queued execution metadata."],
   "decisions": [
     {
       "decision": "automations_flag",

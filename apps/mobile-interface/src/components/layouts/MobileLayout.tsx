@@ -1,8 +1,8 @@
 // @ts-nocheck - Framer-motion type compatibility issue
-import { ReactNode, useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ReactNode, useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -14,19 +14,19 @@ import {
   BellIcon,
   CogIcon,
   MapIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 import {
   HomeIcon as HomeIconSolid,
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
   FolderIcon as FolderIconSolid,
   ChartBarIcon as ChartBarIconSolid,
   UserIcon as UserIconSolid,
-} from '@heroicons/react/24/solid';
-import type { ComponentType, SVGProps } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useOffline } from '@/hooks/useOffline';
-import { Badge } from '@/components/Badge';
-import { Avatar } from '@/components/Avatar';
+} from "@heroicons/react/24/solid";
+import type { ComponentType, SVGProps } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useOffline } from "@/hooks/useOffline";
+import { Badge } from "@/components/Badge";
+import { Avatar } from "@/components/Avatar";
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -43,32 +43,32 @@ interface NavigationItem {
 
 const navigationItems: NavigationItem[] = [
   {
-    name: 'Home',
-    href: '/',
+    name: "Home",
+    href: "/",
     icon: HomeIcon,
     iconSolid: HomeIconSolid,
   },
   {
-    name: 'Search',
-    href: '/search',
+    name: "Search",
+    href: "/search",
     icon: MagnifyingGlassIcon,
     iconSolid: MagnifyingGlassIconSolid,
   },
   {
-    name: 'Cases',
-    href: '/cases',
+    name: "Cases",
+    href: "/cases",
     icon: FolderIcon,
     iconSolid: FolderIconSolid,
   },
   {
-    name: 'Analytics',
-    href: '/analytics',
+    name: "Analytics",
+    href: "/analytics",
     icon: ChartBarIcon,
     iconSolid: ChartBarIconSolid,
   },
   {
-    name: 'Profile',
-    href: '/profile',
+    name: "Profile",
+    href: "/profile",
     icon: UserIcon,
     iconSolid: UserIconSolid,
   },
@@ -90,17 +90,17 @@ export function MobileLayout({
       setShowSidebar(false);
     };
 
-    router.events.on('routeChangeStart', handleRouteChange);
+    router.events.on("routeChangeStart", handleRouteChange);
     return () => {
-      router.events.off('routeChangeStart', handleRouteChange);
+      router.events.off("routeChangeStart", handleRouteChange);
     };
   }, [router.events]);
 
   const sidebarVariants = {
     closed: {
-      x: '-100%',
+      x: "-100%",
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 400,
         damping: 40,
       },
@@ -108,7 +108,7 @@ export function MobileLayout({
     open: {
       x: 0,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 400,
         damping: 40,
       },
@@ -145,23 +145,15 @@ export function MobileLayout({
 
             <div className="flex items-center space-x-1">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
                 </svg>
               </div>
-              <span className="text-lg font-bold text-intel-900 dark:text-white">
-                IntelGraph
-              </span>
+              <span className="text-lg font-bold text-intel-900 dark:text-white">IntelGraph</span>
             </div>
 
             <div className="flex items-center space-x-2">
-              {isOffline && (
-                <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse" />
-              )}
+              {isOffline && <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse" />}
               <button className="p-2 text-intel-600 dark:text-intel-400 hover:text-intel-900 dark:hover:text-white relative">
                 <BellIcon className="w-6 h-6" />
                 {notificationCount > 0 && (
@@ -208,14 +200,14 @@ export function MobileLayout({
                     src={user?.avatar}
                     alt={user?.name}
                     size="md"
-                    fallback={user?.name?.charAt(0) || 'U'}
+                    fallback={user?.name?.charAt(0) || "U"}
                   />
                   <div>
                     <p className="font-medium text-intel-900 dark:text-white">
-                      {user?.name || 'Anonymous'}
+                      {user?.name || "Anonymous"}
                     </p>
                     <p className="text-sm text-intel-600 dark:text-intel-400">
-                      {user?.role || 'Analyst'}
+                      {user?.role || "Analyst"}
                     </p>
                   </div>
                 </div>
@@ -241,8 +233,8 @@ export function MobileLayout({
                         flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors
                         ${
                           isActive
-                            ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                            : 'text-intel-700 dark:text-intel-300 hover:bg-intel-100 dark:hover:bg-intel-700'
+                            ? "bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300"
+                            : "text-intel-700 dark:text-intel-300 hover:bg-intel-100 dark:hover:bg-intel-700"
                         }
                       `}
                     >
@@ -300,7 +292,7 @@ export function MobileLayout({
       <main
         className={`
           flex-1 px-4 py-6
-          ${showBottomNav ? 'pb-24' : ''}
+          ${showBottomNav ? "pb-24" : ""}
         `}
       >
         {children}
@@ -322,8 +314,8 @@ export function MobileLayout({
                     flex flex-col items-center justify-center space-y-1 transition-colors relative
                     ${
                       isActive
-                        ? 'text-primary-600 dark:text-primary-400'
-                        : 'text-intel-500 dark:text-intel-400'
+                        ? "text-primary-600 dark:text-primary-400"
+                        : "text-intel-500 dark:text-intel-400"
                     }
                   `}
                 >
@@ -331,7 +323,7 @@ export function MobileLayout({
                     <motion.div
                       className="absolute top-0 left-1/2 w-12 h-1 bg-primary-600 dark:bg-primary-400 rounded-b-full"
                       layoutId="activeTab"
-                      style={{ x: '-50%' }}
+                      style={{ x: "-50%" }}
                     />
                   )}
                   <Icon className="w-6 h-6" />

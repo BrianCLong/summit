@@ -1,6 +1,7 @@
 # Golden Paths
 
 "Golden Paths" (or Paved Roads) are supported, opinionated ways to build common artifacts in the IntelGraph platform. By following these paths, you get:
+
 - **Security by default** (auth, audit, sanitization)
 - **Observability baked in** (metrics, logging, tracing)
 - **Consistency** (standard project structure and naming)
@@ -34,7 +35,9 @@ npm run scaffold job <name>
 The CI pipeline enforces Golden Path compliance via `npm run check:golden`.
 
 ### Rules
+
 - **Endpoints**: Every file in `server/src/routes/` must have a corresponding test file in `server/src/routes/__tests__/`.
 
 ### Exceptions
+
 If a file does not need a test (e.g., legacy or utility), add `// @golden-path-ignore` to the file content.

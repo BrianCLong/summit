@@ -4,9 +4,9 @@
  * Manages roles, permissions, and access control
  */
 
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('rbac-manager');
+const logger = createLogger("rbac-manager");
 
 export interface Permission {
   resource: string;
@@ -33,7 +33,7 @@ export class RBACManager {
 
   defineRole(role: Role): void {
     this.roles.set(role.name, role);
-    logger.info('Role defined', { role: role.name });
+    logger.info("Role defined", { role: role.name });
   }
 
   assignRole(userId: string, roleName: string): void {
@@ -46,7 +46,7 @@ export class RBACManager {
 
     if (!user.roles.includes(roleName)) {
       user.roles.push(roleName);
-      logger.info('Role assigned', { userId, role: roleName });
+      logger.info("Role assigned", { userId, role: roleName });
     }
   }
 
@@ -57,8 +57,8 @@ export class RBACManager {
       return;
     }
 
-    user.roles = user.roles.filter(r => r !== roleName);
-    logger.info('Role revoked', { userId, role: roleName });
+    user.roles = user.roles.filter((r) => r !== roleName);
+    logger.info("Role revoked", { userId, role: roleName });
   }
 
   grantPermission(userId: string, permission: Permission): void {
@@ -74,7 +74,7 @@ export class RBACManager {
     }
 
     user.customPermissions.push(permission);
-    logger.info('Permission granted', { userId, permission });
+    logger.info("Permission granted", { userId, permission });
   }
 
   hasPermission(userId: string, resource: string, action: string): boolean {
@@ -85,14 +85,14 @@ export class RBACManager {
     }
 
     // Check custom permissions
-    if (user.customPermissions?.some(p => this.matchesPermission(p, resource, action))) {
+    if (user.customPermissions?.some((p) => this.matchesPermission(p, resource, action))) {
       return true;
     }
 
     // Check role permissions
     const allPermissions = this.getUserPermissions(user);
 
-    return allPermissions.some(p => this.matchesPermission(p, resource, action));
+    return allPermissions.some((p) => this.matchesPermission(p, resource, action));
   }
 
   getUserPermissions(user: User): Permission[] {
@@ -115,11 +115,11 @@ export class RBACManager {
 
       // Collect inherited permissions
       if (role.inherits) {
-        role.inherits.forEach(inheritedRole => collectPermissions(inheritedRole));
+        role.inherits.forEach((inheritedRole) => collectPermissions(inheritedRole));
       }
     };
 
-    user.roles.forEach(roleName => collectPermissions(roleName));
+    user.roles.forEach((roleName) => collectPermissions(roleName));
 
     if (user.customPermissions) {
       permissions.push(...user.customPermissions);
@@ -140,22 +140,22 @@ export class RBACManager {
     }
 
     // Wildcard resource
-    if (permission.resource === '*' && permission.action === action) {
+    if (permission.resource === "*" && permission.action === action) {
       return true;
     }
 
     // Wildcard action
-    if (permission.resource === resource && permission.action === '*') {
+    if (permission.resource === resource && permission.action === "*") {
       return true;
     }
 
     // Both wildcards
-    if (permission.resource === '*' && permission.action === '*') {
+    if (permission.resource === "*" && permission.action === "*") {
       return true;
     }
 
     // Pattern matching for resources (e.g., "users:*" matches "users:123")
-    if (permission.resource.endsWith(':*')) {
+    if (permission.resource.endsWith(":*")) {
       const prefix = permission.resource.slice(0, -1);
       if (resource.startsWith(prefix) && permission.action === action) {
         return true;
@@ -168,43 +168,43 @@ export class RBACManager {
   // Predefined roles for intelligence operations
   initializeDefaultRoles(): void {
     this.defineRole({
-      name: 'admin',
-      description: 'Full system access',
-      permissions: [{ resource: '*', action: '*' }],
+      name: "admin",
+      description: "Full system access",
+      permissions: [{ resource: "*", action: "*" }],
     });
 
     this.defineRole({
-      name: 'analyst',
-      description: 'Intelligence analyst',
+      name: "analyst",
+      description: "Intelligence analyst",
       permissions: [
-        { resource: 'investigations', action: 'read' },
-        { resource: 'investigations', action: 'create' },
-        { resource: 'entities', action: 'read' },
-        { resource: 'relationships', action: 'read' },
-        { resource: 'reports', action: 'create' },
+        { resource: "investigations", action: "read" },
+        { resource: "investigations", action: "create" },
+        { resource: "entities", action: "read" },
+        { resource: "relationships", action: "read" },
+        { resource: "reports", action: "create" },
       ],
     });
 
     this.defineRole({
-      name: 'viewer',
-      description: 'Read-only access',
+      name: "viewer",
+      description: "Read-only access",
       permissions: [
-        { resource: 'investigations', action: 'read' },
-        { resource: 'entities', action: 'read' },
-        { resource: 'relationships', action: 'read' },
-        { resource: 'reports', action: 'read' },
+        { resource: "investigations", action: "read" },
+        { resource: "entities", action: "read" },
+        { resource: "relationships", action: "read" },
+        { resource: "reports", action: "read" },
       ],
     });
 
     this.defineRole({
-      name: 'api_consumer',
-      description: 'API access for integrations',
+      name: "api_consumer",
+      description: "API access for integrations",
       permissions: [
-        { resource: 'api:investigations', action: 'read' },
-        { resource: 'api:entities', action: 'read' },
+        { resource: "api:investigations", action: "read" },
+        { resource: "api:entities", action: "read" },
       ],
     });
 
-    logger.info('Default roles initialized');
+    logger.info("Default roles initialized");
   }
 }

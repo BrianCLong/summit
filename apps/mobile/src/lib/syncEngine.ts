@@ -95,7 +95,7 @@ async function recordConflictResolution(
   localData: unknown,
   serverData: unknown,
   resolution: 'local' | 'server' | 'merge',
-  resolvedData: unknown
+  resolvedData: unknown,
 ): Promise<void> {
   const record: ConflictResolution = {
     id: uuidv4(),
@@ -133,7 +133,7 @@ export const syncEngine = {
   async queueForSync(
     operation: 'create' | 'update' | 'delete',
     entityType: 'note' | 'observation' | 'attachment' | 'acknowledgement',
-    data: unknown
+    data: unknown,
   ): Promise<void> {
     const item: SyncQueueItem = {
       id: uuidv4(),
@@ -173,9 +173,7 @@ export const syncEngine = {
       // Process in batches
       for (let i = 0; i < pendingItems.length; i += SYNC_CONFIG.batchSize) {
         const batch = pendingItems.slice(i, i + SYNC_CONFIG.batchSize);
-        const results = await Promise.allSettled(
-          batch.map((item) => this.syncItem(item))
-        );
+        const results = await Promise.allSettled(batch.map((item) => this.syncItem(item)));
 
         for (const result of results) {
           if (result.status === 'fulfilled' && result.value) {
@@ -187,8 +185,7 @@ export const syncEngine = {
       }
 
       syncState.lastSyncAt = new Date().toISOString();
-      syncState.pendingCount = await (await offlineCache.syncQueue.getPending())
-        .length;
+      syncState.pendingCount = await (await offlineCache.syncQueue.getPending()).length;
       syncState.errorCount = failed;
     } catch (error) {
       console.error('Sync error:', error);
@@ -262,7 +259,7 @@ export const syncEngine = {
   // Handle sync conflict
   async handleConflict(
     item: SyncQueueItem,
-    serverData: { data: unknown; version: number; updatedAt: string }
+    serverData: { data: unknown; version: number; updatedAt: string },
   ): Promise<void> {
     const localData = item.data as {
       version?: number;
@@ -288,7 +285,7 @@ export const syncEngine = {
       conflict.localData,
       conflict.serverData,
       winner,
-      mergedData
+      mergedData,
     );
 
     if (winner === 'local') {
@@ -310,10 +307,7 @@ export const syncEngine = {
   },
 
   // Apply server data to local cache
-  async applyServerData(
-    entityType: string,
-    data: unknown
-  ): Promise<void> {
+  async applyServerData(entityType: string, data: unknown): Promise<void> {
     switch (entityType) {
       case 'note':
         await offlineCache.notes.update(data as Note);
@@ -328,10 +322,7 @@ export const syncEngine = {
   },
 
   // Update local entity sync status
-  async updateLocalSyncStatus(
-    item: SyncQueueItem,
-    status: SyncStatus
-  ): Promise<void> {
+  async updateLocalSyncStatus(item: SyncQueueItem, status: SyncStatus): Promise<void> {
     const entityId = (item.data as { id: string }).id;
 
     switch (item.entityType) {
@@ -348,10 +339,7 @@ export const syncEngine = {
   },
 
   // Get API endpoint for entity type
-  getEndpoint(
-    entityType: string,
-    operation: 'create' | 'update' | 'delete'
-  ): string {
+  getEndpoint(entityType: string, operation: 'create' | 'update' | 'delete'): string {
     const baseUrl = '/api/mobile';
     switch (entityType) {
       case 'note':

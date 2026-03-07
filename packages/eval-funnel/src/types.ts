@@ -15,7 +15,7 @@ export interface ProvisioningResult {
   environmentName: string;
   startedAt: number;
   finishedAt: number;
-  status: 'succeeded' | 'failed';
+  status: "succeeded" | "failed";
   stdout: string;
   stderr: string;
   artifactsPath: string;
@@ -30,7 +30,11 @@ export interface ProvisioningOptions {
 }
 
 export interface ProvisioningExecutor {
-  execute(command: string, env?: Record<string, string>, cwd?: string): Promise<{ stdout: string; stderr: string }>;
+  execute(
+    command: string,
+    env?: Record<string, string>,
+    cwd?: string
+  ): Promise<{ stdout: string; stderr: string }>;
 }
 
 export interface CustomerPackSpec {
@@ -58,7 +62,7 @@ export interface KpiSample {
 }
 
 export interface KpiReportOptions {
-  format: 'html' | 'json';
+  format: "html" | "json";
   outputPath?: string;
   includeIncidentTemplate?: boolean;
   sloObjectives?: Array<{ name: string; threshold: number; measured: number; unit?: string }>;

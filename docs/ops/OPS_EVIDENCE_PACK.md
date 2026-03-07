@@ -14,8 +14,8 @@ The pack is a tarball (`.tar.gz`) containing a directory named `<UTC_YYYYMMDDTHH
 
 - **METADATA.json**: Contains commit SHA, branch, timestamp, repo URL, and tool versions (node, pnpm, docker).
 - **LOGS/**:
-    - `verify_ops.stdout.log`: Standard output from the verification script.
-    - `verify_ops.stderr.log`: Standard error from the verification script.
+  - `verify_ops.stdout.log`: Standard output from the verification script.
+  - `verify_ops.stderr.log`: Standard error from the verification script.
 - **ARTIFACTS/**: Captured artifacts from validators (e.g., plans, JSON reports).
 - **MANIFEST.json**: SHA256 checksums of all files in the pack.
 - **SUMMARY.md**: High-level pass/fail result and pointers to logs.
@@ -44,6 +44,7 @@ Evidence packs should be retained according to the project's data retention poli
 ## Rollback
 
 This feature adds new scripts and docs. To rollback, delete:
+
 - `scripts/verification/generate_ops_evidence_pack.sh`
 - `docs/ops/OPS_EVIDENCE_PACK.md`
 - `.github/workflows/generate-ops-evidence-pack.yml`

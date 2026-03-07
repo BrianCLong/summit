@@ -8,12 +8,12 @@
  * - Validation
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { parseBacklogWithDetails } from '../data/backlog-parser.js';
+import * as fs from "fs";
+import * as path from "path";
+import { parseBacklogWithDetails } from "../data/backlog-parser.js";
 
-describe('Backlog Parser', () => {
-  const testDataDir = path.join(__dirname, 'fixtures');
+describe("Backlog Parser", () => {
+  const testDataDir = path.join(__dirname, "fixtures");
 
   beforeAll(() => {
     // Create test fixtures directory if it doesn't exist
@@ -29,22 +29,22 @@ describe('Backlog Parser', () => {
     }
   });
 
-  describe('Valid backlog files', () => {
-    it('should parse a valid backlog with epics and stories', async () => {
-      const testFile = path.join(testDataDir, 'valid-backlog.json');
+  describe("Valid backlog files", () => {
+    it("should parse a valid backlog with epics and stories", async () => {
+      const testFile = path.join(testDataDir, "valid-backlog.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Test Epic',
-            priority: 'Must',
+            id: "E-001",
+            title: "Test Epic",
+            priority: "Must",
             stories: [
               {
-                id: 'S-001',
-                title: 'Test Story',
-                owner: 'Test Team',
-                acceptance_criteria: ['Criterion 1', 'Criterion 2'],
+                id: "S-001",
+                title: "Test Story",
+                owner: "Test Team",
+                acceptance_criteria: ["Criterion 1", "Criterion 2"],
               },
             ],
           },
@@ -60,32 +60,30 @@ describe('Backlog Parser', () => {
       expect(result.warnings).toHaveLength(0);
       expect(result.stats.totalEpics).toBe(1);
       expect(result.stats.totalStories).toBe(1);
-      expect(result.items[0].id).toBe('S-001');
-      expect(result.items[0].title).toBe('Test Story');
-      expect(result.items[0].impact).toBe('blocker');
+      expect(result.items[0].id).toBe("S-001");
+      expect(result.items[0].title).toBe("Test Story");
+      expect(result.items[0].impact).toBe("blocker");
     });
 
-    it('should handle multiple epics and stories', async () => {
-      const testFile = path.join(testDataDir, 'multiple-epics.json');
+    it("should handle multiple epics and stories", async () => {
+      const testFile = path.join(testDataDir, "multiple-epics.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic 1',
-            priority: 'Must',
+            id: "E-001",
+            title: "Epic 1",
+            priority: "Must",
             stories: [
-              { id: 'S-001', title: 'Story 1' },
-              { id: 'S-002', title: 'Story 2' },
+              { id: "S-001", title: "Story 1" },
+              { id: "S-002", title: "Story 2" },
             ],
           },
           {
-            id: 'E-002',
-            title: 'Epic 2',
-            priority: 'Should',
-            stories: [
-              { id: 'S-003', title: 'Story 3' },
-            ],
+            id: "E-002",
+            title: "Epic 2",
+            priority: "Should",
+            stories: [{ id: "S-003", title: "Story 3" }],
           },
         ],
       };
@@ -100,56 +98,56 @@ describe('Backlog Parser', () => {
     });
   });
 
-  describe('Error handling', () => {
-    it('should handle missing file gracefully', async () => {
-      const result = await parseBacklogWithDetails('/nonexistent/file.json');
+  describe("Error handling", () => {
+    it("should handle missing file gracefully", async () => {
+      const result = await parseBacklogWithDetails("/nonexistent/file.json");
 
       expect(result.items).toHaveLength(0);
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('not found');
+      expect(result.warnings[0]).toContain("not found");
     });
 
-    it('should handle empty file', async () => {
-      const testFile = path.join(testDataDir, 'empty.json');
-      fs.writeFileSync(testFile, '');
+    it("should handle empty file", async () => {
+      const testFile = path.join(testDataDir, "empty.json");
+      fs.writeFileSync(testFile, "");
 
       const result = await parseBacklogWithDetails(testFile);
 
       expect(result.items).toHaveLength(0);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].type).toBe('invalid_format');
+      expect(result.errors[0].type).toBe("invalid_format");
     });
 
-    it('should handle invalid JSON', async () => {
-      const testFile = path.join(testDataDir, 'invalid.json');
-      fs.writeFileSync(testFile, '{ invalid json }');
+    it("should handle invalid JSON", async () => {
+      const testFile = path.join(testDataDir, "invalid.json");
+      fs.writeFileSync(testFile, "{ invalid json }");
 
       const result = await parseBacklogWithDetails(testFile);
 
       expect(result.items).toHaveLength(0);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].message).toContain('Invalid JSON');
+      expect(result.errors[0].message).toContain("Invalid JSON");
     });
 
-    it('should handle missing epics array', async () => {
-      const testFile = path.join(testDataDir, 'no-epics.json');
-      fs.writeFileSync(testFile, JSON.stringify({ version: '1.0' }));
+    it("should handle missing epics array", async () => {
+      const testFile = path.join(testDataDir, "no-epics.json");
+      fs.writeFileSync(testFile, JSON.stringify({ version: "1.0" }));
 
       const result = await parseBacklogWithDetails(testFile);
 
       expect(result.items).toHaveLength(0);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].message).toContain('epics');
+      expect(result.errors[0].message).toContain("epics");
     });
 
-    it('should handle epic missing required fields', async () => {
-      const testFile = path.join(testDataDir, 'invalid-epic.json');
+    it("should handle epic missing required fields", async () => {
+      const testFile = path.join(testDataDir, "invalid-epic.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
             // Missing id and title
-            priority: 'Must',
+            priority: "Must",
             stories: [],
           },
         ],
@@ -161,20 +159,20 @@ describe('Backlog Parser', () => {
 
       expect(result.items).toHaveLength(0);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].type).toBe('missing_field');
+      expect(result.errors[0].type).toBe("missing_field");
     });
 
-    it('should handle story missing required fields', async () => {
-      const testFile = path.join(testDataDir, 'invalid-story.json');
+    it("should handle story missing required fields", async () => {
+      const testFile = path.join(testDataDir, "invalid-story.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Must',
+            id: "E-001",
+            title: "Epic",
+            priority: "Must",
             stories: [
-              { id: 'S-001' }, // Missing title
+              { id: "S-001" }, // Missing title
             ],
           },
         ],
@@ -189,17 +187,17 @@ describe('Backlog Parser', () => {
     });
   });
 
-  describe('Priority mapping', () => {
+  describe("Priority mapping", () => {
     it('should map "Must" to blocker', async () => {
-      const testFile = path.join(testDataDir, 'priority-must.json');
+      const testFile = path.join(testDataDir, "priority-must.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Must',
-            stories: [{ id: 'S-001', title: 'Story' }],
+            id: "E-001",
+            title: "Epic",
+            priority: "Must",
+            stories: [{ id: "S-001", title: "Story" }],
           },
         ],
       };
@@ -208,19 +206,19 @@ describe('Backlog Parser', () => {
 
       const result = await parseBacklogWithDetails(testFile);
 
-      expect(result.items[0].impact).toBe('blocker');
+      expect(result.items[0].impact).toBe("blocker");
     });
 
     it('should map "Should" to high', async () => {
-      const testFile = path.join(testDataDir, 'priority-should.json');
+      const testFile = path.join(testDataDir, "priority-should.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Should',
-            stories: [{ id: 'S-001', title: 'Story' }],
+            id: "E-001",
+            title: "Epic",
+            priority: "Should",
+            stories: [{ id: "S-001", title: "Story" }],
           },
         ],
       };
@@ -229,19 +227,19 @@ describe('Backlog Parser', () => {
 
       const result = await parseBacklogWithDetails(testFile);
 
-      expect(result.items[0].impact).toBe('high');
+      expect(result.items[0].impact).toBe("high");
     });
 
     it('should map "Could" to medium', async () => {
-      const testFile = path.join(testDataDir, 'priority-could.json');
+      const testFile = path.join(testDataDir, "priority-could.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Could',
-            stories: [{ id: 'S-001', title: 'Story' }],
+            id: "E-001",
+            title: "Epic",
+            priority: "Could",
+            stories: [{ id: "S-001", title: "Story" }],
           },
         ],
       };
@@ -250,19 +248,19 @@ describe('Backlog Parser', () => {
 
       const result = await parseBacklogWithDetails(testFile);
 
-      expect(result.items[0].impact).toBe('medium');
+      expect(result.items[0].impact).toBe("medium");
     });
 
-    it('should default to low for unknown priority', async () => {
-      const testFile = path.join(testDataDir, 'priority-unknown.json');
+    it("should default to low for unknown priority", async () => {
+      const testFile = path.join(testDataDir, "priority-unknown.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Someday',
-            stories: [{ id: 'S-001', title: 'Story' }],
+            id: "E-001",
+            title: "Epic",
+            priority: "Someday",
+            stories: [{ id: "S-001", title: "Story" }],
           },
         ],
       };
@@ -271,24 +269,24 @@ describe('Backlog Parser', () => {
 
       const result = await parseBacklogWithDetails(testFile);
 
-      expect(result.items[0].impact).toBe('low');
+      expect(result.items[0].impact).toBe("low");
     });
   });
 
-  describe('Complexity calculation', () => {
-    it('should calculate base complexity', async () => {
-      const testFile = path.join(testDataDir, 'complexity-base.json');
+  describe("Complexity calculation", () => {
+    it("should calculate base complexity", async () => {
+      const testFile = path.join(testDataDir, "complexity-base.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Must',
+            id: "E-001",
+            title: "Epic",
+            priority: "Must",
             stories: [
               {
-                id: 'S-001',
-                title: 'Simple Story',
+                id: "S-001",
+                title: "Simple Story",
               },
             ],
           },
@@ -302,20 +300,20 @@ describe('Backlog Parser', () => {
       expect(result.items[0].complexityScore).toBe(10); // Base complexity
     });
 
-    it('should increase complexity with dependencies', async () => {
-      const testFile = path.join(testDataDir, 'complexity-deps.json');
+    it("should increase complexity with dependencies", async () => {
+      const testFile = path.join(testDataDir, "complexity-deps.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Must',
+            id: "E-001",
+            title: "Epic",
+            priority: "Must",
             stories: [
               {
-                id: 'S-001',
-                title: 'Story with deps',
-                depends_on: ['S-000', 'S-002'],
+                id: "S-001",
+                title: "Story with deps",
+                depends_on: ["S-000", "S-002"],
               },
             ],
           },
@@ -329,20 +327,20 @@ describe('Backlog Parser', () => {
       expect(result.items[0].complexityScore).toBe(40); // 10 + 2*15
     });
 
-    it('should increase complexity with acceptance criteria', async () => {
-      const testFile = path.join(testDataDir, 'complexity-criteria.json');
+    it("should increase complexity with acceptance criteria", async () => {
+      const testFile = path.join(testDataDir, "complexity-criteria.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Must',
+            id: "E-001",
+            title: "Epic",
+            priority: "Must",
             stories: [
               {
-                id: 'S-001',
-                title: 'Story with criteria',
-                acceptance_criteria: ['C1', 'C2', 'C3'],
+                id: "S-001",
+                title: "Story with criteria",
+                acceptance_criteria: ["C1", "C2", "C3"],
               },
             ],
           },
@@ -357,20 +355,20 @@ describe('Backlog Parser', () => {
     });
   });
 
-  describe('Data sanitization', () => {
-    it('should trim whitespace from titles', async () => {
-      const testFile = path.join(testDataDir, 'whitespace.json');
+  describe("Data sanitization", () => {
+    it("should trim whitespace from titles", async () => {
+      const testFile = path.join(testDataDir, "whitespace.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: '  Epic with spaces  ',
-            priority: 'Must',
+            id: "E-001",
+            title: "  Epic with spaces  ",
+            priority: "Must",
             stories: [
               {
-                id: 'S-001',
-                title: '  Story with   multiple   spaces  ',
+                id: "S-001",
+                title: "  Story with   multiple   spaces  ",
               },
             ],
           },
@@ -381,22 +379,22 @@ describe('Backlog Parser', () => {
 
       const result = await parseBacklogWithDetails(testFile);
 
-      expect(result.items[0].title).toBe('Story with multiple spaces');
+      expect(result.items[0].title).toBe("Story with multiple spaces");
     });
 
-    it('should handle missing owner gracefully', async () => {
-      const testFile = path.join(testDataDir, 'no-owner.json');
+    it("should handle missing owner gracefully", async () => {
+      const testFile = path.join(testDataDir, "no-owner.json");
       const backlog = {
-        version: '1.0',
+        version: "1.0",
         epics: [
           {
-            id: 'E-001',
-            title: 'Epic',
-            priority: 'Must',
+            id: "E-001",
+            title: "Epic",
+            priority: "Must",
             stories: [
               {
-                id: 'S-001',
-                title: 'Story',
+                id: "S-001",
+                title: "Story",
                 // No owner field
               },
             ],

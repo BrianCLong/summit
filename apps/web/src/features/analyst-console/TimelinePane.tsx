@@ -86,17 +86,14 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
   )
 
   // Handle time brush drag
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (!containerRef.current) return
-      const rect = containerRef.current.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const percent = x / rect.width
-      setDragStart(percent)
-      setIsDragging(true)
-    },
-    []
-  )
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const percent = x / rect.width
+    setDragStart(percent)
+    setIsDragging(true)
+  }, [])
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -250,7 +247,9 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
         {filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <Clock className="h-12 w-12 text-slate-600 mb-2" />
-            <p className="text-sm text-slate-400">No events in this time window</p>
+            <p className="text-sm text-slate-400">
+              No events in this time window
+            </p>
             <p className="text-xs text-slate-500 mt-1">
               Adjust the time range to see events
             </p>
@@ -322,7 +321,9 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
       {/* Footer stats */}
       <div className="p-3 border-t border-slate-800 bg-slate-900/50">
         <div className="flex items-center justify-between text-xs text-slate-400">
-          <span>Showing {filteredEvents.length} of {events.length} events</span>
+          <span>
+            Showing {filteredEvents.length} of {events.length} events
+          </span>
           {selection.selectedEventIds.length > 0 && (
             <Badge variant="secondary" className="text-xs">
               {selection.selectedEventIds.length} selected

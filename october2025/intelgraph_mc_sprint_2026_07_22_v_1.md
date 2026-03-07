@@ -215,8 +215,7 @@ type Query {
 }
 
 type Mutation {
-  setFlag(key: String!, value: JSON!, policy: JSON!): Boolean
-    @auth(abac: "admin.write")
+  setFlag(key: String!, value: JSON!, policy: JSON!): Boolean @auth(abac: "admin.write")
   createExperiment(id: String!, spec: JSON!): Boolean @auth(abac: "admin.write")
   exportMonthlyClose(month: String!): String! @auth(abac: "billing.read")
 }

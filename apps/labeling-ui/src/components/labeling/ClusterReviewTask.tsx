@@ -4,7 +4,7 @@
  * UI for reviewing and validating entity clusters.
  */
 
-import type { Sample, LabelingJob, Label } from '../../types';
+import type { Sample, LabelingJob, Label } from "../../types";
 
 interface ClusterReviewTaskProps {
   sample: Sample;
@@ -13,16 +13,12 @@ interface ClusterReviewTaskProps {
   instructions: string;
 }
 
-export function ClusterReviewTask({
-  sample,
-  instructions,
-  onSubmit,
-}: ClusterReviewTaskProps) {
+export function ClusterReviewTask({ sample, instructions, onSubmit }: ClusterReviewTaskProps) {
   const handleSubmit = () => {
     // Placeholder implementation
     onSubmit([
       {
-        fieldName: 'cluster_valid',
+        fieldName: "cluster_valid",
         value: true,
       },
     ]);

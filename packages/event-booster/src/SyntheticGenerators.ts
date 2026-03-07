@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { EventRecord, EventPayload } from './types.js';
+import { EventRecord, EventPayload } from "./types.js";
 
 /** Shared configuration for all synthetic generators. */
 interface GeneratorBaseOptions {
@@ -49,7 +49,7 @@ const createEvent = (
   timestamp: number,
   signal: number,
   basePayload: EventPayload,
-  tags?: string[],
+  tags?: string[]
 ): EventRecord => ({
   id,
   timestamp,
@@ -57,18 +57,16 @@ const createEvent = (
   tags: tags ? [...tags] : undefined,
 });
 
-const resolveStartTimestamp = (provided?: number): number =>
-  provided ?? Date.now();
+const resolveStartTimestamp = (provided?: number): number => provided ?? Date.now();
 
-const resolveInterval = (provided?: number): number =>
-  Math.max(1, provided ?? 1000);
+const resolveInterval = (provided?: number): number => Math.max(1, provided ?? 1000);
 
 /**
  * Generates a uniform stream of events spaced by {@link UniformGeneratorOptions.intervalMs}.
  */
 export const generateUniformEvents = (
   count: number,
-  options: UniformGeneratorOptions = {},
+  options: UniformGeneratorOptions = {}
 ): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
@@ -84,7 +82,7 @@ export const generateUniformEvents = (
       start + index * interval + jitter,
       signal,
       basePayload,
-      tags,
+      tags
     );
   });
 };
@@ -92,9 +90,7 @@ export const generateUniformEvents = (
 /**
  * Produces bursts of heightened activity separated by idle windows.
  */
-export const generateBurstEvents = (
-  options: BurstGeneratorOptions,
-): EventRecord[] => {
+export const generateBurstEvents = (options: BurstGeneratorOptions): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
   const interval = resolveInterval(options.intervalMs);
@@ -114,8 +110,8 @@ export const generateBurstEvents = (
           timestamp + item * interval,
           signal,
           basePayload,
-          tags,
-        ),
+          tags
+        )
       );
     }
     timestamp += options.burstSize * interval;
@@ -130,9 +126,7 @@ export const generateBurstEvents = (
 /**
  * Generates a seasonal waveform using a sine wave for the signal attribute.
  */
-export const generateSeasonalEvents = (
-  options: SeasonalGeneratorOptions,
-): EventRecord[] => {
+export const generateSeasonalEvents = (options: SeasonalGeneratorOptions): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
   const interval = resolveInterval(options.intervalMs);
@@ -146,8 +140,7 @@ export const generateSeasonalEvents = (
   let index = 0;
   for (let period = 0; period < options.periods; period += 1) {
     for (let point = 0; point < options.pointsPerPeriod; point += 1) {
-      const phase =
-        (2 * Math.PI * point) / options.pointsPerPeriod + phaseOffset;
+      const phase = (2 * Math.PI * point) / options.pointsPerPeriod + phaseOffset;
       const signal = baseline + Math.sin(phase) * amplitude;
       const jitter = (random() - 0.5) * interval * 0.1;
       events.push(
@@ -156,8 +149,8 @@ export const generateSeasonalEvents = (
           start + index * interval + jitter,
           signal,
           basePayload,
-          tags,
-        ),
+          tags
+        )
       );
       index += 1;
     }
@@ -169,9 +162,7 @@ export const generateSeasonalEvents = (
 /**
  * Injects sporadic anomalies into a mostly stable stream.
  */
-export const generateAnomalyEvents = (
-  options: AnomalyGeneratorOptions,
-): EventRecord[] => {
+export const generateAnomalyEvents = (options: AnomalyGeneratorOptions): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
   const interval = resolveInterval(options.intervalMs);
@@ -189,7 +180,7 @@ export const generateAnomalyEvents = (
       start + index * interval,
       signal,
       { ...basePayload, isAnomaly },
-      tags,
+      tags
     );
   });
 };

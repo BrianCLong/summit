@@ -3,12 +3,12 @@ name: copilot-pr-metrics-ci
 on:
   pull_request:
     paths:
-      - 'connectors/github/copilot_metrics/**'
-      - 'pipelines/metrics/copilot_pr_metrics.py'
-      - 'evidence/copilot_pr_metrics/**'
-      - 'evidence/schemas/copilot_pr_metrics.schema.json'
-      - 'scripts/ci/copilot_pr_metrics_checks.py'
-      - '.github/workflows/copilot-pr-metrics-ci.yml'
+      - "connectors/github/copilot_metrics/**"
+      - "pipelines/metrics/copilot_pr_metrics.py"
+      - "evidence/copilot_pr_metrics/**"
+      - "evidence/schemas/copilot_pr_metrics.schema.json"
+      - "scripts/ci/copilot_pr_metrics_checks.py"
+      - ".github/workflows/copilot-pr-metrics-ci.yml"
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Generate deterministic artifacts
         run: python pipelines/metrics/copilot_pr_metrics.py
       - name: metrics-schema-validate

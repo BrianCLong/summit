@@ -4,13 +4,7 @@
   "title": "Summit Agent Manifest",
   "description": "Canonical definition of a Governed AI Agent in the Summit ecosystem. Enforces Vercel-style explicit configuration wrapped in regulatory-grade compliance controls.",
   "type": "object",
-  "required": [
-    "agent_id",
-    "version",
-    "governance",
-    "runtime",
-    "evidence"
-  ],
+  "required": ["agent_id", "version", "governance", "runtime", "evidence"],
   "properties": {
     "agent_id": {
       "type": "string",
@@ -40,9 +34,9 @@
           "description": "Reference to the OPA policy bundle governing this agent."
         },
         "risk_level": {
-            "type": "string",
-            "enum": ["low", "medium", "high", "critical"],
-            "default": "medium"
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "default": "medium"
         }
       }
     },
@@ -70,8 +64,15 @@
           "type": "object",
           "required": ["source", "sha256"],
           "properties": {
-            "source": { "type": "string", "description": "Path to the primary system prompt file." },
-            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Cryptographic hash of the instruction file content." }
+            "source": {
+              "type": "string",
+              "description": "Path to the primary system prompt file."
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "Cryptographic hash of the instruction file content."
+            }
           }
         },
         "tools": {
@@ -80,15 +81,21 @@
             "type": "object",
             "required": ["name", "permission"],
             "properties": {
-              "name": { "type": "string", "description": "Name of the tool as defined in the capability registry." },
-              "permission": { "type": "string", "enum": ["read-only", "read-write", "admin", "sandbox-only"] },
+              "name": {
+                "type": "string",
+                "description": "Name of the tool as defined in the capability registry."
+              },
+              "permission": {
+                "type": "string",
+                "enum": ["read-only", "read-write", "admin", "sandbox-only"]
+              },
               "timeout_ms": { "type": "integer", "default": 30000 }
             }
           }
         },
         "output_schema": {
-            "type": "object",
-            "description": "JSON Schema defining the structure of the agent's final output artifact."
+          "type": "object",
+          "description": "JSON Schema defining the structure of the agent's final output artifact."
         }
       }
     },
@@ -103,7 +110,10 @@
         },
         "required_artifacts": {
           "type": "array",
-          "items": { "type": "string", "enum": ["trace", "decision_log", "tool_output", "policy_eval"] },
+          "items": {
+            "type": "string",
+            "enum": ["trace", "decision_log", "tool_output", "policy_eval"]
+          },
           "description": "List of evidence types that must be persisted for every run."
         },
         "replay_mode": {

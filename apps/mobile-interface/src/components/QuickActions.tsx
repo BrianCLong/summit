@@ -1,11 +1,11 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 interface QuickActionsProps {
   className?: string;
 }
 
-export function QuickActions({ className = '' }: QuickActionsProps) {
+export function QuickActions({ className = "" }: QuickActionsProps) {
   return (
     <div className={`grid grid-cols-4 gap-4 p-4 ${className}`}>
       <button className="flex flex-col items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">

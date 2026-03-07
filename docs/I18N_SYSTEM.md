@@ -41,6 +41,7 @@ The Summit/IntelGraph platform now includes a comprehensive internationalization
 #### LTR (Left-to-Right)
 
 **NATO Countries** (33 languages):
+
 - 🇺🇸 English (US), 🇬🇧 English (UK)
 - 🇫🇷 French, 🇩🇪 German, 🇪🇸 Spanish, 🇮🇹 Italian, 🇵🇹 Portuguese, 🇳🇱 Dutch
 - 🇩🇰 Danish, 🇳🇴 Norwegian, 🇸🇪 Swedish, 🇫🇮 Finnish, 🇮🇸 Icelandic
@@ -48,6 +49,7 @@ The Summit/IntelGraph platform now includes a comprehensive internationalization
 - And 16 more...
 
 **Asian Languages**:
+
 - 🇨🇳 Chinese (Simplified), 🇹🇼 Chinese (Traditional)
 - 🇯🇵 Japanese, 🇰🇷 Korean
 
@@ -62,7 +64,7 @@ The Summit/IntelGraph platform now includes a comprehensive internationalization
 
 ### Package Structure
 
-```text
+````text
 
 @intelgraph/i18n/
 ├── src/
@@ -957,3 +959,4 @@ For questions or issues, refer to the [package README](../packages/i18n/README.m
 ---
 
 **Happy Internationalizing! 🌍**
+````

@@ -18,9 +18,9 @@ spec:
             severity: critical
             component: maestro
           annotations:
-            summary: 'Maestro service is down'
-            description: 'Maestro service {{ $labels.instance }} has been down for more than 1 minute.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro service is down"
+            description: "Maestro service {{ $labels.instance }} has been down for more than 1 minute."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroHighErrorRate
           expr: rate(http_requests_total{job="maestro-control-plane",status=~"5.."}[5m]) > 0.05
@@ -29,9 +29,9 @@ spec:
             severity: critical
             component: maestro
           annotations:
-            summary: 'High error rate in Maestro'
-            description: 'Maestro is experiencing {{ $value | humanizePercentage }} error rate over the last 5 minutes.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "High error rate in Maestro"
+            description: "Maestro is experiencing {{ $value | humanizePercentage }} error rate over the last 5 minutes."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroHighLatency
           expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="maestro-control-plane"}[5m])) > 1.0
@@ -40,9 +40,9 @@ spec:
             severity: warning
             component: maestro
           annotations:
-            summary: 'High latency in Maestro'
-            description: '95th percentile latency is {{ $value }}s for Maestro requests.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "High latency in Maestro"
+            description: "95th percentile latency is {{ $value }}s for Maestro requests."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         # Resource Utilization
         - alert: MaestroPodCPUHigh
@@ -52,9 +52,9 @@ spec:
             severity: warning
             component: maestro
           annotations:
-            summary: 'Maestro pod CPU usage high'
-            description: 'Maestro pod {{ $labels.pod }} CPU usage is above 80%: {{ $value | humanizePercentage }}'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro pod CPU usage high"
+            description: "Maestro pod {{ $labels.pod }} CPU usage is above 80%: {{ $value | humanizePercentage }}"
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroPodMemoryHigh
           expr: container_memory_working_set_bytes{pod=~"maestro-control-plane-.*"} / container_spec_memory_limit_bytes > 0.8
@@ -63,9 +63,9 @@ spec:
             severity: warning
             component: maestro
           annotations:
-            summary: 'Maestro pod memory usage high'
-            description: 'Maestro pod {{ $labels.pod }} memory usage is above 80%: {{ $value | humanizePercentage }}'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro pod memory usage high"
+            description: "Maestro pod {{ $labels.pod }} memory usage is above 80%: {{ $value | humanizePercentage }}"
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         # Deployment Health
         - alert: MaestroDeploymentReplicasMismatch
@@ -75,9 +75,9 @@ spec:
             severity: warning
             component: maestro
           annotations:
-            summary: 'Maestro deployment replicas mismatch'
-            description: 'Maestro deployment has {{ $value }} replicas available, but {{ $labels.spec_replicas }} expected.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro deployment replicas mismatch"
+            description: "Maestro deployment has {{ $value }} replicas available, but {{ $labels.spec_replicas }} expected."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroPodRestartingTooMuch
           expr: rate(kube_pod_container_status_restarts_total{pod=~"maestro-control-plane-.*"}[15m]) > 0
@@ -86,9 +86,9 @@ spec:
             severity: warning
             component: maestro
           annotations:
-            summary: 'Maestro pod restarting frequently'
-            description: 'Maestro pod {{ $labels.pod }} is restarting frequently: {{ $value }} restarts in the last 15 minutes.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro pod restarting frequently"
+            description: "Maestro pod {{ $labels.pod }} is restarting frequently: {{ $value }} restarts in the last 15 minutes."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         # Database Dependencies
         - alert: DatabaseConnectionFailures
@@ -98,9 +98,9 @@ spec:
             severity: critical
             component: database
           annotations:
-            summary: 'Database connection failures'
-            description: 'Maestro is experiencing database connection failures: {{ $value }} errors/sec'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Database connection failures"
+            description: "Maestro is experiencing database connection failures: {{ $value }} errors/sec"
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: RedisConnectionFailures
           expr: rate(redis_connection_errors_total{service="maestro-control-plane"}[5m]) > 0.1
@@ -109,9 +109,9 @@ spec:
             severity: critical
             component: redis
           annotations:
-            summary: 'Redis connection failures'
-            description: 'Maestro is experiencing Redis connection failures: {{ $value }} errors/sec'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Redis connection failures"
+            description: "Maestro is experiencing Redis connection failures: {{ $value }} errors/sec"
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
     - name: maestro.slo
       rules:
@@ -123,9 +123,9 @@ spec:
             severity: critical
             component: slo
           annotations:
-            summary: 'Maestro SLO availability breach'
-            description: 'Maestro availability SLO breached: {{ $value | humanizePercentage }} over last 5 minutes (target: 99.5%)'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro SLO availability breach"
+            description: "Maestro availability SLO breached: {{ $value | humanizePercentage }} over last 5 minutes (target: 99.5%)"
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroSLOLatencyBreach
           expr: histogram_quantile(0.95, avg_over_time(probe_http_duration_seconds_bucket{instance=~".*maestro.*"}[5m])) > 0.5
@@ -134,9 +134,9 @@ spec:
             severity: warning
             component: slo
           annotations:
-            summary: 'Maestro SLO latency breach'
-            description: 'Maestro 95th percentile latency SLO breached: {{ $value }}s (target: <500ms)'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro SLO latency breach"
+            description: "Maestro 95th percentile latency SLO breached: {{ $value }}s (target: <500ms)"
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
     - name: maestro.business
       rules:
@@ -148,9 +148,9 @@ spec:
             severity: warning
             component: business
           annotations:
-            summary: 'High workflow failure rate'
-            description: 'Maestro workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "High workflow failure rate"
+            description: "Maestro workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroQueueDepthHigh
           expr: maestro_queue_depth > 1000
@@ -159,9 +159,9 @@ spec:
             severity: warning
             component: business
           annotations:
-            summary: 'Maestro queue depth high'
-            description: 'Maestro queue depth is {{ $value }} messages, indicating potential processing bottleneck.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro queue depth high"
+            description: "Maestro queue depth is {{ $value }} messages, indicating potential processing bottleneck."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroAPIRateLimitApproaching
           expr: rate(maestro_rate_limit_hits_total[5m]) / rate(maestro_requests_total[5m]) > 0.8
@@ -170,9 +170,9 @@ spec:
             severity: warning
             component: business
           annotations:
-            summary: 'API rate limit approaching'
-            description: '{{ $value | humanizePercentage }} of requests are hitting rate limits.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "API rate limit approaching"
+            description: "{{ $value | humanizePercentage }} of requests are hitting rate limits."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
     - name: maestro.security
       rules:
@@ -184,9 +184,9 @@ spec:
             severity: warning
             component: security
           annotations:
-            summary: 'High unauthorized access attempts'
-            description: '{{ $value }} unauthorized access attempts per second to Maestro.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "High unauthorized access attempts"
+            description: "{{ $value }} unauthorized access attempts per second to Maestro."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroSuspiciousActivity
           expr: rate(http_requests_total{job="maestro-control-plane",status="403"}[5m]) > 0.05
@@ -195,9 +195,9 @@ spec:
             severity: warning
             component: security
           annotations:
-            summary: 'Suspicious access patterns detected'
-            description: '{{ $value }} forbidden access attempts per second, potential security threat.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Suspicious access patterns detected"
+            description: "{{ $value }} forbidden access attempts per second, potential security threat."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
     - name: maestro.infrastructure
       rules:
@@ -209,9 +209,9 @@ spec:
             severity: critical
             component: infrastructure
           annotations:
-            summary: 'Maestro ingress controller down'
-            description: 'Nginx ingress controller is down, Maestro may be inaccessible.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro ingress controller down"
+            description: "Nginx ingress controller is down, Maestro may be inaccessible."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroLoadBalancerDown
           expr: probe_success{job="blackbox",instance=~".*maestro.*"} == 0
@@ -220,9 +220,9 @@ spec:
             severity: critical
             component: infrastructure
           annotations:
-            summary: 'Maestro load balancer health check failing'
-            description: 'External health checks are failing, Maestro may be inaccessible from outside.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro load balancer health check failing"
+            description: "External health checks are failing, Maestro may be inaccessible from outside."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"
 
         - alert: MaestroCertificateExpiring
           expr: probe_ssl_earliest_cert_expiry{instance=~".*maestro.*"} - time() < 86400 * 7
@@ -231,6 +231,6 @@ spec:
             severity: warning
             component: infrastructure
           annotations:
-            summary: 'Maestro TLS certificate expiring soon'
-            description: 'TLS certificate for {{ $labels.instance }} expires in {{ $value | humanizeDuration }}.'
-            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
+            summary: "Maestro TLS certificate expiring soon"
+            description: "TLS certificate for {{ $labels.instance }} expires in {{ $value | humanizeDuration }}."
+            runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md"

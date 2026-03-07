@@ -172,15 +172,38 @@
     }
   ],
   "connections": {
-    "GitHub Webhook": {"main": [[{"node": "Filter: Auto-Implement Label", "type": "main", "index": 0}]]},
-    "Filter: Auto-Implement Label": {"main": [[{"node": "AI: Generate Implementation Plan", "type": "main", "index": 0}]]},
-    "AI: Generate Implementation Plan": {"main": [[{"node": "AI: Generate Code", "type": "main", "index": 0}]]},
-    "AI: Generate Code": {"main": [[{"node": "AI: Generate Tests", "type": "main", "index": 0}]]},
-    "AI: Generate Tests": {"main": [[{"node": "GitHub: Create Branch", "type": "main", "index": 0}]]},
-    "GitHub: Create Branch": {"main": [[{"node": "GitHub: Commit Code", "type": "main", "index": 0}, {"node": "GitHub: Commit Tests", "type": "main", "index": 0}]]},
-    "GitHub: Commit Code": {"main": [[{"node": "GitHub: Create PR", "type": "main", "index": 0}]]},
-    "GitHub: Commit Tests": {"main": [[{"node": "GitHub: Create PR", "type": "main", "index": 0}]]},
-    "GitHub: Create PR": {"main": [[{"node": "Slack: Notify Team", "type": "main", "index": 0}]]}
+    "GitHub Webhook": {
+      "main": [[{ "node": "Filter: Auto-Implement Label", "type": "main", "index": 0 }]]
+    },
+    "Filter: Auto-Implement Label": {
+      "main": [[{ "node": "AI: Generate Implementation Plan", "type": "main", "index": 0 }]]
+    },
+    "AI: Generate Implementation Plan": {
+      "main": [[{ "node": "AI: Generate Code", "type": "main", "index": 0 }]]
+    },
+    "AI: Generate Code": {
+      "main": [[{ "node": "AI: Generate Tests", "type": "main", "index": 0 }]]
+    },
+    "AI: Generate Tests": {
+      "main": [[{ "node": "GitHub: Create Branch", "type": "main", "index": 0 }]]
+    },
+    "GitHub: Create Branch": {
+      "main": [
+        [
+          { "node": "GitHub: Commit Code", "type": "main", "index": 0 },
+          { "node": "GitHub: Commit Tests", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "GitHub: Commit Code": {
+      "main": [[{ "node": "GitHub: Create PR", "type": "main", "index": 0 }]]
+    },
+    "GitHub: Commit Tests": {
+      "main": [[{ "node": "GitHub: Create PR", "type": "main", "index": 0 }]]
+    },
+    "GitHub: Create PR": {
+      "main": [[{ "node": "Slack: Notify Team", "type": "main", "index": 0 }]]
+    }
   },
   "active": true,
   "settings": {

@@ -4,10 +4,10 @@
  * Displays comprehensive source status and activity dashboard.
  */
 
-import React from 'react';
-import type { AssetDashboard } from '../asset-tracking.js';
-import type { SourceStatus, RiskLevel, CredibilityRating } from '../constants.js';
-import { CREDIBILITY_RATINGS, RISK_LEVELS, SOURCE_STATUS } from '../constants.js';
+import React from "react";
+import type { AssetDashboard } from "../asset-tracking.js";
+import type { SourceStatus, RiskLevel, CredibilityRating } from "../constants.js";
+import { CREDIBILITY_RATINGS, RISK_LEVELS, SOURCE_STATUS } from "../constants.js";
 
 export interface SourceDashboardProps {
   dashboard: AssetDashboard;
@@ -19,53 +19,53 @@ export interface SourceDashboardProps {
 
 const getStatusColor = (status: SourceStatus): string => {
   const colors: Record<string, string> = {
-    ACTIVE: '#10b981',
-    DEVELOPMENTAL: '#3b82f6',
-    EVALUATION: '#8b5cf6',
-    DORMANT: '#f59e0b',
-    TERMINATED: '#6b7280',
-    COMPROMISED: '#ef4444',
-    RESETTLED: '#06b6d4',
-    DECEASED: '#1f2937',
+    ACTIVE: "#10b981",
+    DEVELOPMENTAL: "#3b82f6",
+    EVALUATION: "#8b5cf6",
+    DORMANT: "#f59e0b",
+    TERMINATED: "#6b7280",
+    COMPROMISED: "#ef4444",
+    RESETTLED: "#06b6d4",
+    DECEASED: "#1f2937",
   };
-  return colors[status] || '#6b7280';
+  return colors[status] || "#6b7280";
 };
 
 const getRiskColor = (risk: RiskLevel): string => {
   const colors: Record<string, string> = {
-    MINIMAL: '#10b981',
-    LOW: '#22c55e',
-    MODERATE: '#f59e0b',
-    ELEVATED: '#f97316',
-    HIGH: '#ef4444',
-    CRITICAL: '#dc2626',
+    MINIMAL: "#10b981",
+    LOW: "#22c55e",
+    MODERATE: "#f59e0b",
+    ELEVATED: "#f97316",
+    HIGH: "#ef4444",
+    CRITICAL: "#dc2626",
   };
-  return colors[risk] || '#6b7280';
+  return colors[risk] || "#6b7280";
 };
 
 const getCredibilityColor = (score: number): string => {
-  if (score >= 80) return '#10b981';
-  if (score >= 60) return '#22c55e';
-  if (score >= 40) return '#f59e0b';
-  if (score >= 20) return '#f97316';
-  return '#ef4444';
+  if (score >= 80) return "#10b981";
+  if (score >= 60) return "#22c55e";
+  if (score >= 40) return "#f59e0b";
+  if (score >= 20) return "#f97316";
+  return "#ef4444";
 };
 
 const formatDate = (date: Date | null): string => {
-  if (!date) return 'Never';
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  if (!date) return "Never";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 
 const formatDateTime = (date: Date): string => {
-  return new Date(date).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(date).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -78,16 +78,12 @@ export const SourceDashboard: React.FC<SourceDashboardProps> = ({
 }) => {
   const daysUntilContact = dashboard.nextScheduledContact
     ? Math.ceil(
-        (new Date(dashboard.nextScheduledContact).getTime() - Date.now()) /
-          (1000 * 60 * 60 * 24),
+        (new Date(dashboard.nextScheduledContact).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
       )
     : null;
 
   const daysSinceContact = dashboard.lastContact
-    ? Math.floor(
-        (Date.now() - new Date(dashboard.lastContact).getTime()) /
-          (1000 * 60 * 60 * 24),
-      )
+    ? Math.floor((Date.now() - new Date(dashboard.lastContact).getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
   return (
@@ -136,10 +132,7 @@ export const SourceDashboard: React.FC<SourceDashboardProps> = ({
 
         <div className="metric-card">
           <div className="metric-label">Risk Level</div>
-          <div
-            className="metric-value risk"
-            style={{ color: getRiskColor(dashboard.riskLevel) }}
-          >
+          <div className="metric-value risk" style={{ color: getRiskColor(dashboard.riskLevel) }}>
             {RISK_LEVELS[dashboard.riskLevel]?.label || dashboard.riskLevel}
           </div>
         </div>
@@ -148,7 +141,7 @@ export const SourceDashboard: React.FC<SourceDashboardProps> = ({
           <div className="metric-label">Last Contact</div>
           <div className="metric-value">{formatDate(dashboard.lastContact)}</div>
           {daysSinceContact !== null && (
-            <div className={`metric-sublabel ${daysSinceContact > 30 ? 'warning' : ''}`}>
+            <div className={`metric-sublabel ${daysSinceContact > 30 ? "warning" : ""}`}>
               {daysSinceContact} days ago
             </div>
           )}
@@ -159,7 +152,7 @@ export const SourceDashboard: React.FC<SourceDashboardProps> = ({
           <div className="metric-value">
             {dashboard.nextScheduledContact
               ? formatDate(dashboard.nextScheduledContact)
-              : 'Not Scheduled'}
+              : "Not Scheduled"}
           </div>
           {daysUntilContact !== null && daysUntilContact <= 7 && (
             <div className="metric-sublabel upcoming">In {daysUntilContact} days</div>
@@ -204,9 +197,7 @@ export const SourceDashboard: React.FC<SourceDashboardProps> = ({
                 {dashboard.upcomingDebriefs.map((debrief) => (
                   <li key={debrief.id} className="debrief-item">
                     <span className="debrief-type">{debrief.type}</span>
-                    <span className="debrief-date">
-                      {formatDateTime(debrief.scheduledAt)}
-                    </span>
+                    <span className="debrief-date">{formatDateTime(debrief.scheduledAt)}</span>
                   </li>
                 ))}
               </ul>
@@ -279,11 +270,9 @@ export const SourceDashboard: React.FC<SourceDashboardProps> = ({
                     <span className="activity-type">{activity.activityType}</span>
                     <span className="activity-desc">
                       {activity.description.slice(0, 50)}
-                      {activity.description.length > 50 ? '...' : ''}
+                      {activity.description.length > 50 ? "..." : ""}
                     </span>
-                    <span className="activity-time">
-                      {formatDateTime(activity.timestamp)}
-                    </span>
+                    <span className="activity-time">{formatDateTime(activity.timestamp)}</span>
                   </li>
                 ))}
               </ul>

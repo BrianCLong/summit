@@ -97,13 +97,7 @@ packages/
 ### 1.3 `src/types.ts`
 
 ```ts
-export type Json =
-  | null
-  | boolean
-  | number
-  | string
-  | Json[]
-  | { [k: string]: Json };
+export type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 
 export interface PolicyContext {
   purpose: string;
@@ -136,16 +130,16 @@ export interface TaskOutput<T = Json> {
 ### 1.4 `src/context.ts`
 
 ```ts
-import type { RunContext } from './types.js';
+import type { RunContext } from "./types.js";
 
 export function createRunContext(partial: Partial<RunContext>): RunContext {
   return {
-    runId: partial.runId ?? 'local',
-    workflowRef: partial.workflowRef ?? 'local',
-    namespace: partial.namespace ?? 'dev',
+    runId: partial.runId ?? "local",
+    workflowRef: partial.workflowRef ?? "local",
+    namespace: partial.namespace ?? "dev",
     correlation: partial.correlation ?? {},
     logger: partial.logger ?? { info: console.log, error: console.error },
-    secrets: partial.secrets ?? (async () => ''),
+    secrets: partial.secrets ?? (async () => ""),
     emit: partial.emit ?? (async () => {}),
     policy: partial.policy,
   };
@@ -155,20 +149,15 @@ export function createRunContext(partial: Partial<RunContext>): RunContext {
 ### 1.5 `src/task.ts`
 
 ```ts
-import type { RunContext, TaskInput, TaskOutput } from './types.js';
+import type { RunContext, TaskInput, TaskOutput } from "./types.js";
 
 export interface Task<TIn = unknown, TOut = unknown> {
   init?: (ctx: RunContext) => Promise<void> | void;
   validate?: (input: TaskInput<TIn>) => Promise<void> | void;
-  execute: (
-    ctx: RunContext,
-    input: TaskInput<TIn>,
-  ) => Promise<TaskOutput<TOut>>;
+  execute: (ctx: RunContext, input: TaskInput<TIn>) => Promise<TaskOutput<TOut>>;
 }
 
-export function defineTask<TIn = unknown, TOut = unknown>(
-  task: Task<TIn, TOut>,
-): Task<TIn, TOut> {
+export function defineTask<TIn = unknown, TOut = unknown>(task: Task<TIn, TOut>): Task<TIn, TOut> {
   return task;
 }
 ```
@@ -176,7 +165,7 @@ export function defineTask<TIn = unknown, TOut = unknown>(
 ### 1.6 `src/connector.ts`
 
 ```ts
-import type { RunContext } from './types.js';
+import type { RunContext } from "./types.js";
 
 export interface ConnectorConfig {
   [k: string]: unknown;
@@ -188,7 +177,7 @@ export interface Connector<TIn = unknown, TOut = unknown> {
 }
 
 export function defineConnector<TIn = unknown, TOut = unknown>(
-  c: Connector<TIn, TOut>,
+  c: Connector<TIn, TOut>
 ): Connector<TIn, TOut> {
   return c;
 }
@@ -197,23 +186,23 @@ export function defineConnector<TIn = unknown, TOut = unknown>(
 ### 1.7 `src/policy.ts`
 
 ```ts
-import type { PolicyContext } from './types.js';
+import type { PolicyContext } from "./types.js";
 
 export interface PolicyDecision {
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   reason?: string;
 }
 
 export class PolicyClient {
   constructor(
     private baseUrl: string,
-    private fetchImpl: typeof fetch = fetch,
+    private fetchImpl: typeof fetch = fetch
   ) {}
 
   async evaluate(ctx: PolicyContext): Promise<PolicyDecision> {
     const res = await this.fetchImpl(`${this.baseUrl}/policy/evaluate`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(ctx),
     });
     if (!res.ok) throw new Error(`PDP error ${res.status}`);
@@ -237,50 +226,44 @@ export interface ProvenanceReceipt {
 ### 1.9 `src/index.ts`
 
 ```ts
-export * from './types.js';
-export * from './context.js';
-export * from './task.js';
-export * from './connector.js';
-export * from './policy.js';
-export * from './provenance.js';
+export * from "./types.js";
+export * from "./context.js";
+export * from "./task.js";
+export * from "./connector.js";
+export * from "./policy.js";
+export * from "./provenance.js";
 ```
 
 ### 1.10 Example Task — `examples/tasks/http-get.ts`
 
 ```ts
-import {
-  defineTask,
-  createRunContext,
-  type TaskInput,
-} from '@intelgraph/maestro-sdk';
+import { defineTask, createRunContext, type TaskInput } from "@intelgraph/maestro-sdk";
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {
-    if (!input.payload?.url) throw new Error('url is required');
+    if (!input.payload?.url) throw new Error("url is required");
   },
   async execute(ctx, input) {
     const res = await fetch(input.payload.url);
     const body = await res.text();
-    ctx.logger.info('http-get', { status: res.status, bytes: body.length });
-    await ctx.emit('http_get.done', { status: res.status });
+    ctx.logger.info("http-get", { status: res.status, bytes: body.length });
+    await ctx.emit("http_get.done", { status: res.status });
     return { payload: { status: res.status, body } };
   },
 });
 
 // Local demo
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   const ctx = createRunContext({});
-  const task = (await import('./http-get.ts')).default;
-  task
-    .execute(ctx, { payload: { url: 'https://example.com' } })
-    .then((r) => console.log(r));
+  const task = (await import("./http-get.ts")).default;
+  task.execute(ctx, { payload: { url: "https://example.com" } }).then((r) => console.log(r));
 }
 ```
 
 ### 1.11 Example Connector — `examples/connectors/sig-ingest.ts`
 
 ```ts
-import { defineConnector, type RunContext } from '@intelgraph/maestro-sdk';
+import { defineConnector, type RunContext } from "@intelgraph/maestro-sdk";
 
 type Item = { id: string; payload: unknown };
 
@@ -289,10 +272,10 @@ export default defineConnector<
   { jobId: string; receipts: Array<{ id: string; hash: string }> }
 >({
   async send(ctx: RunContext, items: Item[]) {
-    const endpoint = await ctx.secrets('SIG_INGEST_URL');
+    const endpoint = await ctx.secrets("SIG_INGEST_URL");
     const res = await fetch(`${endpoint}/ingest/batch`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ items }),
     });
     if (!res.ok) throw new Error(`SIG ingest failed ${res.status}`);
@@ -304,12 +287,12 @@ export default defineConnector<
 ### 1.12 Vitest — `test/task.spec.ts`
 
 ```ts
-import { defineTask, createRunContext } from '../src/index.js';
+import { defineTask, createRunContext } from "../src/index.js";
 
-test('task validates and executes', async () => {
+test("task validates and executes", async () => {
   const t = defineTask<{ n: number }, { doubled: number }>({
     validate: ({ payload }) => {
-      if (payload.n == null) throw new Error('n required');
+      if (payload.n == null) throw new Error("n required");
     },
     execute: async (_ctx, { payload }) => ({
       payload: { doubled: payload.n * 2 },
@@ -523,7 +506,7 @@ name: Publish NPM (SDK‑TS)
 on:
   push:
     tags:
-      - 'sdk-ts-v*.*.*'
+      - "sdk-ts-v*.*.*"
 
 jobs:
   build-publish:
@@ -536,7 +519,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm test
       - run: npm run build
@@ -553,7 +536,7 @@ name: Publish PyPI (SDK‑PY)
 on:
   push:
     tags:
-      - 'sdk-py-v*.*.*'
+      - "sdk-py-v*.*.*"
 
 jobs:
   build-publish:
@@ -565,7 +548,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - run: python -m pip install --upgrade build
       - run: python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
@@ -580,11 +563,11 @@ jobs:
 ### 4.1 Using TS task in a workflow step
 
 ```ts
-import { defineTask } from '@intelgraph/maestro-sdk';
+import { defineTask } from "@intelgraph/maestro-sdk";
 
 export default defineTask<{ path: string }, { ok: boolean }>({
   async execute(ctx, { payload }) {
-    ctx.logger.info('processing', { path: payload.path });
+    ctx.logger.info("processing", { path: payload.path });
     return { payload: { ok: true } };
   },
 });

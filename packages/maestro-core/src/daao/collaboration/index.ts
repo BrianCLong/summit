@@ -1,2 +1,2 @@
-export * from './prompts';
-export * from './debateValidation';
+export * from "./prompts";
+export * from "./debateValidation";

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -10,21 +10,14 @@ import {
   Alert,
   Switch,
   FormControlLabel,
-} from '@mui/material';
-import {
-  ZoomIn,
-  ZoomOut,
-  CenterFocusStrong,
-  Add,
-  Save,
-  Refresh,
-} from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { setGraphData, addNode, addEdge } from '../../store/slices/graphSlice';
-import PresenceIndicator from '../collaboration/PresenceIndicator';
-import { getSocket } from '../../services/socket';
-import { useQuery, gql } from '@apollo/client';
+} from "@mui/material";
+import { ZoomIn, ZoomOut, CenterFocusStrong, Add, Save, Refresh } from "@mui/icons-material";
+import { useParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { setGraphData, addNode, addEdge } from "../../store/slices/graphSlice";
+import PresenceIndicator from "../collaboration/PresenceIndicator";
+import { getSocket } from "../../services/socket";
+import { useQuery, gql } from "@apollo/client";
 
 // GraphQL Queries
 const PREDICT_LINKS_QUERY = gql`
@@ -69,23 +62,23 @@ function GraphExplorer() {
 
   // Fetch sentiment for all node labels
   const { data: sentimentData } = useQuery(ANALYZE_SENTIMENT_QUERY, {
-    variables: { text: nodes.map((node) => node.label).join('. ') }, // Concatenate all labels for a single sentiment analysis call
+    variables: { text: nodes.map((node) => node.label).join(". ") }, // Concatenate all labels for a single sentiment analysis call
     skip: !showSentimentOverlay || nodes.length === 0,
     pollInterval: 300000, // Poll every 5 minutes for sentiment updates
   });
   const sentimentResult = sentimentData?.analyzeSentiment;
 
   const sampleNodes = [
-    { id: '1', label: 'John Doe', type: 'PERSON', x: 100, y: 100 },
-    { id: '2', label: 'Acme Corp', type: 'ORGANIZATION', x: 300, y: 150 },
-    { id: '3', label: 'New York', type: 'LOCATION', x: 200, y: 250 },
-    { id: '4', label: 'Document A', type: 'DOCUMENT', x: 400, y: 200 },
+    { id: "1", label: "John Doe", type: "PERSON", x: 100, y: 100 },
+    { id: "2", label: "Acme Corp", type: "ORGANIZATION", x: 300, y: 150 },
+    { id: "3", label: "New York", type: "LOCATION", x: 200, y: 250 },
+    { id: "4", label: "Document A", type: "DOCUMENT", x: 400, y: 200 },
   ];
 
   const sampleEdges = [
-    { id: 'e1', source: '1', target: '2', label: 'WORKS_FOR' },
-    { id: 'e2', source: '1', target: '3', label: 'LOCATED_AT' },
-    { id: 'e3', source: '2', target: '4', label: 'OWNS' },
+    { id: "e1", source: "1", target: "2", label: "WORKS_FOR" },
+    { id: "e2", source: "1", target: "3", label: "LOCATED_AT" },
+    { id: "e3", source: "2", target: "4", label: "OWNS" },
   ];
 
   useEffect(() => {
@@ -109,12 +102,12 @@ function GraphExplorer() {
 
   const drawGraph = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw existing edges
-    ctx.strokeStyle = '#999';
+    ctx.strokeStyle = "#999";
     ctx.lineWidth = 2;
     edges.forEach((edge) => {
       const sourceNode = nodes.find((n) => n.id === edge.source);
@@ -128,16 +121,16 @@ function GraphExplorer() {
 
         const midX = (sourceNode.x + targetNode.x) / 2;
         const midY = (sourceNode.y + targetNode.y) / 2;
-        ctx.fillStyle = '#666';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
+        ctx.fillStyle = "#666";
+        ctx.font = "12px Arial";
+        ctx.textAlign = "center";
         ctx.fillText(edge.label, midX, midY - 5);
       }
     });
 
     // Draw predicted links if enabled
     if (showPredictedLinks) {
-      ctx.strokeStyle = '#FF00FF'; // Magenta for predicted links
+      ctx.strokeStyle = "#FF00FF"; // Magenta for predicted links
       ctx.lineWidth = 1;
       ctx.setLineDash([5, 5]); // Dashed line
       predictedLinks.forEach((link) => {
@@ -152,13 +145,13 @@ function GraphExplorer() {
 
           const midX = (sourceNode.x + targetNode.x) / 2;
           const midY = (sourceNode.y + targetNode.y) / 2;
-          ctx.fillStyle = '#FF00FF';
-          ctx.font = '10px Arial';
-          ctx.textAlign = 'center';
+          ctx.fillStyle = "#FF00FF";
+          ctx.font = "10px Arial";
+          ctx.textAlign = "center";
           ctx.fillText(
             `Predicted: ${link.predictedType} (${(link.confidence * 100).toFixed(0)}%)`,
             midX,
-            midY + 15,
+            midY + 15
           );
         }
       });
@@ -172,14 +165,14 @@ function GraphExplorer() {
       if (showSentimentOverlay && sentimentResult) {
         const sentimentLabel = sentimentResult.sentiment; // Assuming sentimentResult.sentiment is 'POSITIVE', 'NEGATIVE', 'NEUTRAL'
         switch (sentimentLabel) {
-          case 'POSITIVE':
-            color = '#4CAF50'; // Green
+          case "POSITIVE":
+            color = "#4CAF50"; // Green
             break;
-          case 'NEGATIVE':
-            color = '#F44336'; // Red
+          case "NEGATIVE":
+            color = "#F44336"; // Red
             break;
-          case 'NEUTRAL':
-            color = '#FFEB3B'; // Yellow
+          case "NEUTRAL":
+            color = "#FFEB3B"; // Yellow
             break;
           default:
             break;
@@ -190,24 +183,24 @@ function GraphExplorer() {
       ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI);
       ctx.fillStyle = color;
       ctx.fill();
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = "#fff";
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      ctx.fillStyle = '#333';
-      ctx.font = '14px Arial';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = "#333";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
       ctx.fillText(node.label, node.x, node.y + 35);
 
       // Display sentiment score if enabled
       if (showSentimentOverlay && sentimentResult) {
-        ctx.fillStyle = '#333';
-        ctx.font = '10px Arial';
-        ctx.textAlign = 'center';
+        ctx.fillStyle = "#333";
+        ctx.font = "10px Arial";
+        ctx.textAlign = "center";
         ctx.fillText(
           `Sentiment: ${sentimentResult.sentiment} (${(sentimentResult.confidence * 100).toFixed(0)}%)`,
           node.x,
-          node.y + 50,
+          node.y + 50
         );
       }
     });
@@ -215,19 +208,19 @@ function GraphExplorer() {
 
   const getNodeColor = (type) => {
     const colors = {
-      PERSON: '#4caf50',
-      ORGANIZATION: '#2196f3',
-      LOCATION: '#ff9800',
-      DOCUMENT: '#9c27b0',
+      PERSON: "#4caf50",
+      ORGANIZATION: "#2196f3",
+      LOCATION: "#ff9800",
+      DOCUMENT: "#9c27b0",
     };
-    return colors[type] || '#9e9e9e';
+    return colors[type] || "#9e9e9e";
   };
 
   const handleAddNode = () => {
     const newNode = {
       id: `node_${Date.now()}`,
       label: `New Entity ${nodes.length + 1}`,
-      type: 'PERSON',
+      type: "PERSON",
       x: Math.random() * 400 + 100,
       y: Math.random() * 300 + 100,
     };
@@ -243,12 +236,12 @@ function GraphExplorer() {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 2,
         }}
       >
@@ -294,15 +287,15 @@ function GraphExplorer() {
       </Box>
 
       <Alert severity="info" sx={{ mb: 2 }}>
-        This is a basic graph visualization. Click "Add Node" to add entities,
-        or use the zoom controls.
+        This is a basic graph visualization. Click "Add Node" to add entities, or use the zoom
+        controls.
       </Alert>
 
       <Paper
         sx={{
           flexGrow: 1,
-          position: 'relative',
-          overflow: 'hidden',
+          position: "relative",
+          overflow: "hidden",
           minHeight: 500,
         }}
         elevation={2}
@@ -314,40 +307,40 @@ function GraphExplorer() {
           role="img"
           aria-label="Graph visualization"
           style={{
-            width: '100%',
-            height: '100%',
-            background: '#fafafa',
+            width: "100%",
+            height: "100%",
+            background: "#fafafa",
           }}
         />
         {/* Presence / collaboration controls */}
         {socket && (
-          <Box sx={{ position: 'absolute', top: 16, left: 16 }}>
+          <Box sx={{ position: "absolute", top: 16, left: 16 }}>
             <PresenceIndicator socket={socket} investigationId={id} />
           </Box>
         )}
 
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             top: 16,
             right: 16,
-            display: 'flex',
-            flexDirection: 'column',
+            display: "flex",
+            flexDirection: "column",
             gap: 1,
           }}
         >
           <Tooltip title="Zoom In">
-            <IconButton size="small" sx={{ bgcolor: 'white' }}>
+            <IconButton size="small" sx={{ bgcolor: "white" }}>
               <ZoomIn />
             </IconButton>
           </Tooltip>
           <Tooltip title="Zoom Out">
-            <IconButton size="small" sx={{ bgcolor: 'white' }}>
+            <IconButton size="small" sx={{ bgcolor: "white" }}>
               <ZoomOut />
             </IconButton>
           </Tooltip>
           <Tooltip title="Center Graph">
-            <IconButton size="small" sx={{ bgcolor: 'white' }}>
+            <IconButton size="small" sx={{ bgcolor: "white" }}>
               <CenterFocusStrong />
             </IconButton>
           </Tooltip>
@@ -355,14 +348,14 @@ function GraphExplorer() {
 
         <Fab
           color="primary"
-          sx={{ position: 'absolute', bottom: 16, right: 16 }}
+          sx={{ position: "absolute", bottom: 16, right: 16 }}
           onClick={handleAddNode}
         >
           <Add />
         </Fab>
       </Paper>
 
-      <Box sx={{ mt: 2, display: 'flex', gap: 4 }}>
+      <Box sx={{ mt: 2, display: "flex", gap: 4 }}>
         <Typography variant="body2" color="text.secondary">
           Nodes: {nodes.length}
         </Typography>
@@ -370,7 +363,7 @@ function GraphExplorer() {
           Edges: {edges.length}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Status: {loading ? 'Loading...' : 'Ready'}
+          Status: {loading ? "Loading..." : "Ready"}
         </Typography>
       </Box>
     </Box>

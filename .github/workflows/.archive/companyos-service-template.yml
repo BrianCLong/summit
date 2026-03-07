@@ -81,7 +81,7 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 20
 
       - name: Run canary SLO gate

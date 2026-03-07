@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       image_ref:
-        description: 'OCI image reference (e.g. ghcr.io/org/app:tag). Leave empty to verify file-based attestation instead.'
+        description: "OCI image reference (e.g. ghcr.io/org/app:tag). Leave empty to verify file-based attestation instead."
         required: false
-        default: ''
+        default: ""
       artifact_path:
-        description: 'Path to built artifact to verify (e.g. dist/app.tar.gz). Used when image_ref is empty.'
+        description: "Path to built artifact to verify (e.g. dist/app.tar.gz). Used when image_ref is empty."
         required: false
-        default: 'sbom.json'
+        default: "sbom.json"
 
 permissions:
   id-token: write
@@ -27,7 +27,7 @@ jobs:
       - name: Verify OCI image attestation (if image_ref provided)
         if: ${{ inputs.image_ref != '' }}
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           cosign verify-attestation             --type slsaprovenance             --certificate-oidc-issuer https://token.actions.githubusercontent.com             --certificate-identity-regexp 'https://github.com/.+/.+/.github/workflows/.+@.+'
             ${{ inputs.image_ref }}

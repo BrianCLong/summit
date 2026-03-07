@@ -1,4 +1,4 @@
-import { FeatureEntry, FeatureRetrievalResult } from './types.js';
+import { FeatureEntry, FeatureRetrievalResult } from "./types.js";
 
 export class FeatureStore {
   private readonly store = new Map<string, FeatureEntry>();

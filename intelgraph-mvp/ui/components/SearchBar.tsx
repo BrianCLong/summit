@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
 
   const handleSearch = () => {
     onSearch(q);
@@ -16,7 +16,7 @@ export default function SearchBar({ onSearch }: { onSearch: (q: string) => void 
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search entities..."
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
       />
       <button className="bg-blue-500 text-white px-4 py-1 rounded" onClick={handleSearch}>
         Search

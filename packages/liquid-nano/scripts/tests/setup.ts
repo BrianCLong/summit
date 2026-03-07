@@ -1,5 +1,5 @@
 beforeAll(() => {
-  process.env.LIQUID_NANO_ENV ??= 'test';
+  process.env.LIQUID_NANO_ENV ??= "test";
 });
 
 beforeEach(() => {

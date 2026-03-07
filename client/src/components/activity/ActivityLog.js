@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -14,8 +14,8 @@ import {
   FormControlLabel,
   TextField,
   TablePagination,
-} from '@mui/material';
-import { ActivityAPI } from '../../services/api';
+} from "@mui/material";
+import { ActivityAPI } from "../../services/api";
 
 export default function ActivityLog() {
   const [rows, setRows] = useState([]);
@@ -24,8 +24,8 @@ export default function ActivityLog() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(50);
-  const [filterAction, setFilterAction] = useState('');
-  const [filterResource, setFilterResource] = useState('');
+  const [filterAction, setFilterAction] = useState("");
+  const [filterResource, setFilterResource] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -108,23 +108,18 @@ export default function ActivityLog() {
           <TableBody>
             {rows.map((r) => (
               <TableRow key={r.id}>
-                <TableCell>
-                  {new Date(r.created_at || r.createdAt).toLocaleString()}
-                </TableCell>
+                <TableCell>{new Date(r.created_at || r.createdAt).toLocaleString()}</TableCell>
                 <TableCell>{r.user_id || r.userId}</TableCell>
                 <TableCell>{r.action}</TableCell>
                 <TableCell>
-                  {r.resource_type || r.resourceType}:
-                  {r.resource_id || r.resourceId}
+                  {r.resource_type || r.resourceType}:{r.resource_id || r.resourceId}
                 </TableCell>
                 <TableCell>
-                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                    {typeof r.details === 'object'
-                      ? JSON.stringify(r.details)
-                      : r.details}
+                  <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                    {typeof r.details === "object" ? JSON.stringify(r.details) : r.details}
                   </pre>
                 </TableCell>
-                <TableCell>{r.ip_address || r.ipAddress || ''}</TableCell>
+                <TableCell>{r.ip_address || r.ipAddress || ""}</TableCell>
               </TableRow>
             ))}
           </TableBody>

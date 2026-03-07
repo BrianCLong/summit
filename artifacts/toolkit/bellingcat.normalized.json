@@ -7,25 +7,12 @@
       "network_required": true,
       "rate_limits_known": false
     },
-    "capabilities": [
-      "archiving",
-      "web_archive_lookup"
-    ],
-    "categories": [
-      "archiving",
-      "web_archive"
-    ],
-    "inputs": [
-      "url"
-    ],
-    "limitations": [
-      "Archived snapshots may be delayed or unavailable."
-    ],
+    "capabilities": ["archiving", "web_archive_lookup"],
+    "categories": ["archiving", "web_archive"],
+    "inputs": ["url"],
+    "limitations": ["Archived snapshots may be delayed or unavailable."],
     "name": "Wayback Machine",
-    "outputs": [
-      "archive_url",
-      "snapshot_status"
-    ],
+    "outputs": ["archive_url", "snapshot_status"],
     "primary_url": "https://web.archive.org/",
     "risk": {
       "abuse_risk": "low",
@@ -42,23 +29,12 @@
       "network_required": true,
       "rate_limits_known": false
     },
-    "capabilities": [
-      "reverse_image_search"
-    ],
-    "categories": [
-      "reverse-image"
-    ],
-    "inputs": [
-      "image_url"
-    ],
-    "limitations": [
-      "Automated scraping may violate terms."
-    ],
+    "capabilities": ["reverse_image_search"],
+    "categories": ["reverse-image"],
+    "inputs": ["image_url"],
+    "limitations": ["Automated scraping may violate terms."],
     "name": "Google Images",
-    "outputs": [
-      "matching_pages",
-      "similar_images"
-    ],
+    "outputs": ["matching_pages", "similar_images"],
     "primary_url": "https://images.google.com/",
     "risk": {
       "abuse_risk": "medium",
@@ -76,26 +52,12 @@
       "network_required": true,
       "rate_limits_known": false
     },
-    "capabilities": [
-      "chronolocation_solar"
-    ],
-    "categories": [
-      "chronolocation",
-      "geolocation"
-    ],
-    "inputs": [
-      "date_time",
-      "lat",
-      "lon"
-    ],
-    "limitations": [
-      "Requires approximate location; results depend on accurate coordinates."
-    ],
+    "capabilities": ["chronolocation_solar"],
+    "categories": ["chronolocation", "geolocation"],
+    "inputs": ["date_time", "lat", "lon"],
+    "limitations": ["Requires approximate location; results depend on accurate coordinates."],
     "name": "SunCalc",
-    "outputs": [
-      "sun_altitude",
-      "sun_azimuth"
-    ],
+    "outputs": ["sun_altitude", "sun_azimuth"],
     "primary_url": "https://suncalc.org/",
     "risk": {
       "abuse_risk": "low",

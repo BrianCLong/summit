@@ -3,14 +3,8 @@
  * Provides advanced search capabilities across catalog metadata
  */
 
-import { Pool } from 'pg';
-import {
-  DataSource,
-  Dataset,
-  Field,
-  Mapping,
-  License,
-} from '../types/metadata.js';
+import { Pool } from "pg";
+import { DataSource, Dataset, Field, Mapping, License } from "../types/metadata.js";
 
 export interface MetadataSearchQuery {
   query?: string;
@@ -22,13 +16,13 @@ export interface MetadataSearchQuery {
 
 export interface MetadataSearchFilter {
   field: string;
-  operator: 'equals' | 'contains' | 'in' | 'gt' | 'lt' | 'between';
+  operator: "equals" | "contains" | "in" | "gt" | "lt" | "between";
   value: any;
 }
 
 export interface MetadataSortOption {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
 }
 
 export interface MetadataSearchResult<T> {
@@ -46,7 +40,7 @@ export interface MetadataSearchFacet {
 }
 
 export class MetadataSearchService {
-  constructor(private pool: Pool) { }
+  constructor(private pool: Pool) {}
 
   /**
    * Search data sources
@@ -54,7 +48,7 @@ export class MetadataSearchService {
   async searchDataSources(query: MetadataSearchQuery): Promise<MetadataSearchResult<DataSource>> {
     const startTime = Date.now();
 
-    let sql = 'SELECT * FROM catalog_data_sources';
+    let sql = "SELECT * FROM catalog_data_sources";
     const params: any[] = [];
     const whereClauses: string[] = [];
     let paramIndex = 1;
@@ -80,11 +74,11 @@ export class MetadataSearchService {
     }
 
     if (whereClauses.length > 0) {
-      sql += ` WHERE ${whereClauses.join(' AND ')}`;
+      sql += ` WHERE ${whereClauses.join(" AND ")}`;
     }
 
     // Sort
-    const orderBy = this.buildOrderBy(query.sort || [{ field: 'updated_at', direction: 'desc' }]);
+    const orderBy = this.buildOrderBy(query.sort || [{ field: "updated_at", direction: "desc" }]);
     sql += ` ${orderBy}`;
 
     // Pagination
@@ -96,7 +90,7 @@ export class MetadataSearchService {
     const result = await this.pool.query(sql, params);
 
     // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM catalog_data_sources ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''}`;
+    const countSql = `SELECT COUNT(*) as total FROM catalog_data_sources ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}`;
     const countResult = await this.pool.query(countSql, params.slice(0, params.length - 2));
     const total = parseInt(countResult.rows[0].total);
 
@@ -115,7 +109,7 @@ export class MetadataSearchService {
   async searchDatasets(query: MetadataSearchQuery): Promise<MetadataSearchResult<Dataset>> {
     const startTime = Date.now();
 
-    let sql = 'SELECT * FROM catalog_datasets';
+    let sql = "SELECT * FROM catalog_datasets";
     const params: any[] = [];
     const whereClauses: string[] = [];
     let paramIndex = 1;
@@ -141,11 +135,11 @@ export class MetadataSearchService {
     }
 
     if (whereClauses.length > 0) {
-      sql += ` WHERE ${whereClauses.join(' AND ')}`;
+      sql += ` WHERE ${whereClauses.join(" AND ")}`;
     }
 
     // Sort
-    const orderBy = this.buildOrderBy(query.sort || [{ field: 'updated_at', direction: 'desc' }]);
+    const orderBy = this.buildOrderBy(query.sort || [{ field: "updated_at", direction: "desc" }]);
     sql += ` ${orderBy}`;
 
     // Pagination
@@ -157,7 +151,7 @@ export class MetadataSearchService {
     const result = await this.pool.query(sql, params);
 
     // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM catalog_datasets ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''}`;
+    const countSql = `SELECT COUNT(*) as total FROM catalog_datasets ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}`;
     const countResult = await this.pool.query(countSql, params.slice(0, params.length - 2));
     const total = parseInt(countResult.rows[0].total);
 
@@ -176,7 +170,7 @@ export class MetadataSearchService {
   async searchFields(query: MetadataSearchQuery): Promise<MetadataSearchResult<Field>> {
     const startTime = Date.now();
 
-    let sql = 'SELECT * FROM catalog_fields';
+    let sql = "SELECT * FROM catalog_fields";
     const params: any[] = [];
     const whereClauses: string[] = [];
     let paramIndex = 1;
@@ -202,11 +196,11 @@ export class MetadataSearchService {
     }
 
     if (whereClauses.length > 0) {
-      sql += ` WHERE ${whereClauses.join(' AND ')}`;
+      sql += ` WHERE ${whereClauses.join(" AND ")}`;
     }
 
     // Sort
-    const orderBy = this.buildOrderBy(query.sort || [{ field: 'name', direction: 'asc' }]);
+    const orderBy = this.buildOrderBy(query.sort || [{ field: "name", direction: "asc" }]);
     sql += ` ${orderBy}`;
 
     // Pagination
@@ -218,7 +212,7 @@ export class MetadataSearchService {
     const result = await this.pool.query(sql, params);
 
     // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM catalog_fields ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''}`;
+    const countSql = `SELECT COUNT(*) as total FROM catalog_fields ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}`;
     const countResult = await this.pool.query(countSql, params.slice(0, params.length - 2));
     const total = parseInt(countResult.rows[0].total);
 
@@ -242,7 +236,7 @@ export class MetadataSearchService {
     `;
 
     const result = await this.pool.query(sql, [canonicalFieldName]);
-    return result.rows.map(row => this.mapRowToField(row));
+    return result.rows.map((row) => this.mapRowToField(row));
   }
 
   /**
@@ -251,7 +245,7 @@ export class MetadataSearchService {
   async searchMappings(query: MetadataSearchQuery): Promise<MetadataSearchResult<Mapping>> {
     const startTime = Date.now();
 
-    let sql = 'SELECT * FROM catalog_mappings';
+    let sql = "SELECT * FROM catalog_mappings";
     const params: any[] = [];
     const whereClauses: string[] = [];
     let paramIndex = 1;
@@ -277,11 +271,11 @@ export class MetadataSearchService {
     }
 
     if (whereClauses.length > 0) {
-      sql += ` WHERE ${whereClauses.join(' AND ')}`;
+      sql += ` WHERE ${whereClauses.join(" AND ")}`;
     }
 
     // Sort
-    const orderBy = this.buildOrderBy(query.sort || [{ field: 'updated_at', direction: 'desc' }]);
+    const orderBy = this.buildOrderBy(query.sort || [{ field: "updated_at", direction: "desc" }]);
     sql += ` ${orderBy}`;
 
     // Pagination
@@ -293,7 +287,7 @@ export class MetadataSearchService {
     const result = await this.pool.query(sql, params);
 
     // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM catalog_mappings ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''}`;
+    const countSql = `SELECT COUNT(*) as total FROM catalog_mappings ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}`;
     const countResult = await this.pool.query(countSql, params.slice(0, params.length - 2));
     const total = parseInt(countResult.rows[0].total);
 
@@ -321,7 +315,7 @@ export class MetadataSearchService {
     `;
     const sourceTypeResult = await this.pool.query(sourceTypeSql);
     facets.push({
-      field: 'type',
+      field: "type",
       values: sourceTypeResult.rows.map((row: any) => ({
         value: row.value,
         count: parseInt(row.count),
@@ -338,7 +332,7 @@ export class MetadataSearchService {
     `;
     const ownerResult = await this.pool.query(ownerSql);
     facets.push({
-      field: 'owner',
+      field: "owner",
       values: ownerResult.rows.map((row: any) => ({
         value: row.value,
         count: parseInt(row.count),
@@ -351,7 +345,10 @@ export class MetadataSearchService {
   /**
    * Search across all metadata (universal search)
    */
-  async universalSearch(queryText: string, limit: number = 10): Promise<{
+  async universalSearch(
+    queryText: string,
+    limit: number = 10
+  ): Promise<{
     dataSources: DataSource[];
     datasets: Dataset[];
     fields: Field[];
@@ -400,7 +397,7 @@ export class MetadataSearchService {
 
     const sql = `
       SELECT * FROM catalog_datasets
-      ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''}
+      ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}
       ORDER BY updated_at DESC
     `;
 
@@ -418,22 +415,22 @@ export class MetadataSearchService {
     const params: any[] = [];
 
     switch (filter.operator) {
-      case 'equals':
+      case "equals":
         return { sql: `${column} = $${startIndex}`, params: [filter.value] };
 
-      case 'contains':
+      case "contains":
         return { sql: `${column} ILIKE $${startIndex}`, params: [`%${filter.value}%`] };
 
-      case 'in':
+      case "in":
         return { sql: `${column} = ANY($${startIndex})`, params: [filter.value] };
 
-      case 'gt':
+      case "gt":
         return { sql: `${column} > $${startIndex}`, params: [filter.value] };
 
-      case 'lt':
+      case "lt":
         return { sql: `${column} < $${startIndex}`, params: [filter.value] };
 
-      case 'between':
+      case "between":
         if (Array.isArray(filter.value) && filter.value.length === 2) {
           return {
             sql: `${column} BETWEEN $${startIndex} AND $${startIndex + 1}`,
@@ -449,31 +446,31 @@ export class MetadataSearchService {
 
   private buildOrderBy(sortOptions: MetadataSortOption[]): string {
     if (sortOptions.length === 0) {
-      return '';
+      return "";
     }
 
-    const orderClauses = sortOptions.map(opt => {
+    const orderClauses = sortOptions.map((opt) => {
       const column = this.mapFieldToColumn(opt.field);
       return `${column} ${opt.direction.toUpperCase()}`;
     });
 
-    return `ORDER BY ${orderClauses.join(', ')}`;
+    return `ORDER BY ${orderClauses.join(", ")}`;
   }
 
   private mapFieldToColumn(field: string): string {
     const mapping: Record<string, string> = {
-      type: 'type',
-      name: 'name',
-      owner: 'owner',
-      status: 'status',
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-      sourceId: 'source_id',
-      datasetId: 'dataset_id',
-      licenseId: 'license_id',
-      canonicalEntityType: 'canonical_entity_type',
-      dataType: 'data_type',
-      sensitivityLevel: 'sensitivity_level',
+      type: "type",
+      name: "name",
+      owner: "owner",
+      status: "status",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      sourceId: "source_id",
+      datasetId: "dataset_id",
+      licenseId: "license_id",
+      canonicalEntityType: "canonical_entity_type",
+      dataType: "data_type",
+      sensitivityLevel: "sensitivity_level",
     };
 
     return mapping[field] || field;

@@ -3,10 +3,10 @@ name: Incident automation
 on:
   pull_request:
     paths:
-      - 'ops/observability-ci/**'
-      - 'ops/runbooks/**'
-      - 'ops/alerts/**'
-      - '.github/workflows/incident-automation.yml'
+      - "ops/observability-ci/**"
+      - "ops/runbooks/**"
+      - "ops/alerts/**"
+      - ".github/workflows/incident-automation.yml"
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: pip install pyyaml

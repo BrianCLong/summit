@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -8,8 +8,8 @@ import {
   TextField,
   CircularProgress,
   Alert,
-} from '@mui/material';
-import { gql, useMutation } from '@apollo/client';
+} from "@mui/material";
+import { gql, useMutation } from "@apollo/client";
 
 // In a real project, this would be in a .graphql file and imported
 // after running a codegen process.
@@ -37,7 +37,7 @@ const WarRoomCreationModal: React.FC<WarRoomCreationModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [createWarRoom, { loading, error }] = useMutation(CREATE_WAR_ROOM);
 
   const handleCreate = async () => {
@@ -46,12 +46,12 @@ const WarRoomCreationModal: React.FC<WarRoomCreationModalProps> = ({
         const { data } = await createWarRoom({ variables: { name: name.trim() } });
         if (data) {
           onSuccess(data);
-          setName('');
+          setName("");
           onClose();
         }
       } catch (e) {
         // Error is already captured by the `error` object from useMutation
-        console.error('Failed to create War Room:', e);
+        console.error("Failed to create War Room:", e);
       }
     }
   };
@@ -78,7 +78,7 @@ const WarRoomCreationModal: React.FC<WarRoomCreationModalProps> = ({
           Cancel
         </Button>
         <Button onClick={handleCreate} disabled={!name.trim() || loading}>
-          {loading ? <CircularProgress size={24} /> : 'Create'}
+          {loading ? <CircularProgress size={24} /> : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

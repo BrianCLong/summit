@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
-import { QuarantineRecord, ReconciliationResult } from './types';
+import { randomUUID } from "crypto";
+import { QuarantineRecord, ReconciliationResult } from "./types";
 
 export type SyncRecord = {
   id: string;
@@ -21,7 +21,11 @@ export class SyncManager {
     this.systemOfRecord.set(objectType, connectorId);
   }
 
-  incrementalSync(connectorId: string, token: string, payloads: Record<string, unknown>[]): SyncRecord {
+  incrementalSync(
+    connectorId: string,
+    token: string,
+    payloads: Record<string, unknown>[]
+  ): SyncRecord {
     this.lastTokens.set(connectorId, token);
     const record = this.startRecord(connectorId, token, payloads, false);
     this.finishRecord(record);
@@ -54,15 +58,19 @@ export class SyncManager {
     return { drift, resolved };
   }
 
-  validatePayload(connectorId: string, payload: Record<string, unknown>, rules: ((payload: Record<string, unknown>) => boolean)[]) {
+  validatePayload(
+    connectorId: string,
+    payload: Record<string, unknown>,
+    rules: ((payload: Record<string, unknown>) => boolean)[]
+  ) {
     for (const rule of rules) {
       const valid = rule(payload);
       if (!valid) {
         const record: QuarantineRecord = {
           connectorId,
-          reason: 'validation_failed',
+          reason: "validation_failed",
           payload,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
         this.quarantine.push(record);
         return false;
@@ -91,7 +99,7 @@ export class SyncManager {
       token,
       payloads,
       fullResync,
-      startedAt: Date.now()
+      startedAt: Date.now(),
     };
   }
 

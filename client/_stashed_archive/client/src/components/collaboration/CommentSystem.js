@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Paper,
@@ -22,7 +22,7 @@ import {
   DialogActions,
   Badge,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Comment,
   Reply,
@@ -35,9 +35,9 @@ import {
   Attachment,
   Close,
   Send,
-} from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
-import { gql, useLazyQuery } from '@apollo/client';
+} from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
+import { gql, useLazyQuery } from "@apollo/client";
 
 const COMMENTS_QUERY = gql`
   query Comments($investigationId: ID!, $targetId: ID) {
@@ -53,30 +53,23 @@ const COMMENTS_QUERY = gql`
     }
   }
 `;
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
-function CommentSystem({
-  targetType,
-  targetId,
-  investigationId,
-  socket,
-  onCommentCountChange,
-}) {
+function CommentSystem({ targetType, targetId, investigationId, socket, onCommentCountChange }) {
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [selectedComment, setSelectedComment] = useState(null);
   const [showReplies, setShowReplies] = useState(new Set());
-  const [filterType, setFilterType] = useState('all');
-  const [sortOrder, setSortOrder] = useState('newest');
+  const [filterType, setFilterType] = useState("all");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [attachmentDialog, setAttachmentDialog] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
   const commentInputRef = useRef(null);
-  const [loadCommentsQuery, { data: commentsData, called }] =
-    useLazyQuery(COMMENTS_QUERY);
+  const [loadCommentsQuery, { data: commentsData, called }] = useLazyQuery(COMMENTS_QUERY);
 
   useEffect(() => {
     // Load persisted comments
@@ -85,8 +78,8 @@ function CommentSystem({
     }
     // Socket updates
     if (socket) {
-      socket.on('comment:update', handleCommentUpdate);
-      return () => socket.off('comment:update', handleCommentUpdate);
+      socket.on("comment:update", handleCommentUpdate);
+      return () => socket.off("comment:update", handleCommentUpdate);
     }
   }, [targetId, socket]);
 
@@ -95,13 +88,13 @@ function CommentSystem({
       const transformed = commentsData.comments.map((c) => ({
         id: c.id,
         content: c.content,
-        author: { id: c.userId, firstName: 'User', lastName: '' },
+        author: { id: c.userId, firstName: "User", lastName: "" },
         timestamp: new Date(c.createdAt),
-        type: 'general',
+        type: "general",
         reactions: { likes: 0, dislikes: 0 },
         replies: [],
         tags: [],
-        priority: 'normal',
+        priority: "normal",
       }));
       setComments(transformed);
     }
@@ -119,15 +112,13 @@ function CommentSystem({
     const { type, comment, commentId } = data;
 
     switch (type) {
-      case 'comment_added':
+      case "comment_added":
         setComments((prev) => [comment, ...prev]);
         break;
-      case 'comment_updated':
-        setComments((prev) =>
-          prev.map((c) => (c.id === comment.id ? { ...c, ...comment } : c)),
-        );
+      case "comment_updated":
+        setComments((prev) => prev.map((c) => (c.id === comment.id ? { ...c, ...comment } : c)));
         break;
-      case 'comment_deleted':
+      case "comment_deleted":
         setComments((prev) => prev.filter((c) => c.id !== commentId));
         break;
       default:
@@ -143,11 +134,11 @@ function CommentSystem({
       content: newComment,
       author: user,
       timestamp: new Date(),
-      type: 'general',
+      type: "general",
       reactions: { likes: 0, dislikes: 0 },
       replies: [],
       tags: [],
-      priority: 'normal',
+      priority: "normal",
       targetType,
       targetId,
       investigationId,
@@ -162,13 +153,11 @@ function CommentSystem({
         };
 
         setComments((prev) =>
-          prev.map((c) =>
-            c.id === replyTo ? { ...c, replies: [...c.replies, reply] } : c,
-          ),
+          prev.map((c) => (c.id === replyTo ? { ...c, replies: [...c.replies, reply] } : c))
         );
 
         if (socket) {
-          socket.emit('comment:add', {
+          socket.emit("comment:add", {
             investigationId,
             comment: reply,
             parentId: replyTo,
@@ -181,16 +170,16 @@ function CommentSystem({
         setComments((prev) => [comment, ...prev]);
 
         if (socket) {
-          socket.emit('comment:add', {
+          socket.emit("comment:add", {
             investigationId,
             comment,
           });
         }
       }
 
-      setNewComment('');
+      setNewComment("");
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error("Error adding comment:", error);
     }
   };
 
@@ -198,14 +187,12 @@ function CommentSystem({
     try {
       setComments((prev) =>
         prev.map((c) =>
-          c.id === commentId
-            ? { ...c, content: newContent, edited: true, editedAt: new Date() }
-            : c,
-        ),
+          c.id === commentId ? { ...c, content: newContent, edited: true, editedAt: new Date() } : c
+        )
       );
 
       if (socket) {
-        socket.emit('comment:update', {
+        socket.emit("comment:update", {
           investigationId,
           comment: { id: commentId, content: newContent },
         });
@@ -213,7 +200,7 @@ function CommentSystem({
 
       setEditingComment(null);
     } catch (error) {
-      console.error('Error editing comment:', error);
+      console.error("Error editing comment:", error);
     }
   };
 
@@ -222,7 +209,7 @@ function CommentSystem({
       setComments((prev) => prev.filter((c) => c.id !== commentId));
 
       if (socket) {
-        socket.emit('comment:delete', {
+        socket.emit("comment:delete", {
           investigationId,
           commentId,
         });
@@ -231,7 +218,7 @@ function CommentSystem({
       setMenuAnchor(null);
       setSelectedComment(null);
     } catch (error) {
-      console.error('Error deleting comment:', error);
+      console.error("Error deleting comment:", error);
     }
   };
 
@@ -244,7 +231,7 @@ function CommentSystem({
           return { ...c, reactions };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -262,48 +249,46 @@ function CommentSystem({
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'info';
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getTypeIcon = (type) => {
     switch (type) {
-      case 'observation':
-        return '👁️';
-      case 'analysis':
-        return '📊';
-      case 'question':
-        return '❓';
-      case 'alert':
-        return '🚨';
+      case "observation":
+        return "👁️";
+      case "analysis":
+        return "📊";
+      case "question":
+        return "❓";
+      case "alert":
+        return "🚨";
       default:
-        return '💬';
+        return "💬";
     }
   };
 
   const filteredAndSortedComments = comments
     .filter((comment) => {
-      if (filterType === 'all') return true;
+      if (filterType === "all") return true;
       return comment.type === filterType;
     })
     .sort((a, b) => {
       switch (sortOrder) {
-        case 'newest':
+        case "newest":
           return new Date(b.timestamp) - new Date(a.timestamp);
-        case 'oldest':
+        case "oldest":
           return new Date(a.timestamp) - new Date(b.timestamp);
-        case 'most_reactions':
+        case "most_reactions":
           return (
-            b.reactions.likes +
-            b.reactions.dislikes -
-            (a.reactions.likes + a.reactions.dislikes)
+            b.reactions.likes + b.reactions.dislikes - (a.reactions.likes + a.reactions.dislikes)
           );
         default:
           return 0;
@@ -311,38 +296,38 @@ function CommentSystem({
     });
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
           Comments & Annotations
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+        <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Button
             size="small"
-            variant={filterType === 'all' ? 'contained' : 'outlined'}
-            onClick={() => setFilterType('all')}
+            variant={filterType === "all" ? "contained" : "outlined"}
+            onClick={() => setFilterType("all")}
           >
             All ({comments.length})
           </Button>
           <Button
             size="small"
-            variant={filterType === 'observation' ? 'contained' : 'outlined'}
-            onClick={() => setFilterType('observation')}
+            variant={filterType === "observation" ? "contained" : "outlined"}
+            onClick={() => setFilterType("observation")}
           >
             Observations
           </Button>
           <Button
             size="small"
-            variant={filterType === 'analysis' ? 'contained' : 'outlined'}
-            onClick={() => setFilterType('analysis')}
+            variant={filterType === "analysis" ? "contained" : "outlined"}
+            onClick={() => setFilterType("analysis")}
           >
             Analysis
           </Button>
           <Button
             size="small"
-            variant={filterType === 'alert' ? 'contained' : 'outlined'}
-            onClick={() => setFilterType('alert')}
+            variant={filterType === "alert" ? "contained" : "outlined"}
+            onClick={() => setFilterType("alert")}
           >
             Alerts
           </Button>
@@ -350,17 +335,13 @@ function CommentSystem({
       </Box>
 
       {/* Comment Input */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
         {replyTo && (
-          <Box sx={{ mb: 2, p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+          <Box sx={{ mb: 2, p: 1, bgcolor: "grey.100", borderRadius: 1 }}>
             <Typography variant="body2" color="text.secondary">
               Replying to comment
             </Typography>
-            <Button
-              size="small"
-              startIcon={<Close />}
-              onClick={() => setReplyTo(null)}
-            >
+            <Button size="small" startIcon={<Close />} onClick={() => setReplyTo(null)}>
               Cancel
             </Button>
           </Box>
@@ -370,21 +351,21 @@ function CommentSystem({
           fullWidth
           multiline
           rows={3}
-          placeholder={replyTo ? 'Write a reply...' : 'Add a comment...'}
+          placeholder={replyTo ? "Write a reply..." : "Add a comment..."}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           variant="outlined"
-          inputProps={{ 'aria-label': replyTo ? 'reply text' : 'comment text' }}
+          inputProps={{ "aria-label": replyTo ? "reply text" : "comment text" }}
           sx={{ mb: 2 }}
         />
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Button
               startIcon={<Attachment />}
               size="small"
@@ -399,19 +380,19 @@ function CommentSystem({
             onClick={handleSubmitComment}
             disabled={!newComment.trim()}
           >
-            {replyTo ? 'Reply' : 'Comment'}
+            {replyTo ? "Reply" : "Comment"}
           </Button>
         </Box>
       </Box>
 
       {/* Comments List */}
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+      <Box sx={{ flexGrow: 1, overflow: "auto" }}>
         <List>
           {filteredAndSortedComments.map((comment) => (
             <React.Fragment key={comment.id}>
               <ListItem alignItems="flex-start" sx={{ py: 2 }}>
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: 'primary.main' }}>
+                  <Avatar sx={{ bgcolor: "primary.main" }}>
                     {comment.author.firstName[0]}
                     {comment.author.lastName[0]}
                   </Avatar>
@@ -420,8 +401,8 @@ function CommentSystem({
                   primary={
                     <Box
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 1,
                         mb: 1,
                       }}
@@ -440,9 +421,7 @@ function CommentSystem({
                         color={getPriorityColor(comment.priority)}
                         variant="outlined"
                       />
-                      <Typography variant="caption">
-                        {getTypeIcon(comment.type)}
-                      </Typography>
+                      <Typography variant="caption">{getTypeIcon(comment.type)}</Typography>
                       {comment.edited && (
                         <Typography variant="caption" color="text.secondary">
                           (edited)
@@ -460,29 +439,24 @@ function CommentSystem({
                             rows={2}
                             defaultValue={comment.content}
                             onKeyPress={(e) => {
-                              if (e.key === 'Enter' && e.ctrlKey) {
+                              if (e.key === "Enter" && e.ctrlKey) {
                                 handleEditComment(comment.id, e.target.value);
                               }
                             }}
                           />
-                          <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                          <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
                             <Button
                               size="small"
                               onClick={(e) =>
                                 handleEditComment(
                                   comment.id,
-                                  e.target.previousSibling.querySelector(
-                                    'textarea',
-                                  ).value,
+                                  e.target.previousSibling.querySelector("textarea").value
                                 )
                               }
                             >
                               Save
                             </Button>
-                            <Button
-                              size="small"
-                              onClick={() => setEditingComment(null)}
-                            >
+                            <Button size="small" onClick={() => setEditingComment(null)}>
                               Cancel
                             </Button>
                           </Box>
@@ -509,8 +483,8 @@ function CommentSystem({
 
                           <Box
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
+                              display: "flex",
+                              alignItems: "center",
                               gap: 1,
                               mt: 1,
                             }}
@@ -518,14 +492,9 @@ function CommentSystem({
                             <Tooltip title="Like">
                               <IconButton
                                 size="small"
-                                onClick={() =>
-                                  handleReaction(comment.id, 'likes')
-                                }
+                                onClick={() => handleReaction(comment.id, "likes")}
                               >
-                                <Badge
-                                  badgeContent={comment.reactions.likes}
-                                  color="primary"
-                                >
+                                <Badge badgeContent={comment.reactions.likes} color="primary">
                                   <ThumbUp fontSize="small" />
                                 </Badge>
                               </IconButton>
@@ -533,14 +502,9 @@ function CommentSystem({
                             <Tooltip title="Dislike">
                               <IconButton
                                 size="small"
-                                onClick={() =>
-                                  handleReaction(comment.id, 'dislikes')
-                                }
+                                onClick={() => handleReaction(comment.id, "dislikes")}
                               >
-                                <Badge
-                                  badgeContent={comment.reactions.dislikes}
-                                  color="error"
-                                >
+                                <Badge badgeContent={comment.reactions.dislikes} color="error">
                                   <ThumbDown fontSize="small" />
                                 </Badge>
                               </IconButton>
@@ -556,11 +520,8 @@ function CommentSystem({
                               Reply
                             </Button>
                             {comment.replies.length > 0 && (
-                              <Button
-                                size="small"
-                                onClick={() => toggleReplies(comment.id)}
-                              >
-                                {showReplies.has(comment.id) ? 'Hide' : 'Show'}{' '}
+                              <Button size="small" onClick={() => toggleReplies(comment.id)}>
+                                {showReplies.has(comment.id) ? "Hide" : "Show"}{" "}
                                 {comment.replies.length} replies
                               </Button>
                             )}
@@ -591,7 +552,7 @@ function CommentSystem({
                       <Avatar
                         size="small"
                         sx={{
-                          bgcolor: 'secondary.main',
+                          bgcolor: "secondary.main",
                           width: 32,
                           height: 32,
                         }}
@@ -602,9 +563,7 @@ function CommentSystem({
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Typography variant="subtitle2" fontSize="0.875rem">
                             {reply.author.firstName} {reply.author.lastName}
                           </Typography>
@@ -631,11 +590,7 @@ function CommentSystem({
       </Box>
 
       {/* Context Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={() => setMenuAnchor(null)}
-      >
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
         <MenuItem
           onClick={() => {
             setEditingComment(selectedComment.id);
@@ -668,9 +623,7 @@ function CommentSystem({
       >
         <DialogTitle>Add Attachment</DialogTitle>
         <DialogContent>
-          <Typography>
-            Attachment functionality would be implemented here.
-          </Typography>
+          <Typography>Attachment functionality would be implemented here.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAttachmentDialog(false)}>Cancel</Button>

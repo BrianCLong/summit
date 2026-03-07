@@ -1,11 +1,11 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-export type AutomationWorkflowName = 'init' | 'check' | 'test' | 'release-dry-run';
+export type AutomationWorkflowName = "init" | "check" | "test" | "release-dry-run";
 
-type StepStatus = 'success' | 'failed';
+type StepStatus = "success" | "failed";
 
 export interface AutomationStep {
   name: string;
@@ -38,7 +38,7 @@ export interface AutomationReport {
 
 export type AutomationRunner = (
   command: string,
-  cwd?: string,
+  cwd?: string
 ) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
 
 export interface AutomationOptions {
@@ -50,8 +50,8 @@ const defaultRunner: AutomationRunner = async (command: string, cwd?: string) =>
   try {
     const { stdout, stderr } = await execAsync(command, {
       cwd,
-      env: { ...process.env, FORCE_COLOR: '0' },
-      shell: '/bin/bash',
+      env: { ...process.env, FORCE_COLOR: "0" },
+      shell: "/bin/bash",
     });
 
     return {
@@ -61,9 +61,9 @@ const defaultRunner: AutomationRunner = async (command: string, cwd?: string) =>
     };
   } catch (error: any) {
     return {
-      stdout: error?.stdout ?? '',
-      stderr: error?.stderr ?? (error instanceof Error ? error.message : ''),
-      exitCode: typeof error?.code === 'number' ? error.code : 1,
+      stdout: error?.stdout ?? "",
+      stderr: error?.stderr ?? (error instanceof Error ? error.message : ""),
+      exitCode: typeof error?.code === "number" ? error.code : 1,
     };
   }
 };
@@ -71,52 +71,52 @@ const defaultRunner: AutomationRunner = async (command: string, cwd?: string) =>
 export const AUTOMATION_WORKFLOWS: Record<AutomationWorkflowName, AutomationStep[]> = {
   init: [
     {
-      name: 'bootstrap',
-      command: 'make bootstrap',
-      description: 'Install dependencies, prepare .env, and prime tooling',
+      name: "bootstrap",
+      command: "make bootstrap",
+      description: "Install dependencies, prepare .env, and prime tooling",
     },
     {
-      name: 'bring-up-stack',
-      command: 'make up',
-      description: 'Start local development stack (Docker compose)',
+      name: "bring-up-stack",
+      command: "make up",
+      description: "Start local development stack (Docker compose)",
     },
   ],
   check: [
     {
-      name: 'lint',
-      command: 'npm run lint',
-      description: 'Run lint + formatting checks across the workspace',
+      name: "lint",
+      command: "npm run lint",
+      description: "Run lint + formatting checks across the workspace",
     },
     {
-      name: 'typecheck',
-      command: 'npm run typecheck',
-      description: 'Type-check the monorepo (tsc -b)',
+      name: "typecheck",
+      command: "npm run typecheck",
+      description: "Type-check the monorepo (tsc -b)",
     },
   ],
   test: [
     {
-      name: 'unit-and-integration',
-      command: 'npm test -- --runInBand',
-      description: 'Execute unit/integration test suites',
+      name: "unit-and-integration",
+      command: "npm test -- --runInBand",
+      description: "Execute unit/integration test suites",
     },
   ],
-  'release-dry-run': [
+  "release-dry-run": [
     {
-      name: 'changeset-status',
-      command: 'npx changeset status --output=.changeset-status.json',
-      description: 'Summarize pending release changes without mutating versions',
+      name: "changeset-status",
+      command: "npx changeset status --output=.changeset-status.json",
+      description: "Summarize pending release changes without mutating versions",
     },
     {
-      name: 'semantic-release-dry-run',
-      command: 'npm run release -- --dry-run',
-      description: 'Validate release pipeline without publishing artifacts',
+      name: "semantic-release-dry-run",
+      command: "npm run release -- --dry-run",
+      description: "Validate release pipeline without publishing artifacts",
     },
   ],
 };
 
 export async function runAutomationWorkflow(
   workflow: AutomationWorkflowName,
-  options: AutomationOptions = {},
+  options: AutomationOptions = {}
 ): Promise<AutomationReport> {
   const steps = AUTOMATION_WORKFLOWS[workflow];
   if (!steps) {
@@ -134,10 +134,10 @@ export async function runAutomationWorkflow(
 
     results.push({
       ...step,
-      status: exitCode === 0 ? 'success' : 'failed',
+      status: exitCode === 0 ? "success" : "failed",
       exitCode,
-      stdout: stdout ?? '',
-      stderr: stderr ?? '',
+      stdout: stdout ?? "",
+      stderr: stderr ?? "",
       startedAt: new Date(stepStart).toISOString(),
       finishedAt: finishedAt.toISOString(),
       durationMs: finishedAt.getTime() - stepStart,
@@ -145,8 +145,8 @@ export async function runAutomationWorkflow(
   }
 
   const finishedAt = new Date();
-  const successCount = results.filter((r) => r.status === 'success').length;
-  const failedCount = results.filter((r) => r.status === 'failed').length;
+  const successCount = results.filter((r) => r.status === "success").length;
+  const failedCount = results.filter((r) => r.status === "failed").length;
 
   return {
     workflow,

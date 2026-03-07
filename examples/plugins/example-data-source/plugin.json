@@ -11,10 +11,7 @@
   "category": "data-source",
   "main": "./dist/index.js",
   "engineVersion": ">=1.0.0",
-  "permissions": [
-    "network:access",
-    "read:data"
-  ],
+  "permissions": ["network:access", "read:data"],
   "resources": {
     "maxMemoryMB": 128,
     "maxCpuPercent": 30,

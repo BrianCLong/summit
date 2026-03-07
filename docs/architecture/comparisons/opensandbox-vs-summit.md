@@ -179,9 +179,9 @@ CI verification
 
 Which enables:
 
-* enterprise compliance
-* deterministic AI execution
-* auditability
+- enterprise compliance
+- deterministic AI execution
+- auditability
 
 ---
 

@@ -33,8 +33,5 @@
     "Evidence index records EVD-NDS-CI-001..004",
     "Required checks documentation lists nds-ci/nds_gates"
   ],
-  "stop_conditions": [
-    "Scope expansion beyond declared paths",
-    "Evidence gate regressions"
-  ]
+  "stop_conditions": ["Scope expansion beyond declared paths", "Evidence gate regressions"]
 }

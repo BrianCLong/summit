@@ -13,8 +13,8 @@ groups:
           service: summit-api
           component: agents
         annotations:
-          summary: 'Summit Agent Task Failure Rate > 5%'
-          description: 'Agent tasks are failing at a rate of {{ $value | humanizePercentage }}.'
+          summary: "Summit Agent Task Failure Rate > 5%"
+          description: "Agent tasks are failing at a rate of {{ $value | humanizePercentage }}."
 
       - alert: SummitFlowSlow
         expr: histogram_quantile(0.95, sum(rate(summit_flow_duration_seconds_bucket[5m])) by (le)) > 10.0
@@ -24,5 +24,5 @@ groups:
           service: summit-api
           component: flow
         annotations:
-          summary: 'Summit Flow P95 Duration > 10s'
-          description: '95th percentile flow duration is {{ $value }}s.'
+          summary: "Summit Flow P95 Duration > 10s"
+          description: "95th percentile flow duration is {{ $value }}s."

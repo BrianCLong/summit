@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Post-freeze restart: safely thaw with staged promotions and backlog triage.'
-  - 'Kubernetes minor upgrade + node OS patch baseline with surge rolling and pod disruption budgets.'
-  - 'Database lifecycle: extension patching, vacuum policy tuning, and connection pooling improvements.'
-  - 'Dependency refresh: framework/LTS upgrades with SBOM deltas and runtime perf sanity.'
-  - 'Feature-flag hygiene: archive stale flags, document permanent guards, and clean dead code.'
-  - 'SLO reset: confirm targets, re-tune burn alerts, and publish 2026 reliability plan.'
+  - "Post-freeze restart: safely thaw with staged promotions and backlog triage."
+  - "Kubernetes minor upgrade + node OS patch baseline with surge rolling and pod disruption budgets."
+  - "Database lifecycle: extension patching, vacuum policy tuning, and connection pooling improvements."
+  - "Dependency refresh: framework/LTS upgrades with SBOM deltas and runtime perf sanity."
+  - "Feature-flag hygiene: archive stale flags, document permanent guards, and clean dead code."
+  - "SLO reset: confirm targets, re-tune burn alerts, and publish 2026 reliability plan."
 ---
 
 # Sprint 30 Plan — Safe Thaw, Platform Upgrades, and 2026 SLO Reset
@@ -237,17 +237,17 @@ jobs:
 **Path:** `tools/flags/export.ts`
 
 ```ts
-import fs from 'fs';
+import fs from "fs";
 // Walk codebase for flag keys, read from flag svc, output usage metrics
 fs.writeFileSync(
-  'flags/catalog.json',
+  "flags/catalog.json",
   JSON.stringify(
     {
       /* ... */
     },
     null,
-    2,
-  ),
+    2
+  )
 );
 ```
 
@@ -278,11 +278,11 @@ spec:
         - alert: FastBurn
           expr: error_rate_5m > 0.02
           for: 2m
-          labels: { severity: page, policy: '2026.01' }
+          labels: { severity: page, policy: "2026.01" }
         - alert: SlowBurn
           expr: error_rate_1h > 0.01
           for: 15m
-          labels: { severity: warn, policy: '2026.01' }
+          labels: { severity: warn, policy: "2026.01" }
 ```
 
 ### 5.10 Thaw Checklist (pin this)

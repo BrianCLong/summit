@@ -11,20 +11,25 @@ export class DebateValidator {
     judge?: { id: string; maxTokens: number };
     qualityRubric?: string;
   }): Promise<DebateResult> {
-    const rubric = input.qualityRubric ?? [
-      "Be correct and specific.",
-      "If unsure, say so and propose verification steps.",
-      "Avoid hallucinated citations or fake numbers.",
-      "Return actionable steps/code when relevant."
-    ].join("\n");
+    const rubric =
+      input.qualityRubric ??
+      [
+        "Be correct and specific.",
+        "If unsure, say so and propose verification steps.",
+        "Avoid hallucinated citations or fake numbers.",
+        "Return actionable steps/code when relevant.",
+      ].join("\n");
 
     const draft = await this.llm.complete({
       modelId: input.modelDraft.id,
       maxTokens: input.modelDraft.maxTokens,
       messages: [
-        { role: "system", content: "You are a careful engineer. Produce a high-quality first draft." },
-        { role: "user", content: input.query }
-      ]
+        {
+          role: "system",
+          content: "You are a careful engineer. Produce a high-quality first draft.",
+        },
+        { role: "user", content: input.query },
+      ],
     });
 
     const critique = await this.llm.complete({
@@ -32,8 +37,11 @@ export class DebateValidator {
       maxTokens: input.modelCritic.maxTokens,
       messages: [
         { role: "system", content: `You are a strict reviewer.\nRubric:\n${rubric}` },
-        { role: "user", content: `Query:\n${input.query}\n\nDraft:\n${draft.text}\n\nFind issues, missing pieces, and risks.` }
-      ]
+        {
+          role: "user",
+          content: `Query:\n${input.query}\n\nDraft:\n${draft.text}\n\nFind issues, missing pieces, and risks.`,
+        },
+      ],
     });
 
     const revised = await this.llm.complete({
@@ -41,8 +49,11 @@ export class DebateValidator {
       maxTokens: input.modelRefiner.maxTokens,
       messages: [
         { role: "system", content: `You revise drafts using critique.\nRubric:\n${rubric}` },
-        { role: "user", content: `Query:\n${input.query}\n\nDraft:\n${draft.text}\n\nCritique:\n${critique.text}\n\nReturn an improved final answer.` }
-      ]
+        {
+          role: "user",
+          content: `Query:\n${input.query}\n\nDraft:\n${draft.text}\n\nCritique:\n${critique.text}\n\nReturn an improved final answer.`,
+        },
+      ],
     });
 
     if (!input.judge) {
@@ -53,9 +64,12 @@ export class DebateValidator {
       modelId: input.judge.id,
       maxTokens: input.judge.maxTokens,
       messages: [
-        { role: "system", content: `You are a gatekeeper. Decide pass/fail.\nRubric:\n${rubric}\nReturn:\nPASS|FAIL\nNotes: ...` },
-        { role: "user", content: `Query:\n${input.query}\n\nCandidate answer:\n${revised.text}` }
-      ]
+        {
+          role: "system",
+          content: `You are a gatekeeper. Decide pass/fail.\nRubric:\n${rubric}\nReturn:\nPASS|FAIL\nNotes: ...`,
+        },
+        { role: "user", content: `Query:\n${input.query}\n\nCandidate answer:\n${revised.text}` },
+      ],
     });
 
     const pass = /^\s*PASS\b/i.test(judged.text);
@@ -63,7 +77,7 @@ export class DebateValidator {
       draft: draft.text,
       critique: critique.text,
       revised: revised.text,
-      judged: { pass, notes: judged.text }
+      judged: { pass, notes: judged.text },
     };
   }
 }

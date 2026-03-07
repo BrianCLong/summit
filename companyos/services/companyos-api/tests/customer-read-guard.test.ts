@@ -10,13 +10,9 @@ describe("customerReadGuard", () => {
   function buildApp() {
     const app = express();
     app.use(stubIdentity);
-    app.get(
-      "/tenants/:tenantId/customers/:id",
-      customerReadGuard,
-      (req, res) => {
-        res.json({ id: req.params.id, tenant_id: req.params.tenantId });
-      },
-    );
+    app.get("/tenants/:tenantId/customers/:id", customerReadGuard, (req, res) => {
+      res.json({ id: req.params.id, tenant_id: req.params.tenantId });
+    });
     return app;
   }
 

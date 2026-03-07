@@ -50,18 +50,21 @@ GA Evidence Pack
 ### Trust Model
 
 **Trust Anchor:**
+
 - **OIDC Issuer**: `https://token.actions.githubusercontent.com`
 - **Repository**: GitHub repository identity from workflow
 - **Workflow**: `.github/workflows/ga-evidence-attest.yml`
 - **Transparency Log**: Rekor (public, append-only ledger)
 
 **What is Guaranteed:**
+
 - ✅ Attestations signed with GitHub OIDC (keyless)
 - ✅ Signatures bound to specific artifact digests
 - ✅ Workflow identity verified
 - ✅ Transparency log entry for auditability
 
 **What is NOT Guaranteed:**
+
 - ❌ Correctness of the workflow itself (requires code review)
 - ❌ Completeness of evidence collection (requires policy enforcement)
 - ❌ Protection against compromised repository or workflow
@@ -152,12 +155,14 @@ cosign verify-blob-attestation \
 ### Workflow: `.github/workflows/ga-evidence-attest.yml`
 
 **Triggers:**
+
 - `workflow_dispatch` (primary)
 - Optionally on push to `main` (commented out by default)
 
 **Jobs:**
 
 #### Job 1: `generate-pack` (No Special Permissions)
+
 ```yaml
 permissions:
   contents: read
@@ -165,19 +170,22 @@ permissions:
 ```
 
 **Steps:**
+
 1. Checkout repository
 2. Install dependencies (pnpm, Node, syft, gitleaks)
 3. Run `generate_ga_evidence_pack.sh`
 4. Upload evidence pack artifact
 
 #### Job 2: `attest` (OIDC Signing)
+
 ```yaml
 permissions:
   contents: read
-  id-token: write  # CRITICAL: Required for OIDC signing
+  id-token: write # CRITICAL: Required for OIDC signing
 ```
 
 **Steps:**
+
 1. Download evidence pack from Job 1
 2. Install cosign
 3. Run `attest_ga_evidence.sh` (generates attestations)
@@ -185,6 +193,7 @@ permissions:
 5. Upload attestations artifact
 
 #### Job 3: `summary`
+
 Generates workflow summary with verification instructions.
 
 ### Permissions Model
@@ -272,6 +281,7 @@ cosign verify-blob-attestation \
 ```
 
 Expected output should include:
+
 - **Issuer**: `https://token.actions.githubusercontent.com`
 - **Subject**: `https://github.com/BrianCLong/summit/.github/workflows/ga-evidence-attest.yml@refs/...`
 
@@ -314,12 +324,14 @@ export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
 ### Threat Model
 
 **Protected Against:**
+
 - ✅ Unauthorized attestation generation (OIDC identity)
 - ✅ Attestation tampering (cryptographic signatures)
 - ✅ Hidden attestation activity (Rekor transparency log)
 - ✅ Certificate replay attacks (short-lived certs)
 
 **NOT Protected Against:**
+
 - ❌ Compromised GitHub Actions runner
 - ❌ Compromised repository with write access
 - ❌ Compromised workflow YAML
@@ -389,11 +401,13 @@ The artifact or attestation has been modified. Verify:
 ## References
 
 ### Internal Documentation
+
 - [Evidence Collection](../ci/EVIDENCE_COLLECTION.md)
 - [Release Runbook](runbook.md)
 - GA Evidence Index
 
 ### External Resources
+
 - [Sigstore Documentation](https://docs.sigstore.dev/)
 - [SLSA Framework](https://slsa.dev/)
 - [SLSA Provenance Spec](https://slsa.dev/provenance/v1)
@@ -405,9 +419,9 @@ The artifact or attestation has been modified. Verify:
 
 ## Change Log
 
-| Date       | Change                                  | Author               |
-| ---------- | --------------------------------------- | -------------------- |
-| 2026-01-23 | Initial GA Evidence Pack with OIDC      | Platform Engineering |
+| Date       | Change                             | Author               |
+| ---------- | ---------------------------------- | -------------------- |
+| 2026-01-23 | Initial GA Evidence Pack with OIDC | Platform Engineering |
 
 ---
 

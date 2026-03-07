@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Governance Gate Catalog
 
 This folder enumerates gates wired into CI and release workflows.

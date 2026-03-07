@@ -1,7 +1,7 @@
-import type { z } from 'zod';
-import type { JsonValue } from './utils/stable-json.js';
+import type { z } from "zod";
+import type { JsonValue } from "./utils/stable-json.js";
 
-export type RiskTier = 'low' | 'medium' | 'high';
+export type RiskTier = "low" | "medium" | "high";
 
 export type ToolScope = string;
 
@@ -66,7 +66,7 @@ export type SkillReference = {
 };
 
 export type PolicyDecision = {
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   reason: string;
   toolId: string;
   riskTier: RiskTier;
@@ -79,7 +79,7 @@ export type EvidenceEvent = {
   timestamp: string;
   traceId: string;
   sessionId: string;
-  type: 'request' | 'policy' | 'tool' | 'response' | 'error';
+  type: "request" | "policy" | "tool" | "response" | "error";
   detail: Record<string, unknown>;
 };
 

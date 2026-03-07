@@ -1,17 +1,17 @@
 export type CanonicalEntityName =
-  | 'user'
-  | 'account'
-  | 'tenant'
-  | 'asset'
-  | 'document'
-  | 'ticket'
-  | 'runbook'
-  | 'model'
-  | 'dataset'
-  | 'feature'
-  | 'automation'
-  | 'policy'
-  | 'release';
+  | "user"
+  | "account"
+  | "tenant"
+  | "asset"
+  | "document"
+  | "ticket"
+  | "runbook"
+  | "model"
+  | "dataset"
+  | "feature"
+  | "automation"
+  | "policy"
+  | "release";
 
 export interface SchemaDefinition {
   name: CanonicalEntityName;
@@ -25,17 +25,17 @@ export interface SchemaValidationResult {
   errors: string[];
 }
 
-export type IntentVerb = 'request' | 'approve' | 'escalate' | 'undo' | 'preview';
+export type IntentVerb = "request" | "approve" | "escalate" | "undo" | "preview";
 
 export type PolicyIntent =
-  | 'business_analytics'
-  | 'decision_support'
-  | 'autonomous_targeting'
-  | 'research'
-  | 'unknown';
+  | "business_analytics"
+  | "decision_support"
+  | "autonomous_targeting"
+  | "research"
+  | "unknown";
 
-export type ActorType = 'enterprise_user' | 'gov_operator' | 'researcher' | 'system';
-export type ModelTier = 'baseline' | 'frontier';
+export type ActorType = "enterprise_user" | "gov_operator" | "researcher" | "system";
+export type ModelTier = "baseline" | "frontier";
 
 export interface PolicyDecisionContext {
   requestId: string;
@@ -53,14 +53,14 @@ export interface PolicyDecisionInput {
 
 export interface PolicyRule {
   id: string;
-  effect: 'allow' | 'deny';
-  intent: PolicyIntent | '*';
-  actorType: ActorType | '*';
-  modelTier: ModelTier | '*';
+  effect: "allow" | "deny";
+  intent: PolicyIntent | "*";
+  actorType: ActorType | "*";
+  modelTier: ModelTier | "*";
   reason: string;
 }
 
-export type PolicyProfileName = 'civilian_safe' | 'defense_restricted' | 'research_unrestricted';
+export type PolicyProfileName = "civilian_safe" | "defense_restricted" | "research_unrestricted";
 
 export interface PolicyProfile {
   name: PolicyProfileName;
@@ -110,7 +110,7 @@ export interface DataQualityRecord {
 export interface QualityAlert {
   table: string;
   reason: string;
-  severity: 'warning' | 'critical';
+  severity: "warning" | "critical";
   records: DataQualityRecord[];
 }
 
@@ -148,7 +148,7 @@ export interface FeatureRetrievalResult {
 
 export interface PiiRule {
   path: string;
-  action: 'redact' | 'hash' | 'drop';
+  action: "redact" | "hash" | "drop";
 }
 
 export interface ProvenanceRecord {

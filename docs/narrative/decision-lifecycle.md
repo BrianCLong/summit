@@ -62,21 +62,22 @@ sequenceDiagram
 
 Why Summit is safer and more effective than the alternatives.
 
-| Feature | Scripted Automation | LLM-Only Agent | Summit Governed Agent |
-| :--- | :--- | :--- | :--- |
-| **Trigger** | Hardcoded `if/then` | Natural Language Prompt | Context-aware Graph State |
-| **Context** | None (Blind) | Limited Context Window | Full Historic & Relational Graph |
-| **Safety** | Rigid (Brittle) | Unpredictable (Hallucination) | Policy-Gated & Deterministic |
-| **Auditability** | Logs only | "Chat History" | Cryptographic Provenance Ledger |
-| **Control** | Stop the script | Prompt Engineering | Architectural Kill Switches |
+| Feature          | Scripted Automation | LLM-Only Agent                | Summit Governed Agent            |
+| :--------------- | :------------------ | :---------------------------- | :------------------------------- |
+| **Trigger**      | Hardcoded `if/then` | Natural Language Prompt       | Context-aware Graph State        |
+| **Context**      | None (Blind)        | Limited Context Window        | Full Historic & Relational Graph |
+| **Safety**       | Rigid (Brittle)     | Unpredictable (Hallucination) | Policy-Gated & Deterministic     |
+| **Auditability** | Logs only           | "Chat History"                | Cryptographic Provenance Ledger  |
+| **Control**      | Stop the script     | Prompt Engineering            | Architectural Kill Switches      |
 
 ---
 
 ## Evidence & Reversibility
 
 Every decision produces a **Decision Record** stored in the immutable ledger. This record answers:
-*   **Why** was this done? (The reasoning trace)
-*   **What** data was used? (The graph context snapshot)
-*   **Who** allowed it? (The policy ID or human approver)
+
+- **Why** was this done? (The reasoning trace)
+- **What** data was used? (The graph context snapshot)
+- **Who** allowed it? (The policy ID or human approver)
 
 This structure allows for **Time-Travel Debugging**: operators can replay the exact state of the world at the moment the decision was made to understand the root cause of any outcome.

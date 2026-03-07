@@ -1,7 +1,7 @@
 ---
 name: Summit Cutover Checklist
 about: Run-of-Show checklist for IntelGraph → Summit rebrand (Level B)
-title: 'Summit Cutover Checklist — <date>'
+title: "Summit Cutover Checklist — <date>"
 labels: [rebrand, cutover]
 assignees: []
 ---

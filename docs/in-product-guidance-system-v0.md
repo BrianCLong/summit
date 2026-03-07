@@ -3,7 +3,7 @@
 ## Objectives
 
 - Enable each persona to reach time-to-value within their first week with minimal live support.
-- Provide contextual, role-aware guidance that explains both *how* to operate CompanyOS and *why* the system behaves a certain way.
+- Provide contextual, role-aware guidance that explains both _how_ to operate CompanyOS and _why_ the system behaves a certain way.
 - Instrument guidance to measure completion, skips, and downstream effectiveness so we can iterate with evidence.
 
 ## Personas and First-Week Journeys
@@ -17,12 +17,12 @@
 
 ### First Three Tasks per Persona
 
-| Persona | Day 1 | Day 2–3 | Day 4–5 |
-| --- | --- | --- | --- |
-| Ops Leader | Accept invitation, set org defaults (timezone, auth provider). | Connect first data source and enable baseline alert routing. | Publish rollout checklist + invite first team, assign roles. |
-| Engineer | Generate API token, explore SDK quickstart. | Build first workflow (trigger + action) in sandbox. | Add logging/metrics sink; set up CI webhook for deployments. |
-| Risk/Compliance | Review policy templates; enable MFA/SAML. | Configure approval workflow (e.g., dual control) for sensitive actions. | Run first audit report and export evidence package. |
-| Exec/Sponsor | View executive overview; confirm value KPIs. | Configure weekly digest + ownership map. | Approve first rollout milestone and monitor adoption dashboard. |
+| Persona         | Day 1                                                          | Day 2–3                                                                 | Day 4–5                                                         |
+| --------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Ops Leader      | Accept invitation, set org defaults (timezone, auth provider). | Connect first data source and enable baseline alert routing.            | Publish rollout checklist + invite first team, assign roles.    |
+| Engineer        | Generate API token, explore SDK quickstart.                    | Build first workflow (trigger + action) in sandbox.                     | Add logging/metrics sink; set up CI webhook for deployments.    |
+| Risk/Compliance | Review policy templates; enable MFA/SAML.                      | Configure approval workflow (e.g., dual control) for sensitive actions. | Run first audit report and export evidence package.             |
+| Exec/Sponsor    | View executive overview; confirm value KPIs.                   | Configure weekly digest + ownership map.                                | Approve first rollout milestone and monitor adoption dashboard. |
 
 ### Onboarding Modality
 

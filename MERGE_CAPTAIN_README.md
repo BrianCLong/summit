@@ -23,6 +23,7 @@
 ### 1. Analysis Documents (3 files)
 
 #### **GOLDEN_MAIN_STATUS_REPORT.md** (700 lines)
+
 - Complete analysis of 234+ branches (later updated to 491)
 - Required checks policy validation (v2.0.0, zero exceptions)
 - 5-tier risk-minimizing merge train design
@@ -30,12 +31,14 @@
 - Copy/paste merge commands
 
 #### **MERGE_CAPTAIN_UPDATE.md** (266 lines)
+
 - Real-time velocity measurements
 - Identified already-merged branches
 - Strategic pivot documentation
 - Updated recommendations
 
 #### **MERGE_CAPTAIN_SUMMARY.md** (320 lines)
+
 - Executive summary and final recommendations
 - Immediate action items (Priority 1-3)
 - Success metrics and predictions
@@ -44,7 +47,9 @@
 ### 2. Automation Tools (3 files + outputs)
 
 #### **scripts/merge-captain-triage.py** (Production)
+
 Python-based branch analyzer:
+
 - ✅ Analyzes all 491 remote branches
 - ✅ Categorizes into 5 actionable buckets
 - ✅ Generates executable cleanup script
@@ -53,10 +58,13 @@ Python-based branch analyzer:
 **Output**: `.merge-captain/cleanup-commands.sh` (executable)
 
 #### **scripts/merge-captain-cleanup.sh** (Legacy)
+
 Bash-based alternative (git-only, no gh CLI needed)
 
 #### **scripts/MERGE_CAPTAIN_TOOLS.md** (Documentation)
+
 Complete guide:
+
 - Usage instructions and workflows
 - Safety guidelines
 - GitHub Actions template
@@ -66,13 +74,13 @@ Complete guide:
 
 **Latest Run** (491 branches analyzed):
 
-| Category | Count | Risk Level | Action |
-|----------|-------|------------|--------|
-| Already Merged | 3 | None | Close immediately |
-| Ancient (7000+ ahead) | **26** | **🚨 CRITICAL** | **Close ASAP** |
-| Stale Auto-Remediation | 8 | Low | Close (superseded) |
-| Distant (> 150 behind) | 232 | Medium | Contact owners |
-| Conflict-Prone (> 100 behind) | 182 | Medium | Rebase needed |
+| Category                      | Count  | Risk Level      | Action             |
+| ----------------------------- | ------ | --------------- | ------------------ |
+| Already Merged                | 3      | None            | Close immediately  |
+| Ancient (7000+ ahead)         | **26** | **🚨 CRITICAL** | **Close ASAP**     |
+| Stale Auto-Remediation        | 8      | Low             | Close (superseded) |
+| Distant (> 150 behind)        | 232    | Medium          | Contact owners     |
+| Conflict-Prone (> 100 behind) | 182    | Medium          | Rebase needed      |
 
 **Cleanup Potential**: 37 branches immediately (merged + ancient + stale)
 
@@ -85,6 +93,7 @@ Complete guide:
 **26 branches with 7000-8091 commits ahead of main**
 
 These pose an **existential threat** to the repository:
+
 - Merging any would overwrite main with ancient code
 - Result would be catastrophic data loss
 - Two branches over 8000 commits ahead!
@@ -94,21 +103,24 @@ These pose an **existential threat** to the repository:
 **List**: See `.merge-captain/ancient-branches.txt` (after running triage script)
 
 **Top offenders**:
+
 - `infra-enhance-redis-dr-2274442055878795105` (8091 commits ahead!)
 - `feature/enhanced-storage-backup-dr-1234585080480741505` (8080 commits ahead!)
 - `claude/master-orchestrator-prompt-WHxWp` (7761 commits ahead)
 - `claude/batch-issue-processor-Yo2zn` (7760 commits ahead)
-- Plus 22 more codex/* branches
+- Plus 22 more codex/\* branches
 
 ### Main Branch Velocity (Measured)
 
 **During ~3 hour observation**:
+
 - **Commits merged**: ~150+
 - **PRs merged**: ~30
 - **Files changed**: 500+
 - **Average velocity**: ~50 commits/hour
 
 **Implications**:
+
 - Manual merge train can't keep pace
 - Branches drift 50 commits/hour
 - Natural selection working well
@@ -145,6 +157,7 @@ cat .merge-captain/already-merged-branches.txt
 ### 3. Execute Cleanup (30 minutes - 2 hours)
 
 **Prerequisites**:
+
 ```bash
 # Install GitHub CLI if needed
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
@@ -156,6 +169,7 @@ gh auth login
 ```
 
 **Execute**:
+
 ```bash
 # Review generated cleanup script
 cat .merge-captain/cleanup-commands.sh
@@ -217,7 +231,7 @@ bash .merge-captain/cleanup-commands.sh
 name: Branch Hygiene
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly
+    - cron: "0 0 * * 0" # Weekly
   workflow_dispatch:
 
 jobs:
@@ -241,6 +255,7 @@ jobs:
 ## 📊 Success Metrics
 
 ### Before (Start of Session)
+
 - **Total branches**: 234+ known (491 actual!)
 - **Ancient branches**: Unknown (26 discovered!)
 - **Already merged**: Unknown (3 identified)
@@ -248,6 +263,7 @@ jobs:
 - **Merge coordination**: Manual
 
 ### After (Current State)
+
 - **Analysis**: ✅ Complete (491 branches)
 - **Automation**: ✅ Production-ready tools
 - **Documentation**: ✅ Comprehensive (1286+ lines)
@@ -255,6 +271,7 @@ jobs:
 - **Ongoing maintenance**: ✅ Repeatable process
 
 ### Target State (After Cleanup)
+
 - **Total branches**: < 100 active (down from 491)
 - **Ancient branches**: 0 (all 26 closed)
 - **Already merged**: 0 (all 3 closed)
@@ -378,6 +395,7 @@ git push origin claude/merge-captain-setup-E1CRJ
 **Mission: ACCOMPLISHED**
 
 The repository has a complete, production-ready system for:
+
 - ✅ Branch analysis and categorization
 - ✅ Automated cleanup script generation
 - ✅ Safety checks (ancient branch detection)

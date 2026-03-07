@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS quota_usage (
 
 ```ts
 export async function loadTenant(req, res, next) {
-  const id = String(req.headers['x-tenant-id'] || '');
-  if (!id) return res.status(400).json({ error: 'tenant_header_required' });
-  req.tenant = await req.db.one('select * from tenants where id=$1', [id]);
+  const id = String(req.headers["x-tenant-id"] || "");
+  if (!id) return res.status(400).json({ error: "tenant_header_required" });
+  req.tenant = await req.db.one("select * from tenants where id=$1", [id]);
   next();
 }
 ```
@@ -58,7 +58,7 @@ export async function loadTenant(req, res, next) {
 **`server/middleware/ratelimit.ts`**
 
 ```ts
-import { createClient } from 'redis';
+import { createClient } from "redis";
 const r = createClient({ url: process.env.REDIS_URL });
 export function rateLimit(limitPerMinByPlan: Record<string, number>) {
   return async (req, res, next) => {
@@ -67,11 +67,9 @@ export function rateLimit(limitPerMinByPlan: Record<string, number>) {
     const key = `rl:${req.tenant.id}:${new Date().toISOString().slice(0, 16)}`; // per‑minute
     const used = await r.incr(key);
     if (used === 1) await r.expire(key, 65);
-    res.setHeader('X-RateLimit-Limit', String(lim));
-    res.setHeader('X-RateLimit-Remaining', String(Math.max(lim - used, 0)));
-    return used > lim
-      ? res.status(429).json({ error: 'rate_limited' })
-      : next();
+    res.setHeader("X-RateLimit-Limit", String(lim));
+    res.setHeader("X-RateLimit-Remaining", String(Math.max(lim - used, 0)));
+    return used > lim ? res.status(429).json({ error: "rate_limited" }) : next();
   };
 }
 ```
@@ -95,21 +93,17 @@ app.use(loadTenant, rateLimit({ starter: 60, pro: 600, enterprise: 6000 }));
 **`server/billing/meter.ts`**
 
 ```ts
-import client from 'prom-client';
+import client from "prom-client";
 export const usage = new client.Counter({
-  name: 'usage_api_calls',
-  help: 'API calls',
-  labelNames: ['tenant'],
+  name: "usage_api_calls",
+  help: "API calls",
+  labelNames: ["tenant"],
 });
-export async function recordUsage(
-  db,
-  tenantId: string,
-  key = 'api_calls_per_day',
-) {
+export async function recordUsage(db, tenantId: string, key = "api_calls_per_day") {
   await db.none(
-    'insert into quota_usage(tenant_id,key,period,used) values($1,$2,current_date,1)\
-                 on conflict (tenant_id,key,period) do update set used=quota_usage.used+1',
-    [tenantId, key],
+    "insert into quota_usage(tenant_id,key,period,used) values($1,$2,current_date,1)\
+                 on conflict (tenant_id,key,period) do update set used=quota_usage.used+1",
+    [tenantId, key]
   );
   usage.inc({ tenant: tenantId });
 }
@@ -165,12 +159,12 @@ allow {
 **`server/middleware/entitlement.ts`**
 
 ```ts
-import { evaluate } from '@open-policy-agent/opa-wasm';
+import { evaluate } from "@open-policy-agent/opa-wasm";
 export function requireFeature(feature: string) {
   return (req, res, next) =>
-    evaluate('entitlements/allow', { plan: req.tenant.plan, feature })
+    evaluate("entitlements/allow", { plan: req.tenant.plan, feature })
       ? next()
-      : res.status(402).json({ error: 'feature_not_in_plan' });
+      : res.status(402).json({ error: "feature_not_in_plan" });
 }
 ```
 
@@ -187,9 +181,9 @@ export function requireFeature(feature: string) {
 **`tests/tenant/isolation.test.ts`**
 
 ```ts
-it('cannot read other tenant resources', async () => {
-  const a = await api('/events', { headers: { 'x-tenant-id': T1 } });
-  const b = await api('/events', { headers: { 'x-tenant-id': T2 } });
+it("cannot read other tenant resources", async () => {
+  const a = await api("/events", { headers: { "x-tenant-id": T1 } });
+  const b = await api("/events", { headers: { "x-tenant-id": T2 } });
   expect(a.body.items.find((x) => x.tenant_id === T2)).toBeUndefined();
 });
 ```
@@ -209,17 +203,12 @@ it('cannot read other tenant resources', async () => {
 **`server/routes/dsar.ts`**
 
 ```ts
-app.post('/dsar/export', requireReason(['/dsar/export']), async (req, res) => {
+app.post("/dsar/export", requireReason(["/dsar/export"]), async (req, res) => {
   /* stream zip of user data */
 });
-app.post(
-  '/dsar/purge',
-  requireReason(['/dsar/purge']),
-  requireStepUp(2),
-  async (req, res) => {
-    /* create deletion_requests row; wait for approval */
-  },
-);
+app.post("/dsar/purge", requireReason(["/dsar/purge"]), requireStepUp(2), async (req, res) => {
+  /* create deletion_requests row; wait for approval */
+});
 ```
 
 **`k8s/cron/purge-processor.yaml`** — processes approved requests daily.
@@ -239,7 +228,7 @@ app.post(
 **`etl/openlineage/client.ts`**
 
 ```ts
-import { OpenLineageClient } from 'openlineage-client';
+import { OpenLineageClient } from "openlineage-client";
 export const ol = new OpenLineageClient({
   url: process.env.OL_URL!,
   apiKey: process.env.OL_TOKEN!,
@@ -302,8 +291,7 @@ export async function run(name: string, batch = 1000) {
 name: migrator-run
 on:
   workflow_dispatch:
-    inputs:
-      { name: { required: true }, batch: { required: false, default: '1000' } }
+    inputs: { name: { required: true }, batch: { required: false, default: "1000" } }
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -351,9 +339,8 @@ allow_write { input.tenant.region == input.request.region }
 
 ```ts
 export function requireRegion(req, res, next) {
-  const region = req.headers['x-region'] || process.env.DEFAULT_REGION;
-  if (region !== req.tenant.region)
-    return res.status(451).json({ error: 'wrong_region' });
+  const region = req.headers["x-region"] || process.env.DEFAULT_REGION;
+  if (region !== req.tenant.region) return res.status(451).json({ error: "wrong_region" });
   next();
 }
 ```
@@ -383,7 +370,7 @@ groups:
 ```yaml
 name: tenant-credits
 on:
-  schedule: [{ cron: '0 0 * * *' }]
+  schedule: [{ cron: "0 0 * * *" }]
 jobs:
   compute:
     runs-on: ubuntu-latest

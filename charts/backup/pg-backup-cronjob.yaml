@@ -10,7 +10,7 @@ metadata:
     component: pg-backup
     version: v24.3.0
 spec:
-  schedule: '*/5 * * * *' # Every 5 minutes for RPO ≤ 5m
+  schedule: "*/5 * * * *" # Every 5 minutes for RPO ≤ 5m
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 10
@@ -28,11 +28,11 @@ spec:
               image: postgres:15
               env:
                 - name: PGHOST
-                  value: 'maestro-pg-primary'
+                  value: "maestro-pg-primary"
                 - name: PGPORT
-                  value: '5432'
+                  value: "5432"
                 - name: PGDATABASE
-                  value: 'maestro'
+                  value: "maestro"
                 - name: PGUSER
                   valueFrom:
                     secretKeyRef:
@@ -54,11 +54,11 @@ spec:
                       name: maestro-backup-secret
                       key: aws_secret_access_key
                 - name: AWS_DEFAULT_REGION
-                  value: 'us-east-1'
+                  value: "us-east-1"
                 - name: S3_BUCKET
-                  value: 'maestro-backups-primary'
+                  value: "maestro-backups-primary"
                 - name: BACKUP_RETENTION_DAYS
-                  value: '30'
+                  value: "30"
               command:
                 - /bin/bash
                 - -c
@@ -157,11 +157,11 @@ spec:
 
               resources:
                 requests:
-                  memory: '512Mi'
-                  cpu: '200m'
+                  memory: "512Mi"
+                  cpu: "200m"
                 limits:
-                  memory: '2Gi'
-                  cpu: '1000m'
+                  memory: "2Gi"
+                  cpu: "1000m"
 
               volumeMounts:
                 - name: backup-temp

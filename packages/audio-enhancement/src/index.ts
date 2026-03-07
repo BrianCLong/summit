@@ -10,14 +10,14 @@
  * - Dynamic range compression
  */
 
-import { z } from 'zod';
-import type { AudioBuffer } from '@intelgraph/audio-processing';
+import { z } from "zod";
+import type { AudioBuffer } from "@intelgraph/audio-processing";
 
 export const NoiseReductionConfigSchema = z.object({
-  algorithm: z.enum(['spectral-subtraction', 'wiener-filter', 'rnn', 'transformer']).default('rnn'),
+  algorithm: z.enum(["spectral-subtraction", "wiener-filter", "rnn", "transformer"]).default("rnn"),
   strength: z.number().min(0).max(1).default(0.5),
   noiseProfile: z.array(z.number()).optional(),
-  adaptiveMode: z.boolean().default(true)
+  adaptiveMode: z.boolean().default(true),
 });
 
 export type NoiseReductionConfig = z.infer<typeof NoiseReductionConfigSchema>;
@@ -27,8 +27,8 @@ export const EnhancementResultSchema = z.object({
   metrics: z.object({
     snrImprovement: z.number().optional(),
     qualityScore: z.number().min(0).max(1),
-    processingTime: z.number()
-  })
+    processingTime: z.number(),
+  }),
 });
 
 export type EnhancementResult = z.infer<typeof EnhancementResultSchema>;

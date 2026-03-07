@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-      - 'release/**'
+      - "release/**"
   pull_request:
     branches:
       - main
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: "Deployment environment"
         required: true
         type: choice
         options:
@@ -21,7 +21,7 @@ on:
           - staging
           - production
       deployment_strategy:
-        description: 'Deployment strategy'
+        description: "Deployment strategy"
         required: true
         type: choice
         options:
@@ -119,13 +119,13 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   # Determine deployment environment
   determine-environment:
@@ -189,7 +189,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
         with:
-          version: '3.13.0'
+          version: "3.13.0"
 
       - name: Add Helm repositories
         run: |
@@ -381,7 +381,7 @@ jobs:
       - name: Notify rollback
         uses: 8398a7/action-slack@v3
         with:
-          status: 'warning'
+          status: "warning"
           text: |
             🔄 Automatic rollback executed for ${{ needs.determine-environment.outputs.environment }}
             Previous commit: ${{ github.sha }}

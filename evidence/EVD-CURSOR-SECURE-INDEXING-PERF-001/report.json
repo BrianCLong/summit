@@ -4,7 +4,5 @@
     "id": "secure-indexing"
   },
   "summary": "Improvement factor: 35.91x",
-  "artifacts": [
-    "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json"
-  ]
+  "artifacts": ["evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json"]
 }

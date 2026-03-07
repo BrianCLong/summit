@@ -19,9 +19,9 @@
 
 ## OUTPUT A — PR INVENTORY
 
-| # | Title | Draft | Mergeable | Checks(summary) | ReviewDecision | Files | +/- | Labels | Updated | Bucket | Risk |
-|---|---|---|---|---|---|---:|---:|---|---|---|---|
-| N/A | Inventory blocked: unable to query GitHub PRs without `gh` + authenticated remote context. | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | CI/Infra (blocker) | High |
+| #   | Title                                                                                      | Draft | Mergeable | Checks(summary) | ReviewDecision | Files | +/- | Labels | Updated | Bucket             | Risk |
+| --- | ------------------------------------------------------------------------------------------ | ----- | --------- | --------------- | -------------- | ----: | --: | ------ | ------- | ------------------ | ---- |
+| N/A | Inventory blocked: unable to query GitHub PRs without `gh` + authenticated remote context. | N/A   | N/A       | N/A             | N/A            |   N/A | N/A | N/A    | N/A     | CI/Infra (blocker) | High |
 
 ## OUTPUT B — MERGE TRAIN (top 15, ordered)
 
@@ -42,7 +42,6 @@ Proposed unblock sequence:
 - **Blocked:** Global blocker — cannot select PR#1 because GitHub PR inventory access failed.
 - **Proposed "Stabilize:" PR title:** `Stabilize: GitHub PR orchestration runtime access`
 - **Golden status:** **Yellow** (no evidence of regressions in local tree, but release readiness cannot be validated against remote protected-branch checks).
-
 
 ## Continuation Plan (Keep Going)
 

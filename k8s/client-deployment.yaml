@@ -12,7 +12,7 @@ spec:
         app: summit-client
     spec:
       containers:
-      - name: summit-client
-        image: summit/client
-        ports:
-        - containerPort: 3000
+        - name: summit-client
+          image: summit/client
+          ports:
+            - containerPort: 3000

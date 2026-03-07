@@ -13,12 +13,12 @@ We track the following golden signals for IntelGraph:
 
 ### Prometheus Metrics
 
-| Metric Name | Type | Description |
-| :--- | :--- | :--- |
-| `neo4j_query_latency_seconds` | Histogram | Latency of Cypher queries |
-| `neo4j_query_errors_total` | Counter | Total number of failed queries |
-| `neo4j_connectivity_up` | Gauge | 1 if connected, 0 if disconnected |
-| `graphql_resolver_duration_seconds` | Histogram | Duration of GraphQL resolvers |
+| Metric Name                         | Type      | Description                       |
+| :---------------------------------- | :-------- | :-------------------------------- |
+| `neo4j_query_latency_seconds`       | Histogram | Latency of Cypher queries         |
+| `neo4j_query_errors_total`          | Counter   | Total number of failed queries    |
+| `neo4j_connectivity_up`             | Gauge     | 1 if connected, 0 if disconnected |
+| `graphql_resolver_duration_seconds` | Histogram | Duration of GraphQL resolvers     |
 
 ## Logging
 
@@ -42,8 +42,8 @@ We use structured logging (Pino) to capture context around operations.
 
 OpenTelemetry is used to trace requests from the GraphQL layer down to the database.
 
--   **Span**: `resolve-entity-by-id` - The GraphQL resolver execution.
--   **Span**: `neo4j-query` - The actual database query.
+- **Span**: `resolve-entity-by-id` - The GraphQL resolver execution.
+- **Span**: `neo4j-query` - The actual database query.
 
 ## Troubleshooting
 
@@ -62,5 +62,5 @@ OpenTelemetry is used to trace requests from the GraphQL layer down to the datab
 
 ## Development Tools
 
--   **Neo4j Browser**: Access at `http://localhost:7474` (User: `neo4j`, Pass: `devpassword`).
--   **GraphQL Playground**: Access at `http://localhost:4000/graphql`.
+- **Neo4j Browser**: Access at `http://localhost:7474` (User: `neo4j`, Pass: `devpassword`).
+- **GraphQL Playground**: Access at `http://localhost:4000/graphql`.

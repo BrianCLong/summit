@@ -20,6 +20,7 @@ This document defines the **trust and confidence scoring model** for agents and 
 ### 1.1 What Trust Scores Are
 
 **Definition:** Non-authoritative numerical signals (0-1 scale) indicating the **historical reliability** of agents or predictions based on:
+
 - Actual outcomes vs. predicted outcomes
 - Compliance with constraints and policies
 - Audit findings and violations
@@ -37,6 +38,7 @@ This document defines the **trust and confidence scoring model** for agents and 
 **Critical Requirement:** Trust scores are **strictly advisory**.
 
 No system component may:
+
 - Grant access based solely on trust score
 - Deny service based solely on trust score
 - Bypass governance checks using trust scores
@@ -55,6 +57,7 @@ Trust scores are computed from **four primary factors**:
 **Definition:** How often predictions matched actual outcomes; how often agent actions achieved stated goals.
 
 **Measurement:**
+
 - Prediction accuracy: `(correct predictions) / (total predictions)`
 - Agent task success: `(successful tasks) / (total tasks)`
 - Time-weighted: Recent accuracy weighted more heavily
@@ -68,6 +71,7 @@ Trust scores are computed from **four primary factors**:
 **Definition:** Adherence to governance constraints, resource limits, and policy boundaries.
 
 **Measurement:**
+
 - Policy compliance: `1 - (violations / total checks)`
 - Resource adherence: `1 - (limit breaches / total runs)`
 - Capability respect: `1 - (unauthorized attempts / total actions)`
@@ -81,6 +85,7 @@ Trust scores are computed from **four primary factors**:
 **Definition:** Results from manual or automated audits of agent/prediction behavior.
 
 **Measurement:**
+
 - Audit pass rate: `(audits passed) / (total audits)`
 - Critical findings: -0.2 per critical finding (last 60 days)
 - Medium findings: -0.1 per medium finding (last 60 days)
@@ -94,6 +99,7 @@ Trust scores are computed from **four primary factors**:
 **Definition:** Stability of performance over time; low variance in outcomes.
 
 **Measurement:**
+
 - Variance in accuracy: `1 - stddev(accuracy_by_week)`
 - Behavioral stability: Low deviation from historical patterns
 
@@ -108,23 +114,19 @@ Trust scores are computed from **four primary factors**:
 ### 3.1 Formula
 
 ```typescript
-TrustScore = (
-  HistoricalAccuracy * 0.40 +
-  ConstraintCompliance * 0.30 +
-  AuditOutcomes * 0.20 +
-  Consistency * 0.10
-)
+TrustScore =
+  HistoricalAccuracy * 0.4 + ConstraintCompliance * 0.3 + AuditOutcomes * 0.2 + Consistency * 0.1;
 ```
 
 ### 3.2 Score Bands
 
-| Score Range | Band | Interpretation | UI Indicator |
-|-------------|------|----------------|--------------|
-| 0.90 - 1.00 | **Very High** | Excellent track record | 🟢 Green |
-| 0.70 - 0.89 | **High** | Good reliability | 🟡 Yellow-Green |
-| 0.50 - 0.69 | **Medium** | Adequate but monitor | 🟡 Yellow |
-| 0.30 - 0.49 | **Low** | Concerning, review needed | 🟠 Orange |
-| 0.00 - 0.29 | **Very Low** | Poor track record | 🔴 Red |
+| Score Range | Band          | Interpretation            | UI Indicator    |
+| ----------- | ------------- | ------------------------- | --------------- |
+| 0.90 - 1.00 | **Very High** | Excellent track record    | 🟢 Green        |
+| 0.70 - 0.89 | **High**      | Good reliability          | 🟡 Yellow-Green |
+| 0.50 - 0.69 | **Medium**    | Adequate but monitor      | 🟡 Yellow       |
+| 0.30 - 0.49 | **Low**       | Concerning, review needed | 🟠 Orange       |
+| 0.00 - 0.29 | **Very Low**  | Poor track record         | 🔴 Red          |
 
 ### 3.3 Initial Trust Score
 
@@ -136,13 +138,13 @@ TrustScore = (
 
 Trust scores **decay over time** to reflect staleness:
 
-| Time Since Last Activity | Decay Factor |
-|-------------------------|--------------|
-| < 7 days | 1.0 (no decay) |
-| 7-30 days | 0.95 |
-| 30-90 days | 0.85 |
-| 90-180 days | 0.70 |
-| > 180 days | 0.50 (revert to neutral) |
+| Time Since Last Activity | Decay Factor             |
+| ------------------------ | ------------------------ |
+| < 7 days                 | 1.0 (no decay)           |
+| 7-30 days                | 0.95                     |
+| 30-90 days               | 0.85                     |
+| 90-180 days              | 0.70                     |
+| > 180 days               | 0.50 (revert to neutral) |
 
 **Rationale:** Inactive agents/models should not maintain high trust indefinitely.
 
@@ -152,13 +154,13 @@ Trust scores **decay over time** to reflect staleness:
 
 These are **distinct but related** concepts:
 
-| Dimension | Prediction Confidence | Trust Score |
-|-----------|----------------------|-------------|
-| **Scope** | Single prediction | Historical track record |
-| **Timeframe** | Instant (per prediction) | Cumulative (over time) |
-| **Data Source** | Data quality, model uncertainty | Audit logs, outcomes |
-| **Use Case** | Assess single prediction reliability | Assess agent/model reliability |
-| **Decay** | Time-based (hours/days) | Activity-based (months) |
+| Dimension       | Prediction Confidence                | Trust Score                    |
+| --------------- | ------------------------------------ | ------------------------------ |
+| **Scope**       | Single prediction                    | Historical track record        |
+| **Timeframe**   | Instant (per prediction)             | Cumulative (over time)         |
+| **Data Source** | Data quality, model uncertainty      | Audit logs, outcomes           |
+| **Use Case**    | Assess single prediction reliability | Assess agent/model reliability |
+| **Decay**       | Time-based (hours/days)              | Activity-based (months)        |
 
 **Relationship:** High trust score + high confidence = strong signal; low trust score + high confidence = red flag (overconfidence).
 
@@ -171,31 +173,34 @@ These are **distinct but related** concepts:
 In addition to the four primary factors, agent trust includes:
 
 **Capability Adherence:**
+
 - Does agent only use declared capabilities?
 - Are capability checks respected?
 
 **Negotiation Behavior:**
+
 - Does agent negotiate in good faith?
 - Are turn limits and protocols respected?
 
 **Resource Discipline:**
+
 - Does agent stay within budgets?
 - Are cleanup actions performed?
 
 ### 5.2 Agent Trust Calculation
 
 ```typescript
-AgentTrustScore = (
-  BaseComponentScore * 0.80 +
-  CapabilityAdherence * 0.10 +
+AgentTrustScore =
+  BaseComponentScore * 0.8 +
+  CapabilityAdherence * 0.1 +
   NegotiationBehavior * 0.05 +
-  ResourceDiscipline * 0.05
-)
+  ResourceDiscipline * 0.05;
 ```
 
 ### 5.3 Agent Trust Updates
 
 Agent trust scores are updated:
+
 - **After each task completion** (outcome recorded)
 - **After policy checks** (compliance tracked)
 - **After audits** (findings incorporated)
@@ -210,29 +215,29 @@ Agent trust scores are updated:
 For predictive models, trust includes:
 
 **Calibration:**
+
 - Are confidence scores well-calibrated? (predicted 0.8 confidence → actual 80% accuracy)
 
 **Bias Detection:**
+
 - Are predictions biased toward certain outcomes?
 - Are false positive/negative rates balanced?
 
 **Explainability:**
+
 - Do explanations correlate with actual factors?
 
 ### 6.2 Model Trust Calculation
 
 ```typescript
-ModelTrustScore = (
-  BaseComponentScore * 0.70 +
-  Calibration * 0.15 +
-  BiasMetrics * 0.10 +
-  ExplainabilityQuality * 0.05
-)
+ModelTrustScore =
+  BaseComponentScore * 0.7 + Calibration * 0.15 + BiasMetrics * 0.1 + ExplainabilityQuality * 0.05;
 ```
 
 ### 6.3 Model Trust Updates
 
 Model trust scores are updated:
+
 - **After prediction validation** (when ground truth available)
 - **After accuracy assessments** (monthly)
 - **After bias audits** (quarterly)
@@ -249,7 +254,7 @@ Every trust score **must** include a breakdown:
 ```typescript
 interface TrustScoreBreakdown {
   overallScore: number; // 0-1
-  band: 'very_high' | 'high' | 'medium' | 'low' | 'very_low';
+  band: "very_high" | "high" | "medium" | "low" | "very_low";
   components: {
     historicalAccuracy: number;
     constraintCompliance: number;
@@ -272,9 +277,11 @@ interface TrustScoreBreakdown {
 Trust scores are accompanied by explanations:
 
 **Example (High Trust):**
+
 > "Trust score: 0.85 (High). This agent has completed 150 tasks with 92% success rate, zero policy violations in the last 90 days, and passed 5 audits. Recent performance is consistent with historical averages."
 
 **Example (Low Trust):**
+
 > "Trust score: 0.42 (Low). This model's predictions have been accurate only 65% of the time over the last 30 days, with 3 policy violations detected. Recommend manual review before relying on outputs."
 
 ### 7.3 Confidence Intervals
@@ -290,6 +297,7 @@ interface TrustScoreWithUncertainty {
 ```
 
 **Example:**
+
 - Score: 0.75
 - Confidence Interval: [0.68, 0.82] (95% CI)
 - Sample Size: 50 predictions
@@ -305,16 +313,18 @@ The following uses of trust scores are **explicitly prohibited**:
 ### 8.1 Sole Authorization
 
 ❌ **Prohibited:**
+
 ```typescript
 if (trustScore > 0.7) {
-  grantCapability('admin_access');
+  grantCapability("admin_access");
 }
 ```
 
 ✅ **Allowed:**
+
 ```typescript
-if (policyCheck.action === 'ALLOW' && trustScore > 0.7) {
-  logger.info('High trust agent approved by policy');
+if (policyCheck.action === "ALLOW" && trustScore > 0.7) {
+  logger.info("High trust agent approved by policy");
 }
 ```
 
@@ -344,12 +354,12 @@ if (policyCheck.action === 'ALLOW' && trustScore > 0.7) {
 
 Trust scores are **sensitive metadata**:
 
-| Role | Read Access | Write Access | Explanation Access |
-|------|-------------|--------------|-------------------|
-| **Agent** | No | No | No |
-| **Human Operator** | Yes | No | Yes |
-| **Audit System** | Yes | Yes (compute only) | Yes |
-| **Policy Engine** | Yes (read-only) | No | Yes |
+| Role               | Read Access     | Write Access       | Explanation Access |
+| ------------------ | --------------- | ------------------ | ------------------ |
+| **Agent**          | No              | No                 | No                 |
+| **Human Operator** | Yes             | No                 | Yes                |
+| **Audit System**   | Yes             | Yes (compute only) | Yes                |
+| **Policy Engine**  | Yes (read-only) | No                 | Yes                |
 
 **Rationale:** Agents should not be aware of their own trust scores to prevent gaming.
 
@@ -359,9 +369,9 @@ All trust score updates generate audit events:
 
 ```typescript
 interface TrustScoreAuditEvent {
-  eventType: 'trust_score_updated';
+  eventType: "trust_score_updated";
   subjectId: string; // Agent or model ID
-  subjectType: 'agent' | 'model';
+  subjectType: "agent" | "model";
   oldScore: number;
   newScore: number;
   updateReason: string; // e.g., "Task completion", "Policy violation"
@@ -388,6 +398,7 @@ Trust scores are reviewed:
 Trust scores can **inform** (not replace) policy decisions:
 
 **Policy Example:**
+
 ```typescript
 {
   id: 'high-risk-prediction-review',
@@ -407,20 +418,22 @@ Trust scores can **inform** (not replace) policy decisions:
 
 Trust score changes trigger alerts:
 
-| Condition | Alert | Action |
-|-----------|-------|--------|
-| Score drops > 0.3 in 7 days | **Critical** | Immediate investigation |
-| Score < 0.4 | **Warning** | Review agent/model behavior |
-| Score drops below 0.3 after being > 0.7 | **Critical** | Suspend pending review |
+| Condition                               | Alert        | Action                      |
+| --------------------------------------- | ------------ | --------------------------- |
+| Score drops > 0.3 in 7 days             | **Critical** | Immediate investigation     |
+| Score < 0.4                             | **Warning**  | Review agent/model behavior |
+| Score drops below 0.3 after being > 0.7 | **Critical** | Suspend pending review      |
 
 ### 10.3 Dashboard Visibility
 
 Trust scores are displayed in:
+
 - Agent management dashboard
 - Prediction review interface
 - Audit report summaries
 
 **Display Format:**
+
 ```
 Agent: compliance-predictor-v2
 Trust Score: 0.82 (High) ▲ +0.05 from last week
@@ -437,21 +450,25 @@ Last Updated: 2025-12-31 10:00:00 UTC
 Trust scores are validated by:
 
 **Historical Backtesting:**
+
 - Do high-trust agents/models perform better than low-trust ones?
 - Measure: Correlation between trust score and actual outcomes (target: r > 0.7)
 
 **Predictive Power:**
+
 - Can trust scores predict future violations or failures?
 - Measure: AUC-ROC for predicting next-month violations (target: AUC > 0.75)
 
 ### 11.2 Weight Tuning
 
 Weights are adjusted if:
+
 - Component does not correlate with outcomes
 - New data suggests different importance
 - Regulatory requirements change
 
 **Procedure:**
+
 1. Analyze historical data (minimum 6 months)
 2. Test alternative weights
 3. Validate on held-out data
@@ -463,11 +480,13 @@ Weights are adjusted if:
 Trust scoring is monitored for bias:
 
 **Protected Attributes:** Ensure scores are not correlated with:
+
 - Tenant size or industry
 - Agent deployment region
 - Time of day/week
 
 **Fairness Metrics:**
+
 - Demographic parity: Trust score distributions should be similar across tenant types
 - Equalized odds: False positive/negative rates should be balanced
 
@@ -478,6 +497,7 @@ Trust scoring is monitored for bias:
 ### 12.1 Data Minimization
 
 Trust scores are computed from:
+
 - **Aggregated** audit logs (not raw event details)
 - **Anonymized** outcomes (no PII)
 - **Statistical** summaries (not individual records)
@@ -487,6 +507,7 @@ Trust scores are computed from:
 ### 12.2 Score Storage
 
 Trust scores are:
+
 - **Computed on-demand** (not persisted)
 - **Cached temporarily** (5-minute TTL)
 - **Encrypted in transit** (TLS 1.3)
@@ -498,6 +519,7 @@ Trust scores are:
 **Threat:** Agent attempts to game trust score by behaving well temporarily.
 
 **Mitigations:**
+
 - Time-weighted scoring (recent ≠ all that matters)
 - Consistency component penalizes variance
 - Audits include randomness (not all actions scored)
@@ -531,11 +553,13 @@ Trust scoring aligns with:
 **Scenario:** Compliance prediction engine generates audit readiness forecast.
 
 **Trust Score Context:**
+
 - Model trust: 0.88 (High)
 - Prediction confidence: 0.75
 - Combined signal: Strong
 
 **Outcome:** Prediction presented to user with trust context:
+
 > "This prediction has 75% confidence from a high-trust model (trust score: 0.88, based on 200 validated predictions). Recommend proceeding with caution."
 
 ### 14.2 Example: Agent Task Assignment
@@ -543,6 +567,7 @@ Trust scoring aligns with:
 **Scenario:** Two agents available for remediation task.
 
 **Trust Scores:**
+
 - Agent A: 0.92 (Very High) - 95% task success, zero violations
 - Agent B: 0.58 (Medium) - 70% task success, 2 recent violations
 
@@ -553,6 +578,7 @@ Trust scoring aligns with:
 **Scenario:** Model trust drops from 0.80 to 0.45 in one week.
 
 **Investigation:**
+
 - Recent predictions: 50% accuracy (down from 90%)
 - Cause: Data pipeline issue (stale data)
 
@@ -563,24 +589,28 @@ Trust scoring aligns with:
 ## 15. Summary: Trust Model in One Page
 
 **What trust scores are:**
+
 - Non-authoritative advisory signals
 - Based on historical accuracy, compliance, audits, consistency
 - Transparent and explainable
 - Decaying over time
 
 **What trust scores are NOT:**
+
 - Authorization mechanisms
 - Sole decision criteria
 - Permanent labels
 - Privacy violations
 
 **Key Components:**
+
 - Historical Accuracy: 40%
 - Constraint Compliance: 30%
 - Audit Outcomes: 20%
 - Consistency: 10%
 
 **Score Bands:**
+
 - 0.90-1.00: Very High
 - 0.70-0.89: High
 - 0.50-0.69: Medium
@@ -588,12 +618,14 @@ Trust scoring aligns with:
 - 0.00-0.29: Very Low
 
 **Prohibited Uses:**
+
 - Sole authorization
 - Automated capability grants
 - Cross-tenant comparison
 - Permanent labeling
 
 **Governance:**
+
 - Access control: Agents cannot see their own scores
 - Audit trail: All updates logged
 - Review: Weekly anomaly detection, monthly manual review

@@ -3,6 +3,7 @@
 This plan converts the eight provided prompts into ready-to-file GitHub issues with suggested branches, feature flags, CI gates, and success criteria. Each issue is scoped to ship behind its specified flag and relies only on typed APIs/events to avoid shared-state conflicts.
 
 ## #25 Graph Branching, Diffs & Merges (GBDM)
+
 - **Issue title:** GBDM: branchable graph commits with 3-way diff/merge and UI
 - **Branch:** `feature/graph-branching`
 - **Feature flag:** `GBDM_ENABLED`
@@ -28,6 +29,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - License-tag awareness must be enforced at SDK level to avoid client-side bypass and should be fuzz-tested for malformed tags.
 
 ## #26 Cost-Based Query Planner & Cardinality Estimator (CBQP)
+
 - **Issue title:** CBQP: cost-based planner and cardinality estimator for Cypher/GraphQL
 - **Branch:** `feature/cbqp`
 - **Feature flag:** `CBQP_ENABLED`
@@ -51,6 +53,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - Ceiling breaches must trigger adaptive throttles coordinated with NL→Cypher previews to avoid cascading UI retries.
 
 ## #27 Secrets & Key Management (KMS) + Envelope Encryption
+
 - **Issue title:** KMS: tenant-scoped keys, envelope encryption, and sidecar decryptor
 - **Branch:** `infra/kms`
 - **Feature flag:** `KMS_ENABLED`
@@ -76,6 +79,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - External HSM adapters need contract tests that prove capability parity (e.g., attestation formats) before enabling tenants.
 
 ## #28 Inference & Rule Engine (Datalog-ish) with Provenance
+
 - **Issue title:** RULES: deterministic inference engine with explainable derivations
 - **Branch:** `feature/rules-engine`
 - **Feature flag:** `RULES_ENABLED`
@@ -101,6 +105,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - Event schemas must be versioned with migration playbooks to prevent consumer breakage when rule provenance schemas evolve.
 
 ## #29 Embeddings Fabric & Vector Index (Text/Image/Graph)
+
 - **Issue title:** EMBEDDINGS: centralized vector service with HNSW index and UI ties
 - **Branch:** `feature/embeddings-fabric`
 - **Feature flag:** `EMBEDDINGS_ENABLED`
@@ -126,6 +131,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - Drift monitors should feed into AASH to cross-check prompt-injection effects on embeddings-based retrieval quality.
 
 ## #30 Layout Orchestrator & Viewport Engine (LOVE)
+
 - **Issue title:** LAYOUT: orchestrated layouts with LOD streaming and stable positions
 - **Branch:** `feature/layout-orchestrator`
 - **Feature flag:** `LAYOUT_ENABLED`
@@ -150,6 +156,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - Layout telemetry (frame render times, cancel events) should feed capacity planning and anomaly detection.
 
 ## #31 Data Retention, Legal Hold & Cryptographic Erasure (DRLH)
+
 - **Issue title:** DRLH: retention policies, legal holds, and verifiable crypto-erasure
 - **Branch:** `feature/retention-legal-hold`
 - **Feature flag:** `DRLH_ENABLED`
@@ -175,6 +182,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - Legal hold indicators must propagate to downstream services (rules/layout/embeddings) to freeze non-essential processing when required.
 
 ## #32 Adversarial AI & Safety Harness (AASH)
+
 - **Issue title:** AASH: continuous red-team harness and AI middleware gates
 - **Branch:** `feature/ai-safety-harness`
 - **Feature flag:** `AASH_ENABLED`
@@ -199,6 +207,7 @@ This plan converts the eight provided prompts into ready-to-file GitHub issues w
   - Adapters for NLQ/GraphRAG must publish compatibility contracts, enabling staged rollout and rollback without blocking unrelated AI paths.
 
 ## Shared CI wiring
+
 - Add branch-specific pipelines that fail if feature flag is disabled in tests, enforce golden fixtures where specified, and run Playwright/k6 suites per service. Persist planner hashes for CBQP in CI and ensure GBDM/RULES/DRLH flows run end-to-end in preview environments.
 - Layered gates (23rd-order coverage):
   - **Flag awareness:** Require feature flags to be enabled in CI for the target service only; block accidental cross-flag leakage.

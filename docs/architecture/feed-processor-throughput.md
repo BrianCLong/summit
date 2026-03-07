@@ -12,16 +12,16 @@ This guide documents the high-throughput ingestion pipeline that powers the Summ
 
 ## Configuration
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `REDIS_URL` | `redis://redis:6379` | Redis connection for queue operations. |
-| `FEED_QUEUE_NAME` | `feed:ingest` | Queue key shared between producers and workers. |
-| `FEED_BATCH_SIZE` | `500` | Max messages fetched per consumer round trip. |
-| `FEED_WORKER_CONCURRENCY` | `4` | Number of concurrent async consumers. |
-| `FEED_PARALLELISM` | `8` | Thread pool size for per-record transforms. |
-| `FEED_FLUSH_INTERVAL` | `5.0` | Cool-down seconds between batches to smooth load. |
-| `FEED_TRACING_ENABLED` | `true` | Enables OpenTelemetry + Jaeger exporter. |
-| `JAEGER_HOST` / `JAEGER_PORT` | `jaeger` / `6831` | UDP endpoint for the Jaeger agent. |
+| Variable                      | Default              | Purpose                                           |
+| ----------------------------- | -------------------- | ------------------------------------------------- |
+| `REDIS_URL`                   | `redis://redis:6379` | Redis connection for queue operations.            |
+| `FEED_QUEUE_NAME`             | `feed:ingest`        | Queue key shared between producers and workers.   |
+| `FEED_BATCH_SIZE`             | `500`                | Max messages fetched per consumer round trip.     |
+| `FEED_WORKER_CONCURRENCY`     | `4`                  | Number of concurrent async consumers.             |
+| `FEED_PARALLELISM`            | `8`                  | Thread pool size for per-record transforms.       |
+| `FEED_FLUSH_INTERVAL`         | `5.0`                | Cool-down seconds between batches to smooth load. |
+| `FEED_TRACING_ENABLED`        | `true`               | Enables OpenTelemetry + Jaeger exporter.          |
+| `JAEGER_HOST` / `JAEGER_PORT` | `jaeger` / `6831`    | UDP endpoint for the Jaeger agent.                |
 
 Docker Compose (`deploy/compose/docker-compose.full.yml`) now ships Redis + Jaeger containers pre-wired for the workers, so `docker compose up feed-processor jaeger redis` is sufficient for local tracing. When running the workers or benchmarks without Compose, export `JAEGER_HOST=127.0.0.1` (or point at your Jaeger agent) to avoid DNS errors while spans are emitted.
 

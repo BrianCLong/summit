@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { DEV } from '../config/env.js';
+import { useState, useEffect, useMemo } from "react";
+import { DEV } from "../config/env.js";
 
 interface FlagConfig {
   [key: string]: {
@@ -16,96 +16,96 @@ interface FlagConfig {
 
 // Default feature flags configuration
 const DEFAULT_FLAGS: FlagConfig = {
-  'realtime-presence': {
+  "realtime-presence": {
     enabled: true,
     rollout: 100,
     conditions: {
-      env: ['development', 'staging', 'production'],
+      env: ["development", "staging", "production"],
     },
   },
-  'graph-streaming': {
+  "graph-streaming": {
     enabled: true,
     rollout: 80,
     conditions: {
-      env: ['development', 'staging', 'production'],
+      env: ["development", "staging", "production"],
     },
   },
-  'graph-lod': {
+  "graph-lod": {
     enabled: true,
     rollout: 100,
     conditions: {
-      env: ['development', 'staging', 'production'],
+      env: ["development", "staging", "production"],
     },
   },
-  'graph-lod-aggregation': {
+  "graph-lod-aggregation": {
     enabled: true,
     rollout: 100,
     conditions: {
-      env: ['development', 'staging', 'production'],
+      env: ["development", "staging", "production"],
     },
   },
-  'graph-lod-benchmark': {
+  "graph-lod-benchmark": {
     enabled: DEV ?? true,
     rollout: 100,
     conditions: {
-      env: ['development', 'staging', 'production'],
+      env: ["development", "staging", "production"],
     },
   },
-  'k-shortest-paths': {
+  "k-shortest-paths": {
     enabled: true,
     rollout: 100,
     conditions: {
-      env: ['development', 'staging'],
+      env: ["development", "staging"],
     },
   },
-  'advanced-search': {
+  "advanced-search": {
     enabled: true,
     rollout: 100,
   },
-  'bulk-actions': {
+  "bulk-actions": {
     enabled: true,
     rollout: 90,
   },
-  'report-templates': {
+  "report-templates": {
     enabled: true,
     rollout: 100,
     conditions: {
-      role: ['analyst', 'admin', 'investigator'],
+      role: ["analyst", "admin", "investigator"],
     },
   },
-  'forensics-reports': {
+  "forensics-reports": {
     enabled: true,
     rollout: 100,
     conditions: {
-      role: ['forensics', 'admin', 'legal'],
+      role: ["forensics", "admin", "legal"],
     },
   },
-  'fps-monitor': {
+  "fps-monitor": {
     enabled: import.meta.env.DEV,
     rollout: 100,
     conditions: {
-      env: ['development'],
+      env: ["development"],
     },
   },
-  'event-inspector': {
+  "event-inspector": {
     enabled: DEV,
     rollout: 100,
     conditions: {
-      env: ['development'],
+      env: ["development"],
     },
   },
-  'optimistic-updates': {
+  "optimistic-updates": {
     enabled: true,
     rollout: 75,
   },
-  'multi-language': {
+  "multi-language": {
     enabled: true,
     rollout: 50,
     conditions: {
-      env: ['staging', 'production'],
+      env: ["staging", "production"],
     },
   },
-  'otel.correlation': {
+  "otel.correlation": {
     enabled: true,
     rollout: 100,
   },
@@ -126,12 +126,12 @@ export function useFlag(flagKey: string, context?: UserContext): boolean {
 
   // Load dynamic flags from server/localStorage (simplified implementation)
   useEffect(() => {
-    const storedFlags = localStorage.getItem('feature-flags');
+    const storedFlags = localStorage.getItem("feature-flags");
     if (storedFlags) {
       try {
         setDynamicFlags(JSON.parse(storedFlags));
       } catch (error) {
-        console.warn('Failed to parse stored feature flags:', error);
+        console.warn("Failed to parse stored feature flags:", error);
       }
     }
   }, []);
@@ -152,7 +152,7 @@ export function useFlag(flagKey: string, context?: UserContext): boolean {
 
     // Check rollout percentage
     if (flag.rollout && flag.rollout < 100) {
-      const hash = hashString(`${flagKey}-${context?.userId || 'anonymous'}`);
+      const hash = hashString(`${flagKey}-${context?.userId || "anonymous"}`);
       const bucket = hash % 100;
       if (bucket >= flag.rollout) {
         return false;
@@ -213,22 +213,22 @@ export function useFlags(context?: UserContext): Record<string, boolean> {
  */
 export function useFlagUpdater() {
   const updateFlag = (flagKey: string, config: Partial<FlagConfig[string]>) => {
-    const storedFlags = localStorage.getItem('feature-flags');
+    const storedFlags = localStorage.getItem("feature-flags");
     let flags: FlagConfig = {};
 
     if (storedFlags) {
       try {
         flags = JSON.parse(storedFlags);
       } catch (error) {
-        console.warn('Failed to parse stored flags:', error);
+        console.warn("Failed to parse stored flags:", error);
       }
     }
 
     flags[flagKey] = { ...flags[flagKey], ...config };
-    localStorage.setItem('feature-flags', JSON.stringify(flags));
+    localStorage.setItem("feature-flags", JSON.stringify(flags));
 
     // Trigger re-evaluation
-    window.dispatchEvent(new CustomEvent('feature-flags-updated'));
+    window.dispatchEvent(new CustomEvent("feature-flags-updated"));
   };
 
   return { updateFlag };

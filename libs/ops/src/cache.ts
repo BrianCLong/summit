@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
-import { cacheHits, cacheMiss } from './metrics-queue.js';
+import Redis from "ioredis";
+import { cacheHits, cacheMiss } from "./metrics-queue.js";
 
 type CachePrimitive = string | number | boolean | Record<string, unknown> | Array<unknown> | null;
 
@@ -12,14 +12,14 @@ export interface CacheAdapter {
 }
 
 function buildRedisClient(): CacheAdapter | null {
-  const enabled = process.env.FLAG_SCALE_REDIS === '1';
+  const enabled = process.env.FLAG_SCALE_REDIS === "1";
   if (!enabled) {
     return null;
   }
 
   const address = process.env.REDIS_ADDR;
   if (!address) {
-    console.warn('cache_disabled_no_address');
+    console.warn("cache_disabled_no_address");
     return null;
   }
 
@@ -39,7 +39,7 @@ export class CacheManager {
     }
 
     if (ttlSeconds <= 0) {
-      throw new Error('cache_ttl_must_be_positive');
+      throw new Error("cache_ttl_must_be_positive");
     }
 
     const cached = await this.client.get(key);
@@ -48,7 +48,7 @@ export class CacheManager {
         cacheHits.inc();
         return JSON.parse(cached) as T;
       } catch (err) {
-        console.warn('cache_deserialize_failed', err);
+        console.warn("cache_deserialize_failed", err);
         await this.client.del([key]);
       }
     }

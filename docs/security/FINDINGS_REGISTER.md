@@ -1,10 +1,10 @@
 # Findings Register - External Security Review (Oct 2025)
 
-| ID | Severity | Component | Title | Status | Disposition |
-|----|----------|-----------|-------|--------|-------------|
-| SEC-2025-001 | **Critical** | Authentication (`server/src/app.ts`) | **Insecure Default Authentication Strategy** | Open | **Fix Now** |
-| SEC-2025-002 | **High** | Security Headers (`middleware/securityHeaders.ts`) | **Permissive Content Security Policy (unsafe-inline)** | Open | **Risk Accept** |
-| SEC-2025-003 | **High** | Request Signing | **HMAC Validation in Non-Blocking Legacy Mode** | Open | **Backlog** |
+| ID           | Severity     | Component                                          | Title                                                  | Status | Disposition     |
+| ------------ | ------------ | -------------------------------------------------- | ------------------------------------------------------ | ------ | --------------- |
+| SEC-2025-001 | **Critical** | Authentication (`server/src/app.ts`)               | **Insecure Default Authentication Strategy**           | Open   | **Fix Now**     |
+| SEC-2025-002 | **High**     | Security Headers (`middleware/securityHeaders.ts`) | **Permissive Content Security Policy (unsafe-inline)** | Open   | **Risk Accept** |
+| SEC-2025-003 | **High**     | Request Signing                                    | **HMAC Validation in Non-Blocking Legacy Mode**        | Open   | **Backlog**     |
 
 ## Detail: SEC-2025-001 (Insecure Default Authentication)
 

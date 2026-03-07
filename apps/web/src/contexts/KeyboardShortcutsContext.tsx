@@ -1,7 +1,13 @@
 // =============================================
 // Keyboard Shortcuts Context
 // =============================================
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 // Define the shape of a shortcut
@@ -15,7 +21,9 @@ export interface Shortcut {
 }
 
 interface KeyboardShortcutsContextType {
-  registerShortcut: (shortcut: Omit<Shortcut, 'action'> & { action?: () => void }) => void
+  registerShortcut: (
+    shortcut: Omit<Shortcut, 'action'> & { action?: () => void }
+  ) => void
   unregisterShortcut: (id: string) => void
   openHelp: () => void
   closeHelp: () => void
@@ -23,12 +31,16 @@ interface KeyboardShortcutsContextType {
   shortcuts: Shortcut[]
 }
 
-const KeyboardShortcutsContext = createContext<KeyboardShortcutsContextType | undefined>(undefined)
+const KeyboardShortcutsContext = createContext<
+  KeyboardShortcutsContextType | undefined
+>(undefined)
 
 export function useKeyboardShortcuts() {
   const context = useContext(KeyboardShortcutsContext)
   if (!context) {
-    throw new Error('useKeyboardShortcuts must be used within KeyboardShortcutsProvider')
+    throw new Error(
+      'useKeyboardShortcuts must be used within KeyboardShortcutsProvider'
+    )
   }
   return context
 }
@@ -63,22 +75,36 @@ export function useShortcut(
     return () => {
       unregisterShortcut(options.id)
     }
-  }, [options.id, options.description, options.category, options.enabled, keys, registerShortcut, unregisterShortcut])
+  }, [
+    options.id,
+    options.description,
+    options.category,
+    options.enabled,
+    keys,
+    registerShortcut,
+    unregisterShortcut,
+  ])
 
   // Bind the hotkey
-  useHotkeys(keys, (e) => {
-    if (options.preventDefault !== false) {
-      e.preventDefault()
-    }
-    callback()
-  }, { enabled: options.enabled !== false })
+  useHotkeys(
+    keys,
+    e => {
+      if (options.preventDefault !== false) {
+        e.preventDefault()
+      }
+      callback()
+    },
+    { enabled: options.enabled !== false }
+  )
 }
 
 interface KeyboardShortcutsProviderProps {
   children: ReactNode
 }
 
-export function KeyboardShortcutsProvider({ children }: KeyboardShortcutsProviderProps) {
+export function KeyboardShortcutsProvider({
+  children,
+}: KeyboardShortcutsProviderProps) {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([])
   const [isHelpOpen, setIsHelpOpen] = useState(false)
 
@@ -86,7 +112,9 @@ export function KeyboardShortcutsProvider({ children }: KeyboardShortcutsProvide
     setShortcuts(prev => {
       // Avoid duplicates
       if (prev.some(s => s.id === shortcut.id)) {
-        return prev.map(s => s.id === shortcut.id ? { ...s, ...shortcut, action: () => {} } : s)
+        return prev.map(s =>
+          s.id === shortcut.id ? { ...s, ...shortcut, action: () => {} } : s
+        )
       }
       return [...prev, { ...shortcut, action: () => {} }]
     })
@@ -100,7 +128,7 @@ export function KeyboardShortcutsProvider({ children }: KeyboardShortcutsProvide
   const closeHelp = useCallback(() => setIsHelpOpen(false), [])
 
   // Register global shortcuts
-  useHotkeys('shift+?', (e) => {
+  useHotkeys('shift+?', e => {
     e.preventDefault()
     setIsHelpOpen(prev => !prev)
   })
@@ -117,7 +145,7 @@ export function KeyboardShortcutsProvider({ children }: KeyboardShortcutsProvide
         openHelp,
         closeHelp,
         isHelpOpen,
-        shortcuts
+        shortcuts,
       }}
     >
       {children}

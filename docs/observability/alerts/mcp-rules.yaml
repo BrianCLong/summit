@@ -8,21 +8,21 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'MCP invoke error rate high (>0.5% over 5m)'
+          summary: "MCP invoke error rate high (>0.5% over 5m)"
       - alert: MCPSessionsSpike
         expr: sum(increase(mcp_sessions_total{event="created"}[5m])) > 200
         for: 2m
         labels:
           severity: warning
         annotations:
-          summary: 'MCP sessions creation spike'
+          summary: "MCP sessions creation spike"
       - alert: ReadinessProbeFailing
         expr: probe_success{job="maestro-ready"} == 0
         for: 2m
         labels:
           severity: critical
         annotations:
-          summary: 'Maestro readiness failing'
+          summary: "Maestro readiness failing"
 
       - alert: OPAEvaluationErrors
         expr: sum(rate(http_requests_total{route=~"/api/maestro/.*",status_code=~"5.."}[5m])) > 0.005
@@ -30,11 +30,11 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Server 5xx rate elevated for Maestro API'
+          summary: "Server 5xx rate elevated for Maestro API"
       - alert: RouteP95High
         expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/maestro/.*"}[5m])) by (le, route)) > 1.5
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: 'Route p95 latency > 1.5s'
+          summary: "Route p95 latency > 1.5s"

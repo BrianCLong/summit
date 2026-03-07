@@ -3,10 +3,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 on:
   schedule:
-    - cron: '0 2 * * *' # 2 AM UTC
+    - cron: "0 2 * * *" # 2 AM UTC
   workflow_dispatch:
 
 jobs:
@@ -29,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4 # v4.0.3
         with:
           node-version: "20"
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install
         run: pnpm install --frozen-lockfile

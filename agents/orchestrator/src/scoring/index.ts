@@ -2,4 +2,4 @@
  * Scoring Module Exports
  */
 
-export { HallucinationScorer, HallucinationScorerDeps } from './HallucinationScorer.js';
+export { HallucinationScorer, HallucinationScorerDeps } from "./HallucinationScorer.js";

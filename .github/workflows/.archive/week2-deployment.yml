@@ -2,21 +2,21 @@ name: Week 2 Deployment Pipeline
 on:
   push:
     tags:
-      - 'v*-week2'
-      - 'v0.2.0*'
+      - "v*-week2"
+      - "v0.2.0*"
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: "Deployment environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
           - canary
           - production
       tag:
-        description: 'Tag to deploy'
+        description: "Tag to deploy"
         required: true
         type: string
 
@@ -107,7 +107,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: '3.14.0'
+          version: "3.14.0"
 
       - name: Deploy to Canary
         id: deploy

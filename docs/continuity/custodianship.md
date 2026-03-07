@@ -12,30 +12,30 @@ The Custodianship Council's primary mandate is to ensure the continuity of the s
 
 ### 2.2. Composition
 
-*   The Council shall consist of **three (3) seats**.
-*   Seats are role-based, not person-based:
-    *   **Lead Technical Custodian:** Responsible for the technical enforcement of invariants. Must be a senior engineer with deep system knowledge.
-    *   **Lead Governance Custodian:** Responsible for the procedural and legal integrity of the system. Must have a background in law, ethics, or compliance.
-    *   **Lead Mission Custodian:** Responsible for ensuring the system's operations remain aligned with its stated purpose. Must have a background in the primary mission domain the system serves.
-*   No single person may hold more than one seat.
+- The Council shall consist of **three (3) seats**.
+- Seats are role-based, not person-based:
+  - **Lead Technical Custodian:** Responsible for the technical enforcement of invariants. Must be a senior engineer with deep system knowledge.
+  - **Lead Governance Custodian:** Responsible for the procedural and legal integrity of the system. Must have a background in law, ethics, or compliance.
+  - **Lead Mission Custodian:** Responsible for ensuring the system's operations remain aligned with its stated purpose. Must have a background in the primary mission domain the system serves.
+- No single person may hold more than one seat.
 
 ## 3. Register of Current Custodians
 
-| Seat                        | Current Custodian     | Term Start Date | Primary Responsibility                                       |
-| --------------------------- | --------------------- | --------------- | ------------------------------------------------------------ |
-| **Lead Technical Custodian**  | `[Name Placeholder]`  | `[YYYY-MM-DD]`  | Guarding the `SAFETY_INVARIANTS.md` and their implementation. |
-| **Lead Governance Custodian** | `[Name Placeholder]`  | `[YYYY-MM-DD]`  | Guarding the `purpose-lock.md` and `authority-transition.md`. |
-| **Lead Mission Custodian**    | `[Name Placeholder]`  | `[YYYY-MM-DD]`  | Guarding against `semantic-drift.md` and mission creep.     |
+| Seat                          | Current Custodian    | Term Start Date | Primary Responsibility                                        |
+| ----------------------------- | -------------------- | --------------- | ------------------------------------------------------------- |
+| **Lead Technical Custodian**  | `[Name Placeholder]` | `[YYYY-MM-DD]`  | Guarding the `SAFETY_INVARIANTS.md` and their implementation. |
+| **Lead Governance Custodian** | `[Name Placeholder]` | `[YYYY-MM-DD]`  | Guarding the `purpose-lock.md` and `authority-transition.md`. |
+| **Lead Mission Custodian**    | `[Name Placeholder]` | `[YYYY-MM-DD]`  | Guarding against `semantic-drift.md` and mission creep.       |
 
-*Note: This register is a living document and must be updated within 24 hours of any change in custodianship.*
+_Note: This register is a living document and must be updated within 24 hours of any change in custodianship._
 
 ## 4. Core Powers and Responsibilities
 
-*   **Review Cadence:** The Council must meet once per quarter to review Drift Sentinel reports, system exception logs, and any pending authority transitions.
-*   **Amendment Authority:** The Council holds the sole authority to approve amendments to the Purpose Lock Charter, requiring a unanimous (3/3) vote.
-*   **Veto Power:** Any Council member may issue a temporary veto on any system change or feature deployment that they believe violates a core invariant. The veto forces a mandatory review at the next Council meeting.
-*   **Transition Approval:** All authority transitions, as defined in `authority-transition.md`, require the approval of at least one Custodian.
-*   **M&A Safety Audit:** The Council is responsible for conducting the `merger-safety.md` checklist during any acquisition event.
+- **Review Cadence:** The Council must meet once per quarter to review Drift Sentinel reports, system exception logs, and any pending authority transitions.
+- **Amendment Authority:** The Council holds the sole authority to approve amendments to the Purpose Lock Charter, requiring a unanimous (3/3) vote.
+- **Veto Power:** Any Council member may issue a temporary veto on any system change or feature deployment that they believe violates a core invariant. The veto forces a mandatory review at the next Council meeting.
+- **Transition Approval:** All authority transitions, as defined in `authority-transition.md`, require the approval of at least one Custodian.
+- **M&A Safety Audit:** The Council is responsible for conducting the `merger-safety.md` checklist during any acquisition event.
 
 ## 5. Succession Protocol
 

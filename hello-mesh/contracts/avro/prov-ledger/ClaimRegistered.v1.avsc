@@ -1,10 +1,10 @@
 {
-  "type":"record",
-  "name":"ClaimRegistered",
-  "namespace":"ig.provledger.v1",
-  "fields":[
-    {"name":"claimId","type":"string"},
-    {"name":"evidenceIds","type":{"type":"array","items":"string"}},
-    {"name":"hash","type":"string"}
+  "type": "record",
+  "name": "ClaimRegistered",
+  "namespace": "ig.provledger.v1",
+  "fields": [
+    { "name": "claimId", "type": "string" },
+    { "name": "evidenceIds", "type": { "type": "array", "items": "string" } },
+    { "name": "hash", "type": "string" }
   ]
 }

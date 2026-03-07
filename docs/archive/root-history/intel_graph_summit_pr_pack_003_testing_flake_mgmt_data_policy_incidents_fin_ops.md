@@ -15,11 +15,11 @@ This pack hardens quality signals, reduces flake, formalizes data protection (DP
 ```js
 /** @type {import('jest').Config} */
 module.exports = {
-  testEnvironment: 'node',
-  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/junit' }]],
+  testEnvironment: "node",
+  reporters: ["default", ["jest-junit", { outputDirectory: "reports/junit" }]],
   collectCoverage: true,
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov'],
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "lcov"],
 };
 ```
 
@@ -27,7 +27,7 @@ module.exports = {
 
 ```js
 // Retry known flakey tests once based on tag
-const retry = parseInt(process.env.JEST_RETRY_TIMES || '0', 10);
+const retry = parseInt(process.env.JEST_RETRY_TIMES || "0", 10);
 if (retry > 0 && global.jest) {
   // @ts-ignore
   jest.retryTimes(retry, { logErrorsBeforeRetry: true });
@@ -37,11 +37,11 @@ if (retry > 0 && global.jest) {
 **`playwright.config.ts`**
 
 ```ts
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 export default defineConfig({
   retries: 2,
-  use: { trace: 'on-first-retry', video: 'retain-on-failure' },
-  reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
+  use: { trace: "on-first-retry", video: "retain-on-failure" },
+  reporter: [["html", { outputFolder: "reports/playwright" }], ["list"]],
 });
 ```
 
@@ -52,7 +52,7 @@ jobs:
   core:
     steps:
       - run: npm test -- --ci
-        env: { JEST_RETRY_TIMES: '1' }
+        env: { JEST_RETRY_TIMES: "1" }
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -63,14 +63,14 @@ jobs:
 
 ```js
 // Parse JUnit to compute flake index (failures that pass on retry)
-const fs = require('fs');
-const glob = require('glob');
-const { XMLParser } = require('fast-xml-parser');
+const fs = require("fs");
+const glob = require("glob");
+const { XMLParser } = require("fast-xml-parser");
 const parser = new XMLParser();
 let total = 0,
   flaky = 0;
-for (const f of glob.sync('reports/junit/**/*.xml')) {
-  const xml = parser.parse(fs.readFileSync(f, 'utf8'));
+for (const f of glob.sync("reports/junit/**/*.xml")) {
+  const xml = parser.parse(fs.readFileSync(f, "utf8"));
   const suites = Array.isArray(xml.testsuites?.testsuite)
     ? xml.testsuites.testsuite
     : [xml.testsuites?.testsuite].filter(Boolean);
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm ci && npm run test:ci || true
       - run: node scripts/flake-index.js
-        env: { FLAKE_BUDGET: '0.02' }
+        env: { FLAKE_BUDGET: "0.02" }
 ```
 
 **Rollback:** Remove flake budget job or set `FLAKE_BUDGET` high.
@@ -123,10 +123,8 @@ jobs:
 **`scripts/coverage-check.js`**
 
 ```js
-const fs = require('fs');
-const summary = JSON.parse(
-  fs.readFileSync('coverage/coverage-summary.json', 'utf8'),
-);
+const fs = require("fs");
+const summary = JSON.parse(fs.readFileSync("coverage/coverage-summary.json", "utf8"));
 const floor = Number(process.env.COVERAGE_FLOOR || 0.8);
 const pct = summary.total.statements.pct / 100;
 console.log(`coverage=${pct}`);
@@ -147,10 +145,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: "20", cache: "npm" }
       - run: npm ci && npm run test:ci
       - run: node scripts/coverage-check.js
-        env: { COVERAGE_FLOOR: '0.80' }
+        env: { COVERAGE_FLOOR: "0.80" }
 ```
 
 **Rollback:** Lower floor or remove required check.
@@ -168,7 +166,7 @@ jobs:
 **`.spectral.yaml`**
 
 ```yaml
-extends: ['spectral:oas', 'spectral:asyncapi']
+extends: ["spectral:oas", "spectral:asyncapi"]
 rules:
   oas3-api-servers: warn
   operation-operationId: error
@@ -192,16 +190,16 @@ jobs:
 **`tests/contract/responds-to-schema.test.ts`**
 
 ```ts
-import Ajv from 'ajv';
-import { load } from 'js-yaml';
-import fs from 'fs';
-import fetch from 'node-fetch';
+import Ajv from "ajv";
+import { load } from "js-yaml";
+import fs from "fs";
+import fetch from "node-fetch";
 
 const ajv = new Ajv({ allErrors: true, strict: false });
-const oas = load(fs.readFileSync('api/openapi.yaml', 'utf8')) as any;
+const oas = load(fs.readFileSync("api/openapi.yaml", "utf8")) as any;
 
-it('GET /health matches schema', async () => {
-  const res = await fetch(process.env.BASE_URL + '/health');
+it("GET /health matches schema", async () => {
+  const res = await fetch(process.env.BASE_URL + "/health");
   const body = await res.json();
   const schema = oas.components.schemas.Health;
   const validate = ajv.compile(schema);
@@ -254,7 +252,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: chaos-pod-killer, namespace: stage }
 spec:
-  schedule: '0 2 * * 3' # weekly Wed 02:00
+  schedule: "0 2 * * 3" # weekly Wed 02:00
   jobTemplate:
     spec:
       template:
@@ -264,7 +262,7 @@ spec:
           containers:
             - name: killer
               image: bitnami/kubectl:latest
-              command: ['/bin/sh', '-c']
+              command: ["/bin/sh", "-c"]
               args:
                 - |
                   POD=$(kubectl -n stage get pods -l app.kubernetes.io/name=web -o jsonpath='{.items[0].metadata.name}');
@@ -282,9 +280,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata: { name: chaos, namespace: stage }
 rules:
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list', 'delete']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -334,10 +332,10 @@ labels: [incident]
 body:
   - type: input
     id: impact
-    attributes: { label: Impact, placeholder: 'users affected, scope' }
+    attributes: { label: Impact, placeholder: "users affected, scope" }
   - type: textarea
     id: timeline
-    attributes: { label: Timeline, placeholder: 'UTC timestamps' }
+    attributes: { label: Timeline, placeholder: "UTC timestamps" }
   - type: textarea
     id: actions
     attributes: { label: Mitigation actions }
@@ -389,7 +387,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: retention-purge, namespace: prod }
 spec:
-  schedule: '0 1 * * *'
+  schedule: "0 1 * * *"
   jobTemplate:
     spec:
       template:
@@ -399,7 +397,7 @@ spec:
             - name: purge
               image: ghcr.io/<org>/<repo>/dbtools:latest
               envFrom: [{ secretRef: { name: db-credentials } }]
-              command: ['/bin/sh', '-c']
+              command: ["/bin/sh", "-c"]
               args:
                 - |
                   psql "$DB_DSN" -c "\
@@ -436,16 +434,14 @@ spec:
 **`scripts/dpia-guard.js`**
 
 ```js
-const fs = require('fs');
-const base = process.env.GITHUB_BASE_REF || 'main';
-const diff = require('child_process')
-  .execSync(`git diff --name-only origin/${base}`)
-  .toString();
+const fs = require("fs");
+const base = process.env.GITHUB_BASE_REF || "main";
+const diff = require("child_process").execSync(`git diff --name-only origin/${base}`).toString();
 const touchesData = diff
-  .split('\n')
+  .split("\n")
   .some((p) => /schema|model|db\/migrations|api\/openapi\.yaml/.test(p));
-if (touchesData && !fs.existsSync('SECURITY/DPIA.md')) {
-  console.error('DPIA required: add/updated SECURITY/DPIA.md');
+if (touchesData && !fs.existsSync("SECURITY/DPIA.md")) {
+  console.error("DPIA required: add/updated SECURITY/DPIA.md");
   process.exit(1);
 }
 ```
@@ -499,12 +495,12 @@ allow {
 **`server/middleware/stepup.ts`**
 
 ```ts
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from "express";
 export function requireStepUp(level = 2) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const mfa = Number(req.headers['x-mfa-level'] || 0);
+    const mfa = Number(req.headers["x-mfa-level"] || 0);
     if (mfa >= level) return next();
-    res.status(401).json({ error: 'step_up_required', level });
+    res.status(401).json({ error: "step_up_required", level });
   };
 }
 ```
@@ -533,7 +529,7 @@ aggregation:
 ```yaml
 name: finops-weekly
 on:
-  schedule: [{ cron: '0 12 * * 1' }]
+  schedule: [{ cron: "0 12 * * 1" }]
 jobs:
   report:
     runs-on: ubuntu-latest
@@ -608,7 +604,7 @@ groups:
 ```yaml
 name: arborist
 on:
-  schedule: [{ cron: '0 5 * * 6' }]
+  schedule: [{ cron: "0 5 * * 6" }]
 jobs:
   prune:
     runs-on: ubuntu-latest

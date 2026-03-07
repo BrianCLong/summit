@@ -1,4 +1,9 @@
-export type LineageLinkType = 'source' | 'transform' | 'claim' | 'case' | 'report'
+export type LineageLinkType =
+  | 'source'
+  | 'transform'
+  | 'claim'
+  | 'case'
+  | 'report'
 
 export interface LineageLink {
   id: string

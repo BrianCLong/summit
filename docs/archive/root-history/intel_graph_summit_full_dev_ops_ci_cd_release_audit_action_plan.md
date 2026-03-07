@@ -102,7 +102,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: "20", cache: "npm" }
       - run: npm ci
       - run: npm run lint && npm run typecheck
       - run: npm test -- --ci --runInBand
@@ -139,7 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with: { languages: 'javascript-typescript' }
+        with: { languages: "javascript-typescript" }
       - uses: github/codeql-action/analyze@v3
   containers:
     runs-on: ubuntu-latest
@@ -151,13 +151,13 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: app:${{ github.sha }}
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
       - name: SBOM (CycloneDX)
         uses: CycloneDX/gh-gomod-generate-sbom@v2 # swap for JS action in your stack
       - name: Sign (cosign keyless)
-        env: { COSIGN_EXPERIMENTAL: 'true' }
+        env: { COSIGN_EXPERIMENTAL: "true" }
         run: cosign sign --yes app:${{ github.sha }}
 ```
 

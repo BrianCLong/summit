@@ -3,9 +3,9 @@ const mockPage = {
   waitForSelector: jest.fn(() => Promise.resolve()),
   click: jest.fn(() => Promise.resolve()),
   type: jest.fn(() => Promise.resolve()),
-  screenshot: jest.fn(() => Promise.resolve(Buffer.from(''))),
+  screenshot: jest.fn(() => Promise.resolve(Buffer.from(""))),
   evaluate: jest.fn(() => Promise.resolve()),
-  content: jest.fn(() => Promise.resolve('<html></html>')),
+  content: jest.fn(() => Promise.resolve("<html></html>")),
   close: jest.fn(() => Promise.resolve()),
   on: jest.fn(),
   off: jest.fn(),
@@ -29,7 +29,7 @@ const mockBrowser = {
 const puppeteer = {
   launch: jest.fn(() => Promise.resolve(mockBrowser)),
   connect: jest.fn(() => Promise.resolve(mockBrowser)),
-  executablePath: jest.fn(() => '/usr/bin/chromium'),
+  executablePath: jest.fn(() => "/usr/bin/chromium"),
   defaultArgs: jest.fn(() => []),
 };
 

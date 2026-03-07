@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -14,20 +14,19 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const defaultSchemaContext = {
-  nodeLabels: ['Person', 'Organization', 'Document'],
-  relationshipTypes: ['ASSOCIATED_WITH', 'CONNECTED_TO'],
-  tenantId: 'demo-tenant',
-  userId: 'demo-user',
+  nodeLabels: ["Person", "Organization", "Document"],
+  relationshipTypes: ["ASSOCIATED_WITH", "CONNECTED_TO"],
+  tenantId: "demo-tenant",
+  userId: "demo-user",
 };
 
 function recordTelemetry(eventName, payload) {
-  const telemetry =
-    (window).__telemetry || ((window).__telemetry = { nlGraphExplanation: [] });
+  const telemetry = window.__telemetry || (window.__telemetry = { nlGraphExplanation: [] });
   telemetry.nlGraphExplanation.push({
     event: eventName,
     ts: Date.now(),
@@ -36,7 +35,7 @@ function recordTelemetry(eventName, payload) {
 }
 
 export default function NlGraphQueryExplainer() {
-  const [prompt, setPrompt] = useState('Show me suspicious payments');
+  const [prompt, setPrompt] = useState("Show me suspicious payments");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -45,7 +44,7 @@ export default function NlGraphQueryExplainer() {
   const confidenceChip = useMemo(() => {
     if (!result?.explanationDetails) return null;
     const pct = Math.round(result.explanationDetails.confidence * 100);
-    const color = pct > 80 ? 'success' : pct > 60 ? 'warning' : 'default';
+    const color = pct > 80 ? "success" : pct > 60 ? "warning" : "default";
     return (
       <Chip
         label={`Confidence ${pct}%`}
@@ -61,9 +60,9 @@ export default function NlGraphQueryExplainer() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/ai/nl-graph-query/compile', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+      const response = await fetch("/ai/nl-graph-query/compile", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           prompt,
           schemaContext: defaultSchemaContext,
@@ -72,10 +71,10 @@ export default function NlGraphQueryExplainer() {
       });
       const json = await response.json();
       if (!response.ok || json.code) {
-        throw new Error(json.message || 'Unable to compile prompt');
+        throw new Error(json.message || "Unable to compile prompt");
       }
       setResult(json);
-      recordTelemetry('explanation_generated', {
+      recordTelemetry("explanation_generated", {
         confidence: json.explanationDetails?.confidence,
       });
     } catch (err) {
@@ -87,7 +86,7 @@ export default function NlGraphQueryExplainer() {
 
   const toggle = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
-    recordTelemetry('explanation_toggled', {
+    recordTelemetry("explanation_toggled", {
       section: key,
       expanded: !expanded[key],
       confidence: result?.explanationDetails?.confidence,
@@ -133,18 +132,18 @@ export default function NlGraphQueryExplainer() {
             <Box
               component="pre"
               sx={{
-                backgroundColor: '#0f172a',
-                color: '#e2e8f0',
+                backgroundColor: "#0f172a",
+                color: "#e2e8f0",
                 p: 1.5,
                 borderRadius: 1,
                 fontSize: 12,
-                whiteSpace: 'pre-wrap',
+                whiteSpace: "pre-wrap",
               }}
             >
               {result.cypher}
             </Box>
             <Divider sx={{ my: 1.5 }} />
-            <Accordion expanded={expanded.rationale} onChange={() => toggle('rationale')}>
+            <Accordion expanded={expanded.rationale} onChange={() => toggle("rationale")}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="subtitle2">Model Rationale</Typography>
               </AccordionSummary>
@@ -164,7 +163,7 @@ export default function NlGraphQueryExplainer() {
                 )}
               </AccordionDetails>
             </Accordion>
-            <Accordion expanded={expanded.evidence} onChange={() => toggle('evidence')}>
+            <Accordion expanded={expanded.evidence} onChange={() => toggle("evidence")}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="subtitle2">Evidence with sources</Typography>
               </AccordionSummary>
@@ -176,7 +175,7 @@ export default function NlGraphQueryExplainer() {
                       mb={1}
                       p={1}
                       borderRadius={1}
-                      sx={{ backgroundColor: '#f8fafc' }}
+                      sx={{ backgroundColor: "#f8fafc" }}
                       data-testid="evidence-item"
                     >
                       <Box display="flex" gap={1} alignItems="center" mb={0.5}>
@@ -185,7 +184,7 @@ export default function NlGraphQueryExplainer() {
                           <InfoOutlinedIcon fontSize="small" color="action" />
                         </Tooltip>
                       </Box>
-                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                      <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
                         {item.snippet}
                       </Typography>
                     </Box>

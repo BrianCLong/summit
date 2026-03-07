@@ -10,7 +10,7 @@ Instead of engaging in deceptive practices, the platform is designed to neutrali
 
 ## Narrative Framing
 
-> *Transparency is the strongest counter-intelligence tool.*
+> _Transparency is the strongest counter-intelligence tool._
 
 By making the analytical and decision-making process as transparent as possible, Summit creates an environment where manipulation struggles to survive. Deception thrives in ambiguity and opacity; this framework is designed to eliminate both.
 

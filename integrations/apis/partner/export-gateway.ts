@@ -1,6 +1,6 @@
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
+import { EventEmitter } from "events";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 export interface PartnerConfig {
   partnerId: string;
@@ -15,7 +15,7 @@ export interface PartnerConfig {
   exportFormats: ExportFormat[];
   allowedDataTypes: DataType[];
   encryptionRequired: boolean;
-  auditLevel: 'minimal' | 'standard' | 'comprehensive';
+  auditLevel: "minimal" | "standard" | "comprehensive";
 }
 
 export interface ExportFormat {
@@ -23,8 +23,8 @@ export interface ExportFormat {
   name: string;
   mimeType: string;
   extension: string;
-  compression?: 'gzip' | 'zip' | 'bzip2';
-  encryption?: 'aes256' | 'rsa4096' | 'pgp';
+  compression?: "gzip" | "zip" | "bzip2";
+  encryption?: "aes256" | "rsa4096" | "pgp";
   schema?: string;
   validationRules?: ValidationRule[];
 }
@@ -32,14 +32,8 @@ export interface ExportFormat {
 export interface DataType {
   id: string;
   name: string;
-  category:
-    | 'entities'
-    | 'relationships'
-    | 'events'
-    | 'analytics'
-    | 'intelligence'
-    | 'metadata';
-  classification: 'public' | 'internal' | 'confidential' | 'restricted';
+  category: "entities" | "relationships" | "events" | "analytics" | "intelligence" | "metadata";
+  classification: "public" | "internal" | "confidential" | "restricted";
   retentionPeriod: number;
   anonymizationRequired: boolean;
   exportLimits: {
@@ -51,7 +45,7 @@ export interface DataType {
 
 export interface ValidationRule {
   field: string;
-  type: 'required' | 'format' | 'range' | 'enum' | 'custom';
+  type: "required" | "format" | "range" | "enum" | "custom";
   constraint: any;
   errorMessage: string;
 }
@@ -73,18 +67,11 @@ export interface ExportRequest {
     publicKey?: string;
   };
   compression?: string;
-  priority: 'low' | 'normal' | 'high' | 'urgent';
+  priority: "low" | "normal" | "high" | "urgent";
   purpose: string;
   classification: string;
   approvalRequired: boolean;
-  status:
-    | 'pending'
-    | 'approved'
-    | 'rejected'
-    | 'processing'
-    | 'completed'
-    | 'failed'
-    | 'expired';
+  status: "pending" | "approved" | "rejected" | "processing" | "completed" | "failed" | "expired";
   createdAt: Date;
   approvedAt?: Date;
   completedAt?: Date;
@@ -95,25 +82,25 @@ export interface ExportRequest {
 export interface ExportFilter {
   field: string;
   operator:
-    | 'eq'
-    | 'ne'
-    | 'gt'
-    | 'gte'
-    | 'lt'
-    | 'lte'
-    | 'in'
-    | 'nin'
-    | 'contains'
-    | 'startswith'
-    | 'endswith';
+    | "eq"
+    | "ne"
+    | "gt"
+    | "gte"
+    | "lt"
+    | "lte"
+    | "in"
+    | "nin"
+    | "contains"
+    | "startswith"
+    | "endswith";
   value: any;
-  logical?: 'and' | 'or';
+  logical?: "and" | "or";
 }
 
 export interface ExportJob {
   id: string;
   requestId: string;
-  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "queued" | "running" | "completed" | "failed" | "cancelled";
   progress: number;
   startTime: Date;
   endTime?: Date;
@@ -159,7 +146,7 @@ export interface ApprovalWorkflow {
   requestId: string;
   steps: ApprovalStep[];
   currentStep: number;
-  status: 'pending' | 'approved' | 'rejected' | 'escalated';
+  status: "pending" | "approved" | "rejected" | "escalated";
   timeoutMinutes: number;
   autoApprovalRules?: AutoApprovalRule[];
 }
@@ -170,7 +157,7 @@ export interface ApprovalStep {
   approver: string;
   role: string;
   required: boolean;
-  status: 'pending' | 'approved' | 'rejected' | 'skipped' | 'timeout';
+  status: "pending" | "approved" | "rejected" | "skipped" | "timeout";
   submittedAt?: Date;
   respondedAt?: Date;
   comments?: string;
@@ -181,7 +168,7 @@ export interface AutoApprovalRule {
   id: string;
   name: string;
   conditions: RuleCondition[];
-  action: 'approve' | 'reject' | 'escalate';
+  action: "approve" | "reject" | "escalate";
   priority: number;
 }
 
@@ -189,12 +176,12 @@ export interface RuleCondition {
   field: string;
   operator: string;
   value: any;
-  logical?: 'and' | 'or';
+  logical?: "and" | "or";
 }
 
 export interface DeliveryChannel {
   id: string;
-  type: 'sftp' | 'api' | 'email' | 's3' | 'azure' | 'gcp' | 'webhook';
+  type: "sftp" | "api" | "email" | "s3" | "azure" | "gcp" | "webhook";
   name: string;
   configuration: Record<string, any>;
   credentials: Record<string, any>;
@@ -257,58 +244,55 @@ export class ExportGateway extends EventEmitter {
   async registerPartner(config: PartnerConfig): Promise<void> {
     this.partners.set(config.partnerId, config);
 
-    this.emit('partner_registered', {
+    this.emit("partner_registered", {
       partnerId: config.partnerId,
       baseUrl: config.baseUrl,
       timestamp: new Date(),
     });
   }
 
-  async authenticatePartner(
-    partnerId: string,
-    token: string,
-  ): Promise<boolean> {
+  async authenticatePartner(partnerId: string, token: string): Promise<boolean> {
     try {
       const partner = this.partners.get(partnerId);
       if (!partner) {
-        throw new Error('Partner not found');
+        throw new Error("Partner not found");
       }
 
       const decoded = jwt.verify(token, partner.secretKey) as any;
 
       if (decoded.partnerId !== partnerId) {
-        throw new Error('Invalid partner ID in token');
+        throw new Error("Invalid partner ID in token");
       }
 
       this.logAuditEvent({
-        type: 'authentication',
+        type: "authentication",
         partnerId,
-        userId: decoded.userId || 'system',
-        action: 'authenticate',
-        resource: 'partner_api',
+        userId: decoded.userId || "system",
+        action: "authenticate",
+        resource: "partner_api",
         details: { success: true },
-        clientIp: '0.0.0.0',
-        userAgent: 'partner-api',
+        clientIp: "0.0.0.0",
+        userAgent: "partner-api",
         timestamp: new Date(),
-        classification: 'internal',
+        classification: "internal",
       });
 
       return true;
     } catch (error) {
       this.logAuditEvent({
-        type: 'authentication',
+        type: "authentication",
         partnerId,
-        userId: 'unknown',
-        action: 'authenticate',
-        resource: 'partner_api',
+        userId: "unknown",
+        action: "authenticate",
+        resource: "partner_api",
         details: {
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         },
-        clientIp: '0.0.0.0',
-        userAgent: 'partner-api',
+        clientIp: "0.0.0.0",
+        userAgent: "partner-api",
         timestamp: new Date(),
-        classification: 'internal',
+        classification: "internal",
       });
 
       return false;
@@ -365,31 +349,27 @@ export class ExportGateway extends EventEmitter {
     options?: {
       encryption?: { algorithm: string; keyId: string; publicKey?: string };
       compression?: string;
-      priority?: 'low' | 'normal' | 'high' | 'urgent';
+      priority?: "low" | "normal" | "high" | "urgent";
       purpose?: string;
-    },
+    }
   ): Promise<ExportRequest> {
     const partner = this.partners.get(partnerId);
     if (!partner) {
-      throw new Error('Partner not found');
+      throw new Error("Partner not found");
     }
 
     if (!(await this.checkRateLimit(partnerId))) {
-      throw new Error('Rate limit exceeded');
+      throw new Error("Rate limit exceeded");
     }
 
-    const allowedDataType = partner.allowedDataTypes.find(
-      (dt) => dt.id === dataType,
-    );
+    const allowedDataType = partner.allowedDataTypes.find((dt) => dt.id === dataType);
     if (!allowedDataType) {
-      throw new Error('Data type not allowed for this partner');
+      throw new Error("Data type not allowed for this partner");
     }
 
-    const supportedFormat = partner.exportFormats.find(
-      (ef) => ef.id === format,
-    );
+    const supportedFormat = partner.exportFormats.find((ef) => ef.id === format);
     if (!supportedFormat) {
-      throw new Error('Export format not supported for this partner');
+      throw new Error("Export format not supported for this partner");
     }
 
     const request: ExportRequest = {
@@ -402,11 +382,11 @@ export class ExportGateway extends EventEmitter {
       dateRange,
       encryption: options?.encryption,
       compression: options?.compression,
-      priority: options?.priority || 'normal',
-      purpose: options?.purpose || 'Data export',
+      priority: options?.priority || "normal",
+      purpose: options?.purpose || "Data export",
       classification: allowedDataType.classification,
       approvalRequired: this.requiresApproval(allowedDataType, dateRange),
-      status: 'pending',
+      status: "pending",
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       metadata: {},
@@ -415,12 +395,12 @@ export class ExportGateway extends EventEmitter {
     this.requests.set(request.id, request);
 
     this.logAuditEvent({
-      type: 'export_request',
+      type: "export_request",
       partnerId,
       userId: requestedBy,
       requestId: request.id,
-      action: 'submit',
-      resource: 'export_request',
+      action: "submit",
+      resource: "export_request",
       details: {
         dataType,
         format,
@@ -428,8 +408,8 @@ export class ExportGateway extends EventEmitter {
         dateRange,
         classification: request.classification,
       },
-      clientIp: '0.0.0.0',
-      userAgent: 'partner-api',
+      clientIp: "0.0.0.0",
+      userAgent: "partner-api",
       timestamp: new Date(),
       classification: request.classification,
     });
@@ -440,7 +420,7 @@ export class ExportGateway extends EventEmitter {
       await this.autoApprove(request);
     }
 
-    this.emit('export_request_submitted', {
+    this.emit("export_request_submitted", {
       requestId: request.id,
       partnerId,
       dataType,
@@ -451,37 +431,31 @@ export class ExportGateway extends EventEmitter {
     return request;
   }
 
-  private requiresApproval(
-    dataType: DataType,
-    dateRange: { start: Date; end: Date },
-  ): boolean {
+  private requiresApproval(dataType: DataType, dateRange: { start: Date; end: Date }): boolean {
     const daysDiff = Math.ceil(
-      (dateRange.end.getTime() - dateRange.start.getTime()) /
-        (1000 * 60 * 60 * 24),
+      (dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)
     );
 
     return (
-      dataType.classification === 'confidential' ||
-      dataType.classification === 'restricted' ||
+      dataType.classification === "confidential" ||
+      dataType.classification === "restricted" ||
       daysDiff > 90
     );
   }
 
-  private async initiateApprovalWorkflow(
-    request: ExportRequest,
-  ): Promise<void> {
+  private async initiateApprovalWorkflow(request: ExportRequest): Promise<void> {
     const workflow: ApprovalWorkflow = {
       id: crypto.randomUUID(),
       requestId: request.id,
       steps: this.getApprovalSteps(request),
       currentStep: 0,
-      status: 'pending',
+      status: "pending",
       timeoutMinutes: 24 * 60, // 24 hours
     };
 
     this.workflows.set(workflow.id, workflow);
 
-    this.emit('approval_workflow_started', {
+    this.emit("approval_workflow_started", {
       workflowId: workflow.id,
       requestId: request.id,
       stepCount: workflow.steps.length,
@@ -492,39 +466,36 @@ export class ExportGateway extends EventEmitter {
   private getApprovalSteps(request: ExportRequest): ApprovalStep[] {
     const steps: ApprovalStep[] = [];
 
-    if (
-      request.classification === 'confidential' ||
-      request.classification === 'restricted'
-    ) {
+    if (request.classification === "confidential" || request.classification === "restricted") {
       steps.push({
         id: crypto.randomUUID(),
-        name: 'Security Review',
-        approver: 'security-team@intelgraph.com',
-        role: 'Security Officer',
+        name: "Security Review",
+        approver: "security-team@intelgraph.com",
+        role: "Security Officer",
         required: true,
-        status: 'pending',
+        status: "pending",
         timeoutMinutes: 4 * 60, // 4 hours
       });
     }
 
     steps.push({
       id: crypto.randomUUID(),
-      name: 'Data Owner Approval',
-      approver: 'data-owner@intelgraph.com',
-      role: 'Data Owner',
+      name: "Data Owner Approval",
+      approver: "data-owner@intelgraph.com",
+      role: "Data Owner",
       required: true,
-      status: 'pending',
+      status: "pending",
       timeoutMinutes: 24 * 60, // 24 hours
     });
 
-    if (request.priority === 'urgent') {
+    if (request.priority === "urgent") {
       steps.push({
         id: crypto.randomUUID(),
-        name: 'Executive Approval',
-        approver: 'exec-team@intelgraph.com',
-        role: 'Executive',
+        name: "Executive Approval",
+        approver: "exec-team@intelgraph.com",
+        role: "Executive",
         required: true,
-        status: 'pending',
+        status: "pending",
         timeoutMinutes: 2 * 60, // 2 hours
       });
     }
@@ -533,19 +504,19 @@ export class ExportGateway extends EventEmitter {
   }
 
   private async autoApprove(request: ExportRequest): Promise<void> {
-    request.status = 'approved';
+    request.status = "approved";
     request.approvedAt = new Date();
 
     this.logAuditEvent({
-      type: 'export_approval',
+      type: "export_approval",
       partnerId: request.partnerId,
-      userId: 'system',
+      userId: "system",
       requestId: request.id,
-      action: 'auto_approve',
-      resource: 'export_request',
-      details: { reason: 'Low risk data type and date range' },
-      clientIp: '0.0.0.0',
-      userAgent: 'system',
+      action: "auto_approve",
+      resource: "export_request",
+      details: { reason: "Low risk data type and date range" },
+      clientIp: "0.0.0.0",
+      userAgent: "system",
       timestamp: new Date(),
       classification: request.classification,
     });
@@ -557,61 +528,57 @@ export class ExportGateway extends EventEmitter {
     requestId: string,
     stepId: string,
     approverId: string,
-    comments?: string,
+    comments?: string
   ): Promise<void> {
     const request = this.requests.get(requestId);
     if (!request) {
-      throw new Error('Request not found');
+      throw new Error("Request not found");
     }
 
-    const workflow = Array.from(this.workflows.values()).find(
-      (w) => w.requestId === requestId,
-    );
+    const workflow = Array.from(this.workflows.values()).find((w) => w.requestId === requestId);
     if (!workflow) {
-      throw new Error('Approval workflow not found');
+      throw new Error("Approval workflow not found");
     }
 
     const step = workflow.steps.find((s) => s.id === stepId);
     if (!step) {
-      throw new Error('Approval step not found');
+      throw new Error("Approval step not found");
     }
 
-    step.status = 'approved';
+    step.status = "approved";
     step.respondedAt = new Date();
     step.comments = comments;
 
     this.logAuditEvent({
-      type: 'export_approval',
+      type: "export_approval",
       partnerId: request.partnerId,
       userId: approverId,
       requestId,
-      action: 'approve_step',
-      resource: 'approval_step',
+      action: "approve_step",
+      resource: "approval_step",
       details: {
         stepId,
         stepName: step.name,
         comments,
       },
-      clientIp: '0.0.0.0',
-      userAgent: 'approval-system',
+      clientIp: "0.0.0.0",
+      userAgent: "approval-system",
       timestamp: new Date(),
       classification: request.classification,
     });
 
     // Check if all required steps are approved
     const requiredSteps = workflow.steps.filter((s) => s.required);
-    const approvedRequiredSteps = requiredSteps.filter(
-      (s) => s.status === 'approved',
-    );
+    const approvedRequiredSteps = requiredSteps.filter((s) => s.status === "approved");
 
     if (approvedRequiredSteps.length === requiredSteps.length) {
-      workflow.status = 'approved';
-      request.status = 'approved';
+      workflow.status = "approved";
+      request.status = "approved";
       request.approvedAt = new Date();
 
       await this.startExportJob(request);
 
-      this.emit('export_request_approved', {
+      this.emit("export_request_approved", {
         requestId,
         workflowId: workflow.id,
         timestamp: new Date(),
@@ -626,51 +593,49 @@ export class ExportGateway extends EventEmitter {
     requestId: string,
     stepId: string,
     approverId: string,
-    reason: string,
+    reason: string
   ): Promise<void> {
     const request = this.requests.get(requestId);
     if (!request) {
-      throw new Error('Request not found');
+      throw new Error("Request not found");
     }
 
-    const workflow = Array.from(this.workflows.values()).find(
-      (w) => w.requestId === requestId,
-    );
+    const workflow = Array.from(this.workflows.values()).find((w) => w.requestId === requestId);
     if (!workflow) {
-      throw new Error('Approval workflow not found');
+      throw new Error("Approval workflow not found");
     }
 
     const step = workflow.steps.find((s) => s.id === stepId);
     if (!step) {
-      throw new Error('Approval step not found');
+      throw new Error("Approval step not found");
     }
 
-    step.status = 'rejected';
+    step.status = "rejected";
     step.respondedAt = new Date();
     step.comments = reason;
 
-    workflow.status = 'rejected';
-    request.status = 'rejected';
+    workflow.status = "rejected";
+    request.status = "rejected";
 
     this.logAuditEvent({
-      type: 'export_approval',
+      type: "export_approval",
       partnerId: request.partnerId,
       userId: approverId,
       requestId,
-      action: 'reject',
-      resource: 'export_request',
+      action: "reject",
+      resource: "export_request",
       details: {
         stepId,
         stepName: step.name,
         reason,
       },
-      clientIp: '0.0.0.0',
-      userAgent: 'approval-system',
+      clientIp: "0.0.0.0",
+      userAgent: "approval-system",
       timestamp: new Date(),
       classification: request.classification,
     });
 
-    this.emit('export_request_rejected', {
+    this.emit("export_request_rejected", {
       requestId,
       workflowId: workflow.id,
       reason,
@@ -682,7 +647,7 @@ export class ExportGateway extends EventEmitter {
     const job: ExportJob = {
       id: crypto.randomUUID(),
       requestId: request.id,
-      status: 'queued',
+      status: "queued",
       progress: 0,
       startTime: new Date(),
       recordsProcessed: 0,
@@ -699,24 +664,24 @@ export class ExportGateway extends EventEmitter {
     };
 
     this.jobs.set(job.id, job);
-    request.status = 'processing';
+    request.status = "processing";
 
     this.logAuditEvent({
-      type: 'export_job',
+      type: "export_job",
       partnerId: request.partnerId,
       userId: request.requestedBy,
       requestId: request.id,
       jobId: job.id,
-      action: 'start',
-      resource: 'export_job',
+      action: "start",
+      resource: "export_job",
       details: {},
-      clientIp: '0.0.0.0',
-      userAgent: 'export-system',
+      clientIp: "0.0.0.0",
+      userAgent: "export-system",
       timestamp: new Date(),
       classification: request.classification,
     });
 
-    this.emit('export_job_started', {
+    this.emit("export_job_started", {
       jobId: job.id,
       requestId: request.id,
       timestamp: new Date(),
@@ -726,12 +691,9 @@ export class ExportGateway extends EventEmitter {
     this.processExportJob(job, request);
   }
 
-  private async processExportJob(
-    job: ExportJob,
-    request: ExportRequest,
-  ): Promise<void> {
+  private async processExportJob(job: ExportJob, request: ExportRequest): Promise<void> {
     try {
-      job.status = 'running';
+      job.status = "running";
 
       // Simulate data extraction
       await this.simulateDelay(2000);
@@ -764,7 +726,7 @@ export class ExportGateway extends EventEmitter {
         path: `/exports/${request.partnerId}/${request.id}/`,
         size: 1024 * 1024, // 1MB
         checksum: crypto.randomUUID(),
-        mimeType: 'application/json',
+        mimeType: "application/json",
         downloadUrl: `https://api.intelgraph.com/exports/${request.partnerId}/${request.id}/download`,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
         downloadCount: 0,
@@ -796,31 +758,31 @@ export class ExportGateway extends EventEmitter {
       job.metrics.uploadTime = 1000;
       job.progress = 100;
 
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
-      request.status = 'completed';
+      request.status = "completed";
       request.completedAt = new Date();
 
       this.logAuditEvent({
-        type: 'export_job',
+        type: "export_job",
         partnerId: request.partnerId,
         userId: request.requestedBy,
         requestId: request.id,
         jobId: job.id,
-        action: 'complete',
-        resource: 'export_job',
+        action: "complete",
+        resource: "export_job",
         details: {
           recordsProcessed: job.recordsProcessed,
           fileSize: job.fileSize,
           processingTime: job.endTime.getTime() - job.startTime.getTime(),
         },
-        clientIp: '0.0.0.0',
-        userAgent: 'export-system',
+        clientIp: "0.0.0.0",
+        userAgent: "export-system",
         timestamp: new Date(),
         classification: request.classification,
       });
 
-      this.emit('export_job_completed', {
+      this.emit("export_job_completed", {
         jobId: job.id,
         requestId: request.id,
         recordsProcessed: job.recordsProcessed,
@@ -832,29 +794,29 @@ export class ExportGateway extends EventEmitter {
       // Notify partner via webhook or delivery channel
       await this.notifyPartner(request, job);
     } catch (error) {
-      job.status = 'failed';
-      job.error = error instanceof Error ? error.message : 'Unknown error';
+      job.status = "failed";
+      job.error = error instanceof Error ? error.message : "Unknown error";
       job.endTime = new Date();
-      request.status = 'failed';
+      request.status = "failed";
 
       this.logAuditEvent({
-        type: 'export_job',
+        type: "export_job",
         partnerId: request.partnerId,
         userId: request.requestedBy,
         requestId: request.id,
         jobId: job.id,
-        action: 'fail',
-        resource: 'export_job',
+        action: "fail",
+        resource: "export_job",
         details: {
           error: job.error,
         },
-        clientIp: '0.0.0.0',
-        userAgent: 'export-system',
+        clientIp: "0.0.0.0",
+        userAgent: "export-system",
         timestamp: new Date(),
         classification: request.classification,
       });
 
-      this.emit('export_job_failed', {
+      this.emit("export_job_failed", {
         jobId: job.id,
         requestId: request.id,
         error: job.error,
@@ -867,10 +829,7 @@ export class ExportGateway extends EventEmitter {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private async notifyPartner(
-    request: ExportRequest,
-    job: ExportJob,
-  ): Promise<void> {
+  private async notifyPartner(request: ExportRequest, job: ExportJob): Promise<void> {
     const partner = this.partners.get(request.partnerId);
     if (!partner || !partner.baseUrl) {
       return;
@@ -886,30 +845,27 @@ export class ExportGateway extends EventEmitter {
         timestamp: new Date(),
       };
 
-      const response = await fetch(
-        `${partner.baseUrl}/webhook/export-notification`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.generatePartnerToken(partner.partnerId)}`,
-          },
-          body: JSON.stringify(notification),
+      const response = await fetch(`${partner.baseUrl}/webhook/export-notification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.generatePartnerToken(partner.partnerId)}`,
         },
-      );
+        body: JSON.stringify(notification),
+      });
 
       if (response.ok) {
-        this.emit('partner_notified', {
+        this.emit("partner_notified", {
           partnerId: request.partnerId,
           requestId: request.id,
           timestamp: new Date(),
         });
       }
     } catch (error) {
-      this.emit('partner_notification_failed', {
+      this.emit("partner_notification_failed", {
         partnerId: request.partnerId,
         requestId: request.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date(),
       });
     }
@@ -919,15 +875,15 @@ export class ExportGateway extends EventEmitter {
     return jwt.sign(
       {
         partnerId,
-        iss: 'intelgraph-export-gateway',
+        iss: "intelgraph-export-gateway",
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
       },
-      this.secretKey,
+      this.secretKey
     );
   }
 
-  private logAuditEvent(event: Omit<AuditEvent, 'id'>): void {
+  private logAuditEvent(event: Omit<AuditEvent, "id">): void {
     const auditEvent: AuditEvent = {
       ...event,
       id: crypto.randomUUID(),
@@ -949,10 +905,7 @@ export class ExportGateway extends EventEmitter {
     return this.jobs.get(jobId);
   }
 
-  async listRequests(
-    partnerId?: string,
-    status?: string,
-  ): Promise<ExportRequest[]> {
+  async listRequests(partnerId?: string, status?: string): Promise<ExportRequest[]> {
     let requests = Array.from(this.requests.values());
 
     if (partnerId) {
@@ -963,43 +916,35 @@ export class ExportGateway extends EventEmitter {
       requests = requests.filter((r) => r.status === status);
     }
 
-    return requests.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
+    return requests.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async getPartnerMetrics(partnerId: string): Promise<PartnerMetrics> {
     const partnerRequests = Array.from(this.requests.values()).filter(
-      (r) => r.partnerId === partnerId,
+      (r) => r.partnerId === partnerId
     );
     const partnerJobs = Array.from(this.jobs.values()).filter((j) => {
       const request = this.requests.get(j.requestId);
       return request?.partnerId === partnerId;
     });
 
-    const completedJobs = partnerJobs.filter((j) => j.status === 'completed');
-    const failedJobs = partnerJobs.filter((j) => j.status === 'failed');
+    const completedJobs = partnerJobs.filter((j) => j.status === "completed");
+    const failedJobs = partnerJobs.filter((j) => j.status === "failed");
 
     return {
       totalRequests: partnerRequests.length,
       approvedRequests: partnerRequests.filter(
-        (r) => r.status === 'approved' || r.status === 'completed',
+        (r) => r.status === "approved" || r.status === "completed"
       ).length,
-      rejectedRequests: partnerRequests.filter((r) => r.status === 'rejected')
-        .length,
+      rejectedRequests: partnerRequests.filter((r) => r.status === "rejected").length,
       completedExports: completedJobs.length,
       failedExports: failedJobs.length,
-      totalRecordsExported: completedJobs.reduce(
-        (sum, j) => sum + j.recordsProcessed,
-        0,
-      ),
+      totalRecordsExported: completedJobs.reduce((sum, j) => sum + j.recordsProcessed, 0),
       totalDataSize: completedJobs.reduce((sum, j) => sum + j.fileSize, 0),
       averageProcessingTime:
         completedJobs.length > 0
           ? completedJobs.reduce((sum, j) => {
-              const duration = j.endTime
-                ? j.endTime.getTime() - j.startTime.getTime()
-                : 0;
+              const duration = j.endTime ? j.endTime.getTime() - j.startTime.getTime() : 0;
               return sum + duration;
             }, 0) / completedJobs.length
           : 0,
@@ -1008,8 +953,7 @@ export class ExportGateway extends EventEmitter {
         callsPerHour: 0,
         callsPerDay: 0,
       },
-      errorRate:
-        partnerJobs.length > 0 ? failedJobs.length / partnerJobs.length : 0,
+      errorRate: partnerJobs.length > 0 ? failedJobs.length / partnerJobs.length : 0,
       complianceScore: 95, // Would be calculated based on compliance events
     };
   }

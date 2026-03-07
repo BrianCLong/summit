@@ -71,6 +71,7 @@ The Organized Crime and Trafficking Intelligence Platform provides comprehensive
 All API endpoints require:
 
 1. **Bearer Token Authentication**
+
    ```
    Authorization: Bearer <jwt-token>
    ```
@@ -86,6 +87,7 @@ All API endpoints require:
 ### Audit Logging
 
 Every action is logged with:
+
 - User identity and agency
 - Timestamp and action type
 - Resources accessed
@@ -94,6 +96,7 @@ Every action is logged with:
 - IP address and user agent
 
 Audit logs are:
+
 - Tamper-proof (write-once storage)
 - Retained per federal records requirements
 - Available for legal proceedings
@@ -187,6 +190,7 @@ All electronic surveillance requires:
 ### Multi-Agency Coordination
 
 **Task Force Operations**:
+
 - Clear command structure
 - Resource sharing agreements
 - Communication protocols
@@ -194,6 +198,7 @@ All electronic surveillance requires:
 - Deconfliction procedures
 
 **International Cooperation**:
+
 - Mutual Legal Assistance Treaties (MLAT)
 - Interpol coordination
 - Europol liaison
@@ -265,6 +270,7 @@ All users must complete:
 ### Security Incidents
 
 Report immediately to:
+
 - Agency security officer
 - System administrator
 - Supervisor
@@ -272,6 +278,7 @@ Report immediately to:
 ### Legal Questions
 
 Consult:
+
 - Agency legal counsel
 - Assigned prosecutor
 - DOJ guidance
@@ -279,6 +286,7 @@ Consult:
 ### System Issues
 
 Contact:
+
 - System administrator
 - Technical support
 - Vendor (if applicable)

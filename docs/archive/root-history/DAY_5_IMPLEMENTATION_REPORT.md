@@ -142,7 +142,7 @@ Pattern Applied Across All Workflows:
 1. Node.js Setup:
   - uses: actions/setup-node@v4
   - node-version: 20
-  - cache: 'pnpm' # Changed from 'npm'
+  - cache: "pnpm" # Changed from 'npm'
 
 2. Package Manager:
   - uses: pnpm/action-setup@v3

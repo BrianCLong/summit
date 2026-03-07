@@ -45,7 +45,7 @@ export interface ReputationHistory {
 
 export interface Attestation {
   attester: string;
-  type: 'identity' | 'content' | 'organization';
+  type: "identity" | "content" | "organization";
   timestamp: Date;
   signature: string;
   claims: Record<string, any>;
@@ -63,16 +63,16 @@ export interface ProvenanceChainLink {
 }
 
 export enum ProvenanceOperation {
-  CREATION = 'creation',
-  MODIFICATION = 'modification',
-  TRANSFER = 'transfer',
-  ATTESTATION = 'attestation',
-  REVOCATION = 'revocation',
-  DERIVATION = 'derivation',
+  CREATION = "creation",
+  MODIFICATION = "modification",
+  TRANSFER = "transfer",
+  ATTESTATION = "attestation",
+  REVOCATION = "revocation",
+  DERIVATION = "derivation",
 }
 
 export interface DigitalSignature {
-  algorithm: 'Ed25519' | 'ECDSA' | 'RSA-PSS';
+  algorithm: "Ed25519" | "ECDSA" | "RSA-PSS";
   publicKey: string;
   signature: string;
   timestamp: Date;
@@ -122,7 +122,7 @@ export interface C2PAIngredient {
   format: string;
   documentId: string;
   instanceId: string;
-  relationship: 'parentOf' | 'componentOf' | 'inputTo';
+  relationship: "parentOf" | "componentOf" | "inputTo";
   manifest?: C2PAManifest;
 }
 
@@ -188,7 +188,7 @@ export interface TimestampValidityResult {
 }
 
 export interface TimestampAnomaly {
-  type: 'future' | 'backdated' | 'inconsistent' | 'gap';
+  type: "future" | "backdated" | "inconsistent" | "gap";
   description: string;
   severity: number;
 }
@@ -196,7 +196,7 @@ export interface TimestampAnomaly {
 export class BlockchainProvenanceVerifier {
   private trustedRegistries: Map<string, TrustedRegistry> = new Map();
   private certificateStore: CertificateStore;
-  private hashAlgorithm: string = 'SHA-256';
+  private hashAlgorithm: string = "SHA-256";
 
   constructor() {
     this.certificateStore = new CertificateStore();
@@ -205,10 +205,10 @@ export class BlockchainProvenanceVerifier {
 
   private initializeTrustedRegistries(): void {
     // Initialize connections to trusted provenance registries
-    this.trustedRegistries.set('c2pa', {
-      name: 'C2PA Registry',
-      endpoint: 'https://verify.c2pa.org',
-      publicKey: 'c2pa-public-key',
+    this.trustedRegistries.set("c2pa", {
+      name: "C2PA Registry",
+      endpoint: "https://verify.c2pa.org",
+      publicKey: "c2pa-public-key",
       trustLevel: 0.95,
     });
   }
@@ -232,12 +232,7 @@ export class BlockchainProvenanceVerifier {
     const metadata = this.extractContentMetadata(manifest);
 
     // Comprehensive verification
-    const verification = await this.performVerification(
-      contentHash,
-      chain,
-      signatures,
-      metadata
-    );
+    const verification = await this.performVerification(contentHash, chain, signatures, metadata);
 
     // Compute merkle root
     const merkleRoot = await this.computeMerkleRoot(chain);
@@ -258,8 +253,8 @@ export class BlockchainProvenanceVerifier {
    * Compute cryptographic hash of content
    */
   private async computeHash(content: Buffer): Promise<string> {
-    const crypto = await import('crypto');
-    return crypto.createHash('sha256').update(content).digest('hex');
+    const crypto = await import("crypto");
+    return crypto.createHash("sha256").update(content).digest("hex");
   }
 
   /**
@@ -276,7 +271,7 @@ export class BlockchainProvenanceVerifier {
       for (const link of manifest.provenanceChain) {
         chain.push({
           index: chain.length,
-          previousHash: chain.length > 0 ? chain[chain.length - 1].contentHash : '0',
+          previousHash: chain.length > 0 ? chain[chain.length - 1].contentHash : "0",
           contentHash: link.hash,
           timestamp: new Date(link.timestamp),
           operation: link.operation as ProvenanceOperation,
@@ -319,7 +314,7 @@ export class BlockchainProvenanceVerifier {
     if (manifest?.signatures) {
       for (const sig of manifest.signatures) {
         signatures.push({
-          algorithm: sig.algorithm || 'Ed25519',
+          algorithm: sig.algorithm || "Ed25519",
           publicKey: sig.publicKey,
           signature: sig.signature,
           timestamp: new Date(sig.timestamp),
@@ -336,7 +331,7 @@ export class BlockchainProvenanceVerifier {
    */
   private async extractCreatorIdentity(manifest?: any): Promise<CreatorIdentity> {
     const creator: CreatorIdentity = {
-      publicKey: manifest?.creator?.publicKey || 'unknown',
+      publicKey: manifest?.creator?.publicKey || "unknown",
       verifiedPlatforms: [],
       reputation: {
         overall: 0.5,
@@ -372,7 +367,7 @@ export class BlockchainProvenanceVerifier {
 
   private calculateReputation(attestations: Attestation[]): ReputationScore {
     const positiveAttestations = attestations.filter(
-      a => a.type === 'identity' || a.type === 'organization'
+      (a) => a.type === "identity" || a.type === "organization"
     );
 
     const overall = Math.min(0.5 + positiveAttestations.length * 0.1, 1.0);
@@ -381,7 +376,7 @@ export class BlockchainProvenanceVerifier {
       overall,
       authenticity: overall,
       consistency: overall,
-      history: attestations.map(a => ({
+      history: attestations.map((a) => ({
         timestamp: a.timestamp,
         score: 0.1,
         event: a.type,
@@ -394,7 +389,7 @@ export class BlockchainProvenanceVerifier {
    */
   private extractContentMetadata(manifest?: any): ContentMetadata {
     const metadata: ContentMetadata = {
-      contentType: manifest?.contentType || 'unknown',
+      contentType: manifest?.contentType || "unknown",
     };
 
     if (manifest?.c2pa) {
@@ -433,13 +428,13 @@ export class BlockchainProvenanceVerifier {
     // Verify integrity
     const integrityStatus = await this.verifyIntegrity(contentHash, chain);
     if (!integrityStatus.hashMatch) {
-      warnings.push('Content hash does not match provenance record');
+      warnings.push("Content hash does not match provenance record");
     }
 
     // Verify chain validity
     const chainValidity = this.verifyChainValidity(chain);
     if (!chainValidity.isValid) {
-      warnings.push('Provenance chain has validity issues');
+      warnings.push("Provenance chain has validity issues");
     }
 
     // Verify signatures
@@ -451,7 +446,7 @@ export class BlockchainProvenanceVerifier {
     // Verify timestamps
     const timestampValidity = this.verifyTimestamps(chain);
     if (!timestampValidity.isValid) {
-      warnings.push('Timestamp anomalies detected');
+      warnings.push("Timestamp anomalies detected");
     }
 
     // Calculate overall authenticity
@@ -469,8 +464,8 @@ export class BlockchainProvenanceVerifier {
     );
 
     if (!isAuthentic) {
-      recommendations.push('Verify content through alternative sources');
-      recommendations.push('Contact original creator for verification');
+      recommendations.push("Verify content through alternative sources");
+      recommendations.push("Contact original creator for verification");
     }
 
     return {
@@ -521,7 +516,7 @@ export class BlockchainProvenanceVerifier {
       if (chain[i].operation === ProvenanceOperation.REVOCATION) {
         suspiciousOperations.push({
           linkIndex: i,
-          reason: 'Content was revoked',
+          reason: "Content was revoked",
           severity: 0.8,
         });
       }
@@ -535,9 +530,7 @@ export class BlockchainProvenanceVerifier {
     };
   }
 
-  private async verifySignatures(
-    signatures: DigitalSignature[]
-  ): Promise<SignatureValidityResult> {
+  private async verifySignatures(signatures: DigitalSignature[]): Promise<SignatureValidityResult> {
     const details: SignatureDetail[] = [];
     let validCount = 0;
     let invalidCount = 0;
@@ -560,7 +553,7 @@ export class BlockchainProvenanceVerifier {
         details.push({
           index: i,
           valid: false,
-          reason: !isValid ? 'invalid' : isExpired ? 'expired' : 'revoked',
+          reason: !isValid ? "invalid" : isExpired ? "expired" : "revoked",
         });
       }
     }
@@ -600,7 +593,7 @@ export class BlockchainProvenanceVerifier {
       // Check for future timestamps
       if (link.timestamp > now) {
         anomalies.push({
-          type: 'future',
+          type: "future",
           description: `Link ${i} has future timestamp`,
           severity: 0.9,
         });
@@ -609,7 +602,7 @@ export class BlockchainProvenanceVerifier {
       // Check chronological order
       if (i > 0 && link.timestamp < chain[i - 1].timestamp) {
         anomalies.push({
-          type: 'inconsistent',
+          type: "inconsistent",
           description: `Link ${i} timestamp before link ${i - 1}`,
           severity: 0.7,
         });
@@ -618,8 +611,8 @@ export class BlockchainProvenanceVerifier {
 
     return {
       isValid: anomalies.length === 0,
-      chronological: !anomalies.some(a => a.type === 'inconsistent'),
-      withinBounds: !anomalies.some(a => a.type === 'future'),
+      chronological: !anomalies.some((a) => a.type === "inconsistent"),
+      withinBounds: !anomalies.some((a) => a.type === "future"),
       anomalies,
     };
   }
@@ -647,9 +640,9 @@ export class BlockchainProvenanceVerifier {
    * Compute Merkle root from chain
    */
   private async computeMerkleRoot(chain: ProvenanceChainLink[]): Promise<string> {
-    if (chain.length === 0) return '0';
+    if (chain.length === 0) return "0";
 
-    const hashes = chain.map(link => link.contentHash);
+    const hashes = chain.map((link) => link.contentHash);
 
     while (hashes.length > 1) {
       const newHashes: string[] = [];
@@ -680,7 +673,7 @@ export class BlockchainProvenanceVerifier {
     // Create initial chain link
     const genesisLink: ProvenanceChainLink = {
       index: 0,
-      previousHash: '0',
+      previousHash: "0",
       contentHash,
       timestamp,
       operation: ProvenanceOperation.CREATION,
@@ -691,7 +684,7 @@ export class BlockchainProvenanceVerifier {
 
     // Create signature
     const signature: DigitalSignature = {
-      algorithm: 'Ed25519',
+      algorithm: "Ed25519",
       publicKey: creator.publicKey,
       signature: genesisLink.signature,
       timestamp,
@@ -711,7 +704,7 @@ export class BlockchainProvenanceVerifier {
       },
       chain: [genesisLink],
       signatures: [signature],
-      metadata: { contentType: 'unknown', ...metadata },
+      metadata: { contentType: "unknown", ...metadata },
       verification: {
         isAuthentic: true,
         confidence: 1.0,
@@ -730,7 +723,12 @@ export class BlockchainProvenanceVerifier {
           revokedCount: 0,
           details: [{ index: 0, valid: true }],
         },
-        timestampValidity: { isValid: true, chronological: true, withinBounds: true, anomalies: [] },
+        timestampValidity: {
+          isValid: true,
+          chronological: true,
+          withinBounds: true,
+          anomalies: [],
+        },
         warnings: [],
         recommendations: [],
       },
@@ -739,8 +737,11 @@ export class BlockchainProvenanceVerifier {
 
   private async sign(data: string, privateKey: string): Promise<string> {
     // Cryptographic signing
-    const crypto = await import('crypto');
-    return crypto.createHash('sha256').update(data + privateKey).digest('hex');
+    const crypto = await import("crypto");
+    return crypto
+      .createHash("sha256")
+      .update(data + privateKey)
+      .digest("hex");
   }
 }
 

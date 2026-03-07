@@ -1,4 +1,4 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 export interface TriggerConfig {
   parameters: Record<string, any>;
@@ -7,14 +7,14 @@ export interface TriggerConfig {
 
 export interface TriggerResult {
   subscriptionId: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 /**
  * Trigger Extension - Defines a source of events that can trigger workflows or automations.
  */
 export interface TriggerExtension extends ExtensionPoint<TriggerConfig, TriggerResult> {
-  type: 'trigger';
+  type: "trigger";
 
   triggerType: string;
   eventSchema: Record<string, any>;
@@ -25,7 +25,7 @@ export interface TriggerExtension extends ExtensionPoint<TriggerConfig, TriggerR
 }
 
 export abstract class BaseTriggerExtension implements TriggerExtension {
-  readonly type = 'trigger' as const;
+  readonly type = "trigger" as const;
 
   constructor(
     public readonly id: string,
@@ -34,7 +34,10 @@ export abstract class BaseTriggerExtension implements TriggerExtension {
     public readonly requiredScopes: string[] = []
   ) {}
 
-  abstract register(config: TriggerConfig, callback: (payload: any) => Promise<void>): Promise<string>;
+  abstract register(
+    config: TriggerConfig,
+    callback: (payload: any) => Promise<void>
+  ): Promise<string>;
   abstract unregister(subscriptionId: string): Promise<void>;
 
   abstract execute(input: TriggerConfig): Promise<TriggerResult>;

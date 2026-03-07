@@ -106,4 +106,3 @@ This document recasts the nine 11-point epics into an execution-first plan optim
 - **Adaptive Onboarding**: use experiment framework to auto-tune onboarding path per segment, optimizing TTV and retention.
 - **Semantic Guardrails**: apply policy-as-code (OPA) for data sharing/public views with real-time feedback during collaboration and template sharing.
 - **Edge-First Delivery**: experiment with edge workers for onboarding API calls and template delivery to reduce p95 for first-session flows.
-

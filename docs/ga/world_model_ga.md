@@ -4,13 +4,13 @@
 
 ## GA Criteria
 
-| Criterion | Target | Status |
-|---|---|---|
-| Prediction accuracy delta | +25% | pending eval |
-| Planning success rate delta | +30% | pending eval |
-| RAG grounding delta | +20% | pending eval |
-| Security audit | pass | pending |
-| `WORLD_MODEL_ENABLED` in prod | `false` | confirmed |
+| Criterion                     | Target  | Status       |
+| ----------------------------- | ------- | ------------ |
+| Prediction accuracy delta     | +25%    | pending eval |
+| Planning success rate delta   | +30%    | pending eval |
+| RAG grounding delta           | +20%    | pending eval |
+| Security audit                | pass    | pending      |
+| `WORLD_MODEL_ENABLED` in prod | `false` | confirmed    |
 
 ## PR Stack Merge Order
 

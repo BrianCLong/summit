@@ -81,10 +81,7 @@ export interface GraphData {
  * @param options - PageRank configuration options
  * @returns PageRank results including scores for each node
  */
-export function calculatePageRank(
-  graph: GraphData,
-  options: PageRankOptions = {},
-): PageRankResult {
+export function calculatePageRank(graph: GraphData, options: PageRankOptions = {}): PageRankResult {
   const startTime = performance.now();
 
   const {
@@ -92,7 +89,7 @@ export function calculatePageRank(
     maxIterations = 100,
     convergenceThreshold = 0.0001,
     initialRank = 1.0,
-    weightProperty = 'weight',
+    weightProperty = "weight",
     personalizedVector,
   } = options;
 
@@ -228,7 +225,7 @@ export function calculatePageRank(
 export function calculatePersonalizedPageRank(
   graph: GraphData,
   seedNodes: string[],
-  options: PageRankOptions = {},
+  options: PageRankOptions = {}
 ): PageRankResult {
   // Create uniform personalized vector for seed nodes
   const personalizedVector = new Map<string, number>();
@@ -251,10 +248,7 @@ export function calculatePersonalizedPageRank(
  * @param k - Number of top nodes to return
  * @returns Array of [nodeId, score] tuples sorted by score descending
  */
-export function getTopKNodes(
-  pageRankResult: PageRankResult,
-  k: number,
-): Array<[string, number]> {
+export function getTopKNodes(pageRankResult: PageRankResult, k: number): Array<[string, number]> {
   const sortedNodes = Array.from(pageRankResult.ranks.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, k);
@@ -274,15 +268,15 @@ export function getTopKNodes(
 export function calculateNodeImportance(
   graph: GraphData,
   nodeId: string,
-  options: PageRankOptions = {},
+  options: PageRankOptions = {}
 ): number {
   // Calculate original PageRank
   const originalResult = calculatePageRank(graph, options);
 
   // Create graph without the node
   const filteredGraph: GraphData = {
-    nodes: graph.nodes.filter(n => n !== nodeId),
-    edges: graph.edges.filter(e => e.source !== nodeId && e.target !== nodeId),
+    nodes: graph.nodes.filter((n) => n !== nodeId),
+    edges: graph.edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
   };
 
   // Calculate PageRank without the node

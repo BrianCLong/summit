@@ -22,7 +22,13 @@ export function Select({ value, onValueChange, children }: SelectProps) {
   )
 }
 
-export function SelectTrigger({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+export function SelectTrigger({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
   return <div className={className}>{children}</div>
 }
 
@@ -31,11 +37,25 @@ export function SelectValue({ placeholder }: { placeholder?: string }) {
   return <span>{value ?? placeholder ?? 'Select'}</span>
 }
 
-export function SelectContent({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+export function SelectContent({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
   return <div className={className}>{children}</div>
 }
 
-export function SelectItem({ value, children, className = '' }: { value: string; children: React.ReactNode; className?: string }) {
+export function SelectItem({
+  value,
+  children,
+  className = '',
+}: {
+  value: string
+  children: React.ReactNode
+  className?: string
+}) {
   const { onValueChange } = React.useContext(SelectContext)
   return (
     <button

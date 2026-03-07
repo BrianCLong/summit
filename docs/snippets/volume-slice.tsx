@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import { useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 type VolumeSliceProps = {
   texture: THREE.DataTexture3D;
@@ -12,10 +12,10 @@ export function VolumeSlice({ texture, planeZ }: VolumeSliceProps) {
     return new THREE.ShaderMaterial({
       uniforms: {
         tex3D: { value: texture },
-        sliceZ: { value: planeZ }
+        sliceZ: { value: planeZ },
       },
       vertexShader:
-        'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        "varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
       fragmentShader: `
         precision highp float;
         varying vec2 vUv;
@@ -28,7 +28,7 @@ export function VolumeSlice({ texture, planeZ }: VolumeSliceProps) {
           gl_FragColor = vec4(voxel.rgb, 1.0 - uncertainty);
         }
       `,
-      transparent: true
+      transparent: true,
     });
   }, [texture, planeZ]);
 

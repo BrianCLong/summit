@@ -4,8 +4,8 @@ export interface CognitiveSurface {
   audience_segments?: string[];
 }
 
-export type ThreatType = 'CIB' | 'SYNTHETIC_MEDIA' | 'RECOMMENDER_EXPLOITATION' | 'DATA_POISONING';
-export type ConfidenceLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+export type ThreatType = "CIB" | "SYNTHETIC_MEDIA" | "RECOMMENDER_EXPLOITATION" | "DATA_POISONING";
+export type ConfidenceLevel = "LOW" | "MEDIUM" | "HIGH";
 
 export interface ThreatHypothesis {
   type: ThreatType;

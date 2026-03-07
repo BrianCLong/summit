@@ -28,7 +28,7 @@ export class TransformIndex {
       (t) =>
         t.name.toLowerCase().includes(lowerQuery) ||
         t.description.toLowerCase().includes(lowerQuery) ||
-        t.inputTypes.some((type) => type.toLowerCase().includes(lowerQuery))
+        t.inputTypes.some((type) => type.toLowerCase().includes(lowerQuery)),
     );
   }
 }

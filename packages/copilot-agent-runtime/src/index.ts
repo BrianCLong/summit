@@ -41,12 +41,12 @@ export class AgentRuntime {
       await this.executeStep(step);
     }
 
-    return { status: 'completed', goal };
+    return { status: "completed", goal };
   }
 
   private async plan(goal: string): Promise<string[]> {
     console.log(`[AgentRuntime] Planning for goal: ${goal}`);
-    return ['step1', 'step2'];
+    return ["step1", "step2"];
   }
 
   private async executeStep(step: string): Promise<void> {

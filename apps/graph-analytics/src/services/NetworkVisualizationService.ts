@@ -1,36 +1,30 @@
-import { Driver } from 'neo4j-driver';
-import { logger } from '../utils/logger';
-import { GraphNode, GraphEdge, GraphSubnet } from './GraphAnalyticsService';
+import { Driver } from "neo4j-driver";
+import { logger } from "../utils/logger";
+import { GraphNode, GraphEdge, GraphSubnet } from "./GraphAnalyticsService";
 
 export interface VisualizationLayout {
-  type:
-    | 'force'
-    | 'hierarchical'
-    | 'circular'
-    | 'grid'
-    | 'concentric'
-    | 'breadthfirst';
+  type: "force" | "hierarchical" | "circular" | "grid" | "concentric" | "breadthfirst";
   options: Record<string, any>;
 }
 
 export interface NodeStyle {
   size: number;
   color: string;
-  shape: 'ellipse' | 'triangle' | 'rectangle' | 'diamond' | 'star' | 'pentagon';
+  shape: "ellipse" | "triangle" | "rectangle" | "diamond" | "star" | "pentagon";
   borderWidth: number;
   borderColor: string;
   label?: {
     text: string;
     fontSize: number;
     color: string;
-    position: 'center' | 'top' | 'bottom';
+    position: "center" | "top" | "bottom";
   };
 }
 
 export interface EdgeStyle {
   width: number;
   color: string;
-  style: 'solid' | 'dashed' | 'dotted';
+  style: "solid" | "dashed" | "dotted";
   arrow: boolean;
   curvature: number;
   label?: {
@@ -55,7 +49,7 @@ export interface VisualizationConfig {
     enablePhysics: boolean;
     enableInteraction: boolean;
     backgroundColor: string;
-    theme: 'light' | 'dark';
+    theme: "light" | "dark";
   };
   performance: {
     maxNodes: number;
@@ -89,7 +83,7 @@ export interface NetworkVisualization {
 
 export interface InteractiveFeatures {
   nodeClick: {
-    action: 'expand' | 'highlight' | 'details' | 'custom';
+    action: "expand" | "highlight" | "details" | "custom";
     config: Record<string, any>;
   };
   nodeHover: {
@@ -114,13 +108,13 @@ export class NetworkVisualizationService {
   async generateVisualization(
     query: string,
     parameters: Record<string, any>,
-    config: VisualizationConfig,
+    config: VisualizationConfig
   ): Promise<NetworkVisualization> {
     const session = this.neo4jDriver.session();
     const startTime = Date.now();
 
     try {
-      logger.info('Generating network visualization', { query, config });
+      logger.info("Generating network visualization", { query, config });
 
       // Execute query to get graph data
       const result = await session.run(query, parameters);
@@ -133,25 +127,23 @@ export class NetworkVisualizationService {
         record.keys.forEach((key) => {
           const value = record.get(key);
 
-          if (value?.constructor?.name === 'Node') {
+          if (value?.constructor?.name === "Node") {
             const node = this.extractNode(value);
             if (this.shouldIncludeNode(node, config.filters)) {
               nodes.set(node.id, node);
             }
-          } else if (value?.constructor?.name === 'Relationship') {
+          } else if (value?.constructor?.name === "Relationship") {
             const edge = this.extractEdge(value);
             if (this.shouldIncludeEdge(edge, config.filters)) {
               edges.set(edge.id, edge);
             }
-          } else if (value?.constructor?.name === 'Path') {
+          } else if (value?.constructor?.name === "Path") {
             // Extract nodes and relationships from path
             const pathNodes = value.segments.flatMap((segment: any) => [
               segment.start,
               segment.end,
             ]);
-            const pathRels = value.segments.map(
-              (segment: any) => segment.relationship,
-            );
+            const pathRels = value.segments.map((segment: any) => segment.relationship);
 
             pathNodes.forEach((nodeValue: any) => {
               const node = this.extractNode(nodeValue);
@@ -181,11 +173,7 @@ export class NetworkVisualizationService {
       if (nodeArray.length > config.performance.maxNodes) {
         if (config.performance.simplifyBeyondThreshold) {
           // Keep high-degree nodes and cluster others
-          visibleNodes = this.simplifyNetwork(
-            nodeArray,
-            edgeArray,
-            config.performance.maxNodes,
-          );
+          visibleNodes = this.simplifyNetwork(nodeArray, edgeArray, config.performance.maxNodes);
         } else {
           // Just truncate
           visibleNodes = nodeArray.slice(0, config.performance.maxNodes);
@@ -195,8 +183,7 @@ export class NetworkVisualizationService {
       // Filter edges to only include those between visible nodes
       const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
       visibleEdges = edgeArray.filter(
-        (edge) =>
-          visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target),
+        (edge) => visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
       );
 
       // Apply edge limit
@@ -239,7 +226,7 @@ export class NetworkVisualizationService {
         },
       };
 
-      logger.info('Network visualization generated', {
+      logger.info("Network visualization generated", {
         totalNodes: nodeArray.length,
         totalEdges: edgeArray.length,
         visibleNodes: styledNodes.length,
@@ -249,7 +236,7 @@ export class NetworkVisualizationService {
 
       return visualization;
     } catch (error) {
-      logger.error('Error generating network visualization:', error);
+      logger.error("Error generating network visualization:", error);
       throw error;
     } finally {
       await session.close();
@@ -259,10 +246,10 @@ export class NetworkVisualizationService {
   async generateSubnetVisualization(
     centerNodeId: string,
     depth: number,
-    config: Partial<VisualizationConfig> = {},
+    config: Partial<VisualizationConfig> = {}
   ): Promise<NetworkVisualization> {
     const defaultConfig: VisualizationConfig = {
-      layout: { type: 'force', options: { iterations: 1000 } },
+      layout: { type: "force", options: { iterations: 1000 } },
       nodeStyles: {},
       edgeStyles: {},
       filters: {},
@@ -271,8 +258,8 @@ export class NetworkVisualizationService {
         showEdgeLabels: false,
         enablePhysics: true,
         enableInteraction: true,
-        backgroundColor: '#ffffff',
-        theme: 'light',
+        backgroundColor: "#ffffff",
+        theme: "light",
       },
       performance: {
         maxNodes: 500,
@@ -294,11 +281,11 @@ export class NetworkVisualizationService {
 
   async generateCommunityVisualization(
     communityIds: string[],
-    config: Partial<VisualizationConfig> = {},
+    config: Partial<VisualizationConfig> = {}
   ): Promise<NetworkVisualization> {
     const defaultConfig: VisualizationConfig = {
       layout: {
-        type: 'force',
+        type: "force",
         options: { nodeRepulsion: 500, edgeLength: 100 },
       },
       nodeStyles: {},
@@ -309,8 +296,8 @@ export class NetworkVisualizationService {
         showEdgeLabels: false,
         enablePhysics: true,
         enableInteraction: true,
-        backgroundColor: '#ffffff',
-        theme: 'light',
+        backgroundColor: "#ffffff",
+        theme: "light",
       },
       performance: {
         maxNodes: 1000,
@@ -336,39 +323,39 @@ export class NetworkVisualizationService {
   async generatePathVisualization(
     sourceId: string,
     targetId: string,
-    pathType: 'shortest' | 'all' = 'shortest',
-    config: Partial<VisualizationConfig> = {},
+    pathType: "shortest" | "all" = "shortest",
+    config: Partial<VisualizationConfig> = {}
   ): Promise<NetworkVisualization> {
     const defaultConfig: VisualizationConfig = {
-      layout: { type: 'hierarchical', options: { direction: 'LR' } },
+      layout: { type: "hierarchical", options: { direction: "LR" } },
       nodeStyles: {
         source: {
           size: 30,
-          color: '#4CAF50',
-          shape: 'diamond',
+          color: "#4CAF50",
+          shape: "diamond",
           borderWidth: 3,
-          borderColor: '#2E7D32',
+          borderColor: "#2E7D32",
         },
         target: {
           size: 30,
-          color: '#F44336',
-          shape: 'diamond',
+          color: "#F44336",
+          shape: "diamond",
           borderWidth: 3,
-          borderColor: '#C62828',
+          borderColor: "#C62828",
         },
         intermediate: {
           size: 20,
-          color: '#2196F3',
-          shape: 'ellipse',
+          color: "#2196F3",
+          shape: "ellipse",
           borderWidth: 2,
-          borderColor: '#1565C0',
+          borderColor: "#1565C0",
         },
       },
       edgeStyles: {
         path: {
           width: 3,
-          color: '#FF9800',
-          style: 'solid',
+          color: "#FF9800",
+          style: "solid",
           arrow: true,
           curvature: 0.1,
         },
@@ -379,8 +366,8 @@ export class NetworkVisualizationService {
         showEdgeLabels: true,
         enablePhysics: false,
         enableInteraction: true,
-        backgroundColor: '#ffffff',
-        theme: 'light',
+        backgroundColor: "#ffffff",
+        theme: "light",
       },
       performance: {
         maxNodes: 200,
@@ -393,7 +380,7 @@ export class NetworkVisualizationService {
     const finalConfig = this.mergeConfig(defaultConfig, config);
 
     const query =
-      pathType === 'shortest'
+      pathType === "shortest"
         ? `
         MATCH path = shortestPath((source {id: $sourceId})-[*]-(target {id: $targetId}))
         RETURN path, nodes(path) as nodes, relationships(path) as rels
@@ -404,19 +391,15 @@ export class NetworkVisualizationService {
         LIMIT 10
         `;
 
-    return this.generateVisualization(
-      query,
-      { sourceId, targetId },
-      finalConfig,
-    );
+    return this.generateVisualization(query, { sourceId, targetId }, finalConfig);
   }
 
   async generateTimelineVisualization(
     timeRange: { start: Date; end: Date },
-    config: Partial<VisualizationConfig> = {},
+    config: Partial<VisualizationConfig> = {}
   ): Promise<NetworkVisualization> {
     const defaultConfig: VisualizationConfig = {
-      layout: { type: 'breadthfirst', options: { directed: true } },
+      layout: { type: "breadthfirst", options: { directed: true } },
       nodeStyles: {},
       edgeStyles: {},
       filters: {},
@@ -425,8 +408,8 @@ export class NetworkVisualizationService {
         showEdgeLabels: false,
         enablePhysics: true,
         enableInteraction: true,
-        backgroundColor: '#ffffff',
-        theme: 'light',
+        backgroundColor: "#ffffff",
+        theme: "light",
       },
       performance: {
         maxNodes: 800,
@@ -453,16 +436,13 @@ export class NetworkVisualizationService {
         startTime: timeRange.start.toISOString(),
         endTime: timeRange.end.toISOString(),
       },
-      finalConfig,
+      finalConfig
     );
   }
 
   private extractNode(nodeValue: any): GraphNode {
     return {
-      id:
-        nodeValue.identity?.toString() ||
-        nodeValue.properties?.id ||
-        Math.random().toString(),
+      id: nodeValue.identity?.toString() || nodeValue.properties?.id || Math.random().toString(),
       labels: nodeValue.labels || [],
       properties: nodeValue.properties || {},
     };
@@ -473,16 +453,13 @@ export class NetworkVisualizationService {
       id: relValue.identity?.toString() || Math.random().toString(),
       source: relValue.start?.toString() || relValue.startNodeId?.toString(),
       target: relValue.end?.toString() || relValue.endNodeId?.toString(),
-      type: relValue.type || 'CONNECTED_TO',
+      type: relValue.type || "CONNECTED_TO",
       properties: relValue.properties || {},
       weight: relValue.properties?.weight || 1,
     };
   }
 
-  private shouldIncludeNode(
-    node: GraphNode,
-    filters: VisualizationConfig['filters'],
-  ): boolean {
+  private shouldIncludeNode(node: GraphNode, filters: VisualizationConfig["filters"]): boolean {
     // Apply node label filters
     if (filters.nodeLabels && filters.nodeLabels.length > 0) {
       if (!node.labels.some((label) => filters.nodeLabels!.includes(label))) {
@@ -494,9 +471,7 @@ export class NetworkVisualizationService {
     if (filters.propertyFilters) {
       for (const filter of filters.propertyFilters) {
         const value = node.properties[filter.property];
-        if (
-          !this.evaluatePropertyFilter(value, filter.operator, filter.value)
-        ) {
+        if (!this.evaluatePropertyFilter(value, filter.operator, filter.value)) {
           return false;
         }
       }
@@ -505,10 +480,7 @@ export class NetworkVisualizationService {
     return true;
   }
 
-  private shouldIncludeEdge(
-    edge: GraphEdge,
-    filters: VisualizationConfig['filters'],
-  ): boolean {
+  private shouldIncludeEdge(edge: GraphEdge, filters: VisualizationConfig["filters"]): boolean {
     // Apply relationship type filters
     if (filters.relationshipTypes && filters.relationshipTypes.length > 0) {
       if (!filters.relationshipTypes.includes(edge.type)) {
@@ -519,42 +491,34 @@ export class NetworkVisualizationService {
     return true;
   }
 
-  private evaluatePropertyFilter(
-    value: any,
-    operator: string,
-    filterValue: any,
-  ): boolean {
+  private evaluatePropertyFilter(value: any, operator: string, filterValue: any): boolean {
     switch (operator) {
-      case 'eq':
+      case "eq":
         return value === filterValue;
-      case 'ne':
+      case "ne":
         return value !== filterValue;
-      case 'gt':
+      case "gt":
         return value > filterValue;
-      case 'gte':
+      case "gte":
         return value >= filterValue;
-      case 'lt':
+      case "lt":
         return value < filterValue;
-      case 'lte':
+      case "lte":
         return value <= filterValue;
-      case 'contains':
+      case "contains":
         return String(value).includes(filterValue);
-      case 'startsWith':
+      case "startsWith":
         return String(value).startsWith(filterValue);
-      case 'endsWith':
+      case "endsWith":
         return String(value).endsWith(filterValue);
-      case 'in':
+      case "in":
         return Array.isArray(filterValue) && filterValue.includes(value);
       default:
         return true;
     }
   }
 
-  private simplifyNetwork(
-    nodes: GraphNode[],
-    edges: GraphEdge[],
-    maxNodes: number,
-  ): GraphNode[] {
+  private simplifyNetwork(nodes: GraphNode[], edges: GraphEdge[], maxNodes: number): GraphNode[] {
     // Calculate node degrees
     const degrees = new Map<string, number>();
     nodes.forEach((node) => degrees.set(node.id, 0));
@@ -570,10 +534,7 @@ export class NetworkVisualizationService {
       .slice(0, maxNodes);
   }
 
-  private getNodeStyle(
-    node: GraphNode,
-    nodeStyles: Record<string, NodeStyle>,
-  ): NodeStyle {
+  private getNodeStyle(node: GraphNode, nodeStyles: Record<string, NodeStyle>): NodeStyle {
     // Find matching style based on node labels
     for (const label of node.labels) {
       if (nodeStyles[label]) {
@@ -589,10 +550,7 @@ export class NetworkVisualizationService {
     return this.getDefaultNodeStyle();
   }
 
-  private getEdgeStyle(
-    edge: GraphEdge,
-    edgeStyles: Record<string, EdgeStyle>,
-  ): EdgeStyle {
+  private getEdgeStyle(edge: GraphEdge, edgeStyles: Record<string, EdgeStyle>): EdgeStyle {
     if (edgeStyles[edge.type]) {
       return { ...this.getDefaultEdgeStyle(), ...edgeStyles[edge.type] };
     }
@@ -603,15 +561,15 @@ export class NetworkVisualizationService {
   private getDefaultNodeStyle(): NodeStyle {
     return {
       size: 20,
-      color: '#2196F3',
-      shape: 'ellipse',
+      color: "#2196F3",
+      shape: "ellipse",
       borderWidth: 2,
-      borderColor: '#1565C0',
+      borderColor: "#1565C0",
       label: {
-        text: '',
+        text: "",
         fontSize: 12,
-        color: '#333333',
-        position: 'center',
+        color: "#333333",
+        position: "center",
       },
     };
   }
@@ -619,14 +577,14 @@ export class NetworkVisualizationService {
   private getDefaultEdgeStyle(): EdgeStyle {
     return {
       width: 2,
-      color: '#666666',
-      style: 'solid',
+      color: "#666666",
+      style: "solid",
       arrow: true,
       curvature: 0.1,
       label: {
-        text: '',
+        text: "",
         fontSize: 10,
-        color: '#666666',
+        color: "#666666",
       },
     };
   }
@@ -634,7 +592,7 @@ export class NetworkVisualizationService {
   private calculateNodePosition(
     node: GraphNode,
     allNodes: GraphNode[],
-    layout: VisualizationLayout,
+    layout: VisualizationLayout
   ): { x: number; y: number } {
     // This would implement actual layout algorithms
     // For now, return random positions
@@ -646,7 +604,7 @@ export class NetworkVisualizationService {
 
   private mergeConfig(
     defaultConfig: VisualizationConfig,
-    userConfig: Partial<VisualizationConfig>,
+    userConfig: Partial<VisualizationConfig>
   ): VisualizationConfig {
     return {
       layout: { ...defaultConfig.layout, ...userConfig.layout },
@@ -661,16 +619,16 @@ export class NetworkVisualizationService {
   // Export visualization data for external tools
   async exportVisualization(
     visualization: NetworkVisualization,
-    format: 'cytoscape' | 'gephi' | 'graphml' | 'json',
+    format: "cytoscape" | "gephi" | "graphml" | "json"
   ): Promise<string> {
     switch (format) {
-      case 'cytoscape':
+      case "cytoscape":
         return this.exportToCytoscape(visualization);
-      case 'gephi':
+      case "gephi":
         return this.exportToGephi(visualization);
-      case 'graphml':
+      case "graphml":
         return this.exportToGraphML(visualization);
-      case 'json':
+      case "json":
         return JSON.stringify(visualization, null, 2);
       default:
         throw new Error(`Unsupported export format: ${format}`);
@@ -710,18 +668,15 @@ export class NetworkVisualizationService {
   private exportToGephi(visualization: NetworkVisualization): string {
     // Gephi GEXF format
     const nodes = visualization.data.nodes
-      .map(
-        (node) =>
-          `    <node id="${node.id}" label="${node.properties.name || node.id}"/>`,
-      )
-      .join('\n');
+      .map((node) => `    <node id="${node.id}" label="${node.properties.name || node.id}"/>`)
+      .join("\n");
 
     const edges = visualization.data.edges
       .map(
         (edge, index) =>
-          `    <edge id="${index}" source="${edge.source}" target="${edge.target}" weight="${edge.weight || 1}"/>`,
+          `    <edge id="${index}" source="${edge.source}" target="${edge.target}" weight="${edge.weight || 1}"/>`
       )
-      .join('\n');
+      .join("\n");
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
@@ -742,18 +697,18 @@ ${edges}
         (node) =>
           `    <node id="${node.id}">
       <data key="name">${node.properties.name || node.id}</data>
-    </node>`,
+    </node>`
       )
-      .join('\n');
+      .join("\n");
 
     const edges = visualization.data.edges
       .map(
         (edge, index) =>
           `    <edge id="e${index}" source="${edge.source}" target="${edge.target}">
       <data key="weight">${edge.weight || 1}</data>
-    </edge>`,
+    </edge>`
       )
-      .join('\n');
+      .join("\n");
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns"

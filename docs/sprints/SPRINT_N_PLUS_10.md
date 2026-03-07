@@ -4,10 +4,10 @@
 
 **Sprint output definition (must ship):**
 
-* **Billing GA**: reliable period close, invoicing artifacts, dispute workflows, and customer-facing transparency
-* **Active-active decision**: GA rollout plan OR rollback plan executed, backed by metrics and evidence
-* **Ecosystem governance v2**: marketplace policy enforcement at scale (signing, approvals, vulnerability and license scanning)
-* **Continuous controls v1**: automated checks + evidence room ingestion + compliance dashboards
+- **Billing GA**: reliable period close, invoicing artifacts, dispute workflows, and customer-facing transparency
+- **Active-active decision**: GA rollout plan OR rollback plan executed, backed by metrics and evidence
+- **Ecosystem governance v2**: marketplace policy enforcement at scale (signing, approvals, vulnerability and license scanning)
+- **Continuous controls v1**: automated checks + evidence room ingestion + compliance dashboards
 
 ---
 
@@ -319,8 +319,8 @@
 
 # Sprint Gates (Non-Negotiable)
 
-* **Billing GA**: period close is idempotent, reliable, and verifiable; disputes supported
-* **Active-active decision**: go/no-go executed with evidence and rollback if no-go
-* **Marketplace governance**: scanning + license/CVE policy enforced; quarantine works
-* **Continuous controls**: automated checks + evidence ingestion + dashboards live
-* **CI enforcement**: new gates required; release cannot cut without evidence pack
+- **Billing GA**: period close is idempotent, reliable, and verifiable; disputes supported
+- **Active-active decision**: go/no-go executed with evidence and rollback if no-go
+- **Marketplace governance**: scanning + license/CVE policy enforced; quarantine works
+- **Continuous controls**: automated checks + evidence ingestion + dashboards live
+- **CI enforcement**: new gates required; release cannot cut without evidence pack

@@ -1,4 +1,4 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 export interface AutomationContext {
   triggerEvent: any;
@@ -15,7 +15,7 @@ export interface AutomationResult {
  * Automation Extension - Defines a pre-packaged automation flow.
  */
 export interface AutomationExtension extends ExtensionPoint<AutomationContext, AutomationResult> {
-  type: 'automation';
+  type: "automation";
 
   triggerId: string; // The Trigger Extension ID or type that starts this
   requiredScopes?: string[];
@@ -28,7 +28,7 @@ export interface AutomationExtension extends ExtensionPoint<AutomationContext, A
 }
 
 export abstract class BaseAutomationExtension implements AutomationExtension {
-  readonly type = 'automation' as const;
+  readonly type = "automation" as const;
 
   constructor(
     public readonly id: string,

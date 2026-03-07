@@ -5,9 +5,11 @@ This directory contains comprehensive documentation about the IntelGraph codebas
 ## Documentation Files
 
 ### 1. **ARCHITECTURE_SUMMARY.md** (24KB)
+
 Comprehensive technical overview of the entire system architecture.
 
 **Covers:**
+
 - Complete package organization (60+ packages)
 - Frontend architecture (React 18, Redux, Apollo, real-time)
 - Backend architecture (Express, GraphQL, Neo4j, PostgreSQL)
@@ -21,15 +23,18 @@ Comprehensive technical overview of the entire system architecture.
 - Deployment and infrastructure
 
 **When to use:**
+
 - Getting deep understanding of system components
 - Understanding how different layers interact
 - Learning about existing implementations
 - Reference for architectural decisions
 
 ### 2. **VISUALIZATION_DEVELOPMENT_GUIDE.md** (12KB)
+
 Practical step-by-step guide for building new visualizations.
 
 **Covers:**
+
 - Frontend component templates with full code
 - Redux slice patterns for state management
 - GraphQL schema additions (type defs, resolvers, subscriptions)
@@ -45,6 +50,7 @@ Practical step-by-step guide for building new visualizations.
 - Common pitfalls to avoid
 
 **When to use:**
+
 - Building new visualization components
 - Understanding the tech stack choices
 - Setting up real-time updates
@@ -52,9 +58,11 @@ Practical step-by-step guide for building new visualizations.
 - Reference while coding
 
 ### 3. **QUICK_REFERENCE.md** (8KB)
+
 Quick lookup guide for common tasks and patterns.
 
 **Covers:**
+
 - Critical file locations (frontend, backend, packages)
 - Technology stack at-a-glance table
 - Key architectural patterns
@@ -69,6 +77,7 @@ Quick lookup guide for common tasks and patterns.
 - Troubleshooting guide
 
 **When to use:**
+
 - Quick lookup of file locations
 - Copy-paste code snippets
 - Quick reference during development
@@ -76,9 +85,11 @@ Quick lookup guide for common tasks and patterns.
 - Finding monitoring endpoints
 
 ### 4. **docs/multi-tenant-control-plane.md** (new)
+
 Operational blueprint for delivering a production-ready multi-tenant control plane with GraphRAG hardening, policy enforcement, observability guardrails, and rainbow deployment strategy.
 
 **Covers:**
+
 - Control plane/core service decomposition
 - GraphRAG safety + performance practices
 - Policy isolation, governance, and audit logging
@@ -88,6 +99,7 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 ## Quick Navigation
 
 ### I want to understand...
+
 - **How the entire system works** → ARCHITECTURE_SUMMARY.md (full document)
 - **How to build a visualization** → VISUALIZATION_DEVELOPMENT_GUIDE.md (full document)
 - **Where to find a specific file** → QUICK_REFERENCE.md (Critical File Locations)
@@ -96,6 +108,7 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 - **How to connect to Redux** → QUICK_REFERENCE.md (Common Code Snippets)
 
 ### I want to...
+
 - **Add a new visualization type** → VISUALIZATION_DEVELOPMENT_GUIDE.md (sections 1-5)
 - **Set up real-time updates** → VISUALIZATION_DEVELOPMENT_GUIDE.md (Section 6)
 - **Find a specific service** → QUICK_REFERENCE.md (Critical File Locations) or ARCHITECTURE_SUMMARY.md (Section 3)
@@ -106,6 +119,7 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 - **Operate price-aware routing (runbook)** → docs/runbooks/price-aware-orchestration.md
 
 ### Licensing and distribution
+
 - **Understand the proprietary licensing model and release obligations** → docs/licensing/PROPRIETARY_LICENSING_GUIDE.md
 
 ## Key Statistics
@@ -121,6 +135,7 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 ## Technology Highlights
 
 ### Frontend
+
 - React 18.3.1 with TypeScript
 - Redux Toolkit for predictable state management
 - Apollo Client for GraphQL data management
@@ -131,6 +146,7 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 - MUI + Emotion for consistent styling
 
 ### Backend
+
 - Express 5.1.0 with TypeScript
 - Apollo Server 5.1.0 for GraphQL
 - uWebSockets.js for high-performance WebSocket
@@ -182,20 +198,23 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 ## Key Integration Points
 
 ### Data Flow
+
 ```
-Component → Redux Dispatch → Service → GraphQL/REST → Response → 
+Component → Redux Dispatch → Service → GraphQL/REST → Response →
 Redux Reducer → Component Re-render
 ```
 
 ### Real-time Flow
+
 ```
-Server Event → Socket.emit → Client Socket.on → Redux Reducer → 
+Server Event → Socket.emit → Client Socket.on → Redux Reducer →
 Component Re-render
 ```
 
 ### Multi-tenancy
+
 ```
-User Auth → JWT with tenantId → All Queries filtered by tenantId → 
+User Auth → JWT with tenantId → All Queries filtered by tenantId →
 Isolated Data
 ```
 
@@ -213,6 +232,7 @@ Isolated Data
 ## Getting Started
 
 ### If you're new to the project:
+
 1. Start with ARCHITECTURE_SUMMARY.md introduction
 2. Skim sections 1-3 (packages, frontend, backend)
 3. Look at section 4 (existing visualizations)
@@ -220,12 +240,14 @@ Isolated Data
 5. Refer to QUICK_REFERENCE.md while coding
 
 ### If you're adding a feature:
+
 1. Check VISUALIZATION_DEVELOPMENT_GUIDE.md sections 1-5 for structure
 2. Use code templates as starting point
 3. Follow patterns from QUICK_REFERENCE.md
 4. Verify against deployment checklist
 
 ### If you're debugging:
+
 1. Check QUICK_REFERENCE.md troubleshooting section
 2. Look at monitoring endpoints in QUICK_REFERENCE.md
 3. Review architectural patterns in ARCHITECTURE_SUMMARY.md
@@ -258,6 +280,7 @@ Isolated Data
 ## Support
 
 For specific questions:
+
 - Architecture questions → ARCHITECTURE_SUMMARY.md (most detailed)
 - Development questions → VISUALIZATION_DEVELOPMENT_GUIDE.md (practical)
 - Quick lookup → QUICK_REFERENCE.md (fast answers)

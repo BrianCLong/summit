@@ -122,13 +122,10 @@ Generate PKCE parameters:
 
 ```javascript
 // Generate code verifier
-const codeVerifier = crypto.randomBytes(32).toString('base64url');
+const codeVerifier = crypto.randomBytes(32).toString("base64url");
 
 // Generate code challenge
-const codeChallenge = crypto
-  .createHash('sha256')
-  .update(codeVerifier)
-  .digest('base64url');
+const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
 ```
 
 ## API Keys
@@ -136,6 +133,7 @@ const codeChallenge = crypto
 ### Creating API Keys
 
 **Via Portal:**
+
 1. Log in to https://api.summit.gov/portal
 2. Navigate to "API Keys"
 3. Click "Create New Key"
@@ -208,16 +206,19 @@ curl -X POST https://api.summit.gov/api/keys/key_123/rotate \
 **Server Configuration:**
 
 ```typescript
-import https from 'https';
-import fs from 'fs';
+import https from "https";
+import fs from "fs";
 
-const server = https.createServer({
-  cert: fs.readFileSync('server-cert.pem'),
-  key: fs.readFileSync('server-key.pem'),
-  ca: fs.readFileSync('ca-cert.pem'),
-  requestCert: true,
-  rejectUnauthorized: true,
-}, app);
+const server = https.createServer(
+  {
+    cert: fs.readFileSync("server-cert.pem"),
+    key: fs.readFileSync("server-key.pem"),
+    ca: fs.readFileSync("ca-cert.pem"),
+    requestCert: true,
+    rejectUnauthorized: true,
+  },
+  app
+);
 ```
 
 **Client Request:**
@@ -232,6 +233,7 @@ curl -X GET https://api.summit.gov/api/v1/investigations \
 ### Certificate Validation
 
 The gateway validates:
+
 - Certificate not expired
 - Valid certificate chain
 - CN in allowed list
@@ -242,18 +244,18 @@ The gateway validates:
 
 ### Available Scopes
 
-| Scope | Description |
-|-------|-------------|
-| `investigations:read` | Read investigations |
-| `investigations:write` | Create/update investigations |
-| `investigations:delete` | Delete investigations |
-| `entities:read` | Read entities |
-| `entities:write` | Create/update entities |
-| `relationships:read` | Read relationships |
-| `relationships:write` | Create/update relationships |
-| `reports:read` | Read reports |
-| `reports:write` | Create reports |
-| `admin:*` | Full administrative access |
+| Scope                   | Description                  |
+| ----------------------- | ---------------------------- |
+| `investigations:read`   | Read investigations          |
+| `investigations:write`  | Create/update investigations |
+| `investigations:delete` | Delete investigations        |
+| `entities:read`         | Read entities                |
+| `entities:write`        | Create/update entities       |
+| `relationships:read`    | Read relationships           |
+| `relationships:write`   | Create/update relationships  |
+| `reports:read`          | Read reports                 |
+| `reports:write`         | Create reports               |
+| `admin:*`               | Full administrative access   |
 
 ### Requesting Multiple Scopes
 
@@ -301,11 +303,13 @@ curl -X POST https://api.summit.gov/api/roles \
 ### 1. Token Storage
 
 **DO:**
+
 - Store tokens in secure, httpOnly cookies
 - Use secure session storage
 - Encrypt tokens at rest
 
 **DON'T:**
+
 - Store tokens in localStorage
 - Log tokens
 - Expose tokens in URLs
@@ -327,6 +331,7 @@ All authentication endpoints are rate limited:
 ### 4. Audit Logging
 
 All authentication events are logged:
+
 - Successful logins
 - Failed login attempts
 - Token generation
@@ -351,6 +356,7 @@ curl -X POST https://api.summit.gov/api/keys/key_123/allowlist \
 ### Invalid Token
 
 **Error:**
+
 ```json
 {
   "error": "invalid_token",
@@ -359,6 +365,7 @@ curl -X POST https://api.summit.gov/api/keys/key_123/allowlist \
 ```
 
 **Solution:**
+
 - Check token expiration
 - Verify token signature
 - Ensure correct issuer/audience
@@ -367,6 +374,7 @@ curl -X POST https://api.summit.gov/api/keys/key_123/allowlist \
 ### Insufficient Scopes
 
 **Error:**
+
 ```json
 {
   "error": "insufficient_scope",
@@ -375,12 +383,14 @@ curl -X POST https://api.summit.gov/api/keys/key_123/allowlist \
 ```
 
 **Solution:**
+
 - Request token with required scopes
 - Contact admin to grant permissions
 
 ### Rate Limited
 
 **Error:**
+
 ```json
 {
   "error": "rate_limit_exceeded",
@@ -389,6 +399,7 @@ curl -X POST https://api.summit.gov/api/keys/key_123/allowlist \
 ```
 
 **Solution:**
+
 - Wait for specified seconds
 - Reduce request rate
 - Request higher rate limit tier
@@ -398,13 +409,13 @@ curl -X POST https://api.summit.gov/api/keys/key_123/allowlist \
 ### JavaScript/TypeScript
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 class SummitAPIClient {
   private accessToken: string;
 
   async login(email: string, password: string) {
-    const response = await axios.post('https://api.summit.gov/auth/login', {
+    const response = await axios.post("https://api.summit.gov/auth/login", {
       email,
       password,
     });
@@ -414,14 +425,11 @@ class SummitAPIClient {
   }
 
   async getInvestigations() {
-    const response = await axios.get(
-      'https://api.summit.gov/api/v1/investigations',
-      {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-        },
-      }
-    );
+    const response = await axios.get("https://api.summit.gov/api/v1/investigations", {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
 
     return response.data;
   }
@@ -475,6 +483,7 @@ curl -X GET https://api.summit.gov/api/v1/investigations \
 ## Support
 
 For authentication issues:
+
 - Email: auth-support@summit.gov
 - Documentation: https://docs.summit.gov/api/auth
 - Portal: https://api.summit.gov/portal

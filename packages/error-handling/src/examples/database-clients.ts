@@ -5,14 +5,10 @@
  * resilience patterns (retry, timeout, graceful degradation)
  */
 
-import pino from 'pino';
-import {
-  executeNeo4jQuery,
-  executePostgresQuery,
-  executeRedisOperation,
-} from '../database.js';
+import pino from "pino";
+import { executeNeo4jQuery, executePostgresQuery, executeRedisOperation } from "../database.js";
 
-const logger = pino({ name: 'DatabaseClients' });
+const logger = pino({ name: "DatabaseClients" });
 
 /**
  * Example: Enhanced Neo4j Client
@@ -29,10 +25,10 @@ export class ResilientNeo4jClient {
     options?: {
       timeoutMs?: number;
       retryable?: boolean;
-    },
+    }
   ): Promise<T[]> {
     return executeNeo4jQuery(
-      'query',
+      "query",
       async () => {
         const session = this.driver.session();
 
@@ -43,7 +39,7 @@ export class ResilientNeo4jClient {
           await session.close();
         }
       },
-      options,
+      options
     );
   }
 
@@ -54,10 +50,10 @@ export class ResilientNeo4jClient {
     fn: (tx: any) => Promise<T>,
     options?: {
       timeoutMs?: number;
-    },
+    }
   ): Promise<T> {
     return executeNeo4jQuery(
-      'writeTransaction',
+      "writeTransaction",
       async () => {
         const session = this.driver.session();
 
@@ -67,7 +63,7 @@ export class ResilientNeo4jClient {
           await session.close();
         }
       },
-      options,
+      options
     );
   }
 
@@ -78,10 +74,10 @@ export class ResilientNeo4jClient {
     fn: (tx: any) => Promise<T>,
     options?: {
       timeoutMs?: number;
-    },
+    }
   ): Promise<T> {
     return executeNeo4jQuery(
-      'readTransaction',
+      "readTransaction",
       async () => {
         const session = this.driver.session();
 
@@ -91,7 +87,7 @@ export class ResilientNeo4jClient {
           await session.close();
         }
       },
-      options,
+      options
     );
   }
 }
@@ -111,15 +107,15 @@ export class ResilientPostgresClient {
     options?: {
       timeoutMs?: number;
       retryable?: boolean;
-    },
+    }
   ): Promise<T[]> {
     return executePostgresQuery(
-      'query',
+      "query",
       async () => {
         const result = await this.pool.query(text, params);
         return result.rows;
       },
-      options,
+      options
     );
   }
 
@@ -130,12 +126,12 @@ export class ResilientPostgresClient {
     const client = await this.pool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
       const result = await fn(client);
-      await client.query('COMMIT');
+      await client.query("COMMIT");
       return result;
     } catch (error: any) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -155,12 +151,12 @@ export class ResilientRedisClient {
    */
   async get<T = any>(key: string): Promise<T | null> {
     return executeRedisOperation(
-      'get',
+      "get",
       async () => {
         const value = await this.client.get(key);
         return value ? JSON.parse(value) : null;
       },
-      null, // Fallback to null if Redis fails
+      null // Fallback to null if Redis fails
     );
   }
 
@@ -168,13 +164,9 @@ export class ResilientRedisClient {
    * Set value with graceful degradation
    * Logs error but doesn't throw if Redis is unavailable
    */
-  async set(
-    key: string,
-    value: any,
-    ttlSeconds?: number,
-  ): Promise<boolean> {
+  async set(key: string, value: any, ttlSeconds?: number): Promise<boolean> {
     return executeRedisOperation(
-      'set',
+      "set",
       async () => {
         const serialized = JSON.stringify(value);
 
@@ -186,7 +178,7 @@ export class ResilientRedisClient {
 
         return true;
       },
-      false, // Fallback to false if Redis fails
+      false // Fallback to false if Redis fails
     );
   }
 
@@ -195,12 +187,12 @@ export class ResilientRedisClient {
    */
   async del(key: string): Promise<boolean> {
     return executeRedisOperation(
-      'del',
+      "del",
       async () => {
         const result = await this.client.del(key);
         return result > 0;
       },
-      false,
+      false
     );
   }
 
@@ -209,14 +201,12 @@ export class ResilientRedisClient {
    */
   async mget<T = any>(keys: string[]): Promise<(T | null)[]> {
     return executeRedisOperation(
-      'mget',
+      "mget",
       async () => {
         const values = await this.client.mget(...keys);
-        return values.map((v: string | null) =>
-          v ? JSON.parse(v) : null,
-        );
+        return values.map((v: string | null) => (v ? JSON.parse(v) : null));
       },
-      keys.map(() => null), // Fallback to array of nulls
+      keys.map(() => null) // Fallback to array of nulls
     );
   }
 }

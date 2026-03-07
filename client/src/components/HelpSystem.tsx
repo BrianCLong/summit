@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import DOMPurify from 'dompurify';
+import React, { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
 
 interface HelpTopic {
   id: string;
@@ -15,23 +15,17 @@ interface HelpSystemProps {
   initialTopic?: string;
 }
 
-const HelpSystem: React.FC<HelpSystemProps> = ({
-  isVisible,
-  onClose,
-  initialTopic,
-}) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [activeTopic, setActiveTopic] = useState<string | null>(
-    initialTopic || null,
-  );
+const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopic }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [activeTopic, setActiveTopic] = useState<string | null>(initialTopic || null);
 
   const helpTopics: HelpTopic[] = [
     {
-      id: 'getting-started',
-      title: 'Getting Started',
-      category: 'basics',
-      keywords: ['start', 'begin', 'introduction', 'overview'],
+      id: "getting-started",
+      title: "Getting Started",
+      category: "basics",
+      keywords: ["start", "begin", "introduction", "overview"],
       content: `
         # Getting Started with IntelGraph
 
@@ -67,10 +61,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'advanced-search',
-      title: 'Advanced Search Guide',
-      category: 'search',
-      keywords: ['search', 'query', 'filter', 'dsl', 'syntax'],
+      id: "advanced-search",
+      title: "Advanced Search Guide",
+      category: "search",
+      keywords: ["search", "query", "filter", "dsl", "syntax"],
       content: `
         # Advanced Search Guide
 
@@ -106,10 +100,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'graph-visualization',
-      title: 'Graph Visualization',
-      category: 'analysis',
-      keywords: ['graph', 'visualization', 'network', 'nodes', 'relationships'],
+      id: "graph-visualization",
+      title: "Graph Visualization",
+      category: "analysis",
+      keywords: ["graph", "visualization", "network", "nodes", "relationships"],
       content: `
         # Graph Visualization Guide
 
@@ -145,10 +139,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'investigations',
-      title: 'Investigation Management',
-      category: 'investigations',
-      keywords: ['investigation', 'case', 'manage', 'workflow', 'status'],
+      id: "investigations",
+      title: "Investigation Management",
+      category: "investigations",
+      keywords: ["investigation", "case", "manage", "workflow", "status"],
       content: `
         # Investigation Management
 
@@ -183,10 +177,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'data-export',
-      title: 'Data Export & Reports',
-      category: 'export',
-      keywords: ['export', 'report', 'pdf', 'csv', 'download', 'template'],
+      id: "data-export",
+      title: "Data Export & Reports",
+      category: "export",
+      keywords: ["export", "report", "pdf", "csv", "download", "template"],
       content: `
         # Data Export & Reports
 
@@ -230,10 +224,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'keyboard-shortcuts',
-      title: 'Keyboard Shortcuts',
-      category: 'reference',
-      keywords: ['keyboard', 'shortcuts', 'hotkeys', 'productivity'],
+      id: "keyboard-shortcuts",
+      title: "Keyboard Shortcuts",
+      category: "reference",
+      keywords: ["keyboard", "shortcuts", "hotkeys", "productivity"],
       content: `
         # Keyboard Shortcuts
 
@@ -287,10 +281,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'troubleshooting',
-      title: 'Troubleshooting',
-      category: 'support',
-      keywords: ['help', 'problem', 'error', 'bug', 'issue', 'troubleshoot'],
+      id: "troubleshooting",
+      title: "Troubleshooting",
+      category: "support",
+      keywords: ["help", "problem", "error", "bug", "issue", "troubleshoot"],
       content: `
         # Troubleshooting
 
@@ -340,16 +334,16 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
       `,
     },
     {
-      id: 'enterprise-features',
-      title: 'Enterprise Features Guide',
-      category: 'enterprise',
+      id: "enterprise-features",
+      title: "Enterprise Features Guide",
+      category: "enterprise",
       keywords: [
-        'enterprise',
-        'collaboration',
-        'security',
-        'monitoring',
-        'integrations',
-        'advanced',
+        "enterprise",
+        "collaboration",
+        "security",
+        "monitoring",
+        "integrations",
+        "advanced",
       ],
       content: `
         # Enterprise Features Guide
@@ -410,26 +404,23 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
   ];
 
   const categories = [
-    { id: 'all', label: 'All Topics' },
-    { id: 'basics', label: 'Getting Started' },
-    { id: 'search', label: 'Search & Filtering' },
-    { id: 'analysis', label: 'Analysis & Visualization' },
-    { id: 'investigations', label: 'Investigations' },
-    { id: 'export', label: 'Export & Reports' },
-    { id: 'enterprise', label: 'Enterprise Features' },
-    { id: 'reference', label: 'Reference' },
-    { id: 'support', label: 'Support' },
+    { id: "all", label: "All Topics" },
+    { id: "basics", label: "Getting Started" },
+    { id: "search", label: "Search & Filtering" },
+    { id: "analysis", label: "Analysis & Visualization" },
+    { id: "investigations", label: "Investigations" },
+    { id: "export", label: "Export & Reports" },
+    { id: "enterprise", label: "Enterprise Features" },
+    { id: "reference", label: "Reference" },
+    { id: "support", label: "Support" },
   ];
 
   const filteredTopics = helpTopics.filter((topic) => {
-    const matchesCategory =
-      selectedCategory === 'all' || topic.category === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || topic.category === selectedCategory;
     const matchesSearch =
       !searchQuery ||
       topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      topic.keywords.some((keyword) =>
-        keyword.toLowerCase().includes(searchQuery.toLowerCase()),
-      ) ||
+      topic.keywords.some((keyword) => keyword.toLowerCase().includes(searchQuery.toLowerCase())) ||
       topic.content.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesCategory && matchesSearch;
@@ -452,10 +443,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
           <div className="p-4 border-b">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Help & Documentation</h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                 ✕
               </button>
             </div>
@@ -481,8 +469,8 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
                     w-full text-left px-3 py-2 rounded text-sm
                     ${
                       selectedCategory === category.id
-                        ? 'bg-blue-100 text-blue-800 font-medium'
-                        : 'hover:bg-gray-100'
+                        ? "bg-blue-100 text-blue-800 font-medium"
+                        : "hover:bg-gray-100"
                     }
                   `}
                 >
@@ -500,13 +488,11 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
                 onClick={() => setActiveTopic(topic.id)}
                 className={`
                   w-full text-left p-4 border-b hover:bg-gray-100
-                  ${activeTopic === topic.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}
+                  ${activeTopic === topic.id ? "bg-blue-50 border-l-4 border-l-blue-500" : ""}
                 `}
               >
                 <div className="font-medium text-gray-900">{topic.title}</div>
-                <div className="text-sm text-gray-500 capitalize mt-1">
-                  {topic.category}
-                </div>
+                <div className="text-sm text-gray-500 capitalize mt-1">{topic.category}</div>
               </button>
             ))}
           </div>
@@ -527,31 +513,28 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
                       dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(
                           topic.content
-                            .split('\n')
+                            .split("\n")
                             .map((line) => line.trim())
-                            .join('\n')
-                            .replace(
-                              /^# (.*)/gm,
-                              '<h1 class="text-3xl font-bold mb-4">$1</h1>',
-                            )
+                            .join("\n")
+                            .replace(/^# (.*)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
                             .replace(
                               /^## (.*)/gm,
-                              '<h2 class="text-2xl font-semibold mb-3 mt-6">$1</h2>',
+                              '<h2 class="text-2xl font-semibold mb-3 mt-6">$1</h2>'
                             )
                             .replace(
                               /^### (.*)/gm,
-                              '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>',
+                              '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>'
                             )
                             // eslint-disable-next-line no-useless-escape
-                            .replace(/^\- (.*)/gm, '<li>$1</li>')
-                            .replace(/^(\d+)\. (.*)/gm, '<li>$1. $1</li>')
+                            .replace(/^\- (.*)/gm, "<li>$1</li>")
+                            .replace(/^(\d+)\. (.*)/gm, "<li>$1. $1</li>")
                             .replace(
                               /`([^`]+)`/g,
-                              '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>',
+                              '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>'
                             )
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\n\n/g, '</p><p>')
-                            .replace(/^(.*)$/gm, '<p>$1</p>'),
+                            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                            .replace(/\n\n/g, "</p><p>")
+                            .replace(/^(.*)$/gm, "<p>$1</p>")
                         ),
                       }}
                     />
@@ -563,12 +546,8 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
             <div className="flex-1 flex items-center justify-center text-gray-500">
               <div className="text-center">
                 <div className="text-4xl mb-4">📚</div>
-                <div className="text-lg">
-                  Select a help topic to get started
-                </div>
-                <div className="text-sm mt-2">
-                  Use the search or browse categories on the left
-                </div>
+                <div className="text-lg">Select a help topic to get started</div>
+                <div className="text-sm mt-2">Use the search or browse categories on the left</div>
               </div>
             </div>
           )}
@@ -599,12 +578,7 @@ export const useHelpSystem = () => {
     showHelp,
     hideHelp,
     HelpComponent: (props: Partial<HelpSystemProps>) => (
-      <HelpSystem
-        isVisible={isVisible}
-        onClose={hideHelp}
-        initialTopic={initialTopic}
-        {...props}
-      />
+      <HelpSystem isVisible={isVisible} onClose={hideHelp} initialTopic={initialTopic} {...props} />
     ),
   };
 };

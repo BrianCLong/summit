@@ -15,6 +15,7 @@ This checklist must be completed by the Release Captain before tagging a General
 ## 2. Evidence Collection (Automated)
 
 The release pipeline will generate the following. Verify their existence after the dry-run:
+
 - [ ] `sbom.cdx.json` (CycloneDX SBOM)
 - [ ] `vuln-report.json` (Vulnerability Report)
 - [ ] `test-summary.json` (Test Results)

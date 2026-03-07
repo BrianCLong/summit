@@ -208,11 +208,8 @@ type QueryBudget {
 }
 
 type Mutation {
-  setQueryBudget(
-    opId: String!
-    dailyCostCapUSD: Float!
-    action: String!
-  ): Boolean @auth(abac: "admin.write")
+  setQueryBudget(opId: String!, dailyCostCapUSD: Float!, action: String!): Boolean
+    @auth(abac: "admin.write")
 }
 
 type DatasetQuality {

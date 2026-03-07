@@ -1,4 +1,4 @@
-import { ActionProposal, SimulationOutcome } from '../core/types.js';
+import { ActionProposal, SimulationOutcome } from "../core/types.js";
 
 export type SimulationModel = (
   proposal: ActionProposal,

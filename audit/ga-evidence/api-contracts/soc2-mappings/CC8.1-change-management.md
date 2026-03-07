@@ -17,12 +17,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 **Mechanism:** All API schema changes must pass through CI/CD validation
 
 **Implementation:**
+
 - Schema diff automatically runs on every PR
 - Breaking changes trigger explicit warnings
 - Merge is blocked if breaking changes detected without version bump
 - Platform team approval required for version bumps
 
 **Evidence:**
+
 - CI workflow configuration: `/.github/workflows/schema-diff.yml`
 - Merge protection rules in GitHub
 - Audit log: `/audit/ga-evidence/api-contracts/audit-log/schema-checks.jsonl`
@@ -32,12 +34,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 **Mechanism:** Version policy documents all change categories and requirements
 
 **Implementation:**
+
 - Breaking vs non-breaking changes clearly defined
 - Version bump requirements specified
 - Migration guide templates provided
 - Deprecation timelines documented
 
 **Evidence:**
+
 - Policy document: `/api-schemas/VERSION_POLICY.md`
 - API versioning guide: `/docs/API_VERSIONING.md`
 - Version registry: `/api-schemas/registry.json`
@@ -47,12 +51,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 **Mechanism:** Automated schema diffing validates all changes
 
 **Implementation:**
+
 - GraphQL schema comparison
 - OpenAPI spec comparison
 - Breaking change detection
 - Impact categorization (critical/high/medium/low)
 
 **Evidence:**
+
 - Diff script: `/scripts/schema-diff.ts`
 - Diff reports: `/audit/ga-evidence/api-contracts/diff-reports/*.json`
 - Test results in CI artifacts
@@ -62,12 +68,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 **Mechanism:** Multi-level approval for different change types
 
 **Implementation:**
+
 - Non-breaking changes: Automated approval if CI passes
 - Breaking changes: Blocked until version bump
 - Version bumps: Require platform team approval
 - All changes: Code review required
 
 **Evidence:**
+
 - GitHub branch protection settings
 - PR approval requirements
 - CI status checks (required)
@@ -78,12 +86,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 **Mechanism:** Controlled rollout with version snapshots
 
 **Implementation:**
+
 - Schema snapshots created before deployment
 - Version registry updated atomically
 - Middleware enforces version detection
 - Rollback possible via snapshot restoration
 
 **Evidence:**
+
 - Schema snapshots: `/api-schemas/v{VERSION}/`
 - Version metadata with timestamps
 - Deployment logs
@@ -93,34 +103,36 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 
 ### Primary Evidence
 
-| Artifact | Location | Purpose | Retention |
-|----------|----------|---------|-----------|
-| Version Policy | `/api-schemas/VERSION_POLICY.md` | Change categorization rules | Indefinite |
-| Schema Snapshots | `/api-schemas/v{VERSION}/` | Immutable contract baselines | Indefinite |
-| Diff Reports | `/audit/ga-evidence/api-contracts/diff-reports/` | Change analysis | 7 years |
-| Audit Log | `/audit/ga-evidence/api-contracts/audit-log/` | Authorization trail | 7 years |
-| CI Workflow | `/.github/workflows/schema-diff.yml` | Automated enforcement | Version controlled |
+| Artifact         | Location                                         | Purpose                      | Retention          |
+| ---------------- | ------------------------------------------------ | ---------------------------- | ------------------ |
+| Version Policy   | `/api-schemas/VERSION_POLICY.md`                 | Change categorization rules  | Indefinite         |
+| Schema Snapshots | `/api-schemas/v{VERSION}/`                       | Immutable contract baselines | Indefinite         |
+| Diff Reports     | `/audit/ga-evidence/api-contracts/diff-reports/` | Change analysis              | 7 years            |
+| Audit Log        | `/audit/ga-evidence/api-contracts/audit-log/`    | Authorization trail          | 7 years            |
+| CI Workflow      | `/.github/workflows/schema-diff.yml`             | Automated enforcement        | Version controlled |
 
 ### Supporting Evidence
 
-| Artifact | Location | Purpose |
-|----------|----------|---------|
-| Version Middleware | `/server/src/middleware/api-version.ts` | Runtime enforcement |
-| OpenAPI Specs | `/api-schemas/v{VERSION}/openapi-spec-v{VERSION}.json` | REST API contracts |
-| GraphQL Schemas | `/api-schemas/v{VERSION}/graphql-schema-v{VERSION}.graphql` | GraphQL contracts |
-| Version Registry | `/api-schemas/registry.json` | Version lifecycle management |
+| Artifact           | Location                                                    | Purpose                      |
+| ------------------ | ----------------------------------------------------------- | ---------------------------- |
+| Version Middleware | `/server/src/middleware/api-version.ts`                     | Runtime enforcement          |
+| OpenAPI Specs      | `/api-schemas/v{VERSION}/openapi-spec-v{VERSION}.json`      | REST API contracts           |
+| GraphQL Schemas    | `/api-schemas/v{VERSION}/graphql-schema-v{VERSION}.graphql` | GraphQL contracts            |
+| Version Registry   | `/api-schemas/registry.json`                                | Version lifecycle management |
 
 ## Control Testing
 
 ### Test 1: Unauthorized Breaking Change Prevention
 
 **Test Procedure:**
+
 1. Create PR with breaking change (e.g., remove GraphQL field)
 2. Observe CI schema diff check
 3. Verify merge is blocked
 4. Verify audit log entry created
 
 **Expected Result:**
+
 - ❌ CI check fails
 - ❌ Merge button disabled
 - ⚠️ Breaking change warning in PR comment
@@ -131,12 +143,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 ### Test 2: Non-Breaking Change Approval
 
 **Test Procedure:**
+
 1. Create PR with non-breaking change (e.g., add optional field)
 2. Observe CI schema diff check
 3. Verify merge is allowed after code review
 4. Verify audit log entry created
 
 **Expected Result:**
+
 - ✅ CI check passes
 - ✅ Merge allowed after approval
 - ℹ️ Non-breaking change noted in PR comment
@@ -147,12 +161,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 ### Test 3: Version Bump Authorization
 
 **Test Procedure:**
+
 1. Create PR with breaking changes and version bump
 2. Update version registry and create snapshots
 3. Request platform team approval
 4. Verify merge allowed after approval
 
 **Expected Result:**
+
 - ✅ CI acknowledges version bump
 - ✅ New snapshots created
 - ✅ Platform team approval obtained
@@ -163,12 +179,14 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 ### Test 4: Audit Trail Completeness
 
 **Test Procedure:**
+
 1. Review audit log for sample period
 2. Verify all required fields present
 3. Cross-reference with GitHub PR history
 4. Verify 100% coverage of schema changes
 
 **Expected Result:**
+
 - ✅ All PRs affecting schemas have audit entries
 - ✅ Timestamps, authors, results captured
 - ✅ No gaps in audit trail
@@ -229,6 +247,7 @@ Ensure all API changes are authorized, documented, tested, and approved before i
 ### Monthly Review
 
 Platform team reviews:
+
 1. All breaking changes from past month
 2. Version bump justifications
 3. Deprecation/sunset status
@@ -244,9 +263,9 @@ Platform team reviews:
 
 ## Revision History
 
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-12-27 | 1.0 | Initial control documentation | Platform Team |
+| Date       | Version | Changes                       | Author        |
+| ---------- | ------- | ----------------------------- | ------------- |
+| 2025-12-27 | 1.0     | Initial control documentation | Platform Team |
 
 ---
 

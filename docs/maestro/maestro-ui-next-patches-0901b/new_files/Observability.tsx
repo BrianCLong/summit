@@ -1,12 +1,12 @@
-import React from 'react';
-import GrafanaPanel from '../components/GrafanaPanel';
+import React from "react";
+import GrafanaPanel from "../components/GrafanaPanel";
 
 export default function ObservabilityPage() {
   const cfg = (window as any).__MAESTRO_CFG__ || {};
   const uids = cfg.grafanaDashboards || {
-    overview: 'maestro-overview',
-    slo: 'maestro-slo',
-    cost: 'maestro-cost',
+    overview: "maestro-overview",
+    slo: "maestro-slo",
+    cost: "maestro-cost",
   };
   return (
     <div className="p-6 space-y-4">

@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       scan_type:
-        description: 'Type of scan to perform'
+        description: "Type of scan to perform"
         required: true
-        default: 'baseline'
+        default: "baseline"
         type: choice
         options:
           - baseline
@@ -24,7 +24,7 @@ on:
 
   # Weekly scheduled scan
   schedule:
-    - cron: '0 2 * * 0' # Every Sunday at 2 AM UTC
+    - cron: "0 2 * * 0" # Every Sunday at 2 AM UTC
 
 permissions:
   contents: read
@@ -46,8 +46,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -66,12 +66,12 @@ jobs:
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'http://localhost:4000'
-          rules_file_name: '.github/workflows/config/zap-rules.tsv'
-          cmd_options: '-a -j -l WARN'
+          target: "http://localhost:4000"
+          rules_file_name: ".github/workflows/config/zap-rules.tsv"
+          cmd_options: "-a -j -l WARN"
           allow_issue_writing: true
           fail_action: ${{ github.event_name == 'pull_request' }}
-          artifact_name: 'zap-baseline-report'
+          artifact_name: "zap-baseline-report"
 
       - name: Upload ZAP Baseline Report
         uses: actions/upload-artifact@v4
@@ -96,8 +96,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -119,13 +119,13 @@ jobs:
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
-          target: 'http://localhost:4000'
-          format: 'openapi'
-          api_spec: 'openapi.json'
-          cmd_options: '-a -j -l WARN'
+          target: "http://localhost:4000"
+          format: "openapi"
+          api_spec: "openapi.json"
+          cmd_options: "-a -j -l WARN"
           allow_issue_writing: true
           fail_action: false
-          artifact_name: 'zap-api-report'
+          artifact_name: "zap-api-report"
 
       - name: Upload ZAP API Report
         uses: actions/upload-artifact@v4
@@ -150,8 +150,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -168,12 +168,12 @@ jobs:
       - name: ZAP Full Scan
         uses: zaproxy/action-full-scan@v0.10.0
         with:
-          target: 'http://localhost:4000'
-          rules_file_name: '.github/workflows/config/zap-rules.tsv'
-          cmd_options: '-a -j -l WARN'
+          target: "http://localhost:4000"
+          rules_file_name: ".github/workflows/config/zap-rules.tsv"
+          cmd_options: "-a -j -l WARN"
           allow_issue_writing: true
           fail_action: false
-          artifact_name: 'zap-full-report'
+          artifact_name: "zap-full-report"
 
       - name: Upload ZAP Full Report
         uses: actions/upload-artifact@v4
@@ -221,8 +221,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -285,8 +285,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts

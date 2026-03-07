@@ -4,10 +4,10 @@
  * Displays risk indicators for HUMINT sources.
  */
 
-import React from 'react';
-import type { RiskIndicator } from '../asset-tracking.js';
-import type { RiskLevel } from '../constants.js';
-import { RISK_LEVELS } from '../constants.js';
+import React from "react";
+import type { RiskIndicator } from "../asset-tracking.js";
+import type { RiskLevel } from "../constants.js";
+import { RISK_LEVELS } from "../constants.js";
 
 export interface RiskIndicatorCardProps {
   indicator: RiskIndicator;
@@ -19,46 +19,46 @@ export interface RiskIndicatorCardProps {
 
 const getRiskColor = (severity: RiskLevel): string => {
   const colors: Record<RiskLevel, string> = {
-    MINIMAL: '#10b981',
-    LOW: '#22c55e',
-    MODERATE: '#f59e0b',
-    ELEVATED: '#f97316',
-    HIGH: '#ef4444',
-    CRITICAL: '#dc2626',
+    MINIMAL: "#10b981",
+    LOW: "#22c55e",
+    MODERATE: "#f59e0b",
+    ELEVATED: "#f97316",
+    HIGH: "#ef4444",
+    CRITICAL: "#dc2626",
   };
   return colors[severity];
 };
 
 const getRiskBackground = (severity: RiskLevel): string => {
   const colors: Record<RiskLevel, string> = {
-    MINIMAL: '#ecfdf5',
-    LOW: '#f0fdf4',
-    MODERATE: '#fffbeb',
-    ELEVATED: '#fff7ed',
-    HIGH: '#fef2f2',
-    CRITICAL: '#fef2f2',
+    MINIMAL: "#ecfdf5",
+    LOW: "#f0fdf4",
+    MODERATE: "#fffbeb",
+    ELEVATED: "#fff7ed",
+    HIGH: "#fef2f2",
+    CRITICAL: "#fef2f2",
   };
   return colors[severity];
 };
 
 const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(date).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
-const getIndicatorTypeIcon = (type: RiskIndicator['indicatorType']): string => {
-  const icons: Record<RiskIndicator['indicatorType'], string> = {
-    BEHAVIORAL: '🔍',
-    COMMUNICATION: '📡',
-    FINANCIAL: '💰',
-    TRAVEL: '✈️',
-    COUNTERINTEL: '🛡️',
-    OPERATIONAL: '⚙️',
+const getIndicatorTypeIcon = (type: RiskIndicator["indicatorType"]): string => {
+  const icons: Record<RiskIndicator["indicatorType"], string> = {
+    BEHAVIORAL: "🔍",
+    COMMUNICATION: "📡",
+    FINANCIAL: "💰",
+    TRAVEL: "✈️",
+    COUNTERINTEL: "🛡️",
+    OPERATIONAL: "⚙️",
   };
   return icons[type];
 };
@@ -81,14 +81,9 @@ export const RiskIndicatorCard: React.FC<RiskIndicatorCardProps> = ({
           backgroundColor: getRiskBackground(indicator.severity),
         }}
       >
-        <span className="indicator-icon">
-          {getIndicatorTypeIcon(indicator.indicatorType)}
-        </span>
+        <span className="indicator-icon">{getIndicatorTypeIcon(indicator.indicatorType)}</span>
         <span className="indicator-type">{indicator.indicatorType}</span>
-        <span
-          className="indicator-severity"
-          style={{ color: getRiskColor(indicator.severity) }}
-        >
+        <span className="indicator-severity" style={{ color: getRiskColor(indicator.severity) }}>
           {indicator.severity}
         </span>
         <span className="indicator-desc">{indicator.description}</span>
@@ -107,12 +102,8 @@ export const RiskIndicatorCard: React.FC<RiskIndicatorCardProps> = ({
       {/* Header */}
       <div className="indicator-header">
         <div className="indicator-title">
-          <span className="indicator-icon">
-            {getIndicatorTypeIcon(indicator.indicatorType)}
-          </span>
-          <span className="indicator-type">
-            {indicator.indicatorType.replace(/_/g, ' ')}
-          </span>
+          <span className="indicator-icon">{getIndicatorTypeIcon(indicator.indicatorType)}</span>
+          <span className="indicator-type">{indicator.indicatorType.replace(/_/g, " ")}</span>
         </div>
         <div
           className="severity-badge"
@@ -163,37 +154,26 @@ export const RiskIndicatorCard: React.FC<RiskIndicatorCardProps> = ({
           <div className="resolved-info">
             <span className="resolved-label">Resolved:</span>
             <span className="resolved-date">{formatDate(indicator.resolvedAt)}</span>
-            {indicator.resolvedBy && (
-              <span className="resolved-by">by {indicator.resolvedBy}</span>
-            )}
+            {indicator.resolvedBy && <span className="resolved-by">by {indicator.resolvedBy}</span>}
           </div>
         )}
       </div>
 
       {/* Actions */}
-      {indicator.status === 'ACTIVE' && (
+      {indicator.status === "ACTIVE" && (
         <div className="indicator-actions">
           {onMitigate && (
-            <button
-              className="btn-action mitigate"
-              onClick={() => onMitigate(indicator.id)}
-            >
+            <button className="btn-action mitigate" onClick={() => onMitigate(indicator.id)}>
               Mark Mitigated
             </button>
           )}
           {onDismiss && (
-            <button
-              className="btn-action dismiss"
-              onClick={() => onDismiss(indicator.id)}
-            >
+            <button className="btn-action dismiss" onClick={() => onDismiss(indicator.id)}>
               Dismiss
             </button>
           )}
-          {onEscalate && indicator.severity !== 'CRITICAL' && (
-            <button
-              className="btn-action escalate"
-              onClick={() => onEscalate(indicator.id)}
-            >
+          {onEscalate && indicator.severity !== "CRITICAL" && (
+            <button className="btn-action escalate" onClick={() => onEscalate(indicator.id)}>
               Escalate
             </button>
           )}
@@ -211,19 +191,16 @@ export interface RiskSummaryProps {
   onViewAll?: () => void;
 }
 
-export const RiskSummary: React.FC<RiskSummaryProps> = ({
-  indicators,
-  onViewAll,
-}) => {
-  const activeIndicators = indicators.filter((i) => i.status === 'ACTIVE');
+export const RiskSummary: React.FC<RiskSummaryProps> = ({ indicators, onViewAll }) => {
+  const activeIndicators = indicators.filter((i) => i.status === "ACTIVE");
   const bySeverity: Record<string, number> = {};
 
   activeIndicators.forEach((i) => {
     bySeverity[i.severity] = (bySeverity[i.severity] || 0) + 1;
   });
 
-  const criticalCount = bySeverity['CRITICAL'] || 0;
-  const highCount = bySeverity['HIGH'] || 0;
+  const criticalCount = bySeverity["CRITICAL"] || 0;
+  const highCount = bySeverity["HIGH"] || 0;
 
   return (
     <div className="risk-summary">
@@ -260,7 +237,7 @@ export const RiskSummary: React.FC<RiskSummaryProps> = ({
           {(criticalCount > 0 || highCount > 0) && (
             <div className="risk-alert">
               ⚠️ {criticalCount + highCount} high-priority indicator
-              {criticalCount + highCount > 1 ? 's' : ''} require attention
+              {criticalCount + highCount > 1 ? "s" : ""} require attention
             </div>
           )}
 

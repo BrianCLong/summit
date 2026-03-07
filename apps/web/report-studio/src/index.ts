@@ -1,1 +1,1 @@
-export const render = () => 'report ready';
+export const render = () => 'report ready'

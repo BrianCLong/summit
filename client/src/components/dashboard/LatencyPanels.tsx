@@ -1,15 +1,8 @@
-import React from 'react';
-import { useAppSelector } from '../../store/hooks';
-import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
+import React from "react";
+import { useAppSelector } from "../../store/hooks";
+import { Card, CardContent, Stack, Typography, Skeleton } from "@mui/material";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
 
 export default function LatencyPanels() {
   const { tenant, status, operation } = useAppSelector((s: any) => s.ui);
@@ -18,9 +11,7 @@ export default function LatencyPanels() {
     mock: { valueMs: 120.4 },
     deps: [tenant, status, operation],
   });
-  const { data: trend, loading: loadingTrend } = useSafeQuery<
-    { ts: number; ms: number }[]
-  >({
+  const { data: trend, loading: loadingTrend } = useSafeQuery<{ ts: number; ms: number }[]>({
     queryKey: `p95_trend_${tenant}_${status}`,
     mock: Array.from({ length: 20 }).map((_, i) => ({
       ts: Date.now() - (20 - i) * 60000,

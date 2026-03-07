@@ -1,11 +1,8 @@
-import { createBudgetSnapshot } from 'common-types';
+import { createBudgetSnapshot } from "common-types";
 
 export class BudgetGuardian {
   constructor(options) {
-    this.baselineMonthlyUSD = Math.max(
-      0,
-      Number(options?.baselineMonthlyUSD ?? 0),
-    );
+    this.baselineMonthlyUSD = Math.max(0, Number(options?.baselineMonthlyUSD ?? 0));
     this.alertThreshold = options?.alertThreshold ?? 0.8;
     this.savingsUSD = 0;
     this.reset();
@@ -53,20 +50,13 @@ export class BudgetGuardian {
       consumedUSD: this.consumedUSD,
       timestamp,
     });
-    const burnRatio =
-      this.baselineMonthlyUSD > 0
-        ? this.consumedUSD / this.baselineMonthlyUSD
-        : 0;
+    const burnRatio = this.baselineMonthlyUSD > 0 ? this.consumedUSD / this.baselineMonthlyUSD : 0;
     const alert = burnRatio >= this.alertThreshold;
     const actions = [];
     if (alert) {
-      actions.push(
-        'increaseBatching',
-        'shiftToOpenWeights',
-        'throttleExperiments',
-      );
+      actions.push("increaseBatching", "shiftToOpenWeights", "throttleExperiments");
     } else if (snapshot.headroomPct < 0.25) {
-      actions.push('enableQuantization', 'reuseKVCache');
+      actions.push("enableQuantization", "reuseKVCache");
     }
     return {
       snapshot,

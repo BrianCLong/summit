@@ -8,10 +8,6 @@
     "Cargo.lock",
     "Cargo.toml"
   ],
-  "deps_delta_files": [
-    "deps_delta.md",
-    "DEPENDENCY_DELTA.md",
-    "dependency-delta.md"
-  ],
+  "deps_delta_files": ["deps_delta.md", "DEPENDENCY_DELTA.md", "dependency-delta.md"],
   "ignore_paths": []
 }

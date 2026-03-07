@@ -18,7 +18,7 @@ const mockUser = {
   email: 'test@example.com',
   role: 'admin',
   permissions: ['*'],
-  tenantId: 'tenant-1'
+  tenantId: 'tenant-1',
 }
 
 vi.mock('@/contexts/AuthContext', () => ({
@@ -42,7 +42,6 @@ vi.mock('@/hooks/useRbac', () => ({
   }),
 }))
 
-
 describe('Accessibility Checks', () => {
   it('Navigation should have no accessibility violations', async () => {
     const { container } = render(
@@ -58,7 +57,7 @@ describe('Accessibility Checks', () => {
   })
 
   it('Layout structure should have no accessibility violations', async () => {
-     const { container } = render(
+    const { container } = render(
       <BrowserRouter>
         <TooltipProvider>
           <Layout />

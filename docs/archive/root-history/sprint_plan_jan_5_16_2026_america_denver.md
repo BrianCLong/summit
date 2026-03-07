@@ -59,22 +59,22 @@ Ship a stable, demo-ready release of the **end-to-end golden path** with collabo
 
 ## 4) Backlog (Ready for Sprint)
 
-| ID | Title | Owner | Est | Dependencies | Acceptance Criteria (summary) |
-| --- | --- | --- | ---: | --- | --- |
-| REL-101 | Authority Compiler: Templates Gallery | Designer+FE | 3 | — | Choose/apply template; persists with doc |
-| REL-102 | Authority Compiler: Suggestions & Change Log | FE+BE | 5 | REL-101 | Suggest/accept/reject; audit trail export |
-| REL-111 | License Registry: Policy-as-Code w/ Tests | BE | 5 | — | Policies versioned; unit tests green |
-| REL-112 | License Notifications & Override SLAs | BE+Ops | 3 | REL-111 | Webhook/email; timers recorded |
-| REL-121 | RBAC + RLS Predicates (API) | BE | 5 | — | Predicates enforced; 20 contract tests |
-| REL-122 | RBAC + RLS UI Messaging | FE | 3 | REL-121 | Clear “blocked by + owner/why” |
-| REL-131 | Graph Cache & Invalidation | BE | 3 | — | Hit-rate metric; safe invalidation |
-| REL-132 | Query Perf Gate & SLO Panel | BE+Ops | 2 | REL-131 | p95 panel; alert wired |
-| REL-141 | Verifier v1.1 (Semver + JSON CLI) | BE | 3 | — | n-1 compatibility; structured output |
-| REL-151 | Report Studio: Redaction Presets + PASS Badge | FE | 3 | REL-141 | Presets apply; badge accurate |
-| REL-161 | Canary + Rollback Runbook Update | Ops | 2 | — | Runbook PR merged; drill completed |
-| REL-171* | Materialized Views for Heavy Joins | BE | 3 | — | Precompute two hot paths; compare perf |
+| ID        | Title                                         | Owner       | Est | Dependencies | Acceptance Criteria (summary)             |
+| --------- | --------------------------------------------- | ----------- | --: | ------------ | ----------------------------------------- |
+| REL-101   | Authority Compiler: Templates Gallery         | Designer+FE |   3 | —            | Choose/apply template; persists with doc  |
+| REL-102   | Authority Compiler: Suggestions & Change Log  | FE+BE       |   5 | REL-101      | Suggest/accept/reject; audit trail export |
+| REL-111   | License Registry: Policy-as-Code w/ Tests     | BE          |   5 | —            | Policies versioned; unit tests green      |
+| REL-112   | License Notifications & Override SLAs         | BE+Ops      |   3 | REL-111      | Webhook/email; timers recorded            |
+| REL-121   | RBAC + RLS Predicates (API)                   | BE          |   5 | —            | Predicates enforced; 20 contract tests    |
+| REL-122   | RBAC + RLS UI Messaging                       | FE          |   3 | REL-121      | Clear “blocked by + owner/why”            |
+| REL-131   | Graph Cache & Invalidation                    | BE          |   3 | —            | Hit-rate metric; safe invalidation        |
+| REL-132   | Query Perf Gate & SLO Panel                   | BE+Ops      |   2 | REL-131      | p95 panel; alert wired                    |
+| REL-141   | Verifier v1.1 (Semver + JSON CLI)             | BE          |   3 | —            | n-1 compatibility; structured output      |
+| REL-151   | Report Studio: Redaction Presets + PASS Badge | FE          |   3 | REL-141      | Presets apply; badge accurate             |
+| REL-161   | Canary + Rollback Runbook Update              | Ops         |   2 | —            | Runbook PR merged; drill completed        |
+| REL-171\* | Materialized Views for Heavy Joins            | BE          |   3 | —            | Precompute two hot paths; compare perf    |
 
-> *REL-171 is stretch; only if capacity allows after commit scope is stable.*
+> _REL-171 is stretch; only if capacity allows after commit scope is stable._
 
 ---
 

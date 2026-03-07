@@ -7,12 +7,14 @@ Standard procedures for schema evolutions across Summit Platform databases.
 We use Prisma/Knex for relational schema management.
 
 ### Apply Migrations
+
 ```bash
 # Apply pending migrations to the database
 npm run db:migrate
 ```
 
 ### Rollback
+
 ```bash
 # Rollback the last migration (Knex-specific)
 cd server && npx knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs
@@ -23,7 +25,9 @@ cd server && npx knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs
 Neo4j schema (Indexes and Constraints) is managed via the `indexManager.ts`.
 
 ### Verify Indexes
+
 Indexes are verified automatically at startup. To run manually:
+
 ```bash
 # Check and create missing Neo4j indexes
 npm run db:migrate:neo4j
@@ -38,6 +42,7 @@ npm run db:migrate:neo4j
 ## 4. Rollback Strategy
 
 In the event of a migration failure:
+
 1. **Identify**: Check `server.log` for SQL/Cypher errors.
 2. **Reverse**: Use the rollback command for the specific DB.
 3. **Restore**: If schema rollback fails, restore from the pre-migration backup.

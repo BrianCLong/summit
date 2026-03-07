@@ -1,4 +1,4 @@
-import { Node, Edge } from '../ontology';
+import { Node, Edge } from "../ontology";
 
 export class NarrativeGraphStore {
   async upsertNode(node: Node): Promise<void> {

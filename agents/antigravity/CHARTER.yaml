@@ -26,7 +26,7 @@ accountability:
 
 slo_targets:
   ci_stability:
-    flaky_run_rate_weekly_max: 0.5   # percent
+    flaky_run_rate_weekly_max: 0.5 # percent
     mean_time_to_green_minutes_max: 20
   release_sustainability:
     slo_regressions_allowed: 0

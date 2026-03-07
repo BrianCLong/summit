@@ -126,8 +126,8 @@ if __name__ == "__main__":
 
 ```ts
 // apps/server/src/routes/score.ts
-import { Router } from 'express';
-import { z } from 'zod';
+import { Router } from "express";
+import { z } from "zod";
 
 const ScoreReq = z.object({
   narrativeId: z.string(),
@@ -139,14 +139,12 @@ const ScoreRes = z.object({
   burstScore: z.number(),
   cadenceEntropy: z.number(),
   uncertainty: z.number(),
-  attributions: z.array(
-    z.object({ feature: z.string(), weight: z.number(), snippet: z.string() }),
-  ),
+  attributions: z.array(z.object({ feature: z.string(), weight: z.number(), snippet: z.string() })),
 });
 
-export const scoreRouter = Router().post('/score:narrative', (req, res) => {
+export const scoreRouter = Router().post("/score:narrative", (req, res) => {
   const parse = ScoreReq.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: 'bad_request' });
+  if (!parse.success) return res.status(400).json({ error: "bad_request" });
   const { timestamps, perMinute } = parse.data;
   // call to Python service or WASM port here (omitted for brevity)
   const burstScore = 0.71,
@@ -155,11 +153,11 @@ export const scoreRouter = Router().post('/score:narrative', (req, res) => {
   const uncertainty = 0.22; // calibrated via isotonic
   const attributions = [
     {
-      feature: 'cadenceEntropy',
+      feature: "cadenceEntropy",
       weight: 0.42,
-      snippet: 'irregular inter‑arrivals',
+      snippet: "irregular inter‑arrivals",
     },
-    { feature: 'burstScore', weight: 0.31, snippet: '3 spikes in 5m' },
+    { feature: "burstScore", weight: 0.31, snippet: "3 spikes in 5m" },
   ];
   const body = {
     deceptionScore,

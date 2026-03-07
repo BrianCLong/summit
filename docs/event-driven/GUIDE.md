@@ -111,47 +111,43 @@ await repo.save(investigation);
 Separate read and write models for optimized operations.
 
 ```typescript
-import { CommandBus, QueryBus, ProjectionManager } from '@intelgraph/cqrs';
+import { CommandBus, QueryBus, ProjectionManager } from "@intelgraph/cqrs";
 
 // Command side - writes
 const commandBus = new CommandBus();
 
 commandBus.register({
-  commandType: 'CreateInvestigation',
+  commandType: "CreateInvestigation",
   handler: async (command) => {
     const investigation = new Investigation(uuidv4());
-    investigation.startInvestigation(
-      command.payload.title,
-      command.payload.analyst
-    );
+    investigation.startInvestigation(command.payload.title, command.payload.analyst);
     await repo.save(investigation);
 
     return { success: true, data: { id: investigation.id } };
-  }
+  },
 });
 
-await commandBus.execute('CreateInvestigation', {
-  title: 'APT29 Campaign',
-  analyst: 'analyst-1'
+await commandBus.execute("CreateInvestigation", {
+  title: "APT29 Campaign",
+  analyst: "analyst-1",
 });
 
 // Query side - reads
 const queryBus = new QueryBus(redis);
 
 queryBus.register({
-  queryType: 'GetActiveInvestigations',
+  queryType: "GetActiveInvestigations",
   handler: async (query) => {
-    const investigations = await db.query(
-      'SELECT * FROM investigations WHERE status = $1',
-      ['active']
-    );
+    const investigations = await db.query("SELECT * FROM investigations WHERE status = $1", [
+      "active",
+    ]);
     return { success: true, data: investigations };
   },
   cacheable: true,
-  cacheTTL: 300
+  cacheTTL: 300,
 });
 
-const result = await queryBus.execute('GetActiveInvestigations', {});
+const result = await queryBus.execute("GetActiveInvestigations", {});
 ```
 
 ### 4. Async Messaging Patterns (`@intelgraph/messaging`)
@@ -161,51 +157,51 @@ const result = await queryBus.execute('GetActiveInvestigations', {});
 Coordinate distributed transactions with compensation logic.
 
 ```typescript
-import { SagaOrchestrator } from '@intelgraph/messaging';
+import { SagaOrchestrator } from "@intelgraph/messaging";
 
 const orchestrator = new SagaOrchestrator(redis);
 
 orchestrator.defineSaga({
-  sagaId: 'entity-enrichment',
-  name: 'Entity Enrichment Workflow',
+  sagaId: "entity-enrichment",
+  name: "Entity Enrichment Workflow",
   steps: [
     {
-      stepId: 'fetch-osint',
-      name: 'Fetch OSINT data',
+      stepId: "fetch-osint",
+      name: "Fetch OSINT data",
       action: async (ctx) => {
-        const data = await osintService.fetch(ctx.data.get('entityId'));
-        ctx.data.set('osint', data);
+        const data = await osintService.fetch(ctx.data.get("entityId"));
+        ctx.data.set("osint", data);
       },
       compensation: async (ctx) => {
-        await osintService.cleanup(ctx.data.get('entityId'));
-      }
+        await osintService.cleanup(ctx.data.get("entityId"));
+      },
     },
     {
-      stepId: 'analyze-risk',
-      name: 'Analyze risk score',
+      stepId: "analyze-risk",
+      name: "Analyze risk score",
       action: async (ctx) => {
-        const score = await riskService.analyze(ctx.data.get('osint'));
-        ctx.data.set('riskScore', score);
-      }
+        const score = await riskService.analyze(ctx.data.get("osint"));
+        ctx.data.set("riskScore", score);
+      },
     },
     {
-      stepId: 'update-entity',
-      name: 'Update entity record',
+      stepId: "update-entity",
+      name: "Update entity record",
       action: async (ctx) => {
-        await entityService.update(ctx.data.get('entityId'), {
-          osint: ctx.data.get('osint'),
-          riskScore: ctx.data.get('riskScore')
+        await entityService.update(ctx.data.get("entityId"), {
+          osint: ctx.data.get("osint"),
+          riskScore: ctx.data.get("riskScore"),
         });
       },
       compensation: async (ctx) => {
-        await entityService.revert(ctx.data.get('entityId'));
-      }
-    }
-  ]
+        await entityService.revert(ctx.data.get("entityId"));
+      },
+    },
+  ],
 });
 
-await orchestrator.execute('entity-enrichment', {
-  entityId: 'entity-123'
+await orchestrator.execute("entity-enrichment", {
+  entityId: "entity-123",
 });
 ```
 
@@ -214,24 +210,25 @@ await orchestrator.execute('entity-enrichment', {
 Synchronous-style communication over async messaging.
 
 ```typescript
-import { RequestReply } from '@intelgraph/messaging';
+import { RequestReply } from "@intelgraph/messaging";
 
 const requestReply = new RequestReply(eventBus);
 await requestReply.initialize();
 
 // Server side
-await requestReply.handleRequests('entity.lookup', async (request) => {
+await requestReply.handleRequests("entity.lookup", async (request) => {
   const entity = await db.findEntity(request.payload.id);
   return entity;
 });
 
 // Client side
-const reply = await requestReply.request('entity.lookup',
-  { id: 'entity-123' },
+const reply = await requestReply.request(
+  "entity.lookup",
+  { id: "entity-123" },
   5000 // timeout
 );
 
-console.log('Entity:', reply.payload);
+console.log("Entity:", reply.payload);
 ```
 
 ### 5. Event Streaming (`@intelgraph/event-streaming`)
@@ -243,36 +240,36 @@ import {
   StreamProcessor,
   WindowedAggregator,
   WindowType,
-  Aggregators
-} from '@intelgraph/event-streaming';
+  Aggregators,
+} from "@intelgraph/event-streaming";
 
 // Stream processing pipeline
 const processor = new StreamProcessor(eventBus);
 
-const pipeline = StreamProcessor.builder('threat-analysis', 'raw.threats')
-  .filter(threat => threat.severity >= 7)
-  .map(threat => ({
+const pipeline = StreamProcessor.builder("threat-analysis", "raw.threats")
+  .filter((threat) => threat.severity >= 7)
+  .map((threat) => ({
     ...threat,
     enrichedAt: new Date(),
-    category: categorizeThreat(threat)
+    category: categorizeThreat(threat),
   }))
-  .to('analyzed.threats')
+  .to("analyzed.threats")
   .build();
 
 processor.definePipeline(pipeline);
-await processor.start('threat-analysis');
+await processor.start("threat-analysis");
 
 // Windowed aggregation
 const aggregator = new WindowedAggregator(
   {
     type: WindowType.TUMBLING,
-    size: 60000 // 1 minute windows
+    size: 60000, // 1 minute windows
   },
   Aggregators.count()
 );
 
-aggregator.on('window:closed', ({ result }) => {
-  console.log('Threats in last minute:', result);
+aggregator.on("window:closed", ({ result }) => {
+  console.log("Threats in last minute:", result);
 });
 
 aggregator.start();
@@ -290,6 +287,7 @@ npm start
 ```
 
 Environment variables:
+
 ```
 SERVICE_NAME=event-bus-service
 REDIS_HOST=localhost
@@ -304,7 +302,7 @@ PORT=3000
 Embed in your application:
 
 ```typescript
-import { EventBus } from '@intelgraph/event-bus';
+import { EventBus } from "@intelgraph/event-bus";
 
 const eventBus = new EventBus(config);
 await eventBus.initialize();
@@ -326,7 +324,7 @@ await eventBus.initialize();
 Always design handlers to be idempotent:
 
 ```typescript
-await eventBus.subscribe('entity.updated', async (message) => {
+await eventBus.subscribe("entity.updated", async (message) => {
   const { entityId, version } = message.payload;
 
   // Check if already processed
@@ -338,7 +336,7 @@ await eventBus.subscribe('entity.updated', async (message) => {
   await updateReadModel(message.payload);
 
   // Mark as processed
-  await cache.set(`processed:${entityId}:${version}`, '1', 'EX', 3600);
+  await cache.set(`processed:${entityId}:${version}`, "1", "EX", 3600);
 });
 ```
 
@@ -347,10 +345,10 @@ await eventBus.subscribe('entity.updated', async (message) => {
 Use dead letter queues for failed messages:
 
 ```typescript
-await eventBus.subscribe('critical.events', handler, {
+await eventBus.subscribe("critical.events", handler, {
   maxRetries: 3,
-  retryBackoff: 'exponential',
-  deadLetterQueue: 'dlq-critical'
+  retryBackoff: "exponential",
+  deadLetterQueue: "dlq-critical",
 });
 ```
 
@@ -360,9 +358,9 @@ Track metrics and set up alerts:
 
 ```typescript
 const metrics = eventBus.getMetrics();
-console.log('Messages published:', metrics.messagesPublished);
-console.log('Active subscriptions:', metrics.activeSubscriptions);
-console.log('Dead letters:', metrics.messagesDeadLettered);
+console.log("Messages published:", metrics.messagesPublished);
+console.log("Active subscriptions:", metrics.activeSubscriptions);
+console.log("Dead letters:", metrics.messagesDeadLettered);
 ```
 
 ## Performance Optimization
@@ -386,12 +384,12 @@ Use query caching for read-heavy workloads:
 
 ```typescript
 queryBus.register({
-  queryType: 'ExpensiveQuery',
+  queryType: "ExpensiveQuery",
   handler: async (query) => {
     // Expensive operation
   },
   cacheable: true,
-  cacheTTL: 600 // 10 minutes
+  cacheTTL: 600, // 10 minutes
 });
 ```
 

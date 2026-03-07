@@ -142,17 +142,17 @@ Observability: OTEL traces → Prom metrics → Grafana SLO boards
 
 ```tsx
 // apps/web/src/features/tri-pane/TriPane.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
-import $ from 'jquery';
-const Cytoscape = dynamic(() => import('react-cytoscapejs'), { ssr: false });
+import React, { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import $ from "jquery";
+const Cytoscape = dynamic(() => import("react-cytoscapejs"), { ssr: false });
 export default function TriPane() {
   const [selection, setSelection] = useState(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // jQuery bridge: broadcast selection to timeline & map
-    $(document).on('ig:graph:select', (_e, payload) => setSelection(payload));
-    return () => $(document).off('ig:graph:select');
+    $(document).on("ig:graph:select", (_e, payload) => setSelection(payload));
+    return () => $(document).off("ig:graph:select");
   }, []);
   return (
     <div className="grid grid-cols-12 gap-3 p-3">
@@ -161,9 +161,7 @@ export default function TriPane() {
           elements={[]}
           stylesheet={[]}
           cy={(cy) => {
-            cy.on('select', 'node', (e) =>
-              $(document).trigger('ig:graph:select', e.target.data()),
-            );
+            cy.on("select", "node", (e) => $(document).trigger("ig:graph:select", e.target.data()));
           }}
         />
       </div>
@@ -180,33 +178,20 @@ export default function TriPane() {
 
 ```ts
 // server/src/policy/opa/abac.ts
-import { createRequire } from 'module';
-import { execFile } from 'child_process';
-import type { Request, Response, NextFunction } from 'express';
+import { createRequire } from "module";
+import { execFile } from "child_process";
+import type { Request, Response, NextFunction } from "express";
 const require = createRequire(import.meta.url);
-export function abac(
-  policyPath = process.env.OPA_POLICY || 'SECURITY/policy/opa/abac.rego',
-) {
-  return async function enforce(
-    req: Request,
-    _res: Response,
-    next: NextFunction,
-  ) {
+export function abac(policyPath = process.env.OPA_POLICY || "SECURITY/policy/opa/abac.rego") {
+  return async function enforce(req: Request, _res: Response, next: NextFunction) {
     const input = {
       user: req.user,
       action: req.body?.operationName,
       vars: req.body?.variables,
     };
     execFile(
-      'opa',
-      [
-        'eval',
-        `data.abac.allow`,
-        '--format=json',
-        `-i`,
-        '/dev/stdin',
-        policyPath,
-      ],
+      "opa",
+      ["eval", `data.abac.allow`, "--format=json", `-i`, "/dev/stdin", policyPath],
       { input: JSON.stringify(input) },
       (err, stdout) => {
         if (err) return next(err);
@@ -214,13 +199,13 @@ export function abac(
         const allow = result?.result?.[0]?.expressions?.[0]?.value;
         if (!allow)
           return next(
-            Object.assign(new Error('Access denied by policy'), {
+            Object.assign(new Error("Access denied by policy"), {
               status: 403,
               policy: result,
-            }),
+            })
           );
         next();
-      },
+      }
     );
   };
 }
@@ -230,14 +215,14 @@ export function abac(
 
 ```ts
 // server/src/ai/nl2cypher/index.ts
-import type { Request, Response } from 'express';
-import { estimateCost } from './planner';
+import type { Request, Response } from "express";
+import { estimateCost } from "./planner";
 export async function genCypher(req: Request, res: Response) {
   const { prompt } = req.body;
   // TODO: call model; sanitize schema-aware generation
   const cypher = `MATCH (p:Person)-[r:CONTACTED]->(q:Person) RETURN p,q LIMIT 25`;
   const preview = await estimateCost(cypher);
-  res.json({ cypher, preview, sandboxToken: 'ttl-60s' });
+  res.json({ cypher, preview, sandboxToken: "ttl-60s" });
 }
 ```
 
@@ -245,11 +230,11 @@ export async function genCypher(req: Request, res: Response) {
 
 ```ts
 // server/src/middleware/provenance/bundle.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export async function buildBundle(payload: any) {
-  const resp = await fetch(process.env.PROV_LEDGER_URL + '/api/v1/bundle', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  const resp = await fetch(process.env.PROV_LEDGER_URL + "/api/v1/bundle", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
   });
   if (!resp.ok) throw new Error(`Prov‑ledger bundle failed: ${resp.status}`);
@@ -319,7 +304,7 @@ slo:
   p95QueryMs: 1500
   ingestE2EMin: 5
 policy:
-  opaPolicyPath: '/policies/abac.rego'
+  opaPolicyPath: "/policies/abac.rego"
 ```
 
 ---

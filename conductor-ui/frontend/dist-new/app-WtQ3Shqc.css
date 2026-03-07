@@ -192,8 +192,8 @@
   rotate: 180deg;
 }
 .transform {
-  transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,)
-    var(--tw-skew-x,) var(--tw-skew-y,);
+  transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,)
+    var(--tw-skew-y,);
 }
 .cursor-pointer {
   cursor: pointer;
@@ -366,16 +366,16 @@
   opacity: 0.75;
 }
 .ring-2 {
-  --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0
-    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width))
+    var(--tw-ring-color, currentcolor);
   box-shadow:
-    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
-    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow),
+    var(--tw-ring-shadow), var(--tw-shadow);
 }
 .filter {
-  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,)
-    var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,)
-    var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,)
+    var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,)
+    var(--tw-drop-shadow,);
 }
 .transition {
   transition-property:
@@ -413,8 +413,8 @@
 }
 .transition-colors {
   transition-property:
-    color, background-color, border-color, outline-color, text-decoration-color,
-    fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    color, background-color, border-color, outline-color, text-decoration-color, fill, stroke,
+    --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
   transition-timing-function: var(--tw-ease, ease);
   transition-duration: var(--tw-duration, 0s);
 }
@@ -466,16 +466,16 @@
   position: absolute;
 }
 .focus\:ring-2:focus {
-  --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0
-    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width))
+    var(--tw-ring-color, currentcolor);
   box-shadow:
-    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
-    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow),
+    var(--tw-ring-shadow), var(--tw-shadow);
 }
 .focus\:ring-offset-2:focus {
   --tw-ring-offset-width: 2px;
-  --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0
-    var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width)
+    var(--tw-ring-offset-color);
 }
 .focus\:outline-none:focus {
   --tw-outline-style: none;
@@ -514,154 +514,154 @@ code {
     monospace;
 }
 @property --tw-rotate-x {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-rotate-y {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-rotate-z {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-skew-x {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-skew-y {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-divide-y-reverse {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: 0;
 }
 @property --tw-border-style {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: solid;
 }
 @property --tw-shadow {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
 @property --tw-shadow-color {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-shadow-alpha {
-  syntax: '<percentage>';
+  syntax: "<percentage>";
   inherits: false;
   initial-value: 100%;
 }
 @property --tw-inset-shadow {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
 @property --tw-inset-shadow-color {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-inset-shadow-alpha {
-  syntax: '<percentage>';
+  syntax: "<percentage>";
   inherits: false;
   initial-value: 100%;
 }
 @property --tw-ring-color {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-ring-shadow {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
 @property --tw-inset-ring-color {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-inset-ring-shadow {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
 @property --tw-ring-inset {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-ring-offset-width {
-  syntax: '<length>';
+  syntax: "<length>";
   inherits: false;
   initial-value: 0;
 }
 @property --tw-ring-offset-color {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: #fff;
 }
 @property --tw-ring-offset-shadow {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
 @property --tw-blur {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-brightness {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-contrast {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-grayscale {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-hue-rotate {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-invert {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-opacity {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-saturate {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-sepia {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-drop-shadow {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-drop-shadow-color {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-drop-shadow-alpha {
-  syntax: '<percentage>';
+  syntax: "<percentage>";
   inherits: false;
   initial-value: 100%;
 }
 @property --tw-drop-shadow-size {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }
 @property --tw-duration {
-  syntax: '*';
+  syntax: "*";
   inherits: false;
 }

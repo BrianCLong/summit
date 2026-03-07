@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
-import { EventType, type Event } from '../types.js';
-import { type TaskGraph } from './taskGraph.js';
+import { randomUUID } from "crypto";
+import { EventType, type Event } from "../types.js";
+import { type TaskGraph } from "./taskGraph.js";
 import {
   type SandboxExecutionBoundary,
   type SandboxExecutionRequest,
   type SandboxExecutionResult,
-} from './sandboxExecution.js';
+} from "./sandboxExecution.js";
 
 export interface ArkSpineRunResult {
   runId: string;
@@ -37,35 +37,40 @@ export class ArkSpine {
         metadata: task.metadata,
       };
 
-      events.push(this.createEvent(runId, EventType.TOOL_CALL_REQUESTED, {
-        taskId: task.id,
-        taskName: task.name,
-      }));
+      events.push(
+        this.createEvent(runId, EventType.TOOL_CALL_REQUESTED, {
+          taskId: task.id,
+          taskName: task.name,
+        })
+      );
 
       try {
         const result = await this.sandboxBoundary.execute(request);
         taskResults[task.id] = result;
-        const eventType = result.status === 'success'
-          ? EventType.TOOL_CALL_COMPLETED
-          : EventType.TOOL_CALL_FAILED;
+        const eventType =
+          result.status === "success" ? EventType.TOOL_CALL_COMPLETED : EventType.TOOL_CALL_FAILED;
 
-        events.push(this.createEvent(runId, eventType, {
-          taskId: task.id,
-          status: result.status,
-        }));
+        events.push(
+          this.createEvent(runId, eventType, {
+            taskId: task.id,
+            status: result.status,
+          })
+        );
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message = error instanceof Error ? error.message : "Unknown error";
         taskResults[task.id] = {
           executionId: randomUUID(),
-          status: 'error',
+          status: "error",
           output: null,
           logs: [message],
         };
-        events.push(this.createEvent(runId, EventType.TOOL_CALL_FAILED, {
-          taskId: task.id,
-          status: 'error',
-          error: message,
-        }));
+        events.push(
+          this.createEvent(runId, EventType.TOOL_CALL_FAILED, {
+            taskId: task.id,
+            status: "error",
+            error: message,
+          })
+        );
       }
     }
 

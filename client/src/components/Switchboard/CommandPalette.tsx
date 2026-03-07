@@ -1,5 +1,5 @@
-'use client';
-import React, { useState } from 'react';
+"use client";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +8,8 @@ import {
   List,
   ListItemButton,
   Typography,
-} from '@mui/material';
-import { Search } from '@mui/icons-material';
+} from "@mui/material";
+import { Search } from "@mui/icons-material";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -18,16 +18,16 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ open, onClose, onCommandSelect }: CommandPaletteProps) {
-  const [commandInput, setCommandInput] = useState('');
+  const [commandInput, setCommandInput] = useState("");
 
   const commands = [
-    'Start meeting',
-    'Message Scribe',
-    'Open Graph View',
-    '/call maestro',
-    '/present deck',
-    '/join room',
-    '/status api',
+    "Start meeting",
+    "Message Scribe",
+    "Open Graph View",
+    "/call maestro",
+    "/present deck",
+    "/join room",
+    "/status api",
   ];
 
   const filteredCommands = commands.filter((cmd) =>
@@ -35,12 +35,7 @@ export default function CommandPalette({ open, onClose, onCommandSelect }: Comma
   );
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogContent className="p-0">
         <TextField
           fullWidth

@@ -8,7 +8,7 @@ export interface BotDetectionResult {
   botScore: number;
   confidence: number;
   indicators: BotIndicator[];
-  classification: 'human' | 'likely_human' | 'suspicious' | 'likely_bot' | 'bot';
+  classification: "human" | "likely_human" | "suspicious" | "likely_bot" | "bot";
 }
 
 export interface BotIndicator {
@@ -83,8 +83,8 @@ export class BotDetector {
         // Find similar accounts (potential bot network)
         const network = this.findSimilarAccounts(activity, activities);
         if (network.length > 1) {
-          networks.push(network.map(a => a.accountId));
-          network.forEach(a => processed.add(a.accountId));
+          networks.push(network.map((a) => a.accountId));
+          network.forEach((a) => processed.add(a.accountId));
         }
       }
     }
@@ -93,13 +93,12 @@ export class BotDetector {
   }
 
   private checkAccountAge(activity: AccountActivity): BotIndicator | null {
-    const accountAge =
-      (Date.now() - activity.creationDate.getTime()) / (1000 * 60 * 60 * 24);
+    const accountAge = (Date.now() - activity.creationDate.getTime()) / (1000 * 60 * 60 * 24);
 
     if (accountAge < 30 && activity.postCount > 100) {
       return {
-        type: 'new_account_high_activity',
-        description: 'New account with unusually high activity',
+        type: "new_account_high_activity",
+        description: "New account with unusually high activity",
         score: 0.3,
       };
     }
@@ -108,13 +107,12 @@ export class BotDetector {
   }
 
   private checkPostingFrequency(activity: AccountActivity): BotIndicator | null {
-    const accountAge =
-      (Date.now() - activity.creationDate.getTime()) / (1000 * 60 * 60 * 24);
+    const accountAge = (Date.now() - activity.creationDate.getTime()) / (1000 * 60 * 60 * 24);
     const postsPerDay = activity.postCount / Math.max(accountAge, 1);
 
     if (postsPerDay > 50) {
       return {
-        type: 'high_frequency',
+        type: "high_frequency",
         description: `Extremely high posting frequency: ${postsPerDay.toFixed(1)} posts/day`,
         score: 0.4,
       };
@@ -122,7 +120,7 @@ export class BotDetector {
 
     if (postsPerDay > 30) {
       return {
-        type: 'elevated_frequency',
+        type: "elevated_frequency",
         description: `High posting frequency: ${postsPerDay.toFixed(1)} posts/day`,
         score: 0.2,
       };
@@ -134,8 +132,8 @@ export class BotDetector {
   private checkFollowerRatio(activity: AccountActivity): BotIndicator | null {
     if (activity.followerCount === 0 && activity.followingCount > 100) {
       return {
-        type: 'zero_followers',
-        description: 'No followers but following many accounts',
+        type: "zero_followers",
+        description: "No followers but following many accounts",
         score: 0.3,
       };
     }
@@ -144,7 +142,7 @@ export class BotDetector {
 
     if (ratio > 10) {
       return {
-        type: 'poor_follower_ratio',
+        type: "poor_follower_ratio",
         description: `Following/follower ratio: ${ratio.toFixed(1)}:1`,
         score: 0.2,
       };
@@ -159,25 +157,24 @@ export class BotDetector {
 
     if (variance < 0.1) {
       return {
-        type: 'regular_pattern',
-        description: 'Posting pattern is too regular for human behavior',
+        type: "regular_pattern",
+        description: "Posting pattern is too regular for human behavior",
         score: 0.3,
       };
     }
 
     // Check for 24/7 posting (no sleep pattern)
-    const hasNightActivity = activity.postingPattern.slice(0, 6).some(count => count > 0);
-    const hasDayActivity = activity.postingPattern.slice(6, 22).some(count => count > 0);
+    const hasNightActivity = activity.postingPattern.slice(0, 6).some((count) => count > 0);
+    const hasDayActivity = activity.postingPattern.slice(6, 22).some((count) => count > 0);
 
     if (hasNightActivity && hasDayActivity) {
       const nightRatio =
-        activity.postingPattern.slice(0, 6).reduce((a, b) => a + b, 0) /
-        activity.postCount;
+        activity.postingPattern.slice(0, 6).reduce((a, b) => a + b, 0) / activity.postCount;
 
       if (nightRatio > 0.3) {
         return {
-          type: '24_7_activity',
-          description: 'Active 24/7 with no clear sleep pattern',
+          type: "24_7_activity",
+          description: "Active 24/7 with no clear sleep pattern",
           score: 0.25,
         };
       }
@@ -203,21 +200,20 @@ export class BotDetector {
       }
     }
 
-    const avgSimilarity =
-      similarities.reduce((a, b) => a + b, 0) / similarities.length;
+    const avgSimilarity = similarities.reduce((a, b) => a + b, 0) / similarities.length;
 
     if (avgSimilarity > 0.8) {
       return {
-        type: 'high_content_similarity',
-        description: 'Posts are highly similar (copy-paste behavior)',
+        type: "high_content_similarity",
+        description: "Posts are highly similar (copy-paste behavior)",
         score: 0.4,
       };
     }
 
     if (avgSimilarity > 0.6) {
       return {
-        type: 'moderate_content_similarity',
-        description: 'Posts show repetitive patterns',
+        type: "moderate_content_similarity",
+        description: "Posts show repetitive patterns",
         score: 0.2,
       };
     }
@@ -240,19 +236,19 @@ export class BotDetector {
 
   private classify(
     botScore: number
-  ): 'human' | 'likely_human' | 'suspicious' | 'likely_bot' | 'bot' {
-    if (botScore < 0.2) return 'human';
-    if (botScore < 0.4) return 'likely_human';
-    if (botScore < 0.6) return 'suspicious';
-    if (botScore < 0.8) return 'likely_bot';
-    return 'bot';
+  ): "human" | "likely_human" | "suspicious" | "likely_bot" | "bot" {
+    if (botScore < 0.2) return "human";
+    if (botScore < 0.4) return "likely_human";
+    if (botScore < 0.6) return "suspicious";
+    if (botScore < 0.8) return "likely_bot";
+    return "bot";
   }
 
   private calculateVariance(data: number[]): number {
     if (data.length === 0) return 0;
 
     const mean = data.reduce((a, b) => a + b, 0) / data.length;
-    const squaredDiffs = data.map(x => Math.pow(x - mean, 2));
+    const squaredDiffs = data.map((x) => Math.pow(x - mean, 2));
     const variance = squaredDiffs.reduce((a, b) => a + b, 0) / data.length;
 
     return variance;
@@ -263,7 +259,7 @@ export class BotDetector {
     const words1 = new Set(text1.toLowerCase().split(/\s+/));
     const words2 = new Set(text2.toLowerCase().split(/\s+/));
 
-    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const intersection = new Set([...words1].filter((x) => words2.has(x)));
     const union = new Set([...words1, ...words2]);
 
     return intersection.size / union.size;

@@ -7,7 +7,7 @@
 
 Graph Neural Networks (GNNs) provide powerful signals (link prediction, node importance, community detection) but are computationally expensive and hard to operationalize in the hot path of user queries.
 
-**Goal:** Enable GNN intelligence in millisecond-latency RAG responses *without* runtime GPU dependencies.
+**Goal:** Enable GNN intelligence in millisecond-latency RAG responses _without_ runtime GPU dependencies.
 
 ## 2. The Solution: Offline Enrichment
 
@@ -17,8 +17,8 @@ Instead of "GNN-as-a-Service", we treat GNNs as **Batch Enrichment Jobs**.
 
 1.  **Snapshot:** Daily/Hourly export of the graph (or a subgraph).
 2.  **Inference:** Offline GNN pipeline runs on the snapshot.
-    *   Calculates: `community_id`, `importance_rank`, `predicted_link_score`.
-    *   Generates: `embedding` vectors for nodes.
+    - Calculates: `community_id`, `importance_rank`, `predicted_link_score`.
+    - Generates: `embedding` vectors for nodes.
 3.  **Write-Back:** Results are written back to Neo4j as **static properties** on nodes/relationships.
 
 ### 2.2 Schema Updates
@@ -57,11 +57,11 @@ LIMIT 5
 
 ## 4. Benefits
 
-*   **Zero Latency Overhead:** Query speed depends only on index lookups, not model inference.
-*   **Simplicity:** The serving layer remains pure Cypher/Go/Node.js. No Python/PyTorch containers in the critical path.
-*   **Stability:** "Bad" model updates are caught in batch processing, not during live user requests.
+- **Zero Latency Overhead:** Query speed depends only on index lookups, not model inference.
+- **Simplicity:** The serving layer remains pure Cypher/Go/Node.js. No Python/PyTorch containers in the critical path.
+- **Stability:** "Bad" model updates are caught in batch processing, not during live user requests.
 
 ## 5. Implementation Status
 
-*   **Enrichment Pipeline:** `packages/intelgraph_ai_ml/` (Planned)
-*   **Schema:** Support for `gnn_*` prefix properties is enabled in Neo4j constraints.
+- **Enrichment Pipeline:** `packages/intelgraph_ai_ml/` (Planned)
+- **Schema:** Support for `gnn_*` prefix properties is enabled in Neo4j constraints.

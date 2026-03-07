@@ -2,11 +2,11 @@
 
 ## Import/Export Contract
 
-| Import | Export | Notes |
-| --- | --- | --- |
-| JSON input | `agents/route_opt/schemas/route_plan.schema.json` | Deterministic schema contract |
-| CSV dataset (converted upstream) | `artifacts/route_plan/report.json` | Machine-consumable, reproducible |
-| Solver API (deterministic tools) | `artifacts/route_plan/metrics.json` | Benchmarkable |
+| Import                           | Export                                            | Notes                            |
+| -------------------------------- | ------------------------------------------------- | -------------------------------- |
+| JSON input                       | `agents/route_opt/schemas/route_plan.schema.json` | Deterministic schema contract    |
+| CSV dataset (converted upstream) | `artifacts/route_plan/report.json`                | Machine-consumable, reproducible |
+| Solver API (deterministic tools) | `artifacts/route_plan/metrics.json`               | Benchmarkable                    |
 
 ## Non-goals
 

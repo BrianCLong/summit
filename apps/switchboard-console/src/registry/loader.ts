@@ -1,7 +1,7 @@
-import { readFile, readdir, stat } from 'node:fs/promises';
-import path from 'node:path';
-import { parse } from 'yaml';
-import { RegistryRoot, ToolEntry, ServerEntry } from './types.js';
+import { readFile, readdir, stat } from "node:fs/promises";
+import path from "node:path";
+import { parse } from "yaml";
+import { RegistryRoot, ToolEntry, ServerEntry } from "./types.js";
 
 export interface RegistrySource {
   file: string;
@@ -15,17 +15,17 @@ export async function loadRegistrySources(inputPath: string): Promise<RegistrySo
   if (stats.isDirectory()) {
     const entries = await readdir(inputPath);
     files = entries
-      .filter(e => e.endsWith('.json') || e.endsWith('.yaml') || e.endsWith('.yml'))
+      .filter((e) => e.endsWith(".json") || e.endsWith(".yaml") || e.endsWith(".yml"))
       .sort()
-      .map(e => path.join(inputPath, e));
+      .map((e) => path.join(inputPath, e));
   } else {
     files = [inputPath];
   }
 
   const sources: RegistrySource[] = [];
   for (const file of files) {
-    const content = await readFile(file, 'utf-8');
-    const data = file.endsWith('.json') ? JSON.parse(content) : parse(content);
+    const content = await readFile(file, "utf-8");
+    const data = file.endsWith(".json") ? JSON.parse(content) : parse(content);
     sources.push({ file, data });
   }
 
@@ -38,7 +38,7 @@ export function mergeRegistrySources(sources: RegistrySource[]): {
   itemOrigins: Map<string, string>;
 } {
   const merged: RegistryRoot = {
-    version: '0.0.0',
+    version: "0.0.0",
     tools: [],
     servers: [],
   };
@@ -49,7 +49,7 @@ export function mergeRegistrySources(sources: RegistrySource[]): {
   for (const source of sources) {
     const { file, data } = source;
 
-    if (data.version && merged.version === '0.0.0') {
+    if (data.version && merged.version === "0.0.0") {
       merged.version = data.version;
     }
 

@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
 const mockQuery = jest.fn(() => Promise.resolve({ rows: [], rowCount: 0 }));
 

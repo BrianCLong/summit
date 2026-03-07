@@ -20,6 +20,7 @@
 **Mission:** Provide daily GA CI health status + blockers with evidence-backed links.
 
 **Checklist (run in order):**
+
 1. Pull `main` and refresh local state.
 2. Read GA CI gates + required check name mappings:
    - `required_checks.todo.md`
@@ -36,6 +37,7 @@
 **Mission:** Confirm GA security/evidence posture; separate GA blockers vs post-GA gaps.
 
 **Checklist (run in order):**
+
 1. Read security gate documentation and local verification steps:
    - `SECURITY_GA_GATE.md`
    - `scripts/check-ga-policy.sh`
@@ -54,6 +56,7 @@
 **Mission:** Convert Ops/Incident guidance into executable GA checklists.
 
 **Checklist (run in order):**
+
 1. Open GA war-room cadence + roles:
    - `docs/GA_WAR_ROOM.md`
 2. Open operational incident response procedures:
@@ -76,6 +79,7 @@
 **Output standards:** Evidence-first notes, link to files, and mark any missing data as **“Deferred pending X”** or **“Intentionally constrained.”** Treat external API access gaps as **Governed Exceptions** with explicit follow‑up owners.
 
 **UEF Template (use in every thread output):**
+
 - **UEF / Sensing:** raw evidence list with file paths + commands.
 - **UEF / Reasoning:** judgments, gaps, actions, and owners.
 

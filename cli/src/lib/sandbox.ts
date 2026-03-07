@@ -5,9 +5,9 @@
  * and network permission control for safe CLI operation.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { spawn, SpawnOptions } from 'child_process';
+import * as fs from "fs";
+import * as path from "path";
+import { spawn, SpawnOptions } from "child_process";
 
 // Exit code for sandbox violations
 export const SANDBOX_EXIT_CODE = 2;
@@ -16,41 +16,38 @@ export const SANDBOX_EXIT_CODE = 2;
  * Default deny patterns that cannot be overridden
  */
 export const HARDCODED_DENY_PATTERNS = [
-  '.git/**',
-  '**/*.pem',
-  '**/*.key',
-  '**/*.p12',
-  '**/*.pfx',
-  '**/id_rsa*',
-  '**/*_ed25519*',
-  '**/secrets/**',
+  ".git/**",
+  "**/*.pem",
+  "**/*.key",
+  "**/*.p12",
+  "**/*.pfx",
+  "**/id_rsa*",
+  "**/*_ed25519*",
+  "**/secrets/**",
 ] as const;
 
 /**
  * Env-file patterns (require explicit opt-in)
  */
-export const ENV_FILE_PATTERNS = [
-  '**/.env',
-  '**/.env.*',
-] as const;
+export const ENV_FILE_PATTERNS = ["**/.env", "**/.env.*"] as const;
 
 /**
  * Safe environment variables to pass through to tools
  */
 export const SAFE_ENV_VARS = [
-  'PATH',
-  'HOME',
-  'USER',
-  'SHELL',
-  'TERM',
-  'LANG',
-  'LC_ALL',
-  'TZ',
-  'NODE_ENV',
-  'CI',
-  'GITHUB_ACTIONS',
-  'GITLAB_CI',
-  'JENKINS_HOME',
+  "PATH",
+  "HOME",
+  "USER",
+  "SHELL",
+  "TERM",
+  "LANG",
+  "LC_ALL",
+  "TZ",
+  "NODE_ENV",
+  "CI",
+  "GITHUB_ACTIONS",
+  "GITLAB_CI",
+  "JENKINS_HOME",
 ] as const;
 
 /**
@@ -98,19 +95,19 @@ export interface ToolResult {
 export class SandboxError extends Error {
   constructor(
     message: string,
-    public violationType: 'path' | 'tool' | 'network',
+    public violationType: "path" | "tool" | "network",
     public details: string[] = [],
     public exitCode: number = SANDBOX_EXIT_CODE
   ) {
     super(message);
-    this.name = 'SandboxError';
+    this.name = "SandboxError";
   }
 
   format(): string {
     const sortedDetails = [...this.details].sort();
     let output = `Sandbox Error (${this.violationType}): ${this.message}`;
     if (sortedDetails.length > 0) {
-      output += '\nDetails:';
+      output += "\nDetails:";
       for (const detail of sortedDetails) {
         output += `\n  - ${detail}`;
       }
@@ -124,32 +121,32 @@ export class SandboxError extends Error {
  */
 export function matchesGlob(filePath: string, pattern: string): boolean {
   // Normalize paths
-  const normalizedPath = filePath.replace(/\\/g, '/');
-  const normalizedPattern = pattern.replace(/\\/g, '/');
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  const normalizedPattern = pattern.replace(/\\/g, "/");
 
   // Handle **/ prefix - should match files in any directory including root
   let patternToMatch = normalizedPattern;
-  if (patternToMatch.startsWith('**/')) {
+  if (patternToMatch.startsWith("**/")) {
     // **/ means "any directory including none"
     patternToMatch = patternToMatch.slice(3); // Remove **/
   }
 
   // Convert glob pattern to regex
   let regexPattern = patternToMatch
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape special regex chars
-    .replace(/\*\*/g, '{{GLOBSTAR}}')      // Temp placeholder for **
-    .replace(/\*/g, '[^/]*')               // * matches anything except /
-    .replace(/{{GLOBSTAR}}/g, '.*')        // ** matches anything including /
-    .replace(/\?/g, '[^/]');               // ? matches single char except /
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&") // Escape special regex chars
+    .replace(/\*\*/g, "{{GLOBSTAR}}") // Temp placeholder for **
+    .replace(/\*/g, "[^/]*") // * matches anything except /
+    .replace(/{{GLOBSTAR}}/g, ".*") // ** matches anything including /
+    .replace(/\?/g, "[^/]"); // ? matches single char except /
 
   // If original pattern started with **/, match from any position
-  if (normalizedPattern.startsWith('**/')) {
-    regexPattern = '(^|.*/|^)' + regexPattern;
-  } else if (!normalizedPattern.startsWith('*')) {
-    regexPattern = '(^|/)' + regexPattern;
+  if (normalizedPattern.startsWith("**/")) {
+    regexPattern = "(^|.*/|^)" + regexPattern;
+  } else if (!normalizedPattern.startsWith("*")) {
+    regexPattern = "(^|/)" + regexPattern;
   }
 
-  const regex = new RegExp(regexPattern + '$', 'i');
+  const regex = new RegExp(regexPattern + "$", "i");
   return regex.test(normalizedPath);
 }
 
@@ -158,9 +155,7 @@ export function matchesGlob(filePath: string, pattern: string): boolean {
  */
 export function normalizePath(inputPath: string, baseDir: string): string {
   // Resolve relative paths against base directory
-  const absolutePath = path.isAbsolute(inputPath)
-    ? inputPath
-    : path.resolve(baseDir, inputPath);
+  const absolutePath = path.isAbsolute(inputPath) ? inputPath : path.resolve(baseDir, inputPath);
 
   try {
     // Resolve symlinks
@@ -183,8 +178,7 @@ export function isPathWithin(targetPath: string, baseDir: string): boolean {
     ? normalizedBase
     : normalizedBase + path.sep;
 
-  return normalizedTarget === normalizedBase ||
-         normalizedTarget.startsWith(baseWithSep);
+  return normalizedTarget === normalizedBase || normalizedTarget.startsWith(baseWithSep);
 }
 
 /**
@@ -195,13 +189,13 @@ export function scrubEnvironment(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 
   for (const key of Object.keys(env)) {
     // Always include safe vars
-    if (SAFE_ENV_VARS.includes(key as typeof SAFE_ENV_VARS[number])) {
+    if (SAFE_ENV_VARS.includes(key as (typeof SAFE_ENV_VARS)[number])) {
       result[key] = env[key];
       continue;
     }
 
     // Skip vars matching secret patterns
-    const isSecret = SECRET_ENV_PATTERNS.some(pattern => pattern.test(key));
+    const isSecret = SECRET_ENV_PATTERNS.some((pattern) => pattern.test(key));
     if (!isSecret) {
       result[key] = env[key];
     }
@@ -224,9 +218,10 @@ export class Sandbox {
     this.resolvedRepoRoot = normalizePath(options.repoRoot, process.cwd());
 
     // Build effective allow paths
-    this.effectiveAllowPaths = options.allowPaths.length > 0
-      ? options.allowPaths.map(p => normalizePath(p, this.resolvedRepoRoot))
-      : [this.resolvedRepoRoot];
+    this.effectiveAllowPaths =
+      options.allowPaths.length > 0
+        ? options.allowPaths.map((p) => normalizePath(p, this.resolvedRepoRoot))
+        : [this.resolvedRepoRoot];
 
     // Build effective deny patterns (hardcoded + user-specified)
     this.effectiveDenyPatterns = options.unsafeAllowSensitivePaths
@@ -242,35 +237,31 @@ export class Sandbox {
   /**
    * Check if a path is allowed for read/write access
    */
-  checkPath(targetPath: string, operation: 'read' | 'write'): void {
+  checkPath(targetPath: string, operation: "read" | "write"): void {
     const normalizedPath = normalizePath(targetPath, this.resolvedRepoRoot);
 
     // Check against deny patterns first (they take precedence)
     for (const pattern of this.effectiveDenyPatterns) {
       if (matchesGlob(normalizedPath, pattern)) {
-        throw new SandboxError(
-          `Access to path denied by pattern: ${pattern}`,
-          'path',
-          [`path: ${targetPath}`, `operation: ${operation}`, `matched_pattern: ${pattern}`]
-        );
+        throw new SandboxError(`Access to path denied by pattern: ${pattern}`, "path", [
+          `path: ${targetPath}`,
+          `operation: ${operation}`,
+          `matched_pattern: ${pattern}`,
+        ]);
       }
     }
 
     // Check if path is within any allowed path
-    const isAllowed = this.effectiveAllowPaths.some(allowedPath =>
+    const isAllowed = this.effectiveAllowPaths.some((allowedPath) =>
       isPathWithin(normalizedPath, allowedPath)
     );
 
     if (!isAllowed) {
-      throw new SandboxError(
-        `Path outside allowed directories`,
-        'path',
-        [
-          `path: ${targetPath}`,
-          `operation: ${operation}`,
-          `allowed_paths: ${this.effectiveAllowPaths.join(', ')}`
-        ]
-      );
+      throw new SandboxError(`Path outside allowed directories`, "path", [
+        `path: ${targetPath}`,
+        `operation: ${operation}`,
+        `allowed_paths: ${this.effectiveAllowPaths.join(", ")}`,
+      ]);
     }
   }
 
@@ -279,29 +270,24 @@ export class Sandbox {
    */
   checkTool(tool: string): void {
     if (this.options.allowTools.length === 0) {
-      throw new SandboxError(
-        `Tool execution not allowed: ${tool}`,
-        'tool',
-        ['no_tools_allowed', `requested_tool: ${tool}`]
-      );
+      throw new SandboxError(`Tool execution not allowed: ${tool}`, "tool", [
+        "no_tools_allowed",
+        `requested_tool: ${tool}`,
+      ]);
     }
 
     // Extract tool name from path if necessary
     const toolName = path.basename(tool);
 
-    const isAllowed = this.options.allowTools.some(allowed =>
-      allowed === tool || allowed === toolName
+    const isAllowed = this.options.allowTools.some(
+      (allowed) => allowed === tool || allowed === toolName
     );
 
     if (!isAllowed) {
-      throw new SandboxError(
-        `Tool not in allowlist: ${tool}`,
-        'tool',
-        [
-          `requested_tool: ${tool}`,
-          `allowed_tools: ${this.options.allowTools.join(', ')}`
-        ]
-      );
+      throw new SandboxError(`Tool not in allowlist: ${tool}`, "tool", [
+        `requested_tool: ${tool}`,
+        `allowed_tools: ${this.options.allowTools.join(", ")}`,
+      ]);
     }
   }
 
@@ -311,11 +297,11 @@ export class Sandbox {
   checkNetwork(): void {
     if (!this.options.allowNetwork) {
       throw new SandboxError(
-        'Network access not allowed',
-        'network',
+        "Network access not allowed",
+        "network",
         this.options.ci
-          ? ['network_disabled_in_ci', 'use_--allow-network_to_enable']
-          : ['network_disabled', 'use_--allow-network_to_enable']
+          ? ["network_disabled_in_ci", "use_--allow-network_to_enable"]
+          : ["network_disabled", "use_--allow-network_to_enable"]
       );
     }
   }
@@ -336,20 +322,20 @@ export class Sandbox {
 
     // Disable colors in CI mode
     if (this.options.ci) {
-      env.FORCE_COLOR = '0';
-      env.NO_COLOR = '1';
+      env.FORCE_COLOR = "0";
+      env.NO_COLOR = "1";
     }
 
     const spawnOptions: SpawnOptions = {
       cwd: this.resolvedRepoRoot,
       env,
       timeout: this.options.toolTimeoutMs,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     };
 
     return new Promise((resolve) => {
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
       let timedOut = false;
 
       const proc = spawn(tool, args, spawnOptions);
@@ -357,17 +343,17 @@ export class Sandbox {
       // Set up timeout
       const timeoutHandle = setTimeout(() => {
         timedOut = true;
-        proc.kill('SIGKILL');
+        proc.kill("SIGKILL");
       }, this.options.toolTimeoutMs);
 
       if (proc.stdout) {
-        proc.stdout.on('data', (data) => {
+        proc.stdout.on("data", (data) => {
           stdout += data.toString();
         });
       }
 
       if (proc.stderr) {
-        proc.stderr.on('data', (data) => {
+        proc.stderr.on("data", (data) => {
           stderr += data.toString();
         });
       }
@@ -377,7 +363,7 @@ export class Sandbox {
         proc.stdin.end();
       }
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         clearTimeout(timeoutHandle);
         resolve({
           exitCode: code ?? 1,
@@ -387,12 +373,12 @@ export class Sandbox {
         });
       });
 
-      proc.on('error', (err) => {
+      proc.on("error", (err) => {
         clearTimeout(timeoutHandle);
         resolve({
           exitCode: 1,
           stdout,
-          stderr: stderr + '\n' + err.message,
+          stderr: stderr + "\n" + err.message,
           timedOut: false,
         });
       });
@@ -403,15 +389,15 @@ export class Sandbox {
    * Wrap file read operation with sandbox check
    */
   readFile(filePath: string): string {
-    this.checkPath(filePath, 'read');
-    return fs.readFileSync(normalizePath(filePath, this.resolvedRepoRoot), 'utf-8');
+    this.checkPath(filePath, "read");
+    return fs.readFileSync(normalizePath(filePath, this.resolvedRepoRoot), "utf-8");
   }
 
   /**
    * Wrap file write operation with sandbox check
    */
   writeFile(filePath: string, content: string): void {
-    this.checkPath(filePath, 'write');
+    this.checkPath(filePath, "write");
     const normalizedPath = normalizePath(filePath, this.resolvedRepoRoot);
 
     // Ensure parent directory exists
@@ -427,7 +413,7 @@ export class Sandbox {
    * Check if path exists (with sandbox check)
    */
   exists(filePath: string): boolean {
-    this.checkPath(filePath, 'read');
+    this.checkPath(filePath, "read");
     return fs.existsSync(normalizePath(filePath, this.resolvedRepoRoot));
   }
 
@@ -488,12 +474,12 @@ export function detectRepoRoot(startDir: string = process.cwd()): string {
 
   while (currentDir !== path.dirname(currentDir)) {
     // Check for .git directory
-    if (fs.existsSync(path.join(currentDir, '.git'))) {
+    if (fs.existsSync(path.join(currentDir, ".git"))) {
       return currentDir;
     }
 
     // Check for package.json
-    if (fs.existsSync(path.join(currentDir, 'package.json'))) {
+    if (fs.existsSync(path.join(currentDir, "package.json"))) {
       return currentDir;
     }
 

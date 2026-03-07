@@ -22,11 +22,13 @@ Welcome to the **IntelGraph Platform API** documentation! This comprehensive gui
 #### Option A: Use Official SDKs (Recommended)
 
 **TypeScript/JavaScript:**
+
 ```bash
 npm install @intelgraph/sdk
 ```
 
 **Python:**
+
 ```bash
 pip install intelgraph-sdk
 ```
@@ -95,18 +97,18 @@ sdks/                                   # Generated client SDKs
 
 ### REST API
 
-| Category | Endpoint | Description |
-|----------|----------|-------------|
-| **Authentication** | `POST /v2/auth/login` | Authenticate user |
-| **Graphs** | `GET/POST /v2/graphs` | List or create graphs |
-| **Entities** | `GET/POST /v2/graphs/{id}/entities` | Manage graph entities |
-| **Relationships** | `GET/POST /v2/graphs/{id}/relationships` | Manage relationships |
-| **AI Analysis** | `POST /v2/ai/analyze` | Run AI-powered analysis |
-| **Cases** | `GET/POST /api/cases` | Investigation cases |
-| **Evidence** | `GET/POST /api/evidence/{id}/annotations` | Evidence management |
-| **Ingest** | `POST /api/ingest/start` | Data ingestion jobs |
-| **Triage** | `GET/POST /api/triage/suggestions` | AI triage suggestions |
-| **Admin** | `GET /api/admin/*` | Administrative operations |
+| Category           | Endpoint                                  | Description               |
+| ------------------ | ----------------------------------------- | ------------------------- |
+| **Authentication** | `POST /v2/auth/login`                     | Authenticate user         |
+| **Graphs**         | `GET/POST /v2/graphs`                     | List or create graphs     |
+| **Entities**       | `GET/POST /v2/graphs/{id}/entities`       | Manage graph entities     |
+| **Relationships**  | `GET/POST /v2/graphs/{id}/relationships`  | Manage relationships      |
+| **AI Analysis**    | `POST /v2/ai/analyze`                     | Run AI-powered analysis   |
+| **Cases**          | `GET/POST /api/cases`                     | Investigation cases       |
+| **Evidence**       | `GET/POST /api/evidence/{id}/annotations` | Evidence management       |
+| **Ingest**         | `POST /api/ingest/start`                  | Data ingestion jobs       |
+| **Triage**         | `GET/POST /api/triage/suggestions`        | AI triage suggestions     |
+| **Admin**          | `GET /api/admin/*`                        | Administrative operations |
 
 **Full REST API Documentation**: [/api/docs](https://api.intelgraph.ai/api/docs)
 
@@ -115,6 +117,7 @@ sdks/                                   # Generated client SDKs
 **Endpoint**: `POST https://api.intelgraph.ai/graphql`
 
 **Key Operations**:
+
 - `query { investigation(id: $id) { ... } }` - Get investigation details
 - `mutation { createEntity(input: $input) { ... } }` - Create entity
 - `mutation { createRelationship(input: $input) { ... } }` - Create relationship
@@ -127,7 +130,7 @@ sdks/                                   # Generated client SDKs
 ### TypeScript/JavaScript SDK
 
 ```typescript
-import { IntelGraphClient } from '@intelgraph/sdk';
+import { IntelGraphClient } from "@intelgraph/sdk";
 
 const client = new IntelGraphClient({
   apiKey: process.env.INTELGRAPH_API_KEY,
@@ -135,14 +138,14 @@ const client = new IntelGraphClient({
 
 // Create a graph
 const graph = await client.graphs.create({
-  name: 'Financial Fraud Investigation',
-  tags: ['fraud', 'financial'],
+  name: "Financial Fraud Investigation",
+  tags: ["fraud", "financial"],
 });
 
 // Add entity
 const entity = await client.entities.create(graph.id, {
-  type: 'Person',
-  properties: { name: 'John Doe' },
+  type: "Person",
+  properties: { name: "John Doe" },
 });
 ```
 
@@ -205,11 +208,11 @@ IntelGraph Platform follows **Semantic Versioning** (SemVer):
 
 ### Current Versions
 
-| API | Version | Status | EOL Date |
-|-----|---------|--------|----------|
-| REST API v1 | 1.0.0 | ⚠️ Deprecated | 2025-06-30 |
-| Core API v2 | 2.1.0 | ✅ Current | - |
-| GraphQL | 2.1.0 | ✅ Current | - |
+| API         | Version | Status        | EOL Date   |
+| ----------- | ------- | ------------- | ---------- |
+| REST API v1 | 1.0.0   | ⚠️ Deprecated | 2025-06-30 |
+| Core API v2 | 2.1.0   | ✅ Current    | -          |
+| GraphQL     | 2.1.0   | ✅ Current    | -          |
 
 ### Deprecation Policy
 
@@ -258,13 +261,14 @@ curl https://api.intelgraph.ai/v2/graphs \
 
 ## 🚦 Rate Limiting
 
-| Tier | Requests/Hour | Burst Limit |
-|------|---------------|-------------|
-| **Free** | 100 | 10/minute |
-| **Professional** | 1,000 | 100/minute |
-| **Enterprise** | 10,000 | 1,000/minute |
+| Tier             | Requests/Hour | Burst Limit  |
+| ---------------- | ------------- | ------------ |
+| **Free**         | 100           | 10/minute    |
+| **Professional** | 1,000         | 100/minute   |
+| **Enterprise**   | 10,000        | 1,000/minute |
 
 Rate limit headers:
+
 ```http
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 847
@@ -277,9 +281,9 @@ X-RateLimit-Reset: 1642262400
 
 ```typescript
 const graph = await client.graphs.create({
-  name: 'Financial Fraud Investigation',
-  description: 'Q4 2024 analysis',
-  tags: ['fraud', 'financial'],
+  name: "Financial Fraud Investigation",
+  description: "Q4 2024 analysis",
+  tags: ["fraud", "financial"],
 });
 ```
 
@@ -287,17 +291,17 @@ const graph = await client.graphs.create({
 
 ```typescript
 const person = await client.entities.create(graph.id, {
-  type: 'Person',
-  properties: { name: 'John Doe', role: 'Suspect' },
+  type: "Person",
+  properties: { name: "John Doe", role: "Suspect" },
 });
 
 const org = await client.entities.create(graph.id, {
-  type: 'Organization',
-  properties: { name: 'Shell Company LLC' },
+  type: "Organization",
+  properties: { name: "Shell Company LLC" },
 });
 
 const relationship = await client.relationships.create(graph.id, {
-  type: 'WORKS_FOR',
+  type: "WORKS_FOR",
   sourceId: person.id,
   targetId: org.id,
 });
@@ -308,8 +312,8 @@ const relationship = await client.relationships.create(graph.id, {
 ```typescript
 const analysisJob = await client.ai.analyze({
   graphId: graph.id,
-  analysisType: 'community_detection',
-  parameters: { algorithm: 'louvain' },
+  analysisType: "community_detection",
+  parameters: { algorithm: "louvain" },
 });
 
 const results = await client.ai.waitForJob(analysisJob.jobId);
@@ -319,7 +323,7 @@ const results = await client.ai.waitForJob(analysisJob.jobId);
 
 ```typescript
 const queryResult = await client.graphs.query(graph.id, {
-  query: 'MATCH (p:Person)-[:KNOWS]->(p2:Person) RETURN p, p2',
+  query: "MATCH (p:Person)-[:KNOWS]->(p2:Person) RETURN p, p2",
 });
 ```
 
@@ -474,6 +478,7 @@ MIT License - See [LICENSE](../LICENSE) file for details.
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [OpenAPI Generator](https://openapi-generator.tech/)
 - [ReDoc](https://redocly.com/)
 - [Swagger UI](https://swagger.io/)

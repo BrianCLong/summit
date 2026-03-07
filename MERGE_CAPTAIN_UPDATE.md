@@ -11,11 +11,13 @@
 ### Main Branch Velocity: EXTREME
 
 **Since Initial Analysis** (1 hour ago):
+
 - **First update**: 175 files changed (+8,740 insertions, -1,271 deletions)
 - **Second update**: 164 files changed (+10,783 insertions, -9,225 deletions)
 - **Total**: 339 files in 2 massive merges
 
 **Key Merges Landed**:
+
 1. Complete CI remediation summary (#16540)
 2. Vercel React Best Practices Agent Skill (#16557)
 3. "Moat the Summit" Strategic Epic (#16570)
@@ -30,6 +32,7 @@
 ### Branch Drift Analysis
 
 **Branches went from → to (commits behind)**:
+
 - Auto-remediation: 30 → 79 commits behind
 - Patch branches: 60 → 109 commits behind
 - My merge captain branch: 0 → 50 → rebased to 0 commits behind
@@ -54,7 +57,7 @@ During rebase attempts, I discovered these branches have NO unique commits (alre
 
 ### Constraint Discovery
 
-Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end with matching session id, otherwise push will fail with 403 http code."*
+Per mission brief: _"CRITICAL: the branch should start with 'claude/' and end with matching session id, otherwise push will fail with 403 http code."_
 
 **Rebased Locally** (clean rebases, ready to push by branch owner):
 
@@ -76,22 +79,22 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
 
 ### Closest to Main (< 80 commits behind, with unique changes)
 
-| Branch | Behind | Ahead | Status | Notes |
-|--------|--------|-------|--------|-------|
-| `claude/merge-captain-setup-E1CRJ` | **0** | 1 | ✅ clean | **PUSHED - up to date** |
-| `codex/design-model-registry-v2-with-variants` | 68 | 2 | ⚠️ conflicts | Model registry v2 design |
-| `bolt-remove-duplicate-cmd-k-12980503813304426318` | 78 | 3 | ⚠️ conflicts | UX duplicate removal |
-| `auto-remediation/*` (16 branches) | 79 | 1 | ✅ clean | State sync PRs |
-| `ci/client-route-integrity-gate-2` | 79 | 3 | ⚠️ conflicts | CI gate addition |
+| Branch                                             | Behind | Ahead | Status       | Notes                    |
+| -------------------------------------------------- | ------ | ----- | ------------ | ------------------------ |
+| `claude/merge-captain-setup-E1CRJ`                 | **0**  | 1     | ✅ clean     | **PUSHED - up to date**  |
+| `codex/design-model-registry-v2-with-variants`     | 68     | 2     | ⚠️ conflicts | Model registry v2 design |
+| `bolt-remove-duplicate-cmd-k-12980503813304426318` | 78     | 3     | ⚠️ conflicts | UX duplicate removal     |
+| `auto-remediation/*` (16 branches)                 | 79     | 1     | ✅ clean     | State sync PRs           |
+| `ci/client-route-integrity-gate-2`                 | 79     | 3     | ⚠️ conflicts | CI gate addition         |
 
 ### Patch Branches (now 109-148 behind)
 
-| Branch | Behind | Status | Notes |
-|--------|--------|--------|-------|
-| `BrianCLong-patch-11` | 109 | ✅ clean | Small patches |
-| `BrianCLong-patch-12` | 109 | ✅ clean | Small patches |
+| Branch                     | Behind  | Status   | Notes         |
+| -------------------------- | ------- | -------- | ------------- |
+| `BrianCLong-patch-11`      | 109     | ✅ clean | Small patches |
+| `BrianCLong-patch-12`      | 109     | ✅ clean | Small patches |
 | `BrianCLong-patch-6,7,8,9` | 109-110 | ✅ clean | Small patches |
-| `BrianCLong-patch-2,3,4,5` | 148 | ✅ clean | Older patches |
+| `BrianCLong-patch-2,3,4,5` | 148     | ✅ clean | Older patches |
 
 ---
 
@@ -100,6 +103,7 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
 ### IMMEDIATE ACTIONS
 
 1. **Close Already-Merged Branches**
+
    ```bash
    # These have no unique commits - safe to close
    gh pr close $(gh pr list --head claude/investigate-github-access-HKmPQ --json number -q '.[0].number') \
@@ -110,6 +114,7 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
    ```
 
 2. **Close Stale Auto-Remediation PRs**
+
    ```bash
    # Keep only newest 3, close the other 13
    gh pr list --search "head:auto-remediation/state-update created:<2026-01-22" --limit 20 --json number | \
@@ -128,6 +133,7 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
 **Original Plan**: Rebase all branches, prepare for sequential merges
 
 **New Reality**: Main is advancing faster than branches can be prepared
+
 - Multiple PRs merging per hour
 - Many branches auto-incorporating changes
 - Branch drift accelerating (30→79 commits in 1 hour)
@@ -160,25 +166,30 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
 ## UPDATED MERGE QUEUE (Post-Triage)
 
 ### TIER 0: Already Merged (Close These)
+
 - `claude/investigate-github-access-HKmPQ`
 - `bolt-perf-nav-optimization-15880172993423186153`
 - Any other branches with 0 unique commits
 
 ### TIER 1: Active & Close to Main (< 80 behind)
+
 1. `codex/design-model-registry-v2-with-variants` (68 behind, conflicts) - **NEEDS CONFLICT RESOLUTION**
 2. `bolt-remove-duplicate-cmd-k-12980503813304426318` (78 behind, conflicts) - **NEEDS CONFLICT RESOLUTION**
 3. Newest 3 auto-remediation branches (79 behind, clean) - **MERGE READY after owner push**
 
 ### TIER 2: Moderate Drift (80-110 behind)
+
 - All `BrianCLong-patch-*` branches (109-110 behind)
 - Various `bolt-*` and `antigravity/*` branches (109-111 behind)
 
 ### TIER 3: Significant Drift (> 110 behind)
+
 - Most `codex/*` branches
 - Older feature branches
 - **Recommendation**: Ask owners if still relevant, otherwise close
 
 ### TIER 4: Ancient/Abandoned (> 100 behind, 7000+ ahead)
+
 - **IMMEDIATE CLOSURE RECOMMENDED** - catastrophic merge risk
 
 ---
@@ -190,11 +201,13 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
 **Branches Auto-Merged/Hour**: ~3-5
 
 **Projection**:
+
 - At this rate, branches 50+ commits behind will be 100+ behind in 1 hour
 - Branches 100+ behind will be 150+ behind in 1 hour
 - **Critical drift threshold** (where rebase becomes impractical): ~150 commits
 
 **Time to Critical Drift**:
+
 - Branches currently at 79 behind: ~1.5 hours
 - Branches currently at 109 behind: already approaching critical
 
@@ -214,11 +227,13 @@ Per mission brief: *"CRITICAL: the branch should start with 'claude/' and end wi
 **Original Target**: < 30 open PRs
 
 **Current Reality**: 234+ branches, but many are:
+
 - Already merged (just not closed)
 - Auto-remediation duplicates
 - Ancient/abandoned
 
 **Achievable Target**: < 50 ACTIVE PRs
+
 - Close ~30 already-merged branches
 - Close ~13 superseded auto-remediation
 - Close ~30 ancient/abandoned branches
@@ -263,4 +278,3 @@ The original merge captain mission assumed a stuck queue. Reality: the queue is 
 **Session**: claude/merge-captain-setup-E1CRJ
 **My Branch Status**: Rebased and pushed, 0 commits behind main
 **Recommendation**: Focus on hygiene (closing stale branches) rather than manual rebase queue
-

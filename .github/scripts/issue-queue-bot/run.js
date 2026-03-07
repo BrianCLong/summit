@@ -1,12 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const core = require('@actions/core');
-const github = require('@actions/github');
-const QueueBot = require('./index');
+const fs = require("fs");
+const path = require("path");
+const core = require("@actions/core");
+const github = require("@actions/github");
+const QueueBot = require("./index");
 
 async function run() {
   try {
-    const rulesPath = path.join(__dirname, 'rules.json');
+    const rulesPath = path.join(__dirname, "rules.json");
     const bot = new QueueBot(rulesPath);
 
     const token = process.env.GITHUB_TOKEN;
@@ -16,15 +16,15 @@ async function run() {
     const octokit = github.getOctokit(token);
     const context = github.context;
 
-    const isDryRun = process.env.DRY_RUN === 'true';
+    const isDryRun = process.env.DRY_RUN === "true";
 
     // Figure out which issue we are processing
     let issueNumber;
     let eventName = context.eventName;
 
-    if (eventName === 'workflow_dispatch') {
+    if (eventName === "workflow_dispatch") {
       issueNumber = context.payload.inputs.issue_number;
-    } else if (eventName === 'issues' || eventName === 'issue_comment') {
+    } else if (eventName === "issues" || eventName === "issue_comment") {
       issueNumber = context.payload.issue.number;
     } else {
       console.log(`Unsupported event: ${eventName}. Exiting gracefully.`);
@@ -32,7 +32,7 @@ async function run() {
     }
 
     if (!issueNumber) {
-        throw new Error("Could not determine issue number from context.");
+      throw new Error("Could not determine issue number from context.");
     }
 
     console.log(`Processing issue #${issueNumber}`);
@@ -48,8 +48,8 @@ async function run() {
     const issue = {
       number: issueData.number,
       title: issueData.title,
-      body: issueData.body || '',
-      labels: issueData.labels.map(l => typeof l === 'string' ? l : l.name),
+      body: issueData.body || "",
+      labels: issueData.labels.map((l) => (typeof l === "string" ? l : l.name)),
     };
 
     const { data: comments } = await octokit.rest.issues.listComments({
@@ -65,7 +65,7 @@ async function run() {
       return;
     }
 
-    if (result.action === 'none') {
+    if (result.action === "none") {
       console.log("Issue has already been processed with the current score. Idempotent exit.");
       return;
     }
@@ -83,33 +83,36 @@ async function run() {
     // Apply new labels
     // We only add labels, we don't necessarily want to remove old ones unless they are mutually exclusive like prio:P1 vs prio:P0
     const currentLabels = new Set(issue.labels);
-    const labelsToAdd = result.payload.applied_labels.filter(l => !currentLabels.has(l));
+    const labelsToAdd = result.payload.applied_labels.filter((l) => !currentLabels.has(l));
 
     // Handle mutually exclusive labels if we are adding prio:P0, maybe remove prio:P1
-    if (result.payload.applied_labels.includes('prio:P0')) {
-        if(currentLabels.has('prio:P1')) {
-            try {
-             await octokit.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                name: 'prio:P1'
-             });
-            } catch (e) { console.log(e); }
+    if (result.payload.applied_labels.includes("prio:P0")) {
+      if (currentLabels.has("prio:P1")) {
+        try {
+          await octokit.rest.issues.removeLabel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issueNumber,
+            name: "prio:P1",
+          });
+        } catch (e) {
+          console.log(e);
         }
-    } else if (result.payload.applied_labels.includes('prio:P1')) {
-         if(currentLabels.has('prio:P0')) {
-             try {
-             await octokit.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                name: 'prio:P0'
-             });
-             } catch (e) { console.log(e); }
+      }
+    } else if (result.payload.applied_labels.includes("prio:P1")) {
+      if (currentLabels.has("prio:P0")) {
+        try {
+          await octokit.rest.issues.removeLabel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issueNumber,
+            name: "prio:P0",
+          });
+        } catch (e) {
+          console.log(e);
         }
+      }
     }
-
 
     if (labelsToAdd.length > 0) {
       await octokit.rest.issues.addLabels({
@@ -118,7 +121,7 @@ async function run() {
         issue_number: issueNumber,
         labels: labelsToAdd,
       });
-      console.log(`Added labels: ${labelsToAdd.join(', ')}`);
+      console.log(`Added labels: ${labelsToAdd.join(", ")}`);
     }
 
     // Post comment
@@ -129,7 +132,6 @@ async function run() {
       body: payloadComment,
     });
     console.log(`Posted deterministic JSON payload comment.`);
-
   } catch (error) {
     core.setFailed(`Action failed with error: ${error.message}`);
   }

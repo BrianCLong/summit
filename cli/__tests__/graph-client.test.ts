@@ -2,17 +2,17 @@
  * Graph Client Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
 
 // Use jest.unstable_mockModule for ESM
 const mockQueryResult = {
   records: [
     {
-      keys: ['n'],
+      keys: ["n"],
       get: () => ({
-        elementId: '4:test:123',
-        labels: ['Person'],
-        properties: { name: 'Test' },
+        elementId: "4:test:123",
+        labels: ["Person"],
+        properties: { name: "Test" },
       }),
     },
   ],
@@ -30,7 +30,7 @@ const mockQueryResult = {
         labelsRemoved: 0,
       }),
     },
-    queryType: 'r',
+    queryType: "r",
   },
 };
 
@@ -49,37 +49,38 @@ const mockDriverInstance = {
 const mockNeo4j = {
   driver: () => mockDriverInstance,
   auth: {
-    basic: (user: string) => ({ scheme: 'basic', principal: user }),
+    basic: (user: string) => ({ scheme: "basic", principal: user }),
   },
   session: {
-    READ: 'READ',
-    WRITE: 'WRITE',
+    READ: "READ",
+    WRITE: "WRITE",
   },
   int: (n: number) => ({ toNumber: () => n }),
   isInt: () => false,
-  isNode: (val: unknown) => val && typeof val === 'object' && val !== null && 'labels' in val,
-  isRelationship: (val: unknown) => val && typeof val === 'object' && val !== null && 'type' in val && 'startNodeElementId' in val,
+  isNode: (val: unknown) => val && typeof val === "object" && val !== null && "labels" in val,
+  isRelationship: (val: unknown) =>
+    val && typeof val === "object" && val !== null && "type" in val && "startNodeElementId" in val,
   isPath: () => false,
 };
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-jest.mock('neo4j-driver', () => ({
+jest.mock("neo4j-driver", () => ({
   __esModule: true,
   default: mockNeo4j,
   ...mockNeo4j,
 }));
 
-import { GraphClient } from '../src/lib/graph-client.js';
+import { GraphClient } from "../src/lib/graph-client.js";
 
-describe('GraphClient', () => {
+describe("GraphClient", () => {
   let client: GraphClient;
 
   beforeEach(() => {
     client = new GraphClient({
-      uri: 'bolt://localhost:7687',
-      user: 'neo4j',
-      password: 'password',
-      database: 'neo4j',
+      uri: "bolt://localhost:7687",
+      user: "neo4j",
+      password: "password",
+      database: "neo4j",
       encrypted: false,
     });
   });
@@ -88,44 +89,44 @@ describe('GraphClient', () => {
     await client.disconnect();
   });
 
-  describe('connect', () => {
-    it('should connect to Neo4j', async () => {
+  describe("connect", () => {
+    it("should connect to Neo4j", async () => {
       await expect(client.connect()).resolves.not.toThrow();
     });
 
-    it('should not reconnect if already connected', async () => {
+    it("should not reconnect if already connected", async () => {
       await client.connect();
       await expect(client.connect()).resolves.not.toThrow();
     });
   });
 
-  describe('query', () => {
-    it('should execute a Cypher query', async () => {
-      const result = await client.query('MATCH (n) RETURN n LIMIT 1');
+  describe("query", () => {
+    it("should execute a Cypher query", async () => {
+      const result = await client.query("MATCH (n) RETURN n LIMIT 1");
 
-      expect(result).toHaveProperty('columns');
-      expect(result).toHaveProperty('rows');
-      expect(result).toHaveProperty('summary');
-      expect(result).toHaveProperty('totalRows');
+      expect(result).toHaveProperty("columns");
+      expect(result).toHaveProperty("rows");
+      expect(result).toHaveProperty("summary");
+      expect(result).toHaveProperty("totalRows");
     });
 
-    it('should return query statistics', async () => {
-      const result = await client.query('MATCH (n) RETURN n LIMIT 1');
+    it("should return query statistics", async () => {
+      const result = await client.query("MATCH (n) RETURN n LIMIT 1");
 
-      expect(result.summary).toHaveProperty('resultAvailableAfter');
-      expect(result.summary).toHaveProperty('resultConsumedAfter');
-      expect(result.summary).toHaveProperty('counters');
+      expect(result.summary).toHaveProperty("resultAvailableAfter");
+      expect(result.summary).toHaveProperty("resultConsumedAfter");
+      expect(result.summary).toHaveProperty("counters");
     });
   });
 
-  describe('healthCheck', () => {
-    it('should return health status', async () => {
+  describe("healthCheck", () => {
+    it("should return health status", async () => {
       const health = await client.healthCheck();
 
-      expect(health).toHaveProperty('connected');
-      expect(health).toHaveProperty('latencyMs');
-      expect(typeof health.connected).toBe('boolean');
-      expect(typeof health.latencyMs).toBe('number');
+      expect(health).toHaveProperty("connected");
+      expect(health).toHaveProperty("latencyMs");
+      expect(typeof health.connected).toBe("boolean");
+      expect(typeof health.latencyMs).toBe("number");
     });
   });
 });

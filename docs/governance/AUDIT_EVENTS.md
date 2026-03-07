@@ -3,8 +3,8 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 ### Schema
+
 ```json
 {
   "eventId": "UUID",
@@ -22,11 +22,13 @@
 ```
 
 ## 2. Authenticity Evaluation Signal
+
 **Type:** `DecisionNode`
 **SubType:** `AuthenticityEvaluation`
 **Description:** Recorded when an artifact referenced by a candidate defense action is evaluated for authenticity and provenance.
 
 ### Schema
+
 ```json
 {
   "eventId": "UUID",
@@ -44,11 +46,13 @@
 ```
 
 ## 3. Human Approval Artifact (Checklist)
+
 **Type:** `ActionNode`
 **SubType:** `HumanApproval`
 **Description:** Recorded when an operator completes a mandatory review checklist for an external publishing defense action.
 
 ### Schema
+
 ```json
 {
   "eventId": "UUID",

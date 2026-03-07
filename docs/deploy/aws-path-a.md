@@ -4,12 +4,13 @@
 
 **Path A** represents the "Golden Path" for deploying the Summit platform to AWS. It prioritizes:
 
-*   **Determinism**: Infrastructure as Code (IaC) using Terraform.
-*   **Security**: Minimal privilege, private networking by default.
-*   **Observability**: Integrated monitoring and logging from day one.
-*   **Maintainability**: Modular design with clear separation of concerns.
+- **Determinism**: Infrastructure as Code (IaC) using Terraform.
+- **Security**: Minimal privilege, private networking by default.
+- **Observability**: Integrated monitoring and logging from day one.
+- **Maintainability**: Modular design with clear separation of concerns.
 
 This path targets a standard deployment architecture:
+
 1.  **Network Layer**: VPC, Subnets (Public/Private/Database), NAT Gateways.
 2.  **Compute Layer**: EKS (Kubernetes) for containerized workloads.
 3.  **Data Layer**: RDS (PostgreSQL) and Neo4j (Self-hosted on EC2/EKS or Aura).
@@ -56,9 +57,10 @@ make aws:validate
 ```
 
 This ensures that:
-*   Code is properly formatted (`terraform fmt`).
-*   Syntax is valid (`terraform validate`).
-*   Configuration is consistent.
+
+- Code is properly formatted (`terraform fmt`).
+- Syntax is valid (`terraform validate`).
+- Configuration is consistent.
 
 ## Planned Next Steps
 
@@ -71,4 +73,5 @@ This PR establishes the foundation. Subsequent PRs will implement:
 5.  **Observability**: Full stack monitoring integration.
 
 ---
-*Generated for AWS Path A Foundation*
+
+_Generated for AWS Path A Foundation_

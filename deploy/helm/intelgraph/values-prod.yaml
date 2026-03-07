@@ -1,13 +1,13 @@
 # Production environment overrides
 global:
-  tag: '2025.08.21+build.1'
+  tag: "2025.08.21+build.1"
   pullPolicy: Always
 
   ingress:
     host: intelgraph.mycorp.com
     annotations:
-      nginx.ingress.kubernetes.io/rate-limit: '100'
-      nginx.ingress.kubernetes.io/rate-limit-window: '1m'
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+      nginx.ingress.kubernetes.io/rate-limit-window: "1m"
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Frame-Options: DENY";
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -24,81 +24,81 @@ services:
     replicaCount: 6
     resources:
       limits:
-        cpu: '4'
-        memory: '4Gi'
+        cpu: "4"
+        memory: "4Gi"
       requests:
-        cpu: '1'
-        memory: '1Gi'
+        cpu: "1"
+        memory: "1Gi"
 
   analytics:
     replicaCount: 4
     resources:
       limits:
-        cpu: '2'
-        memory: '2Gi'
+        cpu: "2"
+        memory: "2Gi"
       requests:
-        cpu: '500m'
-        memory: '512Mi'
+        cpu: "500m"
+        memory: "512Mi"
 
   mlEngine:
     replicaCount: 4
     resources:
       limits:
-        cpu: '8'
-        memory: '8Gi'
+        cpu: "8"
+        memory: "8Gi"
       requests:
-        cpu: '2'
-        memory: '2Gi'
+        cpu: "2"
+        memory: "2Gi"
 
   graphAnalytics:
     replicaCount: 4
     resources:
       limits:
-        cpu: '4'
-        memory: '4Gi'
+        cpu: "4"
+        memory: "4Gi"
       requests:
-        cpu: '1'
-        memory: '1Gi'
+        cpu: "1"
+        memory: "1Gi"
 
   feedProcessor:
     replicaCount: 3
     resources:
       limits:
-        cpu: '2'
-        memory: '2Gi'
+        cpu: "2"
+        memory: "2Gi"
       requests:
-        cpu: '500m'
-        memory: '512Mi'
+        cpu: "500m"
+        memory: "512Mi"
 
   searchEngine:
     replicaCount: 3
     resources:
       limits:
-        cpu: '2'
-        memory: '2Gi'
+        cpu: "2"
+        memory: "2Gi"
       requests:
-        cpu: '500m'
-        memory: '512Mi'
+        cpu: "500m"
+        memory: "512Mi"
 
   workflowEngine:
     replicaCount: 3
     resources:
       limits:
-        cpu: '2'
-        memory: '2Gi'
+        cpu: "2"
+        memory: "2Gi"
       requests:
-        cpu: '500m'
-        memory: '512Mi'
+        cpu: "500m"
+        memory: "512Mi"
 
   mobile:
     replicaCount: 3
     resources:
       limits:
-        cpu: '1'
-        memory: '1Gi'
+        cpu: "1"
+        memory: "1Gi"
       requests:
-        cpu: '200m'
-        memory: '256Mi'
+        cpu: "200m"
+        memory: "256Mi"
 
 # Production autoscaling
 autoscaling:
@@ -130,8 +130,8 @@ serviceMonitor:
 # Backup enabled in production
 backup:
   enabled: true
-  schedule: '0 2 * * *'
-  retention: '90d'
+  schedule: "0 2 * * *"
+  retention: "90d"
 
 # External secrets enabled
 externalSecrets:
@@ -139,7 +139,7 @@ externalSecrets:
   secretStore:
     provider: aws
     region: us-west-2
-    roleArn: 'arn:aws:iam::123456789012:role/intelgraph-secrets-role'
+    roleArn: "arn:aws:iam::123456789012:role/intelgraph-secrets-role"
 
 # Production security
 security:
@@ -157,16 +157,16 @@ security:
 resourceQuota:
   enabled: true
   limits:
-    cpu: '100'
-    memory: '200Gi'
-    persistentvolumeclaims: '50'
+    cpu: "100"
+    memory: "200Gi"
+    persistentvolumeclaims: "50"
 
 # Limit ranges
 limitRange:
   enabled: true
   default:
-    cpu: '1'
-    memory: '1Gi'
+    cpu: "1"
+    memory: "1Gi"
   defaultRequest:
-    cpu: '100m'
-    memory: '128Mi'
+    cpu: "100m"
+    memory: "128Mi"

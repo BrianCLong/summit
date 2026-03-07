@@ -33,12 +33,6 @@
     "Manifest receipts hash-chain correctly",
     "Report download endpoint works for authorized tenants"
   ],
-  "stop_conditions": [
-    "Missing prompt registration",
-    "Policy or governance scope mismatch"
-  ],
-  "dependencies": [
-    "server/src/reporting/service.ts",
-    "server/src/evidence/attestation/sign.ts"
-  ]
+  "stop_conditions": ["Missing prompt registration", "Policy or governance scope mismatch"],
+  "dependencies": ["server/src/reporting/service.ts", "server/src/evidence/attestation/sign.ts"]
 }

@@ -17,7 +17,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: api-server
-  minReplicas: 3  # Increased from typical 2 for high availability
+  minReplicas: 3 # Increased from typical 2 for high availability
   maxReplicas: 20
   metrics:
     - type: Resource
@@ -25,7 +25,7 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70  # Conservative for cost optimization
+          averageUtilization: 70 # Conservative for cost optimization
     - type: Resource
       resource:
         name: memory
@@ -38,35 +38,35 @@ spec:
           name: http_requests_per_second
         target:
           type: AverageValue
-          averageValue: '50'  # 50 RPS per pod
+          averageValue: "50" # 50 RPS per pod
     - type: Pods
       pods:
         metric:
           name: graphql_query_rate
         target:
           type: AverageValue
-          averageValue: '30'
+          averageValue: "30"
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 300  # 5 minutes to prevent flapping
+      stabilizationWindowSeconds: 300 # 5 minutes to prevent flapping
       policies:
         - type: Percent
-          value: 10  # Scale down 10% at a time
+          value: 10 # Scale down 10% at a time
           periodSeconds: 60
         - type: Pods
-          value: 2  # Or 2 pods at a time
+          value: 2 # Or 2 pods at a time
           periodSeconds: 60
-      selectPolicy: Min  # Use the minimum of the two policies
+      selectPolicy: Min # Use the minimum of the two policies
     scaleUp:
-      stabilizationWindowSeconds: 60  # Quick scale-up
+      stabilizationWindowSeconds: 60 # Quick scale-up
       policies:
         - type: Percent
-          value: 100  # Double capacity
+          value: 100 # Double capacity
           periodSeconds: 30
         - type: Pods
-          value: 4  # Or add 4 pods
+          value: 4 # Or add 4 pods
           periodSeconds: 30
-      selectPolicy: Max  # Use the maximum for aggressive scale-up
+      selectPolicy: Max # Use the maximum for aggressive scale-up
 
 ---
 # Web Frontend HPA
@@ -137,7 +137,7 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 65  # Lower threshold for query-heavy workload
+          averageUtilization: 65 # Lower threshold for query-heavy workload
     - type: Resource
       resource:
         name: memory
@@ -150,14 +150,14 @@ spec:
           name: graphql_operation_duration_p95
         target:
           type: AverageValue
-          averageValue: '500'  # Scale if p95 latency > 500ms
+          averageValue: "500" # Scale if p95 latency > 500ms
     - type: Pods
       pods:
         metric:
           name: graphql_concurrent_operations
         target:
           type: AverageValue
-          averageValue: '20'  # 20 concurrent operations per pod
+          averageValue: "20" # 20 concurrent operations per pod
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 180
@@ -169,7 +169,7 @@ spec:
       stabilizationWindowSeconds: 45
       policies:
         - type: Percent
-          value: 200  # Triple capacity for query spikes
+          value: 200 # Triple capacity for query spikes
           periodSeconds: 15
 
 ---
@@ -186,22 +186,22 @@ metadata:
 spec:
   scaleTargetRef:
     name: neo4j-query-worker
-  minReplicaCount: 1  # At least one for monitoring
+  minReplicaCount: 1 # At least one for monitoring
   maxReplicaCount: 15
-  pollingInterval: 10  # Check every 10 seconds
-  cooldownPeriod: 120  # 2 minutes cooldown after scaling
-  idleReplicaCount: 1  # Scale to 1 when no activity
+  pollingInterval: 10 # Check every 10 seconds
+  cooldownPeriod: 120 # 2 minutes cooldown after scaling
+  idleReplicaCount: 1 # Scale to 1 when no activity
   triggers:
     - type: redis
       metadata:
         address: redis:6379
         listName: neo4j_query_queue
-        listLength: '5'  # Scale up if 5+ queries queued
-        activationListLength: '1'  # Activate from 0 if any queries
+        listLength: "5" # Scale up if 5+ queries queued
+        activationListLength: "1" # Activate from 0 if any queries
     - type: cpu
       metricType: Utilization
       metadata:
-        value: '70'
+        value: "70"
 
 ---
 # Analytics Engine - KEDA with Prometheus metrics
@@ -226,7 +226,7 @@ spec:
       metadata:
         serverAddress: http://prometheus:9090
         metricName: analytics_jobs_pending
-        threshold: '10'
+        threshold: "10"
         query: |
           sum(rate(analytics_jobs_pending_total[1m]))
 
@@ -245,20 +245,20 @@ spec:
   scaleTargetRef:
     name: ai-copilot
   minReplicaCount: 1
-  maxReplicaCount: 8  # Limited to control AI costs
+  maxReplicaCount: 8 # Limited to control AI costs
   pollingInterval: 15
-  cooldownPeriod: 300  # 5 minutes - AI inference is expensive
+  cooldownPeriod: 300 # 5 minutes - AI inference is expensive
   triggers:
     - type: redis
       metadata:
         address: redis:6379
         listName: copilot_request_queue
-        listLength: '3'  # Low threshold - AI is resource-intensive
+        listLength: "3" # Low threshold - AI is resource-intensive
     - type: prometheus
       metadata:
         serverAddress: http://prometheus:9090
         metricName: copilot_response_latency_p95
-        threshold: '3000'  # Scale if p95 > 3s
+        threshold: "3000" # Scale if p95 > 3s
         query: |
           histogram_quantile(0.95,
             rate(copilot_response_duration_seconds_bucket[5m]))
@@ -303,27 +303,27 @@ spec:
       metadata:
         address: redis:6379
         listName: agent_workload_queue
-        listLength: '10'
-        activationListLength: '1'
+        listLength: "10"
+        activationListLength: "1"
     - type: prometheus
       metadata:
         serverAddress: http://prometheus:9090
         metricName: agent_queue_slo_pressure
-        threshold: '1'
+        threshold: "1"
         query: |
           max_over_time(agent_queue_slo_pressure{queue="agent-default"}[2m])
     - type: prometheus
       metadata:
         serverAddress: http://prometheus:9090
         metricName: agent_workload_latency_burn
-        threshold: '1'
+        threshold: "1"
         query: |
           histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m])) / 2
     - type: prometheus
       metadata:
         serverAddress: http://prometheus:9090
         metricName: agent_queue_cost_pressure
-        threshold: '1.05'
+        threshold: "1.05"
         query: |
           max_over_time(agent_queue_cost_pressure{queue="agent-default"}[5m])
 
@@ -341,7 +341,7 @@ metadata:
 spec:
   scaleTargetRef:
     name: export-worker
-  minReplicaCount: 0  # Scale to zero when idle
+  minReplicaCount: 0 # Scale to zero when idle
   maxReplicaCount: 10
   pollingInterval: 30
   cooldownPeriod: 300
@@ -351,8 +351,8 @@ spec:
       metadata:
         address: redis:6379
         listName: export_job_queue
-        listLength: '2'
-        activationListLength: '1'
+        listLength: "2"
+        activationListLength: "1"
 
 ---
 # Webhook Delivery Worker - KEDA with external trigger
@@ -370,15 +370,15 @@ spec:
     name: webhook-worker
   minReplicaCount: 1
   maxReplicaCount: 20
-  pollingInterval: 5  # Frequent polling for webhooks
+  pollingInterval: 5 # Frequent polling for webhooks
   cooldownPeriod: 60
   triggers:
     - type: redis
       metadata:
         address: redis:6379
         listName: webhook_delivery_queue
-        listLength: '10'
-        activationListLength: '1'
+        listLength: "10"
+        activationListLength: "1"
 
 ---
 # Vertical Pod Autoscaler for stateful services (Neo4j, PostgreSQL)
@@ -397,7 +397,7 @@ spec:
     kind: StatefulSet
     name: neo4j
   updatePolicy:
-    updateMode: "Auto"  # Automatically apply recommendations
+    updateMode: "Auto" # Automatically apply recommendations
   resourcePolicy:
     containerPolicies:
       - containerName: neo4j
@@ -449,7 +449,7 @@ metadata:
   name: api-server-pdb
   namespace: prod
 spec:
-  minAvailable: 2  # Always keep at least 2 replicas
+  minAvailable: 2 # Always keep at least 2 replicas
   selector:
     matchLabels:
       app: api-server
@@ -478,8 +478,8 @@ metadata:
     environment: production
 spec:
   hard:
-    requests.cpu: "200"  # Max 200 CPUs
-    requests.memory: 400Gi  # Max 400GB RAM
+    requests.cpu: "200" # Max 200 CPUs
+    requests.memory: 400Gi # Max 400GB RAM
     limits.cpu: "400"
     limits.memory: 800Gi
     persistentvolumeclaims: "50"

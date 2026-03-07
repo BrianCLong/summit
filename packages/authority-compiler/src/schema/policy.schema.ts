@@ -10,7 +10,7 @@
  * @module authority-compiler
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // -----------------------------------------------------------------------------
 // Core Policy Types
@@ -20,11 +20,11 @@ import { z } from 'zod';
  * Classification levels for data sensitivity
  */
 export const ClassificationLevel = z.enum([
-  'UNCLASSIFIED',
-  'CUI', // Controlled Unclassified Information
-  'CONFIDENTIAL',
-  'SECRET',
-  'TOP_SECRET',
+  "UNCLASSIFIED",
+  "CUI", // Controlled Unclassified Information
+  "CONFIDENTIAL",
+  "SECRET",
+  "TOP_SECRET",
 ]);
 export type ClassificationLevel = z.infer<typeof ClassificationLevel>;
 
@@ -43,12 +43,12 @@ export type Compartment = z.infer<typeof Compartment>;
  * License types that govern data usage
  */
 export const LicenseType = z.enum([
-  'INTERNAL_ONLY', // Cannot be shared externally
-  'RELEASABLE', // Can be shared with approved parties
-  'ORCON', // Originator controlled
-  'NOFORN', // No foreign nationals
-  'PROPIN', // Proprietary information
-  'CUSTOM', // Custom license terms
+  "INTERNAL_ONLY", // Cannot be shared externally
+  "RELEASABLE", // Can be shared with approved parties
+  "ORCON", // Originator controlled
+  "NOFORN", // No foreign nationals
+  "PROPIN", // Proprietary information
+  "CUSTOM", // Custom license terms
 ]);
 export type LicenseType = z.infer<typeof LicenseType>;
 
@@ -56,16 +56,16 @@ export type LicenseType = z.infer<typeof LicenseType>;
  * Operations that can be controlled
  */
 export const Operation = z.enum([
-  'READ',
-  'CREATE',
-  'UPDATE',
-  'DELETE',
-  'EXPORT',
-  'SHARE',
-  'ANNOTATE',
-  'LINK', // Create relationships
-  'QUERY', // Execute queries
-  'COPILOT', // AI copilot interactions
+  "READ",
+  "CREATE",
+  "UPDATE",
+  "DELETE",
+  "EXPORT",
+  "SHARE",
+  "ANNOTATE",
+  "LINK", // Create relationships
+  "QUERY", // Execute queries
+  "COPILOT", // AI copilot interactions
 ]);
 export type Operation = z.infer<typeof Operation>;
 
@@ -115,7 +115,7 @@ export const Authority = z.object({
         .object({
           startHour: z.number().min(0).max(23),
           endHour: z.number().min(0).max(23),
-          timezone: z.string().default('UTC'),
+          timezone: z.string().default("UTC"),
           daysOfWeek: z.array(z.number().min(0).max(6)).optional(),
         })
         .optional(),
@@ -226,7 +226,7 @@ export const SelectorMinimization = z.object({
     maxTimeRange: z
       .object({
         value: z.number().positive(),
-        unit: z.enum(['hours', 'days', 'weeks', 'months']),
+        unit: z.enum(["hours", "days", "weeks", "months"]),
       })
       .optional(),
   }),

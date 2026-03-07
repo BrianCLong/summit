@@ -1,7 +1,7 @@
-import { randomUUID } from 'crypto';
-import { Pool } from 'pg';
-import { logger } from '../utils/logger.js';
-import { ModelVersion, TrainingMetrics } from '../training/TrainingPipeline.js';
+import { randomUUID } from "crypto";
+import { Pool } from "pg";
+import { logger } from "../utils/logger.js";
+import { ModelVersion, TrainingMetrics } from "../training/TrainingPipeline.js";
 
 interface RegisterOptions {
   metrics?: Partial<TrainingMetrics>;
@@ -21,14 +21,14 @@ export class ModelRegistry {
       return;
     }
 
-    await this.pool.query('SELECT 1');
+    await this.pool.query("SELECT 1");
     this.initialized = true;
   }
 
   async ensureRegistered(
     modelType: string,
     version: string,
-    options: RegisterOptions = {},
+    options: RegisterOptions = {}
   ): Promise<ModelVersion> {
     await this.initialize();
 
@@ -39,7 +39,7 @@ export class ModelRegistry {
         ORDER BY created_at DESC
         LIMIT 1
       `,
-      [modelType, version],
+      [modelType, version]
     );
 
     if (existing.rowCount > 0) {
@@ -72,14 +72,14 @@ export class ModelRegistry {
         modelType,
         JSON.stringify(options.metrics ?? {}),
         options.activate ?? false,
-        options.modelPath ?? 'external',
+        options.modelPath ?? "external",
         JSON.stringify(options.hyperparameters ?? {}),
         options.notes ?? null,
-      ],
+      ]
     );
 
     const model = this.mapRow(result.rows[0]);
-    logger.info('Registered new model version', {
+    logger.info("Registered new model version", {
       modelType,
       version,
       modelVersionId: model.id,
@@ -92,11 +92,11 @@ export class ModelRegistry {
     const client = await this.pool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       const result = await client.query(
         `SELECT model_type FROM ml_model_versions WHERE id = $1 FOR UPDATE`,
-        [modelVersionId],
+        [modelVersionId]
       );
 
       if (result.rowCount === 0) {
@@ -107,18 +107,18 @@ export class ModelRegistry {
 
       await client.query(
         `UPDATE ml_model_versions SET is_active = false WHERE model_type = $1 AND is_active = true`,
-        [modelType],
+        [modelType]
       );
       await client.query(
         `UPDATE ml_model_versions SET is_active = true, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-        [modelVersionId],
+        [modelVersionId]
       );
 
-      await client.query('COMMIT');
-      logger.info('Activated model version', { modelVersionId, modelType });
+      await client.query("COMMIT");
+      logger.info("Activated model version", { modelVersionId, modelType });
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Failed to activate model version', error);
+      await client.query("ROLLBACK");
+      logger.error("Failed to activate model version", error);
       throw error;
     } finally {
       client.release();
@@ -129,7 +129,7 @@ export class ModelRegistry {
     await this.initialize();
     const versions = await this.listVersions(modelType, 2);
     if (versions.length < 2) {
-      logger.warn('No previous model version available for rollback', { modelType });
+      logger.warn("No previous model version available for rollback", { modelType });
       return null;
     }
 
@@ -139,7 +139,7 @@ export class ModelRegistry {
     }
 
     await this.setActive(previous.id);
-    logger.info('Rolled back model', {
+    logger.info("Rolled back model", {
       modelType,
       previousVersion: previous.version,
       deactivatedVersion: current.version,
@@ -158,7 +158,7 @@ export class ModelRegistry {
       conditions.push(`model_type = $${params.length}`);
     }
 
-    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const result = await this.pool.query(
       `
@@ -168,7 +168,7 @@ export class ModelRegistry {
         ORDER BY created_at DESC
         LIMIT $${params.length + 1}
       `,
-      [...params, limit],
+      [...params, limit]
     );
 
     return result.rows.map((row) => this.mapRow(row));
@@ -185,7 +185,7 @@ export class ModelRegistry {
         ORDER BY updated_at DESC
         LIMIT 1
       `,
-      [modelType],
+      [modelType]
     );
 
     if (result.rowCount === 0) {
@@ -198,10 +198,9 @@ export class ModelRegistry {
   async getModelById(modelVersionId: string): Promise<ModelVersion | null> {
     await this.initialize();
 
-    const result = await this.pool.query(
-      `SELECT * FROM ml_model_versions WHERE id = $1`,
-      [modelVersionId],
-    );
+    const result = await this.pool.query(`SELECT * FROM ml_model_versions WHERE id = $1`, [
+      modelVersionId,
+    ]);
 
     if (result.rowCount === 0) {
       return null;
@@ -210,10 +209,7 @@ export class ModelRegistry {
     return this.mapRow(result.rows[0]);
   }
 
-  async updateMetrics(
-    modelVersionId: string,
-    metrics: Partial<TrainingMetrics>,
-  ): Promise<void> {
+  async updateMetrics(modelVersionId: string, metrics: Partial<TrainingMetrics>): Promise<void> {
     await this.initialize();
 
     await this.pool.query(
@@ -223,7 +219,7 @@ export class ModelRegistry {
             updated_at = CURRENT_TIMESTAMP
         WHERE id = $1
       `,
-      [modelVersionId, JSON.stringify(metrics)],
+      [modelVersionId, JSON.stringify(metrics)]
     );
   }
 

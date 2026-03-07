@@ -110,9 +110,9 @@ spec:
         app.kubernetes.io/component: authentication
         app.kubernetes.io/part-of: intelgraph
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: maestro-conductor
       securityContext:
@@ -129,17 +129,17 @@ spec:
               name: metrics
           env:
             - name: OAUTH2_PROXY_HTTP_ADDRESS
-              value: '0.0.0.0:4180'
+              value: "0.0.0.0:4180"
             - name: OAUTH2_PROXY_METRICS_ADDRESS
-              value: '0.0.0.0:9090'
+              value: "0.0.0.0:9090"
             - name: OAUTH2_PROXY_UPSTREAMS
-              value: 'http://maestro-conductor:5000/'
+              value: "http://maestro-conductor:5000/"
             - name: OAUTH2_PROXY_PROVIDER
-              value: 'oidc'
+              value: "oidc"
             - name: OAUTH2_PROXY_OIDC_ISSUER_URL
-              value: 'https://auth.intelgraph.io' # TODO: Replace with your OIDC issuer URL
+              value: "https://auth.intelgraph.io" # TODO: Replace with your OIDC issuer URL
             - name: OAUTH2_PROXY_CLIENT_ID
-              value: 'maestro-conductor-prod' # TODO: Replace with your OIDC client ID for production
+              value: "maestro-conductor-prod" # TODO: Replace with your OIDC client ID for production
             - name: OAUTH2_PROXY_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -151,27 +151,27 @@ spec:
                   name: oidc-auth-secret
                   key: session-key
             - name: OAUTH2_PROXY_COOKIE_DOMAINS
-              value: '.intelgraph.io' # TODO: Replace with your production domain
+              value: ".intelgraph.io" # TODO: Replace with your production domain
             - name: OAUTH2_PROXY_REDIRECT_URL
-              value: 'https://maestro.intelgraph.io/oauth2/callback' # TODO: Replace with your production redirect URI
+              value: "https://maestro.intelgraph.io/oauth2/callback" # TODO: Replace with your production redirect URI
             - name: OAUTH2_PROXY_EMAIL_DOMAINS
-              value: '*'
+              value: "*"
             - name: OAUTH2_PROXY_SCOPE
-              value: 'openid profile email groups'
+              value: "openid profile email groups"
             - name: OAUTH2_PROXY_SET_XAUTHREQUEST
-              value: 'true'
+              value: "true"
             - name: OAUTH2_PROXY_PASS_ACCESS_TOKEN
-              value: 'true'
+              value: "true"
             - name: OAUTH2_PROXY_PASS_USER_HEADERS
-              value: 'true'
+              value: "true"
             - name: OAUTH2_PROXY_COOKIE_SECURE
-              value: 'true'
+              value: "true"
             - name: OAUTH2_PROXY_COOKIE_SAMESITE
-              value: 'strict'
+              value: "strict"
             - name: OAUTH2_PROXY_SESSION_STORE_TYPE
-              value: 'redis'
+              value: "redis"
             - name: OAUTH2_PROXY_REDIS_CONNECTION_URL
-              value: 'redis://redis-conductor:6379/1'
+              value: "redis://redis-conductor:6379/1"
             - name: OAUTH2_PROXY_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -216,9 +216,9 @@ metadata:
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:
@@ -246,12 +246,12 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    nginx.ingress.kubernetes.io/auth-url: 'http://oidc-auth-proxy.maestro.svc.cluster.local:4180/oauth2/auth'
-    nginx.ingress.kubernetes.io/auth-signin: 'https://maestro.intelgraph.io/oauth2/start?rd=$escaped_request_uri' # TODO: Replace with your production domain
-    nginx.ingress.kubernetes.io/auth-response-headers: 'X-Auth-Request-User,X-Auth-Request-Email,X-Auth-Request-Groups,X-Auth-Request-Preferred-Username'
+    nginx.ingress.kubernetes.io/auth-url: "http://oidc-auth-proxy.maestro.svc.cluster.local:4180/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://maestro.intelgraph.io/oauth2/start?rd=$escaped_request_uri" # TODO: Replace with your production domain
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User,X-Auth-Request-Email,X-Auth-Request-Groups,X-Auth-Request-Preferred-Username"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       more_set_headers "X-Frame-Options: DENY";
       more_set_headers "X-Content-Type-Options: nosniff";

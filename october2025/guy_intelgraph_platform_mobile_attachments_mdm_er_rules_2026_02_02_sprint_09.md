@@ -127,19 +127,19 @@ Observability: edge mTLS panels, DLP metrics; Docs: playbooks + STRIDE delta
 
 ```tsx
 // apps/web/src/mobile/Attach.tsx
-import React, { useState } from 'react';
-import { runClientDlp } from './dlp';
-import { enqueue } from './offline-queue';
+import React, { useState } from "react";
+import { runClientDlp } from "./dlp";
+import { enqueue } from "./offline-queue";
 export default function Attach({ deviceId }: { deviceId: string }) {
   const [file, setFile] = useState<File | null>(null);
-  const [err, setErr] = useState<string>('');
+  const [err, setErr] = useState<string>("");
   async function onChange(e: any) {
-    setErr('');
+    setErr("");
     const f = e.target.files?.[0];
     if (!f) return;
     const dlp = await runClientDlp(f);
     if (dlp.block) {
-      setErr('Blocked: ' + dlp.reason);
+      setErr("Blocked: " + dlp.reason);
       return;
     }
     setFile(f);
@@ -149,7 +149,7 @@ export default function Attach({ deviceId }: { deviceId: string }) {
     const buf = await file.arrayBuffer();
     enqueue({
       id: crypto.randomUUID(),
-      type: 'attach.upload',
+      type: "attach.upload",
       payload: {
         name: file.name,
         mime: file.type,
@@ -164,11 +164,7 @@ export default function Attach({ deviceId }: { deviceId: string }) {
     <div className="p-2">
       <input type="file" accept="image/*,application/pdf" onChange={onChange} />
       {err && <div className="text-red-600 text-sm mt-1">{err}</div>}
-      <button
-        className="rounded-2xl p-2 shadow mt-2"
-        onClick={upload}
-        disabled={!file}
-      >
+      <button className="rounded-2xl p-2 shadow mt-2" onClick={upload} disabled={!file}>
         Queue Upload
       </button>
     </div>
@@ -181,10 +177,8 @@ export default function Attach({ deviceId }: { deviceId: string }) {
 ```ts
 // apps/web/src/mobile/dlp.ts
 export async function runClientDlp(file: File) {
-  if (file.size > 20 * 1024 * 1024)
-    return { block: true, reason: 'File too large' };
-  if (/\.(exe|bat|sh)$/i.test(file.name))
-    return { block: true, reason: 'Executable not allowed' };
+  if (file.size > 20 * 1024 * 1024) return { block: true, reason: "File too large" };
+  if (/\.(exe|bat|sh)$/i.test(file.name)) return { block: true, reason: "Executable not allowed" };
   // TODO: OCR hook (WebAssembly) for basic text scan
   return { block: false };
 }
@@ -195,23 +189,18 @@ export async function runClientDlp(file: File) {
 ```ts
 // server/src/dlp/pipeline.ts
 export type DlpResult = {
-  action: 'allow' | 'warn' | 'block';
+  action: "allow" | "warn" | "block";
   reasons: string[];
 };
 export async function runDlp(
   buf: Buffer,
-  meta: { mime: string; name: string },
+  meta: { mime: string; name: string }
 ): Promise<DlpResult> {
   const reasons: string[] = [];
-  if (buf.length > 20 * 1024 * 1024) reasons.push('size>20MB');
-  if (!/^image\//.test(meta.mime) && meta.mime !== 'application/pdf')
-    reasons.push('mime');
+  if (buf.length > 20 * 1024 * 1024) reasons.push("size>20MB");
+  if (!/^image\//.test(meta.mime) && meta.mime !== "application/pdf") reasons.push("mime");
   // TODO: OCR then regex scan for emails/PII
-  const action = reasons.length
-    ? reasons.includes('size>20MB')
-      ? 'block'
-      : 'warn'
-    : 'allow';
+  const action = reasons.length ? (reasons.includes("size>20MB") ? "block" : "warn") : "allow";
   return { action, reasons };
 }
 ```
@@ -220,11 +209,11 @@ export async function runDlp(
 
 ```ts
 // server/src/security/mdm.ts
-import * as jose from 'jose';
+import * as jose from "jose";
 export async function verifyMdmToken(token: string, jwk: any) {
   const { payload } = await jose.jwtVerify(token, await jose.importJWK(jwk));
-  if (!payload || !payload['device_id'] || !payload['compliant'])
-    throw new Error('MDM non-compliant');
+  if (!payload || !payload["device_id"] || !payload["compliant"])
+    throw new Error("MDM non-compliant");
   return payload; // { device_id, os, version, compliant }
 }
 ```
@@ -253,34 +242,32 @@ when:
   - field: email
     op: exact
     threshold: 1.0
-explain: 'Exact email match'
+explain: "Exact email match"
 action: auto_candidate
 ```
 
 ```ts
 // server/src/er/apply_rules.ts
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import yaml from "js-yaml";
 export type Rule = {
   id: string;
   when: any[];
   explain: string;
-  action: 'auto_candidate';
+  action: "auto_candidate";
 };
-export function loadRules(dir = 'server/src/er/rules') {
+export function loadRules(dir = "server/src/er/rules") {
   return fs
     .readdirSync(dir)
-    .filter((f) => f.endsWith('.yaml'))
-    .map((f) => yaml.load(fs.readFileSync(path.join(dir, f), 'utf8')) as Rule);
+    .filter((f) => f.endsWith(".yaml"))
+    .map((f) => yaml.load(fs.readFileSync(path.join(dir, f), "utf8")) as Rule);
 }
 export function evaluate(record: any, existing: any, rules: Rule[]) {
   const hits: any[] = [];
   for (const r of rules) {
     const ok = r.when.every((w) =>
-      w.op === 'exact'
-        ? record[w.field] && record[w.field] === existing[w.field]
-        : false,
+      w.op === "exact" ? record[w.field] && record[w.field] === existing[w.field] : false
     );
     if (ok) hits.push({ rule: r.id, explain: r.explain });
   }
@@ -301,7 +288,7 @@ export type Influence = {
 export async function diffusion(
   adj: Map<string, string[]>,
   damping = 0.85,
-  iters = 10,
+  iters = 10
 ): Promise<Influence[]> {
   const nodes = Array.from(adj.keys());
   const n = nodes.length;
@@ -334,7 +321,7 @@ export async function diffusion(
 // server/src/analytics/motifs/influence_paths.ts
 export function kShortestPaths(graph: any, src: string, dst: string, k = 3) {
   // placeholder; replace with Yen's algorithm constrained by time/edge types
-  return [[src, '…', dst]];
+  return [[src, "…", dst]];
 }
 ```
 
@@ -348,9 +335,7 @@ export function kShortestPaths(graph: any, src: string, dst: string, k = 3) {
     {
       "type": "stat",
       "title": "Handshake Errors",
-      "targets": [
-        { "expr": "sum(increase(ingress_mtls_handshake_errors_total[1h]))" }
-      ]
+      "targets": [{ "expr": "sum(increase(ingress_mtls_handshake_errors_total[1h]))" }]
     },
     {
       "type": "graph",
@@ -365,20 +350,20 @@ export function kShortestPaths(graph: any, src: string, dst: string, k = 3) {
 
 ```ts
 // server/src/metrics/dlp.ts
-import client from 'prom-client';
+import client from "prom-client";
 export const dlpBlocks = new client.Counter({
-  name: 'dlp_blocks_total',
-  help: 'DLP blocks',
-  labelNames: ['reason'],
+  name: "dlp_blocks_total",
+  help: "DLP blocks",
+  labelNames: ["reason"],
 });
 export const dlpWarns = new client.Counter({
-  name: 'dlp_warns_total',
-  help: 'DLP warnings',
-  labelNames: ['reason'],
+  name: "dlp_warns_total",
+  help: "DLP warnings",
+  labelNames: ["reason"],
 });
 export const dlpScanMs = new client.Histogram({
-  name: 'dlp_scan_ms',
-  help: 'DLP scan times',
+  name: "dlp_scan_ms",
+  help: "DLP scan times",
   buckets: [10, 50, 100, 250, 500, 1000, 2000],
 });
 ```
@@ -454,7 +439,7 @@ security:
 er:
   ruleAssist: true
 motifs:
-  influence: ['diffusion', 'paths']
+  influence: ["diffusion", "paths"]
 observability:
   dlpPanels: true
   edgePanels: true

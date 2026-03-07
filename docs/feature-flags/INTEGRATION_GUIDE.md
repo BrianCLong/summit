@@ -29,8 +29,8 @@ FEATURE_FLAG_CACHE_TTL=300
 Add to `server/src/app.ts`:
 
 ```typescript
-import { initializeFeatureFlags } from './feature-flags/setup.js';
-import { featureFlagMiddleware, exposeFeatureFlags } from './feature-flags/middleware.js';
+import { initializeFeatureFlags } from "./feature-flags/setup.js";
+import { featureFlagMiddleware, exposeFeatureFlags } from "./feature-flags/middleware.js";
 
 // Bootstrap
 async function bootstrap() {
@@ -44,16 +44,16 @@ async function bootstrap() {
 app.use(featureFlagMiddleware);
 
 // Expose endpoint
-app.get('/api/feature-flags', exposeFeatureFlags);
+app.get("/api/feature-flags", exposeFeatureFlags);
 
 // Use in routes
-app.get('/api/dashboard', async (req, res) => {
-  const newDashboard = await req.featureFlags.isEnabled('new-dashboard');
+app.get("/api/dashboard", async (req, res) => {
+  const newDashboard = await req.featureFlags.isEnabled("new-dashboard");
 
   if (newDashboard) {
-    res.json({ version: 'v2', data: await getNewDashboard() });
+    res.json({ version: "v2", data: await getNewDashboard() });
   } else {
-    res.json({ version: 'v1', data: await getOldDashboard() });
+    res.json({ version: "v1", data: await getOldDashboard() });
   }
 });
 ```
@@ -63,17 +63,17 @@ app.get('/api/dashboard', async (req, res) => {
 Add to Prometheus scrape config:
 
 ```typescript
-import { getFeatureFlagService } from './feature-flags/setup.js';
+import { getFeatureFlagService } from "./feature-flags/setup.js";
 
-app.get('/metrics', async (req, res) => {
+app.get("/metrics", async (req, res) => {
   const service = getFeatureFlagService();
   const metrics = service.getMetrics();
 
   if (metrics) {
-    res.set('Content-Type', metrics.getRegistry().contentType);
+    res.set("Content-Type", metrics.getRegistry().contentType);
     res.end(await metrics.getMetrics());
   } else {
-    res.status(404).send('Metrics not enabled');
+    res.status(404).send("Metrics not enabled");
   }
 });
 ```
@@ -86,7 +86,7 @@ Wrap your app in `FeatureFlagProvider`:
 
 ```tsx
 // App.tsx
-import { FeatureFlagProvider } from '@intelgraph/feature-flags/react';
+import { FeatureFlagProvider } from "@intelgraph/feature-flags/react";
 
 function App() {
   return (
@@ -108,10 +108,10 @@ function App() {
 ### 2. Use Hooks
 
 ```tsx
-import { useFeatureFlag } from '@intelgraph/feature-flags/react';
+import { useFeatureFlag } from "@intelgraph/feature-flags/react";
 
 function Dashboard() {
-  const showNewDashboard = useFeatureFlag('new-dashboard', false);
+  const showNewDashboard = useFeatureFlag("new-dashboard", false);
 
   if (showNewDashboard) {
     return <NewDashboard />;
@@ -124,7 +124,7 @@ function Dashboard() {
 ### 3. Use Components
 
 ```tsx
-import { FeatureFlag } from '@intelgraph/feature-flags/react';
+import { FeatureFlag } from "@intelgraph/feature-flags/react";
 
 function Settings() {
   return (
@@ -135,11 +135,7 @@ function Settings() {
         <AdvancedSettings />
       </FeatureFlag>
 
-      <FeatureFlag
-        flag="beta-features"
-        defaultValue={false}
-        fallback={<BetaComingSoon />}
-      >
+      <FeatureFlag flag="beta-features" defaultValue={false} fallback={<BetaComingSoon />}>
         <BetaFeatures />
       </FeatureFlag>
     </div>
@@ -152,7 +148,7 @@ function Settings() {
 ### 1. Add to Context
 
 ```typescript
-import { getFeatureFlagService } from './feature-flags/setup.js';
+import { getFeatureFlagService } from "./feature-flags/setup.js";
 
 interface GraphQLContext {
   user: User;
@@ -175,14 +171,10 @@ const server = new ApolloServer({
 const resolvers = {
   Query: {
     dashboard: async (_parent, _args, context: GraphQLContext) => {
-      const useNewDashboard = await context.featureFlags.getBooleanFlag(
-        'new-dashboard',
-        false,
-        {
-          userId: context.user.id,
-          tenantId: context.user.tenantId,
-        }
-      );
+      const useNewDashboard = await context.featureFlags.getBooleanFlag("new-dashboard", false, {
+        userId: context.user.id,
+        tenantId: context.user.tenantId,
+      });
 
       if (useNewDashboard) {
         return getNewDashboard();
@@ -202,16 +194,16 @@ const resolvers = {
 // Protect external API calls
 async function callExternalAPI() {
   const apiEnabled = await featureFlags.getBooleanFlag(
-    'kill-switch-external-api',
+    "kill-switch-external-api",
     true, // Default to enabled
     { environment: process.env.NODE_ENV }
   );
 
   if (!apiEnabled) {
-    throw new Error('External API temporarily disabled');
+    throw new Error("External API temporarily disabled");
   }
 
-  return fetch('https://api.example.com/data');
+  return fetch("https://api.example.com/data");
 }
 ```
 
@@ -219,17 +211,14 @@ async function callExternalAPI() {
 
 ```typescript
 // Server
-app.post('/api/checkout', async (req, res) => {
-  const variant = await req.featureFlags.getString(
-    'checkout-flow-experiment',
-    'control'
-  );
+app.post("/api/checkout", async (req, res) => {
+  const variant = await req.featureFlags.getString("checkout-flow-experiment", "control");
 
   // Process checkout
   const result = await processCheckout(req.body, variant);
 
   // Track conversion
-  await req.featureFlags.track('checkout-completed', {
+  await req.featureFlags.track("checkout-completed", {
     variant,
     amount: result.total,
     items: result.items.length,
@@ -244,19 +233,19 @@ app.post('/api/checkout', async (req, res) => {
 ```typescript
 // Start at 5%
 await provider.createFlag({
-  key: 'new-search-algorithm',
-  name: 'New Search Algorithm',
-  rollout: createGradualRollout('enabled', 'disabled', 5),
+  key: "new-search-algorithm",
+  name: "New Search Algorithm",
+  rollout: createGradualRollout("enabled", "disabled", 5),
 });
 
 // Monitor metrics, increase to 25%
-await provider.updateFlag('new-search-algorithm', {
-  rollout: createGradualRollout('enabled', 'disabled', 25),
+await provider.updateFlag("new-search-algorithm", {
+  rollout: createGradualRollout("enabled", "disabled", 25),
 });
 
 // Eventually 100%
-await provider.updateFlag('new-search-algorithm', {
-  rollout: createGradualRollout('enabled', 'disabled', 100),
+await provider.updateFlag("new-search-algorithm", {
+  rollout: createGradualRollout("enabled", "disabled", 100),
 });
 
 // After 2 weeks at 100%, remove flag from code
@@ -265,17 +254,13 @@ await provider.updateFlag('new-search-algorithm', {
 ### Permission-Based Features
 
 ```typescript
-const hasAdvancedAnalytics = await featureFlags.getBooleanFlag(
-  'advanced-analytics',
-  false,
-  {
-    userId: user.id,
-    attributes: {
-      plan: user.subscription.plan,
-      role: user.role,
-    },
-  }
-);
+const hasAdvancedAnalytics = await featureFlags.getBooleanFlag("advanced-analytics", false, {
+  userId: user.id,
+  attributes: {
+    plan: user.subscription.plan,
+    role: user.role,
+  },
+});
 
 // In LaunchDarkly/Unleash, configure targeting rule:
 // If plan IN [premium, enterprise] AND role IN [admin, analyst]
@@ -311,7 +296,7 @@ describe('Dashboard', () => {
 ```typescript
 beforeEach(async () => {
   // Set up test flags
-  await testFeatureFlags.setFlag('test-feature', true);
+  await testFeatureFlags.setFlag("test-feature", true);
 });
 
 afterEach(async () => {
@@ -349,6 +334,7 @@ afterEach(async () => {
 ### Service Not Initializing
 
 Check environment variables:
+
 ```bash
 # LaunchDarkly
 echo $LAUNCHDARKLY_SDK_KEY

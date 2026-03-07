@@ -96,13 +96,12 @@ export function rebalance(bins: Bin[], total: number) {
 
 ```ts
 // services/pcpr/verify.ts
-import Ajv from 'ajv';
-import schema from './pcpr.schema.json';
+import Ajv from "ajv";
+import schema from "./pcpr.schema.json";
 const ajv = new Ajv({ allErrors: true });
 const validate = ajv.compile(schema);
 export function verify(ob: any) {
-  if (!validate(ob))
-    throw new Error('PCPR fail: ' + JSON.stringify(validate.errors));
+  if (!validate(ob)) throw new Error("PCPR fail: " + JSON.stringify(validate.errors));
   return true;
 }
 ```
@@ -151,11 +150,7 @@ np.save('artifacts/pairwise_coef.npy', clf.coef_)
 
 ```ts
 // services/graph/blast.ts
-export function blastRadius(
-  files: string[],
-  G: Record<string, string[]>,
-  max = 3,
-) {
+export function blastRadius(files: string[], G: Record<string, string[]>, max = 3) {
   const seen = new Set(files);
   let frontier = files.slice();
   for (let d = 0; d < max; d++) {
@@ -166,7 +161,7 @@ export function blastRadius(
           seen.add(n);
           next.push(n);
         }
-      }),
+      })
     );
     frontier = next;
     if (!frontier.length) break;
@@ -223,7 +218,7 @@ export function diff(prev: any, cur: any) {
 // server/ai/promptCache.ts
 const H = new Map<string, string>();
 export function key(t: string) {
-  return t.replace(/\s+/g, ' ').trim().toLowerCase();
+  return t.replace(/\s+/g, " ").trim().toLowerCase();
 }
 export function getOrSet(k: string, v: string) {
   const kk = key(k);
@@ -294,11 +289,11 @@ export function pack(jobs: Job[], cap: number) {
     </div>
     <script>
       $(function () {
-        $('#rename').on('click', function () {
-          $.post('/api/fixit/rename', { from: 'foo', to: 'bar' });
+        $("#rename").on("click", function () {
+          $.post("/api/fixit/rename", { from: "foo", to: "bar" });
         });
-        $('#docs').on('click', function () {
-          $.post('/api/fixit/docs', { id: 'PR-1' });
+        $("#docs").on("click", function () {
+          $.post("/api/fixit/docs", { id: "PR-1" });
         });
       });
     </script>
@@ -331,8 +326,8 @@ export function entry(evt: any, prev: string) {
   return { now, hash, data };
 }
 function sha256(s: string) {
-  const c = require('crypto');
-  return c.createHash('sha256').update(s).digest('hex');
+  const c = require("crypto");
+  return c.createHash("sha256").update(s).digest("hex");
 }
 ```
 

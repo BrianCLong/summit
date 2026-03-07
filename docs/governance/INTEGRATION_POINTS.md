@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Governance Integration Points
 
 > Where to add authority checks, PII detection, and provenance capture across Summit APIs, Copilot, and data flows.

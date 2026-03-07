@@ -16,9 +16,10 @@ We are announcing a major architectural upgrade to Summit's agent platform. By a
 ## Why This Matters
 
 As agents move from "chatbots" to "doers", the security surface area explodes. Our approach ensures that every action taken by an AI agent is:
-*   **Identity-Bound**: Tied to a specific user and agent ID.
-*   **Policy-Checked**: Validated against allow-lists before execution.
-*   **Traceable**: Logged with cryptographic evidence.
+
+- **Identity-Bound**: Tied to a specific user and agent ID.
+- **Policy-Checked**: Validated against allow-lists before execution.
+- **Traceable**: Logged with cryptographic evidence.
 
 ## Next Steps
 

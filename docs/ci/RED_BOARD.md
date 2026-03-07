@@ -7,25 +7,28 @@
 ## Top 3 Blockers
 
 ### 1. Unit Test Failures (Redis/Database Connection)
-*   **Job + Step:** `Unit Tests` and `test (20.x)` workflows / `Run unit tests` step.
-*   **Failure Class:** *Real test regression / Flaky infra* (Missing mocks).
-*   **Root Cause:** Tests are attempting to connect to a real Redis instance (`localhost:6379`) instead of using mocks. `ioredis` is not globally mocked in `server/jest.setup.js`.
-*   **Fix Plan:** Implement a global mock for `ioredis` in `server/jest.setup.js` and ensure all database-dependent tests are properly isolated or mocked.
-*   **Link to run(s):** [Simulated local failure]
+
+- **Job + Step:** `Unit Tests` and `test (20.x)` workflows / `Run unit tests` step.
+- **Failure Class:** _Real test regression / Flaky infra_ (Missing mocks).
+- **Root Cause:** Tests are attempting to connect to a real Redis instance (`localhost:6379`) instead of using mocks. `ioredis` is not globally mocked in `server/jest.setup.js`.
+- **Fix Plan:** Implement a global mock for `ioredis` in `server/jest.setup.js` and ensure all database-dependent tests are properly isolated or mocked.
+- **Link to run(s):** [Simulated local failure]
 
 ### 2. Mandatory Branch Protection Audit Gate
-*   **Job + Step:** `CI Core Gate ✅` / `branch-protection-drift` job.
-*   **Failure Class:** *Policy miswire / missing secret*.
-*   **Root Cause:** The `branch-protection-drift` job explicitly fails if `BRANCH_PROTECTION_READ_TOKEN` is missing. This secret is often missing in PRs from forks or if not configured in certain environments, blocking the entire `CI Core Gate ✅`.
-*   **Fix Plan:** Modify the drift check to emit a warning and skip (as a governed exception) instead of hard-failing when the required token is unavailable, especially in `pull_request` context.
-*   **Link to run(s):** `.github/workflows/ci-core.yml:640`
+
+- **Job + Step:** `CI Core Gate ✅` / `branch-protection-drift` job.
+- **Failure Class:** _Policy miswire / missing secret_.
+- **Root Cause:** The `branch-protection-drift` job explicitly fails if `BRANCH_PROTECTION_READ_TOKEN` is missing. This secret is often missing in PRs from forks or if not configured in certain environments, blocking the entire `CI Core Gate ✅`.
+- **Fix Plan:** Modify the drift check to emit a warning and skip (as a governed exception) instead of hard-failing when the required token is unavailable, especially in `pull_request` context.
+- **Link to run(s):** `.github/workflows/ci-core.yml:640`
 
 ### 3. GA Verification Gate Failures
-*   **Job + Step:** `ga-gate.yml` / `gate` job / `Run GA Verification` step.
-*   **Failure Class:** *Tooling/version / ESM mismatch*.
-*   **Root Cause:** `ga:verify` runs a full build/lint/test suite in a single script (`ga-verify-runner.mjs`). It fails on type stub conflicts (`@types/hapi__catbox`) and potential ESM/CJS mismatches during `pnpm typecheck` and root-level `lint`.
-*   **Fix Plan:** Narrow the scope of `ga:verify` or fix the specific type stub issues. Ensure the runner handles ESM correctly and uses workspace-aware commands.
-*   **Link to run(s):** `.github/workflows/ga-gate.yml:45`
+
+- **Job + Step:** `ga-gate.yml` / `gate` job / `Run GA Verification` step.
+- **Failure Class:** _Tooling/version / ESM mismatch_.
+- **Root Cause:** `ga:verify` runs a full build/lint/test suite in a single script (`ga-verify-runner.mjs`). It fails on type stub conflicts (`@types/hapi__catbox`) and potential ESM/CJS mismatches during `pnpm typecheck` and root-level `lint`.
+- **Fix Plan:** Narrow the scope of `ga:verify` or fix the specific type stub issues. Ensure the runner handles ESM correctly and uses workspace-aware commands.
+- **Link to run(s):** `.github/workflows/ga-gate.yml:45`
 
 ## Next 5 Blockers (Queue)
 
@@ -37,5 +40,5 @@
 
 ## Do Not Touch
 
-*   **Application Runtime Logic:** Unless specifically required to fix a test failure, avoid touching `server/src` or `apps/web/src` to minimize blast radius.
-*   **Security Policy Evaluation (Rego):** OPA policies in `policy/` are authoritative; do not weaken them to pass CI. Fix the inputs or the test environment instead.
+- **Application Runtime Logic:** Unless specifically required to fix a test failure, avoid touching `server/src` or `apps/web/src` to minimize blast radius.
+- **Security Policy Evaluation (Rego):** OPA policies in `policy/` are authoritative; do not weaken them to pass CI. Fix the inputs or the test environment instead.

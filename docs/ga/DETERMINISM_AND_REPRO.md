@@ -9,6 +9,7 @@ This guide captures the single-source commands to reproduce the CI gates for cov
    pnpm coverage:collect
    ```
 2. Enforce the threshold (defaults to `origin/main` for comparisons):
+
    ```bash
    COVERAGE_SCOPE=changed COVERAGE_BASE_REF=origin/main pnpm coverage:gate
    ```

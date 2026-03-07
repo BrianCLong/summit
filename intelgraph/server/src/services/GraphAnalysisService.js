@@ -1,12 +1,12 @@
 // ===================================
 // server/src/services/GraphAnalysisService.js - AI Analytics Engine
 // ===================================
-const { getNeo4jDriver } = require('../config/database');
+const { getNeo4jDriver } = require("../config/database");
 // const logger = require('../utils/logger');
 const logger = {
-    error: console.error,
-    warn: console.warn,
-    info: console.log
+  error: console.error,
+  warn: console.warn,
+  info: console.log,
 };
 
 class GraphAnalysisService {
@@ -43,8 +43,7 @@ class GraphAnalysisService {
       const averageDegree = nodeCount > 0 ? (2 * edgeCount) / nodeCount : 0;
 
       // Calculate centrality scores
-      const centralityScores =
-        await this.calculateCentralityScores(investigationId);
+      const centralityScores = await this.calculateCentralityScores(investigationId);
 
       // Detect clusters
       const clusters = await this.detectCommunities(investigationId);
@@ -58,7 +57,7 @@ class GraphAnalysisService {
         clusters,
       };
     } catch (error) {
-      logger.error('Error calculating graph metrics:', error);
+      logger.error("Error calculating graph metrics:", error);
       throw error;
     } finally {
       await session.close();
@@ -84,8 +83,8 @@ class GraphAnalysisService {
 
       const degreeResult = await session.run(degreeQuery, { investigationId });
       const centralityScores = degreeResult.records.map((record) => ({
-        entityId: record.get('entityId'),
-        degree: record.get('degree').toNumber(),
+        entityId: record.get("entityId"),
+        degree: record.get("degree").toNumber(),
         betweenness: 0, // Placeholder - would need more complex calculation
         closeness: 0, // Placeholder - would need more complex calculation
         pagerank: 0, // Placeholder - would need PageRank algorithm
@@ -100,7 +99,7 @@ class GraphAnalysisService {
 
       return centralityScores;
     } catch (error) {
-      logger.error('Error calculating centrality scores:', error);
+      logger.error("Error calculating centrality scores:", error);
       throw error;
     } finally {
       await session.close();
@@ -133,14 +132,13 @@ class GraphAnalysisService {
       // Simple clustering algorithm - group by entity type and high connectivity
       const clusters = new Map();
       const entities = clusterResult.records.map((record) => ({
-        entityId: record.get('entityId'),
-        entityType: record.get('entityType'),
-        connections: record.get('connections').toNumber(),
+        entityId: record.get("entityId"),
+        entityType: record.get("entityType"),
+        connections: record.get("connections").toNumber(),
       }));
 
       entities.forEach((entity) => {
-        const clusterKey =
-          entity.connections > 3 ? 'high_connectivity' : entity.entityType;
+        const clusterKey = entity.connections > 3 ? "high_connectivity" : entity.entityType;
 
         if (!clusters.has(clusterKey)) {
           clusters.set(clusterKey, {
@@ -162,7 +160,7 @@ class GraphAnalysisService {
 
       return Array.from(clusters.values());
     } catch (error) {
-      logger.error('Error detecting communities:', error);
+      logger.error("Error detecting communities:", error);
       throw error;
     } finally {
       await session.close();
@@ -208,27 +206,24 @@ class GraphAnalysisService {
       });
 
       return result.records.map((record) => {
-        const sourceType = record.get('sourceType');
-        const targetType = record.get('targetType');
-        const commonNeighbors = record.get('commonNeighbors').toNumber();
+        const sourceType = record.get("sourceType");
+        const targetType = record.get("targetType");
+        const commonNeighbors = record.get("commonNeighbors").toNumber();
 
         // Predict relationship type based on entity types and patterns
-        const predictedType = this.predictRelationshipType(
-          sourceType,
-          targetType,
-        );
+        const predictedType = this.predictRelationshipType(sourceType, targetType);
         const confidence = Math.min(0.9, commonNeighbors * 0.2 + 0.1);
 
         return {
-          sourceEntityId: record.get('sourceEntityId'),
-          targetEntityId: record.get('targetEntityId'),
+          sourceEntityId: record.get("sourceEntityId"),
+          targetEntityId: record.get("targetEntityId"),
           predictedRelationshipType: predictedType,
           confidence,
           reasoning: `${commonNeighbors} common connections suggest potential relationship`,
         };
       });
     } catch (error) {
-      logger.error('Error predicting links:', error);
+      logger.error("Error predicting links:", error);
       throw error;
     } finally {
       await session.close();
@@ -260,10 +255,10 @@ class GraphAnalysisService {
       });
 
       highConnResult.records.forEach((record) => {
-        const connections = record.get('connections').toNumber();
+        const connections = record.get("connections").toNumber();
         anomalies.push({
-          entityId: record.get('entityId'),
-          anomalyType: 'HIGH_CONNECTIVITY',
+          entityId: record.get("entityId"),
+          anomalyType: "HIGH_CONNECTIVITY",
           severity: Math.min(1.0, connections / 20),
           description: `Entity has unusually high connectivity (${connections} connections)`,
           evidence: [`${connections} direct connections`],
@@ -286,11 +281,11 @@ class GraphAnalysisService {
 
       isolatedResult.records.forEach((record) => {
         anomalies.push({
-          entityId: record.get('entityId'),
-          anomalyType: 'ISOLATED_ENTITY',
+          entityId: record.get("entityId"),
+          anomalyType: "ISOLATED_ENTITY",
           severity: 0.6,
-          description: 'Entity has no connections to other entities',
-          evidence: ['Zero connections', 'Potential data quality issue'],
+          description: "Entity has no connections to other entities",
+          evidence: ["Zero connections", "Potential data quality issue"],
         });
       });
 
@@ -308,17 +303,17 @@ class GraphAnalysisService {
 
       propertyResult.records.forEach((record) => {
         anomalies.push({
-          entityId: record.get('entityId'),
-          anomalyType: 'INCOMPLETE_DATA',
+          entityId: record.get("entityId"),
+          anomalyType: "INCOMPLETE_DATA",
           severity: 0.4,
-          description: 'Entity has missing or incomplete data',
-          evidence: ['Missing label or properties'],
+          description: "Entity has missing or incomplete data",
+          evidence: ["Missing label or properties"],
         });
       });
 
       return anomalies;
     } catch (error) {
-      logger.error('Error detecting anomalies:', error);
+      logger.error("Error detecting anomalies:", error);
       throw error;
     } finally {
       await session.close();
@@ -332,8 +327,7 @@ class GraphAnalysisService {
     // Simple entity extraction patterns
     const patterns = {
       EMAIL: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-      PHONE:
-        /\b(?:\+?1[-.\s]?)?\(?[2-9][0-8][0-9]\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}\b/g,
+      PHONE: /\b(?:\+?1[-.\s]?)?\(?[2-9][0-8][0-9]\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}\b/g,
       IP_ADDRESS: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
       URL: /https?:\/\/(?:[-\w.])+(?:\:[0-9]+)?(?:\/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:\#(?:[\w.])*)?)?/g,
       // Add more patterns for organizations, locations, etc.
@@ -348,7 +342,7 @@ class GraphAnalysisService {
           type,
           label: match,
           confidence: 0.8,
-          properties: { extractedFrom: 'text' },
+          properties: { extractedFrom: "text" },
         });
       });
     });
@@ -358,10 +352,10 @@ class GraphAnalysisService {
     const nameMatches = text.match(namePattern) || [];
     nameMatches.forEach((match) => {
       extractedEntities.push({
-        type: 'PERSON',
+        type: "PERSON",
         label: match,
         confidence: 0.6,
-        properties: { extractedFrom: 'text' },
+        properties: { extractedFrom: "text" },
       });
     });
 
@@ -373,19 +367,19 @@ class GraphAnalysisService {
    */
   predictRelationshipType(sourceType, targetType) {
     const typeMap = {
-      PERSON_ORGANIZATION: 'WORKS_FOR',
-      PERSON_LOCATION: 'LOCATED_AT',
-      PERSON_PERSON: 'KNOWS',
-      ORGANIZATION_LOCATION: 'LOCATED_AT',
-      PERSON_PHONE: 'OWNS',
-      PERSON_EMAIL: 'OWNS',
-      ORGANIZATION_DOCUMENT: 'OWNS',
+      PERSON_ORGANIZATION: "WORKS_FOR",
+      PERSON_LOCATION: "LOCATED_AT",
+      PERSON_PERSON: "KNOWS",
+      ORGANIZATION_LOCATION: "LOCATED_AT",
+      PERSON_PHONE: "OWNS",
+      PERSON_EMAIL: "OWNS",
+      ORGANIZATION_DOCUMENT: "OWNS",
     };
 
     const key = `${sourceType}_${targetType}`;
     const reverseKey = `${targetType}_${sourceType}`;
 
-    return typeMap[key] || typeMap[reverseKey] || 'RELATED_TO';
+    return typeMap[key] || typeMap[reverseKey] || "RELATED_TO";
   }
 }
 

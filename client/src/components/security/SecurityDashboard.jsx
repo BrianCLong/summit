@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -36,7 +36,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Security,
   Warning,
@@ -65,7 +65,7 @@ import {
   Groups,
   PersonAdd,
   LockOpen,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Mock data for demonstration (in real app this would come from GraphQL)
 const mockSecurityStats = {
@@ -104,118 +104,118 @@ const mockSecurityStats = {
 
 const mockSecurityEvents = [
   {
-    id: 'sec-1',
-    eventType: 'SUSPICIOUS_ACTIVITY',
-    userId: 'user-123',
-    riskLevel: 'HIGH',
-    description: 'Multiple failed login attempts from unknown IP',
-    timestamp: '2025-08-26T17:30:00Z',
-    ipAddress: '192.168.1.100',
+    id: "sec-1",
+    eventType: "SUSPICIOUS_ACTIVITY",
+    userId: "user-123",
+    riskLevel: "HIGH",
+    description: "Multiple failed login attempts from unknown IP",
+    timestamp: "2025-08-26T17:30:00Z",
+    ipAddress: "192.168.1.100",
     resolved: false,
-    metadata: { attempts: 7, country: 'Unknown' },
+    metadata: { attempts: 7, country: "Unknown" },
   },
   {
-    id: 'sec-2',
-    eventType: 'LOGIN_SUCCESS',
-    userId: 'user-456',
-    riskLevel: 'MEDIUM',
-    description: 'Login from new device type',
-    timestamp: '2025-08-26T17:25:00Z',
-    ipAddress: '10.0.0.45',
+    id: "sec-2",
+    eventType: "LOGIN_SUCCESS",
+    userId: "user-456",
+    riskLevel: "MEDIUM",
+    description: "Login from new device type",
+    timestamp: "2025-08-26T17:25:00Z",
+    ipAddress: "10.0.0.45",
     resolved: true,
-    metadata: { newDevice: true, deviceType: 'TABLET' },
+    metadata: { newDevice: true, deviceType: "TABLET" },
   },
   {
-    id: 'sec-3',
-    eventType: 'ADMIN_ACTION',
-    userId: 'user-admin',
-    riskLevel: 'LOW',
-    description: 'User permissions updated',
-    timestamp: '2025-08-26T17:20:00Z',
-    ipAddress: '10.0.0.10',
+    id: "sec-3",
+    eventType: "ADMIN_ACTION",
+    userId: "user-admin",
+    riskLevel: "LOW",
+    description: "User permissions updated",
+    timestamp: "2025-08-26T17:20:00Z",
+    ipAddress: "10.0.0.10",
     resolved: true,
-    metadata: { targetUser: 'user-789', action: 'permissions_updated' },
+    metadata: { targetUser: "user-789", action: "permissions_updated" },
   },
   {
-    id: 'sec-4',
-    eventType: 'MFA_ENABLED',
-    userId: 'user-789',
-    riskLevel: 'LOW',
-    description: 'Multi-factor authentication enabled',
-    timestamp: '2025-08-26T17:15:00Z',
-    ipAddress: '10.0.0.25',
+    id: "sec-4",
+    eventType: "MFA_ENABLED",
+    userId: "user-789",
+    riskLevel: "LOW",
+    description: "Multi-factor authentication enabled",
+    timestamp: "2025-08-26T17:15:00Z",
+    ipAddress: "10.0.0.25",
     resolved: true,
-    metadata: { method: 'TOTP' },
+    metadata: { method: "TOTP" },
   },
   {
-    id: 'sec-5',
-    eventType: 'PERMISSION_DENIED',
-    userId: 'user-555',
-    riskLevel: 'MEDIUM',
-    description: 'Access denied to classified investigation',
-    timestamp: '2025-08-26T17:10:00Z',
-    ipAddress: '10.0.0.67',
+    id: "sec-5",
+    eventType: "PERMISSION_DENIED",
+    userId: "user-555",
+    riskLevel: "MEDIUM",
+    description: "Access denied to classified investigation",
+    timestamp: "2025-08-26T17:10:00Z",
+    ipAddress: "10.0.0.67",
     resolved: false,
     metadata: {
-      resource: 'investigation-secret-001',
-      clearanceRequired: 'SECRET',
+      resource: "investigation-secret-001",
+      clearanceRequired: "SECRET",
     },
   },
 ];
 
 const mockUsers = [
   {
-    id: 'user-admin',
-    username: 'admin',
-    fullName: 'System Administrator',
-    email: 'admin@intelgraph.com',
-    role: 'ADMIN',
-    securityClearance: 'TOP_SECRET',
+    id: "user-admin",
+    username: "admin",
+    fullName: "System Administrator",
+    email: "admin@intelgraph.com",
+    role: "ADMIN",
+    securityClearance: "TOP_SECRET",
     isActive: true,
     mfaEnabled: true,
-    lastLogin: '2025-08-26T17:30:00Z',
+    lastLogin: "2025-08-26T17:30:00Z",
     failedLoginAttempts: 0,
-    department: 'IT Security',
+    department: "IT Security",
   },
   {
-    id: 'user-analyst1',
-    username: 'sarah.jones',
-    fullName: 'Sarah Jones',
-    email: 'sarah.jones@intelgraph.com',
-    role: 'SECURITY_ANALYST',
-    securityClearance: 'SECRET',
+    id: "user-analyst1",
+    username: "sarah.jones",
+    fullName: "Sarah Jones",
+    email: "sarah.jones@intelgraph.com",
+    role: "SECURITY_ANALYST",
+    securityClearance: "SECRET",
     isActive: true,
     mfaEnabled: true,
-    lastLogin: '2025-08-26T17:25:00Z',
+    lastLogin: "2025-08-26T17:25:00Z",
     failedLoginAttempts: 0,
-    department: 'Threat Intelligence',
+    department: "Threat Intelligence",
   },
   {
-    id: 'user-analyst2',
-    username: 'mike.chen',
-    fullName: 'Mike Chen',
-    email: 'mike.chen@intelgraph.com',
-    role: 'ANALYST',
-    securityClearance: 'CONFIDENTIAL',
+    id: "user-analyst2",
+    username: "mike.chen",
+    fullName: "Mike Chen",
+    email: "mike.chen@intelgraph.com",
+    role: "ANALYST",
+    securityClearance: "CONFIDENTIAL",
     isActive: true,
     mfaEnabled: false,
-    lastLogin: '2025-08-26T16:45:00Z',
+    lastLogin: "2025-08-26T16:45:00Z",
     failedLoginAttempts: 1,
-    department: 'Cyber Operations',
+    department: "Cyber Operations",
   },
   {
-    id: 'user-locked',
-    username: 'temp.user',
-    fullName: 'Temporary User',
-    email: 'temp.user@intelgraph.com',
-    role: 'VIEWER',
-    securityClearance: 'INTERNAL',
+    id: "user-locked",
+    username: "temp.user",
+    fullName: "Temporary User",
+    email: "temp.user@intelgraph.com",
+    role: "VIEWER",
+    securityClearance: "INTERNAL",
     isActive: false,
     mfaEnabled: false,
-    lastLogin: '2025-08-26T14:30:00Z',
+    lastLogin: "2025-08-26T14:30:00Z",
     failedLoginAttempts: 5,
-    department: 'External Partners',
-    lockedUntil: '2025-08-26T18:30:00Z',
+    department: "External Partners",
+    lockedUntil: "2025-08-26T18:30:00Z",
   },
 ];
 
@@ -227,12 +227,12 @@ const SecurityDashboard = () => {
 
   // New user form state
   const [newUser, setNewUser] = useState({
-    username: '',
-    fullName: '',
-    email: '',
-    role: 'ANALYST',
-    securityClearance: 'CONFIDENTIAL',
-    department: '',
+    username: "",
+    fullName: "",
+    email: "",
+    role: "ANALYST",
+    securityClearance: "CONFIDENTIAL",
+    department: "",
     mfaEnabled: false,
   });
 
@@ -241,45 +241,45 @@ const SecurityDashboard = () => {
   };
 
   const handleCreateUser = () => {
-    console.log('Creating user:', newUser);
+    console.log("Creating user:", newUser);
     setUserDialogOpen(false);
     setNewUser({
-      username: '',
-      fullName: '',
-      email: '',
-      role: 'ANALYST',
-      securityClearance: 'CONFIDENTIAL',
-      department: '',
+      username: "",
+      fullName: "",
+      email: "",
+      role: "ANALYST",
+      securityClearance: "CONFIDENTIAL",
+      department: "",
       mfaEnabled: false,
     });
   };
 
   const getRiskColor = (riskLevel) => {
     switch (riskLevel) {
-      case 'CRITICAL':
-        return 'error';
-      case 'HIGH':
-        return 'warning';
-      case 'MEDIUM':
-        return 'info';
-      case 'LOW':
-        return 'success';
+      case "CRITICAL":
+        return "error";
+      case "HIGH":
+        return "warning";
+      case "MEDIUM":
+        return "info";
+      case "LOW":
+        return "success";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getRoleIcon = (role) => {
     switch (role) {
-      case 'ADMIN':
+      case "ADMIN":
         return <AdminPanelSettings color="error" />;
-      case 'SECURITY_ANALYST':
+      case "SECURITY_ANALYST":
         return <Shield color="warning" />;
-      case 'SENIOR_ANALYST':
+      case "SENIOR_ANALYST":
         return <Assessment color="info" />;
-      case 'ANALYST':
+      case "ANALYST":
         return <Person color="primary" />;
-      case 'VIEWER':
+      case "VIEWER":
         return <Visibility color="action" />;
       default:
         return <Person />;
@@ -288,17 +288,17 @@ const SecurityDashboard = () => {
 
   const getEventIcon = (eventType) => {
     switch (eventType) {
-      case 'LOGIN_SUCCESS':
+      case "LOGIN_SUCCESS":
         return <CheckCircle color="success" />;
-      case 'LOGIN_FAILED':
+      case "LOGIN_FAILED":
         return <Warning color="error" />;
-      case 'SUSPICIOUS_ACTIVITY':
+      case "SUSPICIOUS_ACTIVITY":
         return <Warning color="error" />;
-      case 'PERMISSION_DENIED':
+      case "PERMISSION_DENIED":
         return <Lock color="warning" />;
-      case 'MFA_ENABLED':
+      case "MFA_ENABLED":
         return <VpnLock color="success" />;
-      case 'ADMIN_ACTION':
+      case "ADMIN_ACTION":
         return <Settings color="info" />;
       default:
         return <Security />;
@@ -323,20 +323,19 @@ const SecurityDashboard = () => {
           <Typography
             variant="h5"
             gutterBottom
-            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
             <Security color="primary" />
             🛡️ Advanced Security & Access Control
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Comprehensive security monitoring, user management, and access
-            control dashboard
+            Comprehensive security monitoring, user management, and access control dashboard
           </Typography>
 
           {/* Security Overview Statistics */}
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={6} sm={3}>
-              <Paper sx={{ p: 2, textAlign: 'center' }}>
+              <Paper sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="caption">Active Users</Typography>
                 <Typography variant="h6" color="primary">
                   {mockSecurityStats.users.active}
@@ -347,7 +346,7 @@ const SecurityDashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Paper sx={{ p: 2, textAlign: 'center' }}>
+              <Paper sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="caption">Active Sessions</Typography>
                 <Typography variant="h6" color="success.main">
                   {mockSecurityStats.sessions.active}
@@ -358,11 +357,10 @@ const SecurityDashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Paper sx={{ p: 2, textAlign: 'center' }}>
+              <Paper sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="caption">High Risk Events</Typography>
                 <Typography variant="h6" color="warning.main">
-                  {mockSecurityStats.events.byRisk.HIGH +
-                    mockSecurityStats.events.byRisk.CRITICAL}
+                  {mockSecurityStats.events.byRisk.HIGH + mockSecurityStats.events.byRisk.CRITICAL}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   need attention
@@ -370,13 +368,11 @@ const SecurityDashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Paper sx={{ p: 2, textAlign: 'center' }}>
+              <Paper sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="caption">MFA Adoption</Typography>
                 <Typography variant="h6" color="info.main">
                   {Math.round(
-                    (mockSecurityStats.users.mfaEnabled /
-                      mockSecurityStats.users.total) *
-                      100,
+                    (mockSecurityStats.users.mfaEnabled / mockSecurityStats.users.total) * 100
                   )}
                   %
                 </Typography>
@@ -388,7 +384,7 @@ const SecurityDashboard = () => {
           </Grid>
 
           {/* Quick Actions */}
-          <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+          <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
             <Button
               variant="contained"
               startIcon={<PersonAdd />}
@@ -407,15 +403,13 @@ const SecurityDashboard = () => {
       </Card>
 
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={currentTab} onChange={handleTabChange}>
             <Tab
               label="Security Events"
               icon={
                 <Badge
-                  badgeContent={
-                    mockSecurityEvents.filter((e) => !e.resolved).length
-                  }
+                  badgeContent={mockSecurityEvents.filter((e) => !e.resolved).length}
                   color="error"
                 >
                   <Warning />
@@ -433,10 +427,7 @@ const SecurityDashboard = () => {
             <Tab
               label="Access Control"
               icon={
-                <Badge
-                  badgeContent={mockSecurityStats.users.locked}
-                  color="warning"
-                >
+                <Badge badgeContent={mockSecurityStats.users.locked} color="warning">
                   <Lock />
                 </Badge>
               }
@@ -462,20 +453,14 @@ const SecurityDashboard = () => {
 
               {/* Risk Level Summary */}
               <Grid container spacing={2} sx={{ mb: 2 }}>
-                {Object.entries(mockSecurityStats.events.byRisk).map(
-                  ([level, count]) => (
-                    <Grid item xs={6} sm={3} key={level}>
-                      <Paper sx={{ p: 1, textAlign: 'center' }}>
-                        <Chip
-                          label={level}
-                          color={getRiskColor(level)}
-                          size="small"
-                        />
-                        <Typography variant="h6">{count}</Typography>
-                      </Paper>
-                    </Grid>
-                  ),
-                )}
+                {Object.entries(mockSecurityStats.events.byRisk).map(([level, count]) => (
+                  <Grid item xs={6} sm={3} key={level}>
+                    <Paper sx={{ p: 1, textAlign: "center" }}>
+                      <Chip label={level} color={getRiskColor(level)} size="small" />
+                      <Typography variant="h6">{count}</Typography>
+                    </Paper>
+                  </Grid>
+                ))}
               </Grid>
 
               {/* Events List */}
@@ -485,49 +470,40 @@ const SecurityDashboard = () => {
                     key={event.id}
                     divider
                     sx={{
-                      bgcolor: event.resolved ? 'inherit' : 'action.hover',
+                      bgcolor: event.resolved ? "inherit" : "action.hover",
                       borderLeft: event.resolved
-                        ? 'none'
+                        ? "none"
                         : `4px solid ${
-                            event.riskLevel === 'CRITICAL'
-                              ? 'error.main'
-                              : event.riskLevel === 'HIGH'
-                                ? 'warning.main'
-                                : 'info.main'
+                            event.riskLevel === "CRITICAL"
+                              ? "error.main"
+                              : event.riskLevel === "HIGH"
+                                ? "warning.main"
+                                : "info.main"
                           }`,
                     }}
                   >
                     <ListItemIcon>{getEventIcon(event.eventType)}</ListItemIcon>
                     <ListItemText
                       primary={
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <Typography variant="subtitle1">
-                            {event.description}
-                          </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Typography variant="subtitle1">{event.description}</Typography>
                           <Chip
                             label={event.riskLevel}
                             color={getRiskColor(event.riskLevel)}
                             size="small"
                           />
                           {!event.resolved && (
-                            <Chip
-                              label="UNRESOLVED"
-                              color="error"
-                              size="small"
-                            />
+                            <Chip label="UNRESOLVED" color="error" size="small" />
                           )}
                         </Box>
                       }
                       secondary={
                         <Box>
                           <Typography variant="body2">
-                            IP: {event.ipAddress} •{' '}
-                            {formatTimeAgo(event.timestamp)}
+                            IP: {event.ipAddress} • {formatTimeAgo(event.timestamp)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Event Type: {event.eventType.replace(/_/g, ' ')}
+                            Event Type: {event.eventType.replace(/_/g, " ")}
                           </Typography>
                         </Box>
                       }
@@ -570,18 +546,13 @@ const SecurityDashboard = () => {
                   {mockUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           {getRoleIcon(user.role)}
                           <Box>
                             <Typography variant="body2" fontWeight="bold">
                               {user.fullName}
                             </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
+                            <Typography variant="caption" color="text.secondary">
                               {user.username} • {user.department}
                             </Typography>
                           </Box>
@@ -594,24 +565,22 @@ const SecurityDashboard = () => {
                         <Chip
                           label={user.securityClearance}
                           color={
-                            user.securityClearance === 'TOP_SECRET'
-                              ? 'error'
-                              : user.securityClearance === 'SECRET'
-                                ? 'warning'
-                                : user.securityClearance === 'CONFIDENTIAL'
-                                  ? 'info'
-                                  : 'default'
+                            user.securityClearance === "TOP_SECRET"
+                              ? "error"
+                              : user.securityClearance === "SECRET"
+                                ? "warning"
+                                : user.securityClearance === "CONFIDENTIAL"
+                                  ? "info"
+                                  : "default"
                           }
                           size="small"
                         />
                       </TableCell>
                       <TableCell>
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Chip
-                            label={user.isActive ? 'ACTIVE' : 'LOCKED'}
-                            color={user.isActive ? 'success' : 'error'}
+                            label={user.isActive ? "ACTIVE" : "LOCKED"}
+                            color={user.isActive ? "success" : "error"}
                             size="small"
                           />
                           {user.failedLoginAttempts > 0 && (
@@ -625,15 +594,13 @@ const SecurityDashboard = () => {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={user.mfaEnabled ? 'ENABLED' : 'DISABLED'}
-                          color={user.mfaEnabled ? 'success' : 'warning'}
+                          label={user.mfaEnabled ? "ENABLED" : "DISABLED"}
+                          color={user.mfaEnabled ? "success" : "warning"}
                           size="small"
                         />
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption">
-                          {formatTimeAgo(user.lastLogin)}
-                        </Typography>
+                        <Typography variant="caption">{formatTimeAgo(user.lastLogin)}</Typography>
                       </TableCell>
                       <TableCell>
                         <Button size="small" startIcon={<Edit />}>
@@ -658,13 +625,9 @@ const SecurityDashboard = () => {
                 <Grid item xs={12} md={6}>
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <LocationOn />
-                        <Typography variant="h6">
-                          Location Restrictions
-                        </Typography>
+                        <Typography variant="h6">Location Restrictions</Typography>
                       </Box>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -698,9 +661,7 @@ const SecurityDashboard = () => {
                 <Grid item xs={12} md={6}>
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <AccessTime />
                         <Typography variant="h6">Time Restrictions</Typography>
                       </Box>
@@ -736,9 +697,7 @@ const SecurityDashboard = () => {
                 <Grid item xs={12} md={6}>
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <Computer />
                         <Typography variant="h6">Device Controls</Typography>
                       </Box>
@@ -774,13 +733,9 @@ const SecurityDashboard = () => {
                 <Grid item xs={12} md={6}>
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <Shield />
-                        <Typography variant="h6">
-                          Classification Controls
-                        </Typography>
+                        <Typography variant="h6">Classification Controls</Typography>
                       </Box>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -834,27 +789,23 @@ const SecurityDashboard = () => {
 
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="caption">
-                      Total Audit Events
-                    </Typography>
+                  <Paper sx={{ p: 2, textAlign: "center" }}>
+                    <Typography variant="caption">Total Audit Events</Typography>
                     <Typography variant="h6" color="primary">
                       {mockSecurityStats.audit.total.toLocaleString()}
                     </Typography>
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="caption">
-                      Recent Events (24h)
-                    </Typography>
+                  <Paper sx={{ p: 2, textAlign: "center" }}>
+                    <Typography variant="caption">Recent Events (24h)</Typography>
                     <Typography variant="h6" color="info.main">
                       {mockSecurityStats.audit.recent}
                     </Typography>
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                  <Paper sx={{ p: 2, textAlign: "center" }}>
                     <Typography variant="caption">Failed Actions</Typography>
                     <Typography variant="h6" color="error.main">
                       47
@@ -862,7 +813,7 @@ const SecurityDashboard = () => {
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                  <Paper sx={{ p: 2, textAlign: "center" }}>
                     <Typography variant="caption">Admin Actions</Typography>
                     <Typography variant="h6" color="warning.main">
                       156
@@ -872,9 +823,8 @@ const SecurityDashboard = () => {
               </Grid>
 
               <Alert severity="info" sx={{ mb: 2 }}>
-                Audit logs are automatically retained for 7 years for compliance
-                purposes. All user actions, data access, and system changes are
-                logged.
+                Audit logs are automatically retained for 7 years for compliance purposes. All user
+                actions, data access, and system changes are logged.
               </Alert>
 
               <Typography variant="subtitle2" gutterBottom>
@@ -938,9 +888,7 @@ const SecurityDashboard = () => {
                 fullWidth
                 label="Username"
                 value={newUser.username}
-                onChange={(e) =>
-                  setNewUser((prev) => ({ ...prev, username: e.target.value }))
-                }
+                onChange={(e) => setNewUser((prev) => ({ ...prev, username: e.target.value }))}
                 required
               />
             </Grid>
@@ -949,9 +897,7 @@ const SecurityDashboard = () => {
                 fullWidth
                 label="Full Name"
                 value={newUser.fullName}
-                onChange={(e) =>
-                  setNewUser((prev) => ({ ...prev, fullName: e.target.value }))
-                }
+                onChange={(e) => setNewUser((prev) => ({ ...prev, fullName: e.target.value }))}
                 required
               />
             </Grid>
@@ -961,9 +907,7 @@ const SecurityDashboard = () => {
                 label="Email"
                 type="email"
                 value={newUser.email}
-                onChange={(e) =>
-                  setNewUser((prev) => ({ ...prev, email: e.target.value }))
-                }
+                onChange={(e) => setNewUser((prev) => ({ ...prev, email: e.target.value }))}
                 required
               />
             </Grid>
@@ -986,9 +930,7 @@ const SecurityDashboard = () => {
                 <Select
                   value={newUser.role}
                   label="Role"
-                  onChange={(e) =>
-                    setNewUser((prev) => ({ ...prev, role: e.target.value }))
-                  }
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, role: e.target.value }))}
                 >
                   <MenuItem value="VIEWER">Viewer</MenuItem>
                   <MenuItem value="ANALYST">Analyst</MenuItem>
@@ -1060,7 +1002,7 @@ const SecurityDashboard = () => {
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2">Event Type</Typography>
                   <Typography variant="body1" gutterBottom>
-                    {selectedEvent.eventType.replace(/_/g, ' ')}
+                    {selectedEvent.eventType.replace(/_/g, " ")}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1078,9 +1020,7 @@ const SecurityDashboard = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2">IP Address</Typography>
-                  <Typography variant="body1">
-                    {selectedEvent.ipAddress}
-                  </Typography>
+                  <Typography variant="body1">{selectedEvent.ipAddress}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2">Timestamp</Typography>
@@ -1089,11 +1029,9 @@ const SecurityDashboard = () => {
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2">
-                    Additional Details
-                  </Typography>
-                  <Paper sx={{ p: 1, bgcolor: 'grey.100' }}>
-                    <pre style={{ fontSize: '0.875rem', margin: 0 }}>
+                  <Typography variant="subtitle2">Additional Details</Typography>
+                  <Paper sx={{ p: 1, bgcolor: "grey.100" }}>
+                    <pre style={{ fontSize: "0.875rem", margin: 0 }}>
                       {JSON.stringify(selectedEvent.metadata, null, 2)}
                     </pre>
                   </Paper>

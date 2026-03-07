@@ -37,9 +37,9 @@ All Summit engineering and agentic workflows must demonstrate:
 
 1.  **Threat Modeling First**: Decompose systems into MAESTRO layers and identify cross-layer threats (e.g., Data Poisoning → Agent Misalignment → Tool Abuse).
 2.  **AI-Specific Mitigations**: Implement defenses such as:
-    -   **Input/Output Validation**: Strict schema checks on LLM inputs and tool outputs.
-    -   **Guardrails**: Deterministic checks (e.g., regex, logic gates) that override model decisions.
-    -   **Adversarial Training**: Testing against known jailbreak patterns.
+    - **Input/Output Validation**: Strict schema checks on LLM inputs and tool outputs.
+    - **Guardrails**: Deterministic checks (e.g., regex, logic gates) that override model decisions.
+    - **Adversarial Training**: Testing against known jailbreak patterns.
 3.  **Continuous Monitoring**: Runtime checks for anomaly detection, ensuring agents do not deviate from expected behavior patterns.
 4.  **Benchmark Alignment**: Design components to map to emerging agent security benchmarks (e.g., MITRE ATLAS).
 
@@ -60,13 +60,13 @@ We use **STRIDE** for general threats and **MAESTRO-aligned extensions** for AI-
 
 ### AI/Agent-Specific Categories (MAESTRO Extensions)
 
-| Category                  | Description                                   | Key Questions                            |
-| ------------------------- | --------------------------------------------- | ---------------------------------------- |
-| **PI** - Prompt Injection | Manipulating LLM behavior via crafted inputs  | Can user input alter agent behavior?     |
-| **MA** - Model Abuse      | Using AI capabilities for unintended purposes | Can the model be misused?                |
-| **DP** - Data Poisoning   | Corrupting training or reference data         | Can adversaries influence model outputs? |
-| **GH** - Goal Hijacking   | Diverting agent from intended objectives      | Can agent goals be subverted?            |
-| **OA** - Over-Autonomy    | Agents taking unreviewed high-risk actions    | Are human checkpoints in place?          |
+| Category                  | Description                                   | Key Questions                                            |
+| ------------------------- | --------------------------------------------- | -------------------------------------------------------- |
+| **PI** - Prompt Injection | Manipulating LLM behavior via crafted inputs  | Can user input alter agent behavior?                     |
+| **MA** - Model Abuse      | Using AI capabilities for unintended purposes | Can the model be misused?                                |
+| **DP** - Data Poisoning   | Corrupting training or reference data         | Can adversaries influence model outputs?                 |
+| **GH** - Goal Hijacking   | Diverting agent from intended objectives      | Can agent goals be subverted?                            |
+| **OA** - Over-Autonomy    | Agents taking unreviewed high-risk actions    | Are human checkpoints in place?                          |
 | **TI** - Tool Interaction | Unsafe usage of external tools/APIs           | Can the agent be tricked into harmful actions via tools? |
 
 ### Supply Chain & Operational Categories
@@ -97,9 +97,9 @@ Each threat model MUST include:
 List threats using STRIDE/MAESTRO categories.
 
 ```markdown
-| ID  | Layer | Category | Threat            | Impact | Risk |
-| --- | ----- | -------- | ----------------- | ------ | ---- |
-| T1  | Agent | PI       | Prompt Injection  | High   | High |
+| ID  | Layer | Category | Threat           | Impact | Risk |
+| --- | ----- | -------- | ---------------- | ------ | ---- |
+| T1  | Agent | PI       | Prompt Injection | High   | High |
 ```
 
 ### 4. Mitigations & Controls
@@ -107,9 +107,9 @@ List threats using STRIDE/MAESTRO categories.
 Map mitigations to specific threats.
 
 ```markdown
-| Threat ID | Mitigation         | Layer    | Status      | Implementation         |
-| --------- | ------------------ | -------- | ----------- | ---------------------- |
-| T1        | Output Guardrails  | Security | Implemented | server/src/guardrails/ |
+| Threat ID | Mitigation        | Layer    | Status      | Implementation         |
+| --------- | ----------------- | -------- | ----------- | ---------------------- |
+| T1        | Output Guardrails | Security | Implemented | server/src/guardrails/ |
 ```
 
 ### 5. Residual Risk

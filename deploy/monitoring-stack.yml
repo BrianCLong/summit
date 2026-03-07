@@ -31,15 +31,15 @@ spec:
         - name: global.clusterName
           value: intelgraph-prod
         - name: prometheus.enabled
-          value: 'true'
+          value: "true"
         - name: grafana.enabled
-          value: 'true'
+          value: "true"
         - name: jaeger.enabled
-          value: 'true'
+          value: "true"
         - name: loki.enabled
-          value: 'true'
+          value: "true"
         - name: promtail.enabled
-          value: 'true'
+          value: "true"
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -226,14 +226,14 @@ spec:
                   apiVersion: v1
                   fieldPath: status.podIP
             - name: GOMEMLIMIT
-              value: '800MiB'
+              value: "800MiB"
           resources:
             requests:
-              memory: '512Mi'
-              cpu: '250m'
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: '1Gi'
-              cpu: '500m'
+              memory: "1Gi"
+              cpu: "500m"
           livenessProbe:
             httpGet:
               path: /

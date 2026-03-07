@@ -1,11 +1,11 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { glob, hasMagic } from 'glob';
-import { parse } from 'yaml';
-import { z } from 'zod';
+import fs from "fs/promises";
+import path from "path";
+import { glob, hasMagic } from "glob";
+import { parse } from "yaml";
+import { z } from "zod";
 
-export type AgentRole = 'orchestrator' | 'specialist' | 'critic' | 'executor';
-export type DataAccess = 'public' | 'internal' | 'restricted';
+export type AgentRole = "orchestrator" | "specialist" | "critic" | "executor";
+export type DataAccess = "public" | "internal" | "restricted";
 
 export interface AgentInput {
   name: string;
@@ -47,7 +47,7 @@ function sortObjectKeys(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(sortObjectKeys);
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
       a.localeCompare(b)
     );
@@ -89,12 +89,12 @@ const AgentDefSchema = z
     name: z.string().min(1),
     version: z.string().regex(semverRegex),
     description: z.string().min(1),
-    role: z.enum(['orchestrator', 'specialist', 'critic', 'executor']),
+    role: z.enum(["orchestrator", "specialist", "critic", "executor"]),
     inputs: z.array(AgentInputSchema),
     outputs: z.array(AgentOutputSchema),
     sop_refs: z.array(z.string()).optional(),
     allowed_tools: z.array(z.string()).default([]),
-    data_access: z.enum(['public', 'internal', 'restricted']).default('internal'),
+    data_access: z.enum(["public", "internal", "restricted"]).default("internal"),
     policies: z.array(z.string()).optional(),
     evals: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
@@ -113,13 +113,13 @@ export function getAgentById(agents: AgentDef[], id: string): AgentDef | undefin
 function formatZodErrors(file: string, error: z.ZodError): ValidationError[] {
   return error.issues.map((issue) => ({
     file,
-    path: issue.path.length > 0 ? issue.path.join('.') : undefined,
+    path: issue.path.length > 0 ? issue.path.join(".") : undefined,
     message: issue.message,
   }));
 }
 
 function isYamlFile(entry: string): boolean {
-  return entry.toLowerCase().endsWith('.yaml') || entry.toLowerCase().endsWith('.yml');
+  return entry.toLowerCase().endsWith(".yaml") || entry.toLowerCase().endsWith(".yml");
 }
 
 async function resolveRegistryFiles(dirOrGlob: string): Promise<string[]> {
@@ -161,7 +161,7 @@ export async function loadAgentRegistry(
   } catch (error) {
     errors.push({
       file: dirOrGlob,
-      message: error instanceof Error ? error.message : 'Unable to resolve registry path.',
+      message: error instanceof Error ? error.message : "Unable to resolve registry path.",
     });
     return { agents: [], errors };
   }
@@ -169,14 +169,14 @@ export async function loadAgentRegistry(
   if (files.length === 0) {
     errors.push({
       file: dirOrGlob,
-      message: 'No registry files found.',
+      message: "No registry files found.",
     });
     return { agents: [], errors };
   }
 
   for (const file of files) {
     try {
-      const raw = await fs.readFile(file, 'utf-8');
+      const raw = await fs.readFile(file, "utf-8");
       const parsed = parse(raw);
       const agent = validateAgentDef(parsed);
       agents.push({ agent, file });
@@ -189,7 +189,7 @@ export async function loadAgentRegistry(
           message: `YAML parse failed: ${error.message}`,
         });
       } else {
-        errors.push({ file, message: 'Unknown error while parsing registry file.' });
+        errors.push({ file, message: "Unknown error while parsing registry file." });
       }
     }
   }
@@ -201,7 +201,7 @@ export async function loadAgentRegistry(
     if (existing) {
       errors.push({
         file: entry.file,
-        path: 'id',
+        path: "id",
         message: `Duplicate agent id "${entry.agent.id}" also defined in ${existing}.`,
       });
       continue;

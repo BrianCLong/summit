@@ -1,6 +1,6 @@
-import { CommunityStore } from '../store.js';
-import type { SearchResult } from '../types.js';
-import { normalizeText, scoreMatch } from '../utils.js';
+import { CommunityStore } from "../store.js";
+import type { SearchResult } from "../types.js";
+import { normalizeText, scoreMatch } from "../utils.js";
 
 export interface SearchFilters {
   readonly tags?: readonly string[];
@@ -13,8 +13,8 @@ export class SearchService {
 
   public search(
     query: string,
-    filters?: SearchFilters,
-  ): Array<SearchResult<'thread' | 'profile' | 'post'>> {
+    filters?: SearchFilters
+  ): Array<SearchResult<"thread" | "profile" | "post">> {
     const normalizedQuery = normalizeText(query);
     if (!normalizedQuery) {
       return [];
@@ -24,27 +24,22 @@ export class SearchService {
     const includeProfiles = filters?.includeProfiles ?? true;
     const includePosts = true;
 
-    const tagSet = new Set(
-      filters?.tags?.map((tag) => normalizeText(tag)) ?? [],
-    );
+    const tagSet = new Set(filters?.tags?.map((tag) => normalizeText(tag)) ?? []);
 
-    const results: Array<SearchResult<'thread' | 'profile' | 'post'>> = [];
+    const results: Array<SearchResult<"thread" | "profile" | "post">> = [];
 
     if (includeThreads) {
       for (const thread of this.store.listThreads()) {
-        if (
-          tagSet.size > 0 &&
-          !thread.tags.some((tag) => tagSet.has(normalizeText(tag)))
-        ) {
+        if (tagSet.size > 0 && !thread.tags.some((tag) => tagSet.has(normalizeText(tag)))) {
           continue;
         }
         const score =
           scoreMatch(normalizedQuery, thread.title) +
-          scoreMatch(normalizedQuery, thread.tags.join(' '));
+          scoreMatch(normalizedQuery, thread.tags.join(" "));
         if (score > 0) {
           results.push({
             id: thread.id,
-            type: 'thread',
+            type: "thread",
             score,
             snippet: thread.title,
             tags: [...thread.tags],
@@ -57,24 +52,20 @@ export class SearchService {
       for (const profile of this.store.listUsers()) {
         if (
           tagSet.size > 0 &&
-          !profile.interests.some((interest) =>
-            tagSet.has(normalizeText(interest)),
-          )
+          !profile.interests.some((interest) => tagSet.has(normalizeText(interest)))
         ) {
           continue;
         }
         const score =
           scoreMatch(normalizedQuery, profile.displayName) +
           scoreMatch(normalizedQuery, profile.bio) +
-          scoreMatch(normalizedQuery, profile.interests.join(' '));
+          scoreMatch(normalizedQuery, profile.interests.join(" "));
         if (score > 0) {
           results.push({
             id: profile.id,
-            type: 'profile',
+            type: "profile",
             score,
-            snippet: profile.bio
-              ? profile.bio.slice(0, 180)
-              : profile.displayName,
+            snippet: profile.bio ? profile.bio.slice(0, 180) : profile.displayName,
             tags: [...profile.interests],
           });
         }
@@ -96,7 +87,7 @@ export class SearchService {
         if (score > 0) {
           results.push({
             id: post.id,
-            type: 'post',
+            type: "post",
             score,
             snippet: post.content.slice(0, 180),
             tags: this.store.getThread(post.threadId)?.tags ?? [],

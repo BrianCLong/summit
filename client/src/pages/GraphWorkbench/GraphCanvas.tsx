@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import $ from 'jquery';
-import cytoscape from 'cytoscape';
-import Box from '@mui/material/Box';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
+import React, { useEffect, useRef, useState } from "react";
+import $ from "jquery";
+import cytoscape from "cytoscape";
+import Box from "@mui/material/Box";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 // import { useGwGraphDataQuery, useGwSearchEntitiesLazyQuery } from '../../generated/graphql';
 
 export default function GraphCanvas() {
@@ -51,11 +51,11 @@ export default function GraphCanvas() {
     // Fallback elements if no data
     if (elements.length === 0) {
       elements = [
-        { data: { id: 'a', label: 'Entity A' } },
-        { data: { id: 'b', label: 'Entity B' } },
-        { data: { id: 'c', label: 'Entity C' } },
-        { data: { source: 'a', target: 'b' } },
-        { data: { source: 'a', target: 'c' } },
+        { data: { id: "a", label: "Entity A" } },
+        { data: { id: "b", label: "Entity B" } },
+        { data: { id: "c", label: "Entity C" } },
+        { data: { source: "a", target: "b" } },
+        { data: { source: "a", target: "c" } },
       ];
     }
 
@@ -63,72 +63,72 @@ export default function GraphCanvas() {
       container: containerRef.current,
       style: [
         {
-          selector: 'node',
+          selector: "node",
           style: {
-            'background-color': '#1976d2',
-            label: 'data(label)',
-            color: '#fff',
-            'font-size': 10,
+            "background-color": "#1976d2",
+            label: "data(label)",
+            color: "#fff",
+            "font-size": 10,
           },
         },
         {
-          selector: 'edge',
+          selector: "edge",
           style: {
             width: 2,
-            'line-color': '#90caf9',
-            'target-arrow-shape': 'triangle',
-            'target-arrow-color': '#90caf9',
-            'curve-style': 'bezier',
+            "line-color": "#90caf9",
+            "target-arrow-shape": "triangle",
+            "target-arrow-color": "#90caf9",
+            "curve-style": "bezier",
           },
         },
       ],
-      layout: { name: 'cose' },
+      layout: { name: "cose" },
       elements,
     });
     cyRef.current = cy;
 
     // jQuery: context menu binding
-    const $container = $('#graph-root');
+    const $container = $("#graph-root");
     const onContext = (e: JQuery.ContextMenuEvent) => {
       e.preventDefault();
       const node = cy
-        .$('node')
+        .$("node")
         .filter(
           (n) =>
             n.renderedBoundingBox().x1 < e.offsetX &&
             n.renderedBoundingBox().x2 > e.offsetX &&
             n.renderedBoundingBox().y1 < e.offsetY &&
-            n.renderedBoundingBox().y2 > e.offsetY,
+            n.renderedBoundingBox().y2 > e.offsetY
         );
       setMenuTarget(node ? { id: node.id() } : null);
       setMenuAnchor(e.currentTarget as HTMLElement);
     };
-    $container.on('contextmenu', onContext);
+    $container.on("contextmenu", onContext);
 
     // jQuery: simple lasso (marquee)
     let lasso = false;
     let startX = 0;
     let startY = 0;
     let $marquee: JQuery | null = null;
-    $container.on('mousedown', (e: JQuery.MouseDownEvent) => {
+    $container.on("mousedown", (e: JQuery.MouseDownEvent) => {
       if (e.button !== 0 || e.shiftKey !== true) return; // hold Shift to lasso
       lasso = true;
       startX = e.pageX;
       startY = e.pageY;
-      $marquee = $('<div/>')
+      $marquee = $("<div/>")
         .css({
-          position: 'absolute',
-          border: '1px dashed #1976d2',
-          background: 'rgba(25,118,210,0.1)',
+          position: "absolute",
+          border: "1px dashed #1976d2",
+          background: "rgba(25,118,210,0.1)",
           left: startX,
           top: startY,
           width: 0,
           height: 0,
           zIndex: 10,
         })
-        .appendTo('body');
+        .appendTo("body");
     });
-    $container.on('mousemove', (e: JQuery.MouseMoveEvent) => {
+    $container.on("mousemove", (e: JQuery.MouseMoveEvent) => {
       if (!lasso || !$marquee) return;
       const x = Math.min(e.pageX, startX);
       const y = Math.min(e.pageY, startY);
@@ -136,7 +136,7 @@ export default function GraphCanvas() {
       const h = Math.abs(e.pageY - startY);
       $marquee.css({ left: x, top: y, width: w, height: h });
     });
-    $container.on('mouseup', (e: JQuery.MouseUpEvent) => {
+    $container.on("mouseup", (e: JQuery.MouseUpEvent) => {
       if (!lasso) return;
       lasso = false;
       if ($marquee) {
@@ -149,21 +149,20 @@ export default function GraphCanvas() {
         x2: Math.max(e.pageX, startX),
         y2: Math.max(e.pageY, startY),
       };
-      cy.elements('node').unselect();
+      cy.elements("node").unselect();
       cy.nodes().forEach((n) => {
         const bb = n.renderedBoundingBox();
         const cx = (bb.x1 + bb.x2) / 2;
         const cyy = (bb.y1 + bb.y2) / 2;
-        if (cx >= rect.x1 && cx <= rect.x2 && cyy >= rect.y1 && cyy <= rect.y2)
-          n.select();
+        if (cx >= rect.x1 && cx <= rect.x2 && cyy >= rect.y1 && cyy <= rect.y2) n.select();
       });
     });
 
     return () => {
-      $container.off('contextmenu', onContext);
-      $container.off('mousedown');
-      $container.off('mousemove');
-      $container.off('mouseup');
+      $container.off("contextmenu", onContext);
+      $container.off("mousedown");
+      $container.off("mousemove");
+      $container.off("mouseup");
       cy.destroy();
     };
   }, [data]);
@@ -173,11 +172,8 @@ export default function GraphCanvas() {
     if (!cy || !menuTarget?.id) return;
     const id = menuTarget.id;
     const newId = `${id}-${Math.floor(Math.random() * 1000)}`;
-    cy.add([
-      { data: { id: newId, label: `N:${newId}` } },
-      { data: { source: id, target: newId } },
-    ]);
-    cy.layout({ name: 'cose', animate: false }).run();
+    cy.add([{ data: { id: newId, label: `N:${newId}` } }, { data: { source: id, target: newId } }]);
+    cy.layout({ name: "cose", animate: false }).run();
     setMenuAnchor(null);
   };
 
@@ -193,13 +189,13 @@ export default function GraphCanvas() {
     return (
       <Box
         sx={{
-          border: '1px solid #e0e0e0',
+          border: "1px solid #e0e0e0",
           borderRadius: 2,
           height: 600,
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <CircularProgress />
@@ -211,18 +207,16 @@ export default function GraphCanvas() {
     return (
       <Box
         sx={{
-          border: '1px solid #e0e0e0',
+          border: "1px solid #e0e0e0",
           borderRadius: 2,
           height: 600,
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <Typography color="error">
-          Error loading graph data: {error.message}
-        </Typography>
+        <Typography color="error">Error loading graph data: {error.message}</Typography>
       </Box>
     );
   }
@@ -230,22 +224,14 @@ export default function GraphCanvas() {
   return (
     <Box
       sx={{
-        border: '1px solid #e0e0e0',
+        border: "1px solid #e0e0e0",
         borderRadius: 2,
         height: 600,
-        position: 'relative',
+        position: "relative",
       }}
     >
-      <div
-        id="graph-root"
-        ref={containerRef}
-        style={{ width: '100%', height: '100%' }}
-      />
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={() => setMenuAnchor(null)}
-      >
+      <div id="graph-root" ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
         <MenuItem onClick={handleExpandNeighbors}>Expand Neighbors</MenuItem>
         <MenuItem onClick={handlePinToggle}>Pin/Unpin</MenuItem>
         <MenuItem
@@ -258,7 +244,7 @@ export default function GraphCanvas() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            alert('Added to investigation');
+            alert("Added to investigation");
             setMenuAnchor(null);
           }}
         >
@@ -267,26 +253,20 @@ export default function GraphCanvas() {
       </Menu>
       <Box
         sx={{
-          position: 'absolute',
+          position: "absolute",
           left: 8,
           bottom: 8,
-          display: 'flex',
+          display: "flex",
           gap: 1,
         }}
       >
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={() => cyRef.current?.fit()}
-        >
+        <Button size="small" variant="outlined" onClick={() => cyRef.current?.fit()}>
           Fit
         </Button>
         <Button
           size="small"
           variant="outlined"
-          onClick={() =>
-            cyRef.current?.layout({ name: 'cose', animate: false }).run()
-          }
+          onClick={() => cyRef.current?.layout({ name: "cose", animate: false }).run()}
         >
           Layout
         </Button>
@@ -296,9 +276,9 @@ export default function GraphCanvas() {
           onClick={() => {
             if (cyRef.current) {
               const url = cyRef.current.png();
-              const a = document.createElement('a');
+              const a = document.createElement("a");
               a.href = url;
-              a.download = 'graph.png';
+              a.download = "graph.png";
               a.click();
             }
           }}

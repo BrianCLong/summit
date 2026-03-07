@@ -56,14 +56,14 @@ export interface UncertaintyBin {
 }
 
 export enum QueryStrategy {
-  UNCERTAINTY_SAMPLING = 'uncertainty_sampling',
-  QUERY_BY_COMMITTEE = 'query_by_committee',
-  EXPECTED_MODEL_CHANGE = 'expected_model_change',
-  INFORMATION_DENSITY = 'information_density',
-  DIVERSITY_SAMPLING = 'diversity_sampling',
-  BAYESIAN_OPTIMIZATION = 'bayesian_optimization',
-  ADVERSARIAL_SAMPLING = 'adversarial_sampling',
-  CORE_SET = 'core_set',
+  UNCERTAINTY_SAMPLING = "uncertainty_sampling",
+  QUERY_BY_COMMITTEE = "query_by_committee",
+  EXPECTED_MODEL_CHANGE = "expected_model_change",
+  INFORMATION_DENSITY = "information_density",
+  DIVERSITY_SAMPLING = "diversity_sampling",
+  BAYESIAN_OPTIMIZATION = "bayesian_optimization",
+  ADVERSARIAL_SAMPLING = "adversarial_sampling",
+  CORE_SET = "core_set",
 }
 
 export interface SampleQuery {
@@ -118,7 +118,7 @@ export class ActiveLearningPipeline {
 
   private initializeState(config: ActiveLearningConfig): ActiveLearningState {
     return {
-      modelVersion: '1.0.0',
+      modelVersion: "1.0.0",
       totalSamples: 0,
       labeledSamples: 0,
       performance: {
@@ -172,10 +172,7 @@ export class ActiveLearningPipeline {
   /**
    * Select samples to query for labels
    */
-  async selectSamplesToQuery(
-    batchSize: number,
-    strategy?: QueryStrategy
-  ): Promise<SampleQuery[]> {
+  async selectSamplesToQuery(batchSize: number, strategy?: QueryStrategy): Promise<SampleQuery[]> {
     if (this.state.currentBudget.remainingBudget < batchSize) {
       batchSize = Math.floor(this.state.currentBudget.remainingBudget);
     }
@@ -189,7 +186,7 @@ export class ActiveLearningPipeline {
 
     // Compute uncertainty for all samples
     const samplesWithUncertainty = await Promise.all(
-      unlabeledSamples.map(async sample => ({
+      unlabeledSamples.map(async (sample) => ({
         sample,
         uncertainty: await this.computeUncertainty(sample),
         diversity: await this.diversityCalculator.computeDiversity(sample, unlabeledSamples),
@@ -247,9 +244,9 @@ export class ActiveLearningPipeline {
     await this.evaluatePerformance();
 
     // Update version
-    const versionParts = this.state.modelVersion.split('.').map(Number);
+    const versionParts = this.state.modelVersion.split(".").map(Number);
     versionParts[2]++;
-    this.state.modelVersion = versionParts.join('.');
+    this.state.modelVersion = versionParts.join(".");
 
     // Update uncertainty distribution
     await this.updateUncertaintyDistribution();
@@ -267,7 +264,7 @@ export class ActiveLearningPipeline {
       newVersion: this.state.modelVersion,
       samplesAdded: feedback.length,
       performanceDelta,
-      updatedComponents: ['classifier', 'uncertainty_estimator'],
+      updatedComponents: ["classifier", "uncertainty_estimator"],
     };
   }
 
@@ -278,15 +275,22 @@ export class ActiveLearningPipeline {
     const predictions = await this.modelEnsemble.getAllPredictions(sample);
 
     // Entropy-based uncertainty
-    const meanPrediction = predictions.reduce((sum, p) => sum + (p ? 1 : 0), 0) / predictions.length;
-    const entropy = meanPrediction > 0 && meanPrediction < 1
-      ? -(meanPrediction * Math.log2(meanPrediction) + (1 - meanPrediction) * Math.log2(1 - meanPrediction))
-      : 0;
+    const meanPrediction =
+      predictions.reduce((sum, p) => sum + (p ? 1 : 0), 0) / predictions.length;
+    const entropy =
+      meanPrediction > 0 && meanPrediction < 1
+        ? -(
+            meanPrediction * Math.log2(meanPrediction) +
+            (1 - meanPrediction) * Math.log2(1 - meanPrediction)
+          )
+        : 0;
 
     // Disagreement-based uncertainty
-    const disagreement = predictions.reduce((sum, p, i) => {
-      return sum + predictions.slice(i + 1).filter(p2 => p !== p2).length;
-    }, 0) / (predictions.length * (predictions.length - 1) / 2);
+    const disagreement =
+      predictions.reduce((sum, p, i) => {
+        return sum + predictions.slice(i + 1).filter((p2) => p !== p2).length;
+      }, 0) /
+      ((predictions.length * (predictions.length - 1)) / 2);
 
     return (entropy + disagreement) / 2;
   }
@@ -306,10 +310,11 @@ export class ActiveLearningPipeline {
     }
 
     // Model disagreement: use query by committee
-    const recentCorrectRate = this.state.queryHistory
-      .slice(-50)
-      .filter(q => q.wasCorrect !== undefined)
-      .reduce((sum, q) => sum + (q.wasCorrect ? 1 : 0), 0) / 50;
+    const recentCorrectRate =
+      this.state.queryHistory
+        .slice(-50)
+        .filter((q) => q.wasCorrect !== undefined)
+        .reduce((sum, q) => sum + (q.wasCorrect ? 1 : 0), 0) / 50;
 
     if (recentCorrectRate < 0.7) {
       return QueryStrategy.QUERY_BY_COMMITTEE;
@@ -324,16 +329,14 @@ export class ActiveLearningPipeline {
    */
   private async updateUncertaintyDistribution(): Promise<void> {
     const unlabeled = await this.samplePool.getUnlabeled();
-    const uncertainties = await Promise.all(
-      unlabeled.map(s => this.computeUncertainty(s))
-    );
+    const uncertainties = await Promise.all(unlabeled.map((s) => this.computeUncertainty(s)));
 
     // Create histogram bins
     const bins: UncertaintyBin[] = [];
     for (let i = 0; i < 10; i++) {
       const min = i * 0.1;
       const max = (i + 1) * 0.1;
-      const count = uncertainties.filter(u => u >= min && u < max).length;
+      const count = uncertainties.filter((u) => u >= min && u < max).length;
       bins.push({
         range: { min, max },
         count,
@@ -343,14 +346,15 @@ export class ActiveLearningPipeline {
 
     // Calculate statistics
     const mean = uncertainties.reduce((sum, u) => sum + u, 0) / uncertainties.length;
-    const variance = uncertainties.reduce((sum, u) => sum + Math.pow(u - mean, 2), 0) / uncertainties.length;
+    const variance =
+      uncertainties.reduce((sum, u) => sum + Math.pow(u - mean, 2), 0) / uncertainties.length;
 
     this.state.uncertaintyDistribution = {
       bins,
       mean,
       variance,
       skewness: 0,
-      highUncertaintySamples: uncertainties.filter(u => u > 0.7).length,
+      highUncertaintySamples: uncertainties.filter((u) => u > 0.7).length,
     };
   }
 
@@ -377,22 +381,22 @@ export class ActiveLearningPipeline {
 
       // Evaluate on test set
       const predictions = await Promise.all(
-        testSet.map(async s => ({
+        testSet.map(async (s) => ({
           predicted: (await foldModel.predict(s)).prediction,
           actual: s.label,
         }))
       );
 
       // Calculate metrics
-      const tp = predictions.filter(p => p.predicted && p.actual).length;
-      const fp = predictions.filter(p => p.predicted && !p.actual).length;
-      const fn = predictions.filter(p => !p.predicted && p.actual).length;
-      const tn = predictions.filter(p => !p.predicted && !p.actual).length;
+      const tp = predictions.filter((p) => p.predicted && p.actual).length;
+      const fp = predictions.filter((p) => p.predicted && !p.actual).length;
+      const fn = predictions.filter((p) => !p.predicted && p.actual).length;
+      const tn = predictions.filter((p) => !p.predicted && !p.actual).length;
 
       const accuracy = (tp + tn) / predictions.length;
       const precision = tp / (tp + fp) || 0;
       const recall = tp / (tp + fn) || 0;
-      const f1Score = 2 * precision * recall / (precision + recall) || 0;
+      const f1Score = (2 * precision * recall) / (precision + recall) || 0;
 
       metrics.push({
         accuracy,
@@ -413,7 +417,8 @@ export class ActiveLearningPipeline {
       f1Score: metrics.reduce((sum, m) => sum + m.f1Score, 0) / metrics.length,
       auc: metrics.reduce((sum, m) => sum + m.auc, 0) / metrics.length,
       calibrationError: metrics.reduce((sum, m) => sum + m.calibrationError, 0) / metrics.length,
-      noveltyDetectionRate: metrics.reduce((sum, m) => sum + m.noveltyDetectionRate, 0) / metrics.length,
+      noveltyDetectionRate:
+        metrics.reduce((sum, m) => sum + m.noveltyDetectionRate, 0) / metrics.length,
     };
   }
 
@@ -431,19 +436,19 @@ export class ActiveLearningPipeline {
     const recommendations: string[] = [];
 
     if (this.state.performance.recall < 0.8) {
-      recommendations.push('Collect more positive (manipulated) examples to improve recall');
+      recommendations.push("Collect more positive (manipulated) examples to improve recall");
     }
 
     if (this.state.performance.precision < 0.8) {
-      recommendations.push('Focus on hard negative examples to reduce false positives');
+      recommendations.push("Focus on hard negative examples to reduce false positives");
     }
 
     if (this.state.uncertaintyDistribution.highUncertaintySamples > this.state.totalSamples * 0.2) {
-      recommendations.push('Many samples have high uncertainty - consider targeted labeling');
+      recommendations.push("Many samples have high uncertainty - consider targeted labeling");
     }
 
     if (this.state.currentBudget.remainingBudget < this.state.currentBudget.totalBudget * 0.2) {
-      recommendations.push('Labeling budget running low - prioritize high-impact samples');
+      recommendations.push("Labeling budget running low - prioritize high-impact samples");
     }
 
     return recommendations;
@@ -497,7 +502,7 @@ class QueryByCommitteeStrategy implements QueryStrategyImpl {
   ): Promise<SampleQuery[]> {
     // Select samples with highest disagreement among committee members
     const samplesWithDisagreement = await Promise.all(
-      samples.map(async s => ({
+      samples.map(async (s) => ({
         ...s,
         disagreement: await ensemble.computeDisagreement(s.sample),
       }))
@@ -534,7 +539,7 @@ class ExpectedModelChangeStrategy implements QueryStrategyImpl {
       uncertainty: s.uncertainty,
       expectedInformationGain: s.uncertainty * 1.2,
       diversityScore: s.diversity,
-      reason: 'Expected to cause significant model update',
+      reason: "Expected to cause significant model update",
     }));
   }
 }
@@ -547,7 +552,7 @@ class InformationDensityStrategy implements QueryStrategyImpl {
     ensemble: ModelEnsemble
   ): Promise<SampleQuery[]> {
     // Balance uncertainty with representativeness
-    const scored = samples.map(s => ({
+    const scored = samples.map((s) => ({
       ...s,
       score: s.uncertainty * 0.7 + s.diversity * 0.3,
     }));
@@ -597,7 +602,7 @@ class AdversarialSamplingStrategy implements QueryStrategyImpl {
   ): Promise<SampleQuery[]> {
     // Select samples that might be adversarial examples
     const sorted = samples
-      .filter(s => s.uncertainty > 0.4 && s.uncertainty < 0.6)
+      .filter((s) => s.uncertainty > 0.4 && s.uncertainty < 0.6)
       .sort((a, b) => b.uncertainty - a.uncertainty);
 
     return sorted.slice(0, batchSize).map((s, i) => ({
@@ -608,7 +613,7 @@ class AdversarialSamplingStrategy implements QueryStrategyImpl {
       uncertainty: s.uncertainty,
       expectedInformationGain: 0.8,
       diversityScore: s.diversity,
-      reason: 'Potential adversarial example',
+      reason: "Potential adversarial example",
     }));
   }
 }
@@ -621,7 +626,7 @@ class CoreSetStrategy implements QueryStrategyImpl {
     ensemble: ModelEnsemble
   ): Promise<SampleQuery[]> {
     // Greedy core-set selection
-    const selected: typeof samples[0][] = [];
+    const selected: (typeof samples)[0][] = [];
     const remaining = [...samples];
 
     for (let i = 0; i < batchSize && remaining.length > 0; i++) {
@@ -654,7 +659,7 @@ class CoreSetStrategy implements QueryStrategyImpl {
       uncertainty: s.uncertainty,
       expectedInformationGain: s.diversity,
       diversityScore: s.diversity,
-      reason: 'Core-set representative sample',
+      reason: "Core-set representative sample",
     }));
   }
 }
@@ -672,7 +677,7 @@ class ModelEnsemble {
 
   async predict(sample: any): Promise<{ prediction: boolean; uncertainty: number }> {
     const predictions = await this.getAllPredictions(sample);
-    const positiveRatio = predictions.filter(p => p).length / predictions.length;
+    const positiveRatio = predictions.filter((p) => p).length / predictions.length;
     return {
       prediction: positiveRatio > 0.5,
       uncertainty: 1 - Math.abs(positiveRatio - 0.5) * 2,
@@ -685,7 +690,7 @@ class ModelEnsemble {
 
   async computeDisagreement(sample: any): Promise<number> {
     const predictions = await this.getAllPredictions(sample);
-    const positiveCount = predictions.filter(p => p).length;
+    const positiveCount = predictions.filter((p) => p).length;
     return 1 - Math.abs(positiveCount - predictions.length / 2) / (predictions.length / 2);
   }
 

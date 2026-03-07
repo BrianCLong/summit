@@ -11,7 +11,7 @@
 
 This checklist defines the criteria a metric must meet before it can be surfaced in an executive dashboard. The goal is to ensure every metric an executive sees is trustworthy, actionable, and answerable within 30 seconds.
 
-**Guiding Principle**: *"Evidence or it didn't happen."* If a metric doesn't meet these criteria, it's not exec-ready.
+**Guiding Principle**: _"Evidence or it didn't happen."_ If a metric doesn't meet these criteria, it's not exec-ready.
 
 ---
 
@@ -48,6 +48,7 @@ This checklist defines the criteria a metric must meet before it can be surfaced
 ### 1. Data Quality Requirements
 
 #### 1.1 Data Source Definition
+
 - [ ] **Source Identified**: Clear documentation of where data originates
 - [ ] **Source Reliability**: Data source has its own SLO (≥99.9% availability)
 - [ ] **Single Source of Truth**: No conflicting data sources for same metric
@@ -66,12 +67,14 @@ data_source:
 ```
 
 #### 1.2 Collection Method
+
 - [ ] **Collection Mechanism**: Push, pull, or event-driven clearly specified
 - [ ] **Sampling Strategy**: Full census or sampling with documented rate
 - [ ] **Aggregation Rules**: How raw data becomes the displayed metric
 - [ ] **Time Zone Handling**: UTC storage, local display rules documented
 
 #### 1.3 Refresh Rate
+
 - [ ] **Refresh Interval**: Documented and enforced (e.g., "every 5 minutes")
 - [ ] **Staleness Indicator**: Visual indicator when data is stale
 - [ ] **Max Staleness**: Maximum acceptable age before metric is marked invalid
@@ -88,12 +91,14 @@ refresh:
 ```
 
 #### 1.4 Data Validation
+
 - [ ] **Range Validation**: Impossible values are rejected (e.g., >100% not allowed)
 - [ ] **Null Handling**: Explicit rules for missing data
 - [ ] **Outlier Detection**: Statistical anomalies flagged
 - [ ] **Consistency Checks**: Cross-metric validation rules
 
 #### 1.5 Gap Handling
+
 - [ ] **Backfill Policy**: How historical gaps are filled
 - [ ] **Interpolation Rules**: If/how missing points are estimated
 - [ ] **Gap Visibility**: Gaps are visible, not hidden
@@ -104,6 +109,7 @@ refresh:
 ### 2. Context Requirements
 
 #### 2.1 Business Definition
+
 - [ ] **Plain English Definition**: Non-technical explanation
 - [ ] **Business Impact**: Why this metric matters
 - [ ] **Audience Relevance**: Which personas need this metric
@@ -111,6 +117,7 @@ refresh:
 
 ```markdown
 # Example: Business definition
+
 ## SLO Attainment
 
 **Definition**: The percentage of time our services meet their promised
@@ -122,12 +129,14 @@ Below 99.9% triggers penalty clauses in enterprise contracts.
 **Audience**: CTO, VP Engineering, SRE Lead
 
 **Decisions Supported**:
+
 - Engineering resource allocation
 - Infrastructure investment
 - Customer communication timing
 ```
 
 #### 2.2 Target/Benchmark
+
 - [ ] **Target Value**: Clear success threshold
 - [ ] **Target Source**: How target was determined (historical, industry, contract)
 - [ ] **Benchmark Comparison**: Industry or peer comparison if available
@@ -137,27 +146,30 @@ Below 99.9% triggers penalty clauses in enterprise contracts.
 # Example: Target specification
 metric: change_failure_rate
 target:
-  value: 0.05  # 5%
+  value: 0.05 # 5%
   source: DORA_research_elite_performer
   benchmark:
-    industry: 0.15  # 15% industry average
-    peer_group: 0.08  # 8% among similar companies
+    industry: 0.15 # 15% industry average
+    peer_group: 0.08 # 8% among similar companies
   review_cadence: quarterly
 ```
 
 #### 2.3 Comparison Period
+
 - [ ] **Default Timeframe**: Standard view (e.g., 30 days)
 - [ ] **Comparison Options**: WoW, MoM, QoQ, YoY available
 - [ ] **Trend Direction**: Clear up/down/flat indicators
 - [ ] **Seasonality Notes**: Known seasonal patterns documented
 
 #### 2.4 Executive Sponsor
+
 - [ ] **Sponsor Assigned**: Named executive accountable for metric
 - [ ] **Review Commitment**: Sponsor reviews metric in defined cadence
 - [ ] **Escalation Path**: What happens when metric goes critical
 - [ ] **Sign-off**: Sponsor has approved metric for exec dashboard
 
 #### 2.5 Limitations
+
 - [ ] **Known Limitations**: What the metric doesn't capture
 - [ ] **Edge Cases**: Scenarios where metric may be misleading
 - [ ] **Data Lag**: Any delays in data availability
@@ -165,6 +177,7 @@ target:
 
 ```markdown
 # Example: Documented limitations
+
 ## NRR (Net Revenue Retention) Limitations
 
 1. **Data Lag**: Revenue data has 48-hour delay from billing system
@@ -179,6 +192,7 @@ target:
 ### 3. Presentation Requirements
 
 #### 3.1 Naming
+
 - [ ] **Clear Name**: No acronyms without expansion (first use)
 - [ ] **Consistent Naming**: Same name across all dashboards
 - [ ] **Action-Oriented**: Name implies what to do (e.g., "SLO Budget Remaining")
@@ -198,6 +212,7 @@ good_names:
 ```
 
 #### 3.2 Units
+
 - [ ] **Unit Displayed**: Always show unit (%, ms, $, count)
 - [ ] **Appropriate Precision**: Right number of decimal places
 - [ ] **Human-Readable**: Use K, M, B for large numbers
@@ -217,10 +232,11 @@ metrics:
   - name: Revenue
     unit: USD
     precision: 0
-    humanize: true  # $1.2M instead of $1,234,567
+    humanize: true # $1.2M instead of $1,234,567
 ```
 
 #### 3.3 Thresholds
+
 - [ ] **Visual Thresholds**: Color coding (green/yellow/red)
 - [ ] **Threshold Values**: Documented cutoff points
 - [ ] **Threshold Rationale**: Why these thresholds
@@ -249,12 +265,14 @@ direction: higher_is_better
 ```
 
 #### 3.4 Trend Visualization
+
 - [ ] **Trend Line**: Show historical trend
 - [ ] **Trend Indicator**: Up/down arrow or icon
 - [ ] **Comparison Delta**: Show change from previous period
 - [ ] **Trend Period**: Specify comparison window (e.g., "vs last week")
 
 #### 3.5 Drill-Down Path
+
 - [ ] **Drill-Down Available**: Click to see more detail
 - [ ] **Drill-Down Path Documented**: Where each click leads
 - [ ] **Breadcrumb Navigation**: Can navigate back up
@@ -286,6 +304,7 @@ drill_down:
 ### 4. Operational Requirements
 
 #### 4.1 Ownership
+
 - [ ] **Technical Owner**: Engineer responsible for metric health
 - [ ] **Business Owner**: Business stakeholder accountable
 - [ ] **On-Call Coverage**: Who to contact for issues
@@ -317,6 +336,7 @@ ownership:
 ```
 
 #### 4.2 Alerting
+
 - [ ] **Alert Defined**: Threshold-based alerting configured
 - [ ] **Alert Recipients**: Right personas receive alerts
 - [ ] **Alert Severity**: Appropriate severity levels
@@ -340,6 +360,7 @@ alerts:
 ```
 
 #### 4.3 Runbooks
+
 - [ ] **Anomaly Runbook**: What to do when metric is unexpected
 - [ ] **Investigation Steps**: How to diagnose issues
 - [ ] **Common Causes**: Known reasons for anomalies
@@ -347,26 +368,31 @@ alerts:
 
 ```markdown
 # Example: Runbook reference
+
 ## SLO Attainment Anomaly Runbook
 
 **Location**: runbooks/slo-attainment-anomaly.md
 
 ### Quick Actions
+
 1. Check for active incidents: /incidents
 2. Review recent deploys: /deploys?timeframe=4h
 3. Check error budget burn rate: /dashboards/slo-burn
 
 ### Common Causes
+
 - Recent deployment with bug
 - Upstream dependency failure
 - Traffic spike exceeding capacity
 - Database performance degradation
 
 ### Escalation
+
 If not resolved in 15 minutes, page SRE secondary.
 ```
 
 #### 4.4 Data Freshness SLA
+
 - [ ] **Freshness SLA**: Committed data freshness (e.g., "within 5 minutes")
 - [ ] **SLA Monitoring**: Freshness is itself monitored
 - [ ] **SLA Breach Alerts**: Alert when freshness SLA violated
@@ -385,6 +411,7 @@ freshness_sla:
 ```
 
 #### 4.5 Audit Trail
+
 - [ ] **Change History**: Who changed metric definition and when
 - [ ] **Version Control**: Metric definitions in git
 - [ ] **Approval Workflow**: Changes require review
@@ -419,24 +446,28 @@ freshness_sla:
 ```
 
 ### 1. Proposal Phase
+
 - Submit metric proposal with business justification
 - Identify executive sponsor
 - Define target audience (CEO, CTO, CISO, etc.)
 - Get initial buy-in from stakeholders
 
 ### 2. Documentation Phase
+
 - Complete all checklist items in this document
 - Write runbook for anomaly handling
 - Assign technical and business owners
 - Document limitations and caveats
 
 ### 3. Implementation Phase
+
 - Build Grafana panel/dashboard
 - Configure alerting
 - Implement drill-down paths
 - Set up freshness monitoring
 
 ### 4. Certification Phase
+
 - Technical review by Platform Engineering
 - Business review by Executive Sponsor
 - Final sign-off from Exec Cockpit owner
@@ -505,16 +536,16 @@ next_review_date: "2026-03-07"
 
 ### Metrics That Are NOT Exec-Ready
 
-| Anti-Pattern | Example | Why It's Bad |
-|--------------|---------|--------------|
-| **Vanity Metric** | "Total API calls ever" | Doesn't inform decisions |
-| **No Target** | "CPU usage: 45%" | 45% of what? Good or bad? |
-| **Jargon-Heavy** | "p99 gRPC latency" | Executives don't know gRPC |
-| **No Drill-Down** | Dashboard-only metric | Can't investigate issues |
-| **Stale Data** | "Last updated: 3 days ago" | Not actionable |
-| **No Owner** | Orphaned metric | No one to fix issues |
+| Anti-Pattern           | Example                      | Why It's Bad               |
+| ---------------------- | ---------------------------- | -------------------------- |
+| **Vanity Metric**      | "Total API calls ever"       | Doesn't inform decisions   |
+| **No Target**          | "CPU usage: 45%"             | 45% of what? Good or bad?  |
+| **Jargon-Heavy**       | "p99 gRPC latency"           | Executives don't know gRPC |
+| **No Drill-Down**      | Dashboard-only metric        | Can't investigate issues   |
+| **Stale Data**         | "Last updated: 3 days ago"   | Not actionable             |
+| **No Owner**           | Orphaned metric              | No one to fix issues       |
 | **Hidden Limitations** | "NRR: 120%" (one-time spike) | Misleading without context |
-| **Alert Fatigue** | Fires 10x/day | Gets ignored |
+| **Alert Fatigue**      | Fires 10x/day                | Gets ignored               |
 
 ---
 
@@ -553,6 +584,6 @@ All certified metrics require annual re-certification:
 
 ## Changelog
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | 2025-12-07 | Platform Engineering | Initial Exec-Ready Checklist |
+| Version | Date       | Author               | Changes                      |
+| ------- | ---------- | -------------------- | ---------------------------- |
+| 0.1.0   | 2025-12-07 | Platform Engineering | Initial Exec-Ready Checklist |

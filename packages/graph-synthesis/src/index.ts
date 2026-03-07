@@ -26,7 +26,7 @@ export interface Graph {
 }
 
 export interface GraphGenerationConfig {
-  model: 'erdos-renyi' | 'barabasi-albert' | 'watts-strogatz' | 'community';
+  model: "erdos-renyi" | "barabasi-albert" | "watts-strogatz" | "community";
   numNodes: number;
   avgDegree?: number;
   directed?: boolean;
@@ -38,13 +38,13 @@ export class GraphSynthesizer {
 
   async generate(): Promise<Graph> {
     switch (this.config.model) {
-      case 'erdos-renyi':
+      case "erdos-renyi":
         return this.generateErdosRenyi();
-      case 'barabasi-albert':
+      case "barabasi-albert":
         return this.generateBarabasiAlbert();
-      case 'watts-strogatz':
+      case "watts-strogatz":
         return this.generateWattsStrogatz();
-      case 'community':
+      case "community":
         return this.generateCommunityStructure();
       default:
         throw new Error(`Unknown model: ${this.config.model}`);
@@ -63,7 +63,7 @@ export class GraphSynthesizer {
           edges.push({
             source: nodes[i].id,
             target: nodes[j].id,
-            weight: this.config.weighted ? Math.random() : undefined
+            weight: this.config.weighted ? Math.random() : undefined,
           });
         }
       }
@@ -91,9 +91,13 @@ export class GraphSynthesizer {
     // Add remaining nodes with preferential attachment
     for (let i = m + 1; i < nodes.length; i++) {
       degrees.set(nodes[i].id, 0);
-      const targets = this.preferentialSelection(Array.from(degrees.keys()).slice(0, i), degrees, m);
+      const targets = this.preferentialSelection(
+        Array.from(degrees.keys()).slice(0, i),
+        degrees,
+        m
+      );
 
-      targets.forEach(target => {
+      targets.forEach((target) => {
         edges.push({ source: nodes[i].id, target });
         degrees.set(nodes[i].id, (degrees.get(nodes[i].id) || 0) + 1);
         degrees.set(target, (degrees.get(target) || 0) + 1);
@@ -156,14 +160,22 @@ export class GraphSynthesizer {
       }
     }
 
-    return { nodes, edges, metadata: { directed: false, weighted: false, attributes: ['community'] } };
+    return {
+      nodes,
+      edges,
+      metadata: { directed: false, weighted: false, attributes: ["community"] },
+    };
   }
 
   private createNodes(n: number): GraphNode[] {
     return Array.from({ length: n }, (_, i) => ({ id: `node_${i}` }));
   }
 
-  private preferentialSelection(candidates: string[], degrees: Map<string, number>, m: number): string[] {
+  private preferentialSelection(
+    candidates: string[],
+    degrees: Map<string, number>,
+    m: number
+  ): string[] {
     const totalDegree = Array.from(degrees.values()).reduce((a, b) => a + b, 0);
     const selected = new Set<string>();
 
@@ -186,7 +198,10 @@ export class GraphSynthesizer {
 }
 
 export class TemporalGraphSynthesizer {
-  async generateTemporalGraph(timestamps: number, graphPerTime: GraphGenerationConfig): Promise<Graph[]> {
+  async generateTemporalGraph(
+    timestamps: number,
+    graphPerTime: GraphGenerationConfig
+  ): Promise<Graph[]> {
     const synthesizer = new GraphSynthesizer(graphPerTime);
     return Promise.all(Array.from({ length: timestamps }, () => synthesizer.generate()));
   }

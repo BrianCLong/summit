@@ -2,10 +2,10 @@
  * PostgreSQL database connector
  */
 
-import { Pool, PoolClient } from 'pg';
-import { BaseConnector } from '../core/BaseConnector';
-import { ConnectorCapabilities, DataSourceConfig } from '../types';
-import { Logger } from 'winston';
+import { Pool, PoolClient } from "pg";
+import { BaseConnector } from "../core/BaseConnector";
+import { ConnectorCapabilities, DataSourceConfig } from "../types";
+import { Logger } from "winston";
 
 export class PostgreSQLConnector extends BaseConnector {
   private pool: Pool | null = null;
@@ -29,20 +29,24 @@ export class PostgreSQLConnector extends BaseConnector {
               rejectUnauthorized: this.config.connectionConfig.sslConfig.rejectUnauthorized,
               ca: this.config.connectionConfig.sslConfig.ca,
               cert: this.config.connectionConfig.sslConfig.cert,
-              key: this.config.connectionConfig.sslConfig.key
+              key: this.config.connectionConfig.sslConfig.key,
             }
           : false,
         min: this.config.connectionConfig.connectionPoolConfig?.min || 2,
         max: this.config.connectionConfig.connectionPoolConfig?.max || 10,
-        idleTimeoutMillis: this.config.connectionConfig.connectionPoolConfig?.idleTimeoutMillis || 30000,
-        connectionTimeoutMillis: this.config.connectionConfig.connectionPoolConfig?.acquireTimeoutMillis || 2000
+        idleTimeoutMillis:
+          this.config.connectionConfig.connectionPoolConfig?.idleTimeoutMillis || 30000,
+        connectionTimeoutMillis:
+          this.config.connectionConfig.connectionPoolConfig?.acquireTimeoutMillis || 2000,
       });
 
       this.client = await this.pool.connect();
       this.isConnected = true;
-      this.logger.info(`Connected to PostgreSQL database: ${this.config.connectionConfig.database}`);
+      this.logger.info(
+        `Connected to PostgreSQL database: ${this.config.connectionConfig.database}`
+      );
     } catch (error) {
-      this.logger.error('Failed to connect to PostgreSQL', { error });
+      this.logger.error("Failed to connect to PostgreSQL", { error });
       throw error;
     }
   }
@@ -58,9 +62,9 @@ export class PostgreSQLConnector extends BaseConnector {
         this.pool = null;
       }
       this.isConnected = false;
-      this.logger.info('Disconnected from PostgreSQL');
+      this.logger.info("Disconnected from PostgreSQL");
     } catch (error) {
-      this.logger.error('Error disconnecting from PostgreSQL', { error });
+      this.logger.error("Error disconnecting from PostgreSQL", { error });
       throw error;
     }
   }
@@ -68,12 +72,12 @@ export class PostgreSQLConnector extends BaseConnector {
   async testConnection(): Promise<boolean> {
     try {
       await this.withRetry(async () => {
-        const result = await this.client!.query('SELECT 1');
+        const result = await this.client!.query("SELECT 1");
         return result.rows.length > 0;
-      }, 'Test connection');
+      }, "Test connection");
       return true;
     } catch (error) {
-      this.logger.error('Connection test failed', { error });
+      this.logger.error("Connection test failed", { error });
       return false;
     }
   }
@@ -85,13 +89,13 @@ export class PostgreSQLConnector extends BaseConnector {
       supportsCDC: false, // Would require additional setup (e.g., Debezium)
       supportsSchema: true,
       supportsPartitioning: true,
-      maxConcurrentConnections: this.config.connectionConfig.connectionPoolConfig?.max || 10
+      maxConcurrentConnections: this.config.connectionConfig.connectionPoolConfig?.max || 10,
     };
   }
 
   async *extract(): AsyncGenerator<any[], void, unknown> {
     if (!this.isConnected || !this.client) {
-      throw new Error('Not connected to database');
+      throw new Error("Not connected to database");
     }
 
     const query = this.buildQuery();
@@ -102,7 +106,7 @@ export class PostgreSQLConnector extends BaseConnector {
     try {
       // Use cursor for efficient streaming
       const cursorName = `cursor_${Date.now()}`;
-      await this.client.query('BEGIN');
+      await this.client.query("BEGIN");
       await this.client.query(`DECLARE ${cursorName} CURSOR FOR ${query}`);
 
       let hasMore = true;
@@ -122,18 +126,18 @@ export class PostgreSQLConnector extends BaseConnector {
         await this.rateLimit();
       }
 
-      await this.client.query('COMMIT');
+      await this.client.query("COMMIT");
       this.logger.info(`Extracted ${totalRecords} records from PostgreSQL`);
     } catch (error) {
-      await this.client.query('ROLLBACK');
-      this.logger.error('Error extracting data from PostgreSQL', { error });
+      await this.client.query("ROLLBACK");
+      this.logger.error("Error extracting data from PostgreSQL", { error });
       throw error;
     }
   }
 
   async getSchema(): Promise<any> {
     if (!this.isConnected || !this.client) {
-      throw new Error('Not connected to database');
+      throw new Error("Not connected to database");
     }
 
     const tableName = this.extractTableName();
@@ -156,24 +160,25 @@ export class PostgreSQLConnector extends BaseConnector {
       const result = await this.client.query(query, [tableName]);
       return {
         tableName,
-        columns: result.rows.map(row => ({
+        columns: result.rows.map((row) => ({
           name: row.column_name,
           type: row.data_type,
-          nullable: row.is_nullable === 'YES',
+          nullable: row.is_nullable === "YES",
           default: row.column_default,
           maxLength: row.character_maximum_length,
           precision: row.numeric_precision,
-          scale: row.numeric_scale
-        }))
+          scale: row.numeric_scale,
+        })),
       };
     } catch (error) {
-      this.logger.error('Error getting schema from PostgreSQL', { error });
+      this.logger.error("Error getting schema from PostgreSQL", { error });
       throw error;
     }
   }
 
   private buildQuery(): string {
-    const { query, incrementalColumn, lastExtractedValue, filterConfig } = this.config.extractionConfig;
+    const { query, incrementalColumn, lastExtractedValue, filterConfig } =
+      this.config.extractionConfig;
 
     if (query) {
       return query;
@@ -203,7 +208,7 @@ export class PostgreSQLConnector extends BaseConnector {
     }
 
     if (conditions.length > 0) {
-      sql += ` WHERE ${  conditions.join(' AND ')}`;
+      sql += ` WHERE ${conditions.join(" AND ")}`;
     }
 
     // Add ORDER BY for incremental extraction

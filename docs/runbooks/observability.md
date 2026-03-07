@@ -8,10 +8,10 @@ Use this runbook to triage incidents, interpret dashboards, and query logs/trace
    - Alert name, service label, and severity (`page` routes to PagerDuty).
    - Linked runbook URL from the alert annotation; confirm current deploy version.
 2. **Check health probes**
-   - Open Grafana → IntelGraph Overview → *Request Error Rate* and *Health Probe* panels.
+   - Open Grafana → IntelGraph Overview → _Request Error Rate_ and _Health Probe_ panels.
    - Validate `/health` endpoints directly: `curl -v http://<service>/health/ready`.
 3. **Validate SLO burn**
-   - Inspect *Request Error Rate (5m)* and *Service p95 latency* panels; confirm whether burn-rate alerts align with traffic spikes.
+   - Inspect _Request Error Rate (5m)_ and _Service p95 latency_ panels; confirm whether burn-rate alerts align with traffic spikes.
    - Compare blackbox probe success with service metrics to rule out ingress/network issues.
 4. **Scope blast radius**
    - Use Grafana variables (`tenant`, `service`) to filter panels.

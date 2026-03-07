@@ -20,7 +20,7 @@ The risk score ($R$) is a weighted sum of the following factors:
   - $S_{score} = \text{min}(10, \frac{\text{LOC}}{100})$
 - **Files Touched (F):** The number and type of files modified.
   - $F_{score} = \text{Count of files} \times \text{Sensitivity Multiplier}$
-  - *Sensitivity Multiplier:*
+  - _Sensitivity Multiplier:_
     - `1.0`: Standard source code.
     - `2.0`: Configuration, Build files (`package.json`, `Dockerfile`).
     - `5.0`: Core governance policies, Security policies (`SECURITY.md`, `AGENTS.md`).
@@ -31,22 +31,22 @@ The risk score ($R$) is a weighted sum of the following factors:
   - `3.0`: Fully autonomous agent PR.
 - **Test Coverage Delta (C):** Impact on overall test coverage.
   - $C_{score} = \text{max}(0, 5 \times (\text{Target Coverage} - \text{PR Coverage}))$
-  - *If PR coverage is higher than target, this factor adds 0 risk.*
+  - _If PR coverage is higher than target, this factor adds 0 risk._
 
 **Formula:**
-$$ R = (w_1 \cdot S_{score}) + (w_2 \cdot F_{score}) + (w_3 \cdot A) + (w_4 \cdot C_{score}) $$
-*(Weights $w_n$ are tuned empirically based on historical merge success rates.)*
+$$ R = (w*1 \cdot S*{score}) + (w*2 \cdot F*{score}) + (w*3 \cdot A) + (w_4 \cdot C*{score}) $$
+*(Weights $w_n$ are tuned empirically based on historical merge success rates.)\*
 
 ## 3. Risk Tiers and Reviewer Routing
 
 Based on the calculated risk score ($R$), PRs are categorized into tiers:
 
-| Tier | Risk Score ($R$) | Description | Review Requirement | Routing |
-| :--- | :--- | :--- | :--- | :--- |
-| **Tier 1 (Low)** | $R \le 10$ | Minor changes, high test coverage, localized scope. | Automated Agent Review (e.g., Jules) + 1 Human Approval (Optional if specific conditions met). | Standard queue, prioritized for fast merge. |
-| **Tier 2 (Medium)** | $10 < R \le 30$ | Feature additions, moderate cross-module impact. | 1 Human Approval Required. | Domain Owner queue. |
-| **Tier 3 (High)** | $30 < R \le 60$ | Core architecture changes, security module updates, large refactors. | 2 Human Approvals Required (including 1 Core Maintainer). | Core Maintainer queue, flagged for deep review. |
-| **Tier 4 (Critical)** | $R > 60$ | Massive agent-generated PRs, high-sensitivity file modifications without explicit prior planning. | Revert/Reject by default unless linked to an approved Architecture Decision Record (ADR) or Epic. Requires synchronous review meeting. | Escalated to Governance / Architecture board. |
+| Tier                  | Risk Score ($R$) | Description                                                                                       | Review Requirement                                                                                                                     | Routing                                         |
+| :-------------------- | :--------------- | :------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------- |
+| **Tier 1 (Low)**      | $R \le 10$       | Minor changes, high test coverage, localized scope.                                               | Automated Agent Review (e.g., Jules) + 1 Human Approval (Optional if specific conditions met).                                         | Standard queue, prioritized for fast merge.     |
+| **Tier 2 (Medium)**   | $10 < R \le 30$  | Feature additions, moderate cross-module impact.                                                  | 1 Human Approval Required.                                                                                                             | Domain Owner queue.                             |
+| **Tier 3 (High)**     | $30 < R \le 60$  | Core architecture changes, security module updates, large refactors.                              | 2 Human Approvals Required (including 1 Core Maintainer).                                                                              | Core Maintainer queue, flagged for deep review. |
+| **Tier 4 (Critical)** | $R > 60$         | Massive agent-generated PRs, high-sensitivity file modifications without explicit prior planning. | Revert/Reject by default unless linked to an approved Architecture Decision Record (ADR) or Epic. Requires synchronous review meeting. | Escalated to Governance / Architecture board.   |
 
 ## 4. Automated Diff Summarization
 

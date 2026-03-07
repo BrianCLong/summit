@@ -18,6 +18,7 @@ Result: Complete queue saturation, 3+ hour delays
 **Workflow**: `.github/workflows/pr-gate.yml`
 
 **Checks**:
+
 - Lint (code quality)
 - Typecheck (type safety)
 - Unit tests (basic functionality)
@@ -26,6 +27,7 @@ Result: Complete queue saturation, 3+ hour delays
 - Timestamp scan (security)
 
 **Key Properties**:
+
 - ✅ Runs on every PR
 - ✅ Must pass to merge
 - ✅ Completes in <20 minutes
@@ -39,6 +41,7 @@ Result: Complete queue saturation, 3+ hour delays
 **Workflow**: `.github/workflows/main-validation.yml` (coming in PR 3)
 
 **Checks**:
+
 - Integration tests
 - E2E tests
 - Security scans
@@ -47,6 +50,7 @@ Result: Complete queue saturation, 3+ hour delays
 - Supply chain audits
 
 **Key Properties**:
+
 - ✅ Runs only on `main` branch
 - ✅ Non-blocking (post-merge)
 - ✅ Comprehensive coverage

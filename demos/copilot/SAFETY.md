@@ -7,28 +7,33 @@ All copilot interactions in demo scenarios must adhere to strict safety and poli
 ## Core Safety Principles
 
 ### 1. **No Harmful Content Generation**
+
 - Never generate misinformation, even for "demonstration" purposes
 - Never create deepfakes or manipulated media
 - Never provide instructions for creating misleading content
 - Never generate toxic, abusive, or harmful text
 
 ### 2. **Evidence-Based Explanations Only**
+
 - All copilot explanations must reference specific detection evidence
 - Claims must be grounded in analysis results
 - Uncertainty must be clearly communicated
 - Never make unfounded accusations
 
 ### 3. **Privacy & PII Protection**
+
 - All customer data must be redacted before copilot processing
 - Never expose identifiable information
 - Maintain customer anonymity in all outputs
 
 ### 4. **Authority & License Enforcement**
+
 - Check user permissions before providing sensitive analysis
 - Enforce role-based access control
 - Log all copilot interactions for audit
 
 ### 5. **Transparency & Explainability**
+
 - Always explain detection methodology
 - Provide confidence scores
 - Show evidence chain
@@ -39,6 +44,7 @@ All copilot interactions in demo scenarios must adhere to strict safety and poli
 ### Adversarial Misinfo Defense
 
 **Permitted Actions:**
+
 - ✅ Explain why content was flagged as potential misinformation
 - ✅ Describe detection patterns and red flags
 - ✅ Suggest fact-checking resources
@@ -46,6 +52,7 @@ All copilot interactions in demo scenarios must adhere to strict safety and poli
 - ✅ Provide educational context about manipulation techniques
 
 **Prohibited Actions:**
+
 - ❌ Generate fake news or misinformation
 - ❌ Create deepfake content
 - ❌ Provide step-by-step manipulation tutorials
@@ -54,6 +61,7 @@ All copilot interactions in demo scenarios must adhere to strict safety and poli
 - ❌ Generate counter-narratives that could spread misinfo
 
 **Example Safe Response:**
+
 ```
 This post was flagged with 87% confidence due to three indicators:
 
@@ -73,6 +81,7 @@ before sharing. Flagged for review, not definitive proof.
 ### De-escalation Coaching
 
 **Permitted Actions:**
+
 - ✅ Analyze communication tone and sentiment
 - ✅ Suggest alternative phrasings
 - ✅ Provide empathy coaching
@@ -80,6 +89,7 @@ before sharing. Flagged for review, not definitive proof.
 - ✅ Explain emotional dynamics
 
 **Prohibited Actions:**
+
 - ❌ Generate responses that dismiss valid complaints
 - ❌ Suggest manipulative or deceptive language
 - ❌ Provide legal advice
@@ -88,6 +98,7 @@ before sharing. Flagged for review, not definitive proof.
 - ❌ Generate generic corporate "apologize and deflect" scripts
 
 **Example Safe Response:**
+
 ```
 Analysis of customer message:
 - Toxicity: 0.78 (high)
@@ -112,6 +123,7 @@ This customer needs action + empathy, not just sympathy.
 ## Safety Harness Implementation
 
 ### Input Validation
+
 ```python
 def validate_copilot_request(request):
     """Validate request before sending to copilot."""
@@ -132,6 +144,7 @@ def validate_copilot_request(request):
 ```
 
 ### Output Filtering
+
 ```python
 def filter_copilot_response(response):
     """Filter copilot output before returning to user."""
@@ -152,7 +165,9 @@ def filter_copilot_response(response):
 ```
 
 ### Audit Logging
+
 All copilot interactions must be logged:
+
 - User ID (anonymized)
 - Timestamp
 - Input query
@@ -172,6 +187,7 @@ If copilot attempts to generate unsafe content:
 ## Demo Boundaries
 
 ### What Demos CAN Show
+
 - Realistic analysis of curated, pre-approved content
 - Evidence-based detection explanations
 - Safe, constructive coaching guidance
@@ -179,6 +195,7 @@ If copilot attempts to generate unsafe content:
 - Transparency in AI decision-making
 
 ### What Demos CANNOT Show
+
 - Live creation of harmful content
 - Uncontrolled user-generated inputs
 - Real customer data without consent
@@ -188,6 +205,7 @@ If copilot attempts to generate unsafe content:
 ## Testing Safety Harness
 
 Before demo deployment:
+
 - [ ] Run adversarial prompts to test boundaries
 - [ ] Verify PII redaction works
 - [ ] Test permission enforcement
@@ -198,6 +216,7 @@ Before demo deployment:
 ## Updates & Maintenance
 
 This safety document must be reviewed:
+
 - Before each major demo
 - After any safety incidents
 - Quarterly minimum

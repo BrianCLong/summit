@@ -3,13 +3,9 @@
  * Resolves and links entities across different systems and data sources
  */
 
-import { MatchingEngine } from '@intelgraph/mdm-core';
-import type {
-  MatchingConfig,
-  MatchResult,
-  MatchLevel
-} from '@intelgraph/mdm-core';
-import { v4 as uuidv4 } from 'uuid';
+import { MatchingEngine } from "@intelgraph/mdm-core";
+import type { MatchingConfig, MatchResult, MatchLevel } from "@intelgraph/mdm-core";
+import { v4 as uuidv4 } from "uuid";
 
 export interface EntityResolutionConfig {
   matchingConfig: MatchingConfig;
@@ -32,18 +28,14 @@ export interface EntityLink {
 }
 
 export type LinkType =
-  | 'exact_match'
-  | 'probable_match'
-  | 'possible_match'
-  | 'same_entity'
-  | 'related_entity'
-  | 'manual_link';
+  | "exact_match"
+  | "probable_match"
+  | "possible_match"
+  | "same_entity"
+  | "related_entity"
+  | "manual_link";
 
-export type LinkStatus =
-  | 'proposed'
-  | 'approved'
-  | 'rejected'
-  | 'under_review';
+export type LinkStatus = "proposed" | "approved" | "rejected" | "under_review";
 
 export interface ResolutionResult {
   totalEntities: number;
@@ -67,13 +59,8 @@ export class EntityResolver {
   /**
    * Resolve entities within a dataset
    */
-  async resolveEntities(
-    entities: Record<string, unknown>[]
-  ): Promise<ResolutionResult> {
-    const matches = await this.matchingEngine.findMatches(
-      entities,
-      this.config.matchingConfig
-    );
+  async resolveEntities(entities: Record<string, unknown>[]): Promise<ResolutionResult> {
+    const matches = await this.matchingEngine.findMatches(entities, this.config.matchingConfig);
 
     const links: EntityLink[] = [];
     let autoLinked = 0;
@@ -83,13 +70,13 @@ export class EntityResolver {
       const link = this.createLink(match);
 
       if (match.matchScore >= this.config.autoLinkThreshold) {
-        link.status = 'approved';
+        link.status = "approved";
         autoLinked++;
       } else if (match.matchScore >= this.config.manualReviewThreshold) {
-        link.status = 'under_review';
+        link.status = "under_review";
         manualReviewRequired++;
       } else {
-        link.status = 'proposed';
+        link.status = "proposed";
       }
 
       links.push(link);
@@ -101,7 +88,7 @@ export class EntityResolver {
       matches,
       links,
       manualReviewRequired,
-      autoLinked
+      autoLinked,
     };
   }
 
@@ -126,19 +113,19 @@ export class EntityResolver {
           this.config.matchingConfig
         );
 
-        if (match.matchLevel !== 'no_match') {
+        if (match.matchLevel !== "no_match") {
           allMatches.push(match);
 
           const link = this.createLink(match);
 
           if (match.matchScore >= this.config.autoLinkThreshold) {
-            link.status = 'approved';
+            link.status = "approved";
             autoLinked++;
           } else if (match.matchScore >= this.config.manualReviewThreshold) {
-            link.status = 'under_review';
+            link.status = "under_review";
             manualReviewRequired++;
           } else {
-            link.status = 'proposed';
+            link.status = "proposed";
           }
 
           links.push(link);
@@ -152,7 +139,7 @@ export class EntityResolver {
       matches: allMatches,
       links,
       manualReviewRequired,
-      autoLinked
+      autoLinked,
     };
   }
 
@@ -166,9 +153,9 @@ export class EntityResolver {
       entity2Id: match.recordId2,
       linkType: this.determineLinkType(match),
       confidence: match.confidence,
-      status: 'proposed',
+      status: "proposed",
       createdAt: new Date(),
-      createdBy: 'system'
+      createdBy: "system",
     };
   }
 
@@ -176,14 +163,14 @@ export class EntityResolver {
    * Determine link type from match
    */
   private determineLinkType(match: MatchResult): LinkType {
-    if (match.matchLevel === 'exact') {
-      return 'exact_match';
-    } else if (match.matchLevel === 'high') {
-      return 'probable_match';
-    } else if (match.matchLevel === 'medium') {
-      return 'possible_match';
+    if (match.matchLevel === "exact") {
+      return "exact_match";
+    } else if (match.matchLevel === "high") {
+      return "probable_match";
+    } else if (match.matchLevel === "medium") {
+      return "possible_match";
     }
-    return 'probable_match';
+    return "probable_match";
   }
 
   /**
@@ -195,7 +182,7 @@ export class EntityResolver {
       throw new Error(`Link ${linkId} not found`);
     }
 
-    link.status = 'approved';
+    link.status = "approved";
     link.reviewedAt = new Date();
     link.reviewedBy = reviewedBy;
 
@@ -211,7 +198,7 @@ export class EntityResolver {
       throw new Error(`Link ${linkId} not found`);
     }
 
-    link.status = 'rejected';
+    link.status = "rejected";
     link.reviewedAt = new Date();
     link.reviewedBy = reviewedBy;
 
@@ -231,13 +218,13 @@ export class EntityResolver {
       id: uuidv4(),
       entity1Id,
       entity2Id,
-      linkType: 'manual_link',
+      linkType: "manual_link",
       confidence,
-      status: 'approved',
+      status: "approved",
       createdAt: new Date(),
       createdBy,
       reviewedAt: new Date(),
-      reviewedBy: createdBy
+      reviewedBy: createdBy,
     };
 
     this.links.set(link.id, link);
@@ -249,7 +236,7 @@ export class EntityResolver {
    */
   async getEntityLinks(entityId: string): Promise<EntityLink[]> {
     return Array.from(this.links.values()).filter(
-      link => link.entity1Id === entityId || link.entity2Id === entityId
+      (link) => link.entity1Id === entityId || link.entity2Id === entityId
     );
   }
 
@@ -258,7 +245,7 @@ export class EntityResolver {
    */
   async getLinksForReview(): Promise<EntityLink[]> {
     return Array.from(this.links.values()).filter(
-      link => link.status === 'under_review' || link.status === 'proposed'
+      (link) => link.status === "under_review" || link.status === "proposed"
     );
   }
 
@@ -266,9 +253,7 @@ export class EntityResolver {
    * Get approved links
    */
   async getApprovedLinks(): Promise<EntityLink[]> {
-    return Array.from(this.links.values()).filter(
-      link => link.status === 'approved'
-    );
+    return Array.from(this.links.values()).filter((link) => link.status === "approved");
   }
 
   /**
@@ -287,7 +272,7 @@ export class EntityResolver {
 
       const links = await this.getEntityLinks(currentId);
       for (const link of links) {
-        if (link.status !== 'approved') continue;
+        if (link.status !== "approved") continue;
 
         const otherId = link.entity1Id === currentId ? link.entity2Id : link.entity1Id;
         if (!visited.has(otherId)) {

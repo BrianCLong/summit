@@ -1,6 +1,7 @@
 # IntelGraph Query Performance Analysis
 
 ## Overview
+
 This document analyzes the current state of Cypher queries within the IntelGraph layer, focusing on performance, scalability, and complexity. It identifies bottlenecks and proposes optimizations.
 
 ## Key Findings
@@ -8,6 +9,7 @@ This document analyzes the current state of Cypher queries within the IntelGraph
 ### 1. `GraphOpsService.js` (Interactive Hot Paths)
 
 #### `expandNeighbors`
+
 - **Query**:
   ```cypher
   MATCH (n:Entity {id: $entityId})-[r]-(m:Entity)
@@ -24,6 +26,7 @@ This document analyzes the current state of Cypher queries within the IntelGraph
     - Use `LIMIT` earlier if possible, though `WITH DISTINCT` makes it tricky.
 
 #### `expandNeighborhood`
+
 - **Query**:
   ```cypher
   MATCH (n:Entity {id: $entityId, tenantId: $tenantId, ...})
@@ -40,6 +43,7 @@ This document analyzes the current state of Cypher queries within the IntelGraph
 ### 2. `GraphAnalyticsService.js` (Heavy Jobs)
 
 #### `calculateBasicMetrics`
+
 - **Query**:
   ```cypher
   MATCH (n) ... WITH count(n) ...
@@ -56,6 +60,7 @@ This document analyzes the current state of Cypher queries within the IntelGraph
     - Combine aggregations into a single pass where possible.
 
 #### `calculateCentralityMeasures`
+
 - **Query**:
   ```cypher
   MATCH path = allShortestPaths((n)-[*]-(m)) WHERE n <> m ...
@@ -69,19 +74,21 @@ This document analyzes the current state of Cypher queries within the IntelGraph
     - If GDS is not available, implement a localized centrality (e.g. only for top degree nodes).
 
 #### `detectCommunities`
+
 - **Query**:
   ```cypher
   MATCH path = (n)-[*]-(m)
   ```
 - **Analysis**:
-  - **Infinite Expansion**: `[*]` finds *all* paths of *any* length. This will loop indefinitely in cyclic graphs or explode in size.
+  - **Infinite Expansion**: `[*]` finds _all_ paths of _any_ length. This will loop indefinitely in cyclic graphs or explode in size.
   - **Recommendations**:
     - Use Weakly Connected Components (WCC) algorithm (GDS) or a simple neighbor expansion with fixed depth.
     - Rewrite to finding connected components via traversal if GDS is missing.
 
 #### `calculatePageRank`
+
 - **Analysis**:
-  - Fetches the *entire graph* (`MATCH (n)-[r]->(m) RETURN ...`) into Node.js memory and calculates PageRank in JavaScript.
+  - Fetches the _entire graph_ (`MATCH (n)-[r]->(m) RETURN ...`) into Node.js memory and calculates PageRank in JavaScript.
   - **Bottleneck**: Network transfer and Node.js heap limit.
   - **Recommendations**:
     - Use GDS `gds.pageRank` if available.

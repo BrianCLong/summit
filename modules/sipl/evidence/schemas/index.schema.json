@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["evidence_id", "files"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "files": {"type": "array", "items": {"type": "string"}}
+    "evidence_id": { "type": "string" },
+    "files": { "type": "array", "items": { "type": "string" } }
   },
   "additionalProperties": false
 }

@@ -8,57 +8,57 @@
 // ============================================================================
 
 export enum ESGCategory {
-  ENVIRONMENTAL = 'environmental',
-  SOCIAL = 'social',
-  GOVERNANCE = 'governance',
+  ENVIRONMENTAL = "environmental",
+  SOCIAL = "social",
+  GOVERNANCE = "governance",
 }
 
 export enum ReportStatus {
-  DRAFT = 'draft',
-  IN_REVIEW = 'in_review',
-  APPROVED = 'approved',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
+  DRAFT = "draft",
+  IN_REVIEW = "in_review",
+  APPROVED = "approved",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
 }
 
 export enum ReportType {
-  ANNUAL = 'annual',
-  QUARTERLY = 'quarterly',
-  MONTHLY = 'monthly',
-  AD_HOC = 'ad_hoc',
-  REGULATORY = 'regulatory',
+  ANNUAL = "annual",
+  QUARTERLY = "quarterly",
+  MONTHLY = "monthly",
+  AD_HOC = "ad_hoc",
+  REGULATORY = "regulatory",
 }
 
 export enum ExportFormat {
-  JSON = 'json',
-  CSV = 'csv',
-  PDF = 'pdf',
-  EXCEL = 'excel',
+  JSON = "json",
+  CSV = "csv",
+  PDF = "pdf",
+  EXCEL = "excel",
 }
 
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  NON_COMPLIANT = 'non_compliant',
-  NOT_APPLICABLE = 'not_applicable',
-  PENDING_REVIEW = 'pending_review',
+  COMPLIANT = "compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  NON_COMPLIANT = "non_compliant",
+  NOT_APPLICABLE = "not_applicable",
+  PENDING_REVIEW = "pending_review",
 }
 
 export enum MetricUnit {
   // Environmental
-  TONNES_CO2E = 'tonnes_co2e',
-  KWH = 'kwh',
-  MWH = 'mwh',
-  CUBIC_METERS = 'cubic_meters',
-  TONNES = 'tonnes',
-  KILOGRAMS = 'kilograms',
-  PERCENTAGE = 'percentage',
+  TONNES_CO2E = "tonnes_co2e",
+  KWH = "kwh",
+  MWH = "mwh",
+  CUBIC_METERS = "cubic_meters",
+  TONNES = "tonnes",
+  KILOGRAMS = "kilograms",
+  PERCENTAGE = "percentage",
   // Social/Governance
-  COUNT = 'count',
-  RATIO = 'ratio',
-  HOURS = 'hours',
-  CURRENCY = 'currency',
-  SCORE = 'score',
+  COUNT = "count",
+  RATIO = "ratio",
+  HOURS = "hours",
+  CURRENCY = "currency",
+  SCORE = "score",
 }
 
 // ============================================================================
@@ -266,7 +266,7 @@ export interface ESGRating {
   rating: string;
   score?: number;
   ratingDate: Date;
-  outlook?: 'positive' | 'neutral' | 'negative';
+  outlook?: "positive" | "neutral" | "negative";
   controversyScore?: number;
 }
 
@@ -276,10 +276,10 @@ export interface ESGRating {
 
 export interface ESGDataSource {
   name: string;
-  type: 'manual' | 'automated' | 'third_party' | 'calculated';
+  type: "manual" | "automated" | "third_party" | "calculated";
   lastUpdated: Date;
-  reliability: 'high' | 'medium' | 'low';
-  verificationStatus: 'verified' | 'unverified' | 'pending';
+  reliability: "high" | "medium" | "low";
+  verificationStatus: "verified" | "unverified" | "pending";
 }
 
 export interface ESGMetricEntry {
@@ -293,7 +293,7 @@ export interface ESGMetricEntry {
   targetValue?: number;
   benchmarkValue?: number;
   variance?: number;
-  trend?: 'improving' | 'stable' | 'declining';
+  trend?: "improving" | "stable" | "declining";
   dataSource: ESGDataSource;
   notes?: string;
   complianceMapping?: ComplianceMapping[];
@@ -356,7 +356,7 @@ export interface ReportSchedule {
   tenantId: string;
   name: string;
   reportType: ReportType;
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
+  frequency: "daily" | "weekly" | "monthly" | "quarterly" | "annually";
   cronExpression?: string;
   recipients: string[];
   exportFormats: ExportFormat[];
@@ -393,7 +393,7 @@ export interface ReportStyling {
   secondaryColor?: string;
   logoUrl?: string;
   fontFamily?: string;
-  pageSize?: 'A4' | 'Letter';
+  pageSize?: "A4" | "Letter";
 }
 
 // ============================================================================
@@ -437,5 +437,5 @@ export interface MetricInput {
   unit: MetricUnit;
   targetValue?: number;
   notes?: string;
-  dataSourceType?: 'manual' | 'automated' | 'third_party' | 'calculated';
+  dataSourceType?: "manual" | "automated" | "third_party" | "calculated";
 }

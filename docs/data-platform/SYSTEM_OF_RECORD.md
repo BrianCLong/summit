@@ -6,38 +6,38 @@ Data from these systems will be ingested into the canonical data warehouse to cr
 
 ## 1. Billing & Financials
 
--   **System of Record:** [e.g., Stripe, NetSuite, Zuora]
--   **Description:** This system holds all data related to customer subscriptions, invoices, payments, and revenue recognition.
--   **Key Data:** Monthly Recurring Revenue (MRR), customer subscription status, plan details, invoice history.
--   **Data Owner:** Finance Department
+- **System of Record:** [e.g., Stripe, NetSuite, Zuora]
+- **Description:** This system holds all data related to customer subscriptions, invoices, payments, and revenue recognition.
+- **Key Data:** Monthly Recurring Revenue (MRR), customer subscription status, plan details, invoice history.
+- **Data Owner:** Finance Department
 
 ## 2. Product Events & User Behavior
 
--   **System of Record:** [e.g., Segment, Snowplow, in-house event tracking system]
--   **Description:** This system captures all user interactions and events within the product.
--   **Key Data:** User sign-ups, feature usage, clicks, page views, application performance metrics.
--   **Data Owner:** Product Department
+- **System of Record:** [e.g., Segment, Snowplow, in-house event tracking system]
+- **Description:** This system captures all user interactions and events within the product.
+- **Key Data:** User sign-ups, feature usage, clicks, page views, application performance metrics.
+- **Data Owner:** Product Department
 
 ## 3. Customer Support & Success
 
--   **System of Record:** [e.g., Zendesk, Salesforce Service Cloud, Intercom]
--   **Description:** This system is the source of truth for all customer support tickets, interactions, and success metrics.
--   **Key Data:** Support ticket volume, resolution times, customer satisfaction (CSAT) scores, agent performance.
--   **Data Owner:** Customer Support Department
+- **System of Record:** [e.g., Zendesk, Salesforce Service Cloud, Intercom]
+- **Description:** This system is the source of truth for all customer support tickets, interactions, and success metrics.
+- **Key Data:** Support ticket volume, resolution times, customer satisfaction (CSAT) scores, agent performance.
+- **Data Owner:** Customer Support Department
 
 ## 4. Identity & User Management
 
--   **System of Record:** [e.g., Auth0, Okta, internal user service]
--   **Description:** This system manages user identity, authentication, and core account information.
--   **Key Data:** User ID, email addresses, authentication events, account creation date.
--   **Data Owner:** Engineering Department
+- **System of Record:** [e.g., Auth0, Okta, internal user service]
+- **Description:** This system manages user identity, authentication, and core account information.
+- **Key Data:** User ID, email addresses, authentication events, account creation date.
+- **Data Owner:** Engineering Department
 
 ## 5. Sales & CRM
 
--   **System of Record:** [e.g., Salesforce, HubSpot]
--   **Description:** This system contains all information related to sales activities, leads, opportunities, and customer relationships.
--   **Key Data:** Lead status, opportunity pipeline, account ownership, deal size.
--   **Data Owner:** Sales Department
+- **System of Record:** [e.g., Salesforce, HubSpot]
+- **Description:** This system contains all information related to sales activities, leads, opportunities, and customer relationships.
+- **Key Data:** Lead status, opportunity pipeline, account ownership, deal size.
+- **Data Owner:** Sales Department
 
 ## Reconciliation
 

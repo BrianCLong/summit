@@ -1,5 +1,5 @@
-import { createHash, createHmac, randomUUID } from 'node:crypto';
-import type { AuditLogDataSource, AuditLogEvent, AuditSeverity } from 'common-types';
+import { createHash, createHmac, randomUUID } from "node:crypto";
+import type { AuditLogDataSource, AuditLogEvent, AuditSeverity } from "common-types";
 
 export interface ForensicAuditEventInput {
   evidenceId: string;
@@ -29,7 +29,7 @@ export interface ForensicAuditEntry extends AuditLogEvent {
 export interface ForensicChainFailure {
   index: number;
   id: string;
-  reason: 'PREVIOUS_HASH_MISMATCH' | 'HASH_MISMATCH' | 'SIGNATURE_MISMATCH';
+  reason: "PREVIOUS_HASH_MISMATCH" | "HASH_MISMATCH" | "SIGNATURE_MISMATCH";
 }
 
 export interface ForensicChainVerification {
@@ -77,8 +77,8 @@ export class ForensicAuditLedger {
 
   constructor(options: ForensicLedgerOptions) {
     this.signingKey = options.signingKey;
-    this.system = options.system ?? 'digital-forensics';
-    this.integritySalt = options.integritySalt ?? 'forensic-ledger';
+    this.system = options.system ?? "digital-forensics";
+    this.integritySalt = options.integritySalt ?? "forensic-ledger";
   }
 
   append(input: ForensicAuditEventInput): ForensicAuditEntry {
@@ -147,10 +147,7 @@ export class ForensicAuditLedger {
    * production code paths; this exists so tests can simulate tampering without
    * exposing the internal state to callers.
    */
-  unsafeMutateEntry(
-    index: number,
-    mutator: (entry: ForensicAuditEntry) => void,
-  ): void {
+  unsafeMutateEntry(index: number, mutator: (entry: ForensicAuditEntry) => void): void {
     const target = this.entries[index];
     if (!target) {
       throw new Error(`No entry found at index ${index}`);
@@ -167,7 +164,7 @@ export class ForensicAuditLedger {
         failures.push({
           index,
           id: entry.id,
-          reason: 'PREVIOUS_HASH_MISMATCH',
+          reason: "PREVIOUS_HASH_MISMATCH",
         });
       }
 
@@ -191,20 +188,16 @@ export class ForensicAuditLedger {
         failures.push({
           index,
           id: entry.id,
-          reason: 'HASH_MISMATCH',
+          reason: "HASH_MISMATCH",
         });
       }
 
-      const expectedSignature = signHash(
-        recalculated,
-        signingKey,
-        this.integritySalt,
-      );
+      const expectedSignature = signHash(recalculated, signingKey, this.integritySalt);
       if (expectedSignature !== entry.signature) {
         failures.push({
           index,
           id: entry.id,
-          reason: 'SIGNATURE_MISMATCH',
+          reason: "SIGNATURE_MISMATCH",
         });
       }
 
@@ -226,7 +219,7 @@ export class ForensicAuditLedger {
     events.forEach((event) => {
       if (event.previousHash && event.previousHash !== expectedPrevious) {
         breaks.push(
-          `Unexpected previous hash for ${event.id}: ${event.previousHash} !== ${expectedPrevious}`,
+          `Unexpected previous hash for ${event.id}: ${event.previousHash} !== ${expectedPrevious}`
         );
       }
       expectedPrevious = event.hash;
@@ -239,22 +232,20 @@ export class ForensicAuditLedger {
     const verification = this.verifyChain();
     const actors = new Set(this.entries.map((entry) => entry.actor));
     const locations = new Set(
-      this.entries.map((entry) => entry.location).filter(Boolean) as string[],
+      this.entries.map((entry) => entry.location).filter(Boolean) as string[]
     );
     const custodyTransfers = this.entries.filter((entry) =>
-      entry.action.toLowerCase().includes('transfer'),
+      entry.action.toLowerCase().includes("transfer")
     ).length;
-    const accessEvents = this.entries.filter((entry) =>
-      entry.action.toLowerCase().includes('access') ||
-      entry.action.toLowerCase().includes('view'),
+    const accessEvents = this.entries.filter(
+      (entry) =>
+        entry.action.toLowerCase().includes("access") || entry.action.toLowerCase().includes("view")
     ).length;
-    const highSeverityFindings = this.entries.filter(
-      (entry) => entry.severity === 'high',
-    ).length;
+    const highSeverityFindings = this.entries.filter((entry) => entry.severity === "high").length;
     const evidenceItems = new Set(this.entries.map((entry) => entry.evidenceId));
 
-    const custody: ChainOfCustodyTrail[] = Array.from(evidenceItems).map(
-      (evidenceId) => this.buildCustodyTrail(evidenceId),
+    const custody: ChainOfCustodyTrail[] = Array.from(evidenceItems).map((evidenceId) =>
+      this.buildCustodyTrail(evidenceId)
     );
 
     const summary = {
@@ -275,22 +266,24 @@ export class ForensicAuditLedger {
       tamperReasons: verification.failures.map((failure) => failure.reason),
       summary,
       custody,
-      digest: '',
+      digest: "",
     };
 
-    report.digest = createHash('sha256')
-      .update(JSON.stringify({
-        caseId: report.caseId,
-        headHash: report.headHash,
-        tamperDetected: report.tamperDetected,
-        summary: report.summary,
-        custody: report.custody.map((trail) => ({
-          evidenceId: trail.evidenceId,
-          events: trail.events.map((event) => event.hash),
-          breaks: trail.breaks,
-        })),
-      }))
-      .digest('hex');
+    report.digest = createHash("sha256")
+      .update(
+        JSON.stringify({
+          caseId: report.caseId,
+          headHash: report.headHash,
+          tamperDetected: report.tamperDetected,
+          summary: report.summary,
+          custody: report.custody.map((trail) => ({
+            evidenceId: trail.evidenceId,
+            events: trail.events.map((event) => event.hash),
+            breaks: trail.breaks,
+          })),
+        })
+      )
+      .digest("hex");
 
     return report;
   }
@@ -298,7 +291,7 @@ export class ForensicAuditLedger {
 
 export function forensicLedgerDataSource(
   system: string,
-  ledger: ForensicAuditLedger,
+  ledger: ForensicAuditLedger
 ): AuditLogDataSource {
   return {
     system,
@@ -306,10 +299,7 @@ export function forensicLedgerDataSource(
   };
 }
 
-function convertForensicEntry(
-  entry: ForensicAuditEntry,
-  system: string,
-): AuditLogEvent {
+function convertForensicEntry(entry: ForensicAuditEntry, system: string): AuditLogEvent {
   return {
     id: entry.id,
     timestamp: entry.timestamp,
@@ -317,7 +307,7 @@ function convertForensicEntry(
     action: entry.action,
     resource: entry.resource,
     system: entry.system ?? system,
-    category: entry.category ?? 'forensics',
+    category: entry.category ?? "forensics",
     severity: entry.severity,
     metadata: {
       ...entry.metadata,
@@ -354,7 +344,7 @@ function computeEntryHash(entry: {
   previousHash?: string;
   system: string;
 }): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(entry.id);
   hash.update(entry.timestamp);
   hash.update(entry.actor);
@@ -375,16 +365,18 @@ function computeEntryHash(entry: {
     hash.update(JSON.stringify(entry.metadata));
   }
   if (entry.correlationIds && entry.correlationIds.length > 0) {
-    hash.update(entry.correlationIds.join('|'));
+    hash.update(entry.correlationIds.join("|"));
   }
   if (entry.previousHash) {
     hash.update(entry.previousHash);
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function signHash(hash: string, signingKey: string, salt: string): string {
-  return createHmac('sha256', signingKey).update(hash + salt).digest('hex');
+  return createHmac("sha256", signingKey)
+    .update(hash + salt)
+    .digest("hex");
 }
 
 function normaliseTimestamp(value?: string): string {

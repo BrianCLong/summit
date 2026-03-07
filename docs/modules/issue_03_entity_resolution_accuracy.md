@@ -1,9 +1,9 @@
 ---
-name: 'Issue #3: Entity Resolution Accuracy Drop on Noisy Input'
+name: "Issue #3: Entity Resolution Accuracy Drop on Noisy Input"
 about: Improve AI-based entity resolution for noisy data
-title: 'Issue #3: Entity Resolution Accuracy Drop on Noisy Input'
-labels: 'bug, ai, ml, data-quality'
-assignees: ''
+title: "Issue #3: Entity Resolution Accuracy Drop on Noisy Input"
+labels: "bug, ai, ml, data-quality"
+assignees: ""
 ---
 
 **Branch**: `feature/er-noise-robustness`

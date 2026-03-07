@@ -217,8 +217,7 @@ type InvoiceItem {
 type Mutation {
   signupTenant(name: String!, region: String!, planId: ID!): ID!
   setPlan(tenantId: ID!, planId: ID!): Boolean @auth(abac: "admin.write")
-  generateInvoice(tenantId: ID!, month: String!): Invoice
-    @auth(abac: "admin.write")
+  generateInvoice(tenantId: ID!, month: String!): Invoice @auth(abac: "admin.write")
 }
 ```
 
@@ -325,10 +324,10 @@ repo/
 **Export signer (TS)**
 
 ```ts
-import { createSign } from 'crypto';
+import { createSign } from "crypto";
 export function signBundle(path: string, keyPem: string) {
   const buf = fs.readFileSync(path);
-  const sig = createSign('sha256').update(buf).sign(keyPem, 'base64');
+  const sig = createSign("sha256").update(buf).sign(keyPem, "base64");
   return { sha256: sha256(buf), sig };
 }
 ```
@@ -350,8 +349,8 @@ export async function resync(manifest: any) {
 ```ts
 export function addEvent(
   tenant: string,
-  kind: 'graphql_call' | 'ingest_event' | 'storage_gb_hour',
-  qty: number,
+  kind: "graphql_call" | "ingest_event" | "storage_gb_hour",
+  qty: number
 ) {
   // write immutable row; aggregate later
 }

@@ -21,6 +21,7 @@ We deploy using **Kubernetes** (K8s) and **Helm**.
 ## Build Process
 
 1.  **Build Docker Images**
+
     ```bash
     docker build -t registry.example.com/summit-server:latest -f server/Dockerfile .
     docker build -t registry.example.com/summit-web:latest -f client/Dockerfile .
@@ -65,6 +66,7 @@ docker compose -f docker-compose.prod.yaml up -d
 Configuration is managed via Environment Variables. See `ENV_VARS.md` for a complete list.
 
 **Critical Production Variables:**
+
 - `NODE_ENV=production`
 - `JWT_SECRET`: High entropy secret.
 - `DB_PASSWORD`: Strong passwords.

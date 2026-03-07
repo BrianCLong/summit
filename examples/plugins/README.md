@@ -9,6 +9,7 @@ This directory contains example plugins demonstrating various plugin types and c
 Demonstrates how to create a data source connector for REST APIs.
 
 **Key Features:**
+
 - API authentication
 - Pagination support
 - Error handling
@@ -19,6 +20,7 @@ Demonstrates how to create a data source connector for REST APIs.
 Shows how to build a custom analyzer plugin.
 
 **Key Features:**
+
 - Text analysis
 - Confidence scoring
 - Entity extraction
@@ -29,6 +31,7 @@ Shows how to build a custom analyzer plugin.
 Example of a custom visualization widget.
 
 **Key Features:**
+
 - Custom React component
 - Data transformation
 - Interactive controls
@@ -39,6 +42,7 @@ Example of a custom visualization widget.
 Workflow action plugin that integrates with Slack.
 
 **Key Features:**
+
 - Webhook handling
 - API endpoints
 - Event subscriptions

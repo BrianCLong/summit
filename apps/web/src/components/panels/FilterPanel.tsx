@@ -1,12 +1,5 @@
 import * as React from 'react'
-import {
-  Filter,
-  X,
-  Calendar,
-  Tag,
-  Database,
-  RefreshCw,
-} from 'lucide-react'
+import { Filter, X, Calendar, Tag, Database, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -95,16 +88,27 @@ export function FilterPanel({
 
   const getActiveFilterCount = () => {
     let count = 0
-    if (localFilters.entityTypes.length > 0) {count++}
-    if (localFilters.relationshipTypes.length > 0) {count++}
-    if (localFilters.dateRange.start || localFilters.dateRange.end) {count++}
+    if (localFilters.entityTypes.length > 0) {
+      count++
+    }
+    if (localFilters.relationshipTypes.length > 0) {
+      count++
+    }
+    if (localFilters.dateRange.start || localFilters.dateRange.end) {
+      count++
+    }
     if (
       localFilters.confidenceRange.min > 0 ||
       localFilters.confidenceRange.max < 1
-    )
-      {count++}
-    if (localFilters.tags.length > 0) {count++}
-    if (localFilters.sources.length > 0) {count++}
+    ) {
+      count++
+    }
+    if (localFilters.tags.length > 0) {
+      count++
+    }
+    if (localFilters.sources.length > 0) {
+      count++
+    }
     return count
   }
 

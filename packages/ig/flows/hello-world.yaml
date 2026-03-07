@@ -129,7 +129,7 @@ metadata:
     app.kubernetes.io/component: scheduler
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: '*/15 * * * *' # Every 15 minutes
+  schedule: "*/15 * * * *" # Every 15 minutes
   jobTemplate:
     spec:
       template:

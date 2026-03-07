@@ -2,7 +2,11 @@
  * GeoJSON parser for geospatial data ingestion
  */
 
-import type { FeatureCollection, IntelFeatureCollection, IntelFeature } from '../types/geospatial.js';
+import type {
+  FeatureCollection,
+  IntelFeatureCollection,
+  IntelFeature,
+} from "../types/geospatial.js";
 
 export class GeoJSONParser {
   /**
@@ -11,25 +15,27 @@ export class GeoJSONParser {
   static parse(data: string | object): IntelFeatureCollection {
     let geojson: FeatureCollection;
 
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       try {
         geojson = JSON.parse(data);
       } catch (error) {
-        throw new Error(`Invalid GeoJSON string: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `Invalid GeoJSON string: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
       }
     } else {
       geojson = data as FeatureCollection;
     }
 
-    if (geojson.type !== 'FeatureCollection') {
-      throw new Error('GeoJSON must be a FeatureCollection');
+    if (geojson.type !== "FeatureCollection") {
+      throw new Error("GeoJSON must be a FeatureCollection");
     }
 
     return {
-      type: 'FeatureCollection',
+      type: "FeatureCollection",
       features: geojson.features.map((feature) => this.enrichFeature(feature)),
       metadata: {
-        source: 'geojson',
+        source: "geojson",
         collectionDate: new Date().toISOString(),
       },
     };
@@ -53,13 +59,13 @@ export class GeoJSONParser {
    * Validate GeoJSON structure
    */
   static validate(data: unknown): boolean {
-    if (typeof data !== 'object' || data === null) {
+    if (typeof data !== "object" || data === null) {
       return false;
     }
 
     const obj = data as Record<string, unknown>;
 
-    if (obj.type !== 'FeatureCollection') {
+    if (obj.type !== "FeatureCollection") {
       return false;
     }
 
@@ -69,10 +75,10 @@ export class GeoJSONParser {
 
     return obj.features.every((feature) => {
       return (
-        typeof feature === 'object' &&
+        typeof feature === "object" &&
         feature !== null &&
-        (feature as Record<string, unknown>).type === 'Feature' &&
-        typeof (feature as Record<string, unknown>).geometry === 'object'
+        (feature as Record<string, unknown>).type === "Feature" &&
+        typeof (feature as Record<string, unknown>).geometry === "object"
       );
     });
   }
@@ -89,10 +95,10 @@ export class GeoJSONParser {
    */
   static merge(collections: IntelFeatureCollection[]): IntelFeatureCollection {
     return {
-      type: 'FeatureCollection',
+      type: "FeatureCollection",
       features: collections.flatMap((c) => c.features),
       metadata: {
-        source: 'merged',
+        source: "merged",
         collectionDate: new Date().toISOString(),
       },
     };

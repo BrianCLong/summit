@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from "fs";
 
-const filePath = 'server/src/maestro/__tests__/integration.test.ts';
-let content = fs.readFileSync(filePath, 'utf8');
+const filePath = "server/src/maestro/__tests__/integration.test.ts";
+let content = fs.readFileSync(filePath, "utf8");
 
 content = content.replace(
   `    const result = await pool.query(
@@ -50,4 +50,4 @@ content = content.replace(
 );
 
 fs.writeFileSync(filePath, content);
-console.log('Done!');
+console.log("Done!");

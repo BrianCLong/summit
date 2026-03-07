@@ -79,7 +79,13 @@
     "metadata": {
       "target_environment": "2026 Winter Olympics",
       "target_audience": ["Ukrainian athletes", "IOC", "European publics"],
-      "ttps": ["Fake Reuters-style news packages", "Altered narration (cheapfakes)", "Reputation attack narratives", "Fabricated scandal framing", "AI-assisted content scaling"],
+      "ttps": [
+        "Fake Reuters-style news packages",
+        "Altered narration (cheapfakes)",
+        "Reputation attack narratives",
+        "Fabricated scandal framing",
+        "AI-assisted content scaling"
+      ],
       "tags": ["TARGET.SPORT_EVENT", "VECTOR.FAKE_NEWS_BRAND", "TTP.CHEAPFAKE_EDIT"]
     },
     "relationships": [
@@ -121,7 +127,12 @@
       "actor_type": "State-linked contractor / hybrid IO entity",
       "regions": ["Africa", "Latin America"],
       "model": ["Paid journalists", "Narrative placement", "Expert persona laundering"],
-      "tags": ["IO.STATE_PROXY", "TTP.PAID_MEDIA_PLACEMENT", "TTP.EXPERT_PERSONA", "GEO.AFRICA_LATAM"]
+      "tags": [
+        "IO.STATE_PROXY",
+        "TTP.PAID_MEDIA_PLACEMENT",
+        "TTP.EXPERT_PERSONA",
+        "GEO.AFRICA_LATAM"
+      ]
     }
   },
   {
@@ -201,7 +212,12 @@
     "confidence": 1.0,
     "metadata": {
       "pattern": ["Internal doc exfiltration", "Cloud staging", "Insider vector"],
-      "tags": ["ESPIONAGE.ECONOMIC", "TARGET.AI_TRADE_SECRET", "TTP.CLOUD_STAGING", "VECTOR.INSIDER"]
+      "tags": [
+        "ESPIONAGE.ECONOMIC",
+        "TARGET.AI_TRADE_SECRET",
+        "TTP.CLOUD_STAGING",
+        "VECTOR.INSIDER"
+      ]
     }
   },
   {

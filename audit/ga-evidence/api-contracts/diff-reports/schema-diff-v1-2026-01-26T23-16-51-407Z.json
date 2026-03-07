@@ -10,9 +10,7 @@
   "breakingChanges": [],
   "nonBreakingChanges": [],
   "deprecatedChanges": [],
-  "recommendations": [
-    "✅ No API changes detected - schemas are identical"
-  ],
+  "recommendations": ["✅ No API changes detected - schemas are identical"],
   "schemaHashes": {
     "current": {
       "graphql": "sha256:d917320558d8df5aa3b2d0d4f091bff582261bd8ed98250ca78980a75fd78c42",

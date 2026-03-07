@@ -41,10 +41,7 @@
       "signingKeyId": "ledger-signer",
       "artifactUri": "s3://black-cell/stage/entity-123/graph.json",
       "metadata": {
-        "transforms": [
-          "dedupe@1.4.2",
-          "graph-augment@2.0.0"
-        ],
+        "transforms": ["dedupe@1.4.2", "graph-augment@2.0.0"],
         "modelVersion": "sigint-linker:2026.02"
       },
       "hash": "8c4f59c52ddf611934f08ff7b6bc983681af7babe39cce41dafff449d9cbf607",

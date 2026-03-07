@@ -1,11 +1,6 @@
-import type {
-  EvidenceBundle,
-  EvidenceEvent,
-  PolicyDecision,
-  ToolIndexEntry,
-} from '../types.js';
-import { hashJson } from '../utils/hash.js';
-import { stableSortValue } from '../utils/stable-json.js';
+import type { EvidenceBundle, EvidenceEvent, PolicyDecision, ToolIndexEntry } from "../types.js";
+import { hashJson } from "../utils/hash.js";
+import { stableSortValue } from "../utils/stable-json.js";
 
 export class EvidenceStore {
   private events: EvidenceEvent[] = [];
@@ -13,9 +8,7 @@ export class EvidenceStore {
   private toolSchemas: ToolIndexEntry[] = [];
 
   recordEvent(event: EvidenceEvent): void {
-    this.events = [...this.events, event].sort((a, b) =>
-      a.timestamp.localeCompare(b.timestamp),
-    );
+    this.events = [...this.events, event].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   }
 
   recordPolicy(decision: PolicyDecision): void {
@@ -25,9 +18,7 @@ export class EvidenceStore {
   recordToolSchema(entry: ToolIndexEntry): void {
     const exists = this.toolSchemas.some((schema) => schema.id === entry.id);
     if (!exists) {
-      this.toolSchemas = [...this.toolSchemas, entry].sort((a, b) =>
-        a.id.localeCompare(b.id),
-      );
+      this.toolSchemas = [...this.toolSchemas, entry].sort((a, b) => a.id.localeCompare(b.id));
     }
   }
 

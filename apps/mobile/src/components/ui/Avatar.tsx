@@ -63,15 +63,9 @@ export const Avatar = React.forwardRef<View, AvatarProps>(
 
     return (
       <View className="relative">
-        <View
-          ref={ref}
-          className={cn(avatarVariants({ size }), className)}
-          {...props}
-        >
+        <View ref={ref} className={cn(avatarVariants({ size }), className)} {...props}>
           {showFallback ? (
-            <Text className={avatarTextVariants({ size })}>
-              {getInitials(fallback || alt)}
-            </Text>
+            <Text className={avatarTextVariants({ size })}>{getInitials(fallback || alt)}</Text>
           ) : (
             <Image
               source={{ uri: src }}
@@ -127,10 +121,7 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
       ))}
       {remainingCount > 0 && (
         <View
-          className={cn(
-            avatarVariants({ size }),
-            'bg-dark-elevated border-2 border-dark-bg -ml-2',
-          )}
+          className={cn(avatarVariants({ size }), 'bg-dark-elevated border-2 border-dark-bg -ml-2')}
           style={{ zIndex: 0 }}
         >
           <Text className={avatarTextVariants({ size })}>+{remainingCount}</Text>

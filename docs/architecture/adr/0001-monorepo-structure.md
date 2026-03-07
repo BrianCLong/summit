@@ -51,14 +51,14 @@ We use **pnpm workspaces** for package management and **Turborepo** for build or
 
 ```yaml
 packages:
-  - 'apps/*' # Application entrypoints
-  - 'packages/*' # Shared libraries
-  - 'services/*' # Microservices
-  - 'agents/*' # AI/orchestration agents
-  - 'contracts/*' # API contracts
-  - 'tools/*' # Development utilities
-  - 'server' # Legacy API server
-  - 'client' # Legacy web client
+  - "apps/*" # Application entrypoints
+  - "packages/*" # Shared libraries
+  - "services/*" # Microservices
+  - "agents/*" # AI/orchestration agents
+  - "contracts/*" # API contracts
+  - "tools/*" # Development utilities
+  - "server" # Legacy API server
+  - "client" # Legacy web client
 ```
 
 **Build Pipeline** (defined in `turbo.json`):
@@ -243,8 +243,8 @@ pnpm test       # Test all (with caching)
 
 ## Revision History
 
-| Date       | Author              | Change                                      |
-| ---------- | ------------------- | ------------------------------------------- |
-| 2024-01-10 | Platform Engineering | Initial version                             |
-| 2024-06-15 | Platform Engineering | Updated with Turbo 2.x migration results    |
-| 2025-12-06 | Architecture Team   | Migrated to /docs/architecture/adr/ framework |
+| Date       | Author               | Change                                        |
+| ---------- | -------------------- | --------------------------------------------- |
+| 2024-01-10 | Platform Engineering | Initial version                               |
+| 2024-06-15 | Platform Engineering | Updated with Turbo 2.x migration results      |
+| 2025-12-06 | Architecture Team    | Migrated to /docs/architecture/adr/ framework |

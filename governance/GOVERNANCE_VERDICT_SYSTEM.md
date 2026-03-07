@@ -12,12 +12,14 @@ The Governance Verdict System ensures that **every** AI/agent output includes a 
 ## Purpose
 
 ### Business Objectives
+
 - Ensure all autonomous AI/agent actions comply with organizational policies
 - Provide audit trail for compliance and security reviews
 - Enable real-time governance decision-making
 - Support SOC 2 Type 2 compliance requirements
 
 ### Technical Objectives
+
 - Make governance evaluation mandatory at the type system level
 - Prevent bypass through structural enforcement
 - Provide detailed audit evidence for all AI/agent outputs
@@ -30,21 +32,22 @@ The Governance Verdict System ensures that **every** AI/agent output includes a 
 #### 1. GovernanceVerdict Type
 
 Located in:
+
 - `/home/user/summit/services/agent-execution-platform/src/types/index.ts`
 - `/home/user/summit/server/src/ai/copilot/types.ts`
 
 ```typescript
 export interface GovernanceVerdict {
-  verdict: 'APPROVED' | 'REJECTED' | 'REQUIRES_REVIEW';
+  verdict: "APPROVED" | "REJECTED" | "REQUIRES_REVIEW";
   policy: string;
   rationale: string;
-  timestamp: string;  // ISO 8601
+  timestamp: string; // ISO 8601
   evaluatedBy: string;
-  confidence: number;  // 0.0 to 1.0
+  confidence: number; // 0.0 to 1.0
   metadata?: {
     policyVersion?: string;
     evidence?: string[];
-    riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+    riskLevel?: "low" | "medium" | "high" | "critical";
     soc2Controls?: string[];
     remediationSuggestions?: string[];
     [key: string]: any;
@@ -55,11 +58,13 @@ export interface GovernanceVerdict {
 #### 2. Governance Services
 
 **Agent Execution Platform:**
+
 - Location: `/home/user/summit/services/agent-execution-platform/src/governance/index.ts`
 - Responsibility: Generate verdicts for agent executions
 - Default Policy: `agent-execution-policy`
 
 **AI Copilot:**
+
 - Location: `/home/user/summit/server/src/ai/copilot/governance.service.ts`
 - Responsibility: Generate verdicts for copilot responses
 - Default Policy: `copilot-answer-policy`
@@ -81,18 +86,21 @@ All AI/agent execution paths are wired to emit verdicts:
 ## Verdict Types
 
 ### APPROVED
+
 - **Meaning:** The AI/agent output passed all governance policies
 - **Action:** Output may proceed to user/system
 - **Confidence:** Typically 0.8-1.0
 - **Risk Level:** Typically low or medium
 
 ### REJECTED
+
 - **Meaning:** The AI/agent output violated critical policies
 - **Action:** Output MUST be blocked
 - **Confidence:** Typically 1.0 (high certainty in rejection)
 - **Risk Level:** Typically high or critical
 
 ### REQUIRES_REVIEW
+
 - **Meaning:** The output requires manual review before proceeding
 - **Action:** Queue for human review
 - **Confidence:** Typically 0.6-0.9 (some uncertainty)
@@ -132,19 +140,19 @@ All AI/agent execution paths are wired to emit verdicts:
 Services can register custom policy evaluators:
 
 ```typescript
-import { getGovernanceService } from './governance';
+import { getGovernanceService } from "./governance";
 
 const governanceService = getGovernanceService();
 
-governanceService.registerPolicy('custom-policy', async (input, context) => {
+governanceService.registerPolicy("custom-policy", async (input, context) => {
   // Evaluate policy
   const violations = [];
 
   if (input.containsSensitiveData) {
     violations.push({
-      rule: 'no-sensitive-data',
-      severity: 'critical',
-      message: 'Sensitive data detected',
+      rule: "no-sensitive-data",
+      severity: "critical",
+      message: "Sensitive data detected",
     });
   }
 
@@ -178,7 +186,7 @@ Zod schemas enforce verdict presence at runtime:
 ```typescript
 export const CopilotAnswerSchema = z.object({
   // ... other fields
-  governanceVerdict: GovernanceVerdictSchema,  // REQUIRED
+  governanceVerdict: GovernanceVerdictSchema, // REQUIRED
 });
 ```
 
@@ -204,9 +212,7 @@ try {
 If verdict generation fails, an emergency rejection is returned:
 
 ```typescript
-const emergencyVerdict = governanceService.generateEmergencyRejection(
-  'Verdict generation failed'
-);
+const emergencyVerdict = governanceService.generateEmergencyRejection("Verdict generation failed");
 // Always returns REJECTED verdict with critical risk level
 ```
 
@@ -269,6 +275,7 @@ Every verdict includes SOC 2 control mappings:
 ### Audit Trail
 
 Every verdict includes:
+
 - Unique execution/answer ID
 - Timestamp (ISO 8601)
 - Evaluated by (system identifier)
@@ -364,11 +371,13 @@ ORDER BY timestamp DESC;
 **Symptom:** Response does not include governanceVerdict field
 
 **Diagnosis:**
+
 1. Check TypeScript compilation errors
 2. Verify Zod schema validation
 3. Review service initialization logs
 
 **Resolution:**
+
 1. Ensure governance service is initialized
 2. Verify all response builders include verdict generation
 3. Check for catch blocks that bypass verdict
@@ -378,11 +387,13 @@ ORDER BY timestamp DESC;
 **Symptom:** No rejections despite policy violations
 
 **Diagnosis:**
+
 1. Check if policy evaluators are registered
 2. Verify policy evaluation logic
 3. Review test coverage
 
 **Resolution:**
+
 1. Register policies with governance service
 2. Add logging to policy evaluation
 3. Write tests for rejection scenarios
@@ -392,11 +403,13 @@ ORDER BY timestamp DESC;
 **Symptom:** Seeing emergency-failsafe verdicts
 
 **Diagnosis:**
+
 1. Review error logs for verdict generation failures
 2. Check policy evaluator exceptions
 3. Verify service health
 
 **Resolution:**
+
 1. Fix underlying errors in policy evaluation
 2. Add error handling in policy evaluators
 3. Monitor service dependencies (DB, APIs)
@@ -406,29 +419,28 @@ ORDER BY timestamp DESC;
 ### Adding Verdicts to Existing Code
 
 1. **Update Types**
+
    ```typescript
-   import { GovernanceVerdict } from './types';
+   import { GovernanceVerdict } from "./types";
 
    interface MyResponse {
      // existing fields...
-     governanceVerdict: GovernanceVerdict;  // ADD THIS
+     governanceVerdict: GovernanceVerdict; // ADD THIS
    }
    ```
 
 2. **Initialize Governance Service**
+
    ```typescript
-   import { getGovernanceService } from './governance';
+   import { getGovernanceService } from "./governance";
 
    const governanceService = getGovernanceService();
    ```
 
 3. **Generate Verdicts**
+
    ```typescript
-   const verdict = await governanceService.generateVerdict(
-     input,
-     context,
-     'my-policy'
-   );
+   const verdict = await governanceService.generateVerdict(input, context, "my-policy");
 
    return {
      // existing fields...
@@ -438,7 +450,7 @@ ORDER BY timestamp DESC;
 
 4. **Add Tests**
    ```typescript
-   it('should include governance verdict', async () => {
+   it("should include governance verdict", async () => {
      const result = await myFunction();
      expect(result.governanceVerdict).toBeDefined();
      expect(result.governanceVerdict.verdict).toMatch(/^(APPROVED|REJECTED|REQUIRES_REVIEW)$/);
@@ -454,9 +466,9 @@ ORDER BY timestamp DESC;
 
 ## Version History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-12-27 | GA Hardening Initiative | Initial documentation |
+| Version | Date       | Author                  | Changes               |
+| ------- | ---------- | ----------------------- | --------------------- |
+| 1.0.0   | 2025-12-27 | GA Hardening Initiative | Initial documentation |
 
 ## Approval
 

@@ -38,9 +38,9 @@
 
 ### E1 — Write‑Quorum Limited Prod Pilot (Must) — 18 pts
 
-* **S1. Tenant allowlist + flag controls** (6 pts, *Alice*)
-* **S2. Latency guards/HPA + dashboards** (6 pts, *Grace*)
-* **S3. Backout drill & docs** (6 pts, *Kay*)
+- **S1. Tenant allowlist + flag controls** (6 pts, _Alice_)
+- **S2. Latency guards/HPA + dashboards** (6 pts, _Grace_)
+- **S3. Backout drill & docs** (6 pts, _Kay_)
 
 **AC**: For pilot tenants, write p95 ≤ 700 ms / p99 ≤ 1.5 s; read p95 within +15% baseline; conflict rate < 0.5% with resolver; backout < 10 min; no cross‑tenant mix.
 
@@ -48,9 +48,9 @@
 
 ### E2 — Residency Migrator GA (Must) — 12 pts
 
-* **S1. GA checklist & preflight** (5 pts, *Ivy*)
-* **S2. Guided cutover + rollback** (5 pts, *Ivy*)
-* **S3. Privacy sign‑off & docs** (2 pts, *Kay*)
+- **S1. GA checklist & preflight** (5 pts, _Ivy_)
+- **S2. Guided cutover + rollback** (5 pts, _Ivy_)
+- **S3. Privacy sign‑off & docs** (2 pts, _Kay_)
 
 **AC**: Dry‑run finds zero PII/tag violations; cutover ≤ 30 min downtime; rollback restores service in ≤ 10 min; Privacy sign‑off recorded.
 
@@ -58,9 +58,9 @@
 
 ### E3 — ER v1.5 (Recall Lift + Conflict Review) (Must) — 14 pts
 
-* **S1. Expanded blocking & thresholds** (6 pts, *Elena*)
-* **S2. Conflict review queue + audit** (5 pts, *Jay*)
-* **S3. Safe unmerge/merge rollback** (3 pts, *Elena*)
+- **S1. Expanded blocking & thresholds** (6 pts, _Elena_)
+- **S2. Conflict review queue + audit** (5 pts, _Jay_)
+- **S3. Safe unmerge/merge rollback** (3 pts, _Elena_)
 
 **AC**: Golden set **recall ≥ 0.935** while **precision ≥ 0.982**; reviewer actions audited; unmerge restores prior graph in < 5 min.
 
@@ -68,9 +68,9 @@
 
 ### E4 — Explorer 2.2 (Share Controls + Export) (Should) — 10 pts
 
-* **S1. Share scopes/expiry + RBAC** (5 pts, *Jay*)
-* **S2. CSV/PNG export + signatures** (3 pts, *Jay*)
-* **S3. Annotation diff view** (2 pts, *Jay*)
+- **S1. Share scopes/expiry + RBAC** (5 pts, _Jay_)
+- **S2. CSV/PNG export + signatures** (3 pts, _Jay_)
+- **S3. Annotation diff view** (2 pts, _Jay_)
 
 **AC**: Share links expire/are revocable; exports verified by signature; a11y pass; Playwright smoke green.
 
@@ -78,8 +78,8 @@
 
 ### E5 — Chaos & DR (Should) — 8 pts
 
-* **S1. Network partition chaos suite** (5 pts, *Grace*)
-* **S2. Multi‑region drill + postmortem** (3 pts, *Kay*)
+- **S1. Network partition chaos suite** (5 pts, _Grace_)
+- **S2. Multi‑region drill + postmortem** (3 pts, _Kay_)
 
 **AC**: Quorum holds under partition scenarios or cleanly fails over; alerts noise ≤ 1 page/24h; postmortem with tickets.
 
@@ -87,8 +87,8 @@
 
 ### E6 — SOC2 Evidence Pack v2 (Must) — 6 pts
 
-* **S1. Evidence builder extensions** (4 pts, *Kay*)
-* **S2. Access review snapshot + key‑rotation proof** (2 pts, *Ivy*)
+- **S1. Evidence builder extensions** (4 pts, _Kay_)
+- **S2. Access review snapshot + key‑rotation proof** (2 pts, _Ivy_)
 
 **AC**: Bundle includes SLO reports, SBOM attestation, access reviews, key‑rotation proof, DR records; hashes recorded.
 
@@ -96,8 +96,8 @@
 
 ### E7 — Cost & SLO Optimizations (Should) — 6 pts
 
-* **S1. Cache/LFUDA tuning** (3 pts, *Grace*)
-* **S2. Egress compression defaults + docs** (3 pts, *Grace*)
+- **S1. Cache/LFUDA tuning** (3 pts, _Grace_)
+- **S2. Egress compression defaults + docs** (3 pts, _Grace_)
 
 **AC**: Cache hit‑rate ≥ 90% hot set; egress reduced ≥ 10% vs. baseline; SLOs maintained.
 
@@ -105,7 +105,7 @@
 
 ## Capacity & Forecast
 
-* Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4/E7 may slip).
+- Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4/E7 may slip).
 
 ---
 
@@ -156,28 +156,28 @@ write_quorum:
 
 ## Security, Privacy & Policy
 
-* ABAC/OPA; mTLS; field‑level encryption; signed exports; reviewer actions audited; Privacy sign‑off for migrations.
+- ABAC/OPA; mTLS; field‑level encryption; signed exports; reviewer actions audited; Privacy sign‑off for migrations.
 
 ---
 
 ## Observability & SLOs
 
-* Metrics: write p50/95/99, quorum RTT/conflicts, cache hit‑rate, ER precision/recall, migration duration, error‑budget.
-* Alerts: quorum RTT > target, conflict spike, cache miss, migration overrun, budget @80%.
+- Metrics: write p50/95/99, quorum RTT/conflicts, cache hit‑rate, ER precision/recall, migration duration, error‑budget.
+- Alerts: quorum RTT > target, conflict spike, cache miss, migration overrun, budget @80%.
 
 ---
 
 ## CI/CD & Release
 
-* Gates: lint/type/tests, e2e, perf (quorum), SBOM/CVE, policy sim.
-* Canary: per‑tenant flag; backout disables quorum + routes writes to Region A; migrations paused.
-* Evidence bundle: SLO report, k6 artifacts, SBOM, policy logs, signed exports, migration evidence.
+- Gates: lint/type/tests, e2e, perf (quorum), SBOM/CVE, policy sim.
+- Canary: per‑tenant flag; backout disables quorum + routes writes to Region A; migrations paused.
+- Evidence bundle: SLO report, k6 artifacts, SBOM, policy logs, signed exports, migration evidence.
 
 ---
 
 ## RACI
 
-* **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy • **I**: PM, Finance.
+- **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy • **I**: PM, Finance.
 
 ---
 
@@ -185,14 +185,14 @@ write_quorum:
 
 **Acceptance Pack**
 
-* [ ] All story ACs green
-* [ ] SLO dashboards 24h green
-* [ ] Perf & e2e gates green
-* [ ] SBOM/CVE clear
-* [ ] Policy sim passes
-* [ ] Finance & Privacy sign‑offs recorded
-* [ ] Evidence bundle attached
+- [ ] All story ACs green
+- [ ] SLO dashboards 24h green
+- [ ] Perf & e2e gates green
+- [ ] SBOM/CVE clear
+- [ ] Policy sim passes
+- [ ] Finance & Privacy sign‑offs recorded
+- [ ] Evidence bundle attached
 
 **Backout Plan**
 
-* Disable quorum per‑tenant flags; force writes to Region A; revert ER thresholds; turn off exports; pause/resume migrator per runbook.
+- Disable quorum per‑tenant flags; force writes to Region A; revert ER thresholds; turn off exports; pause/resume migrator per runbook.

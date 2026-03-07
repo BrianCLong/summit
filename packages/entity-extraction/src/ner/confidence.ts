@@ -2,7 +2,7 @@
  * Entity confidence scoring
  */
 
-import type { Entity } from '../types';
+import type { Entity } from "../types";
 
 export class ConfidenceScorer {
   /**
@@ -24,7 +24,7 @@ export class ConfidenceScorer {
    */
   private contextScore(entity: Entity, context: string): number {
     // Check if entity appears in a strong context
-    const strongIndicators = ['said', 'announced', 'reported', 'CEO', 'President'];
+    const strongIndicators = ["said", "announced", "reported", "CEO", "President"];
     const hasStrongContext = strongIndicators.some((indicator) =>
       context.toLowerCase().includes(indicator.toLowerCase())
     );
@@ -36,12 +36,16 @@ export class ConfidenceScorer {
    * Score based on frequency
    */
   private frequencyScore(entity: Entity, context: string): number {
-    const pattern = new RegExp(entity.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const pattern = new RegExp(entity.text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
     const matches = context.match(pattern);
     const frequency = matches ? matches.length : 0;
 
-    if (frequency >= 3) {return 1.2;}
-    if (frequency === 2) {return 1.1;}
+    if (frequency >= 3) {
+      return 1.2;
+    }
+    if (frequency === 2) {
+      return 1.1;
+    }
     return 1.0;
   }
 
@@ -51,8 +55,12 @@ export class ConfidenceScorer {
   private lengthScore(entity: Entity): number {
     const words = entity.text.split(/\s+/).length;
 
-    if (words >= 3) {return 1.1;}
-    if (words === 1) {return 0.9;}
+    if (words >= 3) {
+      return 1.1;
+    }
+    if (words === 1) {
+      return 0.9;
+    }
     return 1.0;
   }
 }

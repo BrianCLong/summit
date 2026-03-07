@@ -2,14 +2,14 @@
  * CSV File Connector Tests
  */
 
-import { CsvFileConnector } from '../connectors/csv-file-connector';
-import type { ConnectorContext, ConnectorEntity } from '../types';
-import { createWriteStream } from 'fs';
-import { unlink, writeFile } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { CsvFileConnector } from "../connectors/csv-file-connector";
+import type { ConnectorContext, ConnectorEntity } from "../types";
+import { createWriteStream } from "fs";
+import { unlink, writeFile } from "fs/promises";
+import { join } from "path";
+import { tmpdir } from "os";
 
-describe('CsvFileConnector', () => {
+describe("CsvFileConnector", () => {
   let connector: CsvFileConnector;
   let testFilePath: string;
 
@@ -26,47 +26,47 @@ describe('CsvFileConnector', () => {
     }
   });
 
-  describe('manifest', () => {
-    it('should have correct manifest', () => {
-      expect(connector.manifest.id).toBe('csv-file-connector');
-      expect(connector.manifest.name).toBe('CSV File Connector');
-      expect(connector.manifest.capabilities).toContain('pull');
-      expect(connector.manifest.capabilities).toContain('batch');
+  describe("manifest", () => {
+    it("should have correct manifest", () => {
+      expect(connector.manifest.id).toBe("csv-file-connector");
+      expect(connector.manifest.name).toBe("CSV File Connector");
+      expect(connector.manifest.capabilities).toContain("pull");
+      expect(connector.manifest.capabilities).toContain("batch");
     });
   });
 
-  describe('initialize', () => {
-    it('should initialize with valid config', async () => {
+  describe("initialize", () => {
+    it("should initialize with valid config", async () => {
       await connector.initialize({
         config: {
           filePath: testFilePath,
         },
         secrets: {},
-        tenantId: 'test-tenant',
+        tenantId: "test-tenant",
       });
 
       expect(connector).toBeDefined();
     });
 
-    it('should throw error if filePath not provided', async () => {
+    it("should throw error if filePath not provided", async () => {
       await expect(
         connector.initialize({
           config: {},
           secrets: {},
-          tenantId: 'test-tenant',
+          tenantId: "test-tenant",
         })
-      ).rejects.toThrow('filePath is required');
+      ).rejects.toThrow("filePath is required");
     });
   });
 
-  describe('pull', () => {
-    it('should ingest CSV records', async () => {
+  describe("pull", () => {
+    it("should ingest CSV records", async () => {
       // Create test CSV file
       const csvContent = `name,age,email
 John Doe,30,john@example.com
 Jane Smith,28,jane@example.com`;
 
-      await writeFile(testFilePath, csvContent, 'utf-8');
+      await writeFile(testFilePath, csvContent, "utf-8");
 
       // Initialize connector
       await connector.initialize({
@@ -74,7 +74,7 @@ Jane Smith,28,jane@example.com`;
           filePath: testFilePath,
         },
         secrets: {},
-        tenantId: 'test-tenant',
+        tenantId: "test-tenant",
       });
 
       // Mock context
@@ -123,9 +123,9 @@ Jane Smith,28,jane@example.com`;
       expect(result.success).toBe(true);
       expect(result.entitiesProcessed).toBe(2);
       expect(entities).toHaveLength(2);
-      expect(entities[0].props).toHaveProperty('name');
-      expect(entities[0].props).toHaveProperty('age');
-      expect(entities[0].props).toHaveProperty('email');
+      expect(entities[0].props).toHaveProperty("name");
+      expect(entities[0].props).toHaveProperty("age");
+      expect(entities[0].props).toHaveProperty("email");
     });
   });
 });

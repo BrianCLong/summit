@@ -8,10 +8,10 @@ This scenario traces a single AcmeCloud enterprise deal from inbound lead throug
 
 ### Discount guardrails — `config/tenants/acmecloud/revops/discounts.yaml`
 
-| Segment | AE max | Sales mgr max | VP sales max | Approval thresholds |
-| --- | --- | --- | --- | --- |
-| `smb` | 15% | 25% | 35% | 15% (none), 25% (sales_manager), 35% (sales_manager, finance) |
-| `enterprise` | 10% | 20% | 30% | 10% (none), 20% (sales_manager), 30% (sales_manager, finance, vp_sales) |
+| Segment      | AE max | Sales mgr max | VP sales max | Approval thresholds                                                     |
+| ------------ | ------ | ------------- | ------------ | ----------------------------------------------------------------------- |
+| `smb`        | 15%    | 25%           | 35%          | 15% (none), 25% (sales_manager), 35% (sales_manager, finance)           |
+| `enterprise` | 10%    | 20%           | 30%          | 10% (none), 20% (sales_manager), 30% (sales_manager, finance, vp_sales) |
 
 - Global ceiling: `max_discount_any_deal = 45%`.
 - Non-standard terms append `legal` to the approval chain.
@@ -45,6 +45,7 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 ## 2) Step 1 — inbound lead routing
 
 **Input**
+
 ```json
 {
   "lead": {
@@ -69,6 +70,7 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 - SLA: 2h first touch from config.
 
 **Decision**
+
 ```json
 {
   "allowed": true,
@@ -81,6 +83,7 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 ```
 
 **Graph + evidence updates**
+
 - Nodes: `Lead(lead-1001)`, `Tenant(acmecloud)`, `Team(ae_enterprise_eu)`, `PolicyDecision(poldec-lead-1001-routing)`, `Receipt(receipt-lead-1001-routing)`.
 - Edges: Lead → Tenant (BELONGS_TO), Lead → Team (ROUTED_TO), Lead → PolicyDecision (HAS_POLICY_DECISION), PolicyDecision → Receipt (EVIDENCED_BY).
 - UI: list “New Enterprise Leads – EU” shows `lead-1001`; graph pane shows Lead ↔ Tenant ↔ Team with PolicyDecision; timeline shows `Lead created` and `Lead routed` with SLA 2h.
@@ -90,10 +93,12 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 ## 3) Step 2 — quote discount & approvals
 
 **Opportunity context**
+
 - AE on `ae_enterprise_eu` opens `Account(megaeu)` and `Opportunity(opp-5001)` (ARR target $240k).
 - `Quote(quote-9001)` at **30% discount** with non-standard terms.
 
 **Input to `revops.discount.decision`**
+
 ```json
 {
   "quote": {
@@ -121,31 +126,25 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 ```
 
 **Evaluation**
+
 - Personal max for enterprise AE = **10%** → subject is over limit.
 - Discount 30% hits top tier → approvals: `sales_manager`, `finance`, `vp_sales`; non-standard terms add `legal`.
 - Within global ceiling (30% ≤ 45%) so allowed if approvals complete.
 
 **Decision**
+
 ```json
 {
   "allowed": true,
   "reason": "over_subject_max_requires_full_chain",
-  "required_approvals": [
-    "sales_manager",
-    "finance",
-    "vp_sales",
-    "legal"
-  ],
+  "required_approvals": ["sales_manager", "finance", "vp_sales", "legal"],
   "max_discount_allowed": 10,
-  "flags": [
-    "over_subject_max",
-    "high_discount_enterprise",
-    "non_standard_terms"
-  ]
+  "flags": ["over_subject_max", "high_discount_enterprise", "non_standard_terms"]
 }
 ```
 
 **Workflow & evidence**
+
 - Creates `Approval` nodes (one per role) and sets `Quote.status = "pending_approval"`.
 - PolicyDecision + Receipt persist bundle/config versions for audit; each approval update emits its own Receipt.
 - UI: Sales Manager sees “Enterprise deal, $240k ARR, 30% discount” in **My Approvals**; policy tab calls out AE max (10%), requested discount (30%), and required approvers.
@@ -155,10 +154,12 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 ## 4) Step 3 — contract signature & activation
 
 **Contract lifecycle**
+
 - CLM generates `Contract(contract-7001)` from the quote and sends via DocuSign (or similar).
 - Statuses emit receipts and connect Quote → Contract: `sent` → `signed` (with signer identities/hashes).
 
 **Input to `revops.contract_activation.decision`**
+
 ```json
 {
   "contract": {
@@ -167,28 +168,26 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
     "segment": "enterprise",
     "jurisdiction": "DE",
     "has_non_standard_terms": true,
-    "signers": [
-      { "email": "cto@megaeu.com", "role": "C-level" }
-    ]
+    "signers": [{ "email": "cto@megaeu.com", "role": "C-level" }]
   },
   "quote": {
     "id": "quote-9001",
     "discount_percentage": 30,
     "segment": "enterprise"
   },
-  "approvals": [
-    "sales_manager", "finance", "vp_sales", "legal"
-  ],
+  "approvals": ["sales_manager", "finance", "vp_sales", "legal"],
   "tenant": { "id": "acmecloud" }
 }
 ```
 
 **Evaluation**
+
 - Invariants: `status == signed`; discount 30% ≤ global 45%.
 - Enterprise + non-standard terms + >20% require finance + VP Sales + legal approvals → satisfied.
 - Jurisdiction DE allowed.
 
 **Decision**
+
 ```json
 {
   "allowed": true,
@@ -198,6 +197,7 @@ The policies read tenant config via `data.revops.config.tenant["acmecloud"]` and
 ```
 
 **Downstream actions**
+
 - Create `Subscription(sub-5501)` and `Order(order-8201)`; trigger provisioning adapter.
 - Each adapter call emits receipts and links back to Contract/Quote/Opportunity/Tenant for traceability.
 
@@ -222,16 +222,16 @@ Account(megaeu) --OPENS--> Opportunity(opp-5001) --HAS_QUOTE--> Quote(quote-9001
 
 ## 6) Timeline (UTC)
 
-| Time | Event |
-| --- | --- |
-| 09:00 | Lead created & routed (enterprise, EU team, SLA 2h) |
-| 09:30 | Opportunity + initial quote drafted |
-| 10:15 | Quote updated to 30% discount, submitted for approval |
+| Time        | Event                                                                               |
+| ----------- | ----------------------------------------------------------------------------------- |
+| 09:00       | Lead created & routed (enterprise, EU team, SLA 2h)                                 |
+| 09:30       | Opportunity + initial quote drafted                                                 |
+| 10:15       | Quote updated to 30% discount, submitted for approval                               |
 | 10:30–12:00 | Sales Manager → Finance → VP Sales → Legal approvals completed (each with receipts) |
-| 12:30 | Contract generated & sent for signature |
-| 14:00 | Contract signed (signer identity captured) |
-| 14:15 | Contract activation decision allowed |
-| 14:16 | Subscription created; provisioning kicked off |
+| 12:30       | Contract generated & sent for signature                                             |
+| 14:00       | Contract signed (signer identity captured)                                          |
+| 14:15       | Contract activation decision allowed                                                |
+| 14:16       | Subscription created; provisioning kicked off                                       |
 
 ---
 
@@ -251,4 +251,3 @@ Account(megaeu) --OPENS--> Opportunity(opp-5001) --HAS_QUOTE--> Quote(quote-9001
 - Discounts: counted in “30%+ enterprise discounts” and “requires full approval chain”.
 - Approvals: latency measured from `pending_approval` → final approval; contributes to approval-time distribution.
 - Revenue controls: increments “non-standard terms >20% with approvals” KPI; visible in RevOps governance panels.
-

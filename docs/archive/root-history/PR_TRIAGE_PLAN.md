@@ -28,24 +28,26 @@ This plan provides a **phased approach** to reduce open PRs to <100 while mainta
 
 **Rationale:** Exact duplicates with no unique value; keeping both wastes review capacity.
 
-| Close PR | Keep PR | Reason |
-|----------|---------|--------|
-| #1419 | None | Broken pnpm-lock.yaml (critical) |
-| #1435 | None | Broken pnpm-lock.yaml (critical) |
-| #1697 | #1698 | Key collision vulnerability |
-| #1436 | #1425 | Training data overfitting issue more critical |
-| #1434 | #1433 | #1433 is canonical codex version |
-| #1422 | None | Hardcoded credentials (security) |
-| #1423 | None | Hardcoded credentials (security) |
-| #1418 | #1432 | #1432 has Copilot autofix available |
+| Close PR | Keep PR | Reason                                        |
+| -------- | ------- | --------------------------------------------- |
+| #1419    | None    | Broken pnpm-lock.yaml (critical)              |
+| #1435    | None    | Broken pnpm-lock.yaml (critical)              |
+| #1697    | #1698   | Key collision vulnerability                   |
+| #1436    | #1425   | Training data overfitting issue more critical |
+| #1434    | #1433   | #1433 is canonical codex version              |
+| #1422    | None    | Hardcoded credentials (security)              |
+| #1423    | None    | Hardcoded credentials (security)              |
+| #1418    | #1432   | #1432 has Copilot autofix available           |
 
 **Action Items:**
+
 - [ ] Add comment to each "Close" PR explaining why it's being closed
 - [ ] Reference the "Keep" PR where applicable
 - [ ] Close all 8 PRs (or 6 if keeping #1698, #1425, #1433, #1432)
 - [ ] For #1698, #1425, #1432, #1433: create follow-up issues for the bot-flagged problems
 
 **Commands:**
+
 ```bash
 # Template command for closing duplicates
 gh pr close 1419 --comment "Closing duplicate PR. This PR has critical pnpm-lock.yaml corruption that breaks pnpm install. The lockfile was truncated from 39k to 241 lines. Neither this nor #1435 should be merged."
@@ -57,13 +59,14 @@ gh pr close 1419 --comment "Closing duplicate PR. This PR has critical pnpm-lock
 
 **Rationale:** PRs with hardcoded credentials or critical security issues that haven't been addressed in 2+ months.
 
-| PR | Issue | Days Open |
-|----|-------|-----------|
-| #1400 | Hardcoded credentials + merge conflicts | ~56 days |
-| #1500 | Logs passwords in cleartext | ~56 days |
-| (Already in duplicates) | #1422, #1423 | ~56 days |
+| PR                      | Issue                                   | Days Open |
+| ----------------------- | --------------------------------------- | --------- |
+| #1400                   | Hardcoded credentials + merge conflicts | ~56 days  |
+| #1500                   | Logs passwords in cleartext             | ~56 days  |
+| (Already in duplicates) | #1422, #1423                            | ~56 days  |
 
 **Action Items:**
+
 - [ ] Close #1400, #1500 with security advisory
 - [ ] Create new issues to track the features (without the security vulnerabilities)
 - [ ] Recommend submitters review the new issue and resubmit with fixes
@@ -73,12 +76,14 @@ gh pr close 1419 --comment "Closing duplicate PR. This PR has critical pnpm-lock
 **Rationale:** PRs that have significant conflicts with main and no recent activity.
 
 **Identification Criteria:**
+
 - Created Sep 24-27, 2025
 - No updates in last 30 days
 - Has merge conflicts
 - No review comments
 
 **Action Items:**
+
 - [ ] Use GitHub CLI to identify PRs matching criteria:
   ```bash
   gh pr list --label codex --json number,title,updatedAt,mergeable \
@@ -91,15 +96,18 @@ gh pr close 1419 --comment "Closing duplicate PR. This PR has critical pnpm-lock
 **Rationale:** Low-risk PRs with minor issues that can be quickly fixed.
 
 **Candidates from September Batch:**
+
 - #1480: Image detection pipeline (only unused import)
 - #1670: SRPL macros and lint rule (no major issues)
 
 **Candidates from Recent PRs:**
+
 - Documentation PRs with no security or breaking changes
 - Test coverage additions
 - Minor bug fixes with passing CI
 
 **Action Items:**
+
 - [ ] Identify quick wins using:
   ```bash
   gh pr list --label "risk:low" --label "needs-review" \
@@ -176,12 +184,14 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 ### 2.3 Batch Processing
 
 **Week 2 Focus: Close Won't Merge + Superseded (70-110 PRs)**
+
 - [ ] Review each categorization
 - [ ] Add explanatory comments
 - [ ] Close in batches of 10-20 per day
 - [ ] Track closed PRs in spreadsheet for audit trail
 
 **Week 3 Focus: Review and Merge Candidates (30-50 PRs)**
+
 - [ ] Assign to reviewers (2-3 PRs per reviewer per day)
 - [ ] Use stacked PR reviews where related
 - [ ] Merge as approved
@@ -197,14 +207,15 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 
 **High-value infrastructure PRs that need targeted fixes:**
 
-| PR | Issue | Fix Effort | Priority |
-|----|-------|-----------|----------|
-| #11985 | Elasticsearch API bug | 30 min | P0 |
-| #11977 | Prometheus metrics registration | 1 hour | P1 |
-| #11886 | Rate limiting + conflicts | 2 hours | P0 |
-| #11887 | CI status unknown | Check first | P2 |
+| PR     | Issue                           | Fix Effort  | Priority |
+| ------ | ------------------------------- | ----------- | -------- |
+| #11985 | Elasticsearch API bug           | 30 min      | P0       |
+| #11977 | Prometheus metrics registration | 1 hour      | P1       |
+| #11886 | Rate limiting + conflicts       | 2 hours     | P0       |
+| #11887 | CI status unknown               | Check first | P2       |
 
 **Action Items:**
+
 - [ ] Create fix branches for each
 - [ ] Submit fix commits
 - [ ] Re-review and merge
@@ -216,6 +227,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 **Target:** 4 focused PRs
 
 **Action Items:**
+
 - [ ] Create PR #1: Fix Gitleaks false positives (docs env vars)
 - [ ] Create PR #2: Fix contract test OPA download conflict
 - [ ] Create PR #3: Add missing Python test packages
@@ -228,6 +240,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 ### 3.3 Triage Intelligence Platform Series (~30 PRs)
 
 **Related PRs from November 2025:**
+
 - Knowledge Graph Platform (#11963)
 - Emerging Threats Platform (#11970)
 - Real-time Stream Processing (#11962)
@@ -237,6 +250,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 **Strategy:** These are ambitious "platform" PRs that likely overlap.
 
 **Action Items:**
+
 - [ ] Map dependencies and overlaps
 - [ ] Identify which platforms are actually needed for roadmap
 - [ ] Close platforms not on roadmap (estimated 15-20 PRs)
@@ -248,6 +262,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 **Focus:** PRs from October that aren't part of September batch.
 
 **Action Items:**
+
 - [ ] Use similar categorization as Phase 2
 - [ ] These are more recent (1-2 months), higher priority than September
 - [ ] Target: Merge 15-20, Close 15-20, Defer 5-10
@@ -261,12 +276,14 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 ### 4.1 Establish PR Aging Policy
 
 **New Policy (to prevent future backlog):**
+
 - PRs without activity for 60 days → auto-comment asking for update
 - PRs without activity for 90 days → auto-close with "stale" label
 - Draft PRs without activity for 30 days → auto-comment
 - Draft PRs without activity for 60 days → auto-close
 
 **Action Items:**
+
 - [ ] Configure GitHub Actions for stale bot
 - [ ] Add policy to CONTRIBUTING.md
 - [ ] Announce policy to team
@@ -276,6 +293,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 **Current Problem:** Bots create PRs that aren't reviewed before submission.
 
 **New Process:**
+
 - [ ] Bot PRs must be marked as Draft initially
 - [ ] Human review required before marking "Ready for Review"
 - [ ] Add bot PR checklist:
@@ -290,6 +308,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 **Remaining ~148 PRs should be organized by theme for easier review:**
 
 **Suggested Themes:**
+
 1. **Security & Auth** (~20 PRs) → Assign to security team
 2. **ML/AI Infrastructure** (~25 PRs) → Assign to ML team
 3. **Platform & Services** (~20 PRs) → Assign to platform team
@@ -301,6 +320,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 9. **Misc/Other** (~18 PRs) → Case-by-case review
 
 **Action Items:**
+
 - [ ] Label all PRs by theme using script
 - [ ] Assign to team DRIs (Directly Responsible Individuals)
 - [ ] Set SLO: Each team reviews assigned PRs within 2 weeks
@@ -315,6 +335,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 ### 5.1 Weekly PR Triage Meeting
 
 **Format:**
+
 - 30-minute weekly sync
 - Review all PRs > 14 days old
 - Decide: Merge, Close, or Request Changes
@@ -323,6 +344,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 ### 5.2 PR Health Dashboard
 
 **Metrics to Track:**
+
 - Open PR count (target: <100)
 - Average time-to-review (target: <7 days)
 - Average time-to-merge (target: <14 days)
@@ -331,6 +353,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 - PRs by age bucket (<7d, 7-30d, 30-60d, 60-90d, 90d+)
 
 **Action Items:**
+
 - [ ] Create Grafana dashboard or GitHub insights dashboard
 - [ ] Review metrics monthly
 - [ ] Adjust policy as needed
@@ -340,6 +363,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 **Current Bottleneck:** 428 PRs / limited reviewers = massive backlog
 
 **Solutions:**
+
 - [ ] Identify 3-5 additional code reviewers across teams
 - [ ] Implement reviewer rotation schedule
 - [ ] Use GitHub auto-assignment for PR reviews
@@ -352,6 +376,7 @@ jq '.[] | select(.createdAt >= "2025-09-24" and .createdAt <= "2025-09-27") |
 Based on analysis, these PR groups should be reviewed together as they're related:
 
 ### Group A: Authentication & Authorization
+
 - #11887: Auth Hardening & Step-up Auth V3
 - #11886: API Security Hardening
 - #11860: Harden IntelGraph Domain and API
@@ -362,6 +387,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Review in order listed (foundational → specific)
 
 ### Group B: Observability & SRE
+
 - #11915: SLO-driven alerting
 - #11912: Structured logging with correlation IDs
 - #11857: Product & Engineering Analytics
@@ -371,6 +397,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Merge #11856 first (policy), then others can reference it
 
 ### Group C: ML/AI Operations
+
 - #11968: MLOps Platform
 - #11941: ML Model Registry
 - #10154: Copilot multi-LLM routing
@@ -379,12 +406,14 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Establish architectural direction first, then review in dependency order
 
 ### Group D: Search & Analytics
+
 - #11985: Search Infrastructure V2
 - #11885: Real-time Analytics and Alerting
 
 **Recommendation:** Fix #11985 Elasticsearch bug, then review together
 
 ### Group E: Workflow & Orchestration
+
 - #11869: Switchboard Control Plane
 - #11866: Maestro Conductor Improvements
 - #11927: Workflow orchestration and task scheduling
@@ -392,6 +421,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Review architectural overlap, potentially merge concepts
 
 ### Group F: Data Engineering
+
 - #11946: Multi-source data fusion ETL
 - #11960: ETL Pipelines and Endpoint Caching
 - #11962: Real-time Stream Processing Platform
@@ -399,6 +429,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Define data platform strategy first, then review
 
 ### Group G: Documentation
+
 - #11934: Align documentation with actual capabilities
 - #11863: October 2025 Board Pack
 - #11859: Refine config and restore reference docs
@@ -407,6 +438,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Quick review and merge batch (low risk)
 
 ### Group H: Testing & Quality
+
 - #11971: Test Coverage Analysis (118 test cases)
 - #11865: Property-based testing with fast-check
 - #11864: Spec-to-code traceability
@@ -415,6 +447,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Recommendation:** Merge all (tests are valuable, low merge risk)
 
 ### Group I: Governance & Compliance
+
 - Multiple September batch PRs covering:
   - Consent management
   - Privacy controls
@@ -435,12 +468,14 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Affected PRs:** ~50-100 PRs show "deployment failed" status
 
 **Common Issues:**
+
 1. Docker build failures
 2. Kubernetes deployment timeouts
 3. Test environment connectivity issues
 4. Secret/config loading errors
 
 **Action Items:**
+
 - [ ] Wait for Jules' CI/CD fixes to land
 - [ ] Re-trigger CI/CD for affected PRs (use GitHub API):
   ```bash
@@ -456,6 +491,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Affected PRs:** ~20-30 PRs show intermittent test failures
 
 **Action Items:**
+
 - [ ] Catalog flaky tests from PR failures
 - [ ] Fix flaky tests in main branch
 - [ ] Rebase affected PRs onto fixed main
@@ -466,6 +502,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 **Issue:** Some PRs show 150-170 checks taking hours to complete
 
 **Recommendation:**
+
 - [ ] Review CI pipeline efficiency
 - [ ] Parallelize test suites where possible
 - [ ] Use test result caching
@@ -486,6 +523,7 @@ Based on analysis, these PR groups should be reviewed together as they're relate
 ### Rollback Plan
 
 If a merged PR causes issues:
+
 1. Immediate revert available for all merges
 2. Track all merges in release notes
 3. Monitor error rates for 24h post-merge
@@ -497,13 +535,13 @@ If a merged PR causes issues:
 
 ### Quantitative Goals
 
-| Metric | Current | Week 1 | Week 3 | Week 5 | Target |
-|--------|---------|--------|--------|--------|--------|
-| Open PRs | 428 | 378 | 228 | 148 | <100 |
-| PRs >60 days | ~250 | ~200 | ~50 | 0 | 0 |
-| Duplicate PRs | 8 | 0 | 0 | 0 | 0 |
-| Security-blocked PRs | ~15 | ~10 | ~5 | 0 | 0 |
-| Draft PRs >30 days | ~10 | ~5 | 0 | 0 | 0 |
+| Metric               | Current | Week 1 | Week 3 | Week 5 | Target |
+| -------------------- | ------- | ------ | ------ | ------ | ------ |
+| Open PRs             | 428     | 378    | 228    | 148    | <100   |
+| PRs >60 days         | ~250    | ~200   | ~50    | 0      | 0      |
+| Duplicate PRs        | 8       | 0      | 0      | 0      | 0      |
+| Security-blocked PRs | ~15     | ~10    | ~5     | 0      | 0      |
+| Draft PRs >30 days   | ~10     | ~5     | 0      | 0      | 0      |
 
 ### Qualitative Goals
 
@@ -518,13 +556,13 @@ If a merged PR causes issues:
 
 ## Timeline Summary
 
-| Phase | Duration | Focus | Target Reduction | Cumulative Total |
-|-------|----------|-------|-----------------|------------------|
-| **Phase 1** | Week 1 | Duplicates, security, quick wins | -50 PRs | 378 open |
-| **Phase 2** | Weeks 2-3 | September batch systematic review | -150 PRs | 228 open |
-| **Phase 3** | Week 4 | Recent PRs, bot fixes, platform series | -80 PRs | 148 open |
-| **Phase 4** | Week 5+ | Theme-based batching, policy establishment | -48 PRs | <100 open |
-| **Phase 5** | Ongoing | Maintenance mode | Sustain <100 | <100 open |
+| Phase       | Duration  | Focus                                      | Target Reduction | Cumulative Total |
+| ----------- | --------- | ------------------------------------------ | ---------------- | ---------------- |
+| **Phase 1** | Week 1    | Duplicates, security, quick wins           | -50 PRs          | 378 open         |
+| **Phase 2** | Weeks 2-3 | September batch systematic review          | -150 PRs         | 228 open         |
+| **Phase 3** | Week 4    | Recent PRs, bot fixes, platform series     | -80 PRs          | 148 open         |
+| **Phase 4** | Week 5+   | Theme-based batching, policy establishment | -48 PRs          | <100 open        |
+| **Phase 5** | Ongoing   | Maintenance mode                           | Sustain <100     | <100 open        |
 
 ---
 
@@ -647,11 +685,13 @@ If you have specific improvements or changes that differ from the other PR, plea
 This PR is being closed due to inactivity and merge conflicts with the main branch.
 
 **Why:**
+
 - Created: {date} ({X} days ago)
 - Last updated: {date} ({Y} days without activity)
 - Current status: Has merge conflicts with main branch
 
 **The work in this PR is valuable**, but the codebase has evolved significantly. If this feature is still relevant, please consider:
+
 1. Creating a fresh branch from main
 2. Reimplementing with current architecture
 3. Opening a new PR
@@ -665,10 +705,12 @@ Thank you for your contribution! If you believe this closure is in error, please
 Thank you for this PR! Automated review has identified some issues that need to be addressed before merge:
 
 **Blocking Issues:**
+
 - [ ] {issue 1}
 - [ ] {issue 2}
 
 **Non-blocking Improvements:**
+
 - [ ] {issue 3}
 
 Please address the blocking issues, and then request re-review. We're happy to help if you have questions!
@@ -686,9 +728,10 @@ I've identified a batch of {N} related PRs in the {topic} area that would benefi
 {list of PR numbers and titles}
 
 **Suggested Review Order:**
+
 1. #{pr} - {reason}
 2. #{pr} - {reason}
-...
+   ...
 
 **Timeline:** Aiming to complete review by {date}
 
@@ -701,13 +744,13 @@ Please let me know if you can help review, and I'll assign specific PRs. Thanks!
 
 ### Key Decisions Made During Triage
 
-| Decision | Rationale | Date | Decided By |
-|----------|-----------|------|------------|
-| Close PRs with lockfile corruption | Breaks build for all developers | 2025-11-20 | Triage team |
-| Keep "codex" labeled version of duplicates | Canonical version from batch generation | 2025-11-20 | Triage team |
-| Split #10079 into focused PRs | Scope creep makes review impossible | 2025-11-20 | Triage team |
-| 90-day stale policy | Balance between patience and backlog management | 2025-11-20 | Triage team |
-| Bot PRs must start as Draft | Require human validation before review request | 2025-11-20 | Triage team |
+| Decision                                   | Rationale                                       | Date       | Decided By  |
+| ------------------------------------------ | ----------------------------------------------- | ---------- | ----------- |
+| Close PRs with lockfile corruption         | Breaks build for all developers                 | 2025-11-20 | Triage team |
+| Keep "codex" labeled version of duplicates | Canonical version from batch generation         | 2025-11-20 | Triage team |
+| Split #10079 into focused PRs              | Scope creep makes review impossible             | 2025-11-20 | Triage team |
+| 90-day stale policy                        | Balance between patience and backlog management | 2025-11-20 | Triage team |
+| Bot PRs must start as Draft                | Require human validation before review request  | 2025-11-20 | Triage team |
 
 ---
 
@@ -733,4 +776,3 @@ Please let me know if you can help review, and I'll assign specific PRs. Thanks!
 **Last Updated:** 2025-11-20
 **Next Review:** End of Week 1 (2025-11-27)
 **Owner:** Engineering Leadership
-

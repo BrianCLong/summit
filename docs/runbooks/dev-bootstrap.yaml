@@ -6,7 +6,7 @@ metadata:
   owner: sre@summit
   updated: 2025-11-20
   allowList:
-    roles: ['platform-engineer', 'sre', 'developer']
+    roles: ["platform-engineer", "sre", "developer"]
   description: >-
     Bootstrap local development environment for IntelGraph/Maestro Conductor.
     Ensures all services start cleanly with docker-compose and validates

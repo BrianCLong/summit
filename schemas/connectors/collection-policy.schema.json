@@ -1,0 +1,18 @@
+{
+  "$id": "https://summit.local/schemas/connectors/collection-policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Collection Policy",
+  "type": "object",
+  "properties": {
+    "policy_id": { "type": "string" },
+    "allowed_classes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "restricted_entities": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["policy_id", "allowed_classes"]
+}

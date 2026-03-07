@@ -24,6 +24,7 @@ The goal is to satisfy legitimate demands for transparency, explainability, and 
 - **Governance**: What process was followed (structure, not thresholds)
 
 **Examples**:
+
 - ✅ "Request blocked due to insufficient evidence of authorization"
 - ✅ "Decision escalated to human review because of conflicting source information"
 - ✅ "Action approved based on verification from trusted sources X, Y, Z"
@@ -36,6 +37,7 @@ The goal is to satisfy legitimate demands for transparency, explainability, and 
 - **Evasion countermeasures**: How Summit detects manipulation attempts
 
 **Anti-Examples** (too revealing):
+
 - ❌ "Blocked because confidence score was 0.68, below our 0.75 threshold"
 - ❌ "Flagged by our ensemble classifier's pattern matching for [specific pattern]"
 - ❌ "Would have been approved if you'd provided 2 more citations"
@@ -47,6 +49,7 @@ The goal is to satisfy legitimate demands for transparency, explainability, and 
 **Context**: Summit approved an action but with constraints or monitoring
 
 **Disclosure Structure**:
+
 ```
 Decision: Approved with [conditions]
 
@@ -59,6 +62,7 @@ Appeal: Not applicable (approved).
 ```
 
 **Example**:
+
 ```
 Decision: Approved with usage monitoring for 30 days
 
@@ -72,6 +76,7 @@ Appeal: Not applicable.
 ```
 
 **What's Protected**:
+
 - Exact confidence scores
 - Specific thresholds that triggered monitoring
 - Which heuristics flagged "recent infrastructure changes"
@@ -83,6 +88,7 @@ Appeal: Not applicable.
 **Context**: Summit declined to act because evidence didn't meet requirements
 
 **Disclosure Structure**:
+
 ```
 Decision: Request refused
 
@@ -95,6 +101,7 @@ Appeal: Available if additional evidence becomes available.
 ```
 
 **Example**:
+
 ```
 Decision: Authorization request refused
 
@@ -109,6 +116,7 @@ Appeal: Submit additional evidence via standard review process.
 ```
 
 **What's Protected**:
+
 - How Summit evaluated source credibility
 - What confidence score was achieved
 - Which specific heuristics detected staleness
@@ -120,6 +128,7 @@ Appeal: Submit additional evidence via standard review process.
 **Context**: Summit deferred to human judgment instead of automated decision
 
 **Disclosure Structure**:
+
 ```
 Decision: Escalated to human review
 
@@ -132,6 +141,7 @@ Process: Independent reviewer will assess with access to full context.
 ```
 
 **Example**:
+
 ```
 Decision: Escalated to expert review
 
@@ -144,6 +154,7 @@ Process: Independent subject matter expert with no operational pressure.
 ```
 
 **What's Protected**:
+
 - Escalation thresholds (numeric or algorithmic)
 - How "conflicting evidence" was detected
 - Internal routing logic for reviewer selection
@@ -155,6 +166,7 @@ Process: Independent subject matter expert with no operational pressure.
 **Context**: Summit questioned the reliability of submitted evidence
 
 **Disclosure Structure**:
+
 ```
 Decision: [Refused/Escalated] pending evidence verification
 
@@ -166,6 +178,7 @@ Process: Evidence quality review per standard protocols.
 ```
 
 **Example**:
+
 ```
 Decision: Request deferred pending evidence verification
 
@@ -179,6 +192,7 @@ Process: Standard evidence quality review; no penalty for resubmission.
 ```
 
 **What's Protected**:
+
 - Specific verification heuristics
 - How Summit detected potential evidence issues
 - Internal credibility scoring mechanisms
@@ -190,6 +204,7 @@ Process: Standard evidence quality review; no penalty for resubmission.
 **Context**: Request was outside Summit's operational scope
 
 **Disclosure Structure**:
+
 ```
 Decision: Outside operational scope
 
@@ -202,6 +217,7 @@ Appeal: Not applicable (scope limitation, not quality judgment).
 ```
 
 **Example**:
+
 ```
 Decision: Outside operational scope
 
@@ -215,6 +231,7 @@ Appeal: Not applicable to scope limitations.
 ```
 
 **What's Protected**:
+
 - How Summit classified the request type
 - Internal scope boundary detection
 - Edge case handling logic
@@ -274,21 +291,25 @@ When in doubt about disclosure level, climb the abstraction ladder:
 All outcome disclosures must be:
 
 ### 1. Evidence-Based
+
 - Claims about why a decision was made must be traceable to actual decision factors
 - No post-hoc rationalization
 - No generic excuses disconnected from real reasons
 
 ### 2. Consistent with Templates
+
 - Use approved disclosure templates for common decision types
 - New templates require security and legal review
 - Deviations from templates require justification
 
 ### 3. Adversarially Reviewed
+
 - Ask: "Could this teach an adversary how to evade?"
 - Red-team review for novel disclosures
 - Err on the side of abstraction for ambiguous cases
 
 ### 4. User-Centric
+
 - Explain in terms the recipient can act on
 - Provide next steps where applicable
 - Avoid jargon or technical internals
@@ -300,11 +321,13 @@ All outcome disclosures must be:
 **Challenge**: Responding to "Why was X approved but Y refused when they seem similar?"
 
 **Approach**:
+
 - Explain the **relevant difference** in evidence, not the full decision logic
 - Focus on what made Y's evidence insufficient, not X's evidence sufficient
 - Avoid revealing relative thresholds
 
 **Example**:
+
 ```
 Both requests involved similar claims, but differed in evidence quality:
 
@@ -322,11 +345,13 @@ The difference was evidence recency and verifiability, not claim type.
 **Challenge**: "This was approved last month, why not now?"
 
 **Approach**:
+
 - Explain what changed in **the evidence or context**, not in Summit's internal thresholds
 - If policy changed, reference governance transparency (see public-invariants.md)
 - Avoid implying arbitrary shifts
 
 **Example**:
+
 ```
 Previous approval was based on evidence that was current at the time.
 
@@ -341,11 +366,13 @@ Summit's requirements have not changed; the underlying facts have.
 **Challenge**: "Why can't you just decide?"
 
 **Approach**:
+
 - Explain the **specific source of uncertainty** (conflicting sources, staleness, ambiguity)
 - Frame refusal/deferral as principled adherence to evidence standards, not indecisiveness
 - Provide path forward if possible
 
 **Example**:
+
 ```
 Summit's purpose is evidence-based decision support, not speculation.
 

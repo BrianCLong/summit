@@ -26,15 +26,15 @@
 
 ## Side-by-Side Summary
 
-| Dimension | OpenClaw | Summit Stack (Summit + Switchboard + IntelGraph + Maestro + CompanyOS) |
-| --- | --- | --- |
-| Security model | Gateway + skills with broad privileges; higher exposure to skill supply-chain risks. | OPA/Rego-governed behaviors, pinned policy bundles, tamper-evident audit chains, and drift detection. |
-| Provenance | Limited lifecycle provenance; relies on skill scanning. | Cryptographic audit chains and policy-bound provenance across CI/CD and runtime. |
-| Architecture | Single gateway with plugins/skills. | Multi-repo enterprise stack with governed ingestion, orchestration, and intelligence graph. |
-| Multi-tenancy & RBAC | Persona isolation without full enterprise tenant model. | Enterprise tenant isolation and RBAC designed as first-class platform features. |
-| Compliance & audit | Operator responsibility; limited native evidence automation. | Compliance evidence automation + audit logging/reporting integrated into release lifecycle. |
-| Domain specialization | Personal productivity automation. | OSINT, threat intelligence, and espionage-defense workflows with graph-native analytics. |
-| Extension risk posture | Skills treated as trusted code; marketplace incentives create risk. | Extensions treated as untrusted; integrity checks and policy-aware releases. |
+| Dimension              | OpenClaw                                                                             | Summit Stack (Summit + Switchboard + IntelGraph + Maestro + CompanyOS)                                |
+| ---------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Security model         | Gateway + skills with broad privileges; higher exposure to skill supply-chain risks. | OPA/Rego-governed behaviors, pinned policy bundles, tamper-evident audit chains, and drift detection. |
+| Provenance             | Limited lifecycle provenance; relies on skill scanning.                              | Cryptographic audit chains and policy-bound provenance across CI/CD and runtime.                      |
+| Architecture           | Single gateway with plugins/skills.                                                  | Multi-repo enterprise stack with governed ingestion, orchestration, and intelligence graph.           |
+| Multi-tenancy & RBAC   | Persona isolation without full enterprise tenant model.                              | Enterprise tenant isolation and RBAC designed as first-class platform features.                       |
+| Compliance & audit     | Operator responsibility; limited native evidence automation.                         | Compliance evidence automation + audit logging/reporting integrated into release lifecycle.           |
+| Domain specialization  | Personal productivity automation.                                                    | OSINT, threat intelligence, and espionage-defense workflows with graph-native analytics.              |
+| Extension risk posture | Skills treated as trusted code; marketplace incentives create risk.                  | Extensions treated as untrusted; integrity checks and policy-aware releases.                          |
 
 ## Readiness Assertion
 

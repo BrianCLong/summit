@@ -121,6 +121,7 @@ The engine implements **Pearl's Causal Hierarchy**:
 **Output**: Causal DAG with typed edges
 
 **Algorithm**:
+
 ```typescript
 function buildCausalGraph(neoData: GraphData): CausalGraph {
   // 1. Identify temporal ordering (time-based edges)
@@ -135,6 +136,7 @@ function buildCausalGraph(neoData: GraphData): CausalGraph {
 ```
 
 **Edge Types**:
+
 - `DIRECT_CAUSE`: X directly causes Y
 - `CONFOUNDER`: Common cause of X and Y
 - `MEDIATOR`: X → M → Y
@@ -146,21 +148,25 @@ function buildCausalGraph(neoData: GraphData): CausalGraph {
 Implements Pearl's three rules of do-calculus:
 
 **Rule 1 (Insertion/Deletion of Observations)**:
+
 ```
 P(y|do(x),z,w) = P(y|do(x),w) if (Y ⊥ Z | X,W) in G_x̄
 ```
 
 **Rule 2 (Action/Observation Exchange)**:
+
 ```
 P(y|do(x),do(z),w) = P(y|do(x),z,w) if (Y ⊥ Z | X,W) in G_x̄Z̄
 ```
 
 **Rule 3 (Insertion/Deletion of Actions)**:
+
 ```
 P(y|do(x),do(z),w) = P(y|do(x),w) if (Y ⊥ Z | X,W) in G_x̄,Z(W)
 ```
 
 **Implementation**:
+
 ```typescript
 class DoCalculus {
   // Check if P(y|do(x)) is identifiable
@@ -182,12 +188,9 @@ class DoCalculus {
 **Goal**: Identify valid adjustment sets to block confounding
 
 **Algorithm**:
+
 ```typescript
-function findBackdoorSets(
-  x: Variable,
-  y: Variable,
-  graph: CausalGraph
-): Variable[][] {
+function findBackdoorSets(x: Variable, y: Variable, graph: CausalGraph): Variable[][] {
   // 1. Find all ancestors of X and Y
   const ancestors = graph.getAncestors([x, y]);
 
@@ -207,11 +210,13 @@ function findBackdoorSets(
 **Goal**: Identify mediators to estimate causal effects when backdoor is blocked
 
 **Conditions for mediator set M**:
+
 1. M intercepts all directed paths from X to Y
 2. No backdoor path from X to M
 3. X blocks all backdoor paths from M to Y
 
 **Implementation**:
+
 ```typescript
 function frontdoorAdjustment(
   x: Variable,
@@ -233,6 +238,7 @@ function frontdoorAdjustment(
 3. **Prediction**: Compute counterfactual outcome
 
 **Algorithm**:
+
 ```typescript
 function simulateCounterfactual(
   scenario: CounterfactualScenario,
@@ -261,36 +267,34 @@ function simulateCounterfactual(
 **Goal**: Decompose total causal effect into path-specific effects
 
 **Path Types**:
+
 - **Direct Effect**: X → Y (no mediators)
 - **Indirect Effect**: X → M₁ → ... → Mₙ → Y
 - **Total Effect**: Sum of all path effects
 
 **Implementation**:
+
 ```typescript
-function analyzeCausalPaths(
-  source: Variable,
-  target: Variable,
-  graph: CausalGraph
-): PathAnalysis {
+function analyzeCausalPaths(source: Variable, target: Variable, graph: CausalGraph): PathAnalysis {
   // 1. Find all directed paths from source to target
   const paths = graph.findAllPaths(source, target);
 
   // 2. Classify paths by type (direct, mediated, confounded)
-  const classified = paths.map(path => ({
+  const classified = paths.map((path) => ({
     path,
     type: classifyPath(path, graph),
     strength: computePathStrength(path, graph),
   }));
 
   // 3. Compute path-specific effects
-  const effects = classified.map(p => ({
+  const effects = classified.map((p) => ({
     ...p,
     effect: computePathEffect(p.path, graph),
   }));
 
   return {
-    direct: effects.filter(e => e.type === 'DIRECT'),
-    indirect: effects.filter(e => e.type === 'MEDIATED'),
+    direct: effects.filter((e) => e.type === "DIRECT"),
+    indirect: effects.filter((e) => e.type === "MEDIATED"),
     total: effects.reduce((sum, e) => sum + e.effect, 0),
   };
 }
@@ -301,12 +305,14 @@ function analyzeCausalPaths(
 **Goal**: Find minimal intervention set to achieve target outcome
 
 **Optimization Problem**:
+
 ```
 minimize:   cost(interventions)
 subject to: P(target = desired | do(interventions)) ≥ threshold
 ```
 
 **Algorithm**:
+
 ```typescript
 function findOptimalInterventions(
   target: Variable,
@@ -338,6 +344,7 @@ function findOptimalInterventions(
 ```
 
 **Optimization Strategies**:
+
 - **Greedy Search**: Add highest-impact intervention iteratively
 - **Beam Search**: Maintain top-k partial solutions
 - **Genetic Algorithm**: Evolve intervention sets over generations
@@ -363,8 +370,8 @@ interface CausalGraph {
 interface CausalNode {
   id: string;
   name: string;
-  type: 'OBSERVABLE' | 'LATENT' | 'INTERVENTION';
-  domain: 'CONTINUOUS' | 'DISCRETE' | 'BINARY';
+  type: "OBSERVABLE" | "LATENT" | "INTERVENTION";
+  domain: "CONTINUOUS" | "DISCRETE" | "BINARY";
   distribution?: ProbabilityDistribution;
 }
 
@@ -377,12 +384,7 @@ interface CausalEdge {
   mechanism?: string; // Description of causal mechanism
 }
 
-type EdgeType =
-  | 'DIRECT_CAUSE'
-  | 'CONFOUNDER'
-  | 'MEDIATOR'
-  | 'COLLIDER'
-  | 'SELECTION_BIAS';
+type EdgeType = "DIRECT_CAUSE" | "CONFOUNDER" | "MEDIATOR" | "COLLIDER" | "SELECTION_BIAS";
 ```
 
 ### Intervention
@@ -391,7 +393,7 @@ type EdgeType =
 interface Intervention {
   variable: string;
   value: any;
-  type: 'HARD' | 'SOFT'; // Hard: set to value, Soft: shift distribution
+  type: "HARD" | "SOFT"; // Hard: set to value, Soft: shift distribution
   cost?: number;
   feasibility?: number; // [0, 1]
 }
@@ -444,7 +446,7 @@ interface CounterfactualResult {
 interface CausalPath {
   nodes: string[];
   edges: CausalEdge[];
-  type: 'DIRECT' | 'MEDIATED' | 'CONFOUNDED';
+  type: "DIRECT" | "MEDIATED" | "CONFOUNDED";
   strength: number;
   contribution: number; // Contribution to total effect
 }
@@ -539,62 +541,61 @@ enum PathType {
 
 # Queries
 type Query {
-  """Get causal graph for an investigation"""
+  """
+  Get causal graph for an investigation
+  """
   getCausalGraph(investigationId: ID!): CausalGraph!
 
-  """Simulate intervention and predict outcome"""
+  """
+  Simulate intervention and predict outcome
+  """
   simulateIntervention(
     graphId: ID!
     interventions: [InterventionInput!]!
     target: TargetInput!
   ): CounterfactualResult!
 
-  """Find optimal intervention sets to achieve goal"""
+  """
+  Find optimal intervention sets to achieve goal
+  """
   findOptimalInterventions(
     graphId: ID!
     target: TargetInput!
     constraints: ConstraintsInput
   ): [InterventionSet!]!
 
-  """Analyze causal paths between variables"""
-  getCausalPaths(
-    graphId: ID!
-    source: String!
-    target: String!
-  ): PathAnalysis!
+  """
+  Analyze causal paths between variables
+  """
+  getCausalPaths(graphId: ID!, source: String!, target: String!): PathAnalysis!
 
-  """Check if causal effect is identifiable"""
-  isIdentifiable(
-    graphId: ID!
-    intervention: String!
-    outcome: String!
-  ): IdentifiabilityResult!
+  """
+  Check if causal effect is identifiable
+  """
+  isIdentifiable(graphId: ID!, intervention: String!, outcome: String!): IdentifiabilityResult!
 }
 
 # Mutations
 type Mutation {
-  """Create causal model from Neo4j data"""
-  createCausalModel(
-    investigationId: ID!
-    config: CausalModelConfig
-  ): CausalGraph!
+  """
+  Create causal model from Neo4j data
+  """
+  createCausalModel(investigationId: ID!, config: CausalModelConfig): CausalGraph!
 
-  """Add intervention to scenario"""
-  addIntervention(
-    scenarioId: ID!
-    intervention: InterventionInput!
-  ): CounterfactualScenario!
+  """
+  Add intervention to scenario
+  """
+  addIntervention(scenarioId: ID!, intervention: InterventionInput!): CounterfactualScenario!
 
-  """Run counterfactual analysis"""
-  runCounterfactual(
-    scenario: CounterfactualScenarioInput!
-  ): CounterfactualResult!
+  """
+  Run counterfactual analysis
+  """
+  runCounterfactual(scenario: CounterfactualScenarioInput!): CounterfactualResult!
 
-  """Update causal graph structure"""
-  updateCausalGraph(
-    graphId: ID!
-    updates: CausalGraphUpdates!
-  ): CausalGraph!
+  """
+  Update causal graph structure
+  """
+  updateCausalGraph(graphId: ID!, updates: CausalGraphUpdates!): CausalGraph!
 }
 
 # Input Types
@@ -745,16 +746,16 @@ class CausalInferenceError extends Error {
     public details?: any
   ) {
     super(message);
-    this.name = 'CausalInferenceError';
+    this.name = "CausalInferenceError";
   }
 }
 
 enum ErrorCode {
-  GRAPH_CYCLIC = 'GRAPH_CYCLIC',
-  NOT_IDENTIFIABLE = 'NOT_IDENTIFIABLE',
-  INVALID_INTERVENTION = 'INVALID_INTERVENTION',
-  NO_VALID_ADJUSTMENT_SET = 'NO_VALID_ADJUSTMENT_SET',
-  SIMULATION_FAILED = 'SIMULATION_FAILED',
+  GRAPH_CYCLIC = "GRAPH_CYCLIC",
+  NOT_IDENTIFIABLE = "NOT_IDENTIFIABLE",
+  INVALID_INTERVENTION = "INVALID_INTERVENTION",
+  NO_VALID_ADJUSTMENT_SET = "NO_VALID_ADJUSTMENT_SET",
+  SIMULATION_FAILED = "SIMULATION_FAILED",
 }
 ```
 
@@ -817,14 +818,10 @@ const interventions = await client.query({
     query FindOptimal {
       findOptimalInterventions(
         graphId: "inv-123"
-        target: {
-          variable: "NetworkDisrupted",
-          desiredValue: true,
-          threshold: 0.9
-        }
+        target: { variable: "NetworkDisrupted", desiredValue: true, threshold: 0.9 }
         constraints: {
-          maxCost: 100000,
-          maxInterventions: 3,
+          maxCost: 100000
+          maxInterventions: 3
           forbiddenVariables: ["CivilianInfrastructure"]
         }
       ) {
@@ -845,12 +842,12 @@ const interventions = await client.query({
   {
     interventions: [
       { variable: "CommandServer1", value: "offline", cost: 25000 },
-      { variable: "KeyOperator", value: "arrested", cost: 50000 }
+      { variable: "KeyOperator", value: "arrested", cost: 50000 },
     ],
     expectedEffect: 0.93,
-    confidence: 0.87
-  }
-]
+    confidence: 0.87,
+  },
+];
 ```
 
 ### Example 3: Causal Path Analysis
@@ -949,10 +946,10 @@ const paths = await client.query({
 
 ### Academic Foundations
 
-1. Pearl, J. (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press.
-2. Pearl, J., & Mackenzie, D. (2018). *The Book of Why*. Basic Books.
-3. Peters, J., Janzing, D., & Schölkopf, B. (2017). *Elements of Causal Inference*. MIT Press.
-4. Imbens, G., & Rubin, D. (2015). *Causal Inference for Statistics, Social, and Biomedical Sciences*. Cambridge University Press.
+1. Pearl, J. (2009). _Causality: Models, Reasoning, and Inference_ (2nd ed.). Cambridge University Press.
+2. Pearl, J., & Mackenzie, D. (2018). _The Book of Why_. Basic Books.
+3. Peters, J., Janzing, D., & Schölkopf, B. (2017). _Elements of Causal Inference_. MIT Press.
+4. Imbens, G., & Rubin, D. (2015). _Causal Inference for Statistics, Social, and Biomedical Sciences_. Cambridge University Press.
 
 ### Implementation Resources
 
@@ -965,17 +962,17 @@ const paths = await client.query({
 
 ## Appendix: Mathematical Notation
 
-| Symbol | Meaning |
-|--------|---------|
-| P(Y\|X) | Probability of Y given X (observational) |
-| P(Y\|do(X)) | Probability of Y given intervention on X |
+| Symbol        | Meaning                                                         |
+| ------------- | --------------------------------------------------------------- |
+| P(Y\|X)       | Probability of Y given X (observational)                        |
+| P(Y\|do(X))   | Probability of Y given intervention on X                        |
 | P(Y_x\|X',Y') | Counterfactual probability of Y under X=x, given observed X',Y' |
-| G | Causal graph (DAG) |
-| G_x̄ | Mutilated graph with incoming edges to X removed |
-| (Y ⊥ Z \| X) | Y independent of Z conditional on X |
-| do(X=x) | Intervention setting X to value x |
-| U | Unobserved (latent) variables |
-| SCM | Structural Causal Model |
+| G             | Causal graph (DAG)                                              |
+| G_x̄           | Mutilated graph with incoming edges to X removed                |
+| (Y ⊥ Z \| X)  | Y independent of Z conditional on X                             |
+| do(X=x)       | Intervention setting X to value x                               |
+| U             | Unobserved (latent) variables                                   |
+| SCM           | Structural Causal Model                                         |
 
 ---
 

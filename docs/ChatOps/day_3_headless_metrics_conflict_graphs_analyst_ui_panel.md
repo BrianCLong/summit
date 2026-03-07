@@ -166,23 +166,23 @@ async def test_fetch_rendered_smoke(monkeypatch):
 
 ```ts
 // services/web-orchestrator/src/metrics.ts
-import client from 'prom-client';
+import client from "prom-client";
 export const registry = new client.Registry();
 client.collectDefaultMetrics({ register: registry });
 
 export const enqueueCounter = new client.Counter({
-  name: 'orchestrator_enqueue_total',
-  help: 'jobs enqueued',
-  labelNames: ['mode'],
+  name: "orchestrator_enqueue_total",
+  help: "jobs enqueued",
+  labelNames: ["mode"],
 });
 export const denyCounter = new client.Counter({
-  name: 'orchestrator_denied_total',
-  help: 'policy denials',
-  labelNames: ['reason'],
+  name: "orchestrator_denied_total",
+  help: "policy denials",
+  labelNames: ["reason"],
 });
 export const publishLatency = new client.Histogram({
-  name: 'orchestrator_publish_seconds',
-  help: 'enqueue→publish latency',
+  name: "orchestrator_publish_seconds",
+  help: "enqueue→publish latency",
   buckets: [0.05, 0.1, 0.25, 0.5, 1, 2],
 });
 registry.registerMetric(enqueueCounter);
@@ -192,11 +192,11 @@ registry.registerMetric(publishLatency);
 
 ```ts
 // services/web-orchestrator/src/index.ts (metrics route)
-import express from 'express';
-import { registry } from './metrics';
+import express from "express";
+import { registry } from "./metrics";
 // ...
-app.get('/metrics', async (_req, res) => {
-  res.set('Content-Type', registry.contentType);
+app.get("/metrics", async (_req, res) => {
+  res.set("Content-Type", registry.contentType);
   res.end(await registry.metrics());
 });
 ```
@@ -461,26 +461,26 @@ default export function MaestroPanel(){
 
 ```ts
 // services/web-orchestrator/src/ui-api.ts
-import express from 'express';
+import express from "express";
 export const uiapi = express.Router();
 
-uiapi.get('/maestro/metrics', async (_req, res) => {
+uiapi.get("/maestro/metrics", async (_req, res) => {
   // Return last 60 buckets: { t: ISO, jobs: number }
   res
     .json(
       [...Array(30)].map((_, i) => ({
         t: new Date(Date.now() - i * 30_000).toISOString(),
         jobs: Math.floor(Math.random() * 10),
-      })),
+      }))
     )
     .end();
 });
 
-uiapi.get('/maestro/conflicts', async (_req, res) => {
+uiapi.get("/maestro/conflicts", async (_req, res) => {
   // Wire to synthesizer/ledger; mock for now
   res.json([
-    { key: 'version', a_value: '1.0', b_value: '1.1' },
-    { key: 'author', a_value: 'Alice', b_value: 'Bob' },
+    { key: "version", a_value: "1.0", b_value: "1.1" },
+    { key: "author", a_value: "Alice", b_value: "Bob" },
   ]);
 });
 ```
@@ -488,8 +488,8 @@ uiapi.get('/maestro/conflicts', async (_req, res) => {
 and mount it in `index.ts`:
 
 ```ts
-import { uiapi } from './ui-api';
-app.use('/api', uiapi);
+import { uiapi } from "./ui-api";
+app.use("/api", uiapi);
 ```
 
 ---

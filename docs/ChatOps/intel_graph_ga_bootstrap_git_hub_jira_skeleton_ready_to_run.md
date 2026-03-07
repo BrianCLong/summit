@@ -183,7 +183,7 @@ Fixes #
 ```yaml
 name: Bug report
 description: File a bug
-labels: ['type:bug']
+labels: ["type:bug"]
 body:
   - type: textarea
     id: what-happened
@@ -205,7 +205,7 @@ body:
 ```yaml
 name: Feature request
 description: Propose a feature
-labels: ['type:feature']
+labels: ["type:feature"]
 body:
   - type: input
     id: outcome
@@ -223,9 +223,9 @@ body:
 name: CI
 on:
   pull_request:
-    branches: ['release/ga-2025']
+    branches: ["release/ga-2025"]
   push:
-    branches: ['release/ga-2025']
+    branches: ["release/ga-2025"]
 
 jobs:
   build-node:
@@ -233,7 +233,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18' }
+        with: { node-version: "18" }
       - run: npm ci --workspaces
       - run: npm run build --workspaces
   lint-node:
@@ -241,7 +241,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18' }
+        with: { node-version: "18" }
       - run: npm ci --workspaces
       - run: npm run lint --workspaces
   test-node:
@@ -249,7 +249,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18' }
+        with: { node-version: "18" }
       - run: npm ci --workspaces
       - run: npm test --workspaces -- --ci
   pytest:
@@ -257,7 +257,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - run: pip install -r backend/requirements.txt || true
       - run: pytest -q || true
   docker-build:
@@ -271,7 +271,7 @@ jobs:
           push: false
   codeql:
     uses: github/codeql-action/init@v3
-    with: { languages: 'javascript,python' }
+    with: { languages: "javascript,python" }
 ```
 
 **`.github/workflows/security.yml`**
@@ -279,7 +279,7 @@ jobs:
 ```yaml
 name: Security Scans
 on:
-  schedule: [{ cron: '0 6 * * *' }]
+  schedule: [{ cron: "0 6 * * *" }]
   workflow_dispatch:
 
 jobs:
@@ -301,13 +301,13 @@ jobs:
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: '/'
+    directory: "/"
     schedule: { interval: weekly }
   - package-ecosystem: pip
-    directory: '/backend'
+    directory: "/backend"
     schedule: { interval: weekly }
   - package-ecosystem: github-actions
-    directory: '/'
+    directory: "/"
     schedule: { interval: weekly }
 ```
 

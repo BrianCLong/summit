@@ -8,7 +8,7 @@
  * @module pages/Plugins/InstalledPlugins
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Container,
@@ -42,7 +42,7 @@ import {
   TablePagination,
   CircularProgress,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Extension,
   Search,
@@ -55,34 +55,34 @@ import {
   Warning,
   Info,
   HealthAndSafety,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   usePlugins,
   usePluginOperations,
   usePluginConfig,
   usePluginHealth,
-} from '../../hooks/usePlugins';
+} from "../../hooks/usePlugins";
 
 // Plugin category colors
 const categoryColors = {
-  alerting: 'error',
-  notification: 'info',
-  integration: 'primary',
-  analytics: 'secondary',
-  automation: 'success',
-  security: 'warning',
-  compliance: 'default',
-  custom: 'default',
+  alerting: "error",
+  notification: "info",
+  integration: "primary",
+  analytics: "secondary",
+  automation: "success",
+  security: "warning",
+  compliance: "default",
+  custom: "default",
 };
 
 // Plugin status colors
 const statusColors = {
-  registered: 'default',
-  installed: 'info',
-  enabled: 'success',
-  disabled: 'warning',
-  error: 'error',
-  deprecated: 'default',
+  registered: "default",
+  installed: "info",
+  enabled: "success",
+  disabled: "warning",
+  error: "error",
+  deprecated: "default",
 };
 
 // Status icons
@@ -106,7 +106,7 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
   const handleToggle = async () => {
     setToggling(true);
     try {
-      await onToggle(plugin.id, plugin.status !== 'enabled');
+      await onToggle(plugin.id, plugin.status !== "enabled");
     } finally {
       setToggling(false);
     }
@@ -115,7 +115,7 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
   return (
     <TableRow hover>
       <TableCell>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Extension color="primary" />
           <Box>
             <Typography variant="subtitle2">{plugin.name}</Typography>
@@ -134,16 +134,16 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
         <Chip
           label={plugin.category}
           size="small"
-          color={categoryColors[plugin.category] || 'default'}
+          color={categoryColors[plugin.category] || "default"}
         />
       </TableCell>
       <TableCell>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <StatusIcon status={plugin.status} />
           <Chip
             label={plugin.status}
             size="small"
-            color={statusColors[plugin.status] || 'default'}
+            color={statusColors[plugin.status] || "default"}
             variant="outlined"
           />
         </Box>
@@ -152,24 +152,24 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
         {healthLoading ? (
           <CircularProgress size={16} />
         ) : health?.healthy ? (
-          <Tooltip title={health.message || 'Healthy'}>
+          <Tooltip title={health.message || "Healthy"}>
             <HealthAndSafety color="success" />
           </Tooltip>
         ) : (
-          <Tooltip title={health?.message || 'Unknown'}>
+          <Tooltip title={health?.message || "Unknown"}>
             <HealthAndSafety color="disabled" />
           </Tooltip>
         )}
       </TableCell>
       <TableCell align="right">
-        <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-          <Tooltip title={plugin.status === 'enabled' ? 'Disable' : 'Enable'}>
+        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
+          <Tooltip title={plugin.status === "enabled" ? "Disable" : "Enable"}>
             <span>
               <Switch
                 size="small"
-                checked={plugin.status === 'enabled'}
+                checked={plugin.status === "enabled"}
                 onChange={handleToggle}
-                disabled={toggling || plugin.status === 'error'}
+                disabled={toggling || plugin.status === "error"}
               />
             </span>
           </Tooltip>
@@ -177,7 +177,7 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
             <IconButton
               size="small"
               onClick={() => onExecute(plugin)}
-              disabled={plugin.status !== 'enabled'}
+              disabled={plugin.status !== "enabled"}
             >
               <PlayArrow />
             </IconButton>
@@ -188,11 +188,7 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
             </IconButton>
           </Tooltip>
           <Tooltip title="Uninstall">
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => onDelete(plugin)}
-            >
+            <IconButton size="small" color="error" onClick={() => onDelete(plugin)}>
               <Delete />
             </IconButton>
           </Tooltip>
@@ -204,9 +200,7 @@ function PluginRow({ plugin, onConfigure, onToggle, onDelete, onExecute }) {
 
 // Plugin Configuration Dialog
 function PluginConfigDialog({ open, plugin, onClose, onSave }) {
-  const { config, loading, error, saving, saveConfig } = usePluginConfig(
-    plugin?.id
-  );
+  const { config, loading, error, saving, saveConfig } = usePluginConfig(plugin?.id);
   const [localConfig, setLocalConfig] = useState({});
   const [enabled, setEnabled] = useState(true);
 
@@ -232,7 +226,7 @@ function PluginConfigDialog({ open, plugin, onClose, onSave }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Extension color="primary" />
           Configure: {plugin.name}
         </Box>
@@ -243,15 +237,11 @@ function PluginConfigDialog({ open, plugin, onClose, onSave }) {
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box
-              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <Typography variant="subtitle1">Plugin Status</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body2">
-                  {enabled ? 'Enabled' : 'Disabled'}
-                </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="body2">{enabled ? "Enabled" : "Disabled"}</Typography>
                 <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
               </Box>
             </Box>
@@ -261,84 +251,78 @@ function PluginConfigDialog({ open, plugin, onClose, onSave }) {
             <Typography variant="subtitle1">Configuration</Typography>
 
             {plugin.manifest?.configSchema?.properties ? (
-              Object.entries(plugin.manifest.configSchema.properties).map(
-                ([key, schema]) => (
-                  <Box key={key}>
-                    {schema.type === 'boolean' ? (
-                      <Box
-                        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                      >
-                        <Box>
-                          <Typography variant="body2">{key}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {schema.description}
-                          </Typography>
-                        </Box>
-                        <Switch
-                          checked={localConfig[key] ?? schema.default ?? false}
-                          onChange={(e) =>
-                            setLocalConfig({ ...localConfig, [key]: e.target.checked })
-                          }
-                        />
+              Object.entries(plugin.manifest.configSchema.properties).map(([key, schema]) => (
+                <Box key={key}>
+                  {schema.type === "boolean" ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="body2">{key}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {schema.description}
+                        </Typography>
                       </Box>
-                    ) : schema.type === 'number' ? (
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label={key}
-                        helperText={schema.description}
-                        value={localConfig[key] ?? schema.default ?? ''}
+                      <Switch
+                        checked={localConfig[key] ?? schema.default ?? false}
                         onChange={(e) =>
-                          setLocalConfig({ ...localConfig, [key]: Number(e.target.value) })
-                        }
-                        inputProps={{
-                          min: schema.minimum,
-                          max: schema.maximum,
-                        }}
-                      />
-                    ) : schema.type === 'array' ? (
-                      <TextField
-                        fullWidth
-                        label={key}
-                        helperText={`${schema.description} (comma-separated)`}
-                        value={(localConfig[key] || []).join(', ')}
-                        onChange={(e) =>
-                          setLocalConfig({
-                            ...localConfig,
-                            [key]: e.target.value.split(',').map((s) => s.trim()),
-                          })
+                          setLocalConfig({ ...localConfig, [key]: e.target.checked })
                         }
                       />
-                    ) : (
-                      <TextField
-                        fullWidth
-                        label={key}
-                        helperText={schema.description}
-                        value={localConfig[key] ?? schema.default ?? ''}
-                        onChange={(e) =>
-                          setLocalConfig({ ...localConfig, [key]: e.target.value })
-                        }
-                      />
-                    )}
-                  </Box>
-                )
-              )
+                    </Box>
+                  ) : schema.type === "number" ? (
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label={key}
+                      helperText={schema.description}
+                      value={localConfig[key] ?? schema.default ?? ""}
+                      onChange={(e) =>
+                        setLocalConfig({ ...localConfig, [key]: Number(e.target.value) })
+                      }
+                      inputProps={{
+                        min: schema.minimum,
+                        max: schema.maximum,
+                      }}
+                    />
+                  ) : schema.type === "array" ? (
+                    <TextField
+                      fullWidth
+                      label={key}
+                      helperText={`${schema.description} (comma-separated)`}
+                      value={(localConfig[key] || []).join(", ")}
+                      onChange={(e) =>
+                        setLocalConfig({
+                          ...localConfig,
+                          [key]: e.target.value.split(",").map((s) => s.trim()),
+                        })
+                      }
+                    />
+                  ) : (
+                    <TextField
+                      fullWidth
+                      label={key}
+                      helperText={schema.description}
+                      value={localConfig[key] ?? schema.default ?? ""}
+                      onChange={(e) => setLocalConfig({ ...localConfig, [key]: e.target.value })}
+                    />
+                  )}
+                </Box>
+              ))
             ) : (
-              <Alert severity="info">
-                This plugin has no configurable options.
-              </Alert>
+              <Alert severity="info">This plugin has no configurable options.</Alert>
             )}
           </Box>
         )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={saving || loading}
-        >
-          {saving ? 'Saving...' : 'Save Configuration'}
+        <Button variant="contained" onClick={handleSave} disabled={saving || loading}>
+          {saving ? "Saving..." : "Save Configuration"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -348,8 +332,8 @@ function PluginConfigDialog({ open, plugin, onClose, onSave }) {
 // Execute Action Dialog
 function ExecuteActionDialog({ open, plugin, onClose }) {
   const { executeAction, loading, error } = usePluginOperations();
-  const [action, setAction] = useState('');
-  const [params, setParams] = useState('{}');
+  const [action, setAction] = useState("");
+  const [params, setParams] = useState("{}");
   const [simulation, setSimulation] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -373,15 +357,19 @@ function ExecuteActionDialog({ open, plugin, onClose }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <PlayArrow color="primary" />
           Execute: {plugin.name}
         </Box>
       </DialogTitle>
       <DialogContent dividers>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             fullWidth
             label="Action"
@@ -389,8 +377,8 @@ function ExecuteActionDialog({ open, plugin, onClose }) {
             onChange={(e) => setAction(e.target.value)}
             helperText={
               availableActions.length > 0
-                ? `Available: ${availableActions.join(', ')}`
-                : 'Enter action name'
+                ? `Available: ${availableActions.join(", ")}`
+                : "Enter action name"
             }
           />
 
@@ -404,20 +392,17 @@ function ExecuteActionDialog({ open, plugin, onClose }) {
             helperText="JSON object with action parameters"
           />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Switch
-              checked={simulation}
-              onChange={(e) => setSimulation(e.target.checked)}
-            />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Switch checked={simulation} onChange={(e) => setSimulation(e.target.checked)} />
             <Typography variant="body2">Simulation Mode (dry run)</Typography>
           </Box>
 
           {result && (
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: "grey.50" }}>
               <Typography variant="subtitle2" gutterBottom>
                 Result:
               </Typography>
-              <pre style={{ margin: 0, overflow: 'auto', maxHeight: 200 }}>
+              <pre style={{ margin: 0, overflow: "auto", maxHeight: 200 }}>
                 {JSON.stringify(result, null, 2)}
               </pre>
             </Paper>
@@ -432,7 +417,7 @@ function ExecuteActionDialog({ open, plugin, onClose }) {
           disabled={loading || !action}
           startIcon={loading ? <CircularProgress size={16} /> : <PlayArrow />}
         >
-          {loading ? 'Executing...' : 'Execute'}
+          {loading ? "Executing..." : "Execute"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -471,13 +456,8 @@ function DeleteConfirmDialog({ open, plugin, onClose, onConfirm }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleConfirm}
-          disabled={loading}
-        >
-          {loading ? 'Uninstalling...' : 'Uninstall'}
+        <Button variant="contained" color="error" onClick={handleConfirm} disabled={loading}>
+          {loading ? "Uninstalling..." : "Uninstall"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -486,22 +466,14 @@ function DeleteConfirmDialog({ open, plugin, onClose, onConfirm }) {
 
 // Main Component
 export default function InstalledPlugins() {
-  const {
-    plugins,
-    loading,
-    error,
-    filters,
-    pagination,
-    updateFilters,
-    changePage,
-    refresh,
-  } = usePlugins();
+  const { plugins, loading, error, filters, pagination, updateFilters, changePage, refresh } =
+    usePlugins();
   const { enablePlugin, disablePlugin } = usePluginOperations();
 
   const [configPlugin, setConfigPlugin] = useState(null);
   const [executePlugin, setExecutePlugin] = useState(null);
   const [deletePlugin, setDeletePlugin] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -537,9 +509,9 @@ export default function InstalledPlugins() {
   const stats = useMemo(() => {
     return {
       total: plugins.length,
-      enabled: plugins.filter((p) => p.status === 'enabled').length,
-      disabled: plugins.filter((p) => p.status === 'disabled').length,
-      error: plugins.filter((p) => p.status === 'error').length,
+      enabled: plugins.filter((p) => p.status === "enabled").length,
+      disabled: plugins.filter((p) => p.status === "disabled").length,
+      error: plugins.filter((p) => p.status === "error").length,
     };
   }, [plugins]);
 
@@ -558,7 +530,7 @@ export default function InstalledPlugins() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="primary">
                 {stats.total}
               </Typography>
@@ -570,7 +542,7 @@ export default function InstalledPlugins() {
         </Grid>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="success.main">
                 {stats.enabled}
               </Typography>
@@ -582,7 +554,7 @@ export default function InstalledPlugins() {
         </Grid>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="warning.main">
                 {stats.disabled}
               </Typography>
@@ -594,7 +566,7 @@ export default function InstalledPlugins() {
         </Grid>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="error.main">
                 {stats.error}
               </Typography>
@@ -618,7 +590,7 @@ export default function InstalledPlugins() {
                 value={searchTerm}
                 onChange={handleSearch}
                 InputProps={{
-                  startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+                  startAdornment: <Search sx={{ mr: 1, color: "text.secondary" }} />,
                 }}
               />
             </Grid>
@@ -626,7 +598,7 @@ export default function InstalledPlugins() {
               <FormControl fullWidth size="small">
                 <InputLabel>Category</InputLabel>
                 <Select
-                  value={filters.category || ''}
+                  value={filters.category || ""}
                   label="Category"
                   onChange={handleCategoryFilter}
                 >
@@ -645,11 +617,7 @@ export default function InstalledPlugins() {
             <Grid item xs={6} sm={3}>
               <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
-                <Select
-                  value={filters.status || ''}
-                  label="Status"
-                  onChange={handleStatusFilter}
-                >
+                <Select value={filters.status || ""} label="Status" onChange={handleStatusFilter}>
                   <MenuItem value="">All Status</MenuItem>
                   <MenuItem value="enabled">Enabled</MenuItem>
                   <MenuItem value="disabled">Disabled</MenuItem>
@@ -659,12 +627,7 @@ export default function InstalledPlugins() {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<Refresh />}
-                onClick={refresh}
-              >
+              <Button fullWidth variant="outlined" startIcon={<Refresh />} onClick={refresh}>
                 Refresh
               </Button>
             </Grid>

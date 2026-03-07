@@ -28,51 +28,51 @@ export default function SignInPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Clear previous error messages (including the global error)
-    setError('');
-    setEmailFieldError('');
-    setPasswordFieldError('');
+    setError('')
+    setEmailFieldError('')
+    setPasswordFieldError('')
 
-    setIsLoading(true);
+    setIsLoading(true)
 
     // Client-side validation
-    let hasErrors = false;
+    let hasErrors = false
 
     if (!email) {
-      setEmailFieldError('Email is required');
-      hasErrors = true;
+      setEmailFieldError('Email is required')
+      hasErrors = true
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailFieldError('Please enter a valid email address');
-      hasErrors = true;
+      setEmailFieldError('Please enter a valid email address')
+      hasErrors = true
     }
 
     if (!password) {
-      setPasswordFieldError('Password is required');
-      hasErrors = true;
+      setPasswordFieldError('Password is required')
+      hasErrors = true
     } else if (password.length < 8) {
-      setPasswordFieldError('Password must be at least 8 characters');
-      hasErrors = true;
+      setPasswordFieldError('Password must be at least 8 characters')
+      hasErrors = true
     }
 
     if (hasErrors) {
-      setIsLoading(false);
-      return;
+      setIsLoading(false)
+      return
     }
 
     try {
-      await login(email, password);
+      await login(email, password)
       // Track signup/signin as the first step
-      trackGoldenPathStep('signup');
-      markStepComplete('signup');
+      trackGoldenPathStep('signup')
+      markStepComplete('signup')
     } catch (err) {
       // When login fails, clear field errors but keep the global error
-      setEmailFieldError('');
-      setPasswordFieldError('');
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setEmailFieldError('')
+      setPasswordFieldError('')
+      setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -121,10 +121,10 @@ export default function SignInPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
+                  onChange={e => {
+                    setEmail(e.target.value)
                     // Clear field-specific error when user starts typing
-                    setEmailFieldError('');
+                    setEmailFieldError('')
                   }}
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your email"
@@ -132,7 +132,10 @@ export default function SignInPage() {
                   aria-describedby="email-error"
                   aria-invalid={!!emailFieldError}
                 />
-                <div id="email-error" className="min-h-[20px] mt-1 text-sm text-red-300">
+                <div
+                  id="email-error"
+                  className="min-h-[20px] mt-1 text-sm text-red-300"
+                >
                   {emailFieldError && <span>{emailFieldError}</span>}
                 </div>
               </div>
@@ -149,10 +152,10 @@ export default function SignInPage() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
+                    onChange={e => {
+                      setPassword(e.target.value)
                       // Clear field-specific error when user starts typing
-                      setPasswordFieldError('');
+                      setPasswordFieldError('')
                     }}
                     className="w-full px-3 py-2 pr-10 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your password"
@@ -165,7 +168,9 @@ export default function SignInPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/70 hover:text-white"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -174,10 +179,15 @@ export default function SignInPage() {
                     )}
                   </button>
                 </div>
-                <div id="password-error" className="min-h-[20px] mt-1 text-sm text-red-300">
+                <div
+                  id="password-error"
+                  className="min-h-[20px] mt-1 text-sm text-red-300"
+                >
                   {passwordFieldError && <span>{passwordFieldError}</span>}
                 </div>
-                <p className="text-xs text-blue-200 mt-1">Must be at least 8 characters long</p>
+                <p className="text-xs text-blue-200 mt-1">
+                  Must be at least 8 characters long
+                </p>
               </div>
 
               {error && (

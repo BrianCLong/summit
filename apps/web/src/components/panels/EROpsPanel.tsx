@@ -67,9 +67,8 @@ export function EROpsPanel() {
   const [precisionData, setPrecisionData] = useState<PrecisionRecallPoint[]>([])
   const [rollbackData, setRollbackData] = useState<RollbackPoint[]>([])
   const [conflictData, setConflictData] = useState<ConflictPoint[]>([])
-  const [guardrailStatus, setGuardrailStatus] = useState<GuardrailStatus | null>(
-    null,
-  )
+  const [guardrailStatus, setGuardrailStatus] =
+    useState<GuardrailStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -85,13 +84,12 @@ export function EROpsPanel() {
           rollbackResponse,
           conflictResponse,
           guardrailResponse,
-        ] =
-          await Promise.all([
-            fetch('/api/ga-core-metrics/er-ops/precision-recall?days=30'),
-            fetch('/api/ga-core-metrics/er-ops/rollbacks?days=30'),
-            fetch('/api/ga-core-metrics/er-ops/conflicts?days=30'),
-            fetch('/api/er/guardrails/status'),
-          ])
+        ] = await Promise.all([
+          fetch('/api/ga-core-metrics/er-ops/precision-recall?days=30'),
+          fetch('/api/ga-core-metrics/er-ops/rollbacks?days=30'),
+          fetch('/api/ga-core-metrics/er-ops/conflicts?days=30'),
+          fetch('/api/er/guardrails/status'),
+        ])
 
         if (!precisionResponse.ok) {
           throw new Error('Failed to load precision/recall trends')
@@ -133,7 +131,10 @@ export function EROpsPanel() {
   }, [])
 
   const precisionTrend = useMemo(() => {
-    const map = new Map<string, { date: string; precision?: number; recall?: number }>()
+    const map = new Map<
+      string,
+      { date: string; precision?: number; recall?: number }
+    >()
     precisionData.forEach(point => {
       const entry = map.get(point.date) || { date: point.date }
       const value = Number(point.value)
@@ -156,7 +157,7 @@ export function EROpsPanel() {
           total: Number(point.total_deployments),
         }))
         .sort((a, b) => a.date.localeCompare(b.date)),
-    [rollbackData],
+    [rollbackData]
   )
 
   const conflictSummary = useMemo(
@@ -165,13 +166,13 @@ export function EROpsPanel() {
         name: point.conflict_reason,
         count: Number(point.count),
       })),
-    [conflictData],
+    [conflictData]
   )
 
   const latestTrend = precisionTrend[precisionTrend.length - 1]
   const totalRollbacks = rollbackTrend.reduce(
     (sum, point) => sum + point.rollbacks,
-    0,
+    0
   )
   const topConflict = conflictSummary[0]?.name
   const guardrailOverride = guardrailStatus?.latestOverride
@@ -207,7 +208,9 @@ export function EROpsPanel() {
                     Guardrails
                   </h4>
                   <Badge
-                    variant={guardrailStatus?.passed ? 'secondary' : 'destructive'}
+                    variant={
+                      guardrailStatus?.passed ? 'secondary' : 'destructive'
+                    }
                   >
                     {guardrailStatus ? guardrailBadge : '---'}
                   </Badge>
@@ -215,11 +218,15 @@ export function EROpsPanel() {
                 <div className="mt-3 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Precision</span>
-                    <span>{formatPercent(guardrailStatus?.metrics?.precision)}</span>
+                    <span>
+                      {formatPercent(guardrailStatus?.metrics?.precision)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Recall</span>
-                    <span>{formatPercent(guardrailStatus?.metrics?.recall)}</span>
+                    <span>
+                      {formatPercent(guardrailStatus?.metrics?.recall)}
+                    </span>
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -274,7 +281,9 @@ export function EROpsPanel() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis domain={[0, 1]} />
-                      <Tooltip formatter={(value: number) => formatPercent(value)} />
+                      <Tooltip
+                        formatter={(value: number) => formatPercent(value)}
+                      />
                       <Line
                         type="monotone"
                         dataKey="precision"
@@ -305,7 +314,11 @@ export function EROpsPanel() {
                       <XAxis dataKey="date" />
                       <YAxis allowDecimals={false} />
                       <Tooltip />
-                      <Bar dataKey="rollbacks" fill="#f97316" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="rollbacks"
+                        fill="#f97316"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

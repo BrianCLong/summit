@@ -1,41 +1,41 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
 export const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
-      main: '#1976d2',
-      dark: '#115293',
-      light: '#42a5f5',
+      main: "#1976d2",
+      dark: "#115293",
+      light: "#42a5f5",
     },
     secondary: {
-      main: '#dc004e',
+      main: "#dc004e",
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: "#f5f5f5",
+      paper: "#ffffff",
     },
     text: {
-      primary: '#1a1a1a',
-      secondary: '#666666',
+      primary: "#1a1a1a",
+      secondary: "#666666",
     },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
-      fontSize: '2.5rem',
+      fontSize: "2.5rem",
       fontWeight: 600,
     },
     h4: {
-      fontSize: '1.5rem',
+      fontSize: "1.5rem",
       fontWeight: 600,
     },
     h5: {
-      fontSize: '1.25rem',
+      fontSize: "1.25rem",
       fontWeight: 600,
     },
     h6: {
-      fontSize: '1rem',
+      fontSize: "1rem",
       fontWeight: 600,
     },
   },
@@ -43,7 +43,7 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
+          textTransform: "none",
           borderRadius: 8,
         },
       },
@@ -52,7 +52,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         },
       },
     },

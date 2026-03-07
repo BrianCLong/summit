@@ -26,8 +26,8 @@ To ensure that the hash of a context object is stable (for signing and caching),
 1.  **Key Ordering:** All JSON object keys must be sorted lexicographically (A-Z).
 2.  **No Whitespace:** Compact JSON (no indentation) is preferred for hashing, though pretty-printing is allowed for logs.
 3.  **Timestamps:**
-    - **Prohibited:** `Date.now()` or nondeterministic timestamps in the *inputs* that affect logic.
-    - **Allowed:** Timestamps in *metadata* logs, provided they are excluded from the content hash.
+    - **Prohibited:** `Date.now()` or nondeterministic timestamps in the _inputs_ that affect logic.
+    - **Allowed:** Timestamps in _metadata_ logs, provided they are excluded from the content hash.
 4.  **Floating Point:** Use fixed precision or string representation to avoid architecture-specific drift.
 
 ## Schema

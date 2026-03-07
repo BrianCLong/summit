@@ -5,7 +5,7 @@
  * checkpoint management, circuit breakers, and verification.
  */
 
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 import {
   Rollback,
   RollbackConfig,
@@ -21,7 +21,7 @@ import {
   GovernanceEvent,
   AgentId,
   FleetId,
-} from '../types';
+} from "../types";
 
 // ============================================================================
 // Configuration
@@ -31,42 +31,42 @@ const DEFAULT_CONFIG: RollbackConfig = {
   enabled: true,
   triggers: [
     {
-      trigger: 'policy_violation',
+      trigger: "policy_violation",
       threshold: 10,
       window: 300_000, // 5 minutes
       cooldown: 600_000, // 10 minutes
       enabled: true,
     },
     {
-      trigger: 'hallucination_threshold',
+      trigger: "hallucination_threshold",
       threshold: 5,
       window: 300_000,
       cooldown: 600_000,
       enabled: true,
     },
     {
-      trigger: 'error_rate_exceeded',
+      trigger: "error_rate_exceeded",
       threshold: 0.1, // 10% error rate
       window: 60_000, // 1 minute
       cooldown: 300_000, // 5 minutes
       enabled: true,
     },
     {
-      trigger: 'safety_breach',
+      trigger: "safety_breach",
       threshold: 1,
       window: 60_000,
       cooldown: 3600_000, // 1 hour
       enabled: true,
     },
     {
-      trigger: 'circuit_breaker',
+      trigger: "circuit_breaker",
       threshold: 3, // 3 consecutive failures
       window: 30_000,
       cooldown: 60_000,
       enabled: true,
     },
   ],
-  scope: 'agent',
+  scope: "agent",
   retentionCheckpoints: 10,
   autoApprove: false,
   notifyChannels: [],
@@ -145,10 +145,12 @@ export class RollbackManager {
       agentId?: AgentId;
       fleetId?: FleetId;
       value?: number;
-    },
+    }
   ): Promise<boolean> {
     const triggerConfig = this.config.triggers.find((t) => t.trigger === trigger);
-    if (!triggerConfig || !triggerConfig.enabled) {return false;}
+    if (!triggerConfig || !triggerConfig.enabled) {
+      return false;
+    }
 
     const key = this.getTriggerKey(trigger, context.agentId, context.fleetId);
 
@@ -200,7 +202,7 @@ export class RollbackManager {
       : this.getLatestCheckpoint(params.scope, params.agentId, params.fleetId);
 
     if (!checkpoint) {
-      throw new Error('No checkpoint available for rollback');
+      throw new Error("No checkpoint available for rollback");
     }
 
     // Get current state
@@ -210,7 +212,7 @@ export class RollbackManager {
       id: `RB-${Date.now()}-${crypto.randomUUID().substring(0, 8)}`,
       trigger: params.trigger,
       scope: params.scope,
-      status: 'pending',
+      status: "pending",
       initiatedAt: new Date(),
       initiatedBy: params.initiatedBy,
       reason: params.reason,
@@ -228,15 +230,15 @@ export class RollbackManager {
     this.emitEvent({
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      type: 'rollback_initiated',
-      source: 'RollbackManager',
+      type: "rollback_initiated",
+      source: "RollbackManager",
       agentId: params.agentId,
       fleetId: params.fleetId,
       actor: params.initiatedBy,
-      action: 'initiate_rollback',
+      action: "initiate_rollback",
       resource: rollback.id,
-      outcome: 'success',
-      classification: 'UNCLASSIFIED',
+      outcome: "success",
+      classification: "UNCLASSIFIED",
       details: {
         trigger: params.trigger,
         scope: params.scope,
@@ -266,42 +268,42 @@ export class RollbackManager {
       throw new Error(`Rollback not found: ${rollbackId}`);
     }
 
-    if (rollback.status !== 'pending') {
+    if (rollback.status !== "pending") {
       throw new Error(`Rollback ${rollbackId} is not in pending status`);
     }
 
-    rollback.status = 'in_progress';
+    rollback.status = "in_progress";
 
     try {
       // Execute each step
       for (const step of rollback.steps) {
-        step.status = 'in_progress';
+        step.status = "in_progress";
         step.startedAt = new Date();
 
         try {
           await this.executeStep(step, rollback);
-          step.status = 'completed';
+          step.status = "completed";
           step.completedAt = new Date();
-          step.result = 'Success';
+          step.result = "Success";
         } catch (error) {
-          step.status = 'failed';
+          step.status = "failed";
           step.completedAt = new Date();
           step.error = error instanceof Error ? error.message : String(error);
 
           // Fail the entire rollback
-          rollback.status = 'failed';
+          rollback.status = "failed";
           break;
         }
       }
 
       // If all steps completed, verify
-      if (rollback.steps.every((s) => s.status === 'completed')) {
+      if (rollback.steps.every((s) => s.status === "completed")) {
         rollback.verification = await this.verifyRollback(rollback);
-        rollback.status = rollback.verification.verified ? 'completed' : 'failed';
+        rollback.status = rollback.verification.verified ? "completed" : "failed";
         rollback.completedAt = new Date();
       }
     } catch (error) {
-      rollback.status = 'failed';
+      rollback.status = "failed";
     }
 
     this.rollbacks.set(rollbackId, rollback);
@@ -310,16 +312,16 @@ export class RollbackManager {
     this.emitEvent({
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      type: 'rollback_completed',
-      source: 'RollbackManager',
+      type: "rollback_completed",
+      source: "RollbackManager",
       actor: executor,
-      action: 'execute_rollback',
+      action: "execute_rollback",
       resource: rollbackId,
-      outcome: rollback.status === 'completed' ? 'success' : 'failure',
-      classification: 'UNCLASSIFIED',
+      outcome: rollback.status === "completed" ? "success" : "failure",
+      classification: "UNCLASSIFIED",
       details: {
         status: rollback.status,
-        stepsCompleted: rollback.steps.filter((s) => s.status === 'completed').length,
+        stepsCompleted: rollback.steps.filter((s) => s.status === "completed").length,
         verification: rollback.verification,
       },
     });
@@ -336,17 +338,14 @@ export class RollbackManager {
     // Validate checkpoint exists and is valid
     const checkpoint = this.getCheckpointById(rollback.checkpointId);
     if (!checkpoint) {
-      issues.push('Checkpoint not found');
+      issues.push("Checkpoint not found");
     }
 
     // Validate state compatibility
     if (checkpoint && rollback.currentState) {
-      const stateValid = this.validateStateCompatibility(
-        rollback.currentState,
-        checkpoint.state,
-      );
+      const stateValid = this.validateStateCompatibility(rollback.currentState, checkpoint.state);
       if (!stateValid) {
-        issues.push('State incompatibility detected');
+        issues.push("State incompatibility detected");
       }
     }
 
@@ -368,19 +367,19 @@ export class RollbackManager {
    */
   private async executeStep(step: RollbackStep, rollback: Rollback): Promise<void> {
     switch (step.action) {
-      case 'stop_agent':
+      case "stop_agent":
         await this.stopAgent(rollback.affectedAgents);
         break;
-      case 'restore_config':
+      case "restore_config":
         await this.restoreConfig(rollback.targetState);
         break;
-      case 'clear_cache':
+      case "clear_cache":
         await this.clearCache(rollback.scope, rollback.affectedAgents, rollback.affectedFleets);
         break;
-      case 'restart_agent':
+      case "restart_agent":
         await this.restartAgent(rollback.affectedAgents);
         break;
-      case 'verify_state':
+      case "verify_state":
         // Verification happens separately
         break;
       default:
@@ -412,7 +411,7 @@ export class RollbackManager {
   private async clearCache(
     scope: RollbackScope,
     agentIds: AgentId[],
-    fleetIds: FleetId[],
+    fleetIds: FleetId[]
   ): Promise<void> {
     console.log(`[Rollback] Clearing caches for scope: ${scope}`);
     // Implementation would clear relevant caches
@@ -438,15 +437,16 @@ export class RollbackManager {
     const currentState = await this.getCurrentState(
       rollback.scope,
       rollback.affectedAgents[0],
-      rollback.affectedFleets[0],
+      rollback.affectedFleets[0]
     );
 
     checks.push({
-      name: 'state_match',
+      name: "state_match",
       passed: currentState.configHash === rollback.targetState.configHash,
-      result: currentState.configHash === rollback.targetState.configHash
-        ? 'State matches target'
-        : 'State mismatch',
+      result:
+        currentState.configHash === rollback.targetState.configHash
+          ? "State matches target"
+          : "State mismatch",
     });
 
     // Check agents are healthy
@@ -455,7 +455,7 @@ export class RollbackManager {
       checks.push({
         name: `agent_health_${agentId}`,
         passed: healthy,
-        result: healthy ? 'Agent healthy' : 'Agent unhealthy',
+        result: healthy ? "Agent healthy" : "Agent unhealthy",
       });
     }
 
@@ -465,9 +465,9 @@ export class RollbackManager {
     return {
       verified: allPassed,
       verifiedAt: new Date(),
-      verifiedBy: 'system',
+      verifiedBy: "system",
       checks,
-      overallHealth: allPassed ? 'healthy' : 'degraded',
+      overallHealth: allPassed ? "healthy" : "degraded",
     };
   }
 
@@ -486,35 +486,35 @@ export class RollbackManager {
     const steps: RollbackStep[] = [];
 
     switch (scope) {
-      case 'agent':
+      case "agent":
         steps.push(
-          { id: '1', sequence: 1, action: 'stop_agent', status: 'pending' },
-          { id: '2', sequence: 2, action: 'restore_config', status: 'pending' },
-          { id: '3', sequence: 3, action: 'clear_cache', status: 'pending' },
-          { id: '4', sequence: 4, action: 'restart_agent', status: 'pending' },
-          { id: '5', sequence: 5, action: 'verify_state', status: 'pending' },
+          { id: "1", sequence: 1, action: "stop_agent", status: "pending" },
+          { id: "2", sequence: 2, action: "restore_config", status: "pending" },
+          { id: "3", sequence: 3, action: "clear_cache", status: "pending" },
+          { id: "4", sequence: 4, action: "restart_agent", status: "pending" },
+          { id: "5", sequence: 5, action: "verify_state", status: "pending" }
         );
         break;
-      case 'fleet':
+      case "fleet":
         steps.push(
-          { id: '1', sequence: 1, action: 'pause_fleet', status: 'pending' },
-          { id: '2', sequence: 2, action: 'restore_fleet_config', status: 'pending' },
-          { id: '3', sequence: 3, action: 'clear_fleet_cache', status: 'pending' },
-          { id: '4', sequence: 4, action: 'resume_fleet', status: 'pending' },
-          { id: '5', sequence: 5, action: 'verify_fleet_state', status: 'pending' },
+          { id: "1", sequence: 1, action: "pause_fleet", status: "pending" },
+          { id: "2", sequence: 2, action: "restore_fleet_config", status: "pending" },
+          { id: "3", sequence: 3, action: "clear_fleet_cache", status: "pending" },
+          { id: "4", sequence: 4, action: "resume_fleet", status: "pending" },
+          { id: "5", sequence: 5, action: "verify_fleet_state", status: "pending" }
         );
         break;
-      case 'chain':
+      case "chain":
         steps.push(
-          { id: '1', sequence: 1, action: 'abort_chain', status: 'pending' },
-          { id: '2', sequence: 2, action: 'restore_chain_config', status: 'pending' },
-          { id: '3', sequence: 3, action: 'verify_chain_state', status: 'pending' },
+          { id: "1", sequence: 1, action: "abort_chain", status: "pending" },
+          { id: "2", sequence: 2, action: "restore_chain_config", status: "pending" },
+          { id: "3", sequence: 3, action: "verify_chain_state", status: "pending" }
         );
         break;
       default:
         steps.push(
-          { id: '1', sequence: 1, action: 'restore_config', status: 'pending' },
-          { id: '2', sequence: 2, action: 'verify_state', status: 'pending' },
+          { id: "1", sequence: 1, action: "restore_config", status: "pending" },
+          { id: "2", sequence: 2, action: "verify_state", status: "pending" }
         );
     }
 
@@ -527,7 +527,7 @@ export class RollbackManager {
   private async getCurrentState(
     scope: RollbackScope,
     agentId?: AgentId,
-    fleetId?: FleetId,
+    fleetId?: FleetId
   ): Promise<RollbackState> {
     // Implementation would fetch actual state
     return {
@@ -543,8 +543,8 @@ export class RollbackManager {
    */
   private validateStateCompatibility(current: RollbackState, target: RollbackState): boolean {
     // Check version compatibility
-    const currentMajor = parseInt(current.version.split('.')[0]);
-    const targetMajor = parseInt(target.version.split('.')[0]);
+    const currentMajor = parseInt(current.version.split(".")[0]);
+    const targetMajor = parseInt(target.version.split(".")[0]);
     return currentMajor === targetMajor;
   }
 
@@ -553,19 +553,19 @@ export class RollbackManager {
    */
   private canExecuteStep(step: RollbackStep): boolean {
     const validActions = [
-      'stop_agent',
-      'restore_config',
-      'clear_cache',
-      'restart_agent',
-      'verify_state',
-      'pause_fleet',
-      'restore_fleet_config',
-      'clear_fleet_cache',
-      'resume_fleet',
-      'verify_fleet_state',
-      'abort_chain',
-      'restore_chain_config',
-      'verify_chain_state',
+      "stop_agent",
+      "restore_config",
+      "clear_cache",
+      "restart_agent",
+      "verify_state",
+      "pause_fleet",
+      "restore_fleet_config",
+      "clear_fleet_cache",
+      "resume_fleet",
+      "verify_fleet_state",
+      "abort_chain",
+      "restore_chain_config",
+      "verify_chain_state",
     ];
     return validActions.includes(step.action);
   }
@@ -574,14 +574,14 @@ export class RollbackManager {
    * Get checkpoint key
    */
   private getCheckpointKey(scope: RollbackScope, agentId?: AgentId, fleetId?: FleetId): string {
-    return `${scope}:${agentId || 'all'}:${fleetId || 'all'}`;
+    return `${scope}:${agentId || "all"}:${fleetId || "all"}`;
   }
 
   /**
    * Get trigger key
    */
   private getTriggerKey(trigger: RollbackTrigger, agentId?: AgentId, fleetId?: FleetId): string {
-    return `${trigger}:${agentId || 'all'}:${fleetId || 'all'}`;
+    return `${trigger}:${agentId || "all"}:${fleetId || "all"}`;
   }
 
   /**
@@ -590,7 +590,9 @@ export class RollbackManager {
   private getCheckpointById(id: string): Checkpoint | null {
     for (const checkpoints of this.checkpoints.values()) {
       const found = checkpoints.find((c) => c.id === id);
-      if (found) {return found;}
+      if (found) {
+        return found;
+      }
     }
     return null;
   }
@@ -601,11 +603,13 @@ export class RollbackManager {
   private getLatestCheckpoint(
     scope: RollbackScope,
     agentId?: AgentId,
-    fleetId?: FleetId,
+    fleetId?: FleetId
   ): Checkpoint | null {
     const key = this.getCheckpointKey(scope, agentId, fleetId);
     const checkpoints = this.checkpoints.get(key);
-    if (!checkpoints || checkpoints.length === 0) {return null;}
+    if (!checkpoints || checkpoints.length === 0) {
+      return null;
+    }
     return checkpoints[checkpoints.length - 1];
   }
 
@@ -621,7 +625,7 @@ export class RollbackManager {
    * Hash state for comparison
    */
   private hashState(state: Record<string, unknown>): string {
-    return crypto.createHash('sha256').update(JSON.stringify(state)).digest('hex');
+    return crypto.createHash("sha256").update(JSON.stringify(state)).digest("hex");
   }
 
   /**
@@ -629,9 +633,11 @@ export class RollbackManager {
    */
   cancelRollback(rollbackId: string, canceller: string): boolean {
     const rollback = this.rollbacks.get(rollbackId);
-    if (!rollback || rollback.status !== 'pending') {return false;}
+    if (!rollback || rollback.status !== "pending") {
+      return false;
+    }
 
-    rollback.status = 'cancelled';
+    rollback.status = "cancelled";
     rollback.completedAt = new Date();
     this.rollbacks.set(rollbackId, rollback);
 
@@ -672,7 +678,7 @@ export class RollbackManager {
     for (const rb of rollbacks) {
       byTrigger[rb.trigger] = (byTrigger[rb.trigger] || 0) + 1;
 
-      if (rb.completedAt && rb.status === 'completed') {
+      if (rb.completedAt && rb.status === "completed") {
         totalRecoveryTime += rb.completedAt.getTime() - rb.initiatedAt.getTime();
         completedCount++;
       }
@@ -680,9 +686,9 @@ export class RollbackManager {
 
     return {
       total: rollbacks.length,
-      successful: rollbacks.filter((r) => r.status === 'completed').length,
-      failed: rollbacks.filter((r) => r.status === 'failed').length,
-      pending: rollbacks.filter((r) => r.status === 'pending').length,
+      successful: rollbacks.filter((r) => r.status === "completed").length,
+      failed: rollbacks.filter((r) => r.status === "failed").length,
+      pending: rollbacks.filter((r) => r.status === "pending").length,
       avgRecoveryTime: completedCount > 0 ? totalRecoveryTime / completedCount : 0,
       byTrigger: byTrigger as Record<RollbackTrigger, number>,
     };
@@ -703,7 +709,7 @@ export class RollbackManager {
       try {
         listener(event);
       } catch (error) {
-        console.error('Event listener error:', error);
+        console.error("Event listener error:", error);
       }
     }
   }

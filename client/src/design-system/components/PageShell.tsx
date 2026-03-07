@@ -1,8 +1,8 @@
-import React from 'react';
-import { Box, Breadcrumbs, Button, Stack, Typography, Alert } from '@mui/material';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import { useDesignSystemTelemetry } from '../DesignSystemProvider';
+import React from "react";
+import { Box, Breadcrumbs, Button, Stack, Typography, Alert } from "@mui/material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import { useDesignSystemTelemetry } from "../DesignSystemProvider";
 
 export type Breadcrumb = { label: string; href?: string; onClick?: () => void };
 
@@ -30,11 +30,11 @@ export const PageShell: React.FC<PageShellProps> = ({
   const reason = permission?.reason;
 
   React.useEffect(() => {
-    telemetry.record('PageShell', '1.0.0', { title, allowed: isAllowed });
+    telemetry.record("PageShell", "1.0.0", { title, allowed: isAllowed });
   }, [telemetry, title, isAllowed]);
 
   return (
-    <Box component="section" sx={{ p: 3, gap: 2, display: 'flex', flexDirection: 'column' }}>
+    <Box component="section" sx={{ p: 3, gap: 2, display: "flex", flexDirection: "column" }}>
       <Box>
         {breadcrumbs && breadcrumbs.length > 0 && (
           <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
@@ -47,13 +47,24 @@ export const PageShell: React.FC<PageShellProps> = ({
               Home
             </Button>
             {breadcrumbs.map((crumb) => (
-              <Button key={crumb.label} variant="text" size="small" onClick={crumb.onClick} href={crumb.href}>
+              <Button
+                key={crumb.label}
+                variant="text"
+                size="small"
+                onClick={crumb.onClick}
+                href={crumb.href}
+              >
                 {crumb.label}
               </Button>
             ))}
           </Breadcrumbs>
         )}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mt={breadcrumbs ? 2 : 0}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          mt={breadcrumbs ? 2 : 0}
+        >
           <Box>
             <Typography variant="h4" component="h1" gutterBottom>
               {title}
@@ -76,7 +87,7 @@ export const PageShell: React.FC<PageShellProps> = ({
             You don’t have access to this area.
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {reason || 'Contact your administrator to request permission.'}
+            {reason || "Contact your administrator to request permission."}
           </Typography>
         </Alert>
       )}

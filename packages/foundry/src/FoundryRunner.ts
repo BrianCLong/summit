@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import chalk from 'chalk';
-import { FoundryRunOptions, RunState } from './types.js';
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
+import { FoundryRunOptions, RunState } from "./types.js";
 
 export class FoundryRunner {
   private options: FoundryRunOptions;
@@ -12,14 +12,14 @@ export class FoundryRunner {
     this.state = {
       iteration: 0,
       completed: false,
-      status: 'running',
+      status: "running",
       logs: [],
     };
   }
 
   async run(): Promise<RunState> {
     const cwd = this.options.cwd || process.cwd();
-    const stateFile = path.join(cwd, 'run_state.json');
+    const stateFile = path.join(cwd, "run_state.json");
 
     console.log(chalk.blue(`Foundry Loop started in ${cwd}`));
     console.log(chalk.dim(`Prompt: ${this.options.prompt}`));
@@ -27,7 +27,9 @@ export class FoundryRunner {
 
     while (this.state.iteration < this.options.maxIterations && !this.state.completed) {
       this.state.iteration++;
-      console.log(chalk.yellow(`\nIteration ${this.state.iteration}/${this.options.maxIterations}`));
+      console.log(
+        chalk.yellow(`\nIteration ${this.state.iteration}/${this.options.maxIterations}`)
+      );
 
       // Simulate agent work (for skeleton)
       this.state.logs.push(`Iteration ${this.state.iteration}: running...`);
@@ -37,10 +39,14 @@ export class FoundryRunner {
       if (isComplete) {
         if (this.state.iteration >= (this.options.minIterations || 0)) {
           this.state.completed = true;
-          this.state.status = 'completed';
-          console.log(chalk.green('Completion promise found! Stopping loop.'));
+          this.state.status = "completed";
+          console.log(chalk.green("Completion promise found! Stopping loop."));
         } else {
-          console.log(chalk.yellow(`Completion found but min iterations (${this.options.minIterations}) not met. Continuing...`));
+          console.log(
+            chalk.yellow(
+              `Completion found but min iterations (${this.options.minIterations}) not met. Continuing...`
+            )
+          );
         }
       }
 
@@ -49,12 +55,12 @@ export class FoundryRunner {
       if (this.state.completed) break;
 
       // Simulate delay or work
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     if (!this.state.completed) {
-      this.state.status = 'stopped';
-      console.log(chalk.red('Max iterations reached.'));
+      this.state.status = "stopped";
+      console.log(chalk.red("Max iterations reached."));
     }
 
     await this.saveState(stateFile);
@@ -62,10 +68,10 @@ export class FoundryRunner {
   }
 
   private checkCompletion(cwd: string): boolean {
-    const promiseFile = path.join(cwd, 'PROMISE');
+    const promiseFile = path.join(cwd, "PROMISE");
     if (fs.existsSync(promiseFile)) {
-        const content = fs.readFileSync(promiseFile, 'utf-8');
-        return content.includes(this.options.completionPromise);
+      const content = fs.readFileSync(promiseFile, "utf-8");
+      return content.includes(this.options.completionPromise);
     }
     return false;
   }

@@ -7,18 +7,21 @@ This specification outlines the "Summit SpecFlow" system, designed to **subsume,
 ## Philosophy: Actions, Not Phases
 
 OpenSpec rightly identifies that workflows should be fluid actions rather than locked phases. Summit adopts this philosophy:
-*   **Actions**: Independent, composable operations (e.g., `explore`, `design`, `implement`, `verify`) that operate on artifacts.
-*   **Artifacts**: Durable, versioned entities (e.g., Specs, Plans, Test Suites, Evidence Bundles) that serve as inputs and outputs for actions.
-*   **Fluidity**: Developers can move backward (revisit design), fork (parallel exploration), or fast-forward (skip formal planning for trivial changes) based on context, without breaking the process.
+
+- **Actions**: Independent, composable operations (e.g., `explore`, `design`, `implement`, `verify`) that operate on artifacts.
+- **Artifacts**: Durable, versioned entities (e.g., Specs, Plans, Test Suites, Evidence Bundles) that serve as inputs and outputs for actions.
+- **Fluidity**: Developers can move backward (revisit design), fork (parallel exploration), or fast-forward (skip formal planning for trivial changes) based on context, without breaking the process.
 
 ## Summit Artifact Graph Engine
 
 The core engine is a **universal workflow compiler**:
-*   **Workflow = Typed DAG**: Workflows are defined as a graph where nodes are Artifacts and edges are Actions or Dependencies.
-*   **Schemas**: Artifacts are strictly typed and versioned. Schemas can be composed and inherited (e.g., `BaseSpec` -> `SecurityCriticalSpec`).
-*   **Engine**: A runtime that validates artifact states, enforces policy guards, and executes actions.
+
+- **Workflow = Typed DAG**: Workflows are defined as a graph where nodes are Artifacts and edges are Actions or Dependencies.
+- **Schemas**: Artifacts are strictly typed and versioned. Schemas can be composed and inherited (e.g., `BaseSpec` -> `SecurityCriticalSpec`).
+- **Engine**: A runtime that validates artifact states, enforces policy guards, and executes actions.
 
 ### Core Artifact Types
+
 1.  **Finding**: Output of `/summit:explore`. Structured investigation data and hypotheses.
 2.  **ChangeRequest**: The root intent for a modification.
 3.  **Spec**: Detailed requirements and design.
@@ -32,19 +35,25 @@ The core engine is a **universal workflow compiler**:
 Summit supports multiple workflow patterns tailored to different needs:
 
 ### 1. Quick Feature
+
 For low-risk, well-understood changes.
-*   **Flow**: `/summit:new` -> `/summit:ff` -> `/summit:apply` -> `/summit:verify` -> `/summit:archive`
-*   **Logic**: Skips detailed `explore` and `spec` phases if the scope is trivial, jumping straight to implementation (`apply`) while still enforcing verification.
+
+- **Flow**: `/summit:new` -> `/summit:ff` -> `/summit:apply` -> `/summit:verify` -> `/summit:archive`
+- **Logic**: Skips detailed `explore` and `spec` phases if the scope is trivial, jumping straight to implementation (`apply`) while still enforcing verification.
 
 ### 2. Exploratory
+
 For ambiguous or complex problems.
-*   **Flow**: `/summit:explore` -> `/summit:continue` (iterate) -> `/summit:new` -> ...
-*   **Logic**: Focuses on gathering `Findings` first. The artifact graph grows as hypotheses are tested.
+
+- **Flow**: `/summit:explore` -> `/summit:continue` (iterate) -> `/summit:new` -> ...
+- **Logic**: Focuses on gathering `Findings` first. The artifact graph grows as hypotheses are tested.
 
 ### 3. Parallel Changes
+
 For concurrent work on related features.
-*   **Flow**: Multiple `/summit:new` branches operating on the same or related specs.
-*   **Logic**: The engine detects conflicts at the spec/policy level, not just code lines.
+
+- **Flow**: Multiple `/summit:new` branches operating on the same or related specs.
+- **Logic**: The engine detects conflicts at the spec/policy level, not just code lines.
 
 ## Verify++ Rubric (The Moat)
 
@@ -63,14 +72,14 @@ Summit upgrades the verification process from a simple check to a **proof-carryi
 
 The CLI exposes high-level commands that manipulate the artifact graph:
 
-*   `/summit:explore`: structured investigation -> produces `Findings` artifact + candidate hypotheses.
-*   `/summit:new <change-id>`: scaffolds a change folder with typed artifacts.
-*   `/summit:continue`: stepwise creation, with guardrails + policy prompts.
-*   `/summit:ff`: generate planning artifacts fast (when scope is clear).
-*   `/summit:apply`: task-execution with checkpointing + resumability (parallel-friendly).
-*   `/summit:verify`: runs Verify++ producing an evidence bundle + a pass/fail + waivers.
-*   `/summit:archive`: merges deltas, stamps provenance, updates changelog/trace graph.
-*   `/summit:bulk-archive`: multi-change merge with automated conflict proofs.
+- `/summit:explore`: structured investigation -> produces `Findings` artifact + candidate hypotheses.
+- `/summit:new <change-id>`: scaffolds a change folder with typed artifacts.
+- `/summit:continue`: stepwise creation, with guardrails + policy prompts.
+- `/summit:ff`: generate planning artifacts fast (when scope is clear).
+- `/summit:apply`: task-execution with checkpointing + resumability (parallel-friendly).
+- `/summit:verify`: runs Verify++ producing an evidence bundle + a pass/fail + waivers.
+- `/summit:archive`: merges deltas, stamps provenance, updates changelog/trace graph.
+- `/summit:bulk-archive`: multi-change merge with automated conflict proofs.
 
 ## Folder Layout
 
@@ -97,20 +106,21 @@ Workflows are persisted in the repository to ensure version control and visibili
 
 The `/summit:verify` command maps directly to CI gates:
 
-| Verify++ Check | CI Job / Script |
-| :--- | :--- |
-| **Completeness** | `scripts/ci/verify_completeness.ts` |
-| **Correctness** | `npm test` / `vitest` |
-| **Coherence** | `scripts/ci/arch_lint.ts` |
-| **Security** | `scripts/ci/security_scan.sh` (SAST, Secrets) |
-| **Compliance** | `scripts/ci/policy_check.ts` (OPA) |
-| **Performance** | `scripts/ci/perf_budget.ts` |
-| **UX Evidence** | `scripts/ci/ui_test.ts` (Playwright screenshots) |
-| **Provenance** | `scripts/compliance/generate_provenance.ts` |
+| Verify++ Check   | CI Job / Script                                  |
+| :--------------- | :----------------------------------------------- |
+| **Completeness** | `scripts/ci/verify_completeness.ts`              |
+| **Correctness**  | `npm test` / `vitest`                            |
+| **Coherence**    | `scripts/ci/arch_lint.ts`                        |
+| **Security**     | `scripts/ci/security_scan.sh` (SAST, Secrets)    |
+| **Compliance**   | `scripts/ci/policy_check.ts` (OPA)               |
+| **Performance**  | `scripts/ci/perf_budget.ts`                      |
+| **UX Evidence**  | `scripts/ci/ui_test.ts` (Playwright screenshots) |
+| **Provenance**   | `scripts/compliance/generate_provenance.ts`      |
 
 ## The Moat: IntelGraph Integration
 
 Every artifact and action in the Summit SpecFlow is a node or edge in **IntelGraph**.
-*   **Traceability**: "Which requirement caused this code change?"
-*   **Impact Analysis**: "Which tests cover this spec?"
-*   **Learning**: The system learns which workflow graphs result in faster shipping with fewer regressions.
+
+- **Traceability**: "Which requirement caused this code change?"
+- **Impact Analysis**: "Which tests cover this spec?"
+- **Learning**: The system learns which workflow graphs result in faster shipping with fewer regressions.

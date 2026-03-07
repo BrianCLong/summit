@@ -44,7 +44,7 @@ Advance Maestro to **self‑governing autonomy**: program‑level orchestration 
 
 ```yaml
 id: OKR-Q3-LATENCY
-objective: 'Reduce p95 API latency by 20%'
+objective: "Reduce p95 API latency by 20%"
 key_results:
   - id: KR1
     metric: api_p95_ms
@@ -60,12 +60,10 @@ key_results:
 // services/okr/map.ts
 export function mapToOKR(files: string[]): string[] {
   const rules = [
-    { pat: /server\/api\//, okr: 'OKR-Q3-LATENCY' },
-    { pat: /tests\//, okr: 'OKR-QA-ROBUST' },
+    { pat: /server\/api\//, okr: "OKR-Q3-LATENCY" },
+    { pat: /tests\//, okr: "OKR-QA-ROBUST" },
   ];
-  return rules
-    .filter((r) => files.some((f) => r.pat.test(f)))
-    .map((r) => r.okr);
+  return rules.filter((r) => files.some((f) => r.pat.test(f))).map((r) => r.okr);
 }
 ```
 
@@ -92,7 +90,7 @@ export function mapToOKR(files: string[]): string[] {
 ```ts
 // tests/serviceA.spec.ts
 /** @spec SPEC-142 */
-test('retries up to jitter budget', () => {
+test("retries up to jitter budget", () => {
   /* ... */
 });
 ```
@@ -101,18 +99,14 @@ test('retries up to jitter budget', () => {
 
 ```ts
 // tools/trace/binder.ts
-import fs from 'fs';
-const specs = new Set(
-  JSON.parse(fs.readFileSync('artifacts/specs.json', 'utf8')),
-);
+import fs from "fs";
+const specs = new Set(JSON.parse(fs.readFileSync("artifacts/specs.json", "utf8")));
 const annos = Array.from(
-  fs
-    .readFileSync('coverage/annotations.txt', 'utf8')
-    .matchAll(/@spec (SPEC-\d+)/g),
+  fs.readFileSync("coverage/annotations.txt", "utf8").matchAll(/@spec (SPEC-\d+)/g)
 ).map((m) => m[1]);
 const missing = [...specs].filter((id) => !annos.includes(id));
 if (missing.length) {
-  console.error('Missing spec tests:', missing);
+  console.error("Missing spec tests:", missing);
   process.exit(1);
 }
 ```
@@ -134,13 +128,13 @@ if (missing.length) {
 **Scenario (YAML)**
 
 ```yaml
-plan: 'PR-5843'
+plan: "PR-5843"
 changes:
-  - path: 'infra/iam/policy.yaml'
-    diff: '+ allow: repo:write'
+  - path: "infra/iam/policy.yaml"
+    diff: "+ allow: repo:write"
 context:
-  region: 'eu-west'
-  tenant: 'acme'
+  region: "eu-west"
+  tenant: "acme"
   budgets: { usd: 3.0, ci_mins: 50 }
 checks:
   - opa: policy/main.rego
@@ -151,10 +145,10 @@ checks:
 
 ```ts
 // services/policy/simulate.ts
-import { opaEval } from '../policy/opa';
+import { opaEval } from "../policy/opa";
 export async function simulate(s: any) {
   const opa = await opaEval({
-    kind: 'plan',
+    kind: "plan",
     changes: s.changes,
     context: s.context,
   });
@@ -215,7 +209,7 @@ export function vickrey(bids: { id: string; bid: number }[]) {
 type Ledger = { [tenant: string]: { eps: number; spent: number } };
 export function charge(ten: string, use: number, L: Ledger) {
   const a = L[ten] || (L[ten] = { eps: 1.5, spent: 0 });
-  if (a.spent + use > a.eps) throw new Error('DP budget exceeded');
+  if (a.spent + use > a.eps) throw new Error("DP budget exceeded");
   a.spent += use;
 }
 ```
@@ -239,7 +233,7 @@ export function charge(ten: string, use: number, L: Ledger) {
 ```ts
 // services/green/bands.ts
 export function band(now: Date, intensity: number) {
-  return intensity < 200 ? 'green' : intensity < 400 ? 'amber' : 'red';
+  return intensity < 200 ? "green" : intensity < 400 ? "amber" : "red";
 }
 ```
 
@@ -295,11 +289,11 @@ export function band(now: Date, intensity: number) {
     </div>
     <script>
       $(function () {
-        $.getJSON('/api/blocker?id=PR-5843', function (d) {
-          $('#reason').text(d.reason);
+        $.getJSON("/api/blocker?id=PR-5843", function (d) {
+          $("#reason").text(d.reason);
         });
-        $('#fix').on('click', function () {
-          $.post('/api/blocker/propose', { id: 'PR-5843' }, function (p) {
+        $("#fix").on("click", function () {
+          $.post("/api/blocker/propose", { id: "PR-5843" }, function (p) {
             alert(p.next_step);
           });
         });

@@ -105,7 +105,7 @@ export default App;
 ### Creating a Dashboard Programmatically
 
 ```typescript
-import { useDashboardStore } from '@intelgraph/dashboard-framework';
+import { useDashboardStore } from "@intelgraph/dashboard-framework";
 
 function useDashboardSetup() {
   const { createDashboard, createPage, addWidget } = useDashboardStore();
@@ -113,16 +113,16 @@ function useDashboardSetup() {
   const setupDashboard = () => {
     // Create dashboard
     const dashboardId = createDashboard({
-      name: 'Executive Dashboard',
-      description: 'Key metrics and KPIs',
+      name: "Executive Dashboard",
+      description: "Key metrics and KPIs",
       pages: [],
     });
 
     // Create page
     const pageId = createPage(dashboardId, {
-      name: 'Overview',
+      name: "Overview",
       layout: {
-        type: 'grid',
+        type: "grid",
         columns: 12,
         rowHeight: 80,
       },
@@ -131,13 +131,13 @@ function useDashboardSetup() {
 
     // Add metric widget
     addWidget(pageId, {
-      type: 'metric',
-      title: 'Total Revenue',
+      type: "metric",
+      title: "Total Revenue",
       config: {
-        value: '$2.5M',
-        label: 'Total Revenue',
-        trend: { value: 12.5, direction: 'up', label: 'vs last month' },
-        color: '#10b981',
+        value: "$2.5M",
+        label: "Total Revenue",
+        trend: { value: 12.5, direction: "up", label: "vs last month" },
+        color: "#10b981",
       },
       layout: { x: 0, y: 0, w: 3, h: 2 },
     });
@@ -216,10 +216,10 @@ interface Widget {
 
 // Widget Layout
 interface WidgetLayout {
-  x: number;  // Grid position
+  x: number; // Grid position
   y: number;
-  w: number;  // Width in grid units
-  h: number;  // Height in grid units
+  w: number; // Width in grid units
+  h: number; // Height in grid units
   minW?: number;
   minH?: number;
   maxW?: number;
@@ -450,10 +450,10 @@ const widgetConfig = {
   interactions: {
     drillDown: {
       enabled: true,
-      targetDashboard: 'detailed-view-dashboard',
+      targetDashboard: "detailed-view-dashboard",
       params: {
-        categoryId: '{{clicked.id}}',
-        dateRange: '{{current.dateRange}}',
+        categoryId: "{{clicked.id}}",
+        dateRange: "{{current.dateRange}}",
       },
     },
   },
@@ -463,25 +463,25 @@ const widgetConfig = {
 ### Export and Sharing
 
 ```typescript
-import { exportDashboard } from '@intelgraph/dashboard-framework/utils';
+import { exportDashboard } from "@intelgraph/dashboard-framework/utils";
 
 // Export to PDF
 await exportDashboard(dashboardId, {
-  format: 'pdf',
-  quality: 'high',
+  format: "pdf",
+  quality: "high",
   includeData: false,
-  orientation: 'landscape',
+  orientation: "landscape",
 });
 
 // Export to PNG
 await exportDashboard(dashboardId, {
-  format: 'png',
-  scale: 2,  // 2x resolution
+  format: "png",
+  scale: 2, // 2x resolution
 });
 
 // Export to PowerPoint
 await exportDashboard(dashboardId, {
-  format: 'pptx',
+  format: "pptx",
   includeData: true,
 });
 ```
@@ -595,34 +595,36 @@ POST   /api/widgets/:id/data        # Get widget data
 
 ```typescript
 const executiveDashboard = {
-  name: 'Executive Dashboard',
-  pages: [{
-    name: 'Overview',
-    layout: { type: 'grid', columns: 12 },
-    widgets: [
-      // Revenue metric
-      {
-        type: 'metric',
-        title: 'Total Revenue',
-        config: {
-          value: '$2.5M',
-          trend: { value: 12.5, direction: 'up' },
+  name: "Executive Dashboard",
+  pages: [
+    {
+      name: "Overview",
+      layout: { type: "grid", columns: 12 },
+      widgets: [
+        // Revenue metric
+        {
+          type: "metric",
+          title: "Total Revenue",
+          config: {
+            value: "$2.5M",
+            trend: { value: 12.5, direction: "up" },
+          },
+          layout: { x: 0, y: 0, w: 3, h: 2 },
         },
-        layout: { x: 0, y: 0, w: 3, h: 2 },
-      },
-      // Revenue chart
-      {
-        type: 'chart',
-        title: 'Revenue Trend',
-        config: {
-          chartType: 'line',
-          xAxis: 'month',
-          yAxis: 'revenue',
+        // Revenue chart
+        {
+          type: "chart",
+          title: "Revenue Trend",
+          config: {
+            chartType: "line",
+            xAxis: "month",
+            yAxis: "revenue",
+          },
+          layout: { x: 0, y: 2, w: 8, h: 4 },
         },
-        layout: { x: 0, y: 2, w: 8, h: 4 },
-      },
-    ],
-  }],
+      ],
+    },
+  ],
 };
 ```
 
@@ -630,35 +632,39 @@ const executiveDashboard = {
 
 ```typescript
 const threatDashboard = {
-  name: 'Threat Intelligence',
-  pages: [{
-    name: 'Threats',
-    widgets: [
-      // Threat map
-      {
-        type: 'map',
-        title: 'Threat Origins',
-        config: {
-          mapType: 'heatmap',
-          layers: [{
-            type: 'heatmap',
-            intensity: 'threatLevel',
-          }],
+  name: "Threat Intelligence",
+  pages: [
+    {
+      name: "Threats",
+      widgets: [
+        // Threat map
+        {
+          type: "map",
+          title: "Threat Origins",
+          config: {
+            mapType: "heatmap",
+            layers: [
+              {
+                type: "heatmap",
+                intensity: "threatLevel",
+              },
+            ],
+          },
+          layout: { x: 0, y: 0, w: 8, h: 6 },
         },
-        layout: { x: 0, y: 0, w: 8, h: 6 },
-      },
-      // Threat network
-      {
-        type: 'network',
-        title: 'Threat Network',
-        config: {
-          layout: 'force',
-          clustering: true,
+        // Threat network
+        {
+          type: "network",
+          title: "Threat Network",
+          config: {
+            layout: "force",
+            clustering: true,
+          },
+          layout: { x: 8, y: 0, w: 4, h: 6 },
         },
-        layout: { x: 8, y: 0, w: 4, h: 6 },
-      },
-    ],
-  }],
+      ],
+    },
+  ],
 };
 ```
 
@@ -699,6 +705,7 @@ const threatDashboard = {
 ## API Reference
 
 See the full API documentation at:
+
 - Core Visualization: `/docs/api/visualization.md`
 - Dashboard Framework: `/docs/api/dashboard-framework.md`
 - Charting Library: `/docs/api/charting.md`
@@ -707,6 +714,7 @@ See the full API documentation at:
 ## Support
 
 For issues, questions, or contributions:
+
 - GitHub Issues: https://github.com/intelgraph/visualization
 - Documentation: https://docs.intelgraph.com/visualization
 - Examples: https://examples.intelgraph.com/visualization

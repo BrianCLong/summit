@@ -23,7 +23,7 @@ export interface DashboardPage {
 }
 
 export interface LayoutConfig {
-  type: 'grid' | 'free' | 'responsive';
+  type: "grid" | "free" | "responsive";
   columns?: number;
   rowHeight?: number;
   breakpoints?: Record<string, number>;
@@ -31,7 +31,7 @@ export interface LayoutConfig {
   gaps?: { x: number; y: number };
   margin?: { x: number; y: number };
   containerPadding?: { x: number; y: number };
-  compactType?: 'vertical' | 'horizontal' | null;
+  compactType?: "vertical" | "horizontal" | null;
   preventCollision?: boolean;
 }
 
@@ -65,7 +65,7 @@ export interface WidgetConfig {
 }
 
 export interface DataSourceConfig {
-  type: 'graphql' | 'rest' | 'websocket' | 'static';
+  type: "graphql" | "rest" | "websocket" | "static";
   endpoint?: string;
   query?: string;
   variables?: Record<string, any>;
@@ -151,7 +151,7 @@ export interface DashboardMetadata {
 export interface GlobalFilter {
   id: string;
   name: string;
-  type: 'select' | 'multiselect' | 'daterange' | 'search' | 'slider';
+  type: "select" | "multiselect" | "daterange" | "search" | "slider";
   field: string;
   value: any;
   options?: any[];
@@ -160,7 +160,7 @@ export interface GlobalFilter {
 
 // Widget Type Definitions
 export interface ChartWidgetConfig extends WidgetConfig {
-  chartType: 'line' | 'bar' | 'pie' | 'scatter' | 'area' | 'heatmap' | 'treemap' | 'sankey';
+  chartType: "line" | "bar" | "pie" | "scatter" | "area" | "heatmap" | "treemap" | "sankey";
   xAxis?: string;
   yAxis?: string | string[];
   groupBy?: string;
@@ -171,7 +171,7 @@ export interface ChartWidgetConfig extends WidgetConfig {
 }
 
 export interface MapWidgetConfig extends WidgetConfig {
-  mapType: 'choropleth' | 'heatmap' | 'points' | 'routes' | 'clusters';
+  mapType: "choropleth" | "heatmap" | "points" | "routes" | "clusters";
   center?: [number, number];
   zoom?: number;
   layers?: MapLayer[];
@@ -201,7 +201,7 @@ export interface TableColumn {
   id: string;
   label: string;
   field: string;
-  type?: 'string' | 'number' | 'date' | 'boolean';
+  type?: "string" | "number" | "date" | "boolean";
   format?: (value: any) => string;
   sortable?: boolean;
   filterable?: boolean;
@@ -214,7 +214,7 @@ export interface MetricWidgetConfig extends WidgetConfig {
   format?: string;
   trend?: {
     value: number;
-    direction: 'up' | 'down';
+    direction: "up" | "down";
     label?: string;
   };
   icon?: string;
@@ -223,7 +223,7 @@ export interface MetricWidgetConfig extends WidgetConfig {
 }
 
 export interface NetworkGraphWidgetConfig extends WidgetConfig {
-  layout: 'force' | 'hierarchical' | 'circular' | 'radial';
+  layout: "force" | "hierarchical" | "circular" | "radial";
   nodeSize?: string;
   nodeColor?: string;
   edgeWidth?: string;
@@ -247,7 +247,7 @@ export interface WidgetTemplate {
   name: string;
   description: string;
   type: string;
-  category: 'chart' | 'map' | 'table' | 'metric' | 'network' | 'timeline' | 'custom';
+  category: "chart" | "map" | "table" | "metric" | "network" | "timeline" | "custom";
   icon: string;
   defaultConfig: WidgetConfig;
   defaultLayout: WidgetLayout;
@@ -261,22 +261,22 @@ export interface DashboardTemplate {
   description: string;
   category: string;
   thumbnail?: string;
-  dashboard: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'>;
+  dashboard: Omit<Dashboard, "id" | "createdAt" | "updatedAt">;
   tags: string[];
 }
 
 // Export Types
 export interface ExportOptions {
-  format: 'pdf' | 'png' | 'pptx' | 'json';
+  format: "pdf" | "png" | "pptx" | "json";
   includeData?: boolean;
   quality?: number;
-  pageSize?: 'a4' | 'letter' | 'custom';
-  orientation?: 'portrait' | 'landscape';
+  pageSize?: "a4" | "letter" | "custom";
+  orientation?: "portrait" | "landscape";
 }
 
 // Real-time Update Types
 export interface DashboardUpdate {
-  type: 'widget-data' | 'widget-config' | 'layout-change' | 'filter-change';
+  type: "widget-data" | "widget-config" | "layout-change" | "filter-change";
   dashboardId: string;
   pageId?: string;
   widgetId?: string;
@@ -285,7 +285,7 @@ export interface DashboardUpdate {
 }
 
 export interface CollaborationEvent {
-  type: 'cursor-move' | 'selection' | 'edit' | 'comment';
+  type: "cursor-move" | "selection" | "edit" | "comment";
   userId: string;
   userName: string;
   data: any;

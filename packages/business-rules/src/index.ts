@@ -3,8 +3,8 @@
  * Provides decision tables, expression language, rule versioning, and testing framework
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Safe Expression Parser
@@ -12,8 +12,30 @@ import { v4 as uuidv4 } from 'uuid';
  * that only allows arithmetic operations and comparisons
  */
 class SafeExpressionParser {
-  private allowedOperators = ['+', '-', '*', '/', '%', '>', '<', '>=', '<=', '==', '!=', '&&', '||', '!'];
-  private allowedFunctions = ['Math.abs', 'Math.ceil', 'Math.floor', 'Math.round', 'Math.max', 'Math.min'];
+  private allowedOperators = [
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    ">",
+    "<",
+    ">=",
+    "<=",
+    "==",
+    "!=",
+    "&&",
+    "||",
+    "!",
+  ];
+  private allowedFunctions = [
+    "Math.abs",
+    "Math.ceil",
+    "Math.floor",
+    "Math.round",
+    "Math.max",
+    "Math.min",
+  ];
   private static readonly MAX_EXPRESSION_LENGTH = 2048;
 
   parse(expression: string): { evaluate: (context: Record<string, any>) => any } {
@@ -23,13 +45,15 @@ class SafeExpressionParser {
     return {
       evaluate: (context: Record<string, any>) => {
         return this.safeEvaluate(expression, context);
-      }
+      },
     };
   }
 
   private validateExpression(expr: string): void {
     if (expr.length > SafeExpressionParser.MAX_EXPRESSION_LENGTH) {
-      throw new Error(`Expression exceeds maximum length of ${SafeExpressionParser.MAX_EXPRESSION_LENGTH} characters`);
+      throw new Error(
+        `Expression exceeds maximum length of ${SafeExpressionParser.MAX_EXPRESSION_LENGTH} characters`
+      );
     }
 
     // Block dangerous patterns
@@ -60,13 +84,15 @@ class SafeExpressionParser {
 
     // Copy only primitive values and simple objects from context
     for (const [key, value] of Object.entries(context)) {
-      if (typeof value === 'number' ||
-        typeof value === 'string' ||
-        typeof value === 'boolean' ||
+      if (
+        typeof value === "number" ||
+        typeof value === "string" ||
+        typeof value === "boolean" ||
         value === null ||
-        value === undefined) {
+        value === undefined
+      ) {
         safeContext[key] = value;
-      } else if (typeof value === 'object' && !Array.isArray(value)) {
+      } else if (typeof value === "object" && !Array.isArray(value)) {
         // Shallow copy of simple objects
         safeContext[key] = { ...value };
       } else if (Array.isArray(value)) {
@@ -79,10 +105,10 @@ class SafeExpressionParser {
       // Replace variable names with their values
       let evalExpr = expression;
       for (const [key, value] of Object.entries(safeContext)) {
-        const regex = new RegExp(`\\b${key}\\b`, 'g');
-        if (typeof value === 'string') {
+        const regex = new RegExp(`\\b${key}\\b`, "g");
+        if (typeof value === "string") {
           evalExpr = evalExpr.replace(regex, JSON.stringify(value));
-        } else if (typeof value === 'number' || typeof value === 'boolean') {
+        } else if (typeof value === "number" || typeof value === "boolean") {
           evalExpr = evalExpr.replace(regex, String(value));
         }
       }
@@ -102,25 +128,25 @@ class SafeExpressionParser {
     expr = expr.trim();
 
     // Handle parentheses first
-    while (expr.includes('(')) {
+    while (expr.includes("(")) {
       expr = expr.replace(/\(([^()]+)\)/g, (_, inner) => {
         return String(this.parseExpression(inner));
       });
     }
 
     // Handle logical operators (lowest precedence)
-    if (expr.includes('||')) {
-      const parts = expr.split('||');
-      return parts.some(p => Boolean(this.parseExpression(p.trim())));
+    if (expr.includes("||")) {
+      const parts = expr.split("||");
+      return parts.some((p) => Boolean(this.parseExpression(p.trim())));
     }
-    if (expr.includes('&&')) {
-      const parts = expr.split('&&');
-      return parts.every(p => Boolean(this.parseExpression(p.trim())));
+    if (expr.includes("&&")) {
+      const parts = expr.split("&&");
+      return parts.every((p) => Boolean(this.parseExpression(p.trim())));
     }
 
     // Handle comparison operators
     // Use a more deterministic split to avoid ReDoS from (.+?)
-    const compOperators = ['===', '!==', '==', '!=', '>=', '<=', '>', '<'];
+    const compOperators = ["===", "!==", "==", "!=", ">=", "<=", ">", "<"];
     for (const op of compOperators) {
       const idx = expr.lastIndexOf(op);
       if (idx > 0) {
@@ -131,16 +157,24 @@ class SafeExpressionParser {
           const rightVal = this.parseExpression(right);
 
           switch (op) {
-            case '===': return leftVal === rightVal;
-            case '!==': return leftVal !== rightVal;
+            case "===":
+              return leftVal === rightVal;
+            case "!==":
+              return leftVal !== rightVal;
             // eslint-disable-next-line eqeqeq -- intentional loose equality for expression language
-            case '==': return leftVal == rightVal;
+            case "==":
+              return leftVal == rightVal;
             // eslint-disable-next-line eqeqeq -- intentional loose inequality for expression language
-            case '!=': return leftVal != rightVal;
-            case '>=': return Number(leftVal) >= Number(rightVal);
-            case '<=': return Number(leftVal) <= Number(rightVal);
-            case '>': return Number(leftVal) > Number(rightVal);
-            case '<': return Number(leftVal) < Number(rightVal);
+            case "!=":
+              return leftVal != rightVal;
+            case ">=":
+              return Number(leftVal) >= Number(rightVal);
+            case "<=":
+              return Number(leftVal) <= Number(rightVal);
+            case ">":
+              return Number(leftVal) > Number(rightVal);
+            case "<":
+              return Number(leftVal) < Number(rightVal);
           }
         }
       }
@@ -149,23 +183,23 @@ class SafeExpressionParser {
     // Handle arithmetic operators (higher precedence)
     // Addition/Subtraction
     // Use lastIndexOf for deterministic splitting (left-associative via recursion)
-    const addOps = ['+', '-'];
+    const addOps = ["+", "-"];
     for (const op of addOps) {
       const idx = expr.lastIndexOf(op);
       // Ensure it's not a unary minus and has content on both sides
-      if (idx > 0 && !['+', '-', '*', '/', '>', '<', '=', '&', '|', '!'].includes(expr[idx - 1])) {
+      if (idx > 0 && !["+", "-", "*", "/", ">", "<", "=", "&", "|", "!"].includes(expr[idx - 1])) {
         const leftStr = expr.substring(0, idx).trim();
         const rightStr = expr.substring(idx + 1).trim();
         if (leftStr && rightStr) {
           const left = Number(this.parseExpression(leftStr));
           const right = Number(this.parseExpression(rightStr));
-          return op === '+' ? left + right : left - right;
+          return op === "+" ? left + right : left - right;
         }
       }
     }
 
     // Multiplication/Division
-    const mulOps = ['*', '/'];
+    const mulOps = ["*", "/"];
     for (const op of mulOps) {
       const idx = expr.lastIndexOf(op);
       if (idx > 0) {
@@ -174,29 +208,37 @@ class SafeExpressionParser {
         if (leftStr && rightStr) {
           const left = Number(this.parseExpression(leftStr));
           const right = Number(this.parseExpression(rightStr));
-          return op === '*' ? left * right : left / right;
+          return op === "*" ? left * right : left / right;
         }
       }
     }
 
     // Handle negation
-    if (expr.startsWith('!')) {
+    if (expr.startsWith("!")) {
       return !this.parseExpression(expr.slice(1));
     }
 
     // Handle string literals
-    if ((expr.startsWith('"') && expr.endsWith('"')) ||
-      (expr.startsWith("'") && expr.endsWith("'"))) {
+    if (
+      (expr.startsWith('"') && expr.endsWith('"')) ||
+      (expr.startsWith("'") && expr.endsWith("'"))
+    ) {
       return expr.slice(1, -1);
     }
 
     // Handle boolean literals
-    if (expr === 'true') { return true; }
-    if (expr === 'false') { return false; }
+    if (expr === "true") {
+      return true;
+    }
+    if (expr === "false") {
+      return false;
+    }
 
     // Handle numeric literals
     const num = Number(expr);
-    if (!isNaN(num)) { return num; }
+    if (!isNaN(num)) {
+      return num;
+    }
 
     throw new Error(`Cannot parse expression: ${expr}`);
   }
@@ -220,7 +262,7 @@ export interface DecisionInput {
   id: string;
   label: string;
   name: string; // Variable name
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object';
+  type: "string" | "number" | "boolean" | "date" | "object";
   allowedValues?: any[];
   description?: string;
 }
@@ -229,7 +271,7 @@ export interface DecisionOutput {
   id: string;
   label: string;
   name: string; // Variable name
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object';
+  type: "string" | "number" | "boolean" | "date" | "object";
   allowedValues?: any[];
   description?: string;
 }
@@ -246,39 +288,39 @@ export interface DecisionRule {
 export interface RuleCondition {
   inputId: string;
   operator:
-  | 'eq'
-  | 'ne'
-  | 'gt'
-  | 'gte'
-  | 'lt'
-  | 'lte'
-  | 'in'
-  | 'not_in'
-  | 'contains'
-  | 'matches'
-  | 'between'
-  | 'exists'
-  | 'expression';
+    | "eq"
+    | "ne"
+    | "gt"
+    | "gte"
+    | "lt"
+    | "lte"
+    | "in"
+    | "not_in"
+    | "contains"
+    | "matches"
+    | "between"
+    | "exists"
+    | "expression";
   value?: any;
   value2?: any; // For 'between' operator
   expression?: string; // For complex expressions
 }
 
 export type HitPolicy =
-  | 'UNIQUE' // Only one rule can match
-  | 'FIRST' // Return first matching rule
-  | 'PRIORITY' // Return highest priority matching rule
-  | 'ANY' // All matching rules must have same output
-  | 'COLLECT' // Return all matching rules
-  | 'RULE_ORDER'; // Return rules in order
+  | "UNIQUE" // Only one rule can match
+  | "FIRST" // Return first matching rule
+  | "PRIORITY" // Return highest priority matching rule
+  | "ANY" // All matching rules must have same output
+  | "COLLECT" // Return all matching rules
+  | "RULE_ORDER"; // Return rules in order
 
 export interface Expression {
   id: string;
   name: string;
   description?: string;
   expression: string;
-  language: 'FEEL' | 'JavaScript' | 'JSONPath';
-  returnType: 'string' | 'number' | 'boolean' | 'object';
+  language: "FEEL" | "JavaScript" | "JSONPath";
+  returnType: "string" | "number" | "boolean" | "object";
   version: string;
   testCases?: ExpressionTestCase[];
 }
@@ -312,7 +354,7 @@ export interface Rule {
 }
 
 export interface RuleAction {
-  type: 'set_value' | 'call_function' | 'emit_event' | 'custom';
+  type: "set_value" | "call_function" | "emit_event" | "custom";
   target?: string; // Variable name for set_value
   value?: any;
   function?: string; // Function name for call_function
@@ -343,9 +385,7 @@ export class BusinessRulesEngine extends EventEmitter {
   /**
    * Create a new decision table
    */
-  createDecisionTable(
-    table: Omit<DecisionTable, 'id' | 'createdAt' | 'updatedAt'>,
-  ): DecisionTable {
+  createDecisionTable(table: Omit<DecisionTable, "id" | "createdAt" | "updatedAt">): DecisionTable {
     const id = uuidv4();
     const now = new Date();
 
@@ -367,20 +407,17 @@ export class BusinessRulesEngine extends EventEmitter {
     versions.push(decisionTable);
     this.ruleVersions.set(versionKey, versions);
 
-    this.emit('decision_table.created', decisionTable);
+    this.emit("decision_table.created", decisionTable);
     return decisionTable;
   }
 
   /**
    * Update an existing decision table
    */
-  updateDecisionTable(
-    id: string,
-    updates: Partial<DecisionTable>,
-  ): DecisionTable {
+  updateDecisionTable(id: string, updates: Partial<DecisionTable>): DecisionTable {
     const table = this.decisionTables.get(id);
     if (!table) {
-      throw new Error('Decision table not found');
+      throw new Error("Decision table not found");
     }
 
     const updatedTable: DecisionTable = {
@@ -394,22 +431,19 @@ export class BusinessRulesEngine extends EventEmitter {
     this.validateDecisionTable(updatedTable);
     this.decisionTables.set(id, updatedTable);
 
-    this.emit('decision_table.updated', updatedTable);
+    this.emit("decision_table.updated", updatedTable);
     return updatedTable;
   }
 
   /**
    * Evaluate a decision table with given inputs
    */
-  evaluateDecisionTable(
-    tableId: string,
-    inputs: Record<string, any>,
-  ): EvaluationResult {
+  evaluateDecisionTable(tableId: string, inputs: Record<string, any>): EvaluationResult {
     const startTime = Date.now();
     const table = this.decisionTables.get(tableId);
 
     if (!table) {
-      throw new Error('Decision table not found');
+      throw new Error("Decision table not found");
     }
 
     const matchedRules: DecisionRule[] = [];
@@ -425,7 +459,7 @@ export class BusinessRulesEngine extends EventEmitter {
         matchedRules.push(rule);
 
         // Apply hit policy
-        if (table.hitPolicy === 'FIRST' || table.hitPolicy === 'UNIQUE') {
+        if (table.hitPolicy === "FIRST" || table.hitPolicy === "UNIQUE") {
           break;
         }
       }
@@ -435,42 +469,36 @@ export class BusinessRulesEngine extends EventEmitter {
     let outputs: Record<string, any> = {};
 
     switch (table.hitPolicy) {
-      case 'UNIQUE':
-      case 'FIRST':
+      case "UNIQUE":
+      case "FIRST":
         if (matchedRules.length > 0) {
           outputs = matchedRules[0].outputs;
         }
         break;
 
-      case 'PRIORITY':
+      case "PRIORITY":
         if (matchedRules.length > 0) {
-          const sortedRules = matchedRules.sort(
-            (a, b) => (b.priority || 0) - (a.priority || 0),
-          );
+          const sortedRules = matchedRules.sort((a, b) => (b.priority || 0) - (a.priority || 0));
           outputs = sortedRules[0].outputs;
         }
         break;
 
-      case 'ANY':
+      case "ANY":
         if (matchedRules.length > 0) {
           // Verify all matched rules have same output
           const firstOutput = JSON.stringify(matchedRules[0].outputs);
-          const allSame = matchedRules.every(
-            (r) => JSON.stringify(r.outputs) === firstOutput,
-          );
+          const allSame = matchedRules.every((r) => JSON.stringify(r.outputs) === firstOutput);
 
           if (!allSame) {
-            throw new Error(
-              'ANY hit policy violation: matched rules have different outputs',
-            );
+            throw new Error("ANY hit policy violation: matched rules have different outputs");
           }
 
           outputs = matchedRules[0].outputs;
         }
         break;
 
-      case 'COLLECT':
-      case 'RULE_ORDER':
+      case "COLLECT":
+      case "RULE_ORDER":
         // Collect all outputs from matched rules
         matchedRules.forEach((rule) => {
           Object.assign(outputs, rule.outputs);
@@ -480,7 +508,7 @@ export class BusinessRulesEngine extends EventEmitter {
 
     const executionTime = Date.now() - startTime;
 
-    this.emit('decision_table.evaluated', {
+    this.emit("decision_table.evaluated", {
       tableId,
       inputs,
       outputs,
@@ -501,7 +529,7 @@ export class BusinessRulesEngine extends EventEmitter {
   private evaluateRule(
     rule: DecisionRule,
     inputs: Record<string, any>,
-    inputDefinitions: DecisionInput[],
+    inputDefinitions: DecisionInput[]
   ): boolean {
     return rule.conditions.every((condition) => {
       const inputDef = inputDefinitions.find((i) => i.id === condition.inputId);
@@ -519,41 +547,41 @@ export class BusinessRulesEngine extends EventEmitter {
    */
   private evaluateCondition(condition: RuleCondition, value: any): boolean {
     switch (condition.operator) {
-      case 'eq':
+      case "eq":
         return value === condition.value;
 
-      case 'ne':
+      case "ne":
         return value !== condition.value;
 
-      case 'gt':
+      case "gt":
         return value > condition.value;
 
-      case 'gte':
+      case "gte":
         return value >= condition.value;
 
-      case 'lt':
+      case "lt":
         return value < condition.value;
 
-      case 'lte':
+      case "lte":
         return value <= condition.value;
 
-      case 'in':
+      case "in":
         return Array.isArray(condition.value) && condition.value.includes(value);
 
-      case 'not_in':
+      case "not_in":
         return Array.isArray(condition.value) && !condition.value.includes(value);
 
-      case 'contains':
+      case "contains":
         return (
-          typeof value === 'string' &&
-          typeof condition.value === 'string' &&
+          typeof value === "string" &&
+          typeof condition.value === "string" &&
           value.includes(condition.value)
         );
 
-      case 'matches':
-        if (typeof value === 'string' && typeof condition.value === 'string') {
+      case "matches":
+        if (typeof value === "string" && typeof condition.value === "string") {
           if (condition.value.length > 256) {
-            throw new Error('Regex pattern too long');
+            throw new Error("Regex pattern too long");
           }
           try {
             return new RegExp(condition.value).test(value);
@@ -563,15 +591,13 @@ export class BusinessRulesEngine extends EventEmitter {
         }
         return false;
 
-      case 'between':
-        return (
-          value >= condition.value && value <= (condition.value2 ?? Infinity)
-        );
+      case "between":
+        return value >= condition.value && value <= (condition.value2 ?? Infinity);
 
-      case 'exists':
+      case "exists":
         return value !== null && value !== undefined;
 
-      case 'expression':
+      case "expression":
         if (condition.expression) {
           return this.evaluateExpression(condition.expression, { value });
         }
@@ -585,9 +611,7 @@ export class BusinessRulesEngine extends EventEmitter {
   /**
    * Create an expression
    */
-  createExpression(
-    expression: Omit<Expression, 'id'>,
-  ): Expression {
+  createExpression(expression: Omit<Expression, "id">): Expression {
     const id = uuidv4();
     const expr: Expression = {
       ...expression,
@@ -595,17 +619,14 @@ export class BusinessRulesEngine extends EventEmitter {
     };
 
     this.expressions.set(id, expr);
-    this.emit('expression.created', expr);
+    this.emit("expression.created", expr);
     return expr;
   }
 
   /**
    * Evaluate an expression
    */
-  evaluateExpression(
-    expressionString: string,
-    context: Record<string, any>,
-  ): any {
+  evaluateExpression(expressionString: string, context: Record<string, any>): any {
     try {
       const expr = this.parser.parse(expressionString);
       return expr.evaluate(context);
@@ -629,7 +650,7 @@ export class BusinessRulesEngine extends EventEmitter {
   } {
     const expression = this.expressions.get(expressionId);
     if (!expression) {
-      throw new Error('Expression not found');
+      throw new Error("Expression not found");
     }
 
     const results: Array<{
@@ -644,13 +665,9 @@ export class BusinessRulesEngine extends EventEmitter {
 
     (expression.testCases || []).forEach((testCase) => {
       try {
-        const actual = this.evaluateExpression(
-          expression.expression,
-          testCase.input,
-        );
+        const actual = this.evaluateExpression(expression.expression, testCase.input);
 
-        const testPassed =
-          JSON.stringify(actual) === JSON.stringify(testCase.expectedOutput);
+        const testPassed = JSON.stringify(actual) === JSON.stringify(testCase.expectedOutput);
 
         if (testPassed) {
           passed++;
@@ -681,9 +698,7 @@ export class BusinessRulesEngine extends EventEmitter {
   /**
    * Create a rule set
    */
-  createRuleSet(
-    ruleSet: Omit<RuleSet, 'id' | 'createdAt' | 'updatedAt'>,
-  ): RuleSet {
+  createRuleSet(ruleSet: Omit<RuleSet, "id" | "createdAt" | "updatedAt">): RuleSet {
     const id = uuidv4();
     const now = new Date();
 
@@ -695,7 +710,7 @@ export class BusinessRulesEngine extends EventEmitter {
     };
 
     this.ruleSets.set(id, newRuleSet);
-    this.emit('rule_set.created', newRuleSet);
+    this.emit("rule_set.created", newRuleSet);
     return newRuleSet;
   }
 
@@ -704,7 +719,7 @@ export class BusinessRulesEngine extends EventEmitter {
    */
   executeRuleSet(
     ruleSetId: string,
-    context: Record<string, any>,
+    context: Record<string, any>
   ): {
     executedRules: string[];
     modifiedContext: Record<string, any>;
@@ -712,7 +727,7 @@ export class BusinessRulesEngine extends EventEmitter {
   } {
     const ruleSet = this.ruleSets.get(ruleSetId);
     if (!ruleSet || !ruleSet.enabled) {
-      throw new Error('Rule set not found or disabled');
+      throw new Error("Rule set not found or disabled");
     }
 
     const modifiedContext = { ...context };
@@ -726,10 +741,7 @@ export class BusinessRulesEngine extends EventEmitter {
 
     for (const rule of sortedRules) {
       try {
-        const conditionResult = this.evaluateExpression(
-          rule.condition,
-          modifiedContext,
-        );
+        const conditionResult = this.evaluateExpression(rule.condition, modifiedContext);
 
         if (conditionResult) {
           executedRules.push(rule.id);
@@ -737,30 +749,30 @@ export class BusinessRulesEngine extends EventEmitter {
           // Execute actions
           for (const action of rule.actions) {
             switch (action.type) {
-              case 'set_value':
+              case "set_value":
                 if (action.target) {
                   modifiedContext[action.target] = action.value;
                 }
                 break;
 
-              case 'call_function':
+              case "call_function":
                 if (action.function) {
                   // Function execution would be implemented here
-                  this.emit('rule.function_call', {
+                  this.emit("rule.function_call", {
                     function: action.function,
                     context: modifiedContext,
                   });
                 }
                 break;
 
-              case 'emit_event':
+              case "emit_event":
                 if (action.event) {
                   events.push(action.event);
                   this.emit(action.event, modifiedContext);
                 }
                 break;
 
-              case 'custom':
+              case "custom":
                 if (action.customAction) {
                   action.customAction(modifiedContext);
                 }
@@ -768,10 +780,10 @@ export class BusinessRulesEngine extends EventEmitter {
             }
           }
 
-          this.emit('rule.executed', { rule: rule.id, context: modifiedContext });
+          this.emit("rule.executed", { rule: rule.id, context: modifiedContext });
         }
       } catch (error) {
-        this.emit('rule.error', { rule: rule.id, error: error.message });
+        this.emit("rule.error", { rule: rule.id, error: error.message });
       }
     }
 
@@ -789,13 +801,13 @@ export class BusinessRulesEngine extends EventEmitter {
     // Check for duplicate input IDs
     const inputIds = table.inputs.map((i) => i.id);
     if (new Set(inputIds).size !== inputIds.length) {
-      throw new Error('Duplicate input IDs found');
+      throw new Error("Duplicate input IDs found");
     }
 
     // Check for duplicate output IDs
     const outputIds = table.outputs.map((o) => o.id);
     if (new Set(outputIds).size !== outputIds.length) {
-      throw new Error('Duplicate output IDs found');
+      throw new Error("Duplicate output IDs found");
     }
 
     // Validate rules
@@ -803,9 +815,7 @@ export class BusinessRulesEngine extends EventEmitter {
       // Check that all condition inputIds exist
       for (const condition of rule.conditions) {
         if (!inputIds.includes(condition.inputId)) {
-          throw new Error(
-            `Rule ${rule.id} references non-existent input ${condition.inputId}`,
-          );
+          throw new Error(`Rule ${rule.id} references non-existent input ${condition.inputId}`);
         }
       }
 
@@ -813,15 +823,13 @@ export class BusinessRulesEngine extends EventEmitter {
       for (const outputName of Object.keys(rule.outputs)) {
         const outputExists = table.outputs.some((o) => o.name === outputName);
         if (!outputExists) {
-          throw new Error(
-            `Rule ${rule.id} references non-existent output ${outputName}`,
-          );
+          throw new Error(`Rule ${rule.id} references non-existent output ${outputName}`);
         }
       }
     }
 
     // Validate UNIQUE hit policy
-    if (table.hitPolicy === 'UNIQUE') {
+    if (table.hitPolicy === "UNIQUE") {
       // TODO: Implement conflict detection for UNIQUE policy
       // This would require analyzing all rules to ensure no two can match simultaneously
     }
@@ -837,7 +845,7 @@ export class BusinessRulesEngine extends EventEmitter {
   }> {
     const table = this.decisionTables.get(tableId);
     if (!table) {
-      throw new Error('Decision table not found');
+      throw new Error("Decision table not found");
     }
 
     const conflicts: Array<{
@@ -869,7 +877,7 @@ export class BusinessRulesEngine extends EventEmitter {
             conflicts.push({
               rule1: rule1.id,
               rule2: rule2.id,
-              conflict: 'Same conditions, different outputs',
+              conflict: "Same conditions, different outputs",
             });
           }
         }
@@ -891,9 +899,7 @@ export class BusinessRulesEngine extends EventEmitter {
       }
     });
 
-    return versions.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
+    return versions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   /**
@@ -902,7 +908,7 @@ export class BusinessRulesEngine extends EventEmitter {
   exportToDMN(tableId: string): string {
     const table = this.decisionTables.get(tableId);
     if (!table) {
-      throw new Error('Decision table not found');
+      throw new Error("Decision table not found");
     }
 
     // Simplified DMN XML export
@@ -914,9 +920,9 @@ export class BusinessRulesEngine extends EventEmitter {
              namespace="http://intelgraph.io/dmn">
   <decision id="${table.id}" name="${table.name}">
     <decisionTable id="${table.id}_table" hitPolicy="${table.hitPolicy}">
-      ${table.inputs.map((input) => `<input id="${input.id}" label="${input.label}"/>`).join('\n      ')}
-      ${table.outputs.map((output) => `<output id="${output.id}" label="${output.label}"/>`).join('\n      ')}
-      ${table.rules.map((rule) => `<rule id="${rule.id}"/>`).join('\n      ')}
+      ${table.inputs.map((input) => `<input id="${input.id}" label="${input.label}"/>`).join("\n      ")}
+      ${table.outputs.map((output) => `<output id="${output.id}" label="${output.label}"/>`).join("\n      ")}
+      ${table.rules.map((rule) => `<rule id="${rule.id}"/>`).join("\n      ")}
     </decisionTable>
   </decision>
 </definitions>`;

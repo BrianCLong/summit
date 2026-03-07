@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Entity record schema
 export const EntityRecordSchema = z.object({
@@ -10,11 +10,15 @@ export const EntityRecordSchema = z.object({
   tenantId: z.string(),
   confidence: z.number().min(0).max(1).optional(),
   // Geographic/temporal signals
-  locations: z.array(z.object({
-    lat: z.number(),
-    lon: z.number(),
-    timestamp: z.string().optional(),
-  })).optional(),
+  locations: z
+    .array(
+      z.object({
+        lat: z.number(),
+        lon: z.number(),
+        timestamp: z.string().optional(),
+      })
+    )
+    .optional(),
   timestamps: z.array(z.string()).optional(),
   // Device/account signals
   deviceIds: z.array(z.string()).optional(),
@@ -59,7 +63,7 @@ export interface CandidateScore {
   confidence: number;
   features: ERFeatures;
   rationale: string[];
-  method: 'deterministic' | 'probabilistic' | 'hybrid';
+  method: "deterministic" | "probabilistic" | "hybrid";
 }
 
 // Candidate request/response
@@ -69,7 +73,7 @@ export const CandidateRequestSchema = z.object({
   population: z.array(EntityRecordSchema),
   topK: z.number().int().positive().optional(),
   threshold: z.number().min(0).max(1).optional(),
-  method: z.enum(['deterministic', 'probabilistic', 'hybrid']).optional(),
+  method: z.enum(["deterministic", "probabilistic", "hybrid"]).optional(),
   policyTags: z.array(z.string()).optional(),
 });
 
@@ -121,11 +125,15 @@ export interface MergeRecord {
 export const SplitRequestSchema = z.object({
   tenantId: z.string(),
   entityId: z.string(),
-  splitGroups: z.array(z.object({
-    attributes: z.record(z.string(), z.unknown()),
-    deviceIds: z.array(z.string()).optional(),
-    accountIds: z.array(z.string()).optional(),
-  })).min(2),
+  splitGroups: z
+    .array(
+      z.object({
+        attributes: z.record(z.string(), z.unknown()),
+        deviceIds: z.array(z.string()).optional(),
+        accountIds: z.array(z.string()).optional(),
+      })
+    )
+    .min(2),
   actor: z.string(),
   reason: z.string(),
 });
@@ -158,7 +166,7 @@ export interface ExplainResponse {
 export const ExplainPairRequestSchema = z.object({
   entityA: EntityRecordSchema,
   entityB: EntityRecordSchema,
-  method: z.enum(['deterministic', 'probabilistic', 'hybrid']).optional(),
+  method: z.enum(["deterministic", "probabilistic", "hybrid"]).optional(),
   threshold: z.number().min(0).max(1).optional(),
 });
 
@@ -204,7 +212,7 @@ export interface AuditEntry {
   id: string;
   tenantId: string;
   actor: string;
-  event: 'merge' | 'revert' | 'split';
+  event: "merge" | "revert" | "split";
   target: string;
   reason: string;
   metadata: Record<string, unknown>;
@@ -224,7 +232,7 @@ export interface ScoringConfig {
     accountIdMatch: number;
   };
   threshold: number;
-  method: 'deterministic' | 'probabilistic' | 'hybrid';
+  method: "deterministic" | "probabilistic" | "hybrid";
 }
 
 // Default scoring configuration
@@ -232,13 +240,13 @@ export const DEFAULT_SCORING_CONFIG: ScoringConfig = {
   weights: {
     nameSimilarity: 0.25,
     typeMatch: 0.15,
-    propertyOverlap: 0.10,
+    propertyOverlap: 0.1,
     semanticSimilarity: 0.15,
-    geographicProximity: 0.10,
-    temporalCoOccurrence: 0.10,
-    deviceIdMatch: 0.10,
+    geographicProximity: 0.1,
+    temporalCoOccurrence: 0.1,
+    deviceIdMatch: 0.1,
     accountIdMatch: 0.05,
   },
   threshold: 0.7,
-  method: 'hybrid',
+  method: "hybrid",
 };

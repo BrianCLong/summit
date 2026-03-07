@@ -1,4 +1,4 @@
-import { ShardConfig } from '../types';
+import { ShardConfig } from "../types";
 
 /**
  * Base interface for shard key strategies
@@ -12,11 +12,7 @@ export interface ShardKeyStrategy {
   /**
    * Get all shards that might contain data for a range query
    */
-  getShardsForRange(
-    startKey: any,
-    endKey: any,
-    shards: ShardConfig[]
-  ): ShardConfig[];
+  getShardsForRange(startKey: any, endKey: any, shards: ShardConfig[]): ShardConfig[];
 
   /**
    * Strategy name

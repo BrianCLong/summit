@@ -1,5 +1,5 @@
-import type { TokenEstimator } from './utils.js';
-import { clampValue, cosineSimilarity, defaultTokenEstimator } from './utils.js';
+import type { TokenEstimator } from "./utils.js";
+import { clampValue, cosineSimilarity, defaultTokenEstimator } from "./utils.js";
 
 export interface ContextSegment {
   id: string;
@@ -29,7 +29,7 @@ export interface DecomposedContext {
 const DEFAULT_THRESHOLD = 0.6;
 
 export class ContextAwareDecomposer {
-  private readonly embed: ContextAwareDecompositionOptions['embed'];
+  private readonly embed: ContextAwareDecompositionOptions["embed"];
   private readonly tokenEstimator: TokenEstimator;
   private readonly adaptiveThreshold: boolean;
   private readonly maxSegments?: number;
@@ -59,12 +59,15 @@ export class ContextAwareDecomposer {
     }
 
     const selected = scored
-      .filter(segment => segment.saliency >= workingThreshold)
+      .filter((segment) => segment.saliency >= workingThreshold)
       .sort((a, b) => b.saliency - a.saliency)
       .slice(0, this.maxSegments ?? scored.length);
 
-    const discarded = scored.filter(segment => !selected.includes(segment));
-    const tokenEstimate = selected.reduce((acc, segment) => acc + this.tokenEstimator(segment.text), 0);
+    const discarded = scored.filter((segment) => !selected.includes(segment));
+    const tokenEstimate = selected.reduce(
+      (acc, segment) => acc + this.tokenEstimator(segment.text),
+      0
+    );
 
     this.threshold = workingThreshold;
 

@@ -38,7 +38,7 @@ const defaultRunbook = JSON.stringify(
     ],
   },
   null,
-  2,
+  2
 )
 
 const schedulePresets = {
@@ -75,7 +75,7 @@ export default function Runbooks() {
   const monacoRef = useRef<any>(null)
 
   const handleStatusUpdate = useCallback(
-    (update) => {
+    update => {
       if (!update.status) return
       setRunStatus(update.status)
       showNotification({
@@ -84,7 +84,7 @@ export default function Runbooks() {
         message: `Run ${update.runId} is now ${update.status}`,
       })
     },
-    [showNotification],
+    [showNotification]
   )
 
   const { connected: socketConnected } = useMaestroRunSocket({
@@ -114,7 +114,9 @@ export default function Runbooks() {
         allowComments: false,
         schemas: [
           {
-            uri: schema.$id || 'https://intelgraph.dev/schemas/maestro-runbook.json',
+            uri:
+              schema.$id ||
+              'https://intelgraph.dev/schemas/maestro-runbook.json',
             fileMatch: ['*'],
             schema,
           },
@@ -230,12 +232,14 @@ export default function Runbooks() {
       }
 
       const res = await fetch(
-        pipelineId ? `/api/maestro/pipelines/${pipelineId}` : '/api/maestro/pipelines',
+        pipelineId
+          ? `/api/maestro/pipelines/${pipelineId}`
+          : '/api/maestro/pipelines',
         {
           method: pipelineId ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        },
+        }
       )
       const data = await res.json()
       if (!res.ok) {
@@ -307,9 +311,7 @@ export default function Runbooks() {
 
   const handleSchedule = async () => {
     const effectiveCron =
-      schedulePreset === 'custom'
-        ? customCron
-        : schedulePresets[schedulePreset]
+      schedulePreset === 'custom' ? customCron : schedulePresets[schedulePreset]
     const enabled = schedulePreset !== 'none'
 
     if (enabled && !effectiveCron) {
@@ -371,7 +373,10 @@ export default function Runbooks() {
         <section className="space-y-4">
           <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700" htmlFor="runbook-name">
+              <label
+                className="text-sm font-medium text-gray-700"
+                htmlFor="runbook-name"
+              >
                 Runbook name
               </label>
               <div className="flex flex-wrap gap-3">
@@ -517,7 +522,7 @@ export default function Runbooks() {
                       {simulation.explain.assumptions.map(
                         (assumption: string, index: number) => (
                           <li key={`${assumption}-${index}`}>{assumption}</li>
-                        ),
+                        )
                       )}
                     </ul>
                   </div>
@@ -538,7 +543,7 @@ export default function Runbooks() {
                               {sample.estimatedDurationMs}ms
                             </span>
                           </div>
-                        ),
+                        )
                       )}
                     </div>
                   </div>
@@ -600,7 +605,9 @@ export default function Runbooks() {
                 className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
                 value={schedulePreset}
                 onChange={e =>
-                  setSchedulePreset(e.target.value as keyof typeof schedulePresets)
+                  setSchedulePreset(
+                    e.target.value as keyof typeof schedulePresets
+                  )
                 }
               >
                 <option value="none">No schedule</option>

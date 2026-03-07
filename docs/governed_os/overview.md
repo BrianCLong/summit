@@ -1,6 +1,7 @@
 # Governed Multi-Agent OS (Governed OS) Overview
 
 ## Purpose
+
 The Governed OS is the control-plane substrate for Summit: a governed multi-agent OS with
 policy graph + provenance graph + per-agent RBAC + approvals + audit trails as first-class
 control objects. The objective is operational moat: compliance-grade auditability, evidence
@@ -35,6 +36,7 @@ through policy- and evidence-backed gates and artifacts. See
 ## Operational Moat
 
 The moat is operational, not aesthetic:
+
 - **Governance is verifiable** (SLOs, dashboards, deterministic evidence bundles).
 - **Audit friction is reduced** (auditor verify UX, policy explainability trees).
 - **Switching cost is compliance cost** (removing Summit means losing evidence guarantees).

@@ -8,11 +8,7 @@
     "path": "prompts/labs/summit-labs-scaffold-v1.md"
   },
   "declared_scope": {
-    "paths": [
-      "labs/",
-      "docs/roadmap/STATUS.json",
-      "agents/examples/"
-    ],
+    "paths": ["labs/", "docs/roadmap/STATUS.json", "agents/examples/"],
     "domains": ["governance", "documentation", "roadmap", "labs"]
   },
   "allowed_operations": ["create", "edit"],

@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto';
+import { createHmac } from "crypto";
 
 export type EgressPolicy = {
   allowedHosts: string[];
@@ -23,7 +23,7 @@ export class SecurityControls {
   }
 
   verifyWebhookSignature(payload: string, signature: string, secret: string) {
-    const computed = createHmac('sha256', secret).update(payload).digest('hex');
+    const computed = createHmac("sha256", secret).update(payload).digest("hex");
     return computed === signature;
   }
 
@@ -60,7 +60,7 @@ export class SecurityControls {
     const windowStart = now - window.windowMs;
     const filtered = history.filter((timestamp) => timestamp >= windowStart);
     if (filtered.length >= window.limit) {
-      throw new Error('Rate limit exceeded');
+      throw new Error("Rate limit exceeded");
     }
     filtered.push(now);
     this.hits.set(tenantId, filtered);

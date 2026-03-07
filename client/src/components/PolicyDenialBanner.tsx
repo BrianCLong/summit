@@ -3,7 +3,7 @@
  * Displays policy denial with structured appeal path and reasons
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Alert,
   AlertTitle,
@@ -23,17 +23,11 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
-import type { ChipProps } from '@mui/material';
-import {
-  AccessTime,
-  Description,
-  InfoOutlined,
-  Shield,
-  WarningAmber,
-} from '@mui/icons-material';
-import { useMutation, useQuery } from '@apollo/client';
-import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from '../graphql/appeals';
+} from "@mui/material";
+import type { ChipProps } from "@mui/material";
+import { AccessTime, Description, InfoOutlined, Shield, WarningAmber } from "@mui/icons-material";
+import { useMutation, useQuery } from "@apollo/client";
+import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from "../graphql/appeals";
 
 interface AppealPath {
   available: boolean;
@@ -54,7 +48,7 @@ interface PolicyDecision {
   decisionId: string;
   timestamp: string;
   metadata?: {
-    riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+    riskLevel?: "LOW" | "MEDIUM" | "HIGH";
     requiresJustification?: boolean;
     alternatives?: string[];
   };
@@ -67,44 +61,42 @@ interface PolicyDenialBannerProps {
   className?: string;
 }
 
-const getRiskLevelColor = (level?: string): ChipProps['color'] => {
+const getRiskLevelColor = (level?: string): ChipProps["color"] => {
   switch (level) {
-    case 'HIGH':
-      return 'error';
-    case 'MEDIUM':
-      return 'warning';
-    case 'LOW':
-      return 'info';
+    case "HIGH":
+      return "error";
+    case "MEDIUM":
+      return "warning";
+    case "LOW":
+      return "info";
     default:
-      return 'default';
+      return "default";
   }
 };
 
-const getUrgencyColor = (urgency: string): ChipProps['color'] => {
+const getUrgencyColor = (urgency: string): ChipProps["color"] => {
   switch (urgency) {
-    case 'CRITICAL':
-      return 'error';
-    case 'HIGH':
-      return 'warning';
-    case 'MEDIUM':
-      return 'info';
-    case 'LOW':
-      return 'success';
+    case "CRITICAL":
+      return "error";
+    case "HIGH":
+      return "warning";
+    case "MEDIUM":
+      return "info";
+    case "LOW":
+      return "success";
     default:
-      return 'default';
+      return "default";
   }
 };
 
 const formatSlaTime = (hours: number) => {
   if (hours < 24) {
-    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    return `${hours} hour${hours !== 1 ? "s" : ""}`;
   }
   const days = Math.floor(hours / 24);
   const remainingHours = hours % 24;
-  return `${days} day${days !== 1 ? 's' : ''}${
-    remainingHours > 0
-      ? ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`
-      : ''
+  return `${days} day${days !== 1 ? "s" : ""}${
+    remainingHours > 0 ? ` ${remainingHours} hour${remainingHours !== 1 ? "s" : ""}` : ""
   }`;
 };
 
@@ -119,12 +111,10 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Appeal form state
-  const [justification, setJustification] = useState('');
-  const [businessNeed, setBusinessNeed] = useState('');
-  const [urgency, setUrgency] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>(
-    'MEDIUM',
-  );
-  const [requestedDuration, setRequestedDuration] = useState('24 hours');
+  const [justification, setJustification] = useState("");
+  const [businessNeed, setBusinessNeed] = useState("");
+  const [urgency, setUrgency] = useState<"LOW" | "MEDIUM" | "HIGH" | "CRITICAL">("MEDIUM");
+  const [requestedDuration, setRequestedDuration] = useState("24 hours");
 
   const [submitAppeal] = useMutation(SUBMIT_POLICY_APPEAL);
 
@@ -153,20 +143,16 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
         setShowAppealForm(false);
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to submit appeal. Please try again.',
-      );
+      setError(err instanceof Error ? err.message : "Failed to submit appeal. Please try again.");
     }
   };
 
-  if (appealStatus?.getAppealStatus?.status === 'APPROVED') {
+  if (appealStatus?.getAppealStatus?.status === "APPROVED") {
     return (
       <Alert
         severity="success"
         icon={<Shield fontSize="small" />}
-        className={`policy-denial-banner ${className || ''}`}
+        className={`policy-denial-banner ${className || ""}`}
         action={
           onRetry ? (
             <Button color="success" size="small" onClick={onRetry}>
@@ -177,8 +163,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       >
         <AlertTitle>Appeal Approved</AlertTitle>
         <Typography variant="body2">
-          Your access request has been approved by a Data Steward. You may now
-          retry your action.
+          Your access request has been approved by a Data Steward. You may now retry your action.
         </Typography>
         {appealStatus.getAppealStatus.responseReason && (
           <Typography variant="caption" color="text.secondary">
@@ -194,7 +179,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       <Alert
         severity="error"
         icon={<WarningAmber fontSize="small" />}
-        className={`policy-denial-banner ${className || ''}`}
+        className={`policy-denial-banner ${className || ""}`}
         onClose={onDismiss}
       >
         <AlertTitle>Access Denied</AlertTitle>
@@ -214,27 +199,23 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
           <Typography variant="body2">{decision.reason}</Typography>
 
-          {decision.metadata?.alternatives &&
-            decision.metadata.alternatives.length > 0 && (
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Suggested alternatives:
-                </Typography>
-                <Box component="ul" sx={{ mb: 0, mt: 0.5, pl: 2 }}>
-                  {decision.metadata.alternatives.map((alt, index) => (
-                    <li key={index}>
-                      <Typography variant="body2">{alt}</Typography>
-                    </li>
-                  ))}
-                </Box>
+          {decision.metadata?.alternatives && decision.metadata.alternatives.length > 0 && (
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Suggested alternatives:
+              </Typography>
+              <Box component="ul" sx={{ mb: 0, mt: 0.5, pl: 2 }}>
+                {decision.metadata.alternatives.map((alt, index) => (
+                  <li key={index}>
+                    <Typography variant="body2">{alt}</Typography>
+                  </li>
+                ))}
               </Box>
-            )}
+            </Box>
+          )}
 
           {decision.appeal?.available ? (
-            <Card
-              variant="outlined"
-              sx={{ borderColor: 'info.light', bgcolor: 'info.50' }}
-            >
+            <Card variant="outlined" sx={{ borderColor: "info.light", bgcolor: "info.50" }}>
               <CardContent sx={{ py: 1.5 }}>
                 <Stack
                   direction="row"
@@ -263,19 +244,12 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                         <>
                           <Chip
                             label={appealStatus.getAppealStatus.status}
-                            color={getUrgencyColor(
-                              appealStatus.getAppealStatus.urgency,
-                            )}
+                            color={getUrgencyColor(appealStatus.getAppealStatus.urgency)}
                             size="small"
                           />
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                          >
-                            <AccessTime fontSize="inherit" /> Submitted{' '}
-                            {new Date(
-                              appealStatus.getAppealStatus.createdAt,
-                            ).toLocaleString()}
+                          <Typography variant="caption" color="text.secondary">
+                            <AccessTime fontSize="inherit" /> Submitted{" "}
+                            {new Date(appealStatus.getAppealStatus.createdAt).toLocaleString()}
                           </Typography>
                         </>
                       ) : (
@@ -298,7 +272,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ display: 'block', mt: 1 }}
+                    sx={{ display: "block", mt: 1 }}
                   >
                     Appeal instructions: {decision.appeal.instructions}
                   </Typography>
@@ -308,16 +282,15 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
           ) : (
             decision.appeal && (
               <Typography variant="caption" color="text.secondary">
-                <InfoOutlined fontSize="inherit" />{' '}
-                {decision.appeal.instructions ||
-                  'This policy decision cannot be appealed.'}
+                <InfoOutlined fontSize="inherit" />{" "}
+                {decision.appeal.instructions || "This policy decision cannot be appealed."}
               </Typography>
             )
           )}
 
-          <Box sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
             <details>
-              <summary style={{ cursor: 'pointer' }}>
+              <summary style={{ cursor: "pointer" }}>
                 <Typography variant="caption" color="text.secondary">
                   Technical Details
                 </Typography>
@@ -359,11 +332,10 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
           <Alert severity="info" sx={{ mb: 2 }} icon={<InfoOutlined />}>
             <Typography variant="body2">
-              <strong>Response SLA:</strong>{' '}
+              <strong>Response SLA:</strong>{" "}
               {decision.appeal && formatSlaTime(decision.appeal.slaHours)}
               <br />
-              <strong>Reviewer:</strong>{' '}
-              {decision.appeal?.requiredRole || 'Data Steward'}
+              <strong>Reviewer:</strong> {decision.appeal?.requiredRole || "Data Steward"}
             </Typography>
           </Alert>
 
@@ -390,22 +362,20 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
               helperText={decision.appeal?.instructions}
             />
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <FormControl fullWidth>
                 <InputLabel>Urgency Level</InputLabel>
                 <Select
                   label="Urgency Level"
                   value={urgency}
                   onChange={(e) =>
-                    setUrgency(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL')
+                    setUrgency(e.target.value as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL")
                   }
                 >
                   <MenuItem value="LOW">Low - Routine work</MenuItem>
                   <MenuItem value="MEDIUM">Medium - Standard business need</MenuItem>
                   <MenuItem value="HIGH">High - Time-sensitive requirement</MenuItem>
-                  <MenuItem value="CRITICAL">
-                    Critical - Security incident or emergency
-                  </MenuItem>
+                  <MenuItem value="CRITICAL">Critical - Security incident or emergency</MenuItem>
                 </Select>
               </FormControl>
 
@@ -427,8 +397,8 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
             <Alert severity="warning" icon={<WarningAmber fontSize="small" />}>
               <Typography variant="body2">
-                <strong>Note:</strong> All appeals are logged and audited. Misuse
-                of the appeal process may result in access restrictions.
+                <strong>Note:</strong> All appeals are logged and audited. Misuse of the appeal
+                process may result in access restrictions.
               </Typography>
             </Alert>
           </Stack>

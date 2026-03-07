@@ -4,7 +4,7 @@
  * Auto-loaded by gateway from adapters/prov-ledger/
  */
 
-const PROV_LEDGER_URL = process.env.PROV_LEDGER_URL || 'http://localhost:4010';
+const PROV_LEDGER_URL = process.env.PROV_LEDGER_URL || "http://localhost:4010";
 
 // ============================================================================
 // GraphQL Schema Extension
@@ -242,8 +242,8 @@ export const resolvers = {
     claim: async (_: any, args: { id: string }, context: any) => {
       const response = await fetch(`${PROV_LEDGER_URL}/claims/${args.id}`, {
         headers: {
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'graphql-query',
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "graphql-query",
         },
       });
       if (!response.ok) return null;
@@ -251,29 +251,26 @@ export const resolvers = {
     },
 
     provenanceChain: async (_: any, args: { claimId: string }, context: any) => {
-      const response = await fetch(
-        `${PROV_LEDGER_URL}/provenance?claimId=${args.claimId}`,
-        {
-          headers: {
-            'x-authority-id': context.user?.id || 'anonymous',
-            'x-reason-for-access': 'graphql-query',
-          },
+      const response = await fetch(`${PROV_LEDGER_URL}/provenance?claimId=${args.claimId}`, {
+        headers: {
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "graphql-query",
         },
-      );
+      });
       return response.json();
     },
 
     contradictions: async (
       _: any,
       args: { claimIds: string[]; minConfidence?: number },
-      context: any,
+      context: any
     ) => {
       const response = await fetch(`${PROV_LEDGER_URL}/claims/contradictions`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'contradiction-analysis',
+          "Content-Type": "application/json",
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "contradiction-analysis",
         },
         body: JSON.stringify({
           claimIds: args.claimIds,
@@ -286,8 +283,8 @@ export const resolvers = {
     disclosureBundle: async (_: any, args: { caseId: string }, context: any) => {
       const response = await fetch(`${PROV_LEDGER_URL}/bundles/${args.caseId}`, {
         headers: {
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'disclosure-export',
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "disclosure-export",
         },
       });
       return response.json();
@@ -296,8 +293,8 @@ export const resolvers = {
     exportManifest: async (_: any, __: any, context: any) => {
       const response = await fetch(`${PROV_LEDGER_URL}/export/manifest`, {
         headers: {
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'manifest-export',
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "manifest-export",
         },
       });
       return response.json();
@@ -307,11 +304,11 @@ export const resolvers = {
   Mutation: {
     registerClaim: async (_: any, args: { input: any }, context: any) => {
       const response = await fetch(`${PROV_LEDGER_URL}/claims`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'claim-registration',
+          "Content-Type": "application/json",
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "claim-registration",
         },
         body: JSON.stringify(args.input),
       });
@@ -320,11 +317,11 @@ export const resolvers = {
 
     registerEvidence: async (_: any, args: { input: any }, context: any) => {
       const response = await fetch(`${PROV_LEDGER_URL}/evidence`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'evidence-registration',
+          "Content-Type": "application/json",
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "evidence-registration",
         },
         body: JSON.stringify(args.input),
       });
@@ -334,18 +331,18 @@ export const resolvers = {
     parseClaim: async (
       _: any,
       args: { rawContent: string; contentType?: string },
-      context: any,
+      context: any
     ) => {
       const response = await fetch(`${PROV_LEDGER_URL}/claims/parse`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-authority-id': context.user?.id || 'anonymous',
-          'x-reason-for-access': 'claim-parsing',
+          "Content-Type": "application/json",
+          "x-authority-id": context.user?.id || "anonymous",
+          "x-reason-for-access": "claim-parsing",
         },
         body: JSON.stringify({
           rawContent: args.rawContent,
-          contentType: args.contentType || 'text/plain',
+          contentType: args.contentType || "text/plain",
         }),
       });
       return response.json();
@@ -358,8 +355,8 @@ export const resolvers = {
 // ============================================================================
 
 export const gatewayPlugin = {
-  name: 'prov-ledger',
-  version: '1.0.0',
+  name: "prov-ledger",
+  version: "1.0.0",
   typeDefs,
   resolvers,
 };

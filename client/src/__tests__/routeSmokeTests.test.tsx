@@ -6,21 +6,30 @@
  * meeting GA stability requirements.
  */
 
-import React from 'react';
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, jest } from '@jest/globals';
-import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { ApolloProvider } from '@apollo/client';
-import { ThemeProvider } from '@mui/material';
-import store from '../store';
-import { apolloClient } from '../services/apollo';
-import { getIntelGraphTheme } from '../theme/intelgraphTheme';
-import { AuthProvider } from '../context/AuthContext';
-import ReleaseReadinessRoute from '../routes/ReleaseReadinessRoute';
+import React from "react";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+  jest,
+} from "@jest/globals";
+import { render, screen, waitFor } from "@testing-library/react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Provider } from "react-redux";
+import { ApolloProvider } from "@apollo/client";
+import { ThemeProvider } from "@mui/material";
+import store from "../store";
+import { apolloClient } from "../services/apollo";
+import { getIntelGraphTheme } from "../theme/intelgraphTheme";
+import { AuthProvider } from "../context/AuthContext";
+import ReleaseReadinessRoute from "../routes/ReleaseReadinessRoute";
 
 // Mock apollo client to bypass import.meta check in js file
-jest.mock('../services/apollo', () => ({
+jest.mock("../services/apollo", () => ({
   apolloClient: {
     query: jest.fn(),
     mutate: jest.fn(),
@@ -50,7 +59,7 @@ const localStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
@@ -100,7 +109,7 @@ beforeEach(() => {
   (global.fetch as any).mockClear();
 
   // Set up default auth token
-  localStorageMock.setItem('token', 'mock-jwt-token');
+  localStorageMock.setItem("token", "mock-jwt-token");
 });
 
 afterEach(() => {
@@ -109,17 +118,15 @@ afterEach(() => {
 });
 
 // Helper to render a route with all necessary providers
-const renderWithProviders = (ui: React.ReactElement, { route = '/' } = {}) => {
-  window.history.pushState({}, 'Test page', route);
+const renderWithProviders = (ui: React.ReactElement, { route = "/" } = {}) => {
+  window.history.pushState({}, "Test page", route);
 
   return render(
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <ThemeProvider theme={getIntelGraphTheme()}>
           <AuthProvider>
-            <BrowserRouter>
-              {ui}
-            </BrowserRouter>
+            <BrowserRouter>{ui}</BrowserRouter>
           </AuthProvider>
         </ThemeProvider>
       </ApolloProvider>
@@ -127,20 +134,20 @@ const renderWithProviders = (ui: React.ReactElement, { route = '/' } = {}) => {
   );
 };
 
-describe('Route Smoke Tests - Console Error Detection', () => {
-  describe('Release Readiness Route', () => {
-    it('renders without console errors when loading', async () => {
+describe("Route Smoke Tests - Console Error Detection", () => {
+  describe("Release Readiness Route", () => {
+    it("renders without console errors when loading", async () => {
       // Mock API responses
       const mockSummary = {
         generatedAt: new Date().toISOString(),
-        versionOrCommit: 'abc123',
+        versionOrCommit: "abc123",
         checks: [
           {
-            id: 'test-check-1',
-            name: 'Test Check',
-            status: 'pass',
+            id: "test-check-1",
+            name: "Test Check",
+            status: "pass",
             lastRunAt: new Date().toISOString(),
-            evidenceLinks: ['docs/test.md'],
+            evidenceLinks: ["docs/test.md"],
           },
         ],
       };
@@ -148,70 +155,75 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       const mockEvidence = {
         controls: [
           {
-            id: 'GOV-01',
-            name: 'Test Control',
-            description: 'Test description',
-            enforcementPoint: 'Test',
-            evidenceArtifact: 'test.md',
+            id: "GOV-01",
+            name: "Test Control",
+            description: "Test description",
+            enforcementPoint: "Test",
+            evidenceArtifact: "test.md",
           },
         ],
         evidence: [
           {
-            controlId: 'GOV-01',
-            controlName: 'Test Control',
-            evidenceType: 'Document',
-            location: 'docs/test.md',
-            verificationCommand: 'ls -l docs/test.md',
+            controlId: "GOV-01",
+            controlName: "Test Control",
+            evidenceType: "Document",
+            location: "docs/test.md",
+            verificationCommand: "ls -l docs/test.md",
           },
         ],
       };
 
       (global.fetch as any).mockImplementation((url: string) => {
-        if (url.includes('/ops/release-readiness/summary')) {
+        if (url.includes("/ops/release-readiness/summary")) {
           return Promise.resolve({
             ok: true,
             json: async () => mockSummary,
           });
         }
-        if (url.includes('/ops/release-readiness/evidence-index')) {
+        if (url.includes("/ops/release-readiness/evidence-index")) {
           return Promise.resolve({
             ok: true,
             json: async () => mockEvidence,
           });
         }
-        return Promise.reject(new Error('Unknown URL'));
+        return Promise.reject(new Error("Unknown URL"));
       });
 
       renderWithProviders(
         <Routes>
           <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
         </Routes>,
-        { route: '/ops/release-readiness' }
+        { route: "/ops/release-readiness" }
       );
 
       // Wait for initial render
-      await waitFor(() => {
-        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          (
+            expect(screen.queryByText(/Loading release readiness data/i)) as any
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // Check for console errors (filter out expected warnings from libraries)
       const actualErrors = consoleErrors.filter(
         (err) =>
           // Filter out known library warnings
-          !err[0]?.toString().includes('Warning: ReactDOM.render') &&
-          !err[0]?.toString().includes('Warning: useLayoutEffect') &&
-          !err[0]?.toString().includes('Not implemented: HTMLFormElement.prototype.submit') &&
-          !err[0]?.toString().includes('ReactDOMTestUtils.act')
+          !err[0]?.toString().includes("Warning: ReactDOM.render") &&
+          !err[0]?.toString().includes("Warning: useLayoutEffect") &&
+          !err[0]?.toString().includes("Not implemented: HTMLFormElement.prototype.submit") &&
+          !err[0]?.toString().includes("ReactDOMTestUtils.act")
       );
 
       expect(actualErrors).toHaveLength(0);
     });
 
-    it('renders without console errors when showing cached data', async () => {
+    it("renders without console errors when showing cached data", async () => {
       // Set up cached data
       const cachedSummary = {
         generatedAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-        versionOrCommit: 'cached123',
+        versionOrCommit: "cached123",
         checks: [],
       };
 
@@ -220,70 +232,77 @@ describe('Route Smoke Tests - Console Error Detection', () => {
         evidence: [],
       };
 
-      localStorageMock.setItem('release-readiness-summary', JSON.stringify(cachedSummary));
-      localStorageMock.setItem('release-readiness-evidence', JSON.stringify(cachedEvidence));
-      localStorageMock.setItem('release-readiness-timestamp', (Date.now() - 10 * 60 * 1000).toString());
+      localStorageMock.setItem("release-readiness-summary", JSON.stringify(cachedSummary));
+      localStorageMock.setItem("release-readiness-evidence", JSON.stringify(cachedEvidence));
+      localStorageMock.setItem(
+        "release-readiness-timestamp",
+        (Date.now() - 10 * 60 * 1000).toString()
+      );
 
       // Mock API to fail (offline simulation)
-      (global.fetch as any).mockRejectedValue(new Error('Network error') as any);
+      (global.fetch as any).mockRejectedValue(new Error("Network error") as any);
 
       renderWithProviders(
         <Routes>
           <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
         </Routes>,
-        { route: '/ops/release-readiness' }
+        { route: "/ops/release-readiness" }
       );
 
       // Should show cached data
       await waitFor(() => {
-        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
+        (
+          expect(screen.queryByText(/Loading release readiness data/i)) as any
+        ).not.toBeInTheDocument();
       });
 
       // Check for console errors
       const actualErrors = consoleErrors.filter(
         (err) =>
-          !err[0]?.toString().includes('Warning: ReactDOM.render') &&
-          !err[0]?.toString().includes('Warning: useLayoutEffect') &&
-          !err[0]?.toString().includes('Not implemented: HTMLFormElement.prototype.submit') &&
-          !err[0]?.toString().includes('Network error') // Expected error from fetch
+          !err[0]?.toString().includes("Warning: ReactDOM.render") &&
+          !err[0]?.toString().includes("Warning: useLayoutEffect") &&
+          !err[0]?.toString().includes("Not implemented: HTMLFormElement.prototype.submit") &&
+          !err[0]?.toString().includes("Network error") // Expected error from fetch
       );
 
       expect(actualErrors).toHaveLength(0);
     });
 
-    it('renders without console errors in error state', async () => {
+    it("renders without console errors in error state", async () => {
       // Mock API to fail
-      (global.fetch as any).mockRejectedValue(new Error('API Error') as any);
+      (global.fetch as any).mockRejectedValue(new Error("API Error") as any);
 
       renderWithProviders(
         <Routes>
           <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
         </Routes>,
-        { route: '/ops/release-readiness' }
+        { route: "/ops/release-readiness" }
       );
 
       // Wait for error state
       await waitFor(() => {
-        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
+        (
+          expect(screen.queryByText(/Loading release readiness data/i)) as any
+        ).not.toBeInTheDocument();
       });
 
       // Check for console errors (allow the expected API error)
       const actualErrors = consoleErrors.filter(
         (err) =>
-          !err[0]?.toString().includes('Warning: ReactDOM.render') &&
-          !err[0]?.toString().includes('Warning: useLayoutEffect') &&
-          !err[0]?.toString().includes('Not implemented: HTMLFormElement.prototype.submit') &&
-          !err[0]?.toString().includes('API Error') &&
-          !err[0]?.toString().includes('Failed to load from cache')
+          !err[0]?.toString().includes("Warning: ReactDOM.render") &&
+          !err[0]?.toString().includes("Warning: useLayoutEffect") &&
+          !err[0]?.toString().includes("Not implemented: HTMLFormElement.prototype.submit") &&
+          !err[0]?.toString().includes("API Error") &&
+          !err[0]?.toString().includes("Failed to load from cache")
       );
 
       expect(actualErrors).toHaveLength(0);
     });
 
-    it('handles tab switching without console errors', async () => {
+    it("handles tab switching without console errors", async () => {
       const mockSummary = {
         generatedAt: new Date().toISOString(),
-        versionOrCommit: 'abc123',
+        versionOrCommit: "abc123",
         checks: [],
       };
 
@@ -293,37 +312,39 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       };
 
       (global.fetch as any).mockImplementation((url: string) => {
-        if (url.includes('/ops/release-readiness/summary')) {
+        if (url.includes("/ops/release-readiness/summary")) {
           return Promise.resolve({
             ok: true,
             json: async () => mockSummary,
           });
         }
-        if (url.includes('/ops/release-readiness/evidence-index')) {
+        if (url.includes("/ops/release-readiness/evidence-index")) {
           return Promise.resolve({
             ok: true,
             json: async () => mockEvidence,
           });
         }
-        return Promise.reject(new Error('Unknown URL'));
+        return Promise.reject(new Error("Unknown URL"));
       });
 
       renderWithProviders(
         <Routes>
           <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
         </Routes>,
-        { route: '/ops/release-readiness' }
+        { route: "/ops/release-readiness" }
       );
 
       await waitFor(() => {
-        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
+        (
+          expect(screen.queryByText(/Loading release readiness data/i)) as any
+        ).not.toBeInTheDocument();
       });
 
       // Clear errors from initial render
       consoleErrors = [];
 
       // Click Evidence Explorer tab (if visible)
-      const evidenceTab = screen.queryByText('Evidence Explorer');
+      const evidenceTab = screen.queryByText("Evidence Explorer");
       if (evidenceTab) {
         (evidenceTab as HTMLElement).click();
 
@@ -338,13 +359,13 @@ describe('Route Smoke Tests - Console Error Detection', () => {
     });
   });
 
-  describe('Route Mounting - No Runaway Effects', () => {
-    it('does not create runaway intervals or timers', async () => {
+  describe("Route Mounting - No Runaway Effects", () => {
+    it("does not create runaway intervals or timers", async () => {
       jest.useFakeTimers();
 
       const mockSummary = {
         generatedAt: new Date().toISOString(),
-        versionOrCommit: 'abc123',
+        versionOrCommit: "abc123",
         checks: [],
       };
 
@@ -354,26 +375,26 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       };
 
       (global.fetch as any).mockImplementation((url: string) => {
-        if (url.includes('/ops/release-readiness/summary')) {
+        if (url.includes("/ops/release-readiness/summary")) {
           return Promise.resolve({
             ok: true,
             json: async () => mockSummary,
           });
         }
-        if (url.includes('/ops/release-readiness/evidence-index')) {
+        if (url.includes("/ops/release-readiness/evidence-index")) {
           return Promise.resolve({
             ok: true,
             json: async () => mockEvidence,
           });
         }
-        return Promise.reject(new Error('Unknown URL'));
+        return Promise.reject(new Error("Unknown URL"));
       });
 
       const { unmount } = renderWithProviders(
         <Routes>
           <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
         </Routes>,
-        { route: '/ops/release-readiness' }
+        { route: "/ops/release-readiness" }
       );
 
       // Fast-forward time

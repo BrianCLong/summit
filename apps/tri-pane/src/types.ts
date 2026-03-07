@@ -1,6 +1,6 @@
-export type LayerId = 'signals' | 'comms' | 'logistics';
+export type LayerId = "signals" | "comms" | "logistics";
 
-export type LayoutMode = 'grid' | 'timeline';
+export type LayoutMode = "grid" | "timeline";
 
 export interface GraphNode {
   id: string;
@@ -61,7 +61,7 @@ export interface SavedViewRecord {
 
 export interface ToastMessage {
   id: string;
-  tone: 'info' | 'warning';
+  tone: "info" | "warning";
   message: string;
 }
 
@@ -71,15 +71,15 @@ export interface TriPaneState extends ViewSnapshot {
 }
 
 export type TriPaneAction =
-  | { type: 'setTimeRange'; payload: TimeRange }
-  | { type: 'toggleLayer'; payload: LayerId }
-  | { type: 'setGeofence'; payload: string | null }
-  | { type: 'togglePin'; payload: string }
-  | { type: 'setFilterText'; payload: string }
-  | { type: 'setFocusNode'; payload: string | undefined }
-  | { type: 'setLayoutMode'; payload: LayoutMode }
-  | { type: 'saveView'; payload: string }
-  | { type: 'loadView'; payload: string }
-  | { type: 'replaceViews'; payload: SavedViewRecord[] }
-  | { type: 'showToast'; payload: ToastMessage }
-  | { type: 'dismissToast' };
+  | { type: "setTimeRange"; payload: TimeRange }
+  | { type: "toggleLayer"; payload: LayerId }
+  | { type: "setGeofence"; payload: string | null }
+  | { type: "togglePin"; payload: string }
+  | { type: "setFilterText"; payload: string }
+  | { type: "setFocusNode"; payload: string | undefined }
+  | { type: "setLayoutMode"; payload: LayoutMode }
+  | { type: "saveView"; payload: string }
+  | { type: "loadView"; payload: string }
+  | { type: "replaceViews"; payload: SavedViewRecord[] }
+  | { type: "showToast"; payload: ToastMessage }
+  | { type: "dismissToast" };

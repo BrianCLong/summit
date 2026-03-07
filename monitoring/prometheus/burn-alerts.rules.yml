@@ -7,5 +7,5 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'High error budget burn rate for GraphQL API'
-          description: 'The API has burned through 2% of its monthly error budget in the last hour.'
+          summary: "High error budget burn rate for GraphQL API"
+          description: "The API has burned through 2% of its monthly error budget in the last hour."

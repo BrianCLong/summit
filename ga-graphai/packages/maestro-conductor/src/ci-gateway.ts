@@ -1,4 +1,4 @@
-import type { CiCheck, CiCheckResult, OrchestrationTask } from './types';
+import type { CiCheck, CiCheckResult, OrchestrationTask } from "./types";
 
 export class CiGateway {
   private readonly checks: CiCheck[] = [];
@@ -25,13 +25,13 @@ export class CiGateway {
           metadata: result.metadata ?? {},
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'unknown ci gate error';
+        const message = error instanceof Error ? error.message : "unknown ci gate error";
         results.push({
           id: check.id,
           description: check.description,
           required: check.required ?? true,
           passed: false,
-          detail: 'ci check execution failed',
+          detail: "ci check execution failed",
           metadata: { error },
           error: message,
         });

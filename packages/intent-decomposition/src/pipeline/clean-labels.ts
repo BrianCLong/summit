@@ -1,6 +1,6 @@
-import { StepSummaryFactual } from '../types.js';
-import { fillTemplate, loadPromptTemplate } from '../utils/prompt.js';
-import { OpenAICompatibleClient } from '../llm/openai-client.js';
+import { StepSummaryFactual } from "../types.js";
+import { fillTemplate, loadPromptTemplate } from "../utils/prompt.js";
+import { OpenAICompatibleClient } from "../llm/openai-client.js";
 
 export interface CleanLabelOptions {
   modelId: string;
@@ -15,12 +15,12 @@ export interface CleanLabelOptions {
 export async function cleanGoldIntent(
   summaries: StepSummaryFactual[],
   goldIntent: string,
-  options: CleanLabelOptions,
+  options: CleanLabelOptions
 ): Promise<string> {
   const prompt = await loadPromptTemplate(
     options.promptPath,
     options.promptId,
-    options.promptVersion,
+    options.promptVersion
   );
   const client = new OpenAICompatibleClient(options.baseUrl, options.apiKey);
 

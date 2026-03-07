@@ -24,7 +24,7 @@ pip list | grep -E "scikit-learn|pandas"
 
 ## Claude Prompt
 
-```
+````
 You are implementing Entity Resolution (ER) v1 for IntelGraph - explainable deduplication with human-in-the-loop.
 
 CONTEXT:
@@ -220,9 +220,10 @@ SAMPLE CANDIDATE API RESPONSE:
     }
   ]
 }
-```
+````
 
 SAMPLE MERGE API PAYLOAD:
+
 ```json
 {
   "entityIds": ["entity-1", "entity-2"],
@@ -233,6 +234,7 @@ SAMPLE MERGE API PAYLOAD:
 ```
 
 SAMPLE EXPLAIN API RESPONSE:
+
 ```json
 {
   "entityId": "merged-entity-5",
@@ -257,6 +259,7 @@ SAMPLE EXPLAIN API RESPONSE:
 ```
 
 SAMPLE NAME MATCHER (Python):
+
 ```python
 from jellyfish import jaro_winkler_similarity, soundex
 
@@ -280,6 +283,7 @@ class NameMatcher:
 ```
 
 SAMPLE PERCEPTUAL HASH (Python):
+
 ```python
 from imagehash import phash
 from PIL import Image
@@ -309,6 +313,7 @@ Provide:
 (f) Tests (F1 score ≥ 0.95)
 (g) API documentation (OpenAPI/Swagger)
 (h) User guide (how to use ER queue)
+
 ```
 
 ---
@@ -336,3 +341,4 @@ Provide:
 - Phonetic matching: https://pypi.org/project/jellyfish/
 - Perceptual hashing: https://pypi.org/project/ImageHash/
 - Entity resolution theory: https://cs.stanford.edu/people/chrismre/papers/jellyfish.pdf
+```

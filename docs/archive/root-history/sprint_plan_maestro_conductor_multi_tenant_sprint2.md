@@ -12,6 +12,7 @@
 4. **SaaS readiness is proven.** Rate limiting, incident runbooks, DR drills, and usage signals exist for hosted Conductor.
 
 **Success signals**
+
 - Per-tenant quotas visible in dashboards; load tests show no cross-tenant impact.
 - Partner-ready profile selection + guide validated by a non-core engineer walkthrough.
 - Three golden CompanyOS workflows runnable via Switchboard/"New Workflow" UI with provenance.
@@ -24,6 +25,7 @@
 ### Workstream 1 — Multi-Tenant Isolation & Limits
 
 **Story 1.1 – Tenant Isolation & Resource Quotas**
+
 - **Goal:** Prevent one tenant from starving/breaking others via per-tenant limits.
 - **Scope:** Max concurrent runs, max queued runs, max task concurrency; execution classes (standard/bulk/low-priority) for scheduling; quota events surfaced to alerts/metrics/dashboards.
 - **Acceptance:**
@@ -33,6 +35,7 @@
   - Runbook snippet exists for responding to Conductor quota hits.
 
 **Story 1.2 – Data Boundary & Secret Scoping**
+
 - **Goal:** Enforce tenant/environment tagging and secret isolation.
 - **Scope:** Require tenant + environment tags on definitions/runs/log pointers/secrets; secrets backend enforces tenant namespaces and least-privilege worker identities; structured security events for cross-tenant attempts.
 - **Acceptance:**
@@ -43,6 +46,7 @@
 ### Workstream 2 — Workflow Developer Experience & SDK
 
 **Story 2.1 – Conductor Workflow SDK (TypeScript-first)**
+
 - **Goal:** Disciplined, typed authoring for internal/partner devs.
 - **Scope:** SDK for workflow definitions (steps, tasks, retries, timeouts), metadata (`risk_level`, `tenant_scope`, `category`, `tags`, `runbook_link`), and structured events/evidence hooks; published as internal NPM package with docs.
 - **Acceptance:**
@@ -50,11 +54,12 @@
   - Tests ensure type safety (no `any` on critical surfaces) and broken definitions fail fast with readable errors.
 
 **Story 2.2 – Golden CompanyOS Workflows Library v1**
+
 - **Goal:** Default Maestro adoption for canonical CompanyOS flows.
 - **Scope:** Implement via SDK:
-  1) Employee Onboarding (identity, access grants, initial apps).
-  2) Tenant Provisioning/Bootstrap (create tenant, policies, default dashboards).
-  3) Incident Lifecycle (declare incident, notify roles, collect evidence).
+  1. Employee Onboarding (identity, access grants, initial apps).
+  2. Tenant Provisioning/Bootstrap (create tenant, policies, default dashboards).
+  3. Incident Lifecycle (declare incident, notify roles, collect evidence).
 - **Acceptance:**
   - Each workflow risk-tagged, policy-gated, with linked runbook/documentation and provenance receipts.
   - Triggerable from Switchboard command palette and/or New Workflow UI; demoed end-to-end in staging with real-ish data.
@@ -62,6 +67,7 @@
 ### Workstream 3 — White-Label & Partner Readiness
 
 **Story 3.1 – Conductor Configuration Profiles (Internal / White-Label / Hosted SaaS)**
+
 - **Goal:** Single binary with three deployment personas.
 - **Scope:** Profile configs (`internal-edition`, `white-label-edition`, `hosted-saas`) toggling default policies, limits/quotas, logging/retention; code-defined YAML/JSON (e.g., `values.conductor.internal.yaml`, `.white-label.yaml`, `.saas.yaml`), selectable via flag/env var.
 - **Acceptance:**
@@ -69,6 +75,7 @@
   - Docs clarify profile choice and per-tenant overrides.
 
 **Story 3.2 – Partner/Integrator Onboarding Guide for Maestro**
+
 - **Goal:** Competent partner can deploy Conductor + Switchboard for a demo tenant.
 - **Scope:** Guide covering architecture, Helm/Terraform profile deploy, first workflow via SDK, identity wiring, and OPA integration; commands/snippets tested in CI and referenced from the white-label kit.
 - **Acceptance:**
@@ -78,6 +85,7 @@
 ### Workstream 4 — Hosted SaaS: Rate Limits, Incidents, DR
 
 **Story 4.1 – Tenant-Aware Rate Limiting & Abuse Protection**
+
 - **Goal:** Prevent abuse and protect global SLOs in hosted mode.
 - **Scope:** API and workflow-trigger rate limits per-tenant and per-IP (where applicable); abuse patterns/alarms (e.g., rapid create/cancel cycles); dashboards for top tenants by limit hits and global health; runbook for rate-limit/abuse response.
 - **Acceptance:**
@@ -85,6 +93,7 @@
   - Dashboards highlight limit hits; runbook published.
 
 **Story 4.2 – DR Drill & Kill-Switch for Conductor**
+
 - **Goal:** Pause risky automation and recover from failures with evidence.
 - **Scope:** Policy-gated global kill-switch (banner + status in Switchboard) with evidence receipts; DR runbook with RPO/RTO targets and backup/restore steps; staging DR drill simulating data loss/region outage with report and owners for gaps.
 - **Acceptance:**
@@ -94,6 +103,7 @@
 ### Workstream 5 — FinOps & Usage-Based Pricing Inputs
 
 **Story 5.1 – Enriched Metering for Pricing Experiments**
+
 - **Goal:** Enable finance/product to model pricing from real usage.
 - **Scope:** Metering events include workflow complexity hints (steps, external calls), execution duration bands, and data volume/weight estimates; basic model spreadsheet/dashboard exploring per-run/per-task/blended pricing axes with pros/cons; per-tenant usage view (total runs, tasks, complexity score per period).
 - **Acceptance:**
@@ -103,6 +113,7 @@
 ---
 
 ## 3) Global Definition of Done (reaffirmed)
+
 1. **Spec / ADR:** Rationale and alternatives captured.
 2. **Policy:** OPA/ABAC bundles updated with simulation tests for new/changed flows.
 3. **Tests:** Unit + integration on new critical paths (target ≥80% coverage).
@@ -114,6 +125,7 @@
 ---
 
 ## 4) Milestones & Checks (2-week cadence)
+
 - **Day 1:** Kickoff; confirm tenant quota defaults + profile flag wiring; align SDK packaging path.
 - **Day 5:** Mid-sprint demo of quota enforcement, SDK API shape, and one golden workflow skeleton; check guide CI snippets.
 - **Day 8:** Abuse/rate-limit dashboards + kill-switch UI preview; DR drill plan reviewed.
@@ -123,6 +135,7 @@
 ---
 
 ## 5) Risks & Mitigations
+
 - **Risk:** Quota enforcement introduces regressions for legacy tenants → **Mitigation:** feature flags + per-tenant overrides with canary tenants and rollback runbook.
 - **Risk:** SDK adoption friction → **Mitigation:** pair with migrated workflows, add lint rules and type tests for early failures.
 - **Risk:** Profile divergence over time → **Mitigation:** profiles-as-code with versioned defaults and CI validation of overrides.
@@ -131,6 +144,7 @@
 ---
 
 ## 6) Exit Criteria Checklist
+
 - Per-tenant quotas, execution classes, and dashboards live with alerting and runbook.
 - Tenant/environment tagging enforced with automated tests; secrets scoped and audited.
 - TypeScript SDK published internally; ≥2 workflows migrated; policy harness consumes metadata.

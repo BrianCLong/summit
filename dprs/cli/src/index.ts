@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync } from 'fs';
-import { dirname, join, resolve } from 'path';
-import { spawnSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync } from "fs";
+import { dirname, join, resolve } from "path";
+import { spawnSync } from "child_process";
+import { fileURLToPath } from "url";
 
 interface MetricConfig {
   id: string;
   name: string;
-  frequency: 'daily' | 'weekly' | 'monthly';
+  frequency: "daily" | "weekly" | "monthly";
   epsilon: number;
   delta?: number;
   group_size?: number;
-  priority: 'critical' | 'nice-to-have';
+  priority: "critical" | "nice-to-have";
 }
 
 interface SchedulerInput {
@@ -36,8 +36,8 @@ interface ScheduledRelease {
   metric_id: string;
   metric_name: string;
   date: string;
-  frequency: 'daily' | 'weekly' | 'monthly';
-  priority: 'critical' | 'nice-to-have';
+  frequency: "daily" | "weekly" | "monthly";
+  priority: "critical" | "nice-to-have";
   epsilon_cost: number;
   delta_cost: number;
   group_size: number;
@@ -80,7 +80,7 @@ function advancedComposition(epsilons: number[], deltaCap: number, deltaUsed: nu
   const sum = epsilons.reduce((acc, value) => acc + value, 0);
   const sumSq = epsilons.reduce((acc, value) => acc + value * value, 0);
   if (deltaCap <= deltaUsed) {
-    throw new Error('delta cap exhausted before advanced composition');
+    throw new Error("delta cap exhausted before advanced composition");
   }
   const deltaSlack = Math.max(1e-12, deltaCap - deltaUsed);
   const logTerm = Math.log(1 / deltaSlack);
@@ -120,17 +120,17 @@ function resolveManifest(customPath?: string): string {
   if (envPath) {
     return resolve(envPath);
   }
-  return resolve(join(moduleDir, '../../core/Cargo.toml'));
+  return resolve(join(moduleDir, "../../core/Cargo.toml"));
 }
 
 function runScheduler(manifestPath: string, input: SchedulerInput): SchedulerOutput {
   const processResult = spawnSync(
-    'cargo',
-    ['run', '--quiet', '--manifest-path', manifestPath, '--release'],
+    "cargo",
+    ["run", "--quiet", "--manifest-path", manifestPath, "--release"],
     {
       input: JSON.stringify(input),
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe']
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
     }
   );
 
@@ -138,37 +138,45 @@ function runScheduler(manifestPath: string, input: SchedulerInput): SchedulerOut
     throw processResult.error;
   }
   if (processResult.status !== 0) {
-    throw new Error(processResult.stderr || 'dprs-core failed to produce a schedule');
+    throw new Error(processResult.stderr || "dprs-core failed to produce a schedule");
   }
   return JSON.parse(processResult.stdout) as SchedulerOutput;
 }
 
 function formatSchedule(output: SchedulerOutput): string {
   const lines: string[] = [];
-  lines.push('Differential Privacy Release Schedule');
-  lines.push('===================================');
+  lines.push("Differential Privacy Release Schedule");
+  lines.push("===================================");
   lines.push(`Total releases scheduled: ${output.summary.total_releases}`);
-  lines.push(`Epsilon used (direct): ${output.summary.epsilon_used.toFixed(6)} / ${output.summary.epsilon_cap}`);
-  lines.push(`Epsilon used (advanced): ${output.summary.advanced_epsilon.toFixed(6)} / ${output.summary.epsilon_cap}`);
-  lines.push(`Delta used: ${output.summary.delta_used.toExponential(4)} / ${output.summary.delta_cap.toExponential(4)}`);
-  lines.push('');
-  lines.push('Scheduled Releases:');
+  lines.push(
+    `Epsilon used (direct): ${output.summary.epsilon_used.toFixed(6)} / ${output.summary.epsilon_cap}`
+  );
+  lines.push(
+    `Epsilon used (advanced): ${output.summary.advanced_epsilon.toFixed(6)} / ${output.summary.epsilon_cap}`
+  );
+  lines.push(
+    `Delta used: ${output.summary.delta_used.toExponential(4)} / ${output.summary.delta_cap.toExponential(4)}`
+  );
+  lines.push("");
+  lines.push("Scheduled Releases:");
   for (const release of output.schedule) {
-    lines.push(`- [${release.date}] ${release.metric_name} (${release.priority}) :: epsilon ${release.epsilon_cost.toFixed(6)} (remaining ${release.proof.epsilon_remaining.toFixed(6)})`);
+    lines.push(
+      `- [${release.date}] ${release.metric_name} (${release.priority}) :: epsilon ${release.epsilon_cost.toFixed(6)} (remaining ${release.proof.epsilon_remaining.toFixed(6)})`
+    );
   }
   if (output.summary.skipped.length > 0) {
-    lines.push('');
-    lines.push('Skipped Releases:');
+    lines.push("");
+    lines.push("Skipped Releases:");
     for (const skipped of output.summary.skipped) {
       lines.push(`- [${skipped.date}] ${skipped.metric_name}: ${skipped.reason}`);
     }
   }
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function main(): void {
   const args = process.argv.slice(2);
-  if (args.length === 0 || args[0] !== 'schedule') {
+  if (args.length === 0 || args[0] !== "schedule") {
     printUsage();
     process.exit(args.length === 0 ? 1 : 0);
   }
@@ -182,12 +190,12 @@ function main(): void {
       configPath = arg;
       continue;
     }
-    if (arg === '--output') {
+    if (arg === "--output") {
       outputPath = args[i + 1];
       i += 1;
       continue;
     }
-    if (arg === '--manifest') {
+    if (arg === "--manifest") {
       manifestOverride = args[i + 1];
       i += 1;
       continue;
@@ -201,7 +209,7 @@ function main(): void {
   }
 
   const manifestPath = resolveManifest(manifestOverride);
-  const fileContent = readFileSync(resolve(configPath), 'utf-8');
+  const fileContent = readFileSync(resolve(configPath), "utf-8");
   const input = JSON.parse(fileContent) as SchedulerInput;
   const output = runScheduler(manifestPath, input);
 

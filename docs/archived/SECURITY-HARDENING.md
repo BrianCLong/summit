@@ -92,7 +92,7 @@ securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: ['ALL']
+    drop: ["ALL"]
   seccompProfile:
     type: Localhost
     localhostProfile: profiles/intelgraph-seccomp.json
@@ -140,14 +140,14 @@ mtls:
 rules:
   - from:
       - source:
-          principals: ['cluster.local/ns/ingress-nginx/sa/ingress-nginx']
+          principals: ["cluster.local/ns/ingress-nginx/sa/ingress-nginx"]
     to:
       - operation:
-          methods: ['POST']
-          paths: ['/api/maestro/v1/*']
+          methods: ["POST"]
+          paths: ["/api/maestro/v1/*"]
     when:
       - key: request.headers[authorization]
-        values: ['Bearer *']
+        values: ["Bearer *"]
 ```
 
 ### Ingress Security
@@ -168,10 +168,10 @@ Application-layer network filtering:
 # HTTP method and path filtering
 rules:
   http:
-    - method: 'POST'
-      path: '/api/maestro/v1/.*'
+    - method: "POST"
+      path: "/api/maestro/v1/.*"
       headers:
-        - 'Content-Type: application/json'
+        - "Content-Type: application/json"
 ```
 
 ## Secrets Management
@@ -193,7 +193,7 @@ Automated weekly secret rotation:
 
 ```yaml
 # CronJob for secret rotation
-schedule: '0 2 * * 0' # Weekly on Sunday at 2 AM
+schedule: "0 2 * * 0" # Weekly on Sunday at 2 AM
 ```
 
 ### Secret Scanning
@@ -233,10 +233,10 @@ Minimal required permissions:
 ```yaml
 rules:
   # Read-only access to own configuration
-  - apiGroups: ['']
-    resources: ['configmaps']
-    verbs: ['get', 'list', 'watch']
-    resourceNames: ['maestro-config']
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+    resourceNames: ["maestro-config"]
 ```
 
 ### User RBAC
@@ -267,11 +267,11 @@ Policy enforcement at deployment time:
 ```yaml
 # Security policy constraints
 requiredLabels:
-  - 'app.kubernetes.io/name'
-  - 'security.intelgraph.ai/level'
+  - "app.kubernetes.io/name"
+  - "security.intelgraph.ai/level"
 allowedRegistries:
-  - 'ghcr.io/brianlong/intelgraph/'
-  - 'gcr.io/distroless/'
+  - "ghcr.io/brianlong/intelgraph/"
+  - "gcr.io/distroless/"
 ```
 
 #### Kyverno Policies
@@ -282,7 +282,7 @@ Image verification and mutation:
 # Verify image signatures
 verifyImages:
   - imageReferences:
-      - 'ghcr.io/brianlong/intelgraph/*'
+      - "ghcr.io/brianlong/intelgraph/*"
     attestors:
       - count: 1
         entries:

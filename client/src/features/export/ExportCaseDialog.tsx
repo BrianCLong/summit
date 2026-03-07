@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { EXPORT_CASE } from '../../graphql/export.gql.js';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { EXPORT_CASE } from "../../graphql/export.gql.js";
 
 interface Props {
   caseId: string;
@@ -32,43 +32,38 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)' }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)" }}
     >
       <div
         style={{
           maxWidth: 720,
-          margin: '10% auto',
-          background: 'white',
+          margin: "10% auto",
+          background: "white",
           padding: 16,
           borderRadius: 8,
         }}
       >
         <h3>Export Case Bundle</h3>
         <p>Case: {caseId}</p>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           <button onClick={handleExport} disabled={loading}>
             Export
           </button>
           <button onClick={onClose}>Close</button>
         </div>
-        {error ? (
-          <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p>
-        ) : null}
+        {error ? <p style={{ color: "crimson" }}>Error: {(error as any)?.message}</p> : null}
         {blockReason ? (
           <div
             style={{
               marginTop: 12,
               padding: 8,
-              background: '#fff6f6',
-              border: '1px solid #f0caca',
+              background: "#fff6f6",
+              border: "1px solid #f0caca",
             }}
           >
             <strong>Blocked by Policy:</strong>
-            <pre style={{ whiteSpace: 'pre-wrap' }}>{blockReason}</pre>
-            <small>
-              Contact the dataset owner or follow the appeal path documented in
-              policy.
-            </small>
+            <pre style={{ whiteSpace: "pre-wrap" }}>{blockReason}</pre>
+            <small>Contact the dataset owner or follow the appeal path documented in policy.</small>
           </div>
         ) : null}
         {manifest ? (
@@ -105,8 +100,8 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
               </p>
             ) : (
               <small>
-                Note: a downloadable bundle URL may be populated by a background
-                worker in a later step.
+                Note: a downloadable bundle URL may be populated by a background worker in a later
+                step.
               </small>
             )}
           </div>

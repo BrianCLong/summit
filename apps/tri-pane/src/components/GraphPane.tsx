@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react';
-import { edges, layers, nodes } from '../data';
-import { useTriPane } from './EventBus';
+import React, { useMemo } from "react";
+import { edges, layers, nodes } from "../data";
+import { useTriPane } from "./EventBus";
 
 function getLayout(nodeIds: string[], layoutMode: string) {
   const spacingX = 170;
   const spacingY = 120;
   const startX = 110;
   const startY = 80;
-  if (layoutMode === 'timeline') {
+  if (layoutMode === "timeline") {
     const layerOrder = layers.map((layer) => layer.id);
     const width = 420;
     return nodeIds.reduce<Record<string, { x: number; y: number }>>((acc, id, idx) => {
@@ -44,7 +44,11 @@ export function GraphPane() {
   }, [timeRange, activeLayers, geofence, filterText, pinnedNodes]);
 
   const layout = useMemo(
-    () => getLayout(visibleNodes.map((n) => n.id), layoutMode),
+    () =>
+      getLayout(
+        visibleNodes.map((n) => n.id),
+        layoutMode
+      ),
     [visibleNodes, layoutMode]
   );
 
@@ -55,35 +59,40 @@ export function GraphPane() {
   const focus = visibleNodes.find((n) => n.id === focusNodeId);
 
   return (
-    <section aria-labelledby="graph-heading" className="flex flex-col gap-3 rounded-2xl border border-sand/20 bg-horizon/40 p-4 shadow-inner">
+    <section
+      aria-labelledby="graph-heading"
+      className="flex flex-col gap-3 rounded-2xl border border-sand/20 bg-horizon/40 p-4 shadow-inner"
+    >
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-wide text-sand/80">Graph Canvas</p>
-          <h2 id="graph-heading" className="text-lg font-semibold">Connections and anomalies</h2>
+          <h2 id="graph-heading" className="text-lg font-semibold">
+            Connections and anomalies
+          </h2>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2" role="group" aria-label="Graph layout mode">
             <button
               type="button"
               className={`rounded-full border px-3 py-1 text-xs transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
-                layoutMode === 'grid'
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'border-sand/20 bg-horizon text-sand/80'
+                layoutMode === "grid"
+                  ? "border-accent bg-accent/15 text-accent"
+                  : "border-sand/20 bg-horizon text-sand/80"
               }`}
-              aria-pressed={layoutMode === 'grid'}
-              onClick={() => dispatch({ type: 'setLayoutMode', payload: 'grid' })}
+              aria-pressed={layoutMode === "grid"}
+              onClick={() => dispatch({ type: "setLayoutMode", payload: "grid" })}
             >
               Grid
             </button>
             <button
               type="button"
               className={`rounded-full border px-3 py-1 text-xs transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
-                layoutMode === 'timeline'
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'border-sand/20 bg-horizon text-sand/80'
+                layoutMode === "timeline"
+                  ? "border-accent bg-accent/15 text-accent"
+                  : "border-sand/20 bg-horizon text-sand/80"
               }`}
-              aria-pressed={layoutMode === 'timeline'}
-              onClick={() => dispatch({ type: 'setLayoutMode', payload: 'timeline' })}
+              aria-pressed={layoutMode === "timeline"}
+              onClick={() => dispatch({ type: "setLayoutMode", payload: "timeline" })}
             >
               Timeline
             </button>
@@ -94,15 +103,15 @@ export function GraphPane() {
           <input
             id="graph-filter"
             value={filterText}
-            onChange={(e) => dispatch({ type: 'setFilterText', payload: e.target.value })}
+            onChange={(e) => dispatch({ type: "setFilterText", payload: e.target.value })}
             className="rounded-md border border-sand/20 bg-ink px-3 py-1 text-sm"
             aria-describedby="graph-filter-help"
           />
         </div>
       </div>
       <p id="graph-filter-help" className="text-xs text-sand/70">
-        Pin nodes to lock them in view. Expand reveals neighbor links and provenance context. Active window: {timeRange.start}h →{' '}
-        {timeRange.end}h.
+        Pin nodes to lock them in view. Expand reveals neighbor links and provenance context. Active
+        window: {timeRange.start}h → {timeRange.end}h.
       </p>
       <div className="relative overflow-hidden rounded-xl border border-sand/10 bg-ink/60">
         <svg
@@ -141,11 +150,11 @@ export function GraphPane() {
               <g key={node.id} transform={`translate(${position.x}, ${position.y})`}>
                 <circle
                   r={22}
-                  className={`cursor-pointer fill-accent/80 ${pinned ? 'stroke-4 stroke-sand' : 'stroke-2 stroke-sand/60'}`}
+                  className={`cursor-pointer fill-accent/80 ${pinned ? "stroke-4 stroke-sand" : "stroke-2 stroke-sand/60"}`}
                   tabIndex={0}
                   aria-label={`${node.label} (${node.layer}) confidence ${Math.round(node.confidence * 100)}%`}
-                  onFocus={() => dispatch({ type: 'setFocusNode', payload: node.id })}
-                  onClick={() => dispatch({ type: 'setFocusNode', payload: node.id })}
+                  onFocus={() => dispatch({ type: "setFocusNode", payload: node.id })}
+                  onClick={() => dispatch({ type: "setFocusNode", payload: node.id })}
                 />
                 <text
                   className="select-none text-[11px] font-semibold fill-sand"
@@ -172,13 +181,13 @@ export function GraphPane() {
                 key={`pin-${node.id}`}
                 className={`rounded-full border px-3 py-1 text-xs transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
                   pinnedNodes.includes(node.id)
-                    ? 'border-accent bg-accent/20 text-accent'
-                    : 'border-sand/30 bg-horizon'
+                    ? "border-accent bg-accent/20 text-accent"
+                    : "border-sand/30 bg-horizon"
                 }`}
                 aria-pressed={pinnedNodes.includes(node.id)}
-                onClick={() => dispatch({ type: 'togglePin', payload: node.id })}
+                onClick={() => dispatch({ type: "togglePin", payload: node.id })}
               >
-                {pinnedNodes.includes(node.id) ? 'Pinned' : 'Pin'} {node.label}
+                {pinnedNodes.includes(node.id) ? "Pinned" : "Pin"} {node.label}
               </button>
             ))}
             {visibleNodes.length === 0 && (
@@ -196,13 +205,13 @@ export function GraphPane() {
               <p className="text-sand/80">Layer: {focus.layer}</p>
               <p className="text-sand/80">Provenance: {focus.provenance}</p>
               <p className="text-sand/80">Confidence: {(focus.confidence * 100).toFixed(0)}%</p>
-              <p className="text-sand/80">Neighbors: {focus.neighbors.join(', ')}</p>
+              <p className="text-sand/80">Neighbors: {focus.neighbors.join(", ")}</p>
               <div className="flex gap-2 pt-2">
                 {focus.neighbors.map((neighborId) => (
                   <button
                     key={`expand-${neighborId}`}
                     className="rounded-md border border-accent/60 bg-accent/10 px-3 py-1 text-xs text-accent"
-                    onClick={() => dispatch({ type: 'setFocusNode', payload: neighborId })}
+                    onClick={() => dispatch({ type: "setFocusNode", payload: neighborId })}
                   >
                     Expand {neighborId}
                   </button>

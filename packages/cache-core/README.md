@@ -24,10 +24,10 @@ pnpm add @intelgraph/cache-core
 ### Basic Usage
 
 ```typescript
-import { createCache, CacheTier } from '@intelgraph/cache-core';
+import { createCache, CacheTier } from "@intelgraph/cache-core";
 
 const cache = createCache({
-  namespace: 'my-service',
+  namespace: "my-service",
   tiers: [CacheTier.L1, CacheTier.L2],
   defaultTtlSeconds: 300,
   metrics: true,
@@ -36,17 +36,17 @@ const cache = createCache({
   },
   l2: {
     connection: {
-      host: 'localhost',
+      host: "localhost",
       port: 6379,
-      password: 'secret',
+      password: "secret",
     },
   },
 });
 
 // Basic operations
-await cache.set('key', { data: 'value' });
-const value = await cache.get<MyType>('key');
-await cache.delete('key');
+await cache.set("key", { data: "value" });
+const value = await cache.get<MyType>("key");
+await cache.delete("key");
 ```
 
 ### Cache-Aside Pattern
@@ -54,7 +54,7 @@ await cache.delete('key');
 ```typescript
 // Automatically handles cache miss, loader, and caching
 const result = await cache.getOrSet(
-  'expensive-key',
+  "expensive-key",
   async () => {
     return await expensiveOperation();
   },
@@ -66,15 +66,15 @@ const result = await cache.getOrSet(
 
 ```typescript
 // Cache with tags
-await cache.set('entity:123', entity, {
-  tags: ['investigation:456', 'tenant:abc'],
+await cache.set("entity:123", entity, {
+  tags: ["investigation:456", "tenant:abc"],
 });
-await cache.set('entity:124', entity2, {
-  tags: ['investigation:456'],
+await cache.set("entity:124", entity2, {
+  tags: ["investigation:456"],
 });
 
 // Invalidate all entries with a tag
-await cache.invalidateByTag('investigation:456');
+await cache.invalidateByTag("investigation:456");
 // Both entity:123 and entity:124 are now invalidated
 ```
 
@@ -82,19 +82,21 @@ await cache.invalidateByTag('investigation:456');
 
 ```typescript
 // Delete all user-related cache entries
-const deleted = await cache.deleteByPattern('user:*');
+const deleted = await cache.deleteByPattern("user:*");
 console.log(`Deleted ${deleted} entries`);
 ```
 
 ### Using an Existing Redis Client
 
 ```typescript
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
-const redis = new Redis({ /* your config */ });
+const redis = new Redis({
+  /* your config */
+});
 
 const cache = createCache({
-  namespace: 'my-service',
+  namespace: "my-service",
   tiers: [CacheTier.L1, CacheTier.L2],
   l2: {
     client: redis, // Use existing client
@@ -104,16 +106,16 @@ const cache = createCache({
 
 ## Configuration
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `namespace` | string | required | Prefix for all cache keys |
-| `tiers` | CacheTier[] | [L1, L2] | Which cache tiers to enable |
-| `defaultTtlSeconds` | number | 300 | Default TTL for entries |
-| `metrics` | boolean | true | Enable Prometheus metrics |
-| `l1.maxBytes` | number | 100MB | Maximum L1 cache size |
-| `l2.connection` | object | - | Redis connection options |
-| `l2.client` | Redis | - | Existing Redis client |
-| `l2.invalidationChannel` | string | 'cache:invalidation' | Pub/sub channel |
+| Option                   | Type        | Default              | Description                 |
+| ------------------------ | ----------- | -------------------- | --------------------------- |
+| `namespace`              | string      | required             | Prefix for all cache keys   |
+| `tiers`                  | CacheTier[] | [L1, L2]             | Which cache tiers to enable |
+| `defaultTtlSeconds`      | number      | 300                  | Default TTL for entries     |
+| `metrics`                | boolean     | true                 | Enable Prometheus metrics   |
+| `l1.maxBytes`            | number      | 100MB                | Maximum L1 cache size       |
+| `l2.connection`          | object      | -                    | Redis connection options    |
+| `l2.client`              | Redis       | -                    | Existing Redis client       |
+| `l2.invalidationChannel` | string      | 'cache:invalidation' | Pub/sub channel             |
 
 ## Metrics
 

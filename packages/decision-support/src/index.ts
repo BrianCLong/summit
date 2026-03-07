@@ -6,7 +6,7 @@
  * risk assessment, impact analysis, and executive briefing generation.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Course of Action (COA) Analysis
@@ -19,13 +19,15 @@ export const CourseOfActionSchema = z.object({
   operationId: z.string(),
 
   // Objectives
-  objectives: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
-    measurable: z.boolean(),
-    metrics: z.array(z.string())
-  })),
+  objectives: z.array(
+    z.object({
+      id: z.string(),
+      description: z.string(),
+      priority: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
+      measurable: z.boolean(),
+      metrics: z.array(z.string()),
+    })
+  ),
 
   // Resources required
   resources: z.object({
@@ -33,7 +35,7 @@ export const CourseOfActionSchema = z.object({
     equipment: z.array(z.string()),
     budget: z.number(),
     time: z.number(), // days
-    specialCapabilities: z.array(z.string())
+    specialCapabilities: z.array(z.string()),
   }),
 
   // Timeline
@@ -42,37 +44,43 @@ export const CourseOfActionSchema = z.object({
     preparation: z.number(),
     execution: z.number(),
     assessment: z.number(),
-    total: z.number()
+    total: z.number(),
   }),
 
   // Risks
-  risks: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    probability: z.number(), // 0-100
-    impact: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    mitigation: z.string()
-  })),
+  risks: z.array(
+    z.object({
+      id: z.string(),
+      description: z.string(),
+      probability: z.number(), // 0-100
+      impact: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      mitigation: z.string(),
+    })
+  ),
 
   // Advantages
-  advantages: z.array(z.object({
-    description: z.string(),
-    significance: z.enum(['MAJOR', 'MODERATE', 'MINOR'])
-  })),
+  advantages: z.array(
+    z.object({
+      description: z.string(),
+      significance: z.enum(["MAJOR", "MODERATE", "MINOR"]),
+    })
+  ),
 
   // Disadvantages
-  disadvantages: z.array(z.object({
-    description: z.string(),
-    significance: z.enum(['MAJOR', 'MODERATE', 'MINOR'])
-  })),
+  disadvantages: z.array(
+    z.object({
+      description: z.string(),
+      significance: z.enum(["MAJOR", "MODERATE", "MINOR"]),
+    })
+  ),
 
   // Feasibility assessment
   feasibility: z.object({
-    technical: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    operational: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    political: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    legal: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    overall: z.enum(['HIGH', 'MEDIUM', 'LOW'])
+    technical: z.enum(["HIGH", "MEDIUM", "LOW"]),
+    operational: z.enum(["HIGH", "MEDIUM", "LOW"]),
+    political: z.enum(["HIGH", "MEDIUM", "LOW"]),
+    legal: z.enum(["HIGH", "MEDIUM", "LOW"]),
+    overall: z.enum(["HIGH", "MEDIUM", "LOW"]),
   }),
 
   // Success probability
@@ -83,7 +91,7 @@ export const CourseOfActionSchema = z.object({
 
   metadata: z.record(z.unknown()),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
 });
 
 export const COAComparisonSchema = z.object({
@@ -92,31 +100,35 @@ export const COAComparisonSchema = z.object({
   coas: z.array(z.string()), // COA IDs
 
   // Comparison criteria
-  criteria: z.array(z.object({
-    name: z.string(),
-    weight: z.number(), // 0-1
-    scores: z.record(z.number()) // COA ID -> score
-  })),
+  criteria: z.array(
+    z.object({
+      name: z.string(),
+      weight: z.number(), // 0-1
+      scores: z.record(z.number()), // COA ID -> score
+    })
+  ),
 
   // Rankings
-  ranking: z.array(z.object({
-    coaId: z.string(),
-    rank: z.number(),
-    totalScore: z.number(),
-    strengths: z.array(z.string()),
-    weaknesses: z.array(z.string())
-  })),
+  ranking: z.array(
+    z.object({
+      coaId: z.string(),
+      rank: z.number(),
+      totalScore: z.number(),
+      strengths: z.array(z.string()),
+      weaknesses: z.array(z.string()),
+    })
+  ),
 
   recommendation: z.object({
     recommendedCOA: z.string(),
     rationale: z.string(),
     conditions: z.array(z.string()),
-    alternatives: z.array(z.string())
+    alternatives: z.array(z.string()),
   }),
 
   comparedBy: z.string(),
   comparedAt: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -130,46 +142,48 @@ export const RiskAssessmentSchema = z.object({
   coaId: z.string().optional(),
 
   // Risk categories
-  risks: z.array(z.object({
-    id: z.string(),
-    category: z.enum([
-      'OPERATIONAL',
-      'SECURITY',
-      'TECHNICAL',
-      'POLITICAL',
-      'LEGAL',
-      'ENVIRONMENTAL',
-      'REPUTATIONAL',
-      'FINANCIAL'
-    ]),
-    description: z.string(),
-    likelihood: z.enum(['VERY_LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH']),
-    impact: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'CATASTROPHIC']),
-    riskLevel: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+  risks: z.array(
+    z.object({
+      id: z.string(),
+      category: z.enum([
+        "OPERATIONAL",
+        "SECURITY",
+        "TECHNICAL",
+        "POLITICAL",
+        "LEGAL",
+        "ENVIRONMENTAL",
+        "REPUTATIONAL",
+        "FINANCIAL",
+      ]),
+      description: z.string(),
+      likelihood: z.enum(["VERY_LOW", "LOW", "MEDIUM", "HIGH", "VERY_HIGH"]),
+      impact: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "CATASTROPHIC"]),
+      riskLevel: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
 
-    // Mitigation
-    mitigation: z.object({
-      strategies: z.array(z.string()),
-      residualRisk: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-      cost: z.number().optional(),
-      timeline: z.string().optional()
-    }),
+      // Mitigation
+      mitigation: z.object({
+        strategies: z.array(z.string()),
+        residualRisk: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+        cost: z.number().optional(),
+        timeline: z.string().optional(),
+      }),
 
-    // Monitoring
-    indicators: z.array(z.string()),
-    triggers: z.array(z.string()),
-    owner: z.string()
-  })),
+      // Monitoring
+      indicators: z.array(z.string()),
+      triggers: z.array(z.string()),
+      owner: z.string(),
+    })
+  ),
 
   // Overall assessment
-  overallRisk: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+  overallRisk: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
 
   // Risk matrix
   matrix: z.object({
     low: z.number(),
     medium: z.number(),
     high: z.number(),
-    critical: z.number()
+    critical: z.number(),
   }),
 
   recommendations: z.array(z.string()),
@@ -178,7 +192,7 @@ export const RiskAssessmentSchema = z.object({
   assessedAt: z.string(),
   validUntil: z.string().optional(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -194,70 +208,80 @@ export const ImpactAnalysisSchema = z.object({
   impacts: z.object({
     operational: z.object({
       description: z.string(),
-      magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
       affectedAssets: z.array(z.string()),
       duration: z.string(),
-      mitigationOptions: z.array(z.string())
+      mitigationOptions: z.array(z.string()),
     }),
 
     strategic: z.object({
       description: z.string(),
-      magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
       objectives: z.array(z.string()),
-      longTermEffects: z.array(z.string())
+      longTermEffects: z.array(z.string()),
     }),
 
     political: z.object({
       description: z.string(),
-      magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
       stakeholders: z.array(z.string()),
-      publicPerception: z.enum(['VERY_NEGATIVE', 'NEGATIVE', 'NEUTRAL', 'POSITIVE', 'VERY_POSITIVE'])
+      publicPerception: z.enum([
+        "VERY_NEGATIVE",
+        "NEGATIVE",
+        "NEUTRAL",
+        "POSITIVE",
+        "VERY_POSITIVE",
+      ]),
     }),
 
     economic: z.object({
       description: z.string(),
-      magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
       estimatedCost: z.number(),
-      economicSectors: z.array(z.string())
+      economicSectors: z.array(z.string()),
     }),
 
     humanitarian: z.object({
       description: z.string(),
-      magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
       affectedPopulation: z.number(),
-      casualties: z.object({
-        estimated: z.number(),
-        civilian: z.number(),
-        military: z.number()
-      }).optional()
+      casualties: z
+        .object({
+          estimated: z.number(),
+          civilian: z.number(),
+          military: z.number(),
+        })
+        .optional(),
     }),
 
     environmental: z.object({
       description: z.string(),
-      magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
       affectedArea: z.number(), // sq km
       duration: z.string(),
-      reversibility: z.enum(['REVERSIBLE', 'PARTIALLY_REVERSIBLE', 'IRREVERSIBLE'])
-    })
+      reversibility: z.enum(["REVERSIBLE", "PARTIALLY_REVERSIBLE", "IRREVERSIBLE"]),
+    }),
   }),
 
   // Overall impact
-  overallImpact: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE']),
+  overallImpact: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
 
   // Cascading effects
-  cascadingEffects: z.array(z.object({
-    effect: z.string(),
-    probability: z.number(), // 0-100
-    timeframe: z.string(),
-    magnitude: z.enum(['NEGLIGIBLE', 'MINOR', 'MODERATE', 'MAJOR', 'SEVERE'])
-  })),
+  cascadingEffects: z.array(
+    z.object({
+      effect: z.string(),
+      probability: z.number(), // 0-100
+      timeframe: z.string(),
+      magnitude: z.enum(["NEGLIGIBLE", "MINOR", "MODERATE", "MAJOR", "SEVERE"]),
+    })
+  ),
 
   recommendations: z.array(z.string()),
 
   analyzedBy: z.string(),
   analyzedAt: z.string(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -269,12 +293,12 @@ export const PredictionModelSchema = z.object({
   name: z.string(),
   description: z.string(),
   type: z.enum([
-    'THREAT_FORECAST',
-    'BEHAVIOR_PREDICTION',
-    'TREND_ANALYSIS',
-    'OUTCOME_PROBABILITY',
-    'RESOURCE_DEMAND',
-    'TIMELINE_ESTIMATION'
+    "THREAT_FORECAST",
+    "BEHAVIOR_PREDICTION",
+    "TREND_ANALYSIS",
+    "OUTCOME_PROBABILITY",
+    "RESOURCE_DEMAND",
+    "TIMELINE_ESTIMATION",
   ]),
 
   // Model parameters
@@ -284,30 +308,34 @@ export const PredictionModelSchema = z.object({
     trainingData: z.object({
       size: z.number(),
       period: z.string(),
-      sources: z.array(z.string())
+      sources: z.array(z.string()),
     }),
     confidence: z.number(), // 0-100
-    accuracy: z.number().optional() // 0-100
+    accuracy: z.number().optional(), // 0-100
   }),
 
   // Input requirements
-  inputs: z.array(z.object({
-    name: z.string(),
-    type: z.string(),
-    required: z.boolean(),
-    description: z.string()
-  })),
+  inputs: z.array(
+    z.object({
+      name: z.string(),
+      type: z.string(),
+      required: z.boolean(),
+      description: z.string(),
+    })
+  ),
 
   // Output format
-  outputs: z.array(z.object({
-    name: z.string(),
-    type: z.string(),
-    description: z.string()
-  })),
+  outputs: z.array(
+    z.object({
+      name: z.string(),
+      type: z.string(),
+      description: z.string(),
+    })
+  ),
 
   metadata: z.record(z.unknown()),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
 });
 
 export const PredictionSchema = z.object({
@@ -323,36 +351,44 @@ export const PredictionSchema = z.object({
     timeframe: z.string(),
 
     // Supporting data
-    factors: z.array(z.object({
-      factor: z.string(),
-      weight: z.number(),
-      value: z.unknown()
-    })),
+    factors: z.array(
+      z.object({
+        factor: z.string(),
+        weight: z.number(),
+        value: z.unknown(),
+      })
+    ),
 
     // Uncertainty
-    uncertaintyRange: z.object({
-      lower: z.number(),
-      upper: z.number()
-    }).optional(),
+    uncertaintyRange: z
+      .object({
+        lower: z.number(),
+        upper: z.number(),
+      })
+      .optional(),
 
     // Alternative outcomes
-    alternatives: z.array(z.object({
-      outcome: z.string(),
-      probability: z.number()
-    }))
+    alternatives: z.array(
+      z.object({
+        outcome: z.string(),
+        probability: z.number(),
+      })
+    ),
   }),
 
   // Recommendations
-  recommendations: z.array(z.object({
-    action: z.string(),
-    rationale: z.string(),
-    priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
-    timeframe: z.string()
-  })),
+  recommendations: z.array(
+    z.object({
+      action: z.string(),
+      rationale: z.string(),
+      priority: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
+      timeframe: z.string(),
+    })
+  ),
 
   validUntil: z.string(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -372,35 +408,41 @@ export const ExecutiveBriefingSchema = z.object({
   situation: z.object({
     overview: z.string(),
     keyPoints: z.array(z.string()),
-    timeline: z.array(z.object({
-      timestamp: z.string(),
-      event: z.string()
-    })),
-    context: z.string()
+    timeline: z.array(
+      z.object({
+        timestamp: z.string(),
+        event: z.string(),
+      })
+    ),
+    context: z.string(),
   }),
 
   // Assessment
   assessment: z.object({
     currentState: z.string(),
-    trends: z.array(z.object({
-      trend: z.string(),
-      direction: z.enum(['IMPROVING', 'STABLE', 'DETERIORATING']),
-      significance: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
-    })),
+    trends: z.array(
+      z.object({
+        trend: z.string(),
+        direction: z.enum(["IMPROVING", "STABLE", "DETERIORATING"]),
+        significance: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      })
+    ),
     threats: z.array(z.string()),
-    opportunities: z.array(z.string())
+    opportunities: z.array(z.string()),
   }),
 
   // Options
-  options: z.array(z.object({
-    option: z.string(),
-    description: z.string(),
-    pros: z.array(z.string()),
-    cons: z.array(z.string()),
-    risk: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    resources: z.string(),
-    timeline: z.string()
-  })),
+  options: z.array(
+    z.object({
+      option: z.string(),
+      description: z.string(),
+      pros: z.array(z.string()),
+      cons: z.array(z.string()),
+      risk: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      resources: z.string(),
+      timeline: z.string(),
+    })
+  ),
 
   // Recommendation
   recommendation: z.object({
@@ -408,29 +450,33 @@ export const ExecutiveBriefingSchema = z.object({
     rationale: z.string(),
     nextSteps: z.array(z.string()),
     decisionRequired: z.boolean(),
-    deadline: z.string().optional()
+    deadline: z.string().optional(),
   }),
 
   // Supporting materials
-  attachments: z.array(z.object({
-    type: z.enum(['MAP', 'CHART', 'TABLE', 'DOCUMENT', 'IMAGE']),
-    title: z.string(),
-    url: z.string(),
-    description: z.string()
-  })),
+  attachments: z.array(
+    z.object({
+      type: z.enum(["MAP", "CHART", "TABLE", "DOCUMENT", "IMAGE"]),
+      title: z.string(),
+      url: z.string(),
+      description: z.string(),
+    })
+  ),
 
   // Intelligence sources
-  sources: z.array(z.object({
-    source: z.string(),
-    reliability: z.string(),
-    date: z.string()
-  })),
+  sources: z.array(
+    z.object({
+      source: z.string(),
+      reliability: z.string(),
+      date: z.string(),
+    })
+  ),
 
   preparedBy: z.string(),
   preparedAt: z.string(),
   validUntil: z.string().optional(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -446,15 +492,15 @@ export const DecisionRecordSchema = z.object({
     title: z.string(),
     description: z.string(),
     type: z.enum([
-      'STRATEGIC',
-      'OPERATIONAL',
-      'TACTICAL',
-      'ADMINISTRATIVE',
-      'APPROVAL',
-      'AUTHORIZATION'
+      "STRATEGIC",
+      "OPERATIONAL",
+      "TACTICAL",
+      "ADMINISTRATIVE",
+      "APPROVAL",
+      "AUTHORIZATION",
     ]),
     options: z.array(z.string()),
-    selected: z.string()
+    selected: z.string(),
   }),
 
   // Context
@@ -462,14 +508,14 @@ export const DecisionRecordSchema = z.object({
     situation: z.string(),
     constraints: z.array(z.string()),
     pressures: z.array(z.string()),
-    timeAvailable: z.string()
+    timeAvailable: z.string(),
   }),
 
   // Decision maker
   decisionMaker: z.object({
     userId: z.string(),
     role: z.string(),
-    authority: z.string()
+    authority: z.string(),
   }),
 
   // Analysis
@@ -477,7 +523,7 @@ export const DecisionRecordSchema = z.object({
     coaId: z.string().optional(),
     riskAssessmentId: z.string().optional(),
     impactAnalysisId: z.string().optional(),
-    supportingDocuments: z.array(z.string())
+    supportingDocuments: z.array(z.string()),
   }),
 
   // Rationale
@@ -485,23 +531,27 @@ export const DecisionRecordSchema = z.object({
   assumptions: z.array(z.string()),
 
   // Approvals
-  approvals: z.array(z.object({
-    approver: z.string(),
-    role: z.string(),
-    timestamp: z.string(),
-    status: z.enum(['APPROVED', 'REJECTED', 'CONDITIONAL']),
-    comments: z.string()
-  })),
+  approvals: z.array(
+    z.object({
+      approver: z.string(),
+      role: z.string(),
+      timestamp: z.string(),
+      status: z.enum(["APPROVED", "REJECTED", "CONDITIONAL"]),
+      comments: z.string(),
+    })
+  ),
 
   // Outcome tracking
-  outcome: z.object({
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'SUCCESSFUL', 'FAILED', 'MIXED']),
-    results: z.string().optional(),
-    lessonsLearned: z.array(z.string())
-  }).optional(),
+  outcome: z
+    .object({
+      status: z.enum(["PENDING", "IN_PROGRESS", "SUCCESSFUL", "FAILED", "MIXED"]),
+      results: z.string().optional(),
+      lessonsLearned: z.array(z.string()),
+    })
+    .optional(),
 
   timestamp: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -544,14 +594,16 @@ export class DecisionSupport {
    * Compare courses of action
    */
   compareCOAs(coaIds: string[], criteria: any[]): COAComparison {
-    const coas = coaIds.map(id => this.coas.get(id)).filter((c): c is CourseOfAction => c !== undefined);
+    const coas = coaIds
+      .map((id) => this.coas.get(id))
+      .filter((c): c is CourseOfAction => c !== undefined);
 
     if (coas.length === 0) {
-      throw new Error('No valid COAs found');
+      throw new Error("No valid COAs found");
     }
 
     // Score each COA
-    const rankings = coas.map(coa => {
+    const rankings = coas.map((coa) => {
       let totalScore = 0;
       const strengths: string[] = [];
       const weaknesses: string[] = [];
@@ -573,13 +625,13 @@ export class DecisionSupport {
         rank: 0, // Will be set after sorting
         totalScore,
         strengths,
-        weaknesses
+        weaknesses,
       };
     });
 
     // Sort by score and assign ranks
     rankings.sort((a, b) => b.totalScore - a.totalScore);
-    rankings.forEach((r, i) => r.rank = i + 1);
+    rankings.forEach((r, i) => (r.rank = i + 1));
 
     const comparison: COAComparison = {
       id: `comp-${Date.now()}`,
@@ -591,11 +643,11 @@ export class DecisionSupport {
         recommendedCOA: rankings[0].coaId,
         rationale: `Highest overall score (${rankings[0].totalScore.toFixed(1)})`,
         conditions: [],
-        alternatives: rankings.slice(1, 3).map(r => r.coaId)
+        alternatives: rankings.slice(1, 3).map((r) => r.coaId),
       },
-      comparedBy: 'system',
+      comparedBy: "system",
       comparedAt: new Date().toISOString(),
-      metadata: {}
+      metadata: {},
     };
 
     const validated = COAComparisonSchema.parse(comparison);
@@ -636,20 +688,20 @@ export class DecisionSupport {
       modelId,
       timestamp: new Date().toISOString(),
       prediction: {
-        outcome: 'Predicted outcome based on inputs',
+        outcome: "Predicted outcome based on inputs",
         probability: 75,
         confidence: model.parameters.confidence,
-        timeframe: '7 days',
+        timeframe: "7 days",
         factors: Object.entries(inputs).map(([factor, value]) => ({
           factor,
           weight: 1 / Object.keys(inputs).length,
-          value
+          value,
         })),
-        alternatives: []
+        alternatives: [],
       },
       recommendations: [],
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      metadata: {}
+      metadata: {},
     };
 
     const validated = PredictionSchema.parse(prediction);
@@ -663,34 +715,34 @@ export class DecisionSupport {
   generateBriefing(data: Partial<ExecutiveBriefing>): ExecutiveBriefing {
     const briefing: ExecutiveBriefing = {
       id: `brief-${Date.now()}`,
-      title: data.title || 'Executive Briefing',
-      classification: data.classification || 'SECRET',
+      title: data.title || "Executive Briefing",
+      classification: data.classification || "SECRET",
       audience: data.audience || [],
-      executiveSummary: data.executiveSummary || '',
+      executiveSummary: data.executiveSummary || "",
       situation: data.situation || {
-        overview: '',
+        overview: "",
         keyPoints: [],
         timeline: [],
-        context: ''
+        context: "",
       },
       assessment: data.assessment || {
-        currentState: '',
+        currentState: "",
         trends: [],
         threats: [],
-        opportunities: []
+        opportunities: [],
       },
       options: data.options || [],
       recommendation: data.recommendation || {
-        recommendedOption: '',
-        rationale: '',
+        recommendedOption: "",
+        rationale: "",
         nextSteps: [],
-        decisionRequired: false
+        decisionRequired: false,
       },
       attachments: data.attachments || [],
       sources: data.sources || [],
-      preparedBy: data.preparedBy || 'system',
+      preparedBy: data.preparedBy || "system",
       preparedAt: new Date().toISOString(),
-      metadata: data.metadata || {}
+      metadata: data.metadata || {},
     };
 
     const validated = ExecutiveBriefingSchema.parse(briefing);
@@ -712,7 +764,7 @@ export class DecisionSupport {
    */
   getDecisionHistory(operationId: string): DecisionRecord[] {
     return Array.from(this.decisions.values())
-      .filter(d => d.operationId === operationId)
+      .filter((d) => d.operationId === operationId)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 }

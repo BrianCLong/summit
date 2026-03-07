@@ -157,9 +157,9 @@ stages:
   - name: test
     parallel:
       - run: shell
-        with: { command: 'npm test' }
+        with: { command: "npm test" }
       - run: shell
-        with: { command: 'npm run typecheck' }
+        with: { command: "npm run typecheck" }
 ```
 
 ## 🏁 Final Assessment

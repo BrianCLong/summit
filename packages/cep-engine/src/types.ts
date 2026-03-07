@@ -23,7 +23,7 @@ export interface PatternElement {
  * Element quantifier
  */
 export interface ElementQuantifier {
-  type: 'one' | 'one_or_more' | 'zero_or_more' | 'times' | 'optional';
+  type: "one" | "one_or_more" | "zero_or_more" | "times" | "optional";
   count?: number;
   greedy?: boolean;
 }
@@ -32,7 +32,7 @@ export interface ElementQuantifier {
  * Pattern quantifier (for whole pattern)
  */
 export interface PatternQuantifier {
-  type: 'skip_past_last_event' | 'skip_to_first' | 'skip_to_last' | 'strict';
+  type: "skip_past_last_event" | "skip_to_first" | "skip_to_last" | "strict";
 }
 
 /**
@@ -40,7 +40,7 @@ export interface PatternQuantifier {
  */
 export interface TimeConstraint {
   withinMs: number;
-  startFrom?: 'first' | 'last';
+  startFrom?: "first" | "last";
 }
 
 /**
@@ -81,7 +81,7 @@ export interface StateMachine {
  */
 export interface State {
   name: string;
-  type: 'normal' | 'final' | 'error';
+  type: "normal" | "final" | "error";
   onEnter?: (context: any) => void;
   onExit?: (context: any) => void;
 }

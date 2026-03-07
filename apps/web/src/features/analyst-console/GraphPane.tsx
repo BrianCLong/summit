@@ -10,7 +10,11 @@ import { Network, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { useAnalystView, useSelection, useGlobalTimeBrush } from './AnalystViewContext'
+import {
+  useAnalystView,
+  useSelection,
+  useGlobalTimeBrush,
+} from './AnalystViewContext'
 import type { GraphPaneProps, AnalystEntity, AnalystLink } from './types'
 
 /**
@@ -23,7 +27,8 @@ export function GraphPane({
   className,
 }: GraphPaneProps) {
   const { state } = useAnalystView()
-  const { selection, selectEntity, isEntitySelected, resetSelection } = useSelection()
+  const { selection, selectEntity, isEntitySelected, resetSelection } =
+    useSelection()
   const { timeWindow } = useGlobalTimeBrush()
 
   // Filter entities based on time window and filters
@@ -68,7 +73,8 @@ export function GraphPane({
     const visibleEntityIds = new Set(filteredEntities.map(e => e.id))
     return links.filter(
       link =>
-        visibleEntityIds.has(link.sourceId) && visibleEntityIds.has(link.targetId)
+        visibleEntityIds.has(link.sourceId) &&
+        visibleEntityIds.has(link.targetId)
     )
   }, [links, filteredEntities])
 
@@ -121,7 +127,11 @@ export function GraphPane({
   }, [filteredEntities])
 
   // Get color for entity type
-  const getEntityColor = (type: string, isSelected: boolean, isHighlighted: boolean) => {
+  const getEntityColor = (
+    type: string,
+    isSelected: boolean,
+    isHighlighted: boolean
+  ) => {
     const colors: Record<string, string> = {
       Person: 'fill-blue-500',
       Org: 'fill-purple-500',
@@ -140,7 +150,10 @@ export function GraphPane({
 
   return (
     <div
-      className={cn('relative w-full h-full overflow-hidden bg-slate-900', className)}
+      className={cn(
+        'relative w-full h-full overflow-hidden bg-slate-900',
+        className
+      )}
       role="region"
       aria-label="Entity graph visualization"
     >
@@ -156,10 +169,7 @@ export function GraphPane({
             refY="3.5"
             orient="auto"
           >
-            <polygon
-              points="0 0, 10 3.5, 0 7"
-              className="fill-slate-400"
-            />
+            <polygon points="0 0, 10 3.5, 0 7" className="fill-slate-400" />
           </marker>
         </defs>
 

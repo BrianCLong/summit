@@ -57,7 +57,7 @@ Always use pnpm commands, never npm or yarn:
 export const resolvers = {
   Query: {
     entity: async (_parent, { id }, context) => {
-      await context.authorize('entity:read');
+      await context.authorize("entity:read");
       return entityService.findById(id);
     },
   },
@@ -90,7 +90,7 @@ export const EntityCard: React.FC<Props> = ({ entity }) => (
 export async function createEntity(data: CreateEntityInput): Promise<Entity> {
   const validated = entitySchema.parse(data);
   const entity = await db.entity.create({ data: validated });
-  await auditLog.record('entity:created', entity.id);
+  await auditLog.record("entity:created", entity.id);
   return entity;
 }
 ```

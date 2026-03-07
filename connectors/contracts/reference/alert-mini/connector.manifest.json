@@ -27,14 +27,31 @@
   },
   "pii": {
     "fields": [
-      { "field": "reported_by", "category": "medium", "policy": "mask", "comment": "mask analyst email addresses" }
+      {
+        "field": "reported_by",
+        "category": "medium",
+        "policy": "mask",
+        "comment": "mask analyst email addresses"
+      }
     ]
   },
   "mapping": {
     "handler": "./mapper.js",
     "hints": [
-      { "source": "alerts[].id", "targetType": "Alert", "idField": "id", "nameField": "title", "provenanceTag": "alert-record" },
-      { "source": "assets", "targetType": "Asset", "idField": "asset_id", "nameField": "hostname", "provenanceTag": "asset-record" }
+      {
+        "source": "alerts[].id",
+        "targetType": "Alert",
+        "idField": "id",
+        "nameField": "title",
+        "provenanceTag": "alert-record"
+      },
+      {
+        "source": "assets",
+        "targetType": "Asset",
+        "idField": "asset_id",
+        "nameField": "hostname",
+        "provenanceTag": "asset-record"
+      }
     ]
   },
   "fixtures": {

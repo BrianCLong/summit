@@ -3,10 +3,10 @@ name: release-lint
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
       - package.json
       - client/package.json

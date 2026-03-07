@@ -81,6 +81,7 @@ The Evidence-First GraphRAG service provides citation-backed answers from case-s
 Get a citation-backed answer to a question about a case.
 
 **Request Body:**
+
 ```json
 {
   "caseId": "case-123",
@@ -89,6 +90,7 @@ Get a citation-backed answer to a question about a case.
 ```
 
 **Response:**
+
 ```json
 {
   "answer": {
@@ -123,6 +125,7 @@ Get a citation-backed answer to a question about a case.
 Health check endpoint.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -134,10 +137,12 @@ Health check endpoint.
 ## Citation Format
 
 Citations in the answer text follow the format:
+
 - `[evidence: EV-ID]` - Citation to a specific evidence item
 - `[evidence: EV-ID, claim: CLM-ID]` - Citation including the associated claim
 
 The `citations` array in the response contains structured references that can be used to:
+
 - Link to the original evidence in the UI
 - Display source information on hover
 - Navigate to the full evidence document
@@ -151,6 +156,7 @@ The service explicitly tracks what it **cannot** answer:
 3. **LLM-identified gaps**: The LLM reports missing information in its response
 
 Example unknowns:
+
 ```json
 {
   "unknowns": [
@@ -164,15 +170,16 @@ Example unknowns:
 
 Evidence is filtered based on:
 
-| Check | Description |
-|-------|-------------|
-| **Classification** | User's clearance level vs evidence classification (PUBLIC → TS-SCI) |
-| **Need-to-Know** | User must have at least one matching tag |
-| **License** | Evidence license must allow ANALYZE/INTERNAL_USE |
-| **Tenant** | Evidence must belong to user's tenant |
-| **Case Membership** | User must be a member of the case |
+| Check               | Description                                                         |
+| ------------------- | ------------------------------------------------------------------- |
+| **Classification**  | User's clearance level vs evidence classification (PUBLIC → TS-SCI) |
+| **Need-to-Know**    | User must have at least one matching tag                            |
+| **License**         | Evidence license must allow ANALYZE/INTERNAL_USE                    |
+| **Tenant**          | Evidence must belong to user's tenant                               |
+| **Case Membership** | User must be a member of the case                                   |
 
 If all evidence is filtered, the response will be:
+
 ```json
 {
   "answerText": "No evidence is available for you to view in this case based on your current permissions.",
@@ -185,19 +192,20 @@ If all evidence is filtered, the response will be:
 
 Environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `LLM_API_URL` | LLM API endpoint | `https://api.openai.com/v1/chat/completions` |
-| `LLM_API_KEY` | API key for LLM | (required) |
-| `LLM_MODEL` | Model to use | `gpt-4o-mini` |
-| `GRAPHRAG_REDIS_URL` | Redis for caching (optional) | - |
-| `NEO4J_URI` | Neo4j connection URI | (required) |
-| `NEO4J_USER` | Neo4j username | (required) |
-| `NEO4J_PASSWORD` | Neo4j password | (required) |
+| Variable             | Description                  | Default                                      |
+| -------------------- | ---------------------------- | -------------------------------------------- |
+| `LLM_API_URL`        | LLM API endpoint             | `https://api.openai.com/v1/chat/completions` |
+| `LLM_API_KEY`        | API key for LLM              | (required)                                   |
+| `LLM_MODEL`          | Model to use                 | `gpt-4o-mini`                                |
+| `GRAPHRAG_REDIS_URL` | Redis for caching (optional) | -                                            |
+| `NEO4J_URI`          | Neo4j connection URI         | (required)                                   |
+| `NEO4J_USER`         | Neo4j username               | (required)                                   |
+| `NEO4J_PASSWORD`     | Neo4j password               | (required)                                   |
 
 ## Database Schema
 
 ### case_evidence Table
+
 ```sql
 CREATE TABLE case_evidence (
   id UUID PRIMARY KEY,
@@ -215,6 +223,7 @@ CREATE INDEX case_evidence_content_idx ON case_evidence USING gin(to_tsvector('e
 ```
 
 ### graphrag_audit_log Table
+
 ```sql
 CREATE TABLE graphrag_audit_log (
   id UUID PRIMARY KEY,
@@ -238,27 +247,27 @@ CREATE TABLE graphrag_audit_log (
 ### Basic Usage (TypeScript)
 
 ```typescript
-import { getGraphRagService } from './services/graphrag';
+import { getGraphRagService } from "./services/graphrag";
 
 const service = getGraphRagService();
 
 const response = await service.answer(
   {
-    caseId: 'case-123',
-    question: 'Who are the key suspects?',
-    userId: 'analyst-001',
+    caseId: "case-123",
+    question: "Who are the key suspects?",
+    userId: "analyst-001",
   },
   {
-    userId: 'analyst-001',
-    roles: ['analyst'],
-    clearances: ['SECRET'],
-    cases: ['case-123'],
+    userId: "analyst-001",
+    roles: ["analyst"],
+    clearances: ["SECRET"],
+    cases: ["case-123"],
   }
 );
 
 console.log(response.answer.answerText);
 console.log(`Citations: ${response.answer.citations.length}`);
-console.log(`Gaps: ${response.answer.unknowns.join(', ')}`);
+console.log(`Gaps: ${response.answer.unknowns.join(", ")}`);
 ```
 
 ### Frontend Integration
@@ -272,9 +281,9 @@ const useGraphRagAnswer = (caseId: string) => {
   const askQuestion = async (question: string) => {
     setLoading(true);
     try {
-      const response = await fetch('/graphrag/answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/graphrag/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ caseId, question }),
       });
       const data = await response.json();
@@ -298,7 +307,7 @@ function renderWithCitations(text: string, citations: Citation[]) {
   return parts.map((part, i) => {
     const match = part.match(/\[evidence: ([^\],]+)(?:, claim: ([^\]]+))?\]/);
     if (match) {
-      const citation = citations.find(c => c.evidenceId === match[1]);
+      const citation = citations.find((c) => c.evidenceId === match[1]);
       return (
         <CitationLink key={i} citation={citation}>
           {part}
@@ -326,27 +335,30 @@ pnpm test -- src/tests/graphrag/service.test.ts
 
 ## Performance & Limits
 
-| Parameter | Default | Max |
-|-----------|---------|-----|
-| Max nodes in context | 50 | 100 |
-| Max edges in context | - | 200 |
-| Max evidence snippets | 20 | 50 |
-| Max answer length | - | 10,000 chars |
-| Question max length | - | 2,000 chars |
+| Parameter             | Default | Max          |
+| --------------------- | ------- | ------------ |
+| Max nodes in context  | 50      | 100          |
+| Max edges in context  | -       | 200          |
+| Max evidence snippets | 20      | 50           |
+| Max answer length     | -       | 10,000 chars |
+| Question max length   | -       | 2,000 chars  |
 
 ## Troubleshooting
 
 ### "No evidence is available"
+
 - Check user's case membership
 - Verify evidence exists for the case in `case_evidence` table
 - Check user's clearance level matches evidence classification
 
 ### "Unable to generate citation-backed answer"
+
 - LLM could not cite evidence for its claims
 - Evidence may not be relevant to the question
 - Try rephrasing the question
 
 ### Empty citations array
+
 - LLM response did not include valid evidence IDs
 - All cited IDs were invalid and filtered out
 - Check LLM API connection and response format

@@ -5,15 +5,20 @@ import type {
   MultiPolygonGeometry,
   PolygonGeometry,
   Position,
-} from '../types/geospatial.js';
+} from "../types/geospatial.js";
 
-const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
+const clamp = (value: number, min: number, max: number): number =>
+  Math.max(min, Math.min(max, value));
 
-export const pointToPosition = (point: GeoPoint): Position => [point.longitude, point.latitude, point.elevation ?? 0];
+export const pointToPosition = (point: GeoPoint): Position => [
+  point.longitude,
+  point.latitude,
+  point.elevation ?? 0,
+];
 
 export const boundingBoxFromPoints = (points: GeoPoint[]): BoundingBox => {
   if (!points.length) {
-    throw new Error('Cannot derive bounding box from empty point array');
+    throw new Error("Cannot derive bounding box from empty point array");
   }
 
   let minLon = Infinity;
@@ -28,23 +33,25 @@ export const boundingBoxFromPoints = (points: GeoPoint[]): BoundingBox => {
     maxLat = Math.max(maxLat, p.latitude);
   });
 
-  return { minLon, minLat, maxLon, maxLat, crs: 'EPSG:4326' };
+  return { minLon, minLat, maxLon, maxLat, crs: "EPSG:4326" };
 };
 
 const flattenPositions = (geometry: Exclude<Geometry, null>): Position[] => {
   switch (geometry.type) {
-    case 'Point':
+    case "Point":
       return [geometry.coordinates];
-    case 'MultiPoint':
-    case 'LineString':
+    case "MultiPoint":
+    case "LineString":
       return geometry.coordinates;
-    case 'MultiLineString':
-    case 'Polygon':
+    case "MultiLineString":
+    case "Polygon":
       return geometry.coordinates.flat();
-    case 'MultiPolygon':
+    case "MultiPolygon":
       return geometry.coordinates.flat(2);
-    case 'GeometryCollection':
-      return geometry.geometries.filter(Boolean).flatMap((geom) => flattenPositions(geom as Exclude<Geometry, null>));
+    case "GeometryCollection":
+      return geometry.geometries
+        .filter(Boolean)
+        .flatMap((geom) => flattenPositions(geom as Exclude<Geometry, null>));
     default:
       return [];
   }
@@ -67,7 +74,7 @@ export const boundingBoxFromGeometry = (geometry: Geometry): BoundingBox | undef
     maxLat = Math.max(maxLat, lat);
   });
 
-  return { minLon, minLat, maxLon, maxLat, crs: 'EPSG:4326' };
+  return { minLon, minLat, maxLon, maxLat, crs: "EPSG:4326" };
 };
 
 const isPointInPolygonRing = (point: Position, ring: Position[]): boolean => {
@@ -77,14 +84,19 @@ const isPointInPolygonRing = (point: Position, ring: Position[]): boolean => {
     const yi = ring[i][1];
     const xj = ring[j][0];
     const yj = ring[j][1];
-    const intersect = yi > point[1] !== yj > point[1] && point[0] < ((xj - xi) * (point[1] - yi)) / (yj - yi + Number.EPSILON) + xi;
+    const intersect =
+      yi > point[1] !== yj > point[1] &&
+      point[0] < ((xj - xi) * (point[1] - yi)) / (yj - yi + Number.EPSILON) + xi;
     if (intersect) inside = !inside;
   }
   return inside;
 };
 
-const pointInPolygon = (point: Position, polygon: PolygonGeometry | MultiPolygonGeometry): boolean => {
-  const rings = polygon.type === 'Polygon' ? [polygon.coordinates] : polygon.coordinates;
+const pointInPolygon = (
+  point: Position,
+  polygon: PolygonGeometry | MultiPolygonGeometry
+): boolean => {
+  const rings = polygon.type === "Polygon" ? [polygon.coordinates] : polygon.coordinates;
   return rings.some((polyRings) => {
     const outer = polyRings[0];
     if (!outer || !isPointInPolygonRing(point, outer)) return false;
@@ -95,20 +107,25 @@ const pointInPolygon = (point: Position, polygon: PolygonGeometry | MultiPolygon
 
 export const pointInGeometry = (point: GeoPoint, geometry: Geometry): boolean => {
   if (!geometry) return false;
-  if (geometry.type === 'Point') {
-    return geometry.coordinates[0] === point.longitude && geometry.coordinates[1] === point.latitude;
+  if (geometry.type === "Point") {
+    return (
+      geometry.coordinates[0] === point.longitude && geometry.coordinates[1] === point.latitude
+    );
   }
-  if (geometry.type === 'MultiPoint') {
-    return geometry.coordinates.some((coord) => coord[0] === point.longitude && coord[1] === point.latitude);
+  if (geometry.type === "MultiPoint") {
+    return geometry.coordinates.some(
+      (coord) => coord[0] === point.longitude && coord[1] === point.latitude
+    );
   }
-  if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+  if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
     return pointInPolygon(pointToPosition(point), geometry);
   }
-  if (geometry.type === 'LineString' || geometry.type === 'MultiLineString') {
-    const positions = geometry.type === 'LineString' ? geometry.coordinates : geometry.coordinates.flat();
+  if (geometry.type === "LineString" || geometry.type === "MultiLineString") {
+    const positions =
+      geometry.type === "LineString" ? geometry.coordinates : geometry.coordinates.flat();
     return positions.some(([lon, lat]) => lon === point.longitude && lat === point.latitude);
   }
-  if (geometry.type === 'GeometryCollection') {
+  if (geometry.type === "GeometryCollection") {
     return geometry.geometries.filter(Boolean).some((geom) => pointInGeometry(point, geom));
   }
   return false;
@@ -163,7 +180,7 @@ export const rectangularGrid = (bbox: BoundingBox, cellSizeKm: number): PolygonG
   const cellLatSize = cellSizeKm / 110.574; // km per degree latitude
   const midLatRad = ((bbox.minLat + bbox.maxLat) / 2 / 180) * Math.PI;
   const metersPerDegreeLon = 111320 * Math.cos(midLatRad);
-  const cellLonSize = cellSizeKm * 1000 / metersPerDegreeLon;
+  const cellLonSize = (cellSizeKm * 1000) / metersPerDegreeLon;
 
   const polygons: PolygonGeometry[] = [];
   for (let lat = bbox.minLat; lat < bbox.maxLat; lat += cellLatSize) {
@@ -171,7 +188,7 @@ export const rectangularGrid = (bbox: BoundingBox, cellSizeKm: number): PolygonG
       const maxLat = Math.min(lat + cellLatSize, bbox.maxLat);
       const maxLon = Math.min(lon + cellLonSize, bbox.maxLon);
       polygons.push({
-        type: 'Polygon',
+        type: "Polygon",
         coordinates: [
           [
             [lon, lat],

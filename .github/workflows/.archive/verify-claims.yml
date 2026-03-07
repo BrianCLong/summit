@@ -6,10 +6,10 @@ on:
   pull_request:
     branches: [main, master, develop]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -23,7 +23,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsx scripts/governance/validate_claims.ts

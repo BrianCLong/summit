@@ -17,7 +17,9 @@ Naming convention: `evidence/<feature-slug>/` or `evidence/<YYYY-MM-DD-short-des
 A valid Evidence Bundle must contain the following:
 
 ### 1. `claims.yml`
+
 Declarative statements about the change.
+
 ```yaml
 changes:
   - "Added ContextOps documentation"
@@ -26,7 +28,9 @@ behavior:
 ```
 
 ### 2. `checks.yml`
+
 The commands executed to verify the claims.
+
 ```yaml
 checks:
   - command: "npm test"
@@ -36,7 +40,9 @@ checks:
 ```
 
 ### 3. `risk.json`
+
 Automated or manual risk assessment.
+
 ```json
 {
   "touched_areas": ["docs"],
@@ -46,7 +52,9 @@ Automated or manual risk assessment.
 ```
 
 ### 4. `repro.md`
+
 Human-readable reproduction steps.
+
 ```markdown
 1. Checkout branch
 2. Run `cat docs/contextops.md`
@@ -54,7 +62,9 @@ Human-readable reproduction steps.
 ```
 
 ### 5. `artifacts/` (Directory)
+
 Raw evidence files.
+
 - `logs/`: Build logs, test logs.
 - `snapshots/`: Screenshots, DOM dumps.
 - `diffs/`: `git diff --stat`.

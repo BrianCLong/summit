@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Stewardship & Succession Model
 
 **Mission:** Define who holds authority over Summit long-term and how that authority is transferred.

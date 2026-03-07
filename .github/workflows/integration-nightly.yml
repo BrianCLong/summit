@@ -2,7 +2,7 @@ name: integration-nightly
 
 on:
   schedule:
-    - cron: "17 07 * * *"   # 07:17 UTC nightly
+    - cron: "17 07 * * *" # 07:17 UTC nightly
   workflow_dispatch:
 
 concurrency:
@@ -37,8 +37,8 @@ jobs:
       - name: Setup Node 18.20.4 (cache npm)
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
-          cache: 'npm'
+          node-version: "18.20.4"
+          cache: "npm"
 
       - name: Install deps (no scripts)
         run: npm ci --ignore-scripts

@@ -8,25 +8,23 @@ This pack implements the remaining glue to make the **Unification Release** full
 
 ```ts
 // tools/config/render.ts
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import yaml from "js-yaml";
 
 type Dict = Record<string, any>;
 function resolveVault(s: string) {
   const m = s.match(/^\$\{vault:([^}]+)\}$/);
   if (!m) return s;
   // For dev, read from local .secrets.json; in prod, use Vault CSI/ENV
-  const secrets = JSON.parse(
-    fs.readFileSync(path.resolve('.secrets.json'), 'utf8'),
-  );
-  return m ? secrets[m[1]] || '' : s;
+  const secrets = JSON.parse(fs.readFileSync(path.resolve(".secrets.json"), "utf8"));
+  return m ? secrets[m[1]] || "" : s;
 }
 
 function flatten(obj: any, out: Dict = {}) {
   for (const k of Object.keys(obj)) {
     const v = obj[k];
-    if (typeof v === 'object' && v && !Array.isArray(v)) flatten(v, out);
+    if (typeof v === "object" && v && !Array.isArray(v)) flatten(v, out);
     else out[k] = v;
   }
   return out;
@@ -34,99 +32,91 @@ function flatten(obj: any, out: Dict = {}) {
 
 function renderEnv(env: Dict) {
   const lines = Object.entries(env).map(
-    ([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`,
+    ([k, v]) => `${k}=${typeof v === "string" ? v : JSON.stringify(v)}`
   );
-  return lines.join('\n') + '\n';
+  return lines.join("\n") + "\n";
 }
 
 function main() {
-  const configPath = path.resolve('config', 'unified.yaml');
-  const conf: any = yaml.load(fs.readFileSync(configPath, 'utf8'));
+  const configPath = path.resolve("config", "unified.yaml");
+  const conf: any = yaml.load(fs.readFileSync(configPath, "utf8"));
   const common = conf.env.common as Dict;
   const flags = conf.env.flags as Dict;
   // Resolve vault refs
   for (const [k, v] of Object.entries(common))
-    if (typeof v === 'string') (common as any)[k] = resolveVault(v);
+    if (typeof v === "string") (common as any)[k] = resolveVault(v);
   // Per‑service maps (env subset)
   const services: Dict = {
-    'services/gateway-graphql/.env': [
-      'LAC_URL',
-      'LEDGER_URL',
-      'ANALYTICS_URL',
-      'MINER_URL',
-      'NL_URL',
-      'BUDGET_URL',
-      'XAI_URL',
-      'FED_URL',
-      'WALLET_URL',
-      'KEYCLOAK_ISSUER',
-      'KEYCLOAK_AUDIENCE',
-      'OPA_URL',
+    "services/gateway-graphql/.env": [
+      "LAC_URL",
+      "LEDGER_URL",
+      "ANALYTICS_URL",
+      "MINER_URL",
+      "NL_URL",
+      "BUDGET_URL",
+      "XAI_URL",
+      "FED_URL",
+      "WALLET_URL",
+      "KEYCLOAK_ISSUER",
+      "KEYCLOAK_AUDIENCE",
+      "OPA_URL",
     ],
-    'services/lac-policy-compiler/.env': [
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'OPA_URL',
-      'PORT',
+    "services/lac-policy-compiler/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "OPA_URL", "PORT"],
+    "services/prov-ledger/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "POSTGRES_URL", "PORT"],
+    "services/analytics-service/.env": [
+      "NEO4J_URL",
+      "NEO4J_USER",
+      "NEO4J_PASS",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/prov-ledger/.env': [
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'POSTGRES_URL',
-      'PORT',
+    "services/pattern-miner/.env": [
+      "NEO4J_URL",
+      "NEO4J_USER",
+      "NEO4J_PASS",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/analytics-service/.env': [
-      'NEO4J_URL',
-      'NEO4J_USER',
-      'NEO4J_PASS',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
+    "services/ai-nl2cypher/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "PORT"],
+    "services/case-service/.env": [
+      "LAC_URL",
+      "POSTGRES_URL",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/pattern-miner/.env': [
-      'NEO4J_URL',
-      'NEO4J_USER',
-      'NEO4J_PASS',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
+    "services/report-service/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "PORT"],
+    "services/runbook-engine/.env": [
+      "GATEWAY_URL",
+      "ANALYTICS_URL",
+      "NL_URL",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/ai-nl2cypher/.env': ['OTEL_EXPORTER_OTLP_ENDPOINT', 'PORT'],
-    'services/case-service/.env': [
-      'LAC_URL',
-      'POSTGRES_URL',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
+    "services/budget-guard/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "PORT"],
+    "services/archive-tier/.env": [
+      "S3_ENDPOINT",
+      "S3_KEY",
+      "S3_SECRET",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/report-service/.env': ['OTEL_EXPORTER_OTLP_ENDPOINT', 'PORT'],
-    'services/runbook-engine/.env': [
-      'GATEWAY_URL',
-      'ANALYTICS_URL',
-      'NL_URL',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
+    "services/offline-sync/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "PORT"],
+    "services/xai-service/.env": [
+      "NEO4J_URL",
+      "NEO4J_USER",
+      "NEO4J_PASS",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/budget-guard/.env': ['OTEL_EXPORTER_OTLP_ENDPOINT', 'PORT'],
-    'services/archive-tier/.env': [
-      'S3_ENDPOINT',
-      'S3_KEY',
-      'S3_SECRET',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
+    "services/federation-service/.env": [
+      "NEO4J_URL",
+      "NEO4J_USER",
+      "NEO4J_PASS",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "PORT",
     ],
-    'services/offline-sync/.env': ['OTEL_EXPORTER_OTLP_ENDPOINT', 'PORT'],
-    'services/xai-service/.env': [
-      'NEO4J_URL',
-      'NEO4J_USER',
-      'NEO4J_PASS',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
-    ],
-    'services/federation-service/.env': [
-      'NEO4J_URL',
-      'NEO4J_USER',
-      'NEO4J_PASS',
-      'OTEL_EXPORTER_OTLP_ENDPOINT',
-      'PORT',
-    ],
-    'services/wallet-service/.env': ['OTEL_EXPORTER_OTLP_ENDPOINT', 'PORT'],
-    'services/dsar-service/.env': ['OTEL_EXPORTER_OTLP_ENDPOINT', 'PORT'],
+    "services/wallet-service/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "PORT"],
+    "services/dsar-service/.env": ["OTEL_EXPORTER_OTLP_ENDPOINT", "PORT"],
   };
   for (const [file, keys] of Object.entries(services)) {
     const env: Dict = {};
@@ -139,16 +129,13 @@ function main() {
   }
   // Helm values overlay
   const values = {
-    imageRepo: 'ghcr.io/ORG/intelgraph',
+    imageRepo: "ghcr.io/ORG/intelgraph",
     commonEnv: common,
     flags,
   };
-  fs.mkdirSync('deploy/helm/intelgraph/overlays', { recursive: true });
-  fs.writeFileSync(
-    'deploy/helm/intelgraph/overlays/values-generated.yaml',
-    yaml.dump(values),
-  );
-  console.log('Rendered per‑service .env and Helm values.');
+  fs.mkdirSync("deploy/helm/intelgraph/overlays", { recursive: true });
+  fs.writeFileSync("deploy/helm/intelgraph/overlays/values-generated.yaml", yaml.dump(values));
+  console.log("Rendered per‑service .env and Helm values.");
 }
 main();
 ```
@@ -174,11 +161,11 @@ jobs:
 
 ```ts
 // services/gateway-graphql/src/auth.ts
-import jwksRsa from 'jwks-rsa';
-import jwt from 'jsonwebtoken';
+import jwksRsa from "jwks-rsa";
+import jwt from "jsonwebtoken";
 export async function getContext({ req }: any) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '');
-  if (!token) return { subject: { sub: 'anon', roles: ['guest'], attrs: {} } };
+  const token = (req.headers.authorization || "").replace("Bearer ", "");
+  if (!token) return { subject: { sub: "anon", roles: ["guest"], attrs: {} } };
   const kid: any = (jwt.decode(token, { complete: true }) as any)?.header?.kid;
   const client = jwksRsa({
     jwksUri: `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/certs`,
@@ -203,7 +190,7 @@ Apply to Apollo:
 
 ```ts
 // services/gateway-graphql/src/index.ts (add)
-import { getContext } from './auth';
+import { getContext } from "./auth";
 // ...
 const server = new ApolloServer({ typeDefs, resolvers });
 startStandaloneServer(server, {
@@ -218,10 +205,8 @@ Propagate subject header to downstream calls:
 // helper
 function subHeaders(ctx: any) {
   return {
-    'content-type': 'application/json',
-    'x-subject': Buffer.from(JSON.stringify(ctx.subject || {})).toString(
-      'base64',
-    ),
+    "content-type": "application/json",
+    "x-subject": Buffer.from(JSON.stringify(ctx.subject || {})).toString("base64"),
   };
 }
 ```
@@ -234,11 +219,11 @@ Service helper to read subject:
 // services/*/src/subject.ts
 export function subjectFrom(req: any) {
   try {
-    const raw = req.headers['x-subject'];
-    if (!raw) return { sub: 'anon', roles: ['guest'] };
-    return JSON.parse(Buffer.from(String(raw), 'base64').toString('utf8'));
+    const raw = req.headers["x-subject"];
+    if (!raw) return { sub: "anon", roles: ["guest"] };
+    return JSON.parse(Buffer.from(String(raw), "base64").toString("utf8"));
   } catch {
-    return { sub: 'anon', roles: ['guest'] };
+    return { sub: "anon", roles: ["guest"] };
   }
 }
 ```
@@ -249,10 +234,7 @@ export function subjectFrom(req: any) {
 
 ```ts
 // services/gateway-graphql/src/costGuard.ts
-export function withCostGuard<T extends (...a: any) => Promise<any>>(
-  fn: T,
-  budgetMs: number,
-) {
+export function withCostGuard<T extends (...a: any) => Promise<any>>(fn: T, budgetMs: number) {
   return async (...args: any[]) => {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), budgetMs * 2); // hard kill at 2x budget
@@ -274,7 +256,7 @@ Update analytics/pattern resolvers to accept `AbortController` and pass `signal`
 
 ```ts
 // services/prov-ledger/src/index.ts (add)
-app.get('/claims', async (req, res) => {
+app.get("/claims", async (req, res) => {
   const { subjectId, kind, cursor, limit } = req.query as any;
   const take = Math.min(Number(limit || 50), 200);
   const where: any = {};
@@ -284,12 +266,12 @@ app.get('/claims', async (req, res) => {
     where,
     take,
     skip: Number(cursor || 0),
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   res.json(claims);
 });
 
-app.get('/manifests/:id/export', async (req, res) => {
+app.get("/manifests/:id/export", async (req, res) => {
   const m = await prisma.manifest.findUnique({
     where: { id: req.params.id },
     include: { claims: true },
@@ -312,20 +294,20 @@ app.get('/manifests/:id/export', async (req, res) => {
 
 ```tsx
 // webapp/src/features/policy/PolicyInspector.tsx
-import React, { useState } from 'react';
-import $ from 'jquery';
+import React, { useState } from "react";
+import $ from "jquery";
 export default function PolicyInspector() {
   const [json, setJson] = useState(
-    '{"subject":{"sub":"u1","roles":["analyst"]},"resource":{"kind":"doc","sensitivity":"restricted"},"action":"READ","context":{"purpose":"investigation"}}',
+    '{"subject":{"sub":"u1","roles":["analyst"]},"resource":{"kind":"doc","sensitivity":"restricted"},"action":"READ","context":{"purpose":"investigation"}}'
   );
   async function run() {
     $.ajax({
-      url: '/lac/enforce',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/lac/enforce",
+      method: "POST",
+      contentType: "application/json",
       data: json,
       success: (d) => {
-        $('#policy-result').text(JSON.stringify(d, null, 2));
+        $("#policy-result").text(JSON.stringify(d, null, 2));
       },
     });
   }
@@ -347,16 +329,16 @@ _(Dev server proxies `/lac/_` → LAC service.)\*
 
 ```tsx
 // webapp/src/features/case/DsarButton.tsx
-import React from 'react';
-import $ from 'jquery';
+import React from "react";
+import $ from "jquery";
 export default function DsarButton() {
   function req() {
     $.ajax({
-      url: '/dsar/request',
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ subjectId: 'E_demo', audience: 'press' }),
-      success: (r) => alert('DSAR bundle generated: ' + r.id),
+      url: "/dsar/request",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ subjectId: "E_demo", audience: "press" }),
+      success: (r) => alert("DSAR bundle generated: " + r.id),
     });
   }
   return <button onClick={req}>Generate DSAR (press)</button>;
@@ -375,14 +357,12 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata: { name: intelgraph-gateway }
 spec:
-  scaleTargetRef:
-    { apiVersion: apps/v1, kind: Deployment, name: intelgraph-gateway }
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: intelgraph-gateway }
   minReplicas: 2
   maxReplicas: 10
   metrics:
     - type: Resource
-      resource:
-        { name: cpu, target: { type: Utilization, averageUtilization: 60 } }
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 60 } }
 ```
 
 ### 7.2 PDB
@@ -421,7 +401,7 @@ apiVersion: v1
 kind: Secret
 metadata: { name: neo4j-pass }
 type: Opaque
-stringData: { password: 'REDACTED' } # In prod, sourced from Vault CSI
+stringData: { password: "REDACTED" } # In prod, sourced from Vault CSI
 ```
 
 ---

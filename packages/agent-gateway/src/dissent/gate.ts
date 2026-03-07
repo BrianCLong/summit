@@ -2,9 +2,7 @@ export async function ensureCoverage(runId: string, minCoverage = 0.7) {
   // compute coverage over hypothesis space explored by adversarial co-agents
   const cov = await computeCoverage(runId); // implement from planner trace
   if (cov < minCoverage) {
-    throw new Error(
-      `Dissent coverage ${cov.toFixed(2)} below threshold ${minCoverage}`,
-    );
+    throw new Error(`Dissent coverage ${cov.toFixed(2)} below threshold ${minCoverage}`);
   }
   return cov;
 }

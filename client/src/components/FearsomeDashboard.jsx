@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactFlow from 'react-flow-renderer';
+import React from "react";
+import ReactFlow from "react-flow-renderer";
 
 const FearsomeDashboard = ({ plan }) => (
   <div>

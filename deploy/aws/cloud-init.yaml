@@ -42,7 +42,7 @@ write_files:
       # File system
       fs.file-max = 65536
       fs.inotify.max_user_watches = 524288
-    permissions: '0644'
+    permissions: "0644"
 
   # Firewall rules
   - path: /etc/iptables/rules.v4
@@ -78,7 +78,7 @@ write_files:
       -A INPUT -j DROP
 
       COMMIT
-    permissions: '0644'
+    permissions: "0644"
 
   # CloudWatch agent configuration
   - path: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
@@ -140,7 +140,7 @@ write_files:
           }
         }
       }
-    permissions: '0644'
+    permissions: "0644"
 
   # K3s configuration
   - path: /etc/rancher/k3s/config.yaml
@@ -168,7 +168,7 @@ write_files:
         - "bind-address=0.0.0.0"
       cluster-cidr: "10.42.0.0/16"
       service-cidr: "10.43.0.0/16"
-    permissions: '0644'
+    permissions: "0644"
 
   # Systemd service for automatic updates
   - path: /etc/systemd/system/maestro-updater.service
@@ -183,7 +183,7 @@ write_files:
 
       [Install]
       WantedBy=multi-user.target
-    permissions: '0644'
+    permissions: "0644"
 
   # Systemd timer for updates
   - path: /etc/systemd/system/maestro-updater.timer
@@ -198,7 +198,7 @@ write_files:
 
       [Install]
       WantedBy=timers.target
-    permissions: '0644'
+    permissions: "0644"
 
   # Enhanced SSH configuration
   - path: /etc/ssh/sshd_config.d/maestro.conf
@@ -217,7 +217,7 @@ write_files:
       MaxAuthTries 3
       MaxSessions 2
       LoginGraceTime 30
-    permissions: '0644'
+    permissions: "0644"
 
 runcmd:
   # Apply sysctl settings
@@ -329,7 +329,7 @@ timezone: UTC
 users:
   - default
   - name: maestro
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     shell: /bin/bash
     groups: [docker]
     ssh_authorized_keys: []

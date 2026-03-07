@@ -7,7 +7,8 @@
 ---
 
 ## 1. Evidence Principles
-To prove "Non-Exfiltration," we must generate an audit trail that proves *what* was asked and *that* the protocol was followed, without recording the *data* itself.
+
+To prove "Non-Exfiltration," we must generate an audit trail that proves _what_ was asked and _that_ the protocol was followed, without recording the _data_ itself.
 
 ## 2. The Bundle Structure (JSON)
 
@@ -47,14 +48,15 @@ Every ZK session produces a `zk_proof_bundle.json` stored in WORM storage (S3 Ob
 
 ## 3. Explanation of Fields
 
-*   **participants:** Hashed tenant IDs (or cleartext if internal policy allows) to identify who spoke to whom.
-*   **commitments:** We do **not** log the points themselves (which could be brute-forced). We log a *hash of the set of points*. This proves that the set sent at time $T$ is the same set claimed later during a dispute, without revealing the set content.
-*   **intersectionHash:** A commitment to the *result*. If Alice claims "I found 5 matches" but the log implies 3, this hash mismatch proves lying.
+- **participants:** Hashed tenant IDs (or cleartext if internal policy allows) to identify who spoke to whom.
+- **commitments:** We do **not** log the points themselves (which could be brute-forced). We log a _hash of the set of points_. This proves that the set sent at time $T$ is the same set claimed later during a dispute, without revealing the set content.
+- **intersectionHash:** A commitment to the _result_. If Alice claims "I found 5 matches" but the log implies 3, this hash mismatch proves lying.
 
 ## 4. Verification Process
+
 1.  **Dispute:** Tenant B suspects Tenant A is mining data.
 2.  **Audit:** Auditor pulls `zk_proof_bundle.json`.
 3.  **Check:**
-    *   Was `setSizeInitiator` within policy limits?
-    *   Does `matchCount` align with expected probability? (Statistical anomaly detection).
+    - Was `setSizeInitiator` within policy limits?
+    - Does `matchCount` align with expected probability? (Statistical anomaly detection).
 4.  **Deep Verify (Optional):** If Tenant A and B cooperate during an audit, they can reproduce the `initiatorSetHash` from their private logs to prove they didn't modify inputs.

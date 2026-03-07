@@ -10,7 +10,7 @@ const focusableSelector =
 
 export function computeFocusOrder(root: ParentNode = document): FocusStep[] {
   const elements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector)).filter(
-    (element) => !element.hasAttribute('disabled') && !element.getAttribute('aria-hidden'),
+    (element) => !element.hasAttribute("disabled") && !element.getAttribute("aria-hidden")
   );
 
   return elements.map((element, index) => ({
@@ -28,10 +28,10 @@ export function exportFocusOrder(): string {
 
 function deriveLabel(element: HTMLElement): string {
   const label =
-    element.getAttribute('aria-label') ||
-    element.getAttribute('aria-labelledby') ||
+    element.getAttribute("aria-label") ||
+    element.getAttribute("aria-labelledby") ||
     element.textContent?.trim() ||
-    element.getAttribute('name') ||
+    element.getAttribute("name") ||
     element.id;
-  return label || 'unlabeled control';
+  return label || "unlabeled control";
 }

@@ -19,13 +19,14 @@ However, **invariants do not travel with context**. This creates vulnerabilities
 2. **Cross-agent trust collapse**: Agent A cannot specify constraints that Agent B must respect
    - Scenario: Agent A generates context requiring "finance domain only," Agent B ignores this
 
-3. **Policy-context mismatch**: Policies enforce *what the system can do*, not *what the context permits*
+3. **Policy-context mismatch**: Policies enforce _what the system can do_, not _what the context permits_
    - Problem: A user artifact might say "classify as SECRET," but orchestrator policy doesn't enforce it
 
-4. **No structural enforcement**: Violating context rules only fails *after* the model attempts forbidden reasoning
+4. **No structural enforcement**: Violating context rules only fails _after_ the model attempts forbidden reasoning
    - Better: Make invalid context **unexecutable by construction**
 
 As Summit scales to:
+
 - Multi-agent workflows with varying trust levels
 - High-assurance environments (government, healthcare, finance)
 - Contexts containing sensitive instructions (clearance-restricted prompts, PII handling rules)
@@ -42,15 +43,15 @@ A **capsule** is an independently verifiable unit of context:
 
 ```typescript
 interface ContextCapsule {
-  id: string;                    // Cryptographic hash of content + invariants
-  content: ContextSegment;       // The actual context (from ADR-009 CPG)
-  invariants: Invariant[];       // Machine-verifiable rules
-  signature?: string;            // Optional cryptographic signature (agent identity)
+  id: string; // Cryptographic hash of content + invariants
+  content: ContextSegment; // The actual context (from ADR-009 CPG)
+  invariants: Invariant[]; // Machine-verifiable rules
+  signature?: string; // Optional cryptographic signature (agent identity)
   metadata: {
-    createdBy: string;           // Agent ID
-    authorityScope: string[];    // Permitted operations
-    validUntil?: Date;           // Expiration
-    policyDomain: string;        // Classification level, data domain
+    createdBy: string; // Agent ID
+    authorityScope: string[]; // Permitted operations
+    validUntil?: Date; // Expiration
+    policyDomain: string; // Classification level, data domain
   };
 }
 ```
@@ -62,24 +63,25 @@ Invariants specify **constraints on how the capsule's content may be used**:
 ```typescript
 interface Invariant {
   id: string;
-  type: 'reasoning_constraint' | 'data_usage' | 'output_class' | 'authority_scope';
-  rule: Rule;                    // Machine-verifiable expression
-  severity: 'info' | 'warn' | 'block';
+  type: "reasoning_constraint" | "data_usage" | "output_class" | "authority_scope";
+  rule: Rule; // Machine-verifiable expression
+  severity: "info" | "warn" | "block";
   remediation?: string;
 }
 
 type Rule =
-  | { kind: 'forbid_topics'; topics: string[] }
-  | { kind: 'require_clearance'; level: string }
-  | { kind: 'output_must_match'; schema: JSONSchema }
-  | { kind: 'no_external_calls'; strict: boolean }
-  | { kind: 'data_retention'; maxDays: number }
-  | { kind: 'custom_expression'; expr: string }; // Future: Rego/OPA policy
+  | { kind: "forbid_topics"; topics: string[] }
+  | { kind: "require_clearance"; level: string }
+  | { kind: "output_must_match"; schema: JSONSchema }
+  | { kind: "no_external_calls"; strict: boolean }
+  | { kind: "data_retention"; maxDays: number }
+  | { kind: "custom_expression"; expr: string }; // Future: Rego/OPA policy
 ```
 
 **Example invariants**:
 
 1. **Reasoning constraint**:
+
    ```json
    {
      "id": "no-medical-advice",
@@ -91,6 +93,7 @@ type Rule =
    ```
 
 2. **Data usage**:
+
    ```json
    {
      "id": "pii-redaction-required",
@@ -124,9 +127,9 @@ class InvariantValidator {
       if (!this.verifyCapsuleHash(capsule)) {
         violations.push({
           capsuleId: capsule.id,
-          violation: 'hash_mismatch',
-          severity: 'block',
-          message: 'Capsule content has been tampered with'
+          violation: "hash_mismatch",
+          severity: "block",
+          message: "Capsule content has been tampered with",
         });
       }
 
@@ -134,9 +137,9 @@ class InvariantValidator {
       if (capsule.signature && !this.verifySignature(capsule)) {
         violations.push({
           capsuleId: capsule.id,
-          violation: 'invalid_signature',
-          severity: 'block',
-          message: 'Capsule signature verification failed'
+          violation: "invalid_signature",
+          severity: "block",
+          message: "Capsule signature verification failed",
         });
       }
 
@@ -150,7 +153,7 @@ class InvariantValidator {
             violation: result.reason,
             severity: invariant.severity,
             message: result.message,
-            remediation: invariant.remediation
+            remediation: invariant.remediation,
           });
         }
       }
@@ -159,33 +162,34 @@ class InvariantValidator {
       if (capsule.metadata.validUntil && new Date() > capsule.metadata.validUntil) {
         violations.push({
           capsuleId: capsule.id,
-          violation: 'expired',
-          severity: 'block',
-          message: 'Capsule has expired'
+          violation: "expired",
+          severity: "block",
+          message: "Capsule has expired",
         });
       }
     }
 
     // 5. Apply severity rules
-    const blockingViolations = violations.filter(v => v.severity === 'block');
+    const blockingViolations = violations.filter((v) => v.severity === "block");
     if (blockingViolations.length > 0) {
       return {
         valid: false,
         violations,
-        action: 'deny_execution'
+        action: "deny_execution",
       };
     }
 
     return {
       valid: true,
-      violations,  // May include warnings
-      action: 'permit'
+      violations, // May include warnings
+      action: "permit",
     };
   }
 }
 ```
 
 **Enforcement points**:
+
 - **Pre-compilation gate**: Validate before assembling LLMRequest
 - **Kill-switch integration**: Blocking violations trigger execution halt
 - **Audit logging**: All violations recorded in provenance graph
@@ -196,11 +200,7 @@ class InvariantValidator {
 
 ```typescript
 class CapsulePolicy {
-  canAcceptCapsule(
-    capsule: ContextCapsule,
-    receivingAgent: Agent,
-    sendingAgent: Agent
-  ): boolean {
+  canAcceptCapsule(capsule: ContextCapsule, receivingAgent: Agent, sendingAgent: Agent): boolean {
     // Rule: Cannot accept capsules from lower trust tier
     if (sendingAgent.trustTier < receivingAgent.requiredTrustTier) {
       return false;
@@ -222,6 +222,7 @@ class CapsulePolicy {
 ```
 
 **Capsule identity & lineage**:
+
 - Capsules carry `createdBy` agent ID
 - Forwarded capsules preserve original creator + forwarding chain
 - Enables **transitive trust**: Agent C can trace capsule back to originating Agent A
@@ -229,11 +230,13 @@ class CapsulePolicy {
 ### 5. Integration with ADR-009 Context Provenance Graph
 
 **Capsules as provenance nodes**:
+
 - Each capsule becomes a `ProvenanceNode` in the CPG
 - Invariant violations create edges: `VIOLATES_INVARIANT`
 - Revoked capsules propagate invalidation to descendant capsules
 
 **Combined enforcement**:
+
 1. **CPG**: Tracks capsule lineage, enables revocation
 2. **IC³**: Validates capsules before inclusion in compiled context
 3. **Result**: Self-defending context with cryptographic audit trail
@@ -241,11 +244,13 @@ class CapsulePolicy {
 ### 6. Implementation in Summit
 
 **New modules**:
+
 - `agents/orchestrator/src/context/capsules/ContextCapsule.ts`
 - `agents/orchestrator/src/context/capsules/InvariantValidator.ts`
 - `agents/orchestrator/src/context/capsules/CapsulePolicy.ts`
 
 **Integration points**:
+
 - Modify `ContextCompiler.compile()` to:
   1. Convert context segments to capsules
   2. Run `InvariantValidator.validate()`
@@ -254,6 +259,7 @@ class CapsulePolicy {
 - Extend `ga-graphai/packages/data-integrity/src/invariants/` with capsule-aware rules
 
 **Backward compatibility**:
+
 - Existing context segments without invariants treated as "permissive capsules"
 - Gradual rollout: start with opt-in capsules, migrate to mandatory over time
 
@@ -278,43 +284,51 @@ class CapsulePolicy {
 ### Risks
 
 - **Over-constraint**: Too many invariants could make valid operations impossible
-  - *Mitigation*: Start with minimal invariant set, expand based on violations in production
+  - _Mitigation_: Start with minimal invariant set, expand based on violations in production
 
 - **Invariant language limitations**: Complex policies may not be expressible in initial rule types
-  - *Mitigation*: Support custom expressions via Rego/OPA in Phase 2
+  - _Mitigation_: Support custom expressions via Rego/OPA in Phase 2
 
 - **Signature key management**: Compromised agent keys could forge capsules
-  - *Mitigation*: Integrate with existing PKI, require key rotation, audit signature usage
+  - _Mitigation_: Integrate with existing PKI, require key rotation, audit signature usage
 
 - **Denial of service**: Malicious agent sends capsules with unsatisfiable invariants
-  - *Mitigation*: Rate-limit capsule creation, flag agents with high rejection rates
+  - _Mitigation_: Rate-limit capsule creation, flag agents with high rejection rates
 
 ## Alternatives Considered
 
 ### 1. Advisory Metadata Only (No Validation)
+
 **Description**: Attach metadata to context suggesting usage rules, but don't enforce
 **Rejected because**:
+
 - No guarantee model respects hints
 - Cannot detect violations until after model generates output
 - Insufficient for high-assurance environments
 
 ### 2. Runtime Invariant Checking (Post-Model)
+
 **Description**: Validate model outputs against context rules, not inputs
 **Rejected because**:
+
 - Model already performed forbidden reasoning
 - Cannot prevent information leakage (model "saw" restricted content)
 - Wasteful: generate output then discard if invalid
 
 ### 3. Embedding Invariants in System Prompts
+
 **Description**: Write rules as natural language instructions
 **Rejected because**:
+
 - Models can ignore/misinterpret text instructions
 - Not machine-verifiable (cannot prove compliance)
 - Prompt injection can override instructions
 
 ### 4. Separate Policy Database (External to Context)
+
 **Description**: Store invariants in centralized database, look up at runtime
 **Deferred because**:
+
 - Requires network call during compilation (latency)
 - Capsules cannot be self-contained (portability loss)
 - Future optimization: cache frequently-used policies
@@ -322,36 +336,42 @@ class CapsulePolicy {
 ## Implementation Plan
 
 ### Phase 1: Core Capsule Infrastructure (Weeks 1-2)
+
 - Implement `ContextCapsule` data structure
 - Define initial invariant types (reasoning_constraint, data_usage, authority_scope)
 - Build `InvariantValidator` with cryptographic hash verification
 - Write unit tests for capsule creation + validation
 
 ### Phase 2: Integration with ContextCompiler (Weeks 3-4)
+
 - Modify compilation pipeline to generate capsules from segments
 - Add validation gate before LLMRequest assembly
 - Integrate with kill-switch controller (blocking violations → halt)
 - Create default invariants for common scenarios (PII, financial, medical)
 
 ### Phase 3: Multi-Agent Trust (Weeks 5-6)
+
 - Implement `CapsulePolicy` with trust tier checks
 - Add agent signature generation + verification
 - Build capsule forwarding logic (preserve lineage)
 - Create admin API for inspecting capsule rejection logs
 
 ### Phase 4: Advanced Invariants (Weeks 7-8)
+
 - Add support for custom expressions (Rego/OPA integration)
 - Implement output schema validation (output_class invariants)
 - Build invariant composition rules (AND/OR logic)
 - Performance optimization (batch validation, caching)
 
 ### Phase 5: Production Hardening (Weeks 9-10)
+
 - Security audit: verify cryptographic guarantees
 - Fuzz testing: generate malformed capsules, verify rejection
 - Documentation: operator runbooks, developer guides
 - Monitoring: metrics for validation latency, rejection rates
 
 ### Phase 6: Future Enhancements
+
 - Federated invariant sharing (publish trusted capsules to registry)
 - Machine learning on invariant effectiveness (detect weak rules)
 - Dynamic invariant generation (LLM suggests rules for new contexts)

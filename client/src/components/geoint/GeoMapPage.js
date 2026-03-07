@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -9,11 +9,11 @@ import {
   Button,
   TextField,
   Grid,
-} from '@mui/material';
-import { useSelector } from 'react-redux';
-import GeoMapPanel from './GeoMapPanel';
-import { GeointAPI } from '../../services/api';
-import GeointTimeSeriesPanel from './GeointTimeSeriesPanel';
+} from "@mui/material";
+import { useSelector } from "react-redux";
+import GeoMapPanel from "./GeoMapPanel";
+import { GeointAPI } from "../../services/api";
+import GeointTimeSeriesPanel from "./GeointTimeSeriesPanel";
 
 export default function GeoMapPage() {
   const nodes = useSelector((s) => s.graph.nodes || []);
@@ -28,43 +28,28 @@ export default function GeoMapPage() {
 
   const baseNodes = useMemo(
     () => (useSelectedOnly && selected?.length ? selected : nodes),
-    [useSelectedOnly, selected, nodes],
+    [useSelectedOnly, selected, nodes]
   );
   const locPointsRaw = useMemo(
     () =>
       (baseNodes || [])
         .map((n) => n.data || n)
-        .filter(
-          (n) =>
-            n.type === 'LOCATION' &&
-            n.properties?.latitude &&
-            n.properties?.longitude,
-        )
+        .filter((n) => n.type === "LOCATION" && n.properties?.latitude && n.properties?.longitude)
         .map((n) => ({
           latitude: n.properties.latitude,
           longitude: n.properties.longitude,
         })),
-    [nodes],
+    [nodes]
   );
   const locPoints = useMemo(() => {
     if (!timeWindow) return locPointsRaw;
     // Filter by timestamp if available on node properties
-    const [startMs, endMs] = [
-      Date.parse(timeWindow.start),
-      Date.parse(timeWindow.end),
-    ];
+    const [startMs, endMs] = [Date.parse(timeWindow.start), Date.parse(timeWindow.end)];
     return (baseNodes || [])
       .map((n) => n.data || n)
-      .filter(
-        (n) =>
-          n.type === 'LOCATION' &&
-          n.properties?.latitude &&
-          n.properties?.longitude,
-      )
+      .filter((n) => n.type === "LOCATION" && n.properties?.latitude && n.properties?.longitude)
       .filter((n) => {
-        const ts = n.properties?.timestamp
-          ? Date.parse(n.properties.timestamp)
-          : null;
+        const ts = n.properties?.timestamp ? Date.parse(n.properties.timestamp) : null;
         if (!ts || isNaN(ts)) return true; // if no timestamp, keep by default
         return ts >= startMs && ts <= endMs;
       })
@@ -79,24 +64,17 @@ export default function GeoMapPage() {
     const pts = points
       .map((p) => ({ x: p.longitude, y: p.latitude }))
       .sort((a, b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
-    const cross = (o, a, b) =>
-      (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
     const lower = [];
     for (const p of pts) {
-      while (
-        lower.length >= 2 &&
-        cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0
-      )
+      while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0)
         lower.pop();
       lower.push(p);
     }
     const upper = [];
     for (let i = pts.length - 1; i >= 0; i--) {
       const p = pts[i];
-      while (
-        upper.length >= 2 &&
-        cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0
-      )
+      while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0)
         upper.pop();
       upper.push(p);
     }
@@ -115,10 +93,8 @@ export default function GeoMapPage() {
       });
       const mapped = (res.clusters || []).map((clusterArr) => {
         // centroid
-        const lat =
-          clusterArr.reduce((a, p) => a + p.latitude, 0) / clusterArr.length;
-        const lon =
-          clusterArr.reduce((a, p) => a + p.longitude, 0) / clusterArr.length;
+        const lat = clusterArr.reduce((a, p) => a + p.latitude, 0) / clusterArr.length;
+        const lon = clusterArr.reduce((a, p) => a + p.longitude, 0) / clusterArr.length;
         return {
           centroid: { latitude: lat, longitude: lon },
           size: clusterArr.length,
@@ -139,18 +115,13 @@ export default function GeoMapPage() {
   }, [locPoints.length]);
 
   return (
-    <Box sx={{ height: 'calc(100vh - 120px)' }}>
-      <Toolbar sx={{ pl: 0, flexWrap: 'wrap', gap: 1 }}>
+    <Box sx={{ height: "calc(100vh - 120px)" }}>
+      <Toolbar sx={{ pl: 0, flexWrap: "wrap", gap: 1 }}>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Geo Map
         </Typography>
         <FormControlLabel
-          control={
-            <Switch
-              checked={showHeat}
-              onChange={(e) => setShowHeat(e.target.checked)}
-            />
-          }
+          control={<Switch checked={showHeat} onChange={(e) => setShowHeat(e.target.checked)} />}
           label="Heat"
         />
         <FormControlLabel
@@ -180,37 +151,26 @@ export default function GeoMapPage() {
           size="small"
           sx={{ mr: 1, width: 220 }}
           label="Start (ISO)"
-          value={timeWindow?.start || ''}
-          onChange={(e) =>
-            setTimeWindow((w) => ({ ...(w || {}), start: e.target.value }))
-          }
+          value={timeWindow?.start || ""}
+          onChange={(e) => setTimeWindow((w) => ({ ...(w || {}), start: e.target.value }))}
         />
         <TextField
           size="small"
           sx={{ mr: 1, width: 220 }}
           label="End (ISO)"
-          value={timeWindow?.end || ''}
-          onChange={(e) =>
-            setTimeWindow((w) => ({ ...(w || {}), end: e.target.value }))
-          }
+          value={timeWindow?.end || ""}
+          onChange={(e) => setTimeWindow((w) => ({ ...(w || {}), end: e.target.value }))}
         />
         <Button variant="outlined" onClick={() => setTimeWindow(null)}>
           Clear window
         </Button>
-        <Button
-          variant="outlined"
-          onClick={runClusters}
-          disabled={!locPoints.length}
-        >
+        <Button variant="outlined" onClick={runClusters} disabled={!locPoints.length}>
           Cluster
         </Button>
       </Toolbar>
-      <Grid container spacing={2} sx={{ height: '100%' }}>
-        <Grid item xs={12} md={8} sx={{ height: '100%' }}>
-          <Paper
-            variant="outlined"
-            sx={{ height: '100%', minHeight: 420, overflow: 'hidden' }}
-          >
+      <Grid container spacing={2} sx={{ height: "100%" }}>
+        <Grid item xs={12} md={8} sx={{ height: "100%" }}>
+          <Paper variant="outlined" sx={{ height: "100%", minHeight: 420, overflow: "hidden" }}>
             <GeoMapPanel
               nodes={baseNodes}
               showHeat={showHeat}
@@ -240,14 +200,10 @@ export default function GeoMapPage() {
           <GeointTimeSeriesPanel
             points={locPoints.map((p, i) => ({
               ...p,
-              timestamp: new Date(
-                Date.now() - (locPoints.length - i) * 600000,
-              ).toISOString(),
+              timestamp: new Date(Date.now() - (locPoints.length - i) * 600000).toISOString(),
             }))}
             intervalMinutes={30}
-            onSelectBin={(bin) =>
-              setTimeWindow({ start: bin.start, end: bin.end })
-            }
+            onSelectBin={(bin) => setTimeWindow({ start: bin.start, end: bin.end })}
           />
         </Grid>
       </Grid>

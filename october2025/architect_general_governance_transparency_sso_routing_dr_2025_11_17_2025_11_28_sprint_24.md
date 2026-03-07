@@ -121,7 +121,7 @@ spec:
   initContainers:
     - name: verify-bundle
       image: ghcr.io/org/verify-tool:latest
-      command: ['/bin/sh', '-c']
+      command: ["/bin/sh", "-c"]
       args:
         - >-
           set -e; \
@@ -131,7 +131,7 @@ spec:
   containers:
     - name: noop
       image: busybox
-      command: ['sh', '-c', 'sleep 1']
+      command: ["sh", "-c", "sleep 1"]
   volumes: [{ name: policy, configMap: { name: switchboard-policy-cm } }]
 ```
 
@@ -172,35 +172,33 @@ export function PolicyVerifyBanner({
 version: 1
 providers:
   - name: okta_saml
-    match: { issuer: 'https://okta.example.com/app/...' }
+    match: { issuer: "https://okta.example.com/app/..." }
     map:
-      role: '${assertion.attributes.role}' # e.g., Admin/Operator/Analyst
-      residency: '${assertion.attributes.region}' # US/EU
-      classification_cap: '${assertion.attributes.clearance}' # 0..3
-      groups: '${assertion.attributes.groups}' # CSV
+      role: "${assertion.attributes.role}" # e.g., Admin/Operator/Analyst
+      residency: "${assertion.attributes.region}" # US/EU
+      classification_cap: "${assertion.attributes.clearance}" # 0..3
+      groups: "${assertion.attributes.groups}" # CSV
   - name: entra_oidc
-    match: { issuer: 'https://login.microsoftonline.com/<tenant>/v2.0' }
+    match: { issuer: "https://login.microsoftonline.com/<tenant>/v2.0" }
     map:
-      role: '${claims.roles[0]}'
-      residency: '${claims.extension_region}'
-      groups: '${claims.groups}'
+      role: "${claims.roles[0]}"
+      residency: "${claims.extension_region}"
+      groups: "${claims.groups}"
 ```
 
 **Mapper (`apps/server/lib/abac-map.ts`)**
 
 ```ts
-import yaml from 'js-yaml';
+import yaml from "js-yaml";
 export function mapToAbac(payload: any, cfgYaml: string) {
   const cfg: any = yaml.load(cfgYaml); // validate against schema in CI
   const p = cfg.providers.find((p: any) => matches(p.match, payload.issuer));
-  if (!p) throw new Error('no_provider_match');
+  if (!p) throw new Error("no_provider_match");
   const ctx: any = { subject: { authenticated: true } };
   ctx.subject.role = evalTpl(p.map.role, payload);
   ctx.subject.residency = evalTpl(p.map.residency, payload);
-  ctx.subject.classification_cap = Number(
-    evalTpl(p.map.classification_cap || '2', payload),
-  );
-  ctx.subject.groups = evalTpl(p.map.groups || '[]', payload);
+  ctx.subject.classification_cap = Number(evalTpl(p.map.classification_cap || "2", payload));
+  ctx.subject.groups = evalTpl(p.map.groups || "[]", payload);
   return ctx;
 }
 ```
@@ -253,13 +251,13 @@ record "switchboard.example.com" {
 // apps/web/src/middleware.ts
 export function middleware(req: any) {
   const cookies = req.cookies;
-  let region = cookies.get('x-region')?.value;
+  let region = cookies.get("x-region")?.value;
   if (!region) {
     region = detect(req);
   }
   const res = NextResponse.next();
-  res.cookies.set('x-region', region, { maxAge: 60 * 60 * 24 * 7 });
-  res.headers.set('x-region', region);
+  res.cookies.set("x-region", region, { maxAge: 60 * 60 * 24 * 7 });
+  res.headers.set("x-region", region);
   return res;
 }
 ```
@@ -278,7 +276,7 @@ probes:
 ```yaml
 name: dr-sim
 on:
-  schedule: [{ cron: '0 5 * * 3' }]
+  schedule: [{ cron: "0 5 * * 3" }]
   workflow_dispatch:
 jobs:
   restore-into-sandbox:
@@ -328,9 +326,9 @@ export type SavedQuery = {
 **Scoring Script (`ops/gates/canary-score.js`)**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 const weights = { home: 0.3, agents: 0.25, audit: 0.25, admin: 0.2 };
-const results = JSON.parse(fs.readFileSync('probe.results.json', 'utf8'));
+const results = JSON.parse(fs.readFileSync("probe.results.json", "utf8"));
 function score() {
   let s = 0;
   for (const k of Object.keys(weights)) {

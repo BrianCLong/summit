@@ -15,6 +15,7 @@ The Summit monorepo has grown to **417 workspaces** with unclear boundaries betw
 - Build inefficiencies due to tangled dependency graph
 
 **Examples of current issues:**
+
 - `apps/server` (26KB stub) vs `server/` (27MB production) - which is canonical?
 - `apps/types` contains pure types but is in `apps/` instead of `packages/`
 - `packages/prov-ledger` contains server logic but is in `packages/`
@@ -31,6 +32,7 @@ The Summit monorepo has grown to **417 workspaces** with unclear boundaries betw
 ### Option 1: Three-Tier Taxonomy (Recommended)
 
 **Structure:**
+
 ```
 apps/      → User-facing entrypoints only
 packages/  → Pure libraries (no side effects, no servers)
@@ -63,6 +65,7 @@ Organize by domain (`intel/`, `ml/`, `platform/`) instead of type.
 ### Workspace Definitions
 
 #### Apps (User-Facing Entrypoints)
+
 - **Purpose**: Deployable applications that users interact with
 - **Examples**: `web` (React UI), `gateway` (API gateway), `cli` (command-line tools)
 - **Rules**:
@@ -72,6 +75,7 @@ Organize by domain (`intel/`, `ml/`, `platform/`) instead of type.
   - **No business logic** - delegate to packages/services
 
 #### Packages (Pure Libraries)
+
 - **Purpose**: Shared code with no runtime side effects
 - **Examples**: `common-types`, `sdk-ts`, `graph-utils`, `ui-components`
 - **Rules**:
@@ -82,6 +86,7 @@ Organize by domain (`intel/`, `ml/`, `platform/`) instead of type.
   - Should have 100% test coverage for exported APIs
 
 #### Services (Backend Workers & APIs)
+
 - **Purpose**: Stateful backend processes that handle business logic
 - **Examples**: `api` (GraphQL), `auth` (authentication), `ingest` (data pipeline)
 - **Rules**:
@@ -121,17 +126,20 @@ Introduce scoped package names for better organization:
 ## Consequences
 
 ### Positive
+
 - Clear mental model for developers
 - Better build caching (packages rarely change)
 - Easier dependency auditing
 - Enables automated enforcement via linting
 
 ### Negative
+
 - Migration effort required for misplaced packages
 - Some edge cases may not fit cleanly into three categories
 - Need to update import paths across codebase
 
 ### Risks
+
 - Developers may resist taxonomy enforcement
 - Migration may introduce temporary import errors
 
@@ -140,13 +148,14 @@ Introduce scoped package names for better organization:
 ## Compliance
 
 All new workspaces must:
+
 1. Follow the taxonomy rules above
 2. Pass `pnpm lint:taxonomy` check
 3. Include workspace type in `package.json`:
    ```json
    {
      "name": "@intelgraph/my-package",
-     "workspaceType": "package"  // or "app" or "service"
+     "workspaceType": "package" // or "app" or "service"
    }
    ```
 

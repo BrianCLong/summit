@@ -62,6 +62,7 @@ https://api.intelgraph.io/v1/api/entities
 ```
 
 **Advantages:**
+
 - Explicit and visible in logs
 - Easy to cache at CDN/proxy level
 - Simple to test with tools like curl
@@ -72,18 +73,21 @@ https://api.intelgraph.io/v1/api/entities
 Alternative method using HTTP headers:
 
 **Option 1: API-Version header**
+
 ```http
 GET /graphql
 API-Version: v1
 ```
 
 **Option 2: Accept header**
+
 ```http
 GET /graphql
 Accept: application/vnd.intelgraph.v1+json
 ```
 
 **Advantages:**
+
 - Clean URLs
 - Easier to change versions programmatically
 - Better for versioning with content negotiation
@@ -128,7 +132,7 @@ When multiple version indicators are present, the priority order is:
 The version middleware automatically detects and validates the API version:
 
 ```typescript
-import { versionMiddleware } from './versioning';
+import { versionMiddleware } from "./versioning";
 
 app.use(versionMiddleware);
 ```
@@ -138,14 +142,14 @@ app.use(versionMiddleware);
 Once detected, version information is attached to the request:
 
 ```typescript
-import { getVersionContext } from './versioning';
+import { getVersionContext } from "./versioning";
 
-app.get('/api/entities', (req, res) => {
+app.get("/api/entities", (req, res) => {
   const versionCtx = getVersionContext(req);
 
-  console.log(versionCtx.resolvedVersion);  // 'v1'
-  console.log(versionCtx.isDeprecated);     // false
-  console.log(versionCtx.warnings);         // []
+  console.log(versionCtx.resolvedVersion); // 'v1'
+  console.log(versionCtx.isDeprecated); // false
+  console.log(versionCtx.warnings); // []
 });
 ```
 
@@ -179,7 +183,7 @@ X-API-Warn: API version v1 is deprecated and will be sunset on 2025-12-31
 The system maintains a compatibility matrix between versions:
 
 | From → To | v1  | v2  |
-|-----------|-----|-----|
+| --------- | --- | --- |
 | **v1**    | ✅  | ✅  |
 | **v2**    | ✅  | ✅  |
 
@@ -192,29 +196,23 @@ The system maintains a compatibility matrix between versions:
 The compatibility layer automatically transforms requests and responses between compatible versions:
 
 ```typescript
-import { compatibilityLayer } from './versioning';
+import { compatibilityLayer } from "./versioning";
 
 // Transform v1 request to v2 format
-const transformedRequest = await compatibilityLayer.transformRequest(
-  requestData,
-  {
-    fromVersion: 'v1',
-    toVersion: 'v2',
-    operation: 'createEntity',
-    path: '/graphql'
-  }
-);
+const transformedRequest = await compatibilityLayer.transformRequest(requestData, {
+  fromVersion: "v1",
+  toVersion: "v2",
+  operation: "createEntity",
+  path: "/graphql",
+});
 
 // Transform v2 response back to v1 format
-const transformedResponse = await compatibilityLayer.transformResponse(
-  responseData,
-  {
-    fromVersion: 'v1',
-    toVersion: 'v2',
-    operation: 'createEntity',
-    path: '/graphql'
-  }
-);
+const transformedResponse = await compatibilityLayer.transformResponse(responseData, {
+  fromVersion: "v1",
+  toVersion: "v2",
+  operation: "createEntity",
+  path: "/graphql",
+});
 ```
 
 ### Example: Confidence Value Transformation
@@ -262,13 +260,10 @@ const transformedResponse = await compatibilityLayer.transformResponse(
 When a version is deprecated:
 
 ```typescript
-import { versionRegistry } from './versioning';
+import { versionRegistry } from "./versioning";
 
 // Deprecate v1 with sunset date
-versionRegistry.deprecateVersion(
-  'v1',
-  new Date('2025-12-31')
-);
+versionRegistry.deprecateVersion("v1", new Date("2025-12-31"));
 ```
 
 ### Client Notifications
@@ -286,7 +281,7 @@ X-API-Sunset-Date: 2025-12-31T00:00:00.000Z
 In production, you can optionally block deprecated versions:
 
 ```typescript
-import { blockDeprecatedVersions } from './versioning';
+import { blockDeprecatedVersions } from "./versioning";
 
 // Block deprecated versions (optional)
 app.use(blockDeprecatedVersions);
@@ -313,15 +308,13 @@ HTTP/1.1 426 Upgrade Required
 Migration guides are automatically generated for compatible versions:
 
 ```typescript
-import { documentationGenerator } from './versioning';
+import { documentationGenerator } from "./versioning";
 
-const doc = documentationGenerator.generateDocumentation('v1');
+const doc = documentationGenerator.generateDocumentation("v1");
 const migrationGuides = doc.migrationGuides;
 
 // Get specific migration guide
-const v1ToV2 = migrationGuides.find(
-  g => g.fromVersion === 'v1' && g.toVersion === 'v2'
-);
+const v1ToV2 = migrationGuides.find((g) => g.fromVersion === "v1" && g.toVersion === "v2");
 
 console.log(v1ToV2.breakingChanges);
 console.log(v1ToV2.steps);
@@ -391,19 +384,21 @@ Each migration guide includes:
 #### 1. Always Specify Version
 
 **Good:**
+
 ```javascript
-const response = await fetch('https://api.intelgraph.io/v1/graphql', {
+const response = await fetch("https://api.intelgraph.io/v1/graphql", {
   headers: {
-    'API-Version': 'v1',
-    'Authorization': `Bearer ${token}`
-  }
+    "API-Version": "v1",
+    Authorization: `Bearer ${token}`,
+  },
 });
 ```
 
 **Bad:**
+
 ```javascript
 // Don't rely on default version
-const response = await fetch('https://api.intelgraph.io/graphql');
+const response = await fetch("https://api.intelgraph.io/graphql");
 ```
 
 #### 2. Monitor Deprecation Headers
@@ -411,17 +406,14 @@ const response = await fetch('https://api.intelgraph.io/graphql');
 ```javascript
 const response = await fetch(url);
 
-if (response.headers.get('X-API-Deprecation') === 'true') {
-  console.warn(
-    'API version deprecated:',
-    response.headers.get('X-API-Warn')
-  );
+if (response.headers.get("X-API-Deprecation") === "true") {
+  console.warn("API version deprecated:", response.headers.get("X-API-Warn"));
 
   // Log to monitoring system
   logger.warn({
-    event: 'deprecated_api_version',
-    version: response.headers.get('X-API-Version'),
-    sunsetDate: response.headers.get('X-API-Sunset-Date')
+    event: "deprecated_api_version",
+    version: response.headers.get("X-API-Version"),
+    sunsetDate: response.headers.get("X-API-Sunset-Date"),
   });
 }
 ```
@@ -439,14 +431,14 @@ Test against multiple versions:
 
 ```javascript
 // Test v1
-await testWithVersion('v1');
+await testWithVersion("v1");
 
 // Test v2
-await testWithVersion('v2');
+await testWithVersion("v2");
 
 async function testWithVersion(version) {
   const response = await fetch(url, {
-    headers: { 'API-Version': version }
+    headers: { "API-Version": version },
   });
   // ... assertions
 }
@@ -457,22 +449,24 @@ async function testWithVersion(version) {
 #### 1. Maintain Backward Compatibility
 
 **Good:**
+
 ```typescript
 // Adding optional fields is safe
 type Entity = {
   id: string;
   name: string;
-  newField?: string;  // Optional, backward compatible
+  newField?: string; // Optional, backward compatible
 };
 ```
 
 **Bad:**
+
 ```typescript
 // Removing or changing required fields is breaking
 type Entity = {
   id: string;
   // name: string;  // BREAKING: Removed required field
-  fullName: string;  // BREAKING: Renamed field
+  fullName: string; // BREAKING: Renamed field
 };
 ```
 
@@ -495,24 +489,24 @@ type Query = {
 #### 3. Document All Changes
 
 ```typescript
-import { changelogAutomation } from './versioning';
+import { changelogAutomation } from "./versioning";
 
 // Add changelog entry
-changelogAutomation.addEntry('v2', {
-  type: 'breaking',
-  description: 'Changed confidence field to percentage (0-100) instead of decimal (0-1)',
-  ticket: '#12345',
-  migration: 'Multiply all confidence values by 100'
+changelogAutomation.addEntry("v2", {
+  type: "breaking",
+  description: "Changed confidence field to percentage (0-100) instead of decimal (0-1)",
+  ticket: "#12345",
+  migration: "Multiply all confidence values by 100",
 });
 ```
 
 #### 4. Test Cross-Version Compatibility
 
 ```typescript
-import { compatibilityLayer } from './versioning';
+import { compatibilityLayer } from "./versioning";
 
-describe('v1 to v2 compatibility', () => {
-  it('transforms confidence values', () => {
+describe("v1 to v2 compatibility", () => {
+  it("transforms confidence values", () => {
     const v1Data = { confidence: 0.95 };
     const v2Data = compatibilityLayer.transformV1toV2Request(v1Data);
 
@@ -524,15 +518,15 @@ describe('v1 to v2 compatibility', () => {
 #### 5. Generate Documentation
 
 ```typescript
-import { documentationGenerator } from './versioning';
+import { documentationGenerator } from "./versioning";
 
 // Generate markdown docs
-const markdown = documentationGenerator.generateMarkdown('v2');
-fs.writeFileSync('docs/api-v2.md', markdown);
+const markdown = documentationGenerator.generateMarkdown("v2");
+fs.writeFileSync("docs/api-v2.md", markdown);
 
 // Generate OpenAPI spec
-const openapi = documentationGenerator.generateOpenAPI('v2');
-fs.writeFileSync('docs/openapi-v2.json', JSON.stringify(openapi, null, 2));
+const openapi = documentationGenerator.generateOpenAPI("v2");
+fs.writeFileSync("docs/openapi-v2.json", JSON.stringify(openapi, null, 2));
 ```
 
 ---
@@ -542,32 +536,32 @@ fs.writeFileSync('docs/openapi-v2.json', JSON.stringify(openapi, null, 2));
 ### Version Registry
 
 ```typescript
-import { versionRegistry } from './versioning';
+import { versionRegistry } from "./versioning";
 
 // Get version info
-const v1 = versionRegistry.getVersion('v1');
-console.log(v1.status);           // 'active' | 'deprecated' | 'sunset'
+const v1 = versionRegistry.getVersion("v1");
+console.log(v1.status); // 'active' | 'deprecated' | 'sunset'
 console.log(v1.releaseDate);
 console.log(v1.changelog);
 
 // Check status
-versionRegistry.isDeprecated('v1');     // false
-versionRegistry.isSunset('v1');         // false
+versionRegistry.isDeprecated("v1"); // false
+versionRegistry.isSunset("v1"); // false
 
 // Get versions
-versionRegistry.getActiveVersions();    // [v1, v2]
-versionRegistry.getLatestVersion();     // 'v2'
-versionRegistry.getDefaultVersion();    // 'v1'
+versionRegistry.getActiveVersions(); // [v1, v2]
+versionRegistry.getLatestVersion(); // 'v2'
+versionRegistry.getDefaultVersion(); // 'v1'
 
 // Compatibility
-versionRegistry.isCompatible('v1', 'v2');  // true
-const compat = versionRegistry.getCompatibility('v1', 'v2');
-console.log(compat.autoMigrate);           // true
+versionRegistry.isCompatible("v1", "v2"); // true
+const compat = versionRegistry.getCompatibility("v1", "v2");
+console.log(compat.autoMigrate); // true
 console.log(compat.warnings);
 
 // Manage versions
-versionRegistry.deprecateVersion('v1', new Date('2025-12-31'));
-versionRegistry.sunsetVersion('v0');
+versionRegistry.deprecateVersion("v1", new Date("2025-12-31"));
+versionRegistry.sunsetVersion("v0");
 ```
 
 ### Version Middleware
@@ -577,20 +571,20 @@ import {
   versionMiddleware,
   requireVersion,
   blockDeprecatedVersions,
-  getVersionContext
-} from './versioning';
+  getVersionContext,
+} from "./versioning";
 
 // Apply version detection
 app.use(versionMiddleware);
 
 // Require specific version
-app.get('/v2/new-feature', requireVersion('v2'), handler);
+app.get("/v2/new-feature", requireVersion("v2"), handler);
 
 // Block deprecated versions (optional)
 app.use(blockDeprecatedVersions);
 
 // Get version from request
-app.get('/api/entities', (req, res) => {
+app.get("/api/entities", (req, res) => {
   const ctx = getVersionContext(req);
   console.log(ctx.resolvedVersion);
   console.log(ctx.isDeprecated);
@@ -600,19 +594,23 @@ app.get('/api/entities', (req, res) => {
 ### Compatibility Layer
 
 ```typescript
-import { compatibilityLayer } from './versioning';
+import { compatibilityLayer } from "./versioning";
 
 // Transform request
-const transformed = await compatibilityLayer.transformRequest(
-  data,
-  { fromVersion: 'v1', toVersion: 'v2', operation: 'createEntity', path: '/graphql' }
-);
+const transformed = await compatibilityLayer.transformRequest(data, {
+  fromVersion: "v1",
+  toVersion: "v2",
+  operation: "createEntity",
+  path: "/graphql",
+});
 
 // Transform response
-const transformed = await compatibilityLayer.transformResponse(
-  data,
-  { fromVersion: 'v1', toVersion: 'v2', operation: 'createEntity', path: '/graphql' }
-);
+const transformed = await compatibilityLayer.transformResponse(data, {
+  fromVersion: "v1",
+  toVersion: "v2",
+  operation: "createEntity",
+  path: "/graphql",
+});
 
 // Transform GraphQL
 const query = compatibilityLayer.transformGraphQLQuery(queryString, context);
@@ -623,42 +621,42 @@ const result = compatibilityLayer.transformGraphQLResult(data, context);
 ### Documentation Generator
 
 ```typescript
-import { documentationGenerator } from './versioning';
+import { documentationGenerator } from "./versioning";
 
 // Generate docs
-const doc = documentationGenerator.generateDocumentation('v1');
+const doc = documentationGenerator.generateDocumentation("v1");
 console.log(doc.endpoints);
 console.log(doc.examples);
 console.log(doc.migrationGuides);
 
 // Generate markdown
-const markdown = documentationGenerator.generateMarkdown('v1');
+const markdown = documentationGenerator.generateMarkdown("v1");
 
 // Generate OpenAPI
-const openapi = documentationGenerator.generateOpenAPI('v1');
+const openapi = documentationGenerator.generateOpenAPI("v1");
 ```
 
 ### Changelog Automation
 
 ```typescript
-import { changelogAutomation } from './versioning';
+import { changelogAutomation } from "./versioning";
 
 // Generate changelog
-const changelog = changelogAutomation.generateChangelog('v1');
+const changelog = changelogAutomation.generateChangelog("v1");
 console.log(changelog.markdown);
 
 // Generate full changelog
 const full = changelogAutomation.generateFullChangelog();
 
 // Add entry
-changelogAutomation.addEntry('v2', {
-  type: 'feature',
-  description: 'Added new analytics endpoints',
-  ticket: '#12345'
+changelogAutomation.addEntry("v2", {
+  type: "feature",
+  description: "Added new analytics endpoints",
+  ticket: "#12345",
 });
 
 // Export
-changelogAutomation.exportChangelog('v1', 'CHANGELOG-v1.md', 'markdown');
+changelogAutomation.exportChangelog("v1", "CHANGELOG-v1.md", "markdown");
 ```
 
 ---
@@ -668,13 +666,13 @@ changelogAutomation.exportChangelog('v1', 'CHANGELOG-v1.md', 'markdown');
 ### Complete Client Example
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 class IntelGraphClient {
   private apiVersion: string;
   private baseUrl: string;
 
-  constructor(version: string = 'v2') {
+  constructor(version: string = "v2") {
     this.apiVersion = version;
     this.baseUrl = `https://api.intelgraph.io/${version}`;
   }
@@ -686,9 +684,9 @@ class IntelGraphClient {
         { query, variables },
         {
           headers: {
-            'API-Version': this.apiVersion,
-            'Authorization': `Bearer ${this.getToken()}`
-          }
+            "API-Version": this.apiVersion,
+            Authorization: `Bearer ${this.getToken()}`,
+          },
         }
       );
 
@@ -703,36 +701,33 @@ class IntelGraphClient {
   }
 
   private checkDeprecation(headers: any) {
-    if (headers['x-api-deprecation'] === 'true') {
-      console.warn(
-        'API version deprecated:',
-        headers['x-api-warn']
-      );
+    if (headers["x-api-deprecation"] === "true") {
+      console.warn("API version deprecated:", headers["x-api-warn"]);
 
       // Emit event for monitoring
-      this.emit('deprecation', {
-        version: headers['x-api-version'],
-        sunsetDate: headers['x-api-sunset-date'],
-        warning: headers['x-api-warn']
+      this.emit("deprecation", {
+        version: headers["x-api-version"],
+        sunsetDate: headers["x-api-sunset-date"],
+        warning: headers["x-api-warn"],
       });
     }
   }
 
   private handleVersionError(error: any) {
     if (error.response?.status === 410) {
-      console.error('API version sunset:', error.response.data);
+      console.error("API version sunset:", error.response.data);
       throw new Error(`API version ${this.apiVersion} is no longer supported`);
     }
 
     if (error.response?.status === 426) {
-      console.error('API version deprecated:', error.response.data);
+      console.error("API version deprecated:", error.response.data);
       throw new Error(`API version ${this.apiVersion} requires upgrade`);
     }
   }
 
   private getToken(): string {
     // Get JWT token
-    return process.env.API_TOKEN || '';
+    return process.env.API_TOKEN || "";
   }
 
   private emit(event: string, data: any) {
@@ -741,7 +736,7 @@ class IntelGraphClient {
 }
 
 // Usage
-const client = new IntelGraphClient('v2');
+const client = new IntelGraphClient("v2");
 
 const result = await client.query(`
   query {
@@ -757,13 +752,13 @@ const result = await client.query(`
 ### Complete Server Example
 
 ```typescript
-import express from 'express';
+import express from "express";
 import {
   versionMiddleware,
   versionRegistry,
   documentationGenerator,
-  changelogAutomation
-} from './versioning';
+  changelogAutomation,
+} from "./versioning";
 
 const app = express();
 
@@ -771,69 +766,62 @@ const app = express();
 app.use(versionMiddleware);
 
 // Version info endpoint
-app.get('/api/versions', (req, res) => {
+app.get("/api/versions", (req, res) => {
   res.json({
     current: versionRegistry.getDefaultVersion(),
     latest: versionRegistry.getLatestVersion(),
-    active: versionRegistry.getActiveVersions().map(v => ({
+    active: versionRegistry.getActiveVersions().map((v) => ({
       version: v.version,
       status: v.status,
-      releaseDate: v.releaseDate
+      releaseDate: v.releaseDate,
     })),
-    deprecated: versionRegistry.getDeprecatedVersions().map(v => ({
+    deprecated: versionRegistry.getDeprecatedVersions().map((v) => ({
       version: v.version,
-      sunsetDate: v.sunsetDate
-    }))
+      sunsetDate: v.sunsetDate,
+    })),
   });
 });
 
 // Compatibility matrix endpoint
-app.get('/api/compatibility', (req, res) => {
+app.get("/api/compatibility", (req, res) => {
   res.json(versionRegistry.generateCompatibilityMatrix());
 });
 
 // Changelog endpoint
-app.get('/api/changelog/:version', (req, res) => {
-  const changelog = changelogAutomation.generateChangelog(
-    req.params.version,
-    { format: 'json' }
-  );
+app.get("/api/changelog/:version", (req, res) => {
+  const changelog = changelogAutomation.generateChangelog(req.params.version, { format: "json" });
 
   if (!changelog) {
-    return res.status(404).json({ error: 'Version not found' });
+    return res.status(404).json({ error: "Version not found" });
   }
 
-  res.json(JSON.parse(changelog.json || '{}'));
+  res.json(JSON.parse(changelog.json || "{}"));
 });
 
 // Documentation endpoint
-app.get('/api/docs/:version', (req, res) => {
-  const doc = documentationGenerator.generateDocumentation(
-    req.params.version
-  );
+app.get("/api/docs/:version", (req, res) => {
+  const doc = documentationGenerator.generateDocumentation(req.params.version);
 
   if (!doc) {
-    return res.status(404).json({ error: 'Version not found' });
+    return res.status(404).json({ error: "Version not found" });
   }
 
   res.json(doc);
 });
 
 // OpenAPI spec endpoint
-app.get('/api/openapi/:version', (req, res) => {
-  const openapi = documentationGenerator.generateOpenAPI(
-    req.params.version
-  );
+app.get("/api/openapi/:version", (req, res) => {
+  const openapi = documentationGenerator.generateOpenAPI(req.params.version);
 
   if (!openapi) {
-    return res.status(404).json({ error: 'Version not found' });
+    return res.status(404).json({ error: "Version not found" });
   }
 
   res.json(openapi);
 });
 
 app.listen(4000, () => {
-  console.log('API server running on port 4000');
+  console.log("API server running on port 4000");
 });
 ```
 
@@ -846,6 +834,7 @@ app.listen(4000, () => {
 **Problem:** API version defaults to v1 even when specified
 
 **Solution:** Check version detection priority:
+
 1. URL path takes precedence
 2. Then API-Version header
 3. Then Accept header
@@ -853,13 +842,15 @@ app.listen(4000, () => {
 
 ```javascript
 // Ensure version is in correct format
-const response = await fetch('/v2/graphql', {  // ✅ Correct
-  headers: { 'API-Version': 'v2' }
+const response = await fetch("/v2/graphql", {
+  // ✅ Correct
+  headers: { "API-Version": "v2" },
 });
 
 // Not in URL
-const response = await fetch('/graphql', {     // Version from header only
-  headers: { 'API-Version': 'v2' }
+const response = await fetch("/graphql", {
+  // Version from header only
+  headers: { "API-Version": "v2" },
 });
 ```
 
@@ -871,11 +862,11 @@ const response = await fetch('/graphql', {     // Version from header only
 
 ```typescript
 // Some endpoints require specific versions
-app.get('/v2/new-feature', requireVersion('v2'), handler);
+app.get("/v2/new-feature", requireVersion("v2"), handler);
 
 // Ensure you're calling with correct version
-await fetch('/v2/new-feature', {
-  headers: { 'API-Version': 'v2' }  // Must match
+await fetch("/v2/new-feature", {
+  headers: { "API-Version": "v2" }, // Must match
 });
 ```
 
@@ -888,12 +879,12 @@ await fetch('/v2/new-feature', {
 ```typescript
 // Register custom transformer if needed
 compatibilityLayer.registerTransformer({
-  from: 'v1',
-  to: 'v2',
+  from: "v1",
+  to: "v2",
   requestTransformer: (data, ctx) => {
     // Custom transformation logic
     return transformedData;
-  }
+  },
 });
 ```
 

@@ -11,8 +11,8 @@ import {
   TimeTravel,
   DataFile,
   OptimizeResult,
-  TableMetadata
-} from '../types.js';
+  TableMetadata,
+} from "../types.js";
 
 export abstract class BaseTable {
   protected config: TableConfig;
@@ -32,11 +32,13 @@ export abstract class BaseTable {
       location: this.config.location,
       properties: this.config.properties || {},
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
-  abstract beginTransaction(operation: 'insert' | 'update' | 'delete' | 'merge'): Promise<Transaction>;
+  abstract beginTransaction(
+    operation: "insert" | "update" | "delete" | "merge"
+  ): Promise<Transaction>;
   abstract commitTransaction(transaction: Transaction): Promise<void>;
   abstract abortTransaction(transaction: Transaction): Promise<void>;
 

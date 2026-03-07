@@ -1,6 +1,6 @@
-import { haversineDistance } from '../utils/distance.js';
-import { pointInGeometry } from '../utils/geometry.js';
-import type { GeoPoint, Route, RouteSegment, Geofence } from '../types/geospatial.js';
+import { haversineDistance } from "../utils/distance.js";
+import { pointInGeometry } from "../utils/geometry.js";
+import type { GeoPoint, Route, RouteSegment, Geofence } from "../types/geospatial.js";
 
 interface GraphNode {
   id: string;
@@ -30,7 +30,7 @@ export class RouteGraph {
     const fromNode = this.nodes.get(from);
     const toNode = this.nodes.get(to);
     if (!fromNode || !toNode) {
-      throw new Error('Both nodes must exist before adding an edge');
+      throw new Error("Both nodes must exist before adding an edge");
     }
     const distance = weight ?? haversineDistance(fromNode.point, toNode.point);
     fromNode.edges.push({ to, weight: distance });
@@ -50,7 +50,10 @@ export class RouteGraph {
     while (unvisited.size) {
       let current: string | null = null;
       unvisited.forEach((candidate) => {
-        if (current === null || (distances.get(candidate) ?? Infinity) < (distances.get(current) ?? Infinity)) {
+        if (
+          current === null ||
+          (distances.get(candidate) ?? Infinity) < (distances.get(current) ?? Infinity)
+        ) {
           current = candidate;
         }
       });
@@ -112,7 +115,9 @@ export const optimizeRoute = (
       const toNode = graph.getNode(path[j + 1]);
       if (!fromNode || !toNode) continue;
 
-      const blocked = geofences.some((fence) => crossesGeofence(fromNode.point, toNode.point, fence));
+      const blocked = geofences.some((fence) =>
+        crossesGeofence(fromNode.point, toNode.point, fence)
+      );
       if (blocked) {
         continue;
       }

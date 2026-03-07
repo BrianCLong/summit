@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState, useRef } from "react";
+import $ from "jquery";
 
 interface RegionData {
   region: string;
@@ -18,7 +18,7 @@ export default function RegionsBoard() {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
-    const s = new EventSource('/api/regions/stream');
+    const s = new EventSource("/api/regions/stream");
     eventSourceRef.current = s;
     s.onmessage = (e) => setRows(JSON.parse(e.data));
     return () => {
@@ -32,16 +32,16 @@ export default function RegionsBoard() {
       handlerBoundRef.current = true;
       const h = function (this: HTMLInputElement) {
         const v = Number(this.value) || 0;
-        ($('.row') as JQuery<HTMLElement>).each(function () {
-          const lag = Number($(this).data('lag') || 0);
+        ($(".row") as JQuery<HTMLElement>).each(function () {
+          const lag = Number($(this).data("lag") || 0);
           $(this).toggle(lag >= v);
         });
       };
-      $('#filter').on('input', h);
+      $("#filter").on("input", h);
     }
     return () => {
       if (handlerBoundRef.current) {
-        $('#filter').off('input');
+        $("#filter").off("input");
         handlerBoundRef.current = false;
       }
     };
@@ -50,11 +50,7 @@ export default function RegionsBoard() {
     <div className="p-4 rounded-2xl shadow">
       <div className="flex gap-2 mb-2">
         <h3 className="text-lg font-semibold">Regions & Replication</h3>
-        <input
-          id="filter"
-          className="border rounded px-2 py-1"
-          placeholder="filter…"
-        />
+        <input id="filter" className="border rounded px-2 py-1" placeholder="filter…" />
       </div>
       <table className="w-full text-sm">
         <thead>

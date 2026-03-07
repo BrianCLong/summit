@@ -3,39 +3,39 @@
  */
 
 export enum SourceType {
-  DATABASE = 'database',
-  REST_API = 'rest_api',
-  CLOUD_STORAGE = 'cloud_storage',
-  SAAS = 'saas',
-  SOCIAL_MEDIA = 'social_media',
-  FINANCIAL_FEED = 'financial_feed',
-  THREAT_INTEL = 'threat_intel',
-  EMAIL = 'email',
-  WEBHOOK = 'webhook',
-  STREAM = 'stream',
-  CUSTOM = 'custom'
+  DATABASE = "database",
+  REST_API = "rest_api",
+  CLOUD_STORAGE = "cloud_storage",
+  SAAS = "saas",
+  SOCIAL_MEDIA = "social_media",
+  FINANCIAL_FEED = "financial_feed",
+  THREAT_INTEL = "threat_intel",
+  EMAIL = "email",
+  WEBHOOK = "webhook",
+  STREAM = "stream",
+  CUSTOM = "custom",
 }
 
 export enum ExtractionStrategy {
-  FULL = 'full',
-  INCREMENTAL = 'incremental',
-  CDC = 'cdc', // Change Data Capture
-  SCHEDULED = 'scheduled',
-  REAL_TIME = 'real_time',
-  QUERY_BASED = 'query_based',
-  LOG_PARSING = 'log_parsing',
-  WEB_SCRAPING = 'web_scraping'
+  FULL = "full",
+  INCREMENTAL = "incremental",
+  CDC = "cdc", // Change Data Capture
+  SCHEDULED = "scheduled",
+  REAL_TIME = "real_time",
+  QUERY_BASED = "query_based",
+  LOG_PARSING = "log_parsing",
+  WEB_SCRAPING = "web_scraping",
 }
 
 export enum LoadStrategy {
-  BULK = 'bulk',
-  UPSERT = 'upsert',
-  SCD_TYPE1 = 'scd_type1',
-  SCD_TYPE2 = 'scd_type2',
-  SCD_TYPE3 = 'scd_type3',
-  APPEND_ONLY = 'append_only',
-  DELTA = 'delta',
-  PARTITIONED = 'partitioned'
+  BULK = "bulk",
+  UPSERT = "upsert",
+  SCD_TYPE1 = "scd_type1",
+  SCD_TYPE2 = "scd_type2",
+  SCD_TYPE3 = "scd_type3",
+  APPEND_ONLY = "append_only",
+  DELTA = "delta",
+  PARTITIONED = "partitioned",
 }
 
 export interface DataSourceConfig {
@@ -108,7 +108,7 @@ export interface ExtractionConfig {
 }
 
 export interface PaginationConfig {
-  type: 'offset' | 'cursor' | 'page';
+  type: "offset" | "cursor" | "page";
   pageSize: number;
   maxPages?: number;
   cursorField?: string;
@@ -131,7 +131,7 @@ export interface FilterConfig {
 }
 
 export interface TransformationConfig {
-  type: 'sql' | 'python' | 'spark' | 'custom';
+  type: "sql" | "python" | "spark" | "custom";
   transformations: Transformation[];
   validations?: ValidationRule[];
   enrichments?: EnrichmentRule[];
@@ -148,16 +148,16 @@ export interface Transformation {
 export interface ValidationRule {
   id: string;
   name: string;
-  type: 'schema' | 'type' | 'null' | 'duplicate' | 'range' | 'format' | 'referential' | 'custom';
+  type: "schema" | "type" | "null" | "duplicate" | "range" | "format" | "referential" | "custom";
   config: Record<string, any>;
-  severity: 'error' | 'warning' | 'info';
-  action: 'fail' | 'warn' | 'skip' | 'quarantine';
+  severity: "error" | "warning" | "info";
+  action: "fail" | "warn" | "skip" | "quarantine";
 }
 
 export interface EnrichmentRule {
   id: string;
   name: string;
-  type: 'geolocation' | 'ip_enrichment' | 'entity_resolution' | 'lookup' | 'api' | 'ml' | 'custom';
+  type: "geolocation" | "ip_enrichment" | "entity_resolution" | "lookup" | "api" | "ml" | "custom";
   config: Record<string, any>;
   targetFields: string[];
 }
@@ -177,14 +177,14 @@ export interface LoadConfig {
 }
 
 export interface ErrorHandlingConfig {
-  onError: 'fail' | 'skip' | 'retry' | 'deadletter';
+  onError: "fail" | "skip" | "retry" | "deadletter";
   maxErrors?: number;
   deadLetterQueue?: string;
   errorLogTable?: string;
 }
 
 export interface ScheduleConfig {
-  type: 'cron' | 'interval' | 'event';
+  type: "cron" | "interval" | "event";
   cronExpression?: string;
   intervalSeconds?: number;
   eventTrigger?: string;
@@ -210,17 +210,17 @@ export interface PipelineRun {
 }
 
 export enum PipelineStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  SUCCESS = 'success',
-  FAILED = 'failed',
-  PARTIAL_SUCCESS = 'partial_success',
-  CANCELLED = 'cancelled'
+  PENDING = "pending",
+  RUNNING = "running",
+  SUCCESS = "success",
+  FAILED = "failed",
+  PARTIAL_SUCCESS = "partial_success",
+  CANCELLED = "cancelled",
 }
 
 export interface PipelineError {
   timestamp: Date;
-  stage: 'extraction' | 'transformation' | 'validation' | 'enrichment' | 'loading';
+  stage: "extraction" | "transformation" | "validation" | "enrichment" | "loading";
   message: string;
   details?: any;
   recordId?: string;
@@ -264,7 +264,7 @@ export interface DataQualityReport {
 }
 
 export interface DataQualityIssue {
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   type: string;
   field?: string;
   message: string;

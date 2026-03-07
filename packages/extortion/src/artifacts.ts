@@ -1,9 +1,9 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export function generateEvidenceId(type: string, date: string, content: any): string {
   const canonical = JSON.stringify(content, Object.keys(content).sort());
-  const hash = createHash('sha256').update(canonical).digest('hex').substring(0, 8);
-  const formattedDate = date.replace(/-/g, '');
+  const hash = createHash("sha256").update(canonical).digest("hex").substring(0, 8);
+  const formattedDate = date.replace(/-/g, "");
   return `EVD-${type.toUpperCase()}-${formattedDate}-${hash}`;
 }
 
@@ -14,7 +14,7 @@ export function createDeterministicArtifact(content: any) {
 }
 
 function sortObjectKeys(obj: any): any {
-  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
     if (Array.isArray(obj)) {
       return obj.map(sortObjectKeys);
     }

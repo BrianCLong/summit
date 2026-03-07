@@ -77,6 +77,7 @@ The ETL Assistant provides a complete ingestion and enrichment pipeline for the 
 Interactive CLI for configuring and running connector ingestion.
 
 **Features:**
+
 - Connector selection and validation
 - Auto-proposed field mappings
 - PII detection and review
@@ -84,6 +85,7 @@ Interactive CLI for configuring and running connector ingestion.
 - Lineage recording
 
 **Workflow:**
+
 1. User selects a connector
 2. Wizard validates connector manifest
 3. System proposes field mappings based on sample data
@@ -98,9 +100,11 @@ REST API for schema inference, PII scanning, and license checking.
 **Endpoints:**
 
 #### `POST /etl/preview-schema`
+
 Infer schema from sample rows and suggest canonical mappings.
 
 **Request:**
+
 ```json
 {
   "sample_rows": [{"field1": "value1", ...}],
@@ -109,31 +113,38 @@ Infer schema from sample rows and suggest canonical mappings.
 ```
 
 **Response:**
+
 ```json
 {
-  "fields": [{
-    "name": "email",
-    "inferred_type": "email",
-    "nullable": false,
-    "sample_values": ["user@example.com"],
-    "confidence": 0.95
-  }],
-  "suggested_mappings": [{
-    "source_field": "email",
-    "canonical_entity": "Person",
-    "canonical_property": "email",
-    "confidence": 0.95,
-    "reasoning": "Direct field name match"
-  }],
+  "fields": [
+    {
+      "name": "email",
+      "inferred_type": "email",
+      "nullable": false,
+      "sample_values": ["user@example.com"],
+      "confidence": 0.95
+    }
+  ],
+  "suggested_mappings": [
+    {
+      "source_field": "email",
+      "canonical_entity": "Person",
+      "canonical_property": "email",
+      "confidence": 0.95,
+      "reasoning": "Direct field name match"
+    }
+  ],
   "primary_entity": "Person",
   "record_count": 100
 }
 ```
 
 #### `POST /etl/pii-scan`
+
 Scan sample data for PII and recommend redactions.
 
 **Request:**
+
 ```json
 {
   "sample_rows": [{"ssn": "123-45-6789", ...}],
@@ -142,18 +153,21 @@ Scan sample data for PII and recommend redactions.
 ```
 
 **Response:**
+
 ```json
 {
-  "pii_matches": [{
-    "category": "ssn",
-    "severity": "critical",
-    "field_name": "ssn",
-    "sample_value": "***-**-6789",
-    "match_count": 100,
-    "confidence": 0.95,
-    "recommended_strategy": "hash",
-    "reasoning": "Field name 'ssn' indicates SSN"
-  }],
+  "pii_matches": [
+    {
+      "category": "ssn",
+      "severity": "critical",
+      "field_name": "ssn",
+      "sample_value": "***-**-6789",
+      "match_count": 100,
+      "confidence": 0.95,
+      "recommended_strategy": "hash",
+      "reasoning": "Field name 'ssn' indicates SSN"
+    }
+  ],
   "overall_risk": "critical",
   "summary": "Detected 3 PII field(s) with critical risk",
   "requires_dpia": true
@@ -161,9 +175,11 @@ Scan sample data for PII and recommend redactions.
 ```
 
 #### `POST /etl/license-check`
+
 Verify source against license registry.
 
 #### `POST /etl/configurations`
+
 Save ETL configuration with lineage.
 
 ### 3. Streaming ETL Pipeline (`data-pipelines/etl-assistant/src/streaming_pipeline.py`)
@@ -171,6 +187,7 @@ Save ETL configuration with lineage.
 Asynchronous streaming pipeline with enrichment support.
 
 **Features:**
+
 - Async batch processing (configurable batch size)
 - Backpressure handling (max concurrent workers)
 - Pluggable enrichers
@@ -178,6 +195,7 @@ Asynchronous streaming pipeline with enrichment support.
 - Comprehensive metrics collection
 
 **Configuration:**
+
 ```python
 config = PipelineConfig(
     tenant_id='tenant_123',
@@ -199,6 +217,7 @@ config = PipelineConfig(
 ```
 
 **Usage:**
+
 ```python
 pipeline = StreamingETLPipeline(config)
 
@@ -217,10 +236,12 @@ Pluggable enrichers for streaming ETL.
 #### Base Enricher (`base.py`)
 
 All enrichers inherit from `BaseEnricher` and implement:
+
 - `can_enrich(data)` - Check if enricher can process data
 - `enrich(data, context)` - Perform enrichment
 
 Enrichers automatically track:
+
 - Total/successful/failed enrichments
 - Duration metrics
 - Error messages
@@ -232,6 +253,7 @@ Enriches IP addresses with geographical information.
 **Input:** IP address fields (`ip`, `source_ip`, `dest_ip`, etc.)
 
 **Output:**
+
 ```python
 {
     'geo': {
@@ -258,6 +280,7 @@ Detects language of text content.
 **Input:** Text fields (`text`, `content`, `body`, `message`, etc.)
 
 **Output:**
+
 ```python
 {
     'language': {
@@ -280,6 +303,7 @@ Detects language of text content.
 Generates content hashes for integrity and deduplication.
 
 **Algorithms:**
+
 - SHA-256 (default)
 - SHA-512
 - MD5 (for non-security purposes)
@@ -287,6 +311,7 @@ Generates content hashes for integrity and deduplication.
 - Fuzzy hash (ssdeep) for similarity matching (stub)
 
 **Output:**
+
 ```python
 {
     'hashes': {
@@ -303,6 +328,7 @@ Generates content hashes for integrity and deduplication.
 Scrubs EXIF metadata from images.
 
 **Removed tags:**
+
 - GPS coordinates
 - Camera make/model
 - Software information
@@ -310,6 +336,7 @@ Scrubs EXIF metadata from images.
 - User comments
 
 **Output:**
+
 ```python
 {
     'exif_scrub': {
@@ -329,6 +356,7 @@ Extracts text from images and documents via AI engine integration.
 **Integration:** POST to `{ai_engine_url}/ocr/extract`
 
 **Output:**
+
 ```python
 {
     'ocr': {
@@ -349,6 +377,7 @@ Transcribes audio content via AI engine integration.
 **Integration:** POST to `{ai_engine_url}/stt/transcribe`
 
 **Output:**
+
 ```python
 {
     'stt': {
@@ -372,10 +401,12 @@ Base connector interface with built-in PII, license, and rate limiting.
 #### Base Connector (`sdk/base.py`)
 
 All connectors inherit from `BaseConnector` and implement:
+
 - `fetch_raw_data()` - Fetch data from source (iterator)
 - `map_to_entities()` - Map raw data to canonical entities
 
 Built-in features:
+
 - Rate limiting with backoff
 - PII detection and redaction
 - License enforcement
@@ -534,14 +565,14 @@ config = PipelineConfig(
 
 ### Latency Targets
 
-| Component | Target | Stub | Production |
-|-----------|--------|------|------------|
-| GeoIP enricher | <10ms | ✅ | Use MaxMind GeoIP2 |
-| Language enricher | <10ms | ✅ | Use fastText or langdetect |
-| Hashing enricher | <10ms | ✅ | ✅ (native Python) |
-| EXIF scrub enricher | <10ms | ✅ | Use Pillow |
-| OCR enricher | <500ms | ⚠️ | Integrate AI engine |
-| STT enricher | <5s | ⚠️ | Integrate AI engine |
+| Component           | Target | Stub | Production                 |
+| ------------------- | ------ | ---- | -------------------------- |
+| GeoIP enricher      | <10ms  | ✅   | Use MaxMind GeoIP2         |
+| Language enricher   | <10ms  | ✅   | Use fastText or langdetect |
+| Hashing enricher    | <10ms  | ✅   | ✅ (native Python)         |
+| EXIF scrub enricher | <10ms  | ✅   | Use Pillow                 |
+| OCR enricher        | <500ms | ⚠️   | Integrate AI engine        |
+| STT enricher        | <5s    | ⚠️   | Integrate AI engine        |
 
 ## Metrics
 
@@ -577,6 +608,7 @@ enricher_metrics = {
 ### Enricher Errors
 
 Enrichers catch exceptions and return `EnricherResult` with:
+
 - `success = False`
 - `errors = [error_message]`
 - Failed enrichments don't block pipeline
@@ -584,6 +616,7 @@ Enrichers catch exceptions and return `EnricherResult` with:
 ### Pipeline Errors
 
 Pipeline continues on record-level errors:
+
 - Error logged
 - Record marked as failed
 - Error handler called (if set)
@@ -592,6 +625,7 @@ Pipeline continues on record-level errors:
 ### Connector Errors
 
 Connectors implement retry with exponential backoff:
+
 - Rate limit errors → wait and retry
 - Network errors → exponential backoff
 - Validation errors → fail fast

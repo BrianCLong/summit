@@ -6,13 +6,13 @@
 
 export type Position = [number, number, number?];
 
-export type PointGeometry = { type: 'Point'; coordinates: Position };
-export type LineStringGeometry = { type: 'LineString'; coordinates: Position[] };
-export type PolygonGeometry = { type: 'Polygon'; coordinates: Position[][] };
-export type MultiPointGeometry = { type: 'MultiPoint'; coordinates: Position[] };
-export type MultiLineStringGeometry = { type: 'MultiLineString'; coordinates: Position[][] };
-export type MultiPolygonGeometry = { type: 'MultiPolygon'; coordinates: Position[][][] };
-export type GeometryCollection = { type: 'GeometryCollection'; geometries: Geometry[] };
+export type PointGeometry = { type: "Point"; coordinates: Position };
+export type LineStringGeometry = { type: "LineString"; coordinates: Position[] };
+export type PolygonGeometry = { type: "Polygon"; coordinates: Position[][] };
+export type MultiPointGeometry = { type: "MultiPoint"; coordinates: Position[] };
+export type MultiLineStringGeometry = { type: "MultiLineString"; coordinates: Position[][] };
+export type MultiPolygonGeometry = { type: "MultiPolygon"; coordinates: Position[][][] };
+export type GeometryCollection = { type: "GeometryCollection"; geometries: Geometry[] };
 
 export type Geometry =
   | PointGeometry
@@ -40,7 +40,7 @@ export interface BoundingBox {
 }
 
 export interface Feature<P = Record<string, unknown>> {
-  type: 'Feature';
+  type: "Feature";
   geometry: Geometry;
   properties: P;
   id?: string;
@@ -48,7 +48,7 @@ export interface Feature<P = Record<string, unknown>> {
 }
 
 export interface FeatureCollection<F extends Feature = Feature> {
-  type: 'FeatureCollection';
+  type: "FeatureCollection";
   features: F[];
   bbox?: BoundingBox;
 }
@@ -88,7 +88,7 @@ export interface Geofence {
   id: string;
   name: string;
   geometry: Exclude<Geometry, GeometryCollection | null>;
-  type: 'entry' | 'exit' | 'dwell' | 'proximity';
+  type: "entry" | "exit" | "dwell" | "proximity";
   radius?: number;
   dwellTime?: number;
   enabled: boolean;
@@ -100,7 +100,7 @@ export interface GeofenceEvent {
   id: string;
   geofenceId: string;
   entityId: string;
-  eventType: 'entry' | 'exit' | 'dwell';
+  eventType: "entry" | "exit" | "dwell";
   timestamp: Date;
   location: GeoPoint;
   metadata?: Record<string, unknown>;
@@ -131,7 +131,7 @@ export interface Hotspot {
   location: GeoPoint;
   zScore: number;
   pValue: number;
-  significance: 'high' | 'medium' | 'low' | 'none';
+  significance: "high" | "medium" | "low" | "none";
   count: number;
   radius: number;
 }
@@ -160,7 +160,7 @@ export interface Route {
 export interface Isochrone {
   center: GeoPoint;
   time: number;
-  mode: 'walking' | 'driving' | 'cycling' | 'transit';
+  mode: "walking" | "driving" | "cycling" | "transit";
   geometry: Exclude<Geometry, GeometryCollection | null>;
   area?: number;
 }
@@ -229,7 +229,7 @@ export interface SatelliteImagery {
 export interface MapLayer {
   id: string;
   name: string;
-  type: 'tile' | 'vector' | 'heatmap' | 'cluster' | 'geojson' | '3d';
+  type: "tile" | "vector" | "heatmap" | "cluster" | "geojson" | "3d";
   visible: boolean;
   opacity: number;
   zIndex: number;
@@ -240,7 +240,7 @@ export interface MapLayer {
 }
 
 export interface SpatialIndexConfig {
-  type: 'rtree' | 'quadtree' | 'geohash' | 'h3';
+  type: "rtree" | "quadtree" | "geohash" | "h3";
   precision?: number;
   maxItems?: number;
   maxDepth?: number;

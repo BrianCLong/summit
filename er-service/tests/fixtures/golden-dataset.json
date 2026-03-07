@@ -12,9 +12,7 @@
         "age": 35,
         "occupation": "Engineer"
       },
-      "locations": [
-        { "lat": 40.7128, "lon": -74.0060, "timestamp": "2024-01-15T10:00:00Z" }
-      ],
+      "locations": [{ "lat": 40.7128, "lon": -74.006, "timestamp": "2024-01-15T10:00:00Z" }],
       "timestamps": ["2024-01-15T10:00:00Z", "2024-01-15T14:30:00Z"],
       "deviceIds": ["device-abc123", "device-def456"],
       "accountIds": ["acct-1001"],
@@ -31,9 +29,7 @@
         "age": 35,
         "occupation": "Software Engineer"
       },
-      "locations": [
-        { "lat": 40.7130, "lon": -74.0062, "timestamp": "2024-01-15T10:05:00Z" }
-      ],
+      "locations": [{ "lat": 40.713, "lon": -74.0062, "timestamp": "2024-01-15T10:05:00Z" }],
       "timestamps": ["2024-01-15T10:05:00Z"],
       "deviceIds": ["device-abc123"],
       "accountIds": ["acct-1001"],
@@ -49,9 +45,7 @@
         "age": 28,
         "occupation": "Designer"
       },
-      "locations": [
-        { "lat": 34.0522, "lon": -118.2437, "timestamp": "2024-01-15T09:00:00Z" }
-      ],
+      "locations": [{ "lat": 34.0522, "lon": -118.2437, "timestamp": "2024-01-15T09:00:00Z" }],
       "timestamps": ["2024-01-15T09:00:00Z"],
       "deviceIds": ["device-xyz789"],
       "accountIds": ["acct-2002"],
@@ -80,9 +74,7 @@
         "employees": 500,
         "founded": 2010
       },
-      "locations": [
-        { "lat": 37.7749, "lon": -122.4194 }
-      ]
+      "locations": [{ "lat": 37.7749, "lon": -122.4194 }]
     },
     {
       "id": "org-002",
@@ -93,9 +85,7 @@
         "industry": "Technology",
         "employees": 500
       },
-      "locations": [
-        { "lat": 37.7750, "lon": -122.4195 }
-      ]
+      "locations": [{ "lat": 37.775, "lon": -122.4195 }]
     }
   ]
 }

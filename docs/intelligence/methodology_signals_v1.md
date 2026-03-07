@@ -7,7 +7,7 @@
 
 ### State-Change-Centric Collection
 
-**Signal:** Methodologies focus on detecting and capturing *change* (status flips, content reordering, access gating) as first-order signals, rather than just raw content.
+**Signal:** Methodologies focus on detecting and capturing _change_ (status flips, content reordering, access gating) as first-order signals, rather than just raw content.
 **Operational Importance:** Shifts focus from static snapshots to dynamic evolution, capturing intent and response.
 **Failure Mode:** **Static Blindness** — Missing critical escalations or defensive posturing by only analyzing static states.
 
@@ -27,20 +27,20 @@
 
 ### Claim Lineage Tracking
 
-**Signal:** Explicitly tracking *origin → amplification → mutation* paths for individual claims.
+**Signal:** Explicitly tracking _origin → amplification → mutation_ paths for individual claims.
 **Operational Importance:** Distinguishes primary signals from echo chambers and circular reporting.
 **Failure Mode:** **Echo Amplification** — Mistaking repeated citations of a single false source for independent corroboration.
 
 ### Context-Dependent Trust Scoring
 
-**Signal:** Evaluating credibility relative to *topic, time, and platform norms*.
+**Signal:** Evaluating credibility relative to _topic, time, and platform norms_.
 **Operational Importance:** Recognizes that a source can be reliable in one domain (e.g., logistics) but deceptive in another (e.g., intent).
 **Failure Mode:** **Domain Overreach** — Trusting a source on specialized topics based on general reputation.
 
 ### Revision-Aware Validation
 
 **Signal:** Preserving and comparing successive versions of artifacts (edits, deletions) as evidence.
-**Operational Importance:** Treats the *act of modification* as a signal of intent or correction.
+**Operational Importance:** Treats the _act of modification_ as a signal of intent or correction.
 **Failure Mode:** **Revision Erasure** — Losing the "cover-up" signal by only storing the final state.
 
 ## 3. Automation & Tooling

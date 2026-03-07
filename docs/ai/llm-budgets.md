@@ -4,12 +4,12 @@ This document defines the initial budget policy model for governing LLM usage ac
 
 ## Budget scopes
 
-| Scope | Identifier | Example | Notes |
-| --- | --- | --- | --- |
-| Global | `global` | Entire platform | Applied to every request as a backstop. |
-| Environment | `dev`, `sandbox`, `staging`, `prod` | `sandbox` | Caps traffic per deployment footprint. |
-| Feature | Feature slug | `maestro_planning` | Allows per-workload throttles without blocking unrelated calls. |
-| Tenant | Tenant slug (internal only) | `tenant_acme` | Never log raw tenant IDs externally; use redaction when emitting logs/metrics. |
+| Scope       | Identifier                          | Example            | Notes                                                                          |
+| ----------- | ----------------------------------- | ------------------ | ------------------------------------------------------------------------------ |
+| Global      | `global`                            | Entire platform    | Applied to every request as a backstop.                                        |
+| Environment | `dev`, `sandbox`, `staging`, `prod` | `sandbox`          | Caps traffic per deployment footprint.                                         |
+| Feature     | Feature slug                        | `maestro_planning` | Allows per-workload throttles without blocking unrelated calls.                |
+| Tenant      | Tenant slug (internal only)         | `tenant_acme`      | Never log raw tenant IDs externally; use redaction when emitting logs/metrics. |
 
 Policies can be attached to any combination of scopes; evaluation walks all matching scopes and applies the strictest decision (HARD > SOFT > ALLOW).
 

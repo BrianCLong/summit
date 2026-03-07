@@ -1,6 +1,6 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
-export type ArgType = 'string' | 'number' | 'boolean' | 'object';
+export type ArgType = "string" | "number" | "boolean" | "object";
 
 export interface ArgsSchemaField {
   type: ArgType;
@@ -35,11 +35,15 @@ export interface ExecutionResult {
 export type ToolExecutor = (args: Record<string, unknown>) => Promise<unknown> | unknown;
 
 export class ToolPlanInterpreter {
-  constructor(private allowedTools: string[], private maxSteps = 10, private tools: Record<string, ToolExecutor> = {}) {}
+  constructor(
+    private allowedTools: string[],
+    private maxSteps = 10,
+    private tools: Record<string, ToolExecutor> = {}
+  ) {}
 
   validate(plan: ToolPlan): void {
     if (plan.steps.length === 0) {
-      throw new Error('Tool plan must include at least one step');
+      throw new Error("Tool plan must include at least one step");
     }
     if (plan.steps.length > this.maxSteps) {
       throw new Error(`Tool plan exceeds maximum steps (${this.maxSteps})`);
@@ -52,7 +56,11 @@ export class ToolPlanInterpreter {
     });
   }
 
-  private validateArgs(args: Record<string, unknown>, schema: Record<string, ArgsSchemaField>, index: number): void {
+  private validateArgs(
+    args: Record<string, unknown>,
+    schema: Record<string, ArgsSchemaField>,
+    index: number
+  ): void {
     const schemaKeys = Object.keys(schema);
     for (const key of schemaKeys) {
       const field = schema[key];
@@ -61,7 +69,9 @@ export class ToolPlanInterpreter {
         throw new Error(`Step ${index} missing required arg ${key}`);
       }
       if (value !== undefined && typeof value !== field.type) {
-        throw new Error(`Step ${index} arg ${key} expected ${field.type} but received ${typeof value}`);
+        throw new Error(
+          `Step ${index} arg ${key} expected ${field.type} but received ${typeof value}`
+        );
       }
     }
     for (const argKey of Object.keys(args)) {
@@ -89,7 +99,7 @@ export class ToolPlanInterpreter {
         toolName: step.toolName,
         input: step.args,
         output: this.redactOutput(output),
-        redacted: typeof output === 'string' && output.includes('SECRET'),
+        redacted: typeof output === "string" && output.includes("SECRET"),
       });
     }
 
@@ -97,8 +107,8 @@ export class ToolPlanInterpreter {
   }
 
   private redactOutput(output: unknown): unknown {
-    if (typeof output === 'string') {
-      return output.replace(/SECRET/gi, '[REDACTED]');
+    if (typeof output === "string") {
+      return output.replace(/SECRET/gi, "[REDACTED]");
     }
     return output;
   }

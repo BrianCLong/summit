@@ -9,7 +9,9 @@ export interface WeaponizedNarrative {
 export class NarrativeWeaponizationTracker {
   public track(narrative: WeaponizedNarrative): void {
     if (narrative.lethalityScore > 0.7) {
-      console.warn(`HIGH RISK NARRATIVE DETECTED: ${narrative.theme} targeting ${narrative.targetGroup}`);
+      console.warn(
+        `HIGH RISK NARRATIVE DETECTED: ${narrative.theme} targeting ${narrative.targetGroup}`
+      );
       // Emit alert event
     }
   }

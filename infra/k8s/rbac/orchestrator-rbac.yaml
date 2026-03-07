@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: orchestrator
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    description: 'Service account for IntelGraph Maestro/Conductor orchestrator'
+    description: "Service account for IntelGraph Maestro/Conductor orchestrator"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -23,25 +23,25 @@ metadata:
     app.kubernetes.io/part-of: intelgraph
 rules:
   # ConfigMaps for configuration management
-  - apiGroups: ['']
-    resources: ['configmaps']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
   # Secrets for sensitive data
-  - apiGroups: ['']
-    resources: ['secrets']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
   # Events for audit and debugging
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['create', 'patch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
   # Pods for task execution monitoring
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
   # Services for discovery
-  - apiGroups: ['']
-    resources: ['services']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -55,31 +55,31 @@ metadata:
     app.kubernetes.io/part-of: intelgraph
 rules:
   # Jobs for task execution
-  - apiGroups: ['batch']
-    resources: ['jobs']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
-  - apiGroups: ['batch']
-    resources: ['cronjobs']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   # Pods for job monitoring
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list', 'watch', 'delete']
-  - apiGroups: ['']
-    resources: ['pods/log']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
   # ConfigMaps for job configuration
-  - apiGroups: ['']
-    resources: ['configmaps']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
   # Services for application discovery
-  - apiGroups: ['']
-    resources: ['services']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch"]
   # Events for job monitoring
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -137,21 +137,21 @@ metadata:
   namespace: dev-orch
   name: postgres-operator-role
 rules:
-  - apiGroups: ['']
-    resources: ['persistentvolumes', 'persistentvolumeclaims']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
-  - apiGroups: ['']
-    resources: ['secrets', 'configmaps']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
-  - apiGroups: ['']
-    resources: ['services', 'endpoints']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
-  - apiGroups: ['apps']
-    resources: ['statefulsets', 'deployments']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list', 'watch', 'delete']
+  - apiGroups: [""]
+    resources: ["persistentvolumes", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["services", "endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets", "deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "delete"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

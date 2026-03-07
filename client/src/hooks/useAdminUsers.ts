@@ -7,7 +7,7 @@
  * @module hooks/useAdminUsers
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
   UserManagementAPI,
   ManagedUser,
@@ -17,7 +17,7 @@ import {
   DataEnvelope,
   UserListResult,
   OperationResult,
-} from '../services/admin-api';
+} from "../services/admin-api";
 
 interface UseAdminUsersState {
   users: ManagedUser[];
@@ -41,12 +41,22 @@ interface UseAdminUsersReturn extends UseAdminUsersState {
 
   // Mutation operations
   createUser: (payload: CreateUserPayload) => Promise<DataEnvelope<OperationResult> | null>;
-  updateUser: (userId: string, payload: UpdateUserPayload) => Promise<DataEnvelope<OperationResult> | null>;
+  updateUser: (
+    userId: string,
+    payload: UpdateUserPayload
+  ) => Promise<DataEnvelope<OperationResult> | null>;
   deleteUser: (userId: string, hard?: boolean) => Promise<DataEnvelope<OperationResult> | null>;
   lockUser: (userId: string, reason: string) => Promise<DataEnvelope<OperationResult> | null>;
   unlockUser: (userId: string) => Promise<DataEnvelope<OperationResult> | null>;
-  addToTenant: (userId: string, tenantId: string, roles: string[]) => Promise<DataEnvelope<OperationResult> | null>;
-  removeFromTenant: (userId: string, tenantId: string) => Promise<DataEnvelope<OperationResult> | null>;
+  addToTenant: (
+    userId: string,
+    tenantId: string,
+    roles: string[]
+  ) => Promise<DataEnvelope<OperationResult> | null>;
+  removeFromTenant: (
+    userId: string,
+    tenantId: string
+  ) => Promise<DataEnvelope<OperationResult> | null>;
 }
 
 export function useAdminUsers(initialParams: ListUsersParams = {}): UseAdminUsersReturn {
@@ -64,7 +74,7 @@ export function useAdminUsers(initialParams: ListUsersParams = {}): UseAdminUser
   const [filters, setFiltersState] = useState<ListUsersParams>(initialParams);
 
   const fetchUsers = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const params: ListUsersParams = {
         ...filters,
@@ -73,11 +83,11 @@ export function useAdminUsers(initialParams: ListUsersParams = {}): UseAdminUser
       };
       const envelope: DataEnvelope<UserListResult> = await UserManagementAPI.list(params);
 
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
+      if (envelope.governanceVerdict.result === "DENY") {
+        throw new Error(envelope.governanceVerdict.reason || "Access denied");
       }
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         users: envelope.data.users,
         total: envelope.data.total,
@@ -85,8 +95,8 @@ export function useAdminUsers(initialParams: ListUsersParams = {}): UseAdminUser
         loading: false,
       }));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load users';
-      setState(prev => ({ ...prev, loading: false, error: message }));
+      const message = err instanceof Error ? err.message : "Failed to load users";
+      setState((prev) => ({ ...prev, loading: false, error: message }));
     }
   }, [filters, state.page, state.pageSize]);
 
@@ -95,263 +105,278 @@ export function useAdminUsers(initialParams: ListUsersParams = {}): UseAdminUser
   }, [fetchUsers]);
 
   const loadUser = useCallback(async (userId: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const envelope: DataEnvelope<ManagedUser | null> = await UserManagementAPI.get(userId);
 
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
+      if (envelope.governanceVerdict.result === "DENY") {
+        throw new Error(envelope.governanceVerdict.reason || "Access denied");
       }
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         selectedUser: envelope.data,
         loading: false,
       }));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load user';
-      setState(prev => ({ ...prev, loading: false, error: message }));
+      const message = err instanceof Error ? err.message : "Failed to load user";
+      setState((prev) => ({ ...prev, loading: false, error: message }));
     }
   }, []);
 
-  const createUser = useCallback(async (payload: CreateUserPayload): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.create(payload);
+  const createUser = useCallback(
+    async (payload: CreateUserPayload): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.create(payload);
 
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
+
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
+
+        // Refresh user list
+        await fetchUsers();
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to create user";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
+    },
+    [fetchUsers]
+  );
 
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
+  const updateUser = useCallback(
+    async (
+      userId: string,
+      payload: UpdateUserPayload
+    ): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.update(userId, payload);
+
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
+
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
+
+        // Update local state optimistically
+        setState((prev) => ({
+          ...prev,
+          users: prev.users.map((u) =>
+            u.id === userId ? { ...u, ...payload, updatedAt: new Date().toISOString() } : u
+          ),
+          selectedUser:
+            prev.selectedUser?.id === userId
+              ? { ...prev.selectedUser, ...payload, updatedAt: new Date().toISOString() }
+              : prev.selectedUser,
+          loading: false,
+        }));
+
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to update user";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
+    },
+    []
+  );
 
-      // Refresh user list
-      await fetchUsers();
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to create user';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, [fetchUsers]);
+  const deleteUser = useCallback(
+    async (userId: string, hard = false): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.delete(userId, hard);
 
-  const updateUser = useCallback(async (
-    userId: string,
-    payload: UpdateUserPayload
-  ): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.update(userId, payload);
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
 
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
+
+        // Remove from local state or mark inactive
+        setState((prev) => ({
+          ...prev,
+          users: hard
+            ? prev.users.filter((u) => u.id !== userId)
+            : prev.users.map((u) => (u.id === userId ? { ...u, isActive: false } : u)),
+          selectedUser: prev.selectedUser?.id === userId ? null : prev.selectedUser,
+          loading: false,
+        }));
+
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to delete user";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
+    },
+    []
+  );
 
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
+  const lockUser = useCallback(
+    async (userId: string, reason: string): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.lock(userId, reason);
+
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
+
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
+
+        // Update local state
+        setState((prev) => ({
+          ...prev,
+          users: prev.users.map((u) =>
+            u.id === userId ? { ...u, isLocked: true, lockReason: reason } : u
+          ),
+          selectedUser:
+            prev.selectedUser?.id === userId
+              ? { ...prev.selectedUser, isLocked: true, lockReason: reason }
+              : prev.selectedUser,
+          loading: false,
+        }));
+
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to lock user";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
+    },
+    []
+  );
 
-      // Update local state optimistically
-      setState(prev => ({
-        ...prev,
-        users: prev.users.map(u =>
-          u.id === userId ? { ...u, ...payload, updatedAt: new Date().toISOString() } : u
-        ),
-        selectedUser: prev.selectedUser?.id === userId
-          ? { ...prev.selectedUser, ...payload, updatedAt: new Date().toISOString() }
-          : prev.selectedUser,
-        loading: false,
-      }));
+  const unlockUser = useCallback(
+    async (userId: string): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.unlock(userId);
 
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to update user';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, []);
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
 
-  const deleteUser = useCallback(async (
-    userId: string,
-    hard = false
-  ): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.delete(userId, hard);
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
 
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
+        // Update local state
+        setState((prev) => ({
+          ...prev,
+          users: prev.users.map((u) =>
+            u.id === userId ? { ...u, isLocked: false, lockReason: undefined } : u
+          ),
+          selectedUser:
+            prev.selectedUser?.id === userId
+              ? { ...prev.selectedUser, isLocked: false, lockReason: undefined }
+              : prev.selectedUser,
+          loading: false,
+        }));
+
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to unlock user";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
+    },
+    []
+  );
 
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
+  const addToTenant = useCallback(
+    async (
+      userId: string,
+      tenantId: string,
+      roles: string[]
+    ): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.addToTenant(userId, tenantId, roles);
+
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
+
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
+
+        // Refresh to get updated tenant list
+        if (state.selectedUser?.id === userId) {
+          await loadUser(userId);
+        }
+
+        setState((prev) => ({ ...prev, loading: false }));
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to add user to tenant";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
+    },
+    [loadUser, state.selectedUser]
+  );
 
-      // Remove from local state or mark inactive
-      setState(prev => ({
-        ...prev,
-        users: hard
-          ? prev.users.filter(u => u.id !== userId)
-          : prev.users.map(u => u.id === userId ? { ...u, isActive: false } : u),
-        selectedUser: prev.selectedUser?.id === userId ? null : prev.selectedUser,
-        loading: false,
-      }));
+  const removeFromTenant = useCallback(
+    async (userId: string, tenantId: string): Promise<DataEnvelope<OperationResult> | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const envelope = await UserManagementAPI.removeFromTenant(userId, tenantId);
 
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to delete user';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, []);
+        if (envelope.governanceVerdict.result === "DENY") {
+          throw new Error(envelope.governanceVerdict.reason || "Access denied");
+        }
 
-  const lockUser = useCallback(async (
-    userId: string,
-    reason: string
-  ): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.lock(userId, reason);
+        if (!envelope.data.success) {
+          throw new Error(envelope.data.message);
+        }
 
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
+        // Refresh to get updated tenant list
+        if (state.selectedUser?.id === userId) {
+          await loadUser(userId);
+        }
+
+        setState((prev) => ({ ...prev, loading: false }));
+        return envelope;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to remove user from tenant";
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+        return null;
       }
-
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
-      }
-
-      // Update local state
-      setState(prev => ({
-        ...prev,
-        users: prev.users.map(u =>
-          u.id === userId ? { ...u, isLocked: true, lockReason: reason } : u
-        ),
-        selectedUser: prev.selectedUser?.id === userId
-          ? { ...prev.selectedUser, isLocked: true, lockReason: reason }
-          : prev.selectedUser,
-        loading: false,
-      }));
-
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to lock user';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, []);
-
-  const unlockUser = useCallback(async (userId: string): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.unlock(userId);
-
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
-      }
-
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
-      }
-
-      // Update local state
-      setState(prev => ({
-        ...prev,
-        users: prev.users.map(u =>
-          u.id === userId ? { ...u, isLocked: false, lockReason: undefined } : u
-        ),
-        selectedUser: prev.selectedUser?.id === userId
-          ? { ...prev.selectedUser, isLocked: false, lockReason: undefined }
-          : prev.selectedUser,
-        loading: false,
-      }));
-
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to unlock user';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, []);
-
-  const addToTenant = useCallback(async (
-    userId: string,
-    tenantId: string,
-    roles: string[]
-  ): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.addToTenant(userId, tenantId, roles);
-
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
-      }
-
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
-      }
-
-      // Refresh to get updated tenant list
-      if (state.selectedUser?.id === userId) {
-        await loadUser(userId);
-      }
-
-      setState(prev => ({ ...prev, loading: false }));
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to add user to tenant';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, [loadUser, state.selectedUser]);
-
-  const removeFromTenant = useCallback(async (
-    userId: string,
-    tenantId: string
-  ): Promise<DataEnvelope<OperationResult> | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const envelope = await UserManagementAPI.removeFromTenant(userId, tenantId);
-
-      if (envelope.governanceVerdict.result === 'DENY') {
-        throw new Error(envelope.governanceVerdict.reason || 'Access denied');
-      }
-
-      if (!envelope.data.success) {
-        throw new Error(envelope.data.message);
-      }
-
-      // Refresh to get updated tenant list
-      if (state.selectedUser?.id === userId) {
-        await loadUser(userId);
-      }
-
-      setState(prev => ({ ...prev, loading: false }));
-      return envelope;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to remove user from tenant';
-      setState(prev => ({ ...prev, loading: false, error: message }));
-      return null;
-    }
-  }, [loadUser, state.selectedUser]);
+    },
+    [loadUser, state.selectedUser]
+  );
 
   const setPage = useCallback((page: number) => {
-    setState(prev => ({ ...prev, page }));
+    setState((prev) => ({ ...prev, page }));
   }, []);
 
   const setPageSize = useCallback((pageSize: number) => {
-    setState(prev => ({ ...prev, pageSize, page: 1 }));
+    setState((prev) => ({ ...prev, pageSize, page: 1 }));
   }, []);
 
   const setFilters = useCallback((newFilters: Partial<ListUsersParams>) => {
-    setFiltersState(prev => ({ ...prev, ...newFilters }));
-    setState(prev => ({ ...prev, page: 1 }));
+    setFiltersState((prev) => ({ ...prev, ...newFilters }));
+    setState((prev) => ({ ...prev, page: 1 }));
   }, []);
 
   const clearSelection = useCallback(() => {
-    setState(prev => ({ ...prev, selectedUser: null }));
+    setState((prev) => ({ ...prev, selectedUser: null }));
   }, []);
 
   return {

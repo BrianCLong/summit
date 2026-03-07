@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -40,7 +40,7 @@ import {
   TableRow,
   Tabs,
   Tab,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Assignment,
   Add,
@@ -64,9 +64,9 @@ import {
   Description,
   Gavel,
   Science,
-} from '@mui/icons-material';
-import { useQuery, useMutation } from '@apollo/client';
-import { gql } from '@apollo/client';
+} from "@mui/icons-material";
+import { useQuery, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 // GraphQL queries for investigation workflow
 const GET_ALL_INVESTIGATIONS = gql`
@@ -257,32 +257,32 @@ const InvestigationWorkflowPanel = () => {
 
   // New investigation form state
   const [newInvestigation, setNewInvestigation] = useState({
-    templateId: '',
-    name: '',
-    description: '',
-    priority: 'MEDIUM',
-    assignedTo: ['user-1'],
-    classification: 'CONFIDENTIAL',
+    templateId: "",
+    name: "",
+    description: "",
+    priority: "MEDIUM",
+    assignedTo: ["user-1"],
+    classification: "CONFIDENTIAL",
     tags: [],
   });
 
   // New evidence form state
   const [newEvidence, setNewEvidence] = useState({
-    type: 'DIGITAL_ARTIFACT',
-    title: '',
-    description: '',
-    source: '',
-    classification: 'CONFIDENTIAL',
+    type: "DIGITAL_ARTIFACT",
+    title: "",
+    description: "",
+    source: "",
+    classification: "CONFIDENTIAL",
   });
 
   // New finding form state
   const [newFinding, setNewFinding] = useState({
-    title: '',
-    description: '',
-    severity: 'MEDIUM',
+    title: "",
+    description: "",
+    severity: "MEDIUM",
     confidence: 0.8,
-    category: 'VULNERABILITY',
-    status: 'DRAFT',
+    category: "VULNERABILITY",
+    status: "DRAFT",
     relatedEntities: [],
     evidence: [],
     recommendations: [],
@@ -295,26 +295,23 @@ const InvestigationWorkflowPanel = () => {
     refetch: refetchInvestigations,
   } = useQuery(GET_ALL_INVESTIGATIONS, {
     pollInterval: 10000,
-    errorPolicy: 'all',
+    errorPolicy: "all",
   });
 
   const { data: templatesData } = useQuery(GET_INVESTIGATION_TEMPLATES, {
-    errorPolicy: 'all',
+    errorPolicy: "all",
   });
 
   const { data: statsData } = useQuery(GET_WORKFLOW_STATISTICS, {
     pollInterval: 15000,
-    errorPolicy: 'all',
+    errorPolicy: "all",
   });
 
-  const { data: detailData, loading: detailLoading } = useQuery(
-    GET_INVESTIGATION_DETAIL,
-    {
-      variables: { investigationId: selectedInvestigation },
-      skip: !selectedInvestigation,
-      errorPolicy: 'all',
-    },
-  );
+  const { data: detailData, loading: detailLoading } = useQuery(GET_INVESTIGATION_DETAIL, {
+    variables: { investigationId: selectedInvestigation },
+    skip: !selectedInvestigation,
+    errorPolicy: "all",
+  });
 
   // GraphQL mutations
   const [createInvestigation] = useMutation(CREATE_INVESTIGATION);
@@ -345,17 +342,17 @@ const InvestigationWorkflowPanel = () => {
       });
       setCreateDialogOpen(false);
       setNewInvestigation({
-        templateId: '',
-        name: '',
-        description: '',
-        priority: 'MEDIUM',
-        assignedTo: ['user-1'],
-        classification: 'CONFIDENTIAL',
+        templateId: "",
+        name: "",
+        description: "",
+        priority: "MEDIUM",
+        assignedTo: ["user-1"],
+        classification: "CONFIDENTIAL",
         tags: [],
       });
       refetchInvestigations();
     } catch (err) {
-      console.error('Create investigation error:', err);
+      console.error("Create investigation error:", err);
     }
   };
 
@@ -369,7 +366,7 @@ const InvestigationWorkflowPanel = () => {
       });
       refetchInvestigations();
     } catch (err) {
-      console.error('Advance stage error:', err);
+      console.error("Advance stage error:", err);
     }
   };
 
@@ -389,14 +386,14 @@ const InvestigationWorkflowPanel = () => {
       });
       setEvidenceDialogOpen(false);
       setNewEvidence({
-        type: 'DIGITAL_ARTIFACT',
-        title: '',
-        description: '',
-        source: '',
-        classification: 'CONFIDENTIAL',
+        type: "DIGITAL_ARTIFACT",
+        title: "",
+        description: "",
+        source: "",
+        classification: "CONFIDENTIAL",
       });
     } catch (err) {
-      console.error('Add evidence error:', err);
+      console.error("Add evidence error:", err);
     }
   };
 
@@ -412,64 +409,64 @@ const InvestigationWorkflowPanel = () => {
       });
       setFindingDialogOpen(false);
       setNewFinding({
-        title: '',
-        description: '',
-        severity: 'MEDIUM',
+        title: "",
+        description: "",
+        severity: "MEDIUM",
         confidence: 0.8,
-        category: 'VULNERABILITY',
-        status: 'DRAFT',
+        category: "VULNERABILITY",
+        status: "DRAFT",
         relatedEntities: [],
         evidence: [],
         recommendations: [],
       });
     } catch (err) {
-      console.error('Add finding error:', err);
+      console.error("Add finding error:", err);
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'EMERGENCY':
-        return 'error';
-      case 'CRITICAL':
-        return 'error';
-      case 'HIGH':
-        return 'warning';
-      case 'MEDIUM':
-        return 'info';
-      case 'LOW':
-        return 'success';
+      case "EMERGENCY":
+        return "error";
+      case "CRITICAL":
+        return "error";
+      case "HIGH":
+        return "warning";
+      case "MEDIUM":
+        return "info";
+      case "LOW":
+        return "success";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'ACTIVE':
-        return 'success';
-      case 'ON_HOLD':
-        return 'warning';
-      case 'ESCALATED':
-        return 'error';
-      case 'RESOLVED':
-        return 'info';
-      case 'CLOSED':
-        return 'default';
+      case "ACTIVE":
+        return "success";
+      case "ON_HOLD":
+        return "warning";
+      case "ESCALATED":
+        return "error";
+      case "RESOLVED":
+        return "info";
+      case "CLOSED":
+        return "default";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {
-      case 'CRITICAL':
+      case "CRITICAL":
         return <Warning color="error" />;
-      case 'HIGH':
+      case "HIGH":
         return <Flag color="warning" />;
-      case 'MEDIUM':
+      case "MEDIUM":
         return <Assessment color="info" />;
-      case 'LOW':
+      case "LOW":
         return <CheckCircle color="success" />;
       default:
         return <Assessment />;
@@ -508,30 +505,28 @@ const InvestigationWorkflowPanel = () => {
           <Typography
             variant="h5"
             gutterBottom
-            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
             <Assignment color="primary" />
             🔬 Investigation Workflow Management
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Comprehensive investigation lifecycle management with evidence
-            tracking and workflow automation
+            Comprehensive investigation lifecycle management with evidence tracking and workflow
+            automation
           </Typography>
 
           {statsData?.getWorkflowStatistics && (
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
-                  <Typography variant="caption">
-                    Total Investigations
-                  </Typography>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
+                  <Typography variant="caption">Total Investigations</Typography>
                   <Typography variant="h6" color="primary">
                     {statsData.getWorkflowStatistics.total}
                   </Typography>
                 </Paper>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Active Cases</Typography>
                   <Typography variant="h6" color="success.main">
                     {statsData.getWorkflowStatistics.byStatus?.ACTIVE || 0}
@@ -539,7 +534,7 @@ const InvestigationWorkflowPanel = () => {
                 </Paper>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Critical Priority</Typography>
                   <Typography variant="h6" color="error.main">
                     {statsData.getWorkflowStatistics.byPriority?.CRITICAL || 0}
@@ -547,7 +542,7 @@ const InvestigationWorkflowPanel = () => {
                 </Paper>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Overdue SLA</Typography>
                   <Typography variant="h6" color="warning.main">
                     {statsData.getWorkflowStatistics.overdueSLA}
@@ -557,7 +552,7 @@ const InvestigationWorkflowPanel = () => {
             </Grid>
           )}
 
-          <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+          <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
             <Button
               variant="contained"
               startIcon={<Add />}
@@ -570,15 +565,13 @@ const InvestigationWorkflowPanel = () => {
       </Card>
 
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={currentTab} onChange={handleTabChange}>
             <Tab
               label="All Investigations"
               icon={
                 <Badge
-                  badgeContent={
-                    investigationsData?.getAllInvestigations?.length || 0
-                  }
+                  badgeContent={investigationsData?.getAllInvestigations?.length || 0}
                   color="primary"
                 >
                   <Assignment />
@@ -589,9 +582,7 @@ const InvestigationWorkflowPanel = () => {
               label="Templates"
               icon={
                 <Badge
-                  badgeContent={
-                    templatesData?.getInvestigationTemplates?.length || 0
-                  }
+                  badgeContent={templatesData?.getInvestigationTemplates?.length || 0}
                   color="secondary"
                 >
                   <Folder />
@@ -609,150 +600,132 @@ const InvestigationWorkflowPanel = () => {
                 <LinearProgress />
               ) : (
                 <Grid container spacing={2}>
-                  {investigationsData?.getAllInvestigations?.map(
-                    (investigation) => (
-                      <Grid item xs={12} sm={6} md={4} key={investigation.id}>
-                        <Card variant="outlined" sx={{ height: '100%' }}>
-                          <CardContent>
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                mb: 1,
-                              }}
-                            >
-                              <Typography variant="h6" noWrap>
-                                {investigation.name}
-                              </Typography>
-                              <Chip
-                                label={investigation.status}
-                                color={getStatusColor(investigation.status)}
-                                size="small"
-                              />
-                            </Box>
-
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              {investigation.description || 'No description'}
+                  {investigationsData?.getAllInvestigations?.map((investigation) => (
+                    <Grid item xs={12} sm={6} md={4} key={investigation.id}>
+                      <Card variant="outlined" sx={{ height: "100%" }}>
+                        <CardContent>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              mb: 1,
+                            }}
+                          >
+                            <Typography variant="h6" noWrap>
+                              {investigation.name}
                             </Typography>
+                            <Chip
+                              label={investigation.status}
+                              color={getStatusColor(investigation.status)}
+                              size="small"
+                            />
+                          </Box>
 
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                gap: 1,
-                                mb: 1,
-                                flexWrap: 'wrap',
-                              }}
-                            >
-                              <Chip
-                                label={investigation.priority}
-                                color={getPriorityColor(investigation.priority)}
-                                size="small"
-                              />
-                              <Chip
-                                label={investigation.classification}
-                                variant="outlined"
-                                size="small"
-                              />
-                            </Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            {investigation.description || "No description"}
+                          </Typography>
 
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                mb: 2,
-                              }}
-                            >
-                              {getWorkflowStageIcon(investigation.currentStage)}
-                              <Typography variant="caption">
-                                {investigation.currentStage.replace(/_/g, ' ')}
-                              </Typography>
-                            </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              mb: 1,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <Chip
+                              label={investigation.priority}
+                              color={getPriorityColor(investigation.priority)}
+                              size="small"
+                            />
+                            <Chip
+                              label={investigation.classification}
+                              variant="outlined"
+                              size="small"
+                            />
+                          </Box>
 
-                            <Grid container spacing={1} sx={{ mb: 2 }}>
-                              <Grid item xs={4}>
-                                <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="caption" display="block">
-                                    Entities
-                                  </Typography>
-                                  <Typography variant="h6">
-                                    {investigation.entityCount}
-                                  </Typography>
-                                </Box>
-                              </Grid>
-                              <Grid item xs={4}>
-                                <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="caption" display="block">
-                                    Evidence
-                                  </Typography>
-                                  <Typography variant="h6">
-                                    {investigation.evidenceCount}
-                                  </Typography>
-                                </Box>
-                              </Grid>
-                              <Grid item xs={4}>
-                                <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="caption" display="block">
-                                    Findings
-                                  </Typography>
-                                  <Typography variant="h6">
-                                    {investigation.findingCount}
-                                  </Typography>
-                                </Box>
-                              </Grid>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              mb: 2,
+                            }}
+                          >
+                            {getWorkflowStageIcon(investigation.currentStage)}
+                            <Typography variant="caption">
+                              {investigation.currentStage.replace(/_/g, " ")}
+                            </Typography>
+                          </Box>
+
+                          <Grid container spacing={1} sx={{ mb: 2 }}>
+                            <Grid item xs={4}>
+                              <Box sx={{ textAlign: "center" }}>
+                                <Typography variant="caption" display="block">
+                                  Entities
+                                </Typography>
+                                <Typography variant="h6">{investigation.entityCount}</Typography>
+                              </Box>
                             </Grid>
+                            <Grid item xs={4}>
+                              <Box sx={{ textAlign: "center" }}>
+                                <Typography variant="caption" display="block">
+                                  Evidence
+                                </Typography>
+                                <Typography variant="h6">{investigation.evidenceCount}</Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Box sx={{ textAlign: "center" }}>
+                                <Typography variant="caption" display="block">
+                                  Findings
+                                </Typography>
+                                <Typography variant="h6">{investigation.findingCount}</Typography>
+                              </Box>
+                            </Grid>
+                          </Grid>
 
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              display="block"
-                              sx={{ mb: 1 }}
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            display="block"
+                            sx={{ mb: 1 }}
+                          >
+                            Created: {formatTimeAgo(investigation.createdAt)}
+                          </Typography>
+
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            <Button
+                              size="small"
+                              startIcon={<Visibility />}
+                              onClick={() => {
+                                setSelectedInvestigation(investigation.id);
+                                setDetailDialogOpen(true);
+                              }}
                             >
-                              Created: {formatTimeAgo(investigation.createdAt)}
-                            </Typography>
-
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              <Button
-                                size="small"
-                                startIcon={<Visibility />}
-                                onClick={() => {
-                                  setSelectedInvestigation(investigation.id);
-                                  setDetailDialogOpen(true);
-                                }}
-                              >
-                                View
-                              </Button>
-                              <Button
-                                size="small"
-                                startIcon={<PlayArrow />}
-                                onClick={() =>
-                                  handleAdvanceStage(investigation.id)
-                                }
-                                disabled={
-                                  investigation.currentStage ===
-                                  'LESSONS_LEARNED'
-                                }
-                              >
-                                Advance
-                              </Button>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ),
-                  )}
+                              View
+                            </Button>
+                            <Button
+                              size="small"
+                              startIcon={<PlayArrow />}
+                              onClick={() => handleAdvanceStage(investigation.id)}
+                              disabled={investigation.currentStage === "LESSONS_LEARNED"}
+                            >
+                              Advance
+                            </Button>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
                 </Grid>
               )}
 
               {investigationsData?.getAllInvestigations?.length === 0 && (
                 <Alert severity="info">
-                  No investigations found. Create your first investigation using
-                  a template.
+                  No investigations found. Create your first investigation using a template.
                 </Alert>
               )}
             </Box>
@@ -767,15 +740,11 @@ const InvestigationWorkflowPanel = () => {
                     <Card variant="outlined">
                       <CardContent>
                         <Typography variant="h6">{template.name}</Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                           {template.description}
                         </Typography>
 
-                        <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                        <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
                           <Chip label={template.category} size="small" />
                           <Chip
                             label={template.defaultClassification}
@@ -785,14 +754,13 @@ const InvestigationWorkflowPanel = () => {
                         </Box>
 
                         <Typography variant="caption" display="block">
-                          Estimated Duration: {template.estimatedDuration}h |
-                          SLA: {template.slaHours}h
+                          Estimated Duration: {template.estimatedDuration}h | SLA:{" "}
+                          {template.slaHours}h
                         </Typography>
 
                         <Box sx={{ mt: 1 }}>
                           <Typography variant="caption" color="text.secondary">
-                            Workflow Stages:{' '}
-                            {template.workflowStages.join(' → ')}
+                            Workflow Stages: {template.workflowStages.join(" → ")}
                           </Typography>
                         </Box>
 
@@ -942,7 +910,7 @@ const InvestigationWorkflowPanel = () => {
       >
         <DialogTitle>
           {detailData?.getInvestigation?.name}
-          <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+          <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
             <Button
               size="small"
               startIcon={<FileCopy />}
@@ -968,22 +936,16 @@ const InvestigationWorkflowPanel = () => {
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={6}>
                   <Paper sx={{ p: 2 }}>
-                    <Typography variant="subtitle2">
-                      Status & Priority
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                    <Typography variant="subtitle2">Status & Priority</Typography>
+                    <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                       <Chip
                         label={detailData.getInvestigation.status}
-                        color={getStatusColor(
-                          detailData.getInvestigation.status,
-                        )}
+                        color={getStatusColor(detailData.getInvestigation.status)}
                         size="small"
                       />
                       <Chip
                         label={detailData.getInvestigation.priority}
-                        color={getPriorityColor(
-                          detailData.getInvestigation.priority,
-                        )}
+                        color={getPriorityColor(detailData.getInvestigation.priority)}
                         size="small"
                       />
                     </Box>
@@ -994,20 +956,15 @@ const InvestigationWorkflowPanel = () => {
                     <Typography variant="subtitle2">Current Stage</Typography>
                     <Box
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 1,
                         mt: 1,
                       }}
                     >
-                      {getWorkflowStageIcon(
-                        detailData.getInvestigation.workflow.currentStage,
-                      )}
+                      {getWorkflowStageIcon(detailData.getInvestigation.workflow.currentStage)}
                       <Typography variant="body2">
-                        {detailData.getInvestigation.workflow.currentStage.replace(
-                          /_/g,
-                          ' ',
-                        )}
+                        {detailData.getInvestigation.workflow.currentStage.replace(/_/g, " ")}
                       </Typography>
                     </Box>
                   </Paper>
@@ -1036,31 +993,21 @@ const InvestigationWorkflowPanel = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {detailData.getInvestigation.evidence.map(
-                          (evidence) => (
-                            <TableRow key={evidence.id}>
-                              <TableCell>{evidence.title}</TableCell>
-                              <TableCell>
-                                {evidence.type.replace(/_/g, ' ')}
-                              </TableCell>
-                              <TableCell>{evidence.collectedBy}</TableCell>
-                              <TableCell>
-                                {formatTimeAgo(evidence.collectedAt)}
-                              </TableCell>
-                              <TableCell>
-                                <Chip
-                                  label={evidence.integrity}
-                                  color={
-                                    evidence.integrity === 'VERIFIED'
-                                      ? 'success'
-                                      : 'warning'
-                                  }
-                                  size="small"
-                                />
-                              </TableCell>
-                            </TableRow>
-                          ),
-                        )}
+                        {detailData.getInvestigation.evidence.map((evidence) => (
+                          <TableRow key={evidence.id}>
+                            <TableCell>{evidence.title}</TableCell>
+                            <TableCell>{evidence.type.replace(/_/g, " ")}</TableCell>
+                            <TableCell>{evidence.collectedBy}</TableCell>
+                            <TableCell>{formatTimeAgo(evidence.collectedAt)}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={evidence.integrity}
+                                color={evidence.integrity === "VERIFIED" ? "success" : "warning"}
+                                size="small"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   )}
@@ -1081,22 +1028,14 @@ const InvestigationWorkflowPanel = () => {
                     <List>
                       {detailData.getInvestigation.findings.map((finding) => (
                         <ListItem key={finding.id} divider>
-                          <ListItemIcon>
-                            {getSeverityIcon(finding.severity)}
-                          </ListItemIcon>
+                          <ListItemIcon>{getSeverityIcon(finding.severity)}</ListItemIcon>
                           <ListItemText
                             primary={finding.title}
                             secondary={
                               <Box>
-                                <Typography variant="body2">
-                                  {finding.description}
-                                </Typography>
-                                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                                  <Chip
-                                    label={finding.category}
-                                    size="small"
-                                    variant="outlined"
-                                  />
+                                <Typography variant="body2">{finding.description}</Typography>
+                                <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                                  <Chip label={finding.category} size="small" variant="outlined" />
                                   <Chip
                                     label={`${Math.round(finding.confidence * 100)}% confidence`}
                                     size="small"
@@ -1104,11 +1043,7 @@ const InvestigationWorkflowPanel = () => {
                                   <Chip
                                     label={finding.status}
                                     size="small"
-                                    color={
-                                      finding.status === 'CONFIRMED'
-                                        ? 'success'
-                                        : 'default'
-                                    }
+                                    color={finding.status === "CONFIRMED" ? "success" : "default"}
                                   />
                                 </Box>
                               </Box>
@@ -1130,9 +1065,7 @@ const InvestigationWorkflowPanel = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   {detailData.getInvestigation.timeline.length === 0 ? (
-                    <Alert severity="info">
-                      No timeline events recorded yet
-                    </Alert>
+                    <Alert severity="info">No timeline events recorded yet</Alert>
                   ) : (
                     <List>
                       {detailData.getInvestigation.timeline.map((entry) => (
@@ -1144,15 +1077,9 @@ const InvestigationWorkflowPanel = () => {
                             primary={entry.title}
                             secondary={
                               <Box>
-                                <Typography variant="body2">
-                                  {entry.description}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
-                                  {new Date(entry.timestamp).toLocaleString()} •{' '}
-                                  {entry.actor}
+                                <Typography variant="body2">{entry.description}</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {new Date(entry.timestamp).toLocaleString()} • {entry.actor}
                                 </Typography>
                               </Box>
                             }
@@ -1211,9 +1138,7 @@ const InvestigationWorkflowPanel = () => {
                 fullWidth
                 label="Title"
                 value={newEvidence.title}
-                onChange={(e) =>
-                  setNewEvidence((prev) => ({ ...prev, title: e.target.value }))
-                }
+                onChange={(e) => setNewEvidence((prev) => ({ ...prev, title: e.target.value }))}
                 required
               />
             </Grid>
@@ -1270,9 +1195,7 @@ const InvestigationWorkflowPanel = () => {
                 fullWidth
                 label="Title"
                 value={newFinding.title}
-                onChange={(e) =>
-                  setNewFinding((prev) => ({ ...prev, title: e.target.value }))
-                }
+                onChange={(e) => setNewFinding((prev) => ({ ...prev, title: e.target.value }))}
                 required
               />
             </Grid>

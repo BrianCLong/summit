@@ -22,4 +22,4 @@ env:
   - name: NODE_ENV
     value: staging
   - name: ALLOW_UNSIGNED_POLICY
-    value: 'false'
+    value: "false"

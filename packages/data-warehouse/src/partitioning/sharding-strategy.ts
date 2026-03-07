@@ -3,10 +3,10 @@
  */
 
 export enum ShardingType {
-  HASH = 'HASH',
-  RANGE = 'RANGE',
-  GEOGRAPHIC = 'GEOGRAPHIC',
-  CUSTOM = 'CUSTOM',
+  HASH = "HASH",
+  RANGE = "RANGE",
+  GEOGRAPHIC = "GEOGRAPHIC",
+  CUSTOM = "CUSTOM",
 }
 
 export class ShardingStrategy {

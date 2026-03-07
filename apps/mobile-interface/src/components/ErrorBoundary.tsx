@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
   render() {
@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h1>
             <p className="text-gray-600 mb-4">
-              {this.state.error?.message || 'An unexpected error occurred'}
+              {this.state.error?.message || "An unexpected error occurred"}
             </p>
             <button
               onClick={() => this.setState({ hasError: false })}

@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
-import os from 'os';
-import path from 'path';
-import { ControlRegistry } from '../control-registry.js';
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
+import { ControlRegistry } from "../control-registry.js";
 
 const sampleYaml = `
 - id: control.access.sso
@@ -28,26 +28,23 @@ const sampleYaml = `
     - access
 `;
 
-describe('ControlRegistry', () => {
-  it('validates and normalizes YAML definitions', async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'registry-'));
-    const filePath = path.join(dir, 'controls.yaml');
+describe("ControlRegistry", () => {
+  it("validates and normalizes YAML definitions", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "registry-"));
+    const filePath = path.join(dir, "controls.yaml");
     await fs.writeFile(filePath, sampleYaml);
 
     const registry = await ControlRegistry.fromYaml(filePath);
-    const control = registry.get('control.access.sso');
+    const control = registry.get("control.access.sso");
     expect(control).toBeDefined();
     expect(control?.evidence.path.startsWith(dir)).toBe(true);
   });
 
-  it('rejects invalid owner emails', async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'registry-'));
-    const filePath = path.join(dir, 'controls.yaml');
-    await fs.writeFile(
-      filePath,
-      sampleYaml.replace('security@example.com', 'not-an-email')
-    );
+  it("rejects invalid owner emails", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "registry-"));
+    const filePath = path.join(dir, "controls.yaml");
+    await fs.writeFile(filePath, sampleYaml.replace("security@example.com", "not-an-email"));
 
-    await expect(ControlRegistry.fromYaml(filePath)).rejects.toThrow('Invalid email');
+    await expect(ControlRegistry.fromYaml(filePath)).rejects.toThrow("Invalid email");
   });
 });

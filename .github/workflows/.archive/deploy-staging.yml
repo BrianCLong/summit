@@ -4,22 +4,22 @@ on:
   workflow_call:
     inputs:
       version:
-        description: 'Version to deploy'
+        description: "Version to deploy"
         required: true
         type: string
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
         type: string
-        default: 'staging'
+        default: "staging"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy (leave empty for latest)'
+        description: "Version to deploy (leave empty for latest)"
         required: false
         type: string
       skip-tests:
-        description: 'Skip smoke tests'
+        description: "Skip smoke tests"
         required: false
         type: boolean
         default: false
@@ -171,7 +171,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.13.0'
+          version: "v3.13.0"
 
       - name: Ensure namespace exists
         run: |

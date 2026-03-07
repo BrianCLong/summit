@@ -8,7 +8,7 @@
  * - SLA monitoring
  */
 
-export * from './metrics/metrics-collector.js';
+export * from "./metrics/metrics-collector.js";
 // TODO: Add these modules when implemented
 // export * from './metrics/performance-tracker.js';
 // export * from './logging/request-logger.js';

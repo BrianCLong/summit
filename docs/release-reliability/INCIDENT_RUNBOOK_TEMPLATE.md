@@ -11,28 +11,31 @@ Copy this template when creating a new runbook for a specific incident type or s
 
 ### Metadata
 
-| Field | Value |
-|-------|-------|
-| **Runbook ID** | RB-XXXX |
-| **Service** | [service-name] |
-| **Severity** | P1 / P2 / P3 |
-| **Owner** | [team-name] |
-| **Last Reviewed** | YYYY-MM-DD |
-| **MTTR Target** | XX minutes |
+| Field             | Value          |
+| ----------------- | -------------- |
+| **Runbook ID**    | RB-XXXX        |
+| **Service**       | [service-name] |
+| **Severity**      | P1 / P2 / P3   |
+| **Owner**         | [team-name]    |
+| **Last Reviewed** | YYYY-MM-DD     |
+| **MTTR Target**   | XX minutes     |
 
 ---
 
 ## 1. Overview
 
 ### Description
+
 [Brief description of the incident type this runbook addresses]
 
 ### Impact
+
 - **User Impact**: [How users are affected]
 - **Business Impact**: [Revenue, reputation, compliance implications]
 - **Blast Radius**: [Which services/regions are affected]
 
 ### SLO Affected
+
 - **SLI**: [e.g., API availability, latency p95]
 - **SLO Target**: [e.g., 99.9%]
 - **Error Budget Burn**: [Expected burn rate during incident]
@@ -43,9 +46,9 @@ Copy this template when creating a new runbook for a specific incident type or s
 
 ### Alerting
 
-| Alert Name | Threshold | Dashboard |
-|------------|-----------|-----------|
-| [AlertName] | [condition] | [link] |
+| Alert Name  | Threshold   | Dashboard |
+| ----------- | ----------- | --------- |
+| [AlertName] | [condition] | [link]    |
 
 ### Key Metrics to Check
 
@@ -75,11 +78,11 @@ avg(rate(container_cpu_usage_seconds_total{pod=~"SERVICE-.*"}[5m]))
 
 ### Severity Classification
 
-| Severity | Criteria | Response Time | Escalation |
-|----------|----------|---------------|------------|
-| P1 - Critical | Complete service outage, data loss risk | Immediate | Page on-call + manager |
-| P2 - High | Degraded service, significant user impact | 15 min | Page on-call |
-| P3 - Medium | Partial degradation, workaround available | 1 hour | Slack notification |
+| Severity      | Criteria                                  | Response Time | Escalation             |
+| ------------- | ----------------------------------------- | ------------- | ---------------------- |
+| P1 - Critical | Complete service outage, data loss risk   | Immediate     | Page on-call + manager |
+| P2 - High     | Degraded service, significant user impact | 15 min        | Page on-call           |
+| P3 - Medium   | Partial degradation, workaround available | 1 hour        | Slack notification     |
 
 ### Initial Assessment Checklist
 
@@ -237,13 +240,13 @@ kubectl exec -n production deploy/SERVICE -- df -h
 
 ### Common Root Causes
 
-| Symptom | Likely Cause | Verification | Fix |
-|---------|--------------|--------------|-----|
-| 503 errors | Pod crash loop | `kubectl describe pod` | Check logs, rollback |
-| High latency | Database slow | Check DB metrics | Scale DB, optimize query |
-| OOM kills | Memory leak | Check memory graphs | Increase limits, fix leak |
-| Connection refused | Service not ready | Check readiness probe | Wait or restart pods |
-| Timeout errors | Dependency down | Check dependency health | Failover, circuit breaker |
+| Symptom            | Likely Cause      | Verification            | Fix                       |
+| ------------------ | ----------------- | ----------------------- | ------------------------- |
+| 503 errors         | Pod crash loop    | `kubectl describe pod`  | Check logs, rollback      |
+| High latency       | Database slow     | Check DB metrics        | Scale DB, optimize query  |
+| OOM kills          | Memory leak       | Check memory graphs     | Increase limits, fix leak |
+| Connection refused | Service not ready | Check readiness probe   | Wait or restart pods      |
+| Timeout errors     | Dependency down   | Check dependency health | Failover, circuit breaker |
 
 ---
 
@@ -252,12 +255,14 @@ kubectl exec -n production deploy/SERVICE -- df -h
 ### Recovery Steps
 
 1. **Confirm mitigation is working**
+
    ```bash
    # Check error rate is decreasing
    curl -s "http://prometheus:9090/api/v1/query?query=sum(rate(http_requests_total{service=\"SERVICE\",code=~\"5..\"}[1m]))"
    ```
 
 2. **Verify service health**
+
    ```bash
    # All health checks passing
    curl -sf http://SERVICE.production:4000/health
@@ -289,12 +294,12 @@ kubectl exec -n production deploy/SERVICE -- df -h
 
 ### Stakeholder Updates
 
-| Audience | Channel | Frequency | Template |
-|----------|---------|-----------|----------|
-| Engineering | #incidents | Every 15 min | Status update |
-| Leadership | Email | Every 30 min | Executive summary |
-| Customers | Status page | Major changes | Customer-facing |
-| On-call | PagerDuty | Escalations | Alert details |
+| Audience    | Channel     | Frequency     | Template          |
+| ----------- | ----------- | ------------- | ----------------- |
+| Engineering | #incidents  | Every 15 min  | Status update     |
+| Leadership  | Email       | Every 30 min  | Executive summary |
+| Customers   | Status page | Major changes | Customer-facing   |
+| On-call     | PagerDuty   | Escalations   | Alert details     |
 
 ### Status Update Template
 
@@ -368,41 +373,44 @@ See [Postmortem Template](./POSTMORTEM_TEMPLATE.md)
 
 ## 9. MTTR Expectations
 
-| Severity | Detection | Triage | Mitigation | Recovery | Total MTTR |
-|----------|-----------|--------|------------|----------|------------|
-| P1 | <5 min | <10 min | <15 min | <30 min | <60 min |
-| P2 | <15 min | <15 min | <30 min | <60 min | <2 hours |
-| P3 | <1 hour | <1 hour | <2 hours | <4 hours | <8 hours |
+| Severity | Detection | Triage  | Mitigation | Recovery | Total MTTR |
+| -------- | --------- | ------- | ---------- | -------- | ---------- |
+| P1       | <5 min    | <10 min | <15 min    | <30 min  | <60 min    |
+| P2       | <15 min   | <15 min | <30 min    | <60 min  | <2 hours   |
+| P3       | <1 hour   | <1 hour | <2 hours   | <4 hours | <8 hours   |
 
 ---
 
 ## 10. Related Resources
 
 ### Dashboards
+
 - [Service Dashboard](http://grafana:3001/d/SERVICE)
 - [SLO Dashboard](http://grafana:3001/d/slo-overview)
 - [Golden Signals](http://grafana:3001/d/golden-signals)
 
 ### Documentation
+
 - [Service Architecture](../architecture/SERVICE.md)
 - [Dependency Map](../architecture/dependencies.md)
 - [SLO Definitions](./slo-definitions.md)
 
 ### Contacts
-| Role | Name | Slack | PagerDuty |
-|------|------|-------|-----------|
-| Service Owner | @team | #team-channel | @team-oncall |
-| SRE | @sre-team | #sre | @sre-oncall |
-| On-Call | - | #incidents | @oncall |
+
+| Role          | Name      | Slack         | PagerDuty    |
+| ------------- | --------- | ------------- | ------------ |
+| Service Owner | @team     | #team-channel | @team-oncall |
+| SRE           | @sre-team | #sre          | @sre-oncall  |
+| On-Call       | -         | #incidents    | @oncall      |
 
 ---
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | YYYY-MM-DD | [Author] | Initial version |
+| Version | Date       | Author   | Changes         |
+| ------- | ---------- | -------- | --------------- |
+| 0.1.0   | YYYY-MM-DD | [Author] | Initial version |
 
 ---
 
-*Review this runbook quarterly or after any P1 incident involving this service.*
+_Review this runbook quarterly or after any P1 incident involving this service._

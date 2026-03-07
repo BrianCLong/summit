@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const PRChainStepSchema = z.object({
   step: z.number().int(),
@@ -11,7 +11,7 @@ export const PRChainSchema = z.object({
   id: z.string(),
   goal: z.string(),
   steps: z.array(PRChainStepSchema),
-  verdict: z.enum(['success', 'failure', 'partial']),
+  verdict: z.enum(["success", "failure", "partial"]),
   metadata: z.record(z.any()).optional(),
 });
 

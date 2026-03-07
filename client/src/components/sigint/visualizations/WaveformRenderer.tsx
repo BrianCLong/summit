@@ -3,18 +3,8 @@
  * High-performance rendering for real-time SIGINT waveforms with spectrum
  * analysis and waterfall display capabilities.
  */
-import React, {
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-} from 'react';
-import type {
-  SignalSample,
-  WaveformRendererConfig,
-  PerformanceMetrics,
-} from '../types';
+import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import type { SignalSample, WaveformRendererConfig, PerformanceMetrics } from "../types";
 
 interface WaveformRendererProps {
   samples: SignalSample[];
@@ -26,9 +16,9 @@ interface WaveformRendererProps {
 const DEFAULT_CONFIG: WaveformRendererConfig = {
   width: 800,
   height: 400,
-  backgroundColor: '#0a0e14',
-  waveformColor: '#00ff88',
-  gridColor: '#1e2832',
+  backgroundColor: "#0a0e14",
+  waveformColor: "#00ff88",
+  gridColor: "#1e2832",
   fftSize: 2048,
   smoothing: 0.8,
   showGrid: true,
@@ -85,11 +75,7 @@ const WATERFALL_FRAGMENT_SHADER = `
   }
 `;
 
-function createShader(
-  gl: WebGLRenderingContext,
-  type: number,
-  source: string
-): WebGLShader | null {
+function createShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
   const shader = gl.createShader(type);
   if (!shader) return null;
 
@@ -97,7 +83,7 @@ function createShader(
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+    console.error("Shader compile error:", gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
     return null;
   }
@@ -118,7 +104,7 @@ function createProgram(
   gl.linkProgram(program);
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error('Program link error:', gl.getProgramInfoLog(program));
+    console.error("Program link error:", gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
     return null;
   }
@@ -143,10 +129,7 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
   const frameCountRef = useRef<number>(0);
   const fpsRef = useRef<number>(60);
 
-  const config = useMemo(
-    () => ({ ...DEFAULT_CONFIG, ...configOverrides }),
-    [configOverrides]
-  );
+  const config = useMemo(() => ({ ...DEFAULT_CONFIG, ...configOverrides }), [configOverrides]);
 
   const [dimensions, setDimensions] = useState({
     width: config.width,
@@ -158,13 +141,13 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return false;
 
-    const gl = canvas.getContext('webgl', {
+    const gl = canvas.getContext("webgl", {
       antialias: true,
       preserveDrawingBuffer: true,
     });
 
     if (!gl) {
-      console.error('WebGL not supported');
+      console.error("WebGL not supported");
       return false;
     }
 
@@ -231,11 +214,11 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
     gl.useProgram(program);
 
     // Set resolution uniform
-    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+    const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
     gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
 
     // Set color uniform
-    const colorLocation = gl.getUniformLocation(program, 'u_color');
+    const colorLocation = gl.getUniformLocation(program, "u_color");
     const waveColor = hexToRgb(config.waveformColor);
     gl.uniform3f(colorLocation, waveColor.r, waveColor.g, waveColor.b);
 
@@ -256,14 +239,14 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
     });
 
     // Upload position data
-    const positionLocation = gl.getAttribLocation(program, 'a_position');
+    const positionLocation = gl.getAttribLocation(program, "a_position");
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBufferRef.current);
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
     // Upload intensity data
-    const intensityLocation = gl.getAttribLocation(program, 'a_intensity');
+    const intensityLocation = gl.getAttribLocation(program, "a_intensity");
     gl.bindBuffer(gl.ARRAY_BUFFER, intensityBufferRef.current);
     gl.bufferData(gl.ARRAY_BUFFER, intensities, gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(intensityLocation);
@@ -303,7 +286,7 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
       cfg: WaveformRendererConfig
     ) => {
       const gridColor = hexToRgb(cfg.gridColor);
-      const colorLocation = gl.getUniformLocation(program, 'u_color');
+      const colorLocation = gl.getUniformLocation(program, "u_color");
       gl.uniform3f(colorLocation, gridColor.r, gridColor.g, gridColor.b);
 
       const gridLines: number[] = [];
@@ -325,12 +308,12 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
         gridIntensities.push(0.3, 0.3);
       }
 
-      const positionLocation = gl.getAttribLocation(program, 'a_position');
+      const positionLocation = gl.getAttribLocation(program, "a_position");
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBufferRef.current);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(gridLines), gl.STATIC_DRAW);
       gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-      const intensityLocation = gl.getAttribLocation(program, 'a_intensity');
+      const intensityLocation = gl.getAttribLocation(program, "a_intensity");
       gl.bindBuffer(gl.ARRAY_BUFFER, intensityBufferRef.current);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(gridIntensities), gl.STATIC_DRAW);
       gl.vertexAttribPointer(intensityLocation, 1, gl.FLOAT, false, 0, 0);
@@ -381,7 +364,7 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
   // Initialize and start rendering
   useEffect(() => {
     if (!initializeGL()) {
-      console.error('Failed to initialize WebGL');
+      console.error("Failed to initialize WebGL");
       return;
     }
 
@@ -403,11 +386,11 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
   }, [initializeGL, render]);
 
   return (
-    <div className={`relative w-full h-full min-h-[200px] ${className || ''}`}>
+    <div className={`relative w-full h-full min-h-[200px] ${className || ""}`}>
       <canvas
         ref={canvasRef}
         className="w-full h-full rounded-lg"
-        style={{ touchAction: 'none' }}
+        style={{ touchAction: "none" }}
       />
       {/* FPS indicator */}
       <div className="absolute top-2 right-2 text-xs font-mono text-green-400/70 bg-black/50 px-2 py-1 rounded">

@@ -4,7 +4,7 @@
 
 interface StatsParams {
   entityType?: string;
-  timeRange?: 'day' | 'week' | 'month' | 'year';
+  timeRange?: "day" | "week" | "month" | "year";
 }
 
 interface EntityStats {
@@ -19,7 +19,7 @@ interface EntityStats {
  * Get entity statistics from the graph
  */
 export async function getEntityStats(params: StatsParams): Promise<EntityStats> {
-  const { entityType, timeRange = 'week' } = params;
+  const { entityType, timeRange = "week" } = params;
 
   // In a real extension, this would query the actual API
   // For this example, we'll return mock data

@@ -108,14 +108,9 @@ make up
 
 ```graphql
 query SearchEntities {
-  search(query: {
-    query: "threat intelligence"
-    searchType: FULLTEXT
-    pagination: {
-      page: 1
-      size: 20
-    }
-  }) {
+  search(
+    query: { query: "threat intelligence", searchType: FULLTEXT, pagination: { page: 1, size: 20 } }
+  ) {
     results {
       id
       type
@@ -154,6 +149,7 @@ curl -X POST http://localhost:4000/api/search \
 Standard keyword-based search with fuzzy matching and synonym support.
 
 **Use Cases**:
+
 - Known keywords or phrases
 - Entity name lookups
 - Document searches
@@ -162,15 +158,17 @@ Standard keyword-based search with fuzzy matching and synonym support.
 
 ```graphql
 {
-  search(query: {
-    query: "cyber attack financial sector"
-    searchType: FULLTEXT
-    highlight: {
-      fields: ["title", "content", "description"]
-      fragmentSize: 150
-      numberOfFragments: 3
+  search(
+    query: {
+      query: "cyber attack financial sector"
+      searchType: FULLTEXT
+      highlight: {
+        fields: ["title", "content", "description"]
+        fragmentSize: 150
+        numberOfFragments: 3
+      }
     }
-  }) {
+  ) {
     results {
       id
       score
@@ -181,6 +179,7 @@ Standard keyword-based search with fuzzy matching and synonym support.
 ```
 
 **Features**:
+
 - Typo tolerance (up to 2 character differences)
 - Synonym expansion (e.g., "company" → "organization", "enterprise")
 - Stemming (e.g., "running" → "run")
@@ -194,6 +193,7 @@ Standard keyword-based search with fuzzy matching and synonym support.
 Vector-based search using embeddings for meaning similarity.
 
 **Use Cases**:
+
 - Conceptual searches
 - Finding similar entities
 - Cross-language queries (future)
@@ -202,10 +202,7 @@ Vector-based search using embeddings for meaning similarity.
 
 ```graphql
 {
-  search(query: {
-    query: "companies involved in data breaches"
-    searchType: SEMANTIC
-  }) {
+  search(query: { query: "companies involved in data breaches", searchType: SEMANTIC }) {
     results {
       id
       score
@@ -224,6 +221,7 @@ Vector-based search using embeddings for meaning similarity.
 Combines full-text and semantic search for best results.
 
 **Use Cases**:
+
 - Exploratory searches
 - Unknown entity types
 - Complex multi-faceted queries
@@ -258,6 +256,7 @@ Combines full-text and semantic search for best results.
 Approximate matching for typos and variations.
 
 **Use Cases**:
+
 - User input with potential misspellings
 - Name variations
 - OCR-extracted text
@@ -266,10 +265,12 @@ Approximate matching for typos and variations.
 
 ```graphql
 {
-  search(query: {
-    query: "organizaton" # typo intentional
-    searchType: FUZZY
-  }) {
+  search(
+    query: {
+      query: "organizaton" # typo intentional
+      searchType: FUZZY
+    }
+  ) {
     results {
       id
       source
@@ -294,39 +295,28 @@ Main search endpoint with full configuration options.
 
 ```graphql
 query AdvancedSearch {
-  search(query: {
-    query: "threat actor"
-    searchType: HYBRID
-    filters: {
-      entityTypes: ["person", "organization"]
-      dateRange: {
-        field: "createdAt"
-        from: "2024-01-01"
-        to: "2024-12-31"
+  search(
+    query: {
+      query: "threat actor"
+      searchType: HYBRID
+      filters: {
+        entityTypes: ["person", "organization"]
+        dateRange: { field: "createdAt", from: "2024-01-01", to: "2024-12-31" }
+        confidence: { min: 0.7, max: 1.0 }
+        tags: ["apt", "malware"]
       }
-      confidence: {
-        min: 0.7
-        max: 1.0
+      sort: { field: "createdAt", order: DESC }
+      pagination: { page: 1, size: 50 }
+      facets: ["entityTypes", "sources", "tags", "dateHistogram"]
+      highlight: {
+        fields: ["title", "content"]
+        fragmentSize: 200
+        numberOfFragments: 3
+        preTags: ["<mark>"]
+        postTags: ["</mark>"]
       }
-      tags: ["apt", "malware"]
     }
-    sort: {
-      field: "createdAt"
-      order: DESC
-    }
-    pagination: {
-      page: 1
-      size: 50
-    }
-    facets: ["entityTypes", "sources", "tags", "dateHistogram"]
-    highlight: {
-      fields: ["title", "content"]
-      fragmentSize: 200
-      numberOfFragments: 3
-      preTags: ["<mark>"]
-      postTags: ["</mark>"]
-    }
-  }) {
+  ) {
     results {
       id
       type
@@ -391,12 +381,7 @@ List user's saved searches.
 
 ```graphql
 query MySavedSearches {
-  savedSearches(
-    includePublic: true
-    tags: ["threat-intel"]
-    limit: 20
-    offset: 0
-  ) {
+  savedSearches(includePublic: true, tags: ["threat-intel"], limit: 20, offset: 0) {
     id
     name
     description
@@ -414,10 +399,7 @@ Get search analytics and performance metrics (admin only).
 
 ```graphql
 query SearchMetrics {
-  searchMetrics(
-    startDate: "2024-01-01"
-    endDate: "2024-12-31"
-  ) {
+  searchMetrics(startDate: "2024-01-01", endDate: "2024-12-31") {
     totalQueries
     avgExecutionTime
     successRate
@@ -453,10 +435,7 @@ mutation SaveSearch {
     description: "Critical threat indicators with high confidence"
     query: {
       query: "threat OR attack"
-      filters: {
-        confidence: { min: 0.9 }
-        entityTypes: ["threat"]
-      }
+      filters: { confidence: { min: 0.9 }, entityTypes: ["threat"] }
     }
     isPublic: false
     tags: ["security", "critical"]
@@ -493,11 +472,7 @@ Track when a user clicks on a search result (for analytics).
 
 ```graphql
 mutation TrackClick {
-  trackSearchClick(
-    queryId: "query_123"
-    resultId: "entity_456"
-    position: 2
-  )
+  trackSearchClick(queryId: "query_123", resultId: "entity_456", position: 2)
 }
 ```
 
@@ -572,6 +547,7 @@ curl "http://localhost:4000/api/search/saved?limit=20" \
 Facets provide aggregated counts for filtering.
 
 **Available Facets**:
+
 - `entityTypes`: Count by entity type
 - `sources`: Count by data source
 - `tags`: Count by tags
@@ -582,11 +558,10 @@ Facets provide aggregated counts for filtering.
 
 ```graphql
 {
-  search(query: {
-    query: "financial crime"
-    facets: ["entityTypes", "sources", "tags"]
-  }) {
-    results { id }
+  search(query: { query: "financial crime", facets: ["entityTypes", "sources", "tags"] }) {
+    results {
+      id
+    }
     facets
     # Returns:
     # {
@@ -610,16 +585,18 @@ Highlights matched terms in results.
 
 ```graphql
 {
-  search(query: {
-    query: "data breach"
-    highlight: {
-      fields: ["title", "content", "description"]
-      fragmentSize: 150
-      numberOfFragments: 3
-      preTags: ["<em class='highlight'>"]
-      postTags: ["</em>"]
+  search(
+    query: {
+      query: "data breach"
+      highlight: {
+        fields: ["title", "content", "description"]
+        fragmentSize: 150
+        numberOfFragments: 3
+        preTags: ["<em class='highlight'>"]
+        postTags: ["</em>"]
+      }
     }
-  }) {
+  ) {
     results {
       id
       highlight
@@ -658,6 +635,7 @@ Searching for "company" automatically includes results with "organization", "ent
 Automatic fuzzy matching handles typos.
 
 **Tolerance Levels**:
+
 - 1-2 chars: exact match only
 - 3-5 chars: 1 character difference
 - 6+ chars: 2 character differences
@@ -697,20 +675,20 @@ Adjust relevance scoring for specific fields or conditions.
 
 ```graphql
 {
-  search(query: {
-    query: "entity"
-    boost: {
-      functions: [
-        {
-          type: "field_value_factor"
-          field: "graphScore"
-          factor: 1.5
-          modifier: "log1p"
-        }
-      ]
+  search(
+    query: {
+      query: "entity"
+      boost: {
+        functions: [
+          { type: "field_value_factor", field: "graphScore", factor: 1.5, modifier: "log1p" }
+        ]
+      }
     }
-  }) {
-    results { id score }
+  ) {
+    results {
+      id
+      score
+    }
   }
 }
 ```
@@ -733,20 +711,22 @@ Filters are faster than query clauses. Use them to narrow results before complex
 ```graphql
 # Good
 {
-  search(query: {
-    query: "threat"
-    filters: {
-      entityTypes: ["threat"]
-      confidence: { min: 0.8 }
+  search(
+    query: { query: "threat", filters: { entityTypes: ["threat"], confidence: { min: 0.8 } } }
+  ) {
+    results {
+      id
     }
-  }) { results { id } }
+  }
 }
 
 # Less efficient
 {
-  search(query: {
-    query: "threat AND confidence:>0.8 AND type:threat"
-  }) { results { id } }
+  search(query: { query: "threat AND confidence:>0.8 AND type:threat" }) {
+    results {
+      id
+    }
+  }
 }
 ```
 
@@ -757,18 +737,20 @@ Large result sets impact performance. Use pagination.
 ```graphql
 # Good
 {
-  search(query: {
-    query: "attack"
-    pagination: { page: 1, size: 20 }
-  }) { results { id } }
+  search(query: { query: "attack", pagination: { page: 1, size: 20 } }) {
+    results {
+      id
+    }
+  }
 }
 
 # Bad - may timeout
 {
-  search(query: {
-    query: "attack"
-    pagination: { page: 1, size: 10000 }
-  }) { results { id } }
+  search(query: { query: "attack", pagination: { page: 1, size: 10000 } }) {
+    results {
+      id
+    }
+  }
 }
 ```
 
@@ -794,11 +776,7 @@ Always track clicks for relevance optimization.
 
 ```graphql
 mutation TrackClick {
-  trackSearchClick(
-    queryId: $queryId
-    resultId: $clickedResultId
-    position: $resultPosition
-  )
+  trackSearchClick(queryId: $queryId, resultId: $clickedResultId, position: $resultPosition)
 }
 ```
 
@@ -821,6 +799,7 @@ Add `_nocache` parameter or use fresh data mode.
 **Refresh Interval**: Indices refresh every 60 seconds (configurable).
 
 **Shard Configuration**:
+
 - Entities: 3 shards, 1 replica
 - Cases: 2 shards, 1 replica
 - Documents: 3 shards, 1 replica
@@ -842,6 +821,7 @@ Filters are cached and faster.
 ### No Results
 
 **Check**:
+
 1. Is indexing running? `curl http://localhost:9200/_cat/indices?v`
 2. Are entities indexed? Check index doc count
 3. Are filters too restrictive?
@@ -851,11 +831,9 @@ Filters are cached and faster.
 
 ```graphql
 {
-  search(query: {
-    query: "your query"
-  }) {
+  search(query: { query: "your query" }) {
     results {
-      explanation  # Shows scoring details
+      explanation # Shows scoring details
     }
   }
 }
@@ -864,11 +842,13 @@ Filters are cached and faster.
 ### Slow Queries
 
 **Check**:
+
 1. Search metrics: `searchMetrics` query
 2. Elasticsearch slow log: `/usr/share/elasticsearch/logs/`
 3. Query complexity: simplify filters and facets
 
 **Optimize**:
+
 - Reduce result size
 - Limit highlighted fields
 - Remove unnecessary facets

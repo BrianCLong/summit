@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 1.  Define what data can be used for training/fine-tuning (and who approves).
 2.  Implement dataset provenance tracking (source, license/rights, consent, retention).
 3.  Build “training data contracts” and approval workflow (internal + vendor).

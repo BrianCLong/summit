@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-import { buildDependencyRows, buildTimelineRows } from '../dataTransforms';
-import type { RetentionPlan } from '../types';
+import { buildDependencyRows, buildTimelineRows } from "../dataTransforms";
+import type { RetentionPlan } from "../types";
 
 export interface CsrsTimelineProps {
   plan: RetentionPlan;
@@ -9,13 +9,13 @@ export interface CsrsTimelineProps {
 
 const srOnlyStyle: React.CSSProperties = {
   border: 0,
-  clip: 'rect(0 0 0 0)',
-  height: '1px',
-  margin: '-1px',
-  overflow: 'hidden',
+  clip: "rect(0 0 0 0)",
+  height: "1px",
+  margin: "-1px",
+  overflow: "hidden",
   padding: 0,
-  position: 'absolute',
-  width: '1px',
+  position: "absolute",
+  width: "1px",
 };
 
 export const CsrsTimeline: React.FC<CsrsTimelineProps> = ({ plan }) => {
@@ -27,8 +27,8 @@ export const CsrsTimeline: React.FC<CsrsTimelineProps> = ({ plan }) => {
       <header>
         <h2>Consent-Scoped Retention Simulator</h2>
         <p>
-          Generated at <strong>{plan.generated_at}</strong> with late write slip{' '}
-          <strong>{plan.clock_shift.late_write_slip_days}d</strong> and backfill window{' '}
+          Generated at <strong>{plan.generated_at}</strong> with late write slip{" "}
+          <strong>{plan.clock_shift.late_write_slip_days}d</strong> and backfill window{" "}
           <strong>{plan.clock_shift.backfill_days}d</strong>.
         </p>
       </header>
@@ -59,7 +59,7 @@ export const CsrsTimeline: React.FC<CsrsTimelineProps> = ({ plan }) => {
                 <td>{row.lateWriteHorizon}</td>
                 <td>{row.backfillHorizon}</td>
                 <td>{formatRiskLabel(row.riskLevel)}</td>
-                <td>{row.blockers.join(', ') || 'None'}</td>
+                <td>{row.blockers.join(", ") || "None"}</td>
               </tr>
             ))}
           </tbody>
@@ -100,14 +100,14 @@ export const CsrsTimeline: React.FC<CsrsTimelineProps> = ({ plan }) => {
   );
 };
 
-function formatRiskLabel(level: 'ok' | 'elevated' | 'breach'): string {
+function formatRiskLabel(level: "ok" | "elevated" | "breach"): string {
   switch (level) {
-    case 'breach':
-      return 'Breach';
-    case 'elevated':
-      return 'Elevated';
+    case "breach":
+      return "Breach";
+    case "elevated":
+      return "Elevated";
     default:
-      return 'OK';
+      return "OK";
   }
 }
 

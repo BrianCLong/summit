@@ -62,18 +62,18 @@ Deliver **continuous autonomous operations** with enforced budgets/guardrails, a
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID       | Title                                                  | Owner          | Est | Dependencies | Acceptance Criteria (summary)                                |
-| -------- | ------------------------------------------------------ | -------------- | --: | ------------ | ------------------------------------------------------------ |
-| AUTO-201 | Playbook Scheduler & Triggers                          | Runtime        |   5 | —            | Alerts/cron/event triggers emit trigger receipt + simulation |
-| AUTO-202 | Playbook Budgets & Guardrails                          | Runtime        |   5 | AUTO-201     | Per-playbook budgets enforced; auto-disable rules active     |
-| AUTO-203 | Exception Routing to Switchboard                       | Runtime+Ops    |   3 | AUTO-201     | Approval tickets with evidence + rollback suggestions        |
-| TRUST-211| Weekly Trust Report Export (per tenant)                | Compliance     |   5 | —            | Report content scoped; delivery receipts emitted             |
-| TRUST-212| Delivery Adapters (bucket/link/webhook)                | Compliance     |   3 | TRUST-211    | All delivery modes supported; failure logging                |
-| POSTURE-221 | Provable Posture One-Pager + Appendix               | PM+TW+Sales    |   5 | —            | Claims mapped to artifacts; offline-verifiable evidence      |
-| POSTURE-222 | Enterprise Evaluation Kit                           | PM+Ops         |   3 | POSTURE-221  | 30-day plan with integrations, metrics, exit criteria        |
-| OBS-231  | Playbook Observability Dashboard & Alerts             | Observability  |   4 | AUTO-201     | Charts + alerts for runs/failures/budgets/time saved         |
-| QA-241   | Safety Regression Suite                                | QA+Security    |   4 | AUTO-202     | Covers injection, leakage, budgets, auto-disable             |
-| STRETCH-251 | Transparency Anchoring Enhancements *(Stretch)*     | Ledger         |   3 | TRUST-211    | Anchored proofs optional; exportable digests                 |
+| ID          | Title                                           | Owner         | Est | Dependencies | Acceptance Criteria (summary)                                |
+| ----------- | ----------------------------------------------- | ------------- | --: | ------------ | ------------------------------------------------------------ |
+| AUTO-201    | Playbook Scheduler & Triggers                   | Runtime       |   5 | —            | Alerts/cron/event triggers emit trigger receipt + simulation |
+| AUTO-202    | Playbook Budgets & Guardrails                   | Runtime       |   5 | AUTO-201     | Per-playbook budgets enforced; auto-disable rules active     |
+| AUTO-203    | Exception Routing to Switchboard                | Runtime+Ops   |   3 | AUTO-201     | Approval tickets with evidence + rollback suggestions        |
+| TRUST-211   | Weekly Trust Report Export (per tenant)         | Compliance    |   5 | —            | Report content scoped; delivery receipts emitted             |
+| TRUST-212   | Delivery Adapters (bucket/link/webhook)         | Compliance    |   3 | TRUST-211    | All delivery modes supported; failure logging                |
+| POSTURE-221 | Provable Posture One-Pager + Appendix           | PM+TW+Sales   |   5 | —            | Claims mapped to artifacts; offline-verifiable evidence      |
+| POSTURE-222 | Enterprise Evaluation Kit                       | PM+Ops        |   3 | POSTURE-221  | 30-day plan with integrations, metrics, exit criteria        |
+| OBS-231     | Playbook Observability Dashboard & Alerts       | Observability |   4 | AUTO-201     | Charts + alerts for runs/failures/budgets/time saved         |
+| QA-241      | Safety Regression Suite                         | QA+Security   |   4 | AUTO-202     | Covers injection, leakage, budgets, auto-disable             |
+| STRETCH-251 | Transparency Anchoring Enhancements _(Stretch)_ | Ledger        |   3 | TRUST-211    | Anchored proofs optional; exportable digests                 |
 
 > **Planned:** 37–40 pts core + 3 pt stretch.
 

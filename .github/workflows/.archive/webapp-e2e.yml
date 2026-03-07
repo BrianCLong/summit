@@ -3,8 +3,8 @@ name: Webapp E2E and Visual Regression
 on:
   pull_request:
     paths:
-      - 'apps/webapp/**'
-      - '.github/workflows/webapp-e2e.yml'
+      - "apps/webapp/**"
+      - ".github/workflows/webapp-e2e.yml"
 
 jobs:
   playwright:
@@ -17,8 +17,8 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.14.x'
-          cache: 'pnpm'
+          node-version: "20.14.x"
+          cache: "pnpm"
       - name: Install dependencies and browsers
         run: |
           corepack enable || true
@@ -52,8 +52,8 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.14.x'
-          cache: 'pnpm'
+          node-version: "20.14.x"
+          cache: "pnpm"
       - name: Install dependencies
         run: |
           corepack enable || true

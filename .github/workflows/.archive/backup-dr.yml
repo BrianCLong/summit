@@ -3,16 +3,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 on:
   schedule:
-    - cron: '0 2 * * *' # Daily at 2am UTC
+    - cron: "0 2 * * *" # Daily at 2am UTC
   workflow_dispatch:
     inputs:
       backup_set:
-        description: 'Backup Set'
+        description: "Backup Set"
         required: true
-        default: 'full'
+        default: "full"
         type: choice
         options:
           - full

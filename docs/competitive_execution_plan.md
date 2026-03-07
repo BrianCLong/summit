@@ -3,12 +3,14 @@
 This plan operationalizes competitive intelligence, switching-cost strategy, land-and-expand growth, pricing discipline, reliability, security, narrative operations, partner distribution, and legal readiness into a single program with accountable owners, cadences, and measurable outcomes.
 
 ## Guiding Principles
+
 - Evidence over conjecture: every claim must map to a source and verification path.
 - Safety first: no defamation, no scraping of restricted assets, and legal review on competitive language.
 - Product-led moats: reduce switching friction by making our product objectively better and faster to deploy.
 - Instrument everything: telemetry, audits, and review rituals are required for every stream.
 
 ## Program Governance
+
 - **Executive sponsor:** VP Product
 - **Program lead:** Head of Competitive Strategy
 - **Working group:** Product, Sales, Marketing, Security, Legal, Support, RevOps, and Data.
@@ -22,6 +24,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
   - Reliability/security: status page + monthly reliability/security releases.
 
 ## Epic 1 — Competitive Intelligence (Legally Clean)
+
 - **Competitor matrix:** Standardized template covering features, pricing, packaging, segments, claims, proof points, and verification status. Owners update weekly; PR review required for changes.
 - **Win/loss pipeline:** Mandatory CRM fields (competitor, segment, use case, objection, reason codes), tags for claims cited, and weekly review with Sales + Product.
 - **Customer verbatims:** Structured intake via form/API to data warehouse; anonymize where required; block hearsay uploads.
@@ -35,6 +38,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Competitive responses:** Ship at least one response per month with measured win-rate impact.
 
 ## Epic 2 — Switching Costs (Product-First)
+
 - **Importers:** Top three competitor importers (data + configs + history when available) with validation + parity diff reports.
 - **Compat mode:** Terminology/mapping layers per competitor; reversible toggles per workspace.
 - **Bulk tools:** Bulk edit/export/permissions/workflows with audit trails and rate limiting.
@@ -48,6 +52,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Metrics:** Measure time-to-migrate and retention lift per cohort; publish monthly.
 
 ## Epic 3 — Land and Expand
+
 - **Smallest viable footprint:** One-week “first value” package with starter template producing an executive artifact (report/export/dashboard).
 - **Workspaces:** Per-team spaces with clean boundaries, easy upgrades, and SCIM-ready seat expansion.
 - **Invite loops:** Role-aware invitations with collaboration ready-to-use; objection handling built into flows.
@@ -57,6 +62,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Playbook:** Expansion triggers → actions → messaging; track seats/modules/workflows per cohort.
 
 ## Epic 4 — Pricing as Strategy
+
 - **Market map:** Pricing/packaging map (tiers, limits, add-ons) with competitive bundles that simplify purchasing.
 - **Value metrics:** Define, meter, and audit value metrics; instrument leakage (over-grants/under-billing) with auto-remediation.
 - **Entitlements:** Single entitlement system; no hardcoded plan logic; guardrails for discount approvals and expirations.
@@ -65,6 +71,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Experiments:** Quarterly packaging experiments with holdouts and churn guardrails.
 
 ## Epic 5 — Reliability & Performance
+
 - **SLOs:** Define and publish SLOs for three critical journeys; tie error-budget spend to roadmap pacing.
 - **Synthetics:** End-to-end synthetic checks (including third-party dependencies) with progressive delivery + auto-rollback on SLO burn.
 - **Error remediation:** Fix top 20 customer-visible errors; self-heal tooling for retry/resync/reconnect with safeguards.
@@ -72,6 +79,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Status page:** Incident history, stable update cadence, and incident comms templates.
 
 ## Epic 6 — Trust, Security, and Procurement Velocity
+
 - **Access:** Centralize privileged access behind SSO/MFA; least-privilege IAM with quarterly reviews and auto-expiry.
 - **Audit & secrets:** Immutable admin-action logs; enforced secrets management and rotation with verification.
 - **Data protection:** PII redaction at ingestion for logs/analytics; SBOM + license scanning gates in CI.
@@ -80,6 +88,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Questionnaires:** Standard answers + automation to cut response time by 50%.
 
 ## Epic 7 — Narrative Ops
+
 - **Messaging:** Approved pillars (speed, trust, ROI, governance, ecosystem) with a claim ladder tied to evidence.
 - **Talk tracks:** Competitor-safe scripts; “Reliability/Security Releases” published like product launches.
 - **Product comms:** In-product “what’s new” tied to outcomes; cancellation reason codes fed back to roadmap.
@@ -87,6 +96,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Measurement:** Track win rate, sales-cycle time, and churn reasons; surface in the council.
 
 ## Epic 8 — Distribution via Partners
+
 - **Partner program:** Identify 10 high-leverage partners with tiering, benefits, and obligations.
 - **Integration standards:** Webhooks, retries, signatures, idempotency, versioning; adapter framework for new partners.
 - **Certification:** Partner sandbox with automated pass/fail tests; governance with allowlists, scopes, quotas, kill switches.
@@ -95,6 +105,7 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Deprecation:** Migrate bespoke partner hacks into standardized connectors.
 
 ## Epic 9 — Lawfare, But Legit
+
 - **IP & OSS:** IP ownership audit; OSS compliance with attribution and license policy enforced in CI.
 - **Trademarks & contracts:** Brand hygiene plan and standardized customer terms to reduce legal debt.
 - **Defamation-safe policy:** Rules for public statements; process for responding to competitor FUD with facts and proof.
@@ -103,12 +114,14 @@ This plan operationalizes competitive intelligence, switching-cost strategy, lan
 - **Legal review:** Quarterly legal-risk review with top exposures, shipped mitigations, and expired exceptions.
 
 ## Execution Controls
+
 - **Owner mapping:** Each deliverable has an accountable owner, due date, and success metric tracked in the PM system.
 - **Reviews:** Monthly council decisions captured as ADRs; battlecards and claim library require legal + product review before publication.
 - **Metrics dashboard:** Win rate, time-to-migrate, retention lift, p95 latency, SLO burn-down, discount leakage, questionnaire cycle time, partner retention, and churn reasons.
 - **Compliance:** All assets version-controlled with provenance; no speculative claims; all evidence tagged with source and verification date.
 
 ## Forward-Looking Enhancements
+
 - **State-of-the-art:** Add LLM-assisted evidence classification (source credibility scoring) with human-in-the-loop approval; guarded by PII redaction and rate limits.
 - **Automation:** Auto-generate differential battlecards when competitor release cadence shifts; trigger proactive responses tied to roadmap deltas.
 - **Observability:** Correlate competitive wins/losses with reliability/security SLO trends to prioritize investments.

@@ -3,11 +3,11 @@ name: Dependency Complexity Guardrail
 on:
   pull_request:
     paths:
-      - 'scripts/**'
-      - 'services/**'
-      - 'docker-compose*.yml'
-      - '.github/workflows/**'
-      - 'docs/architecture/**'
+      - "scripts/**"
+      - "services/**"
+      - "docker-compose*.yml"
+      - ".github/workflows/**"
+      - "docs/architecture/**"
 
 jobs:
   dependency-graph:

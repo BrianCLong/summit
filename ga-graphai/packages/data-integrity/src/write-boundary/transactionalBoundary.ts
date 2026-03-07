@@ -28,7 +28,7 @@ export class InMemoryIntentStore implements IntentStore {
 
   async listPending(before: number): Promise<IntentRecord[]> {
     return Array.from(this.intents.values()).filter(
-      (intent) => !intent.completed && intent.createdAt <= before,
+      (intent) => !intent.completed && intent.createdAt <= before
     );
   }
 }
@@ -40,9 +40,15 @@ export interface TransactionAdapter {
 }
 
 export class TransactionalBoundary {
-  constructor(private readonly adapter: TransactionAdapter, private readonly intents: IntentStore) {}
+  constructor(
+    private readonly adapter: TransactionAdapter,
+    private readonly intents: IntentStore
+  ) {}
 
-  async execute<T>(options: { id: string; scope: string; ttlMs: number }, work: () => Promise<T>): Promise<T> {
+  async execute<T>(
+    options: { id: string; scope: string; ttlMs: number },
+    work: () => Promise<T>
+  ): Promise<T> {
     await this.adapter.begin();
     await this.intents.saveIntent({
       id: options.id,

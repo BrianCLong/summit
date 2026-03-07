@@ -1,0 +1,32 @@
+{
+  "$id": "https://summit.local/schemas/evidence/raw-acquisition.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Raw Acquisition Envelope",
+  "type": "object",
+  "properties": {
+    "acquisition_id": { "type": "string" },
+    "connector_id": { "type": "string" },
+    "target": { "type": "string" },
+    "payload_hash": { "type": "string" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "policy_context": {
+      "type": "object",
+      "properties": {
+        "applied_policy": { "type": "string" },
+        "license_class": { "type": "string" }
+      },
+      "required": ["applied_policy", "license_class"]
+    }
+  },
+  "required": [
+    "acquisition_id",
+    "connector_id",
+    "target",
+    "payload_hash",
+    "payload",
+    "policy_context"
+  ]
+}

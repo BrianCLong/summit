@@ -9,17 +9,20 @@ This document outlines Summit's strategic shift to a **Model Context Protocol (M
 The MCP architecture consists of three core capability layers:
 
 ### 1. Runtime & Discovery (`packages/mcp-runtime`)
+
 - **Tool Registry:** Centralized directory of available MCP servers.
 - **Server Discovery:** Dynamic resolution of server endpoints.
 - **Client Wrappers:** Standardized JSON-RPC clients for agents.
 - **Context Injection:** Hooks for safely injecting deterministic context.
 
 ### 2. Context Engineering (`packages/context-kit`)
+
 - **Context Envelopes:** Standardized schema `{version, actor, run_id, inputs, outputs, refs}`.
 - **Determinism:** Canonical JSON serialization and stable key ordering to ensure reproducible agent runs.
 - **Schema Validation:** Strict runtime checking of context payloads.
 
 ### 3. Server Adapters (`packages/mcp-servers`)
+
 - **Internal Tools:** Adapters for existing Summit APIs (Graph, Evidence, Governance).
 - **External Gateways:** Secure proxies for 3rd party APIs.
 - **Security Boundaries:** Enforced permission scopes per server.
@@ -27,19 +30,22 @@ The MCP architecture consists of three core capability layers:
 ## Adoption Plan
 
 ### Phase 1: Scaffolding & Governance (Current)
+
 - Establish the `mcp-runtime` and `context-kit`.
 - Define security controls and threat models.
 - Create pilot templates for high-value agents (Governance, Evidence).
 
 ### Phase 2: Pilot Implementation
+
 - Deploy `governance-agent` using MCP to audit PRs.
 - Deploy `evidence-agent` to collect compliance artifacts.
 - Validate deterministic context behaviors in CI.
 
 ### Phase 3: Legacy Migration
+
 - Wrap existing `server/*` services with MCP adapters.
 - Deprecate direct API calls from agents in favor of MCP tool use.
-- Enforce strict boundaries: Agents *only* speak MCP.
+- Enforce strict boundaries: Agents _only_ speak MCP.
 
 ## Migration Phases
 

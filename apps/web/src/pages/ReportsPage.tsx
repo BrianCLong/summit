@@ -75,7 +75,8 @@ const generateMockReports = (): Report[] => [
   {
     id: 'report-2',
     title: 'Phishing Campaign Threat Assessment',
-    description: 'Analysis of ongoing phishing campaign targeting financial sector',
+    description:
+      'Analysis of ongoing phishing campaign targeting financial sector',
     status: 'draft',
     classification: 'confidential',
     caseId: 'case-2',
@@ -103,17 +104,21 @@ const generateMockReports = (): Report[] => [
 ]
 
 const CLASSIFICATION_COLORS = {
-  'unclassified': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  'confidential': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  'secret': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  unclassified:
+    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  confidential:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  secret:
+    'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   'top-secret': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 }
 
 const STATUS_COLORS = {
-  'draft': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-  'review': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  'approved': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  'published': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+  review: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  published:
+    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
 }
 
 export default function ReportsPage() {
@@ -145,7 +150,9 @@ export default function ReportsPage() {
   const handleExportPDF = (report: Report) => {
     console.log('Exporting report to PDF:', report.id)
     // In a real implementation, this would call the backend PDF generation API
-    alert(`Generating PDF for "${report.title}". This will call the backend PDF service.`)
+    alert(
+      `Generating PDF for "${report.title}". This will call the backend PDF service.`
+    )
   }
 
   const handleCreateReport = () => {
@@ -168,7 +175,9 @@ export default function ReportsPage() {
           {/* Report Metadata */}
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium block mb-1">Report Title</label>
+              <label className="text-sm font-medium block mb-1">
+                Report Title
+              </label>
               <input
                 type="text"
                 placeholder="e.g., APT Campaign Analysis - Q4 2025"
@@ -176,7 +185,9 @@ export default function ReportsPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium block mb-1">Description</label>
+              <label className="text-sm font-medium block mb-1">
+                Description
+              </label>
               <textarea
                 placeholder="Brief overview of the report content..."
                 className="w-full px-3 py-2 rounded-md border border-input bg-background min-h-[80px] resize-none"
@@ -184,7 +195,9 @@ export default function ReportsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium block mb-1">Classification</label>
+                <label className="text-sm font-medium block mb-1">
+                  Classification
+                </label>
                 <select className="w-full px-3 py-2 rounded-md border border-input bg-background">
                   <option value="unclassified">Unclassified</option>
                   <option value="confidential">Confidential</option>
@@ -193,11 +206,17 @@ export default function ReportsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium block mb-1">Link to Case (Optional)</label>
+                <label className="text-sm font-medium block mb-1">
+                  Link to Case (Optional)
+                </label>
                 <select className="w-full px-3 py-2 rounded-md border border-input bg-background">
                   <option value="">None</option>
-                  <option value="case-1">APT Group Infrastructure Analysis</option>
-                  <option value="case-2">Phishing Campaign Investigation</option>
+                  <option value="case-1">
+                    APT Group Infrastructure Analysis
+                  </option>
+                  <option value="case-2">
+                    Phishing Campaign Investigation
+                  </option>
                 </select>
               </div>
             </div>
@@ -224,14 +243,18 @@ export default function ReportsPage() {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium">2. Key Findings</h4>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-800"
+                    >
                       <MessageSquare className="h-3 w-3 mr-1" />
                       AI-Generated
                     </Badge>
                   </div>
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 mb-2">
                     <p className="text-sm italic text-muted-foreground">
-                      AI Copilot will generate findings based on case data with inline citations.
+                      AI Copilot will generate findings based on case data with
+                      inline citations.
                     </p>
                   </div>
                   <Button variant="outline" size="sm">
@@ -244,8 +267,13 @@ export default function ReportsPage() {
               <Card className="bg-muted/30">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium">3. Threat Actor Infrastructure</h4>
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    <h4 className="font-medium">
+                      3. Threat Actor Infrastructure
+                    </h4>
+                    <Badge
+                      variant="secondary"
+                      className="bg-purple-100 text-purple-800"
+                    >
                       <Image className="h-3 w-3 mr-1" />
                       Snapshot
                     </Badge>
@@ -253,7 +281,9 @@ export default function ReportsPage() {
                   <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md p-4 mb-2 flex items-center justify-center">
                     <div className="text-center">
                       <Image className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Graph snapshot will be embedded here</p>
+                      <p className="text-sm text-muted-foreground">
+                        Graph snapshot will be embedded here
+                      </p>
                     </div>
                   </div>
                   <Button variant="outline" size="sm">
@@ -290,7 +320,10 @@ export default function ReportsPage() {
               <Button variant="outline">Request Review</Button>
             </div>
             <div className="space-x-2">
-              <Button variant="outline" onClick={() => alert('Exporting to HTML...')}>
+              <Button
+                variant="outline"
+                onClick={() => alert('Exporting to HTML...')}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export HTML
               </Button>
@@ -312,7 +345,8 @@ export default function ReportsPage() {
         <div>
           <h1 className="text-3xl font-bold">Intelligence Reports</h1>
           <p className="text-muted-foreground mt-1">
-            Create, manage, and export intelligence reports and briefing documents
+            Create, manage, and export intelligence reports and briefing
+            documents
           </p>
         </div>
         <Button onClick={handleCreateReport} className="gap-2">
@@ -361,22 +395,25 @@ export default function ReportsPage() {
       ) : (
         <div className="grid gap-4">
           {filteredReports.map(report => (
-            <Card
-              key={report.id}
-              className="hover:shadow-md transition-shadow"
-            >
+            <Card key={report.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-start gap-3 mb-3">
                       <FileText className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-2">{report.title}</h3>
+                        <h3 className="text-lg font-semibold mb-2">
+                          {report.title}
+                        </h3>
                         <div className="flex flex-wrap gap-2 mb-3">
                           <Badge className={STATUS_COLORS[report.status]}>
                             {report.status}
                           </Badge>
-                          <Badge className={CLASSIFICATION_COLORS[report.classification]}>
+                          <Badge
+                            className={
+                              CLASSIFICATION_COLORS[report.classification]
+                            }
+                          >
                             {report.classification.toUpperCase()}
                           </Badge>
                           {report.caseName && (
@@ -396,7 +433,8 @@ export default function ReportsPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            Updated {new Date(report.updatedAt).toLocaleDateString()}
+                            Updated{' '}
+                            {new Date(report.updatedAt).toLocaleDateString()}
                           </div>
                           <div className="flex items-center gap-2">
                             <span>{report.sectionCount} sections</span>

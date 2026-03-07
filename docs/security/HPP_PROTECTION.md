@@ -5,6 +5,7 @@
 This document details the implementation of **HTTP Parameter Pollution (HPP)** protection in the IntelGraph Server.
 
 **HTTP Parameter Pollution** is a web attack where an attacker sends multiple HTTP parameters with the same name. If the application does not handle this correctly, it can lead to:
+
 - Bypassing input validation (e.g., WAFs).
 - Unexpected application behavior (e.g., retrieving the wrong user record).
 - Type errors (receiving an array instead of a string).
@@ -22,7 +23,7 @@ It is placed **after** the body parser and **before** the application routes to 
 In `server/src/app.ts`:
 
 ```typescript
-import hpp from 'hpp';
+import hpp from "hpp";
 
 // ... other imports and setup
 
@@ -71,13 +72,15 @@ console.log(req.query.category);
 
 If specific endpoints require array input for query parameters, `hpp` can be configured to whitelist specific keys.
 
-*Note: Currently, we use the default configuration which enforces single values for all parameters. If array support is needed, the middleware configuration in `app.ts` needs to be updated:*
+_Note: Currently, we use the default configuration which enforces single values for all parameters. If array support is needed, the middleware configuration in `app.ts` needs to be updated:_
 
 ```typescript
 // Example of allowing arrays for 'ids'
-app.use(hpp({
-  whitelist: [ 'ids' ]
-}));
+app.use(
+  hpp({
+    whitelist: ["ids"],
+  })
+);
 ```
 
 ## Testing Instructions
@@ -85,6 +88,7 @@ app.use(hpp({
 You can verify the protection using `curl` or any HTTP client.
 
 ### Prerequisites
+
 - Ensure the server is running (`pnpm start` or `pnpm dev` in `server/`).
 
 ### Test Case: Duplicate Query Parameters
@@ -95,11 +99,11 @@ You can verify the protection using `curl` or any HTTP client.
    curl -v "http://localhost:4000/health?test=1&test=2"
    ```
 
-2.  **Verify Server Behavior:**
-    - Without HPP: The application might process `['1', '2']`.
-    - With HPP: The application processes `'2'`.
+2. **Verify Server Behavior:**
+   - Without HPP: The application might process `['1', '2']`.
+   - With HPP: The application processes `'2'`.
 
-    *Note: Since `/health` might not echo parameters back, you may need to observe logs or use an endpoint that reflects input if available. For development verification, you can add a temporary log in a route.*
+   _Note: Since `/health` might not echo parameters back, you may need to observe logs or use an endpoint that reflects input if available. For development verification, you can add a temporary log in a route._
 
 ### Automated Verification
 
@@ -107,9 +111,9 @@ We have verified this implementation by ensuring the middleware is loaded. In a 
 
 ```typescript
 // Example Test Assertion
-it('should flatten duplicate query parameters', async () => {
-  const res = await request(app).get('/test?param=a&param=b');
+it("should flatten duplicate query parameters", async () => {
+  const res = await request(app).get("/test?param=a&param=b");
   // Expecting the last value
-  expect(res.body.query.param).toBe('b');
+  expect(res.body.query.param).toBe("b");
 });
 ```

@@ -2,8 +2,8 @@
  * Document Lifecycle Type Definitions
  */
 
-import { z } from 'zod';
-import { LifecycleTypeSchema } from './document.js';
+import { z } from "zod";
+import { LifecycleTypeSchema } from "./document.js";
 
 // Lifecycle State Schema
 export const LifecycleStateSchema = z.object({
@@ -22,11 +22,15 @@ export const LifecycleTransitionSchema = z.object({
   requires_approval: z.boolean().default(false),
   approvers: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  conditions: z.array(z.object({
-    field: z.string(),
-    operator: z.enum(['equals', 'not_equals', 'contains', 'exists', 'not_exists']),
-    value: z.any().optional(),
-  })).optional(),
+  conditions: z
+    .array(
+      z.object({
+        field: z.string(),
+        operator: z.enum(["equals", "not_equals", "contains", "exists", "not_exists"]),
+        value: z.any().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type LifecycleTransition = z.infer<typeof LifecycleTransitionSchema>;
@@ -76,7 +80,7 @@ export const ApprovalRequestSchema = z.object({
   requested_by: z.string(),
   requested_at: z.string().datetime(),
   approvers: z.array(z.string()),
-  status: z.enum(['pending', 'approved', 'rejected', 'expired', 'cancelled']),
+  status: z.enum(["pending", "approved", "rejected", "expired", "cancelled"]),
   comment: z.string().optional(),
   metadata: z.record(z.string(), z.any()).optional(),
 });
@@ -88,7 +92,7 @@ export const ApprovalDecisionSchema = z.object({
   id: z.string().uuid(),
   approval_request_id: z.string().uuid(),
   approver_id: z.string(),
-  decision: z.enum(['approved', 'rejected']),
+  decision: z.enum(["approved", "rejected"]),
   comment: z.string().optional(),
   decided_at: z.string().datetime(),
 });
@@ -101,7 +105,7 @@ export const LifecycleHistoryEntrySchema = z.object({
   document_id: z.string().uuid(),
   previous_state: z.string().nullable(),
   new_state: z.string(),
-  transition_type: z.enum(['manual', 'automatic', 'approval']),
+  transition_type: z.enum(["manual", "automatic", "approval"]),
   triggered_by: z.string(),
   triggered_at: z.string().datetime(),
   approval_request_id: z.string().uuid().optional(),
@@ -115,12 +119,14 @@ export type LifecycleHistoryEntry = z.infer<typeof LifecycleHistoryEntrySchema>;
 export const AvailableTransitionsSchema = z.object({
   document_id: z.string().uuid(),
   current_state: z.string(),
-  available_transitions: z.array(z.object({
-    target_state: z.string(),
-    requires_approval: z.boolean(),
-    approvers: z.array(z.string()).optional(),
-    notes: z.string().optional(),
-  })),
+  available_transitions: z.array(
+    z.object({
+      target_state: z.string(),
+      requires_approval: z.boolean(),
+      approvers: z.array(z.string()).optional(),
+      notes: z.string().optional(),
+    })
+  ),
 });
 
 export type AvailableTransitions = z.infer<typeof AvailableTransitionsSchema>;

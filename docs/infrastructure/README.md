@@ -7,6 +7,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### Issue #11814 - API Documentation with OpenAPI/Swagger ✅
 
 **Implementation:**
+
 - OpenAPI 3.0 specification at `/openapi/spec.yaml`
 - Swagger UI at `/api/docs`
 - ReDoc at `/api/docs/redoc`
@@ -15,6 +16,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Comprehensive tests
 
 **Key Files:**
+
 - `/server/src/routes/api-docs.ts` - Documentation routes
 - `/openapi/spec.yaml` - OpenAPI specification
 - `/scripts/generate-sdk.sh` - SDK generation script
@@ -27,6 +29,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### Issue #11813 - Structured Logging with ELK/OpenTelemetry ✅
 
 **Implementation:**
+
 - Enhanced Winston logger with structured logging
 - Correlation ID middleware
 - OpenTelemetry integration (existing)
@@ -35,6 +38,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Performance and audit logging helpers
 
 **Key Files:**
+
 - `/server/src/utils/logger.ts` - Enhanced logging configuration
 - `/server/src/middleware/correlation-id.ts` - Correlation tracking
 - `/docker-compose.logging.yml` - ELK stack configuration
@@ -48,6 +52,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### Issue #11812 - Job Queue with Bull and Redis ✅
 
 **Implementation:**
+
 - Centralized BullMQ queue configuration
 - Bull Board dashboard at `/queues`
 - Example job processors with retry logic
@@ -56,6 +61,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Comprehensive error handling
 
 **Key Files:**
+
 - `/server/src/queues/config.ts` - Queue configuration
 - `/server/src/routes/queues-dashboard.ts` - Bull Board integration
 - `/server/src/queues/processors/emailProcessor.ts` - Example processor
@@ -203,6 +209,7 @@ await addJob(QueueName.EMAIL, 'test', { message: 'Test' });
 ## Support
 
 For questions or issues:
+
 - See individual documentation files in this directory
 - Check `/docs` for platform documentation
 - Review code examples in `/server/src`

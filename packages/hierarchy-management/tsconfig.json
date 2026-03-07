@@ -6,8 +6,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true
-    ,"allowImportingTsExtensions": false,
+    "composite": true,
+    "allowImportingTsExtensions": false,
     "types": []
   },
   "include": ["src/**/*"],

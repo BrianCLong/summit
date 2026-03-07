@@ -3,23 +3,23 @@
  * Supports multiple CDC strategies for capturing data changes
  */
 
-import { EventEmitter } from 'events';
-import { Logger } from 'winston';
-import { Pool, PoolClient } from 'pg';
+import { EventEmitter } from "events";
+import { Logger } from "winston";
+import { Pool, PoolClient } from "pg";
 
 export enum CDCStrategy {
-  TIMESTAMP = 'timestamp', // Last modified timestamp
-  VERSION = 'version', // Version number/sequence
-  TRIGGER = 'trigger', // Database triggers
-  LOG_BASED = 'log_based', // Transaction log parsing (WAL, binlog, etc.)
-  DIFF = 'diff', // Full scan + diff
-  HYBRID = 'hybrid' // Combination of strategies
+  TIMESTAMP = "timestamp", // Last modified timestamp
+  VERSION = "version", // Version number/sequence
+  TRIGGER = "trigger", // Database triggers
+  LOG_BASED = "log_based", // Transaction log parsing (WAL, binlog, etc.)
+  DIFF = "diff", // Full scan + diff
+  HYBRID = "hybrid", // Combination of strategies
 }
 
 export enum ChangeType {
-  INSERT = 'INSERT',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE'
+  INSERT = "INSERT",
+  UPDATE = "UPDATE",
+  DELETE = "DELETE",
 }
 
 export interface CDCConfig {
@@ -71,7 +71,7 @@ export class CDCEngine extends EventEmitter {
 
   async connect(connectionString: string): Promise<void> {
     this.pool = new Pool({ connectionString });
-    this.logger.info('CDC Engine connected to source database');
+    this.logger.info("CDC Engine connected to source database");
   }
 
   async disconnect(): Promise<void> {
@@ -86,7 +86,7 @@ export class CDCEngine extends EventEmitter {
     }
 
     this.isRunning = false;
-    this.logger.info('CDC Engine disconnected');
+    this.logger.info("CDC Engine disconnected");
   }
 
   /**
@@ -94,11 +94,11 @@ export class CDCEngine extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      throw new Error('CDC Engine is already running');
+      throw new Error("CDC Engine is already running");
     }
 
     if (!this.pool) {
-      throw new Error('CDC Engine not connected. Call connect() first.');
+      throw new Error("CDC Engine not connected. Call connect() first.");
     }
 
     this.isRunning = true;
@@ -134,7 +134,7 @@ export class CDCEngine extends EventEmitter {
       this.pollInterval = null;
     }
 
-    this.logger.info('CDC Engine stopped');
+    this.logger.info("CDC Engine stopped");
   }
 
   /**
@@ -147,8 +147,8 @@ export class CDCEngine extends EventEmitter {
       try {
         await this.captureTimestampChanges();
       } catch (error) {
-        this.logger.error('Error capturing timestamp changes', { error });
-        this.emit('error', error);
+        this.logger.error("Error capturing timestamp changes", { error });
+        this.emit("error", error);
       }
     }, pollIntervalMs);
 
@@ -157,17 +157,19 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async captureTimestampChanges(): Promise<void> {
-    if (!this.pool) {return;}
+    if (!this.pool) {
+      return;
+    }
 
     const client = await this.pool.connect();
 
     try {
       // Get last watermark
       const watermark = await this.getWatermark(client);
-      const lastValue = watermark?.lastProcessedValue || new Date('1970-01-01');
+      const lastValue = watermark?.lastProcessedValue || new Date("1970-01-01");
 
       const tableName = this.getFullTableName();
-      const trackingColumn = this.config.trackingColumn || 'updated_at';
+      const trackingColumn = this.config.trackingColumn || "updated_at";
       const batchSize = this.config.batchSize || 1000;
 
       // Query for changes since last watermark
@@ -186,7 +188,7 @@ export class CDCEngine extends EventEmitter {
       }
 
       // Convert to CDC records
-      const cdcRecords: CDCRecord[] = result.rows.map(row => ({
+      const cdcRecords: CDCRecord[] = result.rows.map((row) => ({
         changeType: ChangeType.UPDATE, // Timestamp-based can't distinguish INSERT from UPDATE
         tableName: this.config.sourceTable,
         primaryKeyValues: this.extractPrimaryKeys(row),
@@ -194,12 +196,12 @@ export class CDCEngine extends EventEmitter {
         changeTimestamp: row[trackingColumn],
         metadata: {
           strategy: CDCStrategy.TIMESTAMP,
-          trackingColumn
-        }
+          trackingColumn,
+        },
       }));
 
       // Emit changes
-      this.emit('changes', cdcRecords);
+      this.emit("changes", cdcRecords);
 
       // Update watermark
       const maxTimestamp = result.rows[result.rows.length - 1][trackingColumn];
@@ -221,8 +223,8 @@ export class CDCEngine extends EventEmitter {
       try {
         await this.captureVersionChanges();
       } catch (error) {
-        this.logger.error('Error capturing version changes', { error });
-        this.emit('error', error);
+        this.logger.error("Error capturing version changes", { error });
+        this.emit("error", error);
       }
     }, pollIntervalMs);
 
@@ -230,7 +232,9 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async captureVersionChanges(): Promise<void> {
-    if (!this.pool) {return;}
+    if (!this.pool) {
+      return;
+    }
 
     const client = await this.pool.connect();
 
@@ -239,7 +243,7 @@ export class CDCEngine extends EventEmitter {
       const lastVersion = watermark?.lastProcessedValue || 0;
 
       const tableName = this.getFullTableName();
-      const versionColumn = this.config.trackingColumn || 'version';
+      const versionColumn = this.config.trackingColumn || "version";
       const batchSize = this.config.batchSize || 1000;
 
       const query = `
@@ -256,7 +260,7 @@ export class CDCEngine extends EventEmitter {
         return;
       }
 
-      const cdcRecords: CDCRecord[] = result.rows.map(row => ({
+      const cdcRecords: CDCRecord[] = result.rows.map((row) => ({
         changeType: ChangeType.UPDATE,
         tableName: this.config.sourceTable,
         primaryKeyValues: this.extractPrimaryKeys(row),
@@ -265,11 +269,11 @@ export class CDCEngine extends EventEmitter {
         sequence: row[versionColumn],
         metadata: {
           strategy: CDCStrategy.VERSION,
-          versionColumn
-        }
+          versionColumn,
+        },
       }));
 
-      this.emit('changes', cdcRecords);
+      this.emit("changes", cdcRecords);
 
       const maxVersion = result.rows[result.rows.length - 1][versionColumn];
       await this.updateWatermark(client, maxVersion);
@@ -293,8 +297,8 @@ export class CDCEngine extends EventEmitter {
       try {
         await this.captureTriggerChanges();
       } catch (error) {
-        this.logger.error('Error capturing trigger changes', { error });
-        this.emit('error', error);
+        this.logger.error("Error capturing trigger changes", { error });
+        this.emit("error", error);
       }
     }, pollIntervalMs);
 
@@ -302,7 +306,9 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async setupTriggerCDC(): Promise<void> {
-    if (!this.pool) {return;}
+    if (!this.pool) {
+      return;
+    }
 
     const client = await this.pool.connect();
 
@@ -355,14 +361,16 @@ export class CDCEngine extends EventEmitter {
         FOR EACH ROW EXECUTE FUNCTION ${this.config.sourceTable}_change_trigger();
       `);
 
-      this.logger.info('Trigger-based CDC setup completed');
+      this.logger.info("Trigger-based CDC setup completed");
     } finally {
       client.release();
     }
   }
 
   private async captureTriggerChanges(): Promise<void> {
-    if (!this.pool) {return;}
+    if (!this.pool) {
+      return;
+    }
 
     const client = await this.pool.connect();
 
@@ -386,7 +394,7 @@ export class CDCEngine extends EventEmitter {
         return;
       }
 
-      const cdcRecords: CDCRecord[] = result.rows.map(row => ({
+      const cdcRecords: CDCRecord[] = result.rows.map((row) => ({
         changeType: row.operation as ChangeType,
         tableName: row.table_name,
         primaryKeyValues: row.primary_key_values,
@@ -396,11 +404,11 @@ export class CDCEngine extends EventEmitter {
         transactionId: row.transaction_id?.toString(),
         metadata: {
           strategy: CDCStrategy.TRIGGER,
-          changeId: row.change_id
-        }
+          changeId: row.change_id,
+        },
       }));
 
-      this.emit('changes', cdcRecords);
+      this.emit("changes", cdcRecords);
 
       const maxChangeId = result.rows[result.rows.length - 1].change_id;
       await this.updateWatermark(client, maxChangeId);
@@ -416,8 +424,8 @@ export class CDCEngine extends EventEmitter {
    */
   private async startLogBasedCDC(): Promise<void> {
     // This would integrate with logical replication slots or external tools like Debezium
-    this.logger.warn('Log-based CDC requires external tools like Debezium or logical replication');
-    throw new Error('Log-based CDC not yet implemented - use Debezium or logical replication');
+    this.logger.warn("Log-based CDC requires external tools like Debezium or logical replication");
+    throw new Error("Log-based CDC not yet implemented - use Debezium or logical replication");
   }
 
   /**
@@ -430,8 +438,8 @@ export class CDCEngine extends EventEmitter {
       try {
         await this.captureDiffChanges();
       } catch (error) {
-        this.logger.error('Error capturing diff changes', { error });
-        this.emit('error', error);
+        this.logger.error("Error capturing diff changes", { error });
+        this.emit("error", error);
       }
     }, pollIntervalMs);
 
@@ -441,7 +449,7 @@ export class CDCEngine extends EventEmitter {
   private async captureDiffChanges(): Promise<void> {
     // This would require storing snapshots and comparing them
     // Complex implementation - typically used only when other methods aren't available
-    this.logger.info('Diff-based CDC - taking snapshot for comparison');
+    this.logger.info("Diff-based CDC - taking snapshot for comparison");
     // Placeholder implementation
   }
 
@@ -449,7 +457,7 @@ export class CDCEngine extends EventEmitter {
    * Get current watermark from tracking table
    */
   private async getWatermark(client: PoolClient): Promise<CDCWatermark | null> {
-    const watermarkTable = this.config.watermarkTable || 'etl_cdc_watermarks';
+    const watermarkTable = this.config.watermarkTable || "etl_cdc_watermarks";
 
     try {
       const result = await client.query(
@@ -467,7 +475,7 @@ export class CDCEngine extends EventEmitter {
         lastProcessedValue: row.last_processed_value,
         lastProcessedTime: row.last_processed_time,
         strategy: row.strategy,
-        metadata: row.metadata
+        metadata: row.metadata,
       };
     } catch (error) {
       // Table might not exist yet
@@ -480,7 +488,7 @@ export class CDCEngine extends EventEmitter {
    * Update watermark after processing changes
    */
   private async updateWatermark(client: PoolClient, value: any): Promise<void> {
-    const watermarkTable = this.config.watermarkTable || 'etl_cdc_watermarks';
+    const watermarkTable = this.config.watermarkTable || "etl_cdc_watermarks";
 
     await client.query(
       `INSERT INTO ${watermarkTable} (source_table, last_processed_value, last_processed_time, strategy)
@@ -493,7 +501,7 @@ export class CDCEngine extends EventEmitter {
    * Create watermark tracking table
    */
   private async createWatermarkTable(client: PoolClient): Promise<void> {
-    const watermarkTable = this.config.watermarkTable || 'etl_cdc_watermarks';
+    const watermarkTable = this.config.watermarkTable || "etl_cdc_watermarks";
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS ${watermarkTable} (

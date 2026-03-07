@@ -20,8 +20,8 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'High error-budget burn (5m & 1h) on IntelGraph'
-          description: 'Burn rate > 1 against 99.95% SLO in both 5m and 1h windows. Tenant={{ $labels.tenant }}'
+          summary: "High error-budget burn (5m & 1h) on IntelGraph"
+          description: "Burn rate > 1 against 99.95% SLO in both 5m and 1h windows. Tenant={{ $labels.tenant }}"
 
       - alert: ModerateErrorBudgetBurn
         expr: |
@@ -42,8 +42,8 @@ groups:
         labels:
           severity: ticket
         annotations:
-          summary: 'Moderate error-budget burn (30m & 6h)'
-          description: 'Burn rate > 0.5 against 99.95% SLO sustained. Tenant={{ $labels.tenant }}'
+          summary: "Moderate error-budget burn (30m & 6h)"
+          description: "Burn rate > 0.5 against 99.95% SLO sustained. Tenant={{ $labels.tenant }}"
 
   - name: intelgraph-slo-ops
     rules:
@@ -62,8 +62,8 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'High error-budget burn (op) — tenant={{ $labels.tenant }} op={{ $labels.operation }}'
-          description: 'Burn > 1 against 99.95% SLO in both 5m and 1h windows.'
+          summary: "High error-budget burn (op) — tenant={{ $labels.tenant }} op={{ $labels.operation }}"
+          description: "Burn > 1 against 99.95% SLO in both 5m and 1h windows."
 
       - alert: ModerateOpErrorBudgetBurn
         expr: |
@@ -80,8 +80,8 @@ groups:
         labels:
           severity: ticket
         annotations:
-          summary: 'Moderate error-budget burn (op) — tenant={{ $labels.tenant }} op={{ $labels.operation }}'
-          description: 'Burn > 0.5 against 99.95% SLO in 30m & 6h windows.'
+          summary: "Moderate error-budget burn (op) — tenant={{ $labels.tenant }} op={{ $labels.operation }}"
+          description: "Burn > 0.5 against 99.95% SLO in 30m & 6h windows."
 
   - name: intelgraph-agent-queues
     rules:
@@ -91,8 +91,8 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'Agent queue SLO pressure exceeds 1'
-          description: 'Latency/backlog SLO pressure above target ({{ $value }}). Queue={{ $labels.queue }}'
+          summary: "Agent queue SLO pressure exceeds 1"
+          description: "Latency/backlog SLO pressure above target ({{ $value }}). Queue={{ $labels.queue }}"
 
       - alert: AgentQueueCostBudgetExceeded
         expr: max_over_time(agent_queue_cost_pressure[15m]) > 1.1
@@ -100,5 +100,5 @@ groups:
         labels:
           severity: ticket
         annotations:
-          summary: 'Agent queue spend rate over budget'
-          description: 'Cost pressure sustained above 110% of budget with healthy latency/backlog. Queue={{ $labels.queue }}'
+          summary: "Agent queue spend rate over budget"
+          description: "Cost pressure sustained above 110% of budget with healthy latency/backlog. Queue={{ $labels.queue }}"

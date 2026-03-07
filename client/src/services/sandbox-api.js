@@ -8,19 +8,19 @@
  * @module services/sandbox-api
  */
 
-const API_BASE = '/api/sandbox';
+const API_BASE = "/api/sandbox";
 
 const getHeaders = () => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem("auth_token");
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    const error = await response.json().catch(() => ({ error: "Unknown error" }));
     throw new Error(error.error || error.message || `HTTP ${response.status}`);
   }
   return response.json();
@@ -32,7 +32,7 @@ export const SandboxAPI = {
    */
   async create(data) {
     const response = await fetch(API_BASE, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
@@ -62,7 +62,7 @@ export const SandboxAPI = {
    */
   async update(sandboxId, data) {
     const response = await fetch(`${API_BASE}/${sandboxId}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
@@ -74,7 +74,7 @@ export const SandboxAPI = {
    */
   async delete(sandboxId) {
     const response = await fetch(`${API_BASE}/${sandboxId}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -85,7 +85,7 @@ export const SandboxAPI = {
    */
   async addScenario(sandboxId, scenario) {
     const response = await fetch(`${API_BASE}/${sandboxId}/scenarios`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(scenario),
     });
@@ -97,7 +97,7 @@ export const SandboxAPI = {
    */
   async execute(sandboxId, options = {}) {
     const response = await fetch(`${API_BASE}/${sandboxId}/execute`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(options),
     });
@@ -119,7 +119,7 @@ export const SandboxAPI = {
    */
   async clonePolicy(sandboxId, policyData) {
     const response = await fetch(`${API_BASE}/${sandboxId}/clone-policy`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(policyData),
     });

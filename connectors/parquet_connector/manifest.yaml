@@ -8,8 +8,8 @@ supported_formats:
 
 configuration:
   batch_size: 1000
-  columns: null  # null means all columns, or specify list: ['col1', 'col2']
-  filters: null  # Row filters (optional)
+  columns: null # null means all columns, or specify list: ['col1', 'col2']
+  filters: null # Row filters (optional)
   sample_data_file: sample.parquet
 
 # Rate limiting (optional for file-based)

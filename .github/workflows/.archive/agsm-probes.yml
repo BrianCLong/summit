@@ -3,9 +3,9 @@ name: AGSM Synthetic Probes
 on:
   pull_request:
     paths:
-      - 'services/agsm/**'
-      - 'tools/agsm-dashboard/**'
-      - '.github/workflows/agsm-probes.yml'
+      - "services/agsm/**"
+      - "tools/agsm-dashboard/**"
+      - ".github/workflows/agsm-probes.yml"
 
 jobs:
   agsm:
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
 
       - name: Run AGSM unit tests
         working-directory: services/agsm

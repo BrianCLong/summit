@@ -25,19 +25,13 @@ Create a reusable MDX component that points to a local mock server (Prism) for s
 **`src/components/TryApi.tsx`**
 
 ```tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
-export default function TryApi({
-  specUrl,
-  proxy,
-}: {
-  specUrl: string;
-  proxy?: string;
-}) {
+export default function TryApi({ specUrl, proxy }: { specUrl: string; proxy?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     (async () => {
-      const SwaggerUI = (await import('swagger-ui-dist')).default;
+      const SwaggerUI = (await import("swagger-ui-dist")).default;
       SwaggerUI({
         domNode: ref.current!,
         url: specUrl,
@@ -56,14 +50,11 @@ export default function TryApi({
 **Usage in MDX**
 
 ```mdx
-import TryApi from '@site/src/components/TryApi';
+import TryApi from "@site/src/components/TryApi";
 
 > **Safe sandbox:** these calls hit a mock server, not production.
 
-<TryApi
-  specUrl="/intelgraph/api/core/1.0.0/openapi.json"
-  proxy="http://localhost:4010/"
-/>
+<TryApi specUrl="/intelgraph/api/core/1.0.0/openapi.json" proxy="http://localhost:4010/" />
 ```
 
 ## A2) Mock server in docs dev
@@ -139,7 +130,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: errata-ai/vale-action@v2
         with:
-          files: 'docs/**/*.md*'
+          files: "docs/**/*.md*"
           reporter: github-pr-review
 ```
 
@@ -157,17 +148,17 @@ jobs:
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: 'docs-site/build',
-      url: ['/', '/reference/', '/tutorials/first-ingest'],
+      staticDistDir: "docs-site/build",
+      url: ["/", "/reference/", "/tutorials/first-ingest"],
     },
     assert: {
       assertions: {
-        'categories:performance': ['error', { minScore: 0.9 }],
-        'first-contentful-paint': ['error', { maxNumericValue: 2000 }],
-        'total-byte-weight': ['warn', { maxNumericValue: 600000 }],
+        "categories:performance": ["error", { minScore: 0.9 }],
+        "first-contentful-paint": ["error", { maxNumericValue: 2000 }],
+        "total-byte-weight": ["warn", { maxNumericValue: 600000 }],
       },
     },
-    upload: { target: 'temporary-public-storage' },
+    upload: { target: "temporary-public-storage" },
   },
 };
 ```
@@ -219,9 +210,7 @@ jobs:
 **`scripts/docs/apply-synonyms.js`** (stub)
 
 ```js
-console.log(
-  'Fetch analytics → update algolia.synonyms.json via Algolia API (requires keys)',
-);
+console.log("Fetch analytics → update algolia.synonyms.json via Algolia API (requires keys)");
 ```
 
 **Acceptance**
@@ -236,24 +225,21 @@ console.log(
 
 ```js
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
-const type = process.argv[2] || 'how-to';
-const title = process.argv.slice(3).join(' ') || 'New Page';
-const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const fs = require("fs");
+const path = require("path");
+const type = process.argv[2] || "how-to";
+const title = process.argv.slice(3).join(" ") || "New Page";
+const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const tpl = fs
-  .readFileSync(`docs/_templates/${type}.md`, 'utf8')
-  .replace('<Task-oriented title>', title)
-  .replace('<End-to-end tutorial>', title)
-  .replace('<Concept name>', title)
-  .replace(
-    'lastUpdated:',
-    `lastUpdated: ${new Date().toISOString().slice(0, 10)}`,
-  );
-const out = `docs/${type === 'concept' ? 'concepts' : type}/${slug}.md`;
+  .readFileSync(`docs/_templates/${type}.md`, "utf8")
+  .replace("<Task-oriented title>", title)
+  .replace("<End-to-end tutorial>", title)
+  .replace("<Concept name>", title)
+  .replace("lastUpdated:", `lastUpdated: ${new Date().toISOString().slice(0, 10)}`);
+const out = `docs/${type === "concept" ? "concepts" : type}/${slug}.md`;
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, tpl);
-console.log('Created', out);
+console.log("Created", out);
 ```
 
 **`package.json`**
@@ -275,20 +261,15 @@ console.log('Created', out);
 **`tests/docs-nav.spec.ts`**
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-const pages = [
-  '/',
-  '/reference/',
-  '/tutorials/first-ingest',
-  '/how-to/zip-export',
-];
+const pages = ["/", "/reference/", "/tutorials/first-ingest", "/how-to/zip-export"];
 
 for (const p of pages) {
   test(`navigates ${p}`, async ({ page }) => {
-    await page.goto(process.env.BASE_URL || 'http://localhost:3000' + p);
+    await page.goto(process.env.BASE_URL || "http://localhost:3000" + p);
     await expect(page).toHaveTitle(/IntelGraph/);
-    const links = await page.locator('a').all();
+    const links = await page.locator("a").all();
     expect(links.length).toBeGreaterThan(10);
   });
 }
@@ -309,7 +290,7 @@ jobs:
       - run: cd docs-site && npm i && npm run build && npx serve -s build -l 3000 &
       - run: npx playwright install --with-deps
       - run: npx playwright test
-        env: { BASE_URL: 'http://localhost:3000' }
+        env: { BASE_URL: "http://localhost:3000" }
 ```
 
 **Acceptance**
@@ -325,8 +306,8 @@ jobs:
 **`src/pages/404.tsx`**
 
 ```tsx
-import React from 'react';
-import Link from '@docusaurus/Link';
+import React from "react";
+import Link from "@docusaurus/Link";
 export default function NotFound() {
   return (
     <main className="container margin-vert--lg">

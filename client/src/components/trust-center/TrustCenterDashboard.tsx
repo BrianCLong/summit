@@ -5,7 +5,7 @@
  * certifications, SLO metrics, and regulatory pack access.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -26,7 +26,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-} from '@mui/material';
+} from "@mui/material";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnyGrid = Grid as any;
@@ -44,7 +44,7 @@ import {
   Timeline,
   Speed,
   CloudDone,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // =============================================================================
 // Types
@@ -53,7 +53,7 @@ import {
 interface CertificationStatus {
   framework: string;
   name: string;
-  status: 'active' | 'pending' | 'expired';
+  status: "active" | "pending" | "expired";
   validFrom?: string;
   validUntil?: string;
   auditor?: string;
@@ -88,7 +88,7 @@ interface RegulatoryPackSummary {
 }
 
 interface TrustCenterData {
-  overallStatus: 'operational' | 'degraded' | 'partial_outage' | 'major_outage';
+  overallStatus: "operational" | "degraded" | "partial_outage" | "major_outage";
   certifications: CertificationStatus[];
   sloSummary: SLOMetrics;
   lastUpdated: string;
@@ -104,37 +104,37 @@ interface TrustCenterData {
 // Helper Functions
 // =============================================================================
 
-const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'info' => {
+const getStatusColor = (status: string): "success" | "warning" | "error" | "info" => {
   switch (status) {
-    case 'operational':
-    case 'active':
-    case 'effective':
-      return 'success';
-    case 'degraded':
-    case 'pending':
-    case 'partially_effective':
-      return 'warning';
-    case 'partial_outage':
-    case 'major_outage':
-    case 'expired':
-    case 'ineffective':
-      return 'error';
+    case "operational":
+    case "active":
+    case "effective":
+      return "success";
+    case "degraded":
+    case "pending":
+    case "partially_effective":
+      return "warning";
+    case "partial_outage":
+    case "major_outage":
+    case "expired":
+    case "ineffective":
+      return "error";
     default:
-      return 'info';
+      return "info";
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'operational':
-    case 'active':
+    case "operational":
+    case "active":
       return <CheckCircle color="success" />;
-    case 'degraded':
-    case 'pending':
+    case "degraded":
+    case "pending":
       return <Warning color="warning" />;
-    case 'partial_outage':
-    case 'major_outage':
-    case 'expired':
+    case "partial_outage":
+    case "major_outage":
+    case "expired":
       return <ErrorIcon color="error" />;
     default:
       return <CheckCircle color="info" />;
@@ -146,10 +146,10 @@ const formatPercentage = (value: number): string => {
 };
 
 const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 
@@ -162,26 +162,26 @@ interface StatusCardProps {
   value: string;
   subtitle?: string;
   icon: React.ReactNode;
-  status: 'success' | 'warning' | 'error' | 'info';
+  status: "success" | "warning" | "error" | "info";
 }
 
 const StatusCard: React.FC<StatusCardProps> = ({ title, value, subtitle, icon, status }) => {
   const colors = {
-    success: '#4caf50',
-    warning: '#ff9800',
-    error: '#f44336',
-    info: '#2196f3',
+    success: "#4caf50",
+    warning: "#ff9800",
+    error: "#f44336",
+    info: "#2196f3",
   };
 
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: "100%" }}>
       <CardContent>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box>
             <Typography variant="body2" color="textSecondary">
               {title}
             </Typography>
-            <Typography variant="h4" sx={{ color: colors[status], fontWeight: 'bold' }}>
+            <Typography variant="h4" sx={{ color: colors[status], fontWeight: "bold" }}>
               {value}
             </Typography>
             {subtitle && (
@@ -204,7 +204,7 @@ interface CertificationCardProps {
 
 const CertificationCard: React.FC<CertificationCardProps> = ({ cert, onDownload }) => {
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: "100%" }}>
       <CardContent>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
           <Box display="flex" alignItems="center" gap={1}>
@@ -228,12 +228,7 @@ const CertificationCard: React.FC<CertificationCardProps> = ({ cert, onDownload 
         )}
         {onDownload && (
           <Box mt={2}>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<Download />}
-              onClick={onDownload}
-            >
+            <Button variant="outlined" size="small" startIcon={<Download />} onClick={onDownload}>
               Download Certificate
             </Button>
           </Box>
@@ -250,7 +245,7 @@ interface SLOGaugeProps {
   unit?: string;
 }
 
-const SLOGauge: React.FC<SLOGaugeProps> = ({ label, current, target, unit = '%' }) => {
+const SLOGauge: React.FC<SLOGaugeProps> = ({ label, current, target, unit = "%" }) => {
   const percentage = Math.min((current / target) * 100, 100);
   const isMet = current >= target;
 
@@ -258,7 +253,7 @@ const SLOGauge: React.FC<SLOGaugeProps> = ({ label, current, target, unit = '%' 
     <Box mb={2}>
       <Box display="flex" justifyContent="space-between" mb={0.5}>
         <Typography variant="body2">{label}</Typography>
-        <Typography variant="body2" color={isMet ? 'success.main' : 'error.main'}>
+        <Typography variant="body2" color={isMet ? "success.main" : "error.main"}>
           {current}
           {unit} / {target}
           {unit}
@@ -267,7 +262,7 @@ const SLOGauge: React.FC<SLOGaugeProps> = ({ label, current, target, unit = '%' 
       <LinearProgress
         variant="determinate"
         value={percentage}
-        color={isMet ? 'success' : 'error'}
+        color={isMet ? "success" : "error"}
         sx={{ height: 8, borderRadius: 4 }}
       />
     </Box>
@@ -292,17 +287,17 @@ export const TrustCenterDashboard: React.FC = () => {
         setLoading(true);
 
         // Fetch status
-        const statusRes = await fetch('/api/v1/trust/status');
-        if (!statusRes.ok) throw new Error('Failed to fetch status');
+        const statusRes = await fetch("/api/v1/trust/status");
+        if (!statusRes.ok) throw new Error("Failed to fetch status");
         const statusData = await statusRes.json();
         setData(statusData);
 
         // Fetch packs
-        const packsRes = await fetch('/api/v1/trust/packs');
-        if (!packsRes.ok) throw new Error('Failed to fetch packs');
+        const packsRes = await fetch("/api/v1/trust/packs");
+        if (!packsRes.ok) throw new Error("Failed to fetch packs");
         const packsData = await packsRes.json();
         setPacks(packsData.packs || []);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -322,17 +317,17 @@ export const TrustCenterDashboard: React.FC = () => {
 
   const handleDownloadReport = async (packId: string) => {
     try {
-      const res = await fetch('/api/v1/trust/reports/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packId, format: 'pdf' }),
+      const res = await fetch("/api/v1/trust/reports/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packId, format: "pdf" }),
       });
-      if (!res.ok) throw new Error('Failed to generate report');
+      if (!res.ok) throw new Error("Failed to generate report");
       const report = await res.json();
       // Handle download
       // eslint-disable-next-line no-console
-      console.log('Report generated:', report);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.log("Report generated:", report);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     }
@@ -352,11 +347,14 @@ export const TrustCenterDashboard: React.FC = () => {
   if (error) {
     return (
       <Box p={4}>
-        <Alert severity="error" action={
-          <Button color="inherit" size="small" onClick={handleRefresh}>
-            Retry
-          </Button>
-        }>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={handleRefresh}>
+              Retry
+            </Button>
+          }
+        >
           {error}
         </Alert>
       </Box>
@@ -383,7 +381,7 @@ export const TrustCenterDashboard: React.FC = () => {
         <Box display="flex" alignItems="center" gap={2}>
           <Chip
             icon={getStatusIcon(data.overallStatus)}
-            label={data.overallStatus.replace('_', ' ').toUpperCase()}
+            label={data.overallStatus.replace("_", " ").toUpperCase()}
             color={getStatusColor(data.overallStatus)}
           />
           <Tooltip title="Refresh">
@@ -402,7 +400,7 @@ export const TrustCenterDashboard: React.FC = () => {
             value={formatPercentage(data.uptime.last30d)}
             subtitle="Target: 99.9%"
             icon={<CloudDone fontSize="large" />}
-            status={data.uptime.last30d >= 99.9 ? 'success' : 'warning'}
+            status={data.uptime.last30d >= 99.9 ? "success" : "warning"}
           />
         </AnyGrid>
         <AnyGrid xs={12} sm={6} md={3}>
@@ -411,13 +409,15 @@ export const TrustCenterDashboard: React.FC = () => {
             value={`${data.sloSummary.latency.p95}ms`}
             subtitle={`Target: ${data.sloSummary.latency.target}ms`}
             icon={<Speed fontSize="large" />}
-            status={data.sloSummary.latency.p95 <= data.sloSummary.latency.target ? 'success' : 'warning'}
+            status={
+              data.sloSummary.latency.p95 <= data.sloSummary.latency.target ? "success" : "warning"
+            }
           />
         </AnyGrid>
         <AnyGrid xs={12} sm={6} md={3}>
           <StatusCard
             title="Active Certifications"
-            value={String(data.certifications.filter(c => c.status === 'active').length)}
+            value={String(data.certifications.filter((c) => c.status === "active").length)}
             subtitle={`${data.certifications.length} total`}
             icon={<VerifiedUser fontSize="large" />}
             status="success"
@@ -428,7 +428,9 @@ export const TrustCenterDashboard: React.FC = () => {
             title="Incidents (30d)"
             value={String(data.incidentCount)}
             icon={<Assessment fontSize="large" />}
-            status={data.incidentCount === 0 ? 'success' : data.incidentCount < 3 ? 'warning' : 'error'}
+            status={
+              data.incidentCount === 0 ? "success" : data.incidentCount < 3 ? "warning" : "error"
+            }
           />
         </AnyGrid>
       </AnyGrid>
@@ -455,7 +457,7 @@ export const TrustCenterDashboard: React.FC = () => {
               <CertificationCard
                 cert={cert}
                 // eslint-disable-next-line no-console
-                onDownload={() => console.log('Download', cert.framework)}
+                onDownload={() => console.log("Download", cert.framework)}
               />
             </AnyGrid>
           ))}
@@ -498,7 +500,7 @@ export const TrustCenterDashboard: React.FC = () => {
                 <List>
                   <ListItem>
                     <ListItemIcon>
-                      <CheckCircle color={data.uptime.last24h >= 99.9 ? 'success' : 'warning'} />
+                      <CheckCircle color={data.uptime.last24h >= 99.9 ? "success" : "warning"} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Last 24 Hours"
@@ -507,7 +509,7 @@ export const TrustCenterDashboard: React.FC = () => {
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
-                      <CheckCircle color={data.uptime.last7d >= 99.9 ? 'success' : 'warning'} />
+                      <CheckCircle color={data.uptime.last7d >= 99.9 ? "success" : "warning"} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Last 7 Days"
@@ -516,7 +518,7 @@ export const TrustCenterDashboard: React.FC = () => {
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
-                      <CheckCircle color={data.uptime.last30d >= 99.9 ? 'success' : 'warning'} />
+                      <CheckCircle color={data.uptime.last30d >= 99.9 ? "success" : "warning"} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Last 30 Days"
@@ -545,12 +547,10 @@ export const TrustCenterDashboard: React.FC = () => {
                     />
                   </Box>
                   <Typography variant="body2" color="textSecondary" gutterBottom>
-                    {pack.framework.replace(/_/g, ' ')}
+                    {pack.framework.replace(/_/g, " ")}
                   </Typography>
                   <Divider sx={{ my: 1 }} />
-                  <Typography variant="body2">
-                    Controls: {pack.controlCount}
-                  </Typography>
+                  <Typography variant="body2">Controls: {pack.controlCount}</Typography>
                   <Typography variant="body2" color="textSecondary">
                     Version: {pack.version}
                   </Typography>
@@ -562,7 +562,7 @@ export const TrustCenterDashboard: React.FC = () => {
                       variant="outlined"
                       size="small"
                       // eslint-disable-next-line no-console
-                      onClick={() => console.log('View pack', pack.id)}
+                      onClick={() => console.log("View pack", pack.id)}
                     >
                       View Details
                     </Button>
@@ -585,12 +585,15 @@ export const TrustCenterDashboard: React.FC = () => {
       {/* Footer */}
       <Box mt={4} pt={2} borderTop={1} borderColor="divider">
         <Typography variant="body2" color="textSecondary" align="center">
-          Last updated: {formatDate(data.lastUpdated)} |{' '}
-          <a href="/docs/compliance/trust-center-regulatory-packs-v0.md" style={{ color: 'inherit' }}>
+          Last updated: {formatDate(data.lastUpdated)} |{" "}
+          <a
+            href="/docs/compliance/trust-center-regulatory-packs-v0.md"
+            style={{ color: "inherit" }}
+          >
             Documentation
-          </a>{' '}
-          |{' '}
-          <a href="mailto:security@company.io" style={{ color: 'inherit' }}>
+          </a>{" "}
+          |{" "}
+          <a href="mailto:security@company.io" style={{ color: "inherit" }}>
             Contact Security Team
           </a>
         </Typography>

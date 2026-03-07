@@ -1,31 +1,31 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App.working.jsx';
-import './styles/globals.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.working.jsx";
+import "./styles/globals.css";
 
-console.log('🚀 IntelGraph Platform Starting (Working Version)...');
+console.log("🚀 IntelGraph Platform Starting (Working Version)...");
 
 try {
-  const root = document.getElementById('root');
+  const root = document.getElementById("root");
   if (!root) {
-    console.error('❌ Root element not found');
-    throw new Error('Root element not found');
+    console.error("❌ Root element not found");
+    throw new Error("Root element not found");
   }
 
-  console.log('✅ Root element found, creating React root...');
+  console.log("✅ Root element found, creating React root...");
 
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <App />
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 
-  console.log('✅ React app rendered successfully');
+  console.log("✅ React app rendered successfully");
 } catch (error) {
-  console.error('❌ Failed to mount React app:', error);
+  console.error("❌ Failed to mount React app:", error);
 
   // Fallback HTML
-  const root = document.getElementById('root');
+  const root = document.getElementById("root");
   if (root) {
     root.innerHTML = `
       <div style="padding: 20px; background: #ffebee; border: 2px solid #f44336; border-radius: 8px; margin: 20px;">

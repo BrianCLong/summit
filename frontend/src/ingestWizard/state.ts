@@ -1,22 +1,22 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   DataSourceConfig,
   FieldMapping,
   IngestWizardState,
   SchemaMappingState,
-  ValidationState
-} from './types';
+  ValidationState,
+} from "./types";
 
 export const createEmptyMapping = (): SchemaMappingState => ({
   sourceSample: [],
   targetSchema: [],
   mappings: [],
-  autoMappedFields: []
+  autoMappedFields: [],
 });
 
 export const createEmptyValidation = (): ValidationState => ({
-  status: 'idle',
-  issues: []
+  status: "idle",
+  issues: [],
 });
 
 export const initialWizardState: IngestWizardState = {
@@ -25,10 +25,10 @@ export const initialWizardState: IngestWizardState = {
     source_config: {},
     geographic_restrictions: [],
     retention_period: 30,
-    tos_accepted: false
+    tos_accepted: false,
   },
   schemaMapping: createEmptyMapping(),
-  validation: createEmptyValidation()
+  validation: createEmptyValidation(),
 };
 
 const mergeDataSource = (
@@ -41,8 +41,8 @@ const mergeDataSource = (
     incoming.geographic_restrictions ?? existing.geographic_restrictions ?? [],
   source_config: {
     ...(existing.source_config || {}),
-    ...(incoming.source_config || {})
-  }
+    ...(incoming.source_config || {}),
+  },
 });
 
 const replaceMapping = (
@@ -52,11 +52,11 @@ const replaceMapping = (
   ...next,
   sourceSample: [...next.sourceSample],
   targetSchema: [...next.targetSchema],
-  mappings: next.mappings.map((mapping) => ({ ...mapping }))
+  mappings: next.mappings.map((mapping) => ({ ...mapping })),
 });
 
 const ingestWizardSlice = createSlice({
-  name: 'ingestWizard',
+  name: "ingestWizard",
   initialState: initialWizardState,
   reducers: {
     setCurrentStep(state, action: PayloadAction<number>) {
@@ -88,8 +88,8 @@ const ingestWizardSlice = createSlice({
     },
     resetWizard() {
       return initialWizardState;
-    }
-  }
+    },
+  },
 });
 
 export const {
@@ -99,7 +99,7 @@ export const {
   removeFieldMapping,
   updateSchemaMapping,
   setValidation,
-  resetWizard
+  resetWizard,
 } = ingestWizardSlice.actions;
 
 export const ingestWizardReducer = ingestWizardSlice.reducer;

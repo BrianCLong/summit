@@ -1,10 +1,13 @@
 # Prompt 3: Neo4j Data Model + Cypher Patterns
 
 ## Role
+
 Graph Data Engineer
 
 ## Context
+
 IntelGraph is a relationship-centric intelligence analysis platform. Graph queries are central to the user experience:
+
 - **Common patterns**: 1-3 hop traversals
 - **Use cases**: Entity resolution, relationship discovery, pattern matching
 - **Scale**: Millions of nodes, tens of millions of relationships
@@ -12,6 +15,7 @@ IntelGraph is a relationship-centric intelligence analysis platform. Graph queri
 Performance is critical for analyst workflows.
 
 ## Task
+
 Design and implement the Neo4j graph data model:
 
 1. **Schema Definition**:
@@ -34,10 +38,12 @@ Design and implement the Neo4j graph data model:
 ## Guardrails (SLOs)
 
 ### Performance Targets
+
 - **1-hop queries**: p95 ≤ 300 ms
 - **2-3 hop queries**: p95 ≤ 1,200 ms
 
 ### Data Quality
+
 - All entities must have provenance
 - Timestamps required on all nodes and relationships
 - Purpose tags for data governance
@@ -45,6 +51,7 @@ Design and implement the Neo4j graph data model:
 ## Deliverables
 
 ### 1. Schema Definition
+
 - [ ] `services/graph/schema.cypher` - Complete schema definition
 - [ ] `services/graph/migrations/` - Migration scripts for:
   - [ ] Indexes
@@ -53,6 +60,7 @@ Design and implement the Neo4j graph data model:
   - [ ] Relationship types
 
 ### 2. Query Library
+
 - [ ] `services/graph/queries/` - Reusable Cypher query templates:
   - [ ] `1-hop-neighborhood.cypher`
   - [ ] `2-3-hop-paths.cypher`
@@ -61,6 +69,7 @@ Design and implement the Neo4j graph data model:
   - [ ] `temporal-queries.cypher`
 
 ### 3. Performance Documentation
+
 - [ ] `QUERY_TUNING.md` with:
   - [ ] EXPLAIN plans for key queries
   - [ ] PROFILE results on seeded datasets
@@ -69,6 +78,7 @@ Design and implement the Neo4j graph data model:
   - [ ] Benchmarking methodology
 
 ### 4. Load Testing
+
 - [ ] k6 load test scripts for:
   - [ ] 1-hop queries
   - [ ] 2-3 hop path traversals
@@ -76,6 +86,7 @@ Design and implement the Neo4j graph data model:
 - [ ] Seeded test dataset (representative scale)
 
 ## Acceptance Criteria
+
 - ✅ All PROFILE'd queries meet SLO targets on seeded data
 - ✅ Load tests validate p95 latencies
 - ✅ `make graph-benchmark` runs successfully
@@ -109,6 +120,7 @@ CREATE (p1:Person {id: 'p1', name: 'Alice'})-[:KNOWS {
 ## Example Queries
 
 ### 1-Hop Neighborhood
+
 ```cypher
 // Find all entities directly connected to a person
 MATCH (p:Person {id: $personId})-[r]-(connected)
@@ -119,6 +131,7 @@ LIMIT 100;
 ```
 
 ### 2-3 Hop Filtered Paths
+
 ```cypher
 // Find paths of 2-3 hops with purpose filtering
 MATCH path = (start:Entity {id: $entityId})-[*2..3]-(end)
@@ -130,6 +143,7 @@ LIMIT 50;
 ```
 
 ## Related Files
+
 - `/home/user/summit/docs/graph-db/GUIDE.md` - Graph database guide
 - `/home/user/summit/docs/graph-db/QUERY_LANGUAGE.md` - Query patterns
 - `/home/user/summit/services/graph/` - Graph service implementation
@@ -145,6 +159,7 @@ claude "Execute prompt 3: Neo4j data model design"
 ```
 
 ## Notes
+
 - Use Neo4j 5.x features (node labels, relationship properties)
 - Implement bitemporal modeling if needed for time-travel queries
 - Consider APOC procedures for complex operations

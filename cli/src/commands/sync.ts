@@ -2,46 +2,46 @@
  * Sync Commands
  */
 
-import { Command } from 'commander';
-import ora from 'ora';
-import type { CLIConfig } from '../lib/config.js';
-import { getProfile } from '../lib/config.js';
-import { GraphClient } from '../lib/graph-client.js';
-import { PgVectorSync, type SyncStatus } from '../lib/pgvector-sync.js';
-import { success, error, formatTable } from '../utils/output.js';
-import { handleError, ConnectionError } from '../utils/errors.js';
+import { Command } from "commander";
+import ora from "ora";
+import type { CLIConfig } from "../lib/config.js";
+import { getProfile } from "../lib/config.js";
+import { GraphClient } from "../lib/graph-client.js";
+import { PgVectorSync, type SyncStatus } from "../lib/pgvector-sync.js";
+import { success, error, formatTable } from "../utils/output.js";
+import { handleError, ConnectionError } from "../utils/errors.js";
 
 export function registerSyncCommands(program: Command, config: CLIConfig): void {
   const sync = program
-    .command('sync')
-    .alias('s')
-    .description('PgVector synchronization operations');
+    .command("sync")
+    .alias("s")
+    .description("PgVector synchronization operations");
 
   sync
-    .command('run')
-    .description('Synchronize graph nodes to pgvector')
-    .option('--batch-size <number>', 'Batch size for processing', '1000')
-    .option('--dimension <number>', 'Embedding dimension', '1536')
-    .option('--table <name>', 'Target table name', 'node_embeddings')
-    .option('--truncate', 'Truncate table before sync')
-    .option('--dry-run', 'Simulate sync without writing')
-    .option('--profile <name>', 'Use named profile')
+    .command("run")
+    .description("Synchronize graph nodes to pgvector")
+    .option("--batch-size <number>", "Batch size for processing", "1000")
+    .option("--dimension <number>", "Embedding dimension", "1536")
+    .option("--table <name>", "Target table name", "node_embeddings")
+    .option("--truncate", "Truncate table before sync")
+    .option("--dry-run", "Simulate sync without writing")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
-      const spinner = ora('Initializing sync...').start();
+      const spinner = ora("Initializing sync...").start();
 
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.neo4j) {
-          throw new ConnectionError('Neo4j configuration not found');
+          throw new ConnectionError("Neo4j configuration not found");
         }
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         // Initialize clients
-        spinner.text = 'Connecting to databases...';
+        spinner.text = "Connecting to databases...";
         const graphClient = new GraphClient(profile.neo4j);
         await graphClient.connect();
 
@@ -50,7 +50,7 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
         await pgSync.connect();
 
         // Run sync
-        spinner.text = 'Running synchronization...';
+        spinner.text = "Running synchronization...";
 
         const status = await pgSync.syncFromGraph(
           {
@@ -73,8 +73,8 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
         if (program.opts().json) {
           console.log(JSON.stringify(status, null, 2));
         } else {
-          if (status.status === 'completed') {
-            success(options.dryRun ? 'Dry run completed' : 'Sync completed successfully');
+          if (status.status === "completed") {
+            success(options.dryRun ? "Dry run completed" : "Sync completed successfully");
             console.log(`\nSync Statistics:`);
             console.log(`  Total Nodes: ${status.stats.totalNodes.toLocaleString()}`);
             console.log(`  Processed: ${status.stats.processedNodes.toLocaleString()}`);
@@ -94,21 +94,21 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
     });
 
   sync
-    .command('search <query>')
-    .description('Search embeddings by similarity')
-    .option('--limit <number>', 'Maximum results', '10')
-    .option('--threshold <number>', 'Minimum similarity threshold')
-    .option('--labels <labels>', 'Filter by labels (comma-separated)')
-    .option('--table <name>', 'Table name', 'node_embeddings')
-    .option('--profile <name>', 'Use named profile')
+    .command("search <query>")
+    .description("Search embeddings by similarity")
+    .option("--limit <number>", "Maximum results", "10")
+    .option("--threshold <number>", "Minimum similarity threshold")
+    .option("--labels <labels>", "Filter by labels (comma-separated)")
+    .option("--table <name>", "Table name", "node_embeddings")
+    .option("--profile <name>", "Use named profile")
     .action(async (query: string, options) => {
-      const spinner = ora('Searching embeddings...').start();
+      const spinner = ora("Searching embeddings...").start();
 
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         const pgSync = new PgVectorSync(profile.postgres);
@@ -120,7 +120,7 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
         const results = await pgSync.search(queryEmbedding, {
           limit: parseInt(options.limit),
           threshold: options.threshold ? parseFloat(options.threshold) : undefined,
-          labels: options.labels?.split(','),
+          labels: options.labels?.split(","),
           tableName: options.table,
         });
 
@@ -132,12 +132,12 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
           console.log(JSON.stringify(results, null, 2));
         } else {
           if (results.length === 0) {
-            console.log('No results found');
+            console.log("No results found");
           } else {
             const tableData = results.map((r) => ({
-              id: r.id.substring(0, 20) + '...',
-              similarity: r.similarity?.toFixed(4) || 'N/A',
-              labels: (r.metadata?.labels as string[])?.join(', ') || '',
+              id: r.id.substring(0, 20) + "...",
+              similarity: r.similarity?.toFixed(4) || "N/A",
+              labels: (r.metadata?.labels as string[])?.join(", ") || "",
             }));
             console.log(formatTable(tableData));
             console.log(`\n${results.length} results found`);
@@ -150,16 +150,16 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
     });
 
   sync
-    .command('get <nodeId>')
-    .description('Get embedding for a specific node')
-    .option('--table <name>', 'Table name', 'node_embeddings')
-    .option('--profile <name>', 'Use named profile')
+    .command("get <nodeId>")
+    .description("Get embedding for a specific node")
+    .option("--table <name>", "Table name", "node_embeddings")
+    .option("--profile <name>", "Use named profile")
     .action(async (nodeId: string, options) => {
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         const pgSync = new PgVectorSync(profile.postgres);
@@ -179,8 +179,13 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
         } else {
           console.log(`\nEmbedding for node ${nodeId}:`);
           console.log(`  Dimension: ${result.embedding.length}`);
-          console.log(`  Labels: ${(result.metadata?.labels as string[])?.join(', ') || 'none'}`);
-          console.log(`  Preview: [${result.embedding.slice(0, 5).map(v => v.toFixed(4)).join(', ')}...]`);
+          console.log(`  Labels: ${(result.metadata?.labels as string[])?.join(", ") || "none"}`);
+          console.log(
+            `  Preview: [${result.embedding
+              .slice(0, 5)
+              .map((v) => v.toFixed(4))
+              .join(", ")}...]`
+          );
         }
       } catch (err) {
         handleError(err);
@@ -188,16 +193,16 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
     });
 
   sync
-    .command('delete <nodeId>')
-    .description('Delete embedding for a node')
-    .option('--table <name>', 'Table name', 'node_embeddings')
-    .option('--profile <name>', 'Use named profile')
+    .command("delete <nodeId>")
+    .description("Delete embedding for a node")
+    .option("--table <name>", "Table name", "node_embeddings")
+    .option("--profile <name>", "Use named profile")
     .action(async (nodeId: string, options) => {
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         const pgSync = new PgVectorSync(profile.postgres);
@@ -218,18 +223,18 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
     });
 
   sync
-    .command('stats')
-    .description('Show pgvector synchronization statistics')
-    .option('--table <name>', 'Table name', 'node_embeddings')
-    .option('--profile <name>', 'Use named profile')
+    .command("stats")
+    .description("Show pgvector synchronization statistics")
+    .option("--table <name>", "Table name", "node_embeddings")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
-      const spinner = ora('Fetching statistics...').start();
+      const spinner = ora("Fetching statistics...").start();
 
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         const pgSync = new PgVectorSync(profile.postgres);
@@ -244,10 +249,10 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
         if (program.opts().json) {
           console.log(JSON.stringify(stats, null, 2));
         } else {
-          console.log('\nPgVector Statistics:');
+          console.log("\nPgVector Statistics:");
           console.log(`  Total Embeddings: ${stats.totalEmbeddings.toLocaleString()}`);
           console.log(`  Dimension: ${stats.dimension}`);
-          console.log(`  Labels: ${stats.labels.join(', ') || 'none'}`);
+          console.log(`  Labels: ${stats.labels.join(", ") || "none"}`);
           if (stats.lastUpdated) {
             console.log(`  Last Updated: ${stats.lastUpdated.toISOString()}`);
           }
@@ -259,17 +264,17 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
     });
 
   sync
-    .command('health')
-    .description('Check pgvector connectivity')
-    .option('--profile <name>', 'Use named profile')
+    .command("health")
+    .description("Check pgvector connectivity")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
-      const spinner = ora('Checking connection...').start();
+      const spinner = ora("Checking connection...").start();
 
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         const pgSync = new PgVectorSync(profile.postgres);
@@ -288,7 +293,7 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
               console.log(`  pgvector version: ${health.pgvectorVersion}`);
             }
           } else {
-            error('Failed to connect to PostgreSQL');
+            error("Failed to connect to PostgreSQL");
           }
         }
       } catch (err) {
@@ -298,19 +303,19 @@ export function registerSyncCommands(program: Command, config: CLIConfig): void 
     });
 
   sync
-    .command('init')
-    .description('Initialize pgvector table and indexes')
-    .option('--dimension <number>', 'Embedding dimension', '1536')
-    .option('--table <name>', 'Table name', 'node_embeddings')
-    .option('--profile <name>', 'Use named profile')
+    .command("init")
+    .description("Initialize pgvector table and indexes")
+    .option("--dimension <number>", "Embedding dimension", "1536")
+    .option("--table <name>", "Table name", "node_embeddings")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
-      const spinner = ora('Initializing table...').start();
+      const spinner = ora("Initializing table...").start();
 
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.postgres) {
-          throw new ConnectionError('PostgreSQL configuration not found');
+          throw new ConnectionError("PostgreSQL configuration not found");
         }
 
         const pgSync = new PgVectorSync(profile.postgres);

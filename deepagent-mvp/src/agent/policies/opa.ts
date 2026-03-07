@@ -1,12 +1,12 @@
-import { loadPolicy } from '@open-policy-agent/opa-wasm';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { loadPolicy } from "@open-policy-agent/opa-wasm";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 let policy: any;
 
 export const checkPolicy = async (input: any): Promise<boolean> => {
   if (!policy) {
-    const policyWasm = readFileSync(join(__dirname, 'policy.wasm'));
+    const policyWasm = readFileSync(join(__dirname, "policy.wasm"));
     policy = await loadPolicy(policyWasm);
   }
 

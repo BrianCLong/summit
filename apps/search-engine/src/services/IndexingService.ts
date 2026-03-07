@@ -1,8 +1,8 @@
-import { Driver as Neo4jDriver, Session as Neo4jSession } from 'neo4j-driver';
-import { Pool } from 'pg';
-import { createLogger, format, transports, Logger } from 'winston';
+import { Driver as Neo4jDriver, Session as Neo4jSession } from "neo4j-driver";
+import { Pool } from "pg";
+import { createLogger, format, transports, Logger } from "winston";
 
-import { ElasticsearchService } from './ElasticsearchService';
+import { ElasticsearchService } from "./ElasticsearchService";
 
 export interface IndexingConfig {
   batchSize: number;
@@ -45,7 +45,7 @@ export class IndexingService {
     private pg: Pool,
     private neo4j: Neo4jDriver,
     private elasticsearch: ElasticsearchService,
-    config?: Partial<IndexingConfig>,
+    config?: Partial<IndexingConfig>
   ) {
     this.config = {
       batchSize: config?.batchSize || 1000,
@@ -57,15 +57,11 @@ export class IndexingService {
     this.lastSyncTimestamp = new Date(0);
 
     this.logger = createLogger({
-      level: process.env.LOG_LEVEL || 'info',
-      format: format.combine(
-        format.timestamp(),
-        format.errors({ stack: true }),
-        format.json(),
-      ),
+      level: process.env.LOG_LEVEL || "info",
+      format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
       transports: [
         new transports.Console(),
-        new transports.File({ filename: 'logs/indexing.log' }),
+        new transports.File({ filename: "logs/indexing.log" }),
       ],
     });
   }
@@ -74,7 +70,7 @@ export class IndexingService {
    * Start the continuous indexing process
    */
   async startIndexing(): Promise<void> {
-    this.logger.info('Starting indexing service', {
+    this.logger.info("Starting indexing service", {
       config: this.config,
     });
 
@@ -87,7 +83,7 @@ export class IndexingService {
         await this.performIncrementalSync();
       }, this.config.indexingInterval);
 
-      this.logger.info('Real-time sync enabled', {
+      this.logger.info("Real-time sync enabled", {
         interval: this.config.indexingInterval,
       });
     }
@@ -98,7 +94,7 @@ export class IndexingService {
    */
   async performFullSync(): Promise<void> {
     if (this.isIndexing) {
-      this.logger.warn('Indexing already in progress, skipping');
+      this.logger.warn("Indexing already in progress, skipping");
       return;
     }
 
@@ -106,7 +102,7 @@ export class IndexingService {
     const startTime = Date.now();
 
     try {
-      this.logger.info('Starting full sync');
+      this.logger.info("Starting full sync");
 
       // Fetch all entities from PostgreSQL
       const entities = await this.fetchAllEntities();
@@ -121,12 +117,12 @@ export class IndexingService {
 
       this.lastSyncTimestamp = new Date();
 
-      this.logger.info('Full sync completed', {
+      this.logger.info("Full sync completed", {
         duration: Date.now() - startTime,
         entityCount: entities.length,
       });
     } catch (error) {
-      this.logger.error('Full sync failed', {
+      this.logger.error("Full sync failed", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -147,7 +143,7 @@ export class IndexingService {
     const startTime = Date.now();
 
     try {
-      this.logger.debug('Starting incremental sync', {
+      this.logger.debug("Starting incremental sync", {
         lastSyncTimestamp: this.lastSyncTimestamp,
       });
 
@@ -155,7 +151,7 @@ export class IndexingService {
       const changedEntities = await this.fetchChangedEntities(this.lastSyncTimestamp);
 
       if (changedEntities.length === 0) {
-        this.logger.debug('No changes detected');
+        this.logger.debug("No changes detected");
         return;
       }
 
@@ -169,12 +165,12 @@ export class IndexingService {
 
       this.lastSyncTimestamp = new Date();
 
-      this.logger.info('Incremental sync completed', {
+      this.logger.info("Incremental sync completed", {
         duration: Date.now() - startTime,
         entityCount: changedEntities.length,
       });
     } catch (error) {
-      this.logger.error('Incremental sync failed', {
+      this.logger.error("Incremental sync failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -231,7 +227,7 @@ export class IndexingService {
    * Transform database row to entity document
    */
   private transformEntity(row: any): EntityDocument {
-    const props = typeof row.props === 'string' ? JSON.parse(row.props) : row.props;
+    const props = typeof row.props === "string" ? JSON.parse(row.props) : row.props;
 
     return {
       id: row.id,
@@ -243,7 +239,7 @@ export class IndexingService {
       description: props.description || props.summary,
       props,
       tags: props.tags || [],
-      source: props.source || 'unknown',
+      source: props.source || "unknown",
       confidence: props.confidence,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -255,36 +251,27 @@ export class IndexingService {
    * Extract searchable content from entity properties
    */
   private extractContent(props: Record<string, any>): string {
-    const contentFields = [
-      'content',
-      'text',
-      'body',
-      'notes',
-      'details',
-      'metadata',
-    ];
+    const contentFields = ["content", "text", "body", "notes", "details", "metadata"];
 
     const contentParts: string[] = [];
 
     for (const field of contentFields) {
       if (props[field]) {
-        if (typeof props[field] === 'string') {
+        if (typeof props[field] === "string") {
           contentParts.push(props[field]);
-        } else if (typeof props[field] === 'object') {
+        } else if (typeof props[field] === "object") {
           contentParts.push(JSON.stringify(props[field]));
         }
       }
     }
 
-    return contentParts.join(' ');
+    return contentParts.join(" ");
   }
 
   /**
    * Enrich entities with Neo4j graph data
    */
-  private async enrichWithGraphData(
-    entities: EntityDocument[],
-  ): Promise<EntityDocument[]> {
+  private async enrichWithGraphData(entities: EntityDocument[]): Promise<EntityDocument[]> {
     const session: Neo4jSession = this.neo4j.session();
 
     try {
@@ -306,13 +293,13 @@ export class IndexingService {
                    }) as neighbors,
                    count(distinct neighbor) as degree
             `,
-            { id: entity.id },
+            { id: entity.id }
           );
 
           if (result.records.length > 0) {
             const record = result.records[0];
-            const neighbors = record.get('neighbors');
-            const degree = record.get('degree').toNumber();
+            const neighbors = record.get("neighbors");
+            const degree = record.get("degree").toNumber();
 
             // Calculate graph score based on connectivity
             const graphScore = this.calculateGraphScore(degree, neighbors);
@@ -326,7 +313,7 @@ export class IndexingService {
             enriched.push(entity);
           }
         } catch (error) {
-          this.logger.warn('Failed to enrich entity with graph data', {
+          this.logger.warn("Failed to enrich entity with graph data", {
             entityId: entity.id,
             error: error instanceof Error ? error.message : String(error),
           });
@@ -349,9 +336,7 @@ export class IndexingService {
     const normalizedDegree = Math.min(degree, maxDegree) / maxDegree;
 
     // Bonus for diverse relationship types
-    const uniqueRelationships = new Set(
-      neighbors.map((n) => n.relationship),
-    ).size;
+    const uniqueRelationships = new Set(neighbors.map((n) => n.relationship)).size;
     const diversityBonus = Math.min(uniqueRelationships / 10, 0.5);
 
     return normalizedDegree + diversityBonus;
@@ -360,9 +345,7 @@ export class IndexingService {
   /**
    * Index entities in batches
    */
-  private async indexEntitiesInBatches(
-    entities: EntityDocument[],
-  ): Promise<void> {
+  private async indexEntitiesInBatches(entities: EntityDocument[]): Promise<void> {
     const batches = this.chunkArray(entities, this.config.batchSize);
 
     for (let i = 0; i < batches.length; i++) {
@@ -420,7 +403,7 @@ export class IndexingService {
    * Get index name for entity type
    */
   private getIndexName(entityKind: string): string {
-    const prefix = process.env.ELASTICSEARCH_INDEX_PREFIX || 'summit';
+    const prefix = process.env.ELASTICSEARCH_INDEX_PREFIX || "summit";
     return `${prefix}-${entityKind.toLowerCase()}`;
   }
 
@@ -464,7 +447,7 @@ export class IndexingService {
       const result = await this.pg.query(query, [entityId]);
 
       if (result.rows.length === 0) {
-        this.logger.warn('Entity not found for indexing', { entityId });
+        this.logger.warn("Entity not found for indexing", { entityId });
         return;
       }
 
@@ -474,12 +457,12 @@ export class IndexingService {
       await this.elasticsearch.indexDocument(
         this.getIndexName(entity.kind),
         entity.id,
-        enriched[0],
+        enriched[0]
       );
 
-      this.logger.info('Entity indexed successfully', { entityId });
+      this.logger.info("Entity indexed successfully", { entityId });
     } catch (error) {
-      this.logger.error('Failed to index entity', {
+      this.logger.error("Failed to index entity", {
         entityId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -494,9 +477,9 @@ export class IndexingService {
     try {
       const indexName = this.getIndexName(entityKind);
       // Note: ElasticsearchService needs a deleteDocument method
-      this.logger.info('Entity deleted from index', { entityId, indexName });
+      this.logger.info("Entity deleted from index", { entityId, indexName });
     } catch (error) {
-      this.logger.error('Failed to delete entity from index', {
+      this.logger.error("Failed to delete entity from index", {
         entityId,
         error: error instanceof Error ? error.message : String(error),
       });

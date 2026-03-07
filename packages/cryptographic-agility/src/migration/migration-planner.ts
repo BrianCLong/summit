@@ -3,8 +3,12 @@
  * Plans and tracks cryptographic algorithm migrations
  */
 
-import { MigrationPlan, MigrationPlanner as IMigrationPlanner, QuantumRiskAssessment } from '../types';
-import { v4 as uuidv4 } from 'crypto';
+import {
+  MigrationPlan,
+  MigrationPlanner as IMigrationPlanner,
+  QuantumRiskAssessment,
+} from "../types";
+import { v4 as uuidv4 } from "crypto";
 
 export class MigrationPlanner implements IMigrationPlanner {
   private plans: Map<string, MigrationPlan> = new Map();
@@ -20,7 +24,7 @@ export class MigrationPlanner implements IMigrationPlanner {
       dependencies: [],
       rollbackStrategy: this.generateRollbackStrategy(source, target),
       validationCriteria: this.generateValidationCriteria(target),
-      status: 'draft',
+      status: "draft",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -43,14 +47,14 @@ export class MigrationPlanner implements IMigrationPlanner {
     return this.plans.get(planId);
   }
 
-  listPlans(status?: MigrationPlan['status']): MigrationPlan[] {
+  listPlans(status?: MigrationPlan["status"]): MigrationPlan[] {
     const allPlans = Array.from(this.plans.values());
 
     if (!status) {
       return allPlans;
     }
 
-    return allPlans.filter(plan => plan.status === status);
+    return allPlans.filter((plan) => plan.status === status);
   }
 
   async validatePlan(planId: string): Promise<boolean> {
@@ -62,7 +66,7 @@ export class MigrationPlanner implements IMigrationPlanner {
     // Check dependencies
     for (const depId of plan.dependencies) {
       const dep = this.plans.get(depId);
-      if (!dep || dep.status !== 'completed') {
+      if (!dep || dep.status !== "completed") {
         return false;
       }
     }
@@ -80,7 +84,11 @@ export class MigrationPlanner implements IMigrationPlanner {
     return true;
   }
 
-  assessQuantumRisk(assetId: string, currentAlgorithm: string, dataRetentionYears: number): QuantumRiskAssessment {
+  assessQuantumRisk(
+    assetId: string,
+    currentAlgorithm: string,
+    dataRetentionYears: number
+  ): QuantumRiskAssessment {
     const quantumVulnerable = this.isQuantumVulnerable(currentAlgorithm);
     const timeToQuantumThreat = 10; // Conservative estimate: 10 years
     const cryptographicLifetime = this.getCryptographicLifetime(currentAlgorithm);
@@ -99,7 +107,7 @@ export class MigrationPlanner implements IMigrationPlanner {
 
     return {
       assetId,
-      dataClassification: 'confidential', // Would be determined from asset metadata
+      dataClassification: "confidential", // Would be determined from asset metadata
       currentAlgorithm,
       quantumVulnerable,
       cryptographicLifetime,
@@ -137,13 +145,13 @@ export class MigrationPlanner implements IMigrationPlanner {
   private estimateDuration(source: string, target: string): number {
     // Estimate in hours based on algorithm complexity
     const complexityMap: Record<string, number> = {
-      'RSA': 40,
-      'ECDSA': 30,
-      'AES': 20,
-      'Kyber': 50,
-      'Dilithium': 50,
-      'FALCON': 60,
-      'SPHINCS+': 45,
+      RSA: 40,
+      ECDSA: 30,
+      AES: 20,
+      Kyber: 50,
+      Dilithium: 50,
+      FALCON: 60,
+      "SPHINCS+": 45,
     };
 
     const sourceComplexity = complexityMap[source] || 40;
@@ -168,30 +176,30 @@ export class MigrationPlanner implements IMigrationPlanner {
 
   private generateValidationCriteria(target: string): string[] {
     return [
-      'All unit tests pass with new algorithm',
-      'Integration tests validate end-to-end functionality',
-      'Performance benchmarks meet requirements',
-      'Security audit completed and approved',
-      'Backward compatibility verified',
-      'Key generation produces valid keys',
-      'Encryption/signing produces valid outputs',
-      'Decryption/verification succeeds with correct inputs',
-      'Decryption/verification fails with incorrect inputs',
-      'Algorithm implementation matches specification',
-      'No memory leaks detected',
-      'Thread safety verified',
-      'Error handling covers all edge cases',
+      "All unit tests pass with new algorithm",
+      "Integration tests validate end-to-end functionality",
+      "Performance benchmarks meet requirements",
+      "Security audit completed and approved",
+      "Backward compatibility verified",
+      "Key generation produces valid keys",
+      "Encryption/signing produces valid outputs",
+      "Decryption/verification succeeds with correct inputs",
+      "Decryption/verification fails with incorrect inputs",
+      "Algorithm implementation matches specification",
+      "No memory leaks detected",
+      "Thread safety verified",
+      "Error handling covers all edge cases",
     ];
   }
 
   private isQuantumVulnerable(algorithm: string): boolean {
-    const vulnerable = ['RSA', 'ECDSA', 'ECDH', 'DSA', 'DH'];
-    return vulnerable.some(v => algorithm.toUpperCase().includes(v));
+    const vulnerable = ["RSA", "ECDSA", "ECDH", "DSA", "DH"];
+    return vulnerable.some((v) => algorithm.toUpperCase().includes(v));
   }
 
   private isDeprecated(algorithm: string): boolean {
-    const deprecated = ['MD5', 'SHA1', 'DES', 'RC4'];
-    return deprecated.some(d => algorithm.toUpperCase().includes(d));
+    const deprecated = ["MD5", "SHA1", "DES", "RC4"];
+    return deprecated.some((d) => algorithm.toUpperCase().includes(d));
   }
 
   private getCryptographicLifetime(algorithm: string): number {
@@ -211,47 +219,47 @@ export class MigrationPlanner implements IMigrationPlanner {
     quantumVulnerable: boolean,
     dataRetentionYears: number,
     timeToQuantumThreat: number
-  ): 'low' | 'medium' | 'high' | 'critical' {
+  ): "low" | "medium" | "high" | "critical" {
     if (!quantumVulnerable) {
-      return 'low';
+      return "low";
     }
 
     // If data retention extends beyond quantum threat timeline
     if (dataRetentionYears > timeToQuantumThreat) {
-      return 'critical';
+      return "critical";
     }
 
     // If data retention is close to quantum threat timeline
     if (dataRetentionYears > timeToQuantumThreat * 0.7) {
-      return 'high';
+      return "high";
     }
 
     // If data retention is moderate
     if (dataRetentionYears > timeToQuantumThreat * 0.4) {
-      return 'medium';
+      return "medium";
     }
 
-    return 'low';
+    return "low";
   }
 
   private calculateMigrationUrgency(
     harvestRisk: string,
     timeToQuantumThreat: number,
     cryptographicLifetime: number
-  ): 'low' | 'medium' | 'high' | 'immediate' {
-    if (harvestRisk === 'critical') {
-      return 'immediate';
+  ): "low" | "medium" | "high" | "immediate" {
+    if (harvestRisk === "critical") {
+      return "immediate";
     }
 
-    if (harvestRisk === 'high' || cryptographicLifetime < 5) {
-      return 'high';
+    if (harvestRisk === "high" || cryptographicLifetime < 5) {
+      return "high";
     }
 
-    if (harvestRisk === 'medium' || cryptographicLifetime < 10) {
-      return 'medium';
+    if (harvestRisk === "medium" || cryptographicLifetime < 10) {
+      return "medium";
     }
 
-    return 'low';
+    return "low";
   }
 
   private generateRecommendations(
@@ -262,25 +270,25 @@ export class MigrationPlanner implements IMigrationPlanner {
     const recommendations: string[] = [];
 
     if (quantumVulnerable) {
-      recommendations.push('Migrate to post-quantum cryptography immediately');
-      recommendations.push('Implement hybrid classical-quantum schemes for defense-in-depth');
+      recommendations.push("Migrate to post-quantum cryptography immediately");
+      recommendations.push("Implement hybrid classical-quantum schemes for defense-in-depth");
     }
 
-    if (harvestRisk === 'critical' || harvestRisk === 'high') {
-      recommendations.push('Re-encrypt sensitive data with post-quantum algorithms');
-      recommendations.push('Rotate keys using quantum-resistant algorithms');
-      recommendations.push('Implement forward secrecy to limit exposure window');
+    if (harvestRisk === "critical" || harvestRisk === "high") {
+      recommendations.push("Re-encrypt sensitive data with post-quantum algorithms");
+      recommendations.push("Rotate keys using quantum-resistant algorithms");
+      recommendations.push("Implement forward secrecy to limit exposure window");
     }
 
-    if (urgency === 'immediate' || urgency === 'high') {
-      recommendations.push('Prioritize migration in next sprint');
-      recommendations.push('Allocate additional resources to accelerate migration');
-      recommendations.push('Conduct security audit after migration');
+    if (urgency === "immediate" || urgency === "high") {
+      recommendations.push("Prioritize migration in next sprint");
+      recommendations.push("Allocate additional resources to accelerate migration");
+      recommendations.push("Conduct security audit after migration");
     }
 
-    recommendations.push('Monitor NIST PQC standardization updates');
-    recommendations.push('Maintain cryptographic agility for future transitions');
-    recommendations.push('Document migration process and lessons learned');
+    recommendations.push("Monitor NIST PQC standardization updates");
+    recommendations.push("Maintain cryptographic agility for future transitions");
+    recommendations.push("Document migration process and lessons learned");
 
     return recommendations;
   }

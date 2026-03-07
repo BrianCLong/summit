@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   AppBar,
   Toolbar,
@@ -11,24 +11,20 @@ import {
   ListItemText,
   Box,
   CssBaseline,
-  IconButton
-} from '@mui/material';
+  IconButton,
+} from "@mui/material";
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   BarChart as ChartIcon,
-  Settings as SettingsIcon
-} from '@mui/icons-material';
-import { useAccessibility } from '../accessibility/AccessibilityContext';
+  Settings as SettingsIcon,
+} from "@mui/icons-material";
+import { useAccessibility } from "../accessibility/AccessibilityContext";
 
 const drawerWidth = 240;
 
-export const MainLayout = ({ 
-  title = 'Summit Platform', 
-  children, 
-  navigation = [] 
-}) => {
+export const MainLayout = ({ title = "Summit Platform", children, navigation = [] }) => {
   const { keyboardNavigation } = useAccessibility();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -37,12 +33,15 @@ export const MainLayout = ({
   };
 
   // Default navigation items if none provided
-  const navItems = navigation.length > 0 ? navigation : [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'Entities', icon: <PeopleIcon />, path: '/entities' },
-    { text: 'Charts', icon: <ChartIcon />, path: '/charts' },
-    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
-  ];
+  const navItems =
+    navigation.length > 0
+      ? navigation
+      : [
+          { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
+          { text: "Entities", icon: <PeopleIcon />, path: "/entities" },
+          { text: "Charts", icon: <ChartIcon />, path: "/charts" },
+          { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
+        ];
 
   const drawer = (
     <div>
@@ -53,11 +52,7 @@ export const MainLayout = ({
       </Toolbar>
       <List>
         {navItems.map((item, index) => (
-          <ListItem 
-            button 
-            key={index}
-            className={keyboardNavigation ? 'summit-focus-visible' : ''}
-          >
+          <ListItem button key={index} className={keyboardNavigation ? "summit-focus-visible" : ""}>
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
@@ -67,7 +62,7 @@ export const MainLayout = ({
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -82,8 +77,8 @@ export const MainLayout = ({
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-            className={keyboardNavigation ? 'summit-focus-visible' : ''}
+            sx={{ mr: 2, display: { sm: "none" } }}
+            className={keyboardNavigation ? "summit-focus-visible" : ""}
           >
             <MenuIcon />
           </IconButton>
@@ -105,8 +100,8 @@ export const MainLayout = ({
             keepMounted: true,
           }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
           }}
         >
           {drawer}
@@ -114,8 +109,8 @@ export const MainLayout = ({
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
           }}
           open
         >
@@ -131,9 +126,7 @@ export const MainLayout = ({
         }}
       >
         <Toolbar />
-        <Container maxWidth="xl">
-          {children}
-        </Container>
+        <Container maxWidth="xl">{children}</Container>
       </Box>
     </Box>
   );

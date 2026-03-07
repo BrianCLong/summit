@@ -146,13 +146,13 @@ All images must be signed using Sigstore cosign. Supported verification methods:
 - **Key-based**: For custom signing keys
 
 ```typescript
-import { CosignVerifier } from './cosign/cosign-verifier';
+import { CosignVerifier } from "./cosign/cosign-verifier";
 
 const verifier = new CosignVerifier({
-  trustedIssuers: ['https://token.actions.githubusercontent.com'],
+  trustedIssuers: ["https://token.actions.githubusercontent.com"],
 });
 
-const result = await verifier.verifyImage('ghcr.io/org/image:v1.0.0');
+const result = await verifier.verifyImage("ghcr.io/org/image:v1.0.0");
 console.log(result.verified); // true/false
 ```
 
@@ -165,14 +165,15 @@ Images must have verifiable build provenance meeting SLSA Level 3 requirements:
 - Parameterless builds
 
 ```typescript
-import { SLSA3Verifier } from './slsa/slsa3-verifier';
+import { SLSA3Verifier } from "./slsa/slsa3-verifier";
 
 const verifier = new SLSA3Verifier({ requiredLevel: 3 });
-const result = await verifier.verifyProvenance('ghcr.io/org/image:v1.0.0');
+const result = await verifier.verifyProvenance("ghcr.io/org/image:v1.0.0");
 console.log(result.slsaLevel); // 0-4
 ```
 
 **Trusted Builders:**
+
 - GitHub Actions SLSA Generators (Go, Container, Node.js)
 - Google Cloud Build
 - Tekton Chains
@@ -182,7 +183,7 @@ console.log(result.slsaLevel); // 0-4
 Trivy scans all images with blocking rules:
 
 | Severity | Action | Block Rate Target |
-|----------|--------|-------------------|
+| -------- | ------ | ----------------- |
 | Critical | Block  | 100%              |
 | High     | Block  | 99%+              |
 | Medium   | Warn   | -                 |
@@ -238,13 +239,13 @@ crane catalog registry.intelgraph.local
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `HARBOR_ADMIN_PASSWORD` | Admin password | Required |
-| `HARBOR_DB_PASSWORD` | PostgreSQL password | Required |
-| `HARBOR_CORE_SECRET` | Core encryption key | Required |
-| `COSIGN_BINARY_PATH` | Path to cosign | `/usr/local/bin/cosign` |
-| `TRIVY_CACHE_DIR` | Trivy cache directory | `/var/cache/trivy` |
+| Variable                | Description           | Default                 |
+| ----------------------- | --------------------- | ----------------------- |
+| `HARBOR_ADMIN_PASSWORD` | Admin password        | Required                |
+| `HARBOR_DB_PASSWORD`    | PostgreSQL password   | Required                |
+| `HARBOR_CORE_SECRET`    | Core encryption key   | Required                |
+| `COSIGN_BINARY_PATH`    | Path to cosign        | `/usr/local/bin/cosign` |
+| `TRIVY_CACHE_DIR`       | Trivy cache directory | `/var/cache/trivy`      |
 
 ### Customizing Policies
 
@@ -253,8 +254,8 @@ Edit `policies/vulnerability-policy.yaml` to adjust blocking rules:
 ```yaml
 severityRules:
   critical:
-    action: block  # or: warn, log
-    maxAge: "0s"   # Time allowed before blocking
+    action: block # or: warn, log
+    maxAge: "0s" # Time allowed before blocking
 ```
 
 ## Monitoring & Observability
@@ -284,6 +285,7 @@ alerts:
 ### Common Issues
 
 1. **Signature verification fails**
+
    ```bash
    # Check cosign is installed
    cosign version
@@ -295,6 +297,7 @@ alerts:
    ```
 
 2. **SLSA verification fails**
+
    ```bash
    # Check for attestations
    cosign download attestation ghcr.io/org/image:tag
@@ -305,6 +308,7 @@ alerts:
    ```
 
 3. **Harbor won't start**
+
    ```bash
    # Check logs
    docker-compose -f docker-compose.harbor.yaml logs
@@ -315,14 +319,15 @@ alerts:
 
 ## Build Time Tradeoffs
 
-| Feature | Build Time Impact | Runtime Impact | Security Benefit |
-|---------|-------------------|----------------|------------------|
-| Signature Verification | +30-60s per image | None | High |
-| SLSA Verification | +15-30s per image | None | High |
-| Vulnerability Scan | +1-5min per image | None | Critical |
-| Offline Export | +2-10min per image | None | N/A |
+| Feature                | Build Time Impact  | Runtime Impact | Security Benefit |
+| ---------------------- | ------------------ | -------------- | ---------------- |
+| Signature Verification | +30-60s per image  | None           | High             |
+| SLSA Verification      | +15-30s per image  | None           | High             |
+| Vulnerability Scan     | +1-5min per image  | None           | Critical         |
+| Offline Export         | +2-10min per image | None           | N/A              |
 
 **Recommendations:**
+
 - Enable parallel verification (default: 5 concurrent)
 - Cache verification results (default: 1 hour TTL)
 - Pre-warm cache during off-peak hours

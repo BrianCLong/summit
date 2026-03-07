@@ -5,6 +5,7 @@
 **Owner:** Trust Engineering
 
 ## Goal
+
 Radical transparency without operational risk. The public trust dashboard provides a real-time (or near real-time) view into the health and trustworthiness of the Summit platform, derived exclusively from sanitized CI artifacts.
 
 ## Design Principles
@@ -17,33 +18,37 @@ Radical transparency without operational risk. The public trust dashboard provid
 ## Dashboard Sections
 
 ### 1. Build & Release Health
-*   **Current Stable Version:** The latest GA release tag.
-*   **CI Status:** Pass/Fail status of the latest build on `main`.
-*   **Build Latency:** Trendline of CI build times.
-*   **Reproducibility:** Badge indicating if the latest release is SLSA Level 3 compliant.
+
+- **Current Stable Version:** The latest GA release tag.
+- **CI Status:** Pass/Fail status of the latest build on `main`.
+- **Build Latency:** Trendline of CI build times.
+- **Reproducibility:** Badge indicating if the latest release is SLSA Level 3 compliant.
 
 ### 2. Security & Compliance
-*   **Policy Compliance:** % of OPA policies passing.
-*   **Vulnerability Status:** Summary of CVE scan results (e.g., "0 Critical, 0 High").
-*   **SBOM Availability:** Link to the Software Bill of Materials for the latest release.
-*   **Signature Verification:** Instructions/badge for verifying release signatures.
+
+- **Policy Compliance:** % of OPA policies passing.
+- **Vulnerability Status:** Summary of CVE scan results (e.g., "0 Critical, 0 High").
+- **SBOM Availability:** Link to the Software Bill of Materials for the latest release.
+- **Signature Verification:** Instructions/badge for verifying release signatures.
 
 ### 3. Reliability History (Lagged)
-*   **Uptime (Last 30 Days):** Synthetic uptime metric derived from external probes.
-*   **Incident Summary:** Count of public-facing incidents in the last 90 days.
-*   **Post-Mortems:** Links to public post-mortem reports for past incidents.
+
+- **Uptime (Last 30 Days):** Synthetic uptime metric derived from external probes.
+- **Incident Summary:** Count of public-facing incidents in the last 90 days.
+- **Post-Mortems:** Links to public post-mortem reports for past incidents.
 
 ## Implementation Architecture
 
 1.  **CI Exporter:** A GitHub Action workflow runs on every merge/release.
-    *   Collects metrics (test results, scan reports, build times).
-    *   Sanitizes the data (removes internal logs, user IDs, etc.).
-    *   Generates a `trust-snapshot.json` adhering to `trust/trust-snapshot.schema.json`.
-    *   Signs the snapshot with the release key.
+    - Collects metrics (test results, scan reports, build times).
+    - Sanitizes the data (removes internal logs, user IDs, etc.).
+    - Generates a `trust-snapshot.json` adhering to `trust/trust-snapshot.schema.json`.
+    - Signs the snapshot with the release key.
 2.  **Publication:** The signed JSON is pushed to a public storage bucket (e.g., S3) or committed to a `gh-pages` branch.
 3.  **Frontend:** A lightweight, static React/HTML page fetches the `trust-snapshot.json` and renders the metrics.
 
 ## Schema
+
 The dashboard consumes the `Trust Snapshot` JSON artifact defined in `trust/trust-snapshot.schema.json`.
 
 ## Exporter Stub (Concept)
@@ -53,7 +58,7 @@ The dashboard consumes the `Trust Snapshot` JSON artifact defined in `trust/trus
 name: Publish Trust Snapshot
 on:
   schedule:
-    - cron: '0 0 * * *' # Daily
+    - cron: "0 0 * * *" # Daily
   release:
     types: [published]
 

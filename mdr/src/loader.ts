@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import { parse } from 'yaml';
-import { MetricSpec, SpecRecord } from './types';
-import { createSpecSignature } from './utils';
+import fs from "fs";
+import path from "path";
+import { parse } from "yaml";
+import { MetricSpec, SpecRecord } from "./types";
+import { createSpecSignature } from "./utils";
 
 export function loadSpecFromFile(filePath: string): SpecRecord {
-  const content = fs.readFileSync(filePath, 'utf8');
+  const content = fs.readFileSync(filePath, "utf8");
   const parsed = parse(content) as MetricSpec;
-  if (!parsed || typeof parsed !== 'object') {
+  if (!parsed || typeof parsed !== "object") {
     throw new Error(`Invalid spec structure in ${filePath}`);
   }
   validateSpec(parsed, filePath);
@@ -23,7 +23,7 @@ export function discoverSpecFiles(specRoot: string): string[] {
       const abs = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(abs);
-      } else if (entry.isFile() && entry.name.endsWith('.yaml')) {
+      } else if (entry.isFile() && entry.name.endsWith(".yaml")) {
         results.push(abs);
       }
     }
@@ -36,7 +36,7 @@ function validateSpec(spec: MetricSpec, filePath: string): void {
   if (!spec.name) {
     throw new Error(`Spec ${filePath} is missing required field 'name'.`);
   }
-  if (typeof spec.version !== 'number') {
+  if (typeof spec.version !== "number") {
     throw new Error(`Spec ${spec.name} is missing numeric 'version'.`);
   }
   if (!Array.isArray(spec.grain) || spec.grain.length === 0) {

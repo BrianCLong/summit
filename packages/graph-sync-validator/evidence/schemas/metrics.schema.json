@@ -5,8 +5,14 @@
     "totals": {
       "type": "object",
       "properties": {
-        "pg": { "type": "object", "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } } },
-        "neo": { "type": "object", "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } } }
+        "pg": {
+          "type": "object",
+          "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } }
+        },
+        "neo": {
+          "type": "object",
+          "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } }
+        }
       }
     },
     "lagRate": { "type": "number" },

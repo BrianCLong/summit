@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 
 type Props =
   | { incidentId: string; investigationId?: never }
@@ -7,15 +7,15 @@ type Props =
 export default function ExportAuditBundleButton(props: Props) {
   const [loading, setLoading] = useState(false);
   const { href, label } = useMemo(() => {
-    if ('investigationId' in props) {
+    if ("investigationId" in props) {
       return {
         href: `/audit/investigations/${props.investigationId}/audit-bundle.zip`,
-        label: 'Download Audit Bundle',
+        label: "Download Audit Bundle",
       };
     }
     return {
       href: `/audit/incidents/${props.incidentId}/audit-bundle.zip`,
-      label: 'Download Audit Bundle',
+      label: "Download Audit Bundle",
     };
   }, [props]);
 
@@ -26,7 +26,7 @@ export default function ExportAuditBundleButton(props: Props) {
       disabled={loading}
       title="Export includes IDs, hashes, and metadata (reasonCode, appealUrl). Sensitive payloads excluded."
     >
-      {loading ? 'Preparing…' : label}
+      {loading ? "Preparing…" : label}
       {/* Hidden link to trigger download in a new tab without blocking UI */}
       <a
         href={href}

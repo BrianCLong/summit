@@ -19,23 +19,23 @@ The demo performs the following steps:
 1.  **Boot Runtime**: Initializes an in-memory Switchboard instance with an attached Ledger.
 2.  **Register Tool**: Registers a mock "Calculator" tool that supports basic arithmetic.
 3.  **Execute Workflow**:
-    -   Runs `calculator` with `op: 'add'` (10 + 5).
-    -   Runs `calculator` with `op: 'mul'` (10 * 5).
+    - Runs `calculator` with `op: 'add'` (10 + 5).
+    - Runs `calculator` with `op: 'mul'` (10 \* 5).
 4.  **Generate Receipts**:
-    -   Produces a deterministic receipt for each execution using `@summit/receipts`.
-    -   Logs the receipt hash and payload.
+    - Produces a deterministic receipt for each execution using `@summit/receipts`.
+    - Logs the receipt hash and payload.
 5.  **Verify Ledger**:
-    -   Iterates through the local ledger.
-    -   Verifies the cryptographic integrity of each receipt (hash match).
+    - Iterates through the local ledger.
+    - Verifies the cryptographic integrity of each receipt (hash match).
 
 ## ✅ Acceptance Criteria
 
 The demo is considered successful if:
 
--   The command exits with code `0`.
--   Output contains "Switchboard Quickstart Demo".
--   Two receipts are generated and displayed.
--   Ledger verification confirms all receipts are "VALID ✅".
+- The command exits with code `0`.
+- Output contains "Switchboard Quickstart Demo".
+- Two receipts are generated and displayed.
+- Ledger verification confirms all receipts are "VALID ✅".
 
 ## 🛠 Troubleshooting
 

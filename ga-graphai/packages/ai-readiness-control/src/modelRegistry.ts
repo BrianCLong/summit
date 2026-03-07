@@ -1,4 +1,4 @@
-import { ModelVersion } from './types.js';
+import { ModelVersion } from "./types.js";
 
 export class ModelRegistry {
   private readonly models = new Map<string, ModelVersion[]>();

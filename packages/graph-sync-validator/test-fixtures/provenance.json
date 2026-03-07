@@ -1,1 +1,4 @@
-{"subject":[{"name":"artifact","digest":{"sha256":"123"}}],"predicate":{"builder":{"id":"test-builder"}}}
+{
+  "subject": [{ "name": "artifact", "digest": { "sha256": "123" } }],
+  "predicate": { "builder": { "id": "test-builder" } }
+}

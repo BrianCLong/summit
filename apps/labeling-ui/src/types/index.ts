@@ -7,7 +7,7 @@ export interface Dataset {
   name: string;
   description: string;
   version: string;
-  status: 'draft' | 'active' | 'archived' | 'deprecated';
+  status: "draft" | "active" | "archived" | "deprecated";
   taskType: TaskType;
   useCase: string;
   sampleCount: number;
@@ -17,15 +17,15 @@ export interface Dataset {
 }
 
 export type TaskType =
-  | 'entity_match'
-  | 'entity_no_match'
-  | 'cluster_review'
-  | 'claim_assessment'
-  | 'safety_decision'
-  | 'relationship_validation'
-  | 'text_classification'
-  | 'named_entity_recognition'
-  | 'sequence_labeling';
+  | "entity_match"
+  | "entity_no_match"
+  | "cluster_review"
+  | "claim_assessment"
+  | "safety_decision"
+  | "relationship_validation"
+  | "text_classification"
+  | "named_entity_recognition"
+  | "sequence_labeling";
 
 export interface Sample {
   id: string;
@@ -84,12 +84,12 @@ export interface SampleMetadata {
 }
 
 export type LabelStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'completed'
-  | 'needs_review'
-  | 'approved'
-  | 'rejected';
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "needs_review"
+  | "approved"
+  | "rejected";
 
 export interface LabelSet {
   id: string;
@@ -131,14 +131,14 @@ export interface LabelingJob {
 }
 
 export type JobStatus =
-  | 'queued'
-  | 'assigned'
-  | 'in_progress'
-  | 'submitted'
-  | 'under_review'
-  | 'approved'
-  | 'rejected'
-  | 'escalated';
+  | "queued"
+  | "assigned"
+  | "in_progress"
+  | "submitted"
+  | "under_review"
+  | "approved"
+  | "rejected"
+  | "escalated";
 
 export interface Annotator {
   id: string;
@@ -151,7 +151,7 @@ export interface Annotator {
   isActive: boolean;
 }
 
-export type AnnotatorRole = 'annotator' | 'reviewer' | 'admin' | 'quality_lead';
+export type AnnotatorRole = "annotator" | "reviewer" | "admin" | "quality_lead";
 
 export interface AnnotatorMetrics {
   totalLabeled: number;
@@ -181,7 +181,7 @@ export interface LabelingWorkflow {
   description: string;
   datasetId: string;
   taskType: TaskType;
-  status: 'draft' | 'active' | 'paused' | 'completed';
+  status: "draft" | "active" | "paused" | "completed";
   currentStageIndex: number;
   stages: WorkflowStage[];
 }
@@ -189,7 +189,7 @@ export interface LabelingWorkflow {
 export interface WorkflowStage {
   id: string;
   name: string;
-  type: 'annotation' | 'review' | 'adjudication' | 'export';
+  type: "annotation" | "review" | "adjudication" | "export";
   requiredRole: AnnotatorRole;
   minAnnotators: number;
 }

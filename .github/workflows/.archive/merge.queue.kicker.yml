@@ -1,7 +1,7 @@
 name: Merge Queue Kicker
 on:
   workflow_run:
-    workflows: ['CI (green)']
+    workflows: ["CI (green)"]
     types: [completed]
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
         with:
           version: 10.0.0
       - uses: actions/setup-node@v4
-        with: { node-version: '20.14.x' , cache: 'pnpm' }
+        with: { node-version: "20.14.x", cache: "pnpm" }
       - name: Install gh
         uses: cli/gh-action@v2
       - name: Nudge branches that match patterns

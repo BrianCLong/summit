@@ -15,6 +15,7 @@ This guide details the strategy and tools available for optimizing Neo4j queries
 ## Tools
 
 ### 1. Slow Query Analysis
+
 The analysis script profiles a set of critical queries (placeholders currently, should be updated with real logs) and checks for full node scans.
 
 ```bash
@@ -23,6 +24,7 @@ npx ts-node server/src/db/optimization/analysis.ts
 ```
 
 ### 2. Index Advisor
+
 The `GraphIndexAdvisorService` runs in the background (sampled) and records query patterns.
 To apply recommendations:
 
@@ -34,6 +36,7 @@ npx ts-node server/src/scripts/apply_indexes.ts
 ### 3. Native Vector Optimization (Neo4j 2025.01+)
 
 #### Vector Type Constraints
+
 Enforce vector dimensions and types to ensure index stability:
 
 ```cypher
@@ -43,6 +46,7 @@ REQUIRE n.embedding IS :: VECTOR<FLOAT32>(1536);
 ```
 
 #### Vector Search (Cypher 25)
+
 Prefer native `vector.similarity` functions for exact nearest neighbor search, especially when combined with graph filters:
 
 ```cypher
@@ -54,6 +58,7 @@ LIMIT 10
 ```
 
 #### Vector Indexes
+
 For large-scale approximate nearest neighbor (ANN) search, use native vector indexes:
 
 ```cypher
@@ -68,6 +73,7 @@ OPTIONS {
 ```
 
 ### 4. Caching Helper
+
 Use the `withCache` higher-order function in resolvers.
 
 ```typescript
@@ -86,13 +92,13 @@ export const resolvers = {
 
 ## Common Pitfalls
 
--   **N+1 Queries**: Use `DataLoader` (already integrated in context) instead of fetching related nodes in a loop.
--   **Missing Indexes**: Always ensure `id` and `tenantId` are indexed for every label.
--   **Cartesian Products**: Avoid disconnected patterns in `MATCH` clauses.
--   **Large Result Sets**: Always use `SKIP` and `LIMIT`.
+- **N+1 Queries**: Use `DataLoader` (already integrated in context) instead of fetching related nodes in a loop.
+- **Missing Indexes**: Always ensure `id` and `tenantId` are indexed for every label.
+- **Cartesian Products**: Avoid disconnected patterns in `MATCH` clauses.
+- **Large Result Sets**: Always use `SKIP` and `LIMIT`.
 
 ## Troubleshooting
 
--   **High Latency**: Check `neo4j_query_latency_ms` metric. Identify specific slow operations.
--   **Connection Timeouts**: Check `neo4j_active_connections`. Increase pool size if consistently full.
--   **Cache Misses**: Check cache metrics. Adjust TTL or key generation strategy.
+- **High Latency**: Check `neo4j_query_latency_ms` metric. Identify specific slow operations.
+- **Connection Timeouts**: Check `neo4j_active_connections`. Increase pool size if consistently full.
+- **Cache Misses**: Check cache metrics. Adjust TTL or key generation strategy.

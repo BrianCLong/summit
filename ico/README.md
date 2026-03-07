@@ -23,4 +23,3 @@ ICO couples a Python planner, a Go controller, and a TypeScript dashboard to pro
    (cd ico/controller && go test ./...)
    (cd ico/dashboard && npm install && npm test)
    ```
-

@@ -1,5 +1,5 @@
 // Stream resilience utilities for SSE and WebSocket connections
-import React from 'react';
+import React from "react";
 
 export interface StreamOptions {
   maxRetries?: number;
@@ -18,15 +18,15 @@ export interface StreamEvent {
   timestamp: number;
 }
 
-type Logger = Pick<Console, 'log' | 'error' | 'warn' | 'info' | 'debug'>;
+type Logger = Pick<Console, "log" | "error" | "warn" | "info" | "debug">;
 
 export type WebSocketClientState =
-  | 'idle'
-  | 'connecting'
-  | 'connected'
-  | 'reconnecting'
-  | 'disconnected'
-  | 'failed';
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected"
+  | "failed";
 
 export interface WebSocketMetricsCollector {
   record(event: string, attributes?: Record<string, unknown>): void;
@@ -69,7 +69,7 @@ const DEFAULT_OPTIONS: Required<StreamOptions> = {
   backoffMultiplier: 1.5,
   reconnectOnVisibilityChange: true,
   heartbeatInterval: 30000,
-  idempotencyKey: '',
+  idempotencyKey: "",
 };
 
 const DEFAULT_WS_OPTIONS: NormalizedWebSocketOptions = {
@@ -106,10 +106,7 @@ export class ResilientEventSource {
 
     // Handle page visibility changes
     if (this.options.reconnectOnVisibilityChange) {
-      document.addEventListener(
-        'visibilitychange',
-        this.handleVisibilityChange,
-      );
+      document.addEventListener("visibilitychange", this.handleVisibilityChange);
     }
   }
 
@@ -127,7 +124,7 @@ export class ResilientEventSource {
       // Set up heartbeat
       this.startHeartbeat();
     } catch (error) {
-      console.error('Failed to create EventSource:', error);
+      console.error("Failed to create EventSource:", error);
       this.scheduleReconnect();
     }
   }
@@ -150,11 +147,8 @@ export class ResilientEventSource {
     this.eventHandlers.get(event)!.add(handler);
 
     // Register with EventSource if connected
-    if (this.eventSource && event !== 'message') {
-      this.eventSource.addEventListener(
-        event,
-        this.createEventHandler(event, handler),
-      );
+    if (this.eventSource && event !== "message") {
+      this.eventSource.addEventListener(event, this.createEventHandler(event, handler));
     }
   }
 
@@ -189,19 +183,19 @@ export class ResilientEventSource {
   private buildUrlWithLastEventId(): string {
     if (!this.lastEventId) return this.url;
 
-    const separator = this.url.includes('?') ? '&' : '?';
+    const separator = this.url.includes("?") ? "&" : "?";
     return `${this.url}${separator}lastEventId=${encodeURIComponent(this.lastEventId)}`;
   }
 
   private handleOpen = (): void => {
-    console.log('EventSource connected');
+    console.log("EventSource connected");
     this.isConnected = true;
     this.retryCount = 0;
     this.onConnectionChange?.(true);
   };
 
   private handleError = (): void => {
-    console.log('EventSource error, attempting reconnect');
+    console.log("EventSource error, attempting reconnect");
     this.isConnected = false;
     this.onConnectionChange?.(false);
     this.scheduleReconnect();
@@ -224,7 +218,7 @@ export class ResilientEventSource {
       // Check for duplicates using event ID
       if (streamEvent.id) {
         if (this.seenEventIds.has(streamEvent.id)) {
-          console.log('Duplicate event received, skipping:', streamEvent.id);
+          console.log("Duplicate event received, skipping:", streamEvent.id);
           return;
         }
         this.seenEventIds.add(streamEvent.id);
@@ -236,16 +230,13 @@ export class ResilientEventSource {
         }
       }
 
-      this.emit('message', streamEvent);
+      this.emit("message", streamEvent);
     } catch (error) {
-      console.error('Failed to parse SSE message:', error);
+      console.error("Failed to parse SSE message:", error);
     }
   };
 
-  private createEventHandler(
-    eventType: string,
-    handler: (event: StreamEvent) => void,
-  ) {
+  private createEventHandler(eventType: string, handler: (event: StreamEvent) => void) {
     return (event: MessageEvent) => {
       const streamEvent: StreamEvent = {
         id: event.lastEventId,
@@ -264,7 +255,7 @@ export class ResilientEventSource {
         try {
           handler(data);
         } catch (error) {
-          console.error('Error in event handler:', error);
+          console.error("Error in event handler:", error);
         }
       });
     }
@@ -272,18 +263,17 @@ export class ResilientEventSource {
 
   private scheduleReconnect(): void {
     if (this.retryCount >= this.options.maxRetries) {
-      console.error('Maximum retry attempts reached');
+      console.error("Maximum retry attempts reached");
       return;
     }
 
     const delay = Math.min(
-      this.options.initialRetryDelay *
-        Math.pow(this.options.backoffMultiplier, this.retryCount),
-      this.options.maxRetryDelay,
+      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
+      this.options.maxRetryDelay
     );
 
     console.log(
-      `Reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`,
+      `Reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`
     );
 
     this.reconnectTimer = setTimeout(() => {
@@ -295,11 +285,8 @@ export class ResilientEventSource {
   private startHeartbeat(): void {
     this.clearHeartbeat();
     this.heartbeatTimer = setInterval(() => {
-      if (
-        !this.isConnected &&
-        this.eventSource?.readyState !== EventSource.OPEN
-      ) {
-        console.log('Heartbeat detected disconnection');
+      if (!this.isConnected && this.eventSource?.readyState !== EventSource.OPEN) {
+        console.log("Heartbeat detected disconnection");
         this.handleError();
       }
     }, this.options.heartbeatInterval);
@@ -321,18 +308,15 @@ export class ResilientEventSource {
   }
 
   private handleVisibilityChange = (): void => {
-    if (document.visibilityState === 'visible' && !this.isConnected) {
-      console.log('Page became visible, reconnecting');
+    if (document.visibilityState === "visible" && !this.isConnected) {
+      console.log("Page became visible, reconnecting");
       this.connect();
     }
   };
 
   destroy(): void {
     this.disconnect();
-    document.removeEventListener(
-      'visibilitychange',
-      this.handleVisibilityChange,
-    );
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     this.eventHandlers.clear();
     this.seenEventIds.clear();
   }
@@ -357,7 +341,7 @@ export class ResilientWebSocket {
   private monitorTimer: NodeJS.Timeout | null = null;
   private queueFlushTimer: NodeJS.Timeout | null = null;
   private pongReceived = true;
-  private state: WebSocketClientState = 'idle';
+  private state: WebSocketClientState = "idle";
   private messageQueue: QueuedWebSocketMessage[] = [];
   private eventHandlers = new Map<string, Set<(data: any) => void>>();
   private onConnectionChange?: (connected: boolean) => void;
@@ -370,11 +354,7 @@ export class ResilientWebSocket {
   private lastResolvedUrl: string;
   private hasVisibilityListener = false;
 
-  constructor(
-    url: string,
-    protocols?: string | string[],
-    options: WebSocketOptions = {},
-  ) {
+  constructor(url: string, protocols?: string | string[], options: WebSocketOptions = {}) {
     this.url = url;
     this.protocols = protocols;
     const meshEndpoints =
@@ -397,16 +377,15 @@ export class ResilientWebSocket {
   connect(): void {
     this.manualClose = false;
     this.clearReconnectTimer();
-    const nextState: WebSocketClientState =
-      this.retryCount === 0 ? 'connecting' : 'reconnecting';
+    const nextState: WebSocketClientState = this.retryCount === 0 ? "connecting" : "reconnecting";
     this.updateState(nextState, { attempt: this.retryCount + 1 });
     this.openSocket();
   }
 
-  disconnect(reason = 'Manual disconnect'): void {
+  disconnect(reason = "Manual disconnect"): void {
     this.manualClose = true;
-    if (this.state !== 'disconnected') {
-      this.updateState('disconnected', { reason });
+    if (this.state !== "disconnected") {
+      this.updateState("disconnected", { reason });
     }
     this.disconnectSocketOnly(reason);
     this.clearTimers();
@@ -417,7 +396,7 @@ export class ResilientWebSocket {
     this.refillTokens();
     const serialized = this.serializeMessage(data);
     if (
-      this.state === 'connected' &&
+      this.state === "connected" &&
       this.ws &&
       this.ws.readyState === WebSocket.OPEN &&
       this.hasCapacity()
@@ -452,8 +431,8 @@ export class ResilientWebSocket {
     this.onConnectionChange = callback;
   }
 
-  notifyNetworkChange(status: 'online' | 'offline'): void {
-    if (status === 'offline') {
+  notifyNetworkChange(status: "online" | "offline"): void {
+    if (status === "offline") {
       this.handleNetworkOffline();
     } else {
       this.handleNetworkOnline();
@@ -471,7 +450,7 @@ export class ResilientWebSocket {
   }
 
   destroy(): void {
-    this.disconnect('Destroyed');
+    this.disconnect("Destroyed");
     this.removeNetworkListeners();
     this.eventHandlers.clear();
     this.messageQueue = [];
@@ -488,85 +467,72 @@ export class ResilientWebSocket {
       this.ws.onmessage = this.handleMessage;
       this.startConnectTimeout();
     } catch (error) {
-      this.logger.error?.('Failed to create WebSocket:', error);
-      this.options.metricsCollector?.record('connect_error', {
-        message: error instanceof Error ? error.message : 'unknown',
+      this.logger.error?.("Failed to create WebSocket:", error);
+      this.options.metricsCollector?.record("connect_error", {
+        message: error instanceof Error ? error.message : "unknown",
       });
-      this.scheduleReconnect('creation_error');
+      this.scheduleReconnect("creation_error");
     }
   }
 
-  private disconnectSocketOnly(reason = 'Manual disconnect'): void {
+  private disconnectSocketOnly(reason = "Manual disconnect"): void {
     if (this.ws) {
       try {
         this.ws.close(1000, reason);
       } catch (error) {
-        this.logger.warn?.(
-          `Failed to close WebSocket cleanly: ${String(error)}`,
-        );
+        this.logger.warn?.(`Failed to close WebSocket cleanly: ${String(error)}`);
       }
       this.ws = null;
     }
   }
 
   private setupNetworkListeners(): void {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', this.handleNetworkOnline);
-      window.addEventListener('offline', this.handleNetworkOffline);
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", this.handleNetworkOnline);
+      window.addEventListener("offline", this.handleNetworkOffline);
     }
-    if (
-      typeof document !== 'undefined' &&
-      this.options.reconnectOnVisibilityChange
-    ) {
-      document.addEventListener(
-        'visibilitychange',
-        this.handleVisibilityChange,
-      );
+    if (typeof document !== "undefined" && this.options.reconnectOnVisibilityChange) {
+      document.addEventListener("visibilitychange", this.handleVisibilityChange);
       this.hasVisibilityListener = true;
     }
   }
 
   private removeNetworkListeners(): void {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('online', this.handleNetworkOnline);
-      window.removeEventListener('offline', this.handleNetworkOffline);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("online", this.handleNetworkOnline);
+      window.removeEventListener("offline", this.handleNetworkOffline);
     }
-    if (typeof document !== 'undefined' && this.hasVisibilityListener) {
-      document.removeEventListener(
-        'visibilitychange',
-        this.handleVisibilityChange,
-      );
+    if (typeof document !== "undefined" && this.hasVisibilityListener) {
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
       this.hasVisibilityListener = false;
     }
   }
 
   private handleVisibilityChange = (): void => {
-    if (typeof document === 'undefined') {
+    if (typeof document === "undefined") {
       return;
     }
-    if (document.visibilityState === 'visible' && this.state !== 'connected') {
-      this.logger.info?.(
-        'Document became visible; verifying WebSocket connectivity',
-      );
-      this.scheduleReconnect('visibility');
+    if (document.visibilityState === "visible" && this.state !== "connected") {
+      this.logger.info?.("Document became visible; verifying WebSocket connectivity");
+      this.scheduleReconnect("visibility");
     }
   };
 
   private handleNetworkOnline = (): void => {
     this.offlineSince = null;
-    this.options.metricsCollector?.record('browser_online', {});
-    if (this.state !== 'connected') {
-      this.scheduleReconnect('network_online');
+    this.options.metricsCollector?.record("browser_online", {});
+    if (this.state !== "connected") {
+      this.scheduleReconnect("network_online");
     }
   };
 
   private handleNetworkOffline = (): void => {
     this.offlineSince = Date.now();
-    this.options.metricsCollector?.record('browser_offline', {});
-    if (this.state === 'connected') {
-      this.connectionLoss('network_offline');
+    this.options.metricsCollector?.record("browser_offline", {});
+    if (this.state === "connected") {
+      this.connectionLoss("network_offline");
     } else {
-      this.scheduleReconnect('network_offline');
+      this.scheduleReconnect("network_offline");
     }
   };
 
@@ -575,8 +541,8 @@ export class ResilientWebSocket {
     this.clearReconnectTimer();
     this.tokens = this.options.rateLimitPerSecond;
     this.pongReceived = true;
-    this.updateState('connected', { endpoint: this.lastResolvedUrl });
-    this.options.metricsCollector?.record('connected', {
+    this.updateState("connected", { endpoint: this.lastResolvedUrl });
+    this.options.metricsCollector?.record("connected", {
       endpoint: this.lastResolvedUrl,
     });
     this.flushQueue();
@@ -585,7 +551,7 @@ export class ResilientWebSocket {
   };
 
   private handleClose = (event: CloseEvent): void => {
-    this.options.metricsCollector?.record('closed', {
+    this.options.metricsCollector?.record("closed", {
       code: event.code,
       reason: event.reason,
     });
@@ -598,60 +564,54 @@ export class ResilientWebSocket {
   };
 
   private handleError = (event: Event): void => {
-    const message = (event as ErrorEvent)?.message || 'unknown';
+    const message = (event as ErrorEvent)?.message || "unknown";
     this.logger.warn?.(`WebSocket error encountered: ${message}`);
-    this.options.metricsCollector?.record('socket_error', { message });
-    this.connectionLoss('error');
+    this.options.metricsCollector?.record("socket_error", { message });
+    this.connectionLoss("error");
   };
 
   private handleMessage = (event: MessageEvent): void => {
     const raw = event.data;
     try {
-      const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      if (data?.type === 'pong') {
+      const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (data?.type === "pong") {
         this.pongReceived = true;
-        this.options.metricsCollector?.record('pong', {
-          latency:
-            typeof data.timestamp === 'number'
-              ? Date.now() - data.timestamp
-              : undefined,
+        this.options.metricsCollector?.record("pong", {
+          latency: typeof data.timestamp === "number" ? Date.now() - data.timestamp : undefined,
         });
         return;
       }
-      this.emit('message', data);
+      this.emit("message", data);
       if (data?.type) {
         this.emit(data.type, data);
       }
     } catch (error) {
-      this.logger.error?.('Failed to parse WebSocket message:', error);
-      this.emit('message', raw);
+      this.logger.error?.("Failed to parse WebSocket message:", error);
+      this.emit("message", raw);
     }
   };
 
-  private updateState(
-    state: WebSocketClientState,
-    context?: Record<string, unknown>,
-  ): void {
+  private updateState(state: WebSocketClientState, context?: Record<string, unknown>): void {
     if (this.state === state) {
       return;
     }
     const previous = this.state;
     this.state = state;
-    const isConnected = state === 'connected';
-    const wasConnected = previous === 'connected';
+    const isConnected = state === "connected";
+    const wasConnected = previous === "connected";
     if (isConnected) {
       this.retryCount = 0;
     }
     if (this.onConnectionChange && isConnected !== wasConnected) {
       this.onConnectionChange(isConnected);
     }
-    this.emit('state-change', {
+    this.emit("state-change", {
       state,
       previous,
       timestamp: Date.now(),
       context,
     });
-    this.options.metricsCollector?.record('state_change', {
+    this.options.metricsCollector?.record("state_change", {
       state,
       previous,
       ...context,
@@ -665,7 +625,7 @@ export class ResilientWebSocket {
       return false;
     }
     if (this.ws.bufferedAmount > this.options.backpressureThreshold) {
-      this.options.metricsCollector?.record('client_backpressure', {
+      this.options.metricsCollector?.record("client_backpressure", {
         bufferedAmount: this.ws.bufferedAmount,
         threshold: this.options.backpressureThreshold,
       });
@@ -678,7 +638,7 @@ export class ResilientWebSocket {
     serialized: string,
     raw: any,
     fromQueue: boolean,
-    enqueuedAt?: number,
+    enqueuedAt?: number
   ): boolean {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return false;
@@ -687,7 +647,7 @@ export class ResilientWebSocket {
       return false;
     }
     if (this.ws.bufferedAmount > this.options.backpressureThreshold) {
-      this.options.metricsCollector?.record('client_backpressure', {
+      this.options.metricsCollector?.record("client_backpressure", {
         bufferedAmount: this.ws.bufferedAmount,
         threshold: this.options.backpressureThreshold,
       });
@@ -696,7 +656,7 @@ export class ResilientWebSocket {
     try {
       this.ws.send(serialized);
       this.tokens = Math.max(0, this.tokens - 1);
-      this.options.metricsCollector?.record('message_sent', {
+      this.options.metricsCollector?.record("message_sent", {
         fromQueue,
         queueDepth: this.messageQueue.length,
         endpoint: this.lastResolvedUrl,
@@ -704,9 +664,9 @@ export class ResilientWebSocket {
       });
       return true;
     } catch (error) {
-      this.logger.error?.('Failed to send WebSocket message:', error);
-      this.options.metricsCollector?.record('send_error', {
-        message: error instanceof Error ? error.message : 'unknown',
+      this.logger.error?.("Failed to send WebSocket message:", error);
+      this.options.metricsCollector?.record("send_error", {
+        message: error instanceof Error ? error.message : "unknown",
       });
       return false;
     }
@@ -715,10 +675,8 @@ export class ResilientWebSocket {
   private enqueue(serialized: string, raw: any): void {
     if (this.messageQueue.length >= this.options.maxQueueSize) {
       this.messageQueue.shift();
-      this.logger.warn?.(
-        'Dropping queued WebSocket message due to queue capacity',
-      );
-      this.options.metricsCollector?.record('queue_dropped', {
+      this.logger.warn?.("Dropping queued WebSocket message due to queue capacity");
+      this.options.metricsCollector?.record("queue_dropped", {
         maxQueueSize: this.options.maxQueueSize,
       });
     }
@@ -728,7 +686,7 @@ export class ResilientWebSocket {
       enqueuedAt: Date.now(),
       attempts: 1,
     });
-    this.options.metricsCollector?.record('message_queued', {
+    this.options.metricsCollector?.record("message_queued", {
       queueDepth: this.messageQueue.length,
       state: this.state,
     });
@@ -746,7 +704,7 @@ export class ResilientWebSocket {
   }
 
   private flushQueue(): void {
-    if (this.state !== 'connected' || !this.ws) {
+    if (this.state !== "connected" || !this.ws) {
       return;
     }
     this.refillTokens();
@@ -754,12 +712,7 @@ export class ResilientWebSocket {
     let failureIndex = -1;
     for (let index = 0; index < batch.length; index += 1) {
       const item = batch[index];
-      const success = this.performSend(
-        item.serialized,
-        item.raw,
-        true,
-        item.enqueuedAt,
-      );
+      const success = this.performSend(item.serialized, item.raw, true, item.enqueuedAt);
       if (!success) {
         item.attempts += 1;
         failureIndex = index;
@@ -773,16 +726,15 @@ export class ResilientWebSocket {
     } else if (this.messageQueue.length > 0) {
       this.scheduleQueueFlush();
     }
-    this.options.metricsCollector?.record('queue_depth', {
+    this.options.metricsCollector?.record("queue_depth", {
       queueDepth: this.messageQueue.length,
     });
   }
 
   private computeReconnectDelay(): number {
     const base = Math.min(
-      this.options.initialRetryDelay *
-        Math.pow(this.options.backoffMultiplier, this.retryCount),
-      this.options.maxRetryDelay,
+      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
+      this.options.maxRetryDelay
     );
     const jitter = base * this.options.jitter;
     const delay = base + (Math.random() * jitter - jitter / 2);
@@ -794,25 +746,25 @@ export class ResilientWebSocket {
 
   private scheduleReconnect(reason: string): void {
     if (this.retryCount >= this.options.maxRetries) {
-      this.updateState('failed', { reason });
-      this.emit('error', {
-        type: 'reconnect_failed',
-        message: 'Maximum WebSocket retry attempts reached',
+      this.updateState("failed", { reason });
+      this.emit("error", {
+        type: "reconnect_failed",
+        message: "Maximum WebSocket retry attempts reached",
         reason,
       });
-      this.options.metricsCollector?.record('reconnect_exhausted', { reason });
+      this.options.metricsCollector?.record("reconnect_exhausted", { reason });
       return;
     }
     this.clearReconnectTimer();
     const delay = this.computeReconnectDelay();
-    this.options.metricsCollector?.record('reconnect_scheduled', {
+    this.options.metricsCollector?.record("reconnect_scheduled", {
       reason,
       delay,
       attempt: this.retryCount + 1,
       nextEndpoint: this.getNextEndpointPreview(),
     });
     this.logger.warn?.(
-      `WebSocket reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries}) due to ${reason}`,
+      `WebSocket reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries}) due to ${reason}`
     );
     this.reconnectTimer = setTimeout(() => {
       this.retryCount += 1;
@@ -832,17 +784,15 @@ export class ResilientWebSocket {
       try {
         this.ws.close(4000, reason);
       } catch (error) {
-        this.logger.warn?.(
-          `Error while closing WebSocket after loss: ${String(error)}`,
-        );
+        this.logger.warn?.(`Error while closing WebSocket after loss: ${String(error)}`);
       }
       this.ws = null;
     }
-    this.options.metricsCollector?.record('connection_lost', {
+    this.options.metricsCollector?.record("connection_lost", {
       reason,
       attempt: this.retryCount + 1,
     });
-    this.updateState('reconnecting', { reason });
+    this.updateState("reconnecting", { reason });
     this.scheduleReconnect(reason);
   }
 
@@ -856,11 +806,11 @@ export class ResilientWebSocket {
   private startConnectTimeout(): void {
     this.clearConnectTimeout();
     this.connectTimeoutTimer = setTimeout(() => {
-      this.options.metricsCollector?.record('connect_timeout', {
+      this.options.metricsCollector?.record("connect_timeout", {
         url: this.lastResolvedUrl,
       });
-      this.logger.warn?.('WebSocket connection attempt timed out');
-      this.connectionLoss('connect_timeout');
+      this.logger.warn?.("WebSocket connection attempt timed out");
+      this.connectionLoss("connect_timeout");
     }, this.options.connectTimeout);
   }
 
@@ -878,15 +828,15 @@ export class ResilientWebSocket {
         return;
       }
       if (!this.pongReceived) {
-        this.logger.warn?.('Pong not received, forcing WebSocket reconnect');
-        this.connectionLoss('heartbeat_timeout');
+        this.logger.warn?.("Pong not received, forcing WebSocket reconnect");
+        this.connectionLoss("heartbeat_timeout");
         return;
       }
       this.pongReceived = false;
       try {
-        this.ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
+        this.ws.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
       } catch (error) {
-        this.logger.error?.('Failed to send ping frame:', error);
+        this.logger.error?.("Failed to send ping frame:", error);
       }
     }, this.options.heartbeatInterval);
   }
@@ -901,7 +851,7 @@ export class ResilientWebSocket {
   private startMonitoring(): void {
     this.stopMonitoring();
     this.monitorTimer = setInterval(() => {
-      this.options.metricsCollector?.record('connection_snapshot', {
+      this.options.metricsCollector?.record("connection_snapshot", {
         state: this.state,
         queueDepth: this.messageQueue.length,
         bufferedAmount: this.ws?.bufferedAmount ?? 0,
@@ -940,7 +890,7 @@ export class ResilientWebSocket {
     }
     this.tokens = Math.min(
       this.options.rateLimitPerSecond,
-      this.tokens + elapsedSeconds * this.options.rateLimitPerSecond,
+      this.tokens + elapsedSeconds * this.options.rateLimitPerSecond
     );
     this.lastTokenRefill = now;
   }
@@ -951,25 +901,23 @@ export class ResilientWebSocket {
       return this.lastResolvedUrl;
     }
     const candidate =
-      this.options.meshEndpoints[
-        this.currentEndpointIndex % this.options.meshEndpoints.length
-      ];
+      this.options.meshEndpoints[this.currentEndpointIndex % this.options.meshEndpoints.length];
     if (!candidate) {
       this.lastResolvedUrl = this.url;
       return this.lastResolvedUrl;
     }
-    if (candidate.includes('{path}')) {
-      const path = this.url.replace(/^wss?:\/\//, '');
-      this.lastResolvedUrl = candidate.replace('{path}', path);
+    if (candidate.includes("{path}")) {
+      const path = this.url.replace(/^wss?:\/\//, "");
+      this.lastResolvedUrl = candidate.replace("{path}", path);
       return this.lastResolvedUrl;
     }
-    if (candidate.startsWith('ws://') || candidate.startsWith('wss://')) {
+    if (candidate.startsWith("ws://") || candidate.startsWith("wss://")) {
       this.lastResolvedUrl = candidate;
       return this.lastResolvedUrl;
     }
     try {
       const reference = new URL(this.url);
-      const base = candidate.endsWith('/') ? candidate.slice(0, -1) : candidate;
+      const base = candidate.endsWith("/") ? candidate.slice(0, -1) : candidate;
       this.lastResolvedUrl = `${base}${reference.pathname}${reference.search}${reference.hash}`;
       return this.lastResolvedUrl;
     } catch (error) {
@@ -982,26 +930,22 @@ export class ResilientWebSocket {
     if (!this.options.meshEndpoints.length) {
       return this.url;
     }
-    const nextIndex =
-      (this.currentEndpointIndex + 1) % this.options.meshEndpoints.length;
+    const nextIndex = (this.currentEndpointIndex + 1) % this.options.meshEndpoints.length;
     return this.options.meshEndpoints[nextIndex] ?? this.url;
   }
 
   private serializeMessage(data: any): string {
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       return data;
     }
     try {
       return JSON.stringify(data);
     } catch (error) {
-      this.logger.error?.(
-        'Failed to serialize WebSocket message payload:',
-        error,
-      );
-      this.options.metricsCollector?.record('serialization_error', {
-        message: error instanceof Error ? error.message : 'unknown',
+      this.logger.error?.("Failed to serialize WebSocket message payload:", error);
+      this.options.metricsCollector?.record("serialization_error", {
+        message: error instanceof Error ? error.message : "unknown",
       });
-      return JSON.stringify({ type: 'unserializable', payload: String(error) });
+      return JSON.stringify({ type: "unserializable", payload: String(error) });
     }
   }
 
@@ -1012,7 +956,7 @@ export class ResilientWebSocket {
         try {
           handler(data);
         } catch (error) {
-          this.logger.error?.('Error in WebSocket event handler:', error);
+          this.logger.error?.("Error in WebSocket event handler:", error);
         }
       });
     }
@@ -1048,7 +992,7 @@ export class WebSocketConnectionPool {
     id: string,
     url: string,
     protocols?: string | string[],
-    options: WebSocketOptions = {},
+    options: WebSocketOptions = {}
   ): ResilientWebSocket {
     const existing = this.connections.get(id);
     if (existing) {
@@ -1065,8 +1009,8 @@ export class WebSocketConnectionPool {
     }
 
     const socket = new ResilientWebSocket(url, protocols, mergedOptions);
-    socket.on('state-change', (payload) => {
-      this.metricsCollector?.record('pool_state_change', {
+    socket.on("state-change", (payload) => {
+      this.metricsCollector?.record("pool_state_change", {
         id,
         ...(payload as Record<string, unknown>),
       });
@@ -1100,26 +1044,20 @@ export class WebSocketConnectionPool {
     }
   }
 
-  notifyNetworkChange(status: 'online' | 'offline'): void {
+  notifyNetworkChange(status: "online" | "offline"): void {
     for (const { socket } of this.connections.values()) {
       socket.notifyNetworkChange(status);
     }
   }
 
-  disconnectAll(reason = 'Pool shutdown'): void {
+  disconnectAll(reason = "Pool shutdown"): void {
     for (const { socket } of this.connections.values()) {
       socket.disconnect(reason);
     }
   }
 
-  getDiagnostics(): Record<
-    string,
-    ReturnType<ResilientWebSocket['getSnapshot']>
-  > {
-    const diagnostics: Record<
-      string,
-      ReturnType<ResilientWebSocket['getSnapshot']>
-    > = {};
+  getDiagnostics(): Record<string, ReturnType<ResilientWebSocket["getSnapshot"]>> {
+    const diagnostics: Record<string, ReturnType<ResilientWebSocket["getSnapshot"]>> = {};
     for (const [id, { socket }] of this.connections.entries()) {
       diagnostics[id] = socket.getSnapshot();
     }
@@ -1127,12 +1065,8 @@ export class WebSocketConnectionPool {
   }
 }
 // React hook for resilient streaming
-export const useResilientStream = (
-  url: string,
-  options: StreamOptions = {},
-) => {
-  const [connection, setConnection] =
-    React.useState<ResilientEventSource | null>(null);
+export const useResilientStream = (url: string, options: StreamOptions = {}) => {
+  const [connection, setConnection] = React.useState<ResilientEventSource | null>(null);
   const [connected, setConnected] = React.useState(false);
   const [events, setEvents] = React.useState<StreamEvent[]>([]);
   const [error, setError] = React.useState<string | null>(null);
@@ -1142,16 +1076,16 @@ export const useResilientStream = (
 
     stream.onConnectionChange((isConnected) => {
       setConnected(isConnected);
-      setError(isConnected ? null : 'Connection lost');
+      setError(isConnected ? null : "Connection lost");
     });
 
-    stream.on('message', (event) => {
+    stream.on("message", (event) => {
       setEvents((prev) => [...prev.slice(-99), event]); // Keep last 100 events
       setError(null);
     });
 
-    stream.on('error', (event) => {
-      setError(event.data?.message || 'Stream error');
+    stream.on("error", (event) => {
+      setError(event.data?.message || "Stream error");
     });
 
     stream.connect();

@@ -9,7 +9,5 @@
     "Public reporting cites thousands of inauthentic profiles within the analyzed dataset.",
     "Reported narrative framing shifted from normalizing intervention to describing the capture as illegal kidnapping."
   ],
-  "limitations": [
-    "Source dataset methods are Deferred pending direct report appendix ingestion."
-  ]
+  "limitations": ["Source dataset methods are Deferred pending direct report appendix ingestion."]
 }

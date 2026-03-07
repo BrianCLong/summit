@@ -1,5 +1,5 @@
-import { QueueJob, QueueProvider, EnqueueReceipt } from './provider';
-import * as crypto from 'crypto';
+import { QueueJob, QueueProvider, EnqueueReceipt } from "./provider";
+import * as crypto from "crypto";
 
 export interface GovernanceConfig {
   maxRetries: number;
@@ -16,7 +16,7 @@ export class GovernedQueueProvider implements QueueProvider {
   }
 
   private hashPayload(payload: any): string {
-    return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+    return crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   }
 
   async enqueue(job: QueueJob): Promise<EnqueueReceipt> {

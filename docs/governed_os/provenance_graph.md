@@ -1,6 +1,7 @@
 # Provenance Graph
 
 ## Definition
+
 The Provenance Graph is the authoritative evidence lineage system for Summit. It captures how
 every output is derived, including dataset and model fingerprints, transformations, and
 citations. The Provenance Graph ensures all citations resolve to evidence hashes and enables
@@ -38,6 +39,7 @@ Evidence bundles are stored under:
 `evidence/EVID-GOVOS-YYYYMMDD-<slug>-<gitsha7>/`
 
 Required files:
+
 - `report.json`
 - `metrics.json`
 - `stamp.json`

@@ -55,4 +55,3 @@ All claims reference `docs/SUMMIT_READINESS_ASSERTION.md` and the Meta-Governanc
 - [ ] All claims have citations; no uncited competitive assertions.
 - [ ] PR stack order and intent recorded in `docs/ci/evidence/<target_slug>/DECISIONS.md`.
 - [ ] GA readiness preserved; no bypass of security or evidence gates.
-

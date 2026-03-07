@@ -6,7 +6,7 @@
 
 export class Omniscience {
   constructor() {
-    console.log('👁️ TIER-9: Omniscience Module Initialized');
+    console.log("👁️ TIER-9: Omniscience Module Initialized");
   }
 
   public log(level: string, message: string, meta: any = {}) {

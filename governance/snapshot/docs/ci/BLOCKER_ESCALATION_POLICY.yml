@@ -10,19 +10,19 @@ version: "1.0.0"
 thresholds:
   # P0 (Blocked) - Critical blockers preventing release
   p0:
-    warn: 60           # 1 hour: add initial escalation label
-    escalate: 240      # 4 hours: escalate with stronger labels
-    page: 480          # 8 hours: (optional) trigger paging/alerting
+    warn: 60 # 1 hour: add initial escalation label
+    escalate: 240 # 4 hours: escalate with stronger labels
+    page: 480 # 8 hours: (optional) trigger paging/alerting
 
   # P1 (Queued/Pending) - Non-critical but attention needed
   p1:
-    warn: 240          # 4 hours: add initial escalation label
-    escalate: 720      # 12 hours: escalate with stronger labels
+    warn: 240 # 4 hours: add initial escalation label
+    escalate: 720 # 12 hours: escalate with stronger labels
 
 # Update cadence to prevent spam
 update_cadence:
-  min_minutes_between_updates: 60    # Don't update more than once per hour
-  force_update_on_escalation: true   # Always update when escalation level changes
+  min_minutes_between_updates: 60 # Don't update more than once per hour
+  force_update_on_escalation: true # Always update when escalation level changes
 
 # Labels applied at each escalation level
 labels:
@@ -69,16 +69,16 @@ notifications:
 # Must match the fingerprint scheme in raise_blocked_release_issues
 fingerprint:
   fields:
-    - "release_line"       # e.g., "main", "release/v4.1.2"
-    - "blocking_sha"       # commit SHA that is blocked
-    - "blocking_workflow"  # workflow name that is failing/queued
-    - "blocking_job"       # job name within the workflow
-    - "blocker_category"   # "failed" | "queued" | "pending"
+    - "release_line" # e.g., "main", "release/v4.1.2"
+    - "blocking_sha" # commit SHA that is blocked
+    - "blocking_workflow" # workflow name that is failing/queued
+    - "blocking_job" # job name within the workflow
+    - "blocker_category" # "failed" | "queued" | "pending"
 
 # Auto-resolution settings
 resolution:
   # Automatically close issues when blocker is resolved
-  auto_close: false        # Set to true to enable auto-close
+  auto_close: false # Set to true to enable auto-close
   # Comment to add when auto-closing
   close_comment: "Blocker resolved. Release line is now promotable."
   # Labels to add when resolved (before closing)

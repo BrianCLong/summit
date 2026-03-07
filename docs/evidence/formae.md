@@ -16,13 +16,13 @@ Capture, constrain, and verify external claims before implementation lock.
 
 ## Claim Table
 
-| Claim ID | Abstracted Claim | Verification Status | Notes |
-| --- | --- | --- | --- |
-| ITEM:CLAIM-01 | Formae introduces a multi-cloud control plane | Pending | Validate by direct capture and quote extraction |
-| ITEM:CLAIM-02 | Focus includes cross-cloud orchestration/governance | Pending | Validate specific governance scope |
-| ITEM:CLAIM-03 | Unified abstraction layer across providers | Pending | Confirm provider list and interface model |
-| ITEM:CLAIM-04 | Kubernetes/cloud-native alignment likely | Pending | Confirm explicit Kubernetes integration |
-| ITEM:CLAIM-05 | Enterprise complexity reduction target | Pending | Confirm enterprise positioning language |
+| Claim ID      | Abstracted Claim                                    | Verification Status | Notes                                           |
+| ------------- | --------------------------------------------------- | ------------------- | ----------------------------------------------- |
+| ITEM:CLAIM-01 | Formae introduces a multi-cloud control plane       | Pending             | Validate by direct capture and quote extraction |
+| ITEM:CLAIM-02 | Focus includes cross-cloud orchestration/governance | Pending             | Validate specific governance scope              |
+| ITEM:CLAIM-03 | Unified abstraction layer across providers          | Pending             | Confirm provider list and interface model       |
+| ITEM:CLAIM-04 | Kubernetes/cloud-native alignment likely            | Pending             | Confirm explicit Kubernetes integration         |
+| ITEM:CLAIM-05 | Enterprise complexity reduction target              | Pending             | Confirm enterprise positioning language         |
 
 ## Validation Protocol
 

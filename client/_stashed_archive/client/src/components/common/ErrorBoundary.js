@@ -1,5 +1,5 @@
-import React from 'react';
-import { Alert, Container, Typography, Button, Box } from '@mui/material';
+import React from "react";
+import { Alert, Container, Typography, Button, Box } from "@mui/material";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -13,7 +13,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     this.setState({ error, errorInfo });
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
   render() {
@@ -26,26 +26,21 @@ class ErrorBoundary extends React.Component {
 
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" gutterBottom>
-              The application encountered an unexpected error. Please refresh
-              the page to try again.
+              The application encountered an unexpected error. Please refresh the page to try again.
             </Typography>
 
-            <Button
-              variant="contained"
-              onClick={() => window.location.reload()}
-              sx={{ mt: 2 }}
-            >
+            <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
               Refresh Page
             </Button>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {process.env.NODE_ENV === "development" && this.state.error && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2">Error Details:</Typography>
                 <pre
                   style={{
-                    fontSize: '12px',
-                    overflow: 'auto',
-                    maxHeight: '200px',
+                    fontSize: "12px",
+                    overflow: "auto",
+                    maxHeight: "200px",
                   }}
                 >
                   {this.state.error.toString()}

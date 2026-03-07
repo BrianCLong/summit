@@ -1,14 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-  Stack,
-  Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+import React, { useMemo, useState } from "react";
+import { Box, Card, CardActionArea, CardContent, Chip, Stack, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 type Workspace = {
   id: string;
@@ -21,26 +13,26 @@ export default function Workspaces() {
   const workspaces = useMemo<Workspace[]>(
     () => [
       {
-        id: 'ops',
-        name: 'Operations',
-        description: 'Live missions, tasking, and joint coordination.',
-        badge: 'Primary',
+        id: "ops",
+        name: "Operations",
+        description: "Live missions, tasking, and joint coordination.",
+        badge: "Primary",
       },
       {
-        id: 'fraud',
-        name: 'Financial Crimes',
-        description: 'Fraud, AML, and sanctions investigations.',
+        id: "fraud",
+        name: "Financial Crimes",
+        description: "Fraud, AML, and sanctions investigations.",
       },
       {
-        id: 'cyber',
-        name: 'Cyber Defense',
-        description: 'Detections, investigations, and incident response.',
+        id: "cyber",
+        name: "Cyber Defense",
+        description: "Detections, investigations, and incident response.",
       },
     ],
-    [],
+    []
   );
 
-  const [active, setActive] = useState('ops');
+  const [active, setActive] = useState("ops");
 
   return (
     <Box sx={{ py: 2 }}>
@@ -48,17 +40,16 @@ export default function Workspaces() {
         Workspaces
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-        Switch context without leaving your current page. Commands preserve the
-        browser history so back navigation continues to work.
+        Switch context without leaving your current page. Commands preserve the browser history so
+        back navigation continues to work.
       </Typography>
       <Grid container spacing={2}>
         {workspaces.map((workspace) => (
           <Grid xs={12} md={4} key={workspace.id}>
             <Card
-              variant={active === workspace.id ? 'outlined' : undefined}
+              variant={active === workspace.id ? "outlined" : undefined}
               sx={{
-                borderColor:
-                  active === workspace.id ? 'primary.main' : 'divider',
+                borderColor: active === workspace.id ? "primary.main" : "divider",
               }}
             >
               <CardActionArea onClick={() => setActive(workspace.id)}>
@@ -73,11 +64,7 @@ export default function Workspaces() {
                     {workspace.description}
                   </Typography>
                   {active === workspace.id && (
-                    <Typography
-                      variant="caption"
-                      color="primary"
-                      sx={{ display: 'block', mt: 1 }}
-                    >
+                    <Typography variant="caption" color="primary" sx={{ display: "block", mt: 1 }}>
                       Active workspace
                     </Typography>
                   )}

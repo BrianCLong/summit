@@ -3,11 +3,11 @@
  * SQL query execution and optimization for lakehouse
  */
 
-import { QueryPlan, Filter } from './types.js';
-import { BaseTable } from './table-formats/base-table.js';
-import pino from 'pino';
+import { QueryPlan, Filter } from "./types.js";
+import { BaseTable } from "./table-formats/base-table.js";
+import pino from "pino";
 
-const logger = pino({ name: 'query-engine' });
+const logger = pino({ name: "query-engine" });
 
 export interface QueryContext {
   table: BaseTable;
@@ -19,7 +19,7 @@ export interface QueryContext {
 
 export class LakehouseQueryEngine {
   async executeQuery(context: QueryContext): Promise<any[]> {
-    logger.info({ table: context.table.getName() }, 'Executing query');
+    logger.info({ table: context.table.getName() }, "Executing query");
 
     // Generate query plan
     const plan = await this.generateQueryPlan(context);
@@ -27,10 +27,7 @@ export class LakehouseQueryEngine {
     // Execute with optimizations
     const results = await this.executeWithPlan(context, plan);
 
-    logger.info(
-      { table: context.table.getName(), rowCount: results.length },
-      'Query executed'
-    );
+    logger.info({ table: context.table.getName(), rowCount: results.length }, "Query executed");
 
     return results;
   }
@@ -51,23 +48,23 @@ export class LakehouseQueryEngine {
       projections: context.projections,
       partitionPruning: {
         totalPartitions: dataFiles.length,
-        prunedPartitions: dataFiles.length - prunedPartitions.length
+        prunedPartitions: dataFiles.length - prunedPartitions.length,
       },
       dataSkipping: {
         totalFiles: prunedPartitions.length,
-        skippedFiles: prunedPartitions.length - skippedFiles.length
+        skippedFiles: prunedPartitions.length - skippedFiles.length,
       },
       estimatedRows: skippedFiles.reduce((sum, f) => sum + f.recordCount, 0),
-      estimatedBytes: skippedFiles.reduce((sum, f) => sum + f.fileSizeBytes, 0)
+      estimatedBytes: skippedFiles.reduce((sum, f) => sum + f.fileSizeBytes, 0),
     };
 
-    logger.info({ plan }, 'Query plan generated');
+    logger.info({ plan }, "Query plan generated");
     return plan;
   }
 
   private applyPartitionPruning(dataFiles: any[], filters: Filter[]): any[] {
     // Filter out partitions that don't match the filters
-    return dataFiles.filter(file => {
+    return dataFiles.filter((file) => {
       for (const filter of filters) {
         const partitionValue = file.partition[filter.column];
         if (partitionValue !== undefined) {
@@ -82,7 +79,7 @@ export class LakehouseQueryEngine {
 
   private applyDataSkipping(dataFiles: any[], filters: Filter[]): any[] {
     // Use column statistics to skip files
-    return dataFiles.filter(file => {
+    return dataFiles.filter((file) => {
       if (!file.columnStats) return true;
 
       for (const filter of filters) {
@@ -97,19 +94,19 @@ export class LakehouseQueryEngine {
 
   private matchesFilter(value: any, filter: Filter): boolean {
     switch (filter.operator) {
-      case 'eq':
+      case "eq":
         return value === filter.value;
-      case 'ne':
+      case "ne":
         return value !== filter.value;
-      case 'lt':
+      case "lt":
         return value < filter.value;
-      case 'lte':
+      case "lte":
         return value <= filter.value;
-      case 'gt':
+      case "gt":
         return value > filter.value;
-      case 'gte':
+      case "gte":
         return value >= filter.value;
-      case 'in':
+      case "in":
         return Array.isArray(filter.value) && filter.value.includes(value);
       default:
         return true;
@@ -118,15 +115,15 @@ export class LakehouseQueryEngine {
 
   private canContainFilter(stats: any, filter: Filter): boolean {
     switch (filter.operator) {
-      case 'eq':
+      case "eq":
         return stats.min <= filter.value && stats.max >= filter.value;
-      case 'lt':
+      case "lt":
         return stats.min < filter.value;
-      case 'lte':
+      case "lte":
         return stats.min <= filter.value;
-      case 'gt':
+      case "gt":
         return stats.max > filter.value;
-      case 'gte':
+      case "gte":
         return stats.max >= filter.value;
       default:
         return true;
@@ -147,7 +144,7 @@ Query Plan:
 -----------
 Table: ${context.table.getName()}
 Filters: ${JSON.stringify(context.filters, null, 2)}
-Projections: ${context.projections.join(', ')}
+Projections: ${context.projections.join(", ")}
 
 Partition Pruning:
   Total Partitions: ${plan.partitionPruning.totalPartitions}

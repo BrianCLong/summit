@@ -4,9 +4,9 @@ These performance constraints are enforced by CI.
 
 ## Budgets
 
-* **Per-PR analysis time:** < 15s
-* **Memory footprint:** < 250MB
-* **Network:** No network in CI by default (optional "enriched mode" behind a feature flag).
+- **Per-PR analysis time:** < 15s
+- **Memory footprint:** < 250MB
+- **Network:** No network in CI by default (optional "enriched mode" behind a feature flag).
 
 ## Profiling
 

@@ -1,7 +1,7 @@
 ---
 name: Release Checklist v24.4.0
 about: Production release gate checklist for Maestro Conductor v24.4.0
-title: 'Release Checklist: v24.4.0 - Sprint +3 (Provenance + Abuse + Cost + RTBF + SLO)'
+title: "Release Checklist: v24.4.0 - Sprint +3 (Provenance + Abuse + Cost + RTBF + SLO)"
 labels: release, v24.4.0, checklist
 assignees:
 ---

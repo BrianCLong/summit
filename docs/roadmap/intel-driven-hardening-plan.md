@@ -9,8 +9,8 @@ This roadmap operationalizes the insights from the January 2026 Threat Signal Ma
 **Target:** Sprint 26
 **Artifacts:**
 
-* `server/src/conductor/validation/semantic-validator.ts`: Implement `checkSemanticDrift` using embedding distance.
-* **Evidence:** `audit/ga-evidence/governance/semantic-validation-results.json`
+- `server/src/conductor/validation/semantic-validator.ts`: Implement `checkSemanticDrift` using embedding distance.
+- **Evidence:** `audit/ga-evidence/governance/semantic-validation-results.json`
 
 ## Priority 2: Immutable Model Signing
 
@@ -19,9 +19,9 @@ This roadmap operationalizes the insights from the January 2026 Threat Signal Ma
 **Target:** Sprint 27
 **Artifacts:**
 
-* `scripts/ci/sign_models.sh`: New CI step to sign model artifacts.
-* `server/src/ai/model_loader.ts`: Verify signature before load.
-* **Evidence:** `audit/ga-evidence/supply-chain/model-signatures.json`
+- `scripts/ci/sign_models.sh`: New CI step to sign model artifacts.
+- `server/src/ai/model_loader.ts`: Verify signature before load.
+- **Evidence:** `audit/ga-evidence/supply-chain/model-signatures.json`
 
 ## Priority 3: Context-Aware Policy Enforcement
 
@@ -30,9 +30,9 @@ This roadmap operationalizes the insights from the January 2026 Threat Signal Ma
 **Target:** Sprint 28
 **Artifacts:**
 
-* `server/src/policies/opa/context_policy.rego`: New Rego rules inspecting context window size/content.
-* `server/src/middleware/policy_enforcer.ts`: Pass context metadata to OPA.
-* **Evidence:** `audit/ga-evidence/governance/policy-decisions.json`
+- `server/src/policies/opa/context_policy.rego`: New Rego rules inspecting context window size/content.
+- `server/src/middleware/policy_enforcer.ts`: Pass context metadata to OPA.
+- **Evidence:** `audit/ga-evidence/governance/policy-decisions.json`
 
 ## Priority 4: Identity Graph Anomaly Detection
 
@@ -41,8 +41,8 @@ This roadmap operationalizes the insights from the January 2026 Threat Signal Ma
 **Target:** Post-GA (Fast-Follow)
 **Artifacts:**
 
-* `server/src/analytics/identity_graph.ts`: Real-time query for role assumption velocity.
-* **Evidence:** `docs/reports/identity-graph-effectiveness.md`
+- `server/src/analytics/identity_graph.ts`: Real-time query for role assumption velocity.
+- **Evidence:** `docs/reports/identity-graph-effectiveness.md`
 
 ## Execution Strategy
 

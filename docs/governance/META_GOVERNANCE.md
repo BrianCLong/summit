@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Meta-Governance Framework
 
 **Authority:** Derived from Article IV of the [Constitution](CONSTITUTION.md).

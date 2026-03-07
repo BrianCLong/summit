@@ -1,5 +1,10 @@
-import { z } from 'zod';
-import { ResourceSchema, AgentEvidenceBundleSchema, CapabilitiesSchema, SignalsSchema } from './schemas.js';
+import { z } from "zod";
+import {
+  ResourceSchema,
+  AgentEvidenceBundleSchema,
+  CapabilitiesSchema,
+  SignalsSchema,
+} from "./schemas.js";
 
 export type Resource = z.infer<typeof ResourceSchema>;
 export type AgentEvidenceBundle = z.infer<typeof AgentEvidenceBundleSchema>;

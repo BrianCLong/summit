@@ -109,7 +109,7 @@ export const performSync = async (): Promise<SyncResult> => {
 
         const response = await fetch(`${API_CONFIG.baseUrl}/sync/pull?${urlParams}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -123,14 +123,17 @@ export const performSync = async (): Promise<SyncResult> => {
       },
       pushChanges: async ({ changes, lastPulledAt }) => {
         const token = await getAuthToken();
-        const response = await fetch(`${API_CONFIG.baseUrl}/sync/push?lastPulledAt=${lastPulledAt}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${API_CONFIG.baseUrl}/sync/push?lastPulledAt=${lastPulledAt}`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(changes),
           },
-          body: JSON.stringify(changes),
-        });
+        );
 
         if (!response.ok) {
           throw new Error(await response.text());

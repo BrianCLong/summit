@@ -11,7 +11,7 @@
 
 This document defines the KPI & Health Model for CompanyOS, providing a structured framework for measuring platform health, customer success, and operational excellence across five core dimensions.
 
-**Guiding Principle**: *"Evidence or it didn't happen."* Every executive question about health must be answerable from observability data within 30 seconds.
+**Guiding Principle**: _"Evidence or it didn't happen."_ Every executive question about health must be answerable from observability data within 30 seconds.
 
 ---
 
@@ -40,13 +40,13 @@ CompanyOS health is measured across five interconnected dimensions:
 
 ### Primary KPIs
 
-| KPI | Definition | Target | Critical Threshold | Data Source |
-|-----|------------|--------|-------------------|-------------|
-| **SLO Attainment** | % of services meeting SLO | ≥99.9% | <99.5% | Prometheus |
-| **Error Budget Burn Rate** | Rate of SLO budget consumption | <1x | >6x | Prometheus |
-| **Change Failure Rate** | % of changes causing incidents | <5% | >15% | GitHub + PagerDuty |
-| **MTTR** | Mean time to recovery (minutes) | <30min | >60min | PagerDuty |
-| **P1 Incident Count** | Critical incidents per month | <2 | >5 | PagerDuty |
+| KPI                        | Definition                      | Target | Critical Threshold | Data Source        |
+| -------------------------- | ------------------------------- | ------ | ------------------ | ------------------ |
+| **SLO Attainment**         | % of services meeting SLO       | ≥99.9% | <99.5%             | Prometheus         |
+| **Error Budget Burn Rate** | Rate of SLO budget consumption  | <1x    | >6x                | Prometheus         |
+| **Change Failure Rate**    | % of changes causing incidents  | <5%    | >15%               | GitHub + PagerDuty |
+| **MTTR**                   | Mean time to recovery (minutes) | <30min | >60min             | PagerDuty          |
+| **P1 Incident Count**      | Critical incidents per month    | <2     | >5                 | PagerDuty          |
 
 ### Cascading Metrics
 
@@ -55,7 +55,7 @@ CompanyOS health is measured across five interconnected dimensions:
 company:
   reliability_score: avg(domain_reliability_scores)
 
-domain_level:  # e.g., "Data Platform", "API Gateway", "Frontend"
+domain_level: # e.g., "Data Platform", "API Gateway", "Frontend"
   reliability_score: weighted_avg(service_slo_attainments)
   change_failure_rate: incidents_caused_by_changes / total_changes
 
@@ -97,14 +97,14 @@ service_level:
 
 ### Primary KPIs
 
-| KPI | Definition | Target | Critical Threshold | Data Source |
-|-----|------------|--------|-------------------|-------------|
-| **Vulnerability SLA Compliance** | % of vulns remediated within SLA | ≥95% | <85% | Snyk/Trivy |
-| **Critical CVE Age** | Days since oldest unpatched critical | 0 days | >7 days | Snyk |
-| **ABAC Policy Coverage** | % of endpoints with policy | 100% | <95% | OPA |
-| **Failed Auth Attempts** | Anomalous auth failures/hour | <100 | >1000 | Auth Logs |
-| **Secret Scan Violations** | Committed secrets detected | 0 | >0 | Gitleaks |
-| **Compliance Score** | SOC2/FedRAMP control adherence | ≥98% | <90% | Compliance Dashboard |
+| KPI                              | Definition                           | Target | Critical Threshold | Data Source          |
+| -------------------------------- | ------------------------------------ | ------ | ------------------ | -------------------- |
+| **Vulnerability SLA Compliance** | % of vulns remediated within SLA     | ≥95%   | <85%               | Snyk/Trivy           |
+| **Critical CVE Age**             | Days since oldest unpatched critical | 0 days | >7 days            | Snyk                 |
+| **ABAC Policy Coverage**         | % of endpoints with policy           | 100%   | <95%               | OPA                  |
+| **Failed Auth Attempts**         | Anomalous auth failures/hour         | <100   | >1000              | Auth Logs            |
+| **Secret Scan Violations**       | Committed secrets detected           | 0      | >0                 | Gitleaks             |
+| **Compliance Score**             | SOC2/FedRAMP control adherence       | ≥98%   | <90%               | Compliance Dashboard |
 
 ### Cascading Metrics
 
@@ -145,14 +145,14 @@ Security Score = (
 
 ### Primary KPIs
 
-| KPI | Definition | Target | Critical Threshold | Data Source |
-|-----|------------|--------|-------------------|-------------|
-| **Active Tenants (DAU)** | Daily active unique tenants | Growing MoM | Declining | Analytics |
-| **Weekly Active Users (WAU)** | Users active in 7-day window | Growing MoM | Declining | Analytics |
-| **Feature Adoption Rate** | % using key features | ≥60% | <30% | Feature Flags |
-| **API Call Volume** | Requests per day | Growing MoM | Declining | Prometheus |
-| **Session Duration** | Avg time per session (min) | ≥15min | <5min | Analytics |
-| **NPS Score** | Net Promoter Score | ≥50 | <20 | Surveys |
+| KPI                           | Definition                   | Target      | Critical Threshold | Data Source   |
+| ----------------------------- | ---------------------------- | ----------- | ------------------ | ------------- |
+| **Active Tenants (DAU)**      | Daily active unique tenants  | Growing MoM | Declining          | Analytics     |
+| **Weekly Active Users (WAU)** | Users active in 7-day window | Growing MoM | Declining          | Analytics     |
+| **Feature Adoption Rate**     | % using key features         | ≥60%        | <30%               | Feature Flags |
+| **API Call Volume**           | Requests per day             | Growing MoM | Declining          | Prometheus    |
+| **Session Duration**          | Avg time per session (min)   | ≥15min      | <5min              | Analytics     |
+| **NPS Score**                 | Net Promoter Score           | ≥50         | <20                | Surveys       |
 
 ### Cascading Metrics
 
@@ -200,13 +200,13 @@ tenant_level:
 
 ### Primary KPIs
 
-| KPI | Definition | Target | Critical Threshold | Data Source |
-|-----|------------|--------|-------------------|-------------|
-| **Net Revenue Retention (NRR)** | Revenue retained + expansion | ≥110% | <90% | Billing |
-| **Gross Margin** | (Revenue - COGS) / Revenue | ≥70% | <60% | Finance |
-| **Infra Cost per Active Unit** | Monthly cloud cost / MAU | Decreasing | Increasing >10% | AWS CUR |
-| **CAC Payback Period** | Months to recover acquisition cost | <12mo | >18mo | Finance |
-| **ARR Growth Rate** | YoY recurring revenue growth | ≥30% | <10% | Billing |
+| KPI                             | Definition                         | Target     | Critical Threshold | Data Source |
+| ------------------------------- | ---------------------------------- | ---------- | ------------------ | ----------- |
+| **Net Revenue Retention (NRR)** | Revenue retained + expansion       | ≥110%      | <90%               | Billing     |
+| **Gross Margin**                | (Revenue - COGS) / Revenue         | ≥70%       | <60%               | Finance     |
+| **Infra Cost per Active Unit**  | Monthly cloud cost / MAU           | Decreasing | Increasing >10%    | AWS CUR     |
+| **CAC Payback Period**          | Months to recover acquisition cost | <12mo      | >18mo              | Finance     |
+| **ARR Growth Rate**             | YoY recurring revenue growth       | ≥30%       | <10%               | Billing     |
 
 ### Cascading Metrics
 
@@ -259,14 +259,14 @@ tenant_level:
 
 ### Primary KPIs
 
-| KPI | Definition | Target | Critical Threshold | Data Source |
-|-----|------------|--------|-------------------|-------------|
-| **Deployment Frequency** | Deploys per day | ≥10/day | <1/day | GitHub Actions |
-| **Lead Time for Changes** | Commit to production (hours) | <4hr | >24hr | GitHub |
-| **Build Success Rate** | % of CI builds passing | ≥95% | <85% | GitHub Actions |
-| **Test Coverage** | Code covered by tests | ≥80% | <60% | Jest/Vitest |
-| **Infra Utilization** | Actual vs provisioned resources | ≥60% | <40% | Prometheus |
-| **Toil Ratio** | Manual ops time / total ops time | <20% | >40% | Time Tracking |
+| KPI                       | Definition                       | Target  | Critical Threshold | Data Source    |
+| ------------------------- | -------------------------------- | ------- | ------------------ | -------------- |
+| **Deployment Frequency**  | Deploys per day                  | ≥10/day | <1/day             | GitHub Actions |
+| **Lead Time for Changes** | Commit to production (hours)     | <4hr    | >24hr              | GitHub         |
+| **Build Success Rate**    | % of CI builds passing           | ≥95%    | <85%               | GitHub Actions |
+| **Test Coverage**         | Code covered by tests            | ≥80%    | <60%               | Jest/Vitest    |
+| **Infra Utilization**     | Actual vs provisioned resources  | ≥60%    | <40%               | Prometheus     |
+| **Toil Ratio**            | Manual ops time / total ops time | <20%    | >40%               | Time Tracking  |
 
 ### Cascading Metrics
 
@@ -354,13 +354,13 @@ def calculate_company_health_score():
 
 ### Health Status Thresholds
 
-| Score Range | Status | Color | Action Required |
-|-------------|--------|-------|-----------------|
-| 90-100 | Excellent | Green | Continue monitoring |
-| 80-89 | Healthy | Light Green | Review weekly |
-| 60-79 | Attention | Yellow | Investigate trends |
-| 40-59 | Warning | Orange | Active remediation |
-| 0-39 | Critical | Red | Immediate escalation |
+| Score Range | Status    | Color       | Action Required      |
+| ----------- | --------- | ----------- | -------------------- |
+| 90-100      | Excellent | Green       | Continue monitoring  |
+| 80-89       | Healthy   | Light Green | Review weekly        |
+| 60-79       | Attention | Yellow      | Investigate trends   |
+| 40-59       | Warning   | Orange      | Active remediation   |
+| 0-39        | Critical  | Red         | Immediate escalation |
 
 ### Prometheus Composite Rule
 
@@ -413,26 +413,26 @@ def calculate_company_health_score():
 
 ### Required Integrations
 
-| Data Source | KPI Categories | Collection Method | Refresh Rate |
-|-------------|---------------|-------------------|--------------|
-| **Prometheus** | Reliability, Efficiency | Pull metrics | 15s |
-| **PagerDuty** | Incidents, MTTR | Webhook + API | Real-time |
-| **GitHub** | DORA metrics, Changes | Webhook + API | Real-time |
-| **Snyk/Trivy** | Security vulns | API polling | 1hr |
-| **OPA** | Policy coverage | Metrics endpoint | 1min |
-| **AWS CUR** | FinOps costs | S3 + Athena | Daily |
-| **Billing System** | Revenue, NRR | API | Daily |
-| **Analytics** | Product adoption | Event stream | Real-time |
-| **Feature Flags** | Adoption rates | LaunchDarkly API | 5min |
+| Data Source        | KPI Categories          | Collection Method | Refresh Rate |
+| ------------------ | ----------------------- | ----------------- | ------------ |
+| **Prometheus**     | Reliability, Efficiency | Pull metrics      | 15s          |
+| **PagerDuty**      | Incidents, MTTR         | Webhook + API     | Real-time    |
+| **GitHub**         | DORA metrics, Changes   | Webhook + API     | Real-time    |
+| **Snyk/Trivy**     | Security vulns          | API polling       | 1hr          |
+| **OPA**            | Policy coverage         | Metrics endpoint  | 1min         |
+| **AWS CUR**        | FinOps costs            | S3 + Athena       | Daily        |
+| **Billing System** | Revenue, NRR            | API               | Daily        |
+| **Analytics**      | Product adoption        | Event stream      | Real-time    |
+| **Feature Flags**  | Adoption rates          | LaunchDarkly API  | 5min         |
 
 ### Metric Retention Policy
 
-| Metric Type | Raw Retention | Aggregated Retention |
-|-------------|--------------|---------------------|
-| Service metrics | 15 days | 2 years (1h rollup) |
-| Business metrics | 30 days | 5 years (1d rollup) |
-| Security events | 90 days | 7 years (compliance) |
-| Financial metrics | 30 days | 7 years |
+| Metric Type       | Raw Retention | Aggregated Retention |
+| ----------------- | ------------- | -------------------- |
+| Service metrics   | 15 days       | 2 years (1h rollup)  |
+| Business metrics  | 30 days       | 5 years (1d rollup)  |
+| Security events   | 90 days       | 7 years (compliance) |
+| Financial metrics | 30 days       | 7 years              |
 
 ---
 
@@ -502,6 +502,6 @@ groups:
 
 ## Changelog
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | 2025-12-07 | Platform Engineering | Initial KPI & Health Model |
+| Version | Date       | Author               | Changes                    |
+| ------- | ---------- | -------------------- | -------------------------- |
+| 0.1.0   | 2025-12-07 | Platform Engineering | Initial KPI & Health Model |

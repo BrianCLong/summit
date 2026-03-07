@@ -4,22 +4,15 @@
  * Utilities for percentage-based rollouts and A/B testing
  */
 
-import murmurhash from 'murmurhash';
-import type {
-  PercentageRollout,
-  RolloutVariation,
-  FlagContext,
-} from '../types.js';
+import murmurhash from "murmurhash";
+import type { PercentageRollout, RolloutVariation, FlagContext } from "../types.js";
 
 /**
  * Evaluate percentage rollout to determine variation
  */
-export function evaluateRollout(
-  rollout: PercentageRollout,
-  context: FlagContext,
-): string | null {
+export function evaluateRollout(rollout: PercentageRollout, context: FlagContext): string | null {
   // Get the bucket key (attribute to use for bucketing)
-  const bucketBy = rollout.bucketBy || 'userId';
+  const bucketBy = rollout.bucketBy || "userId";
   const bucketValue = getBucketValue(context, bucketBy);
 
   if (!bucketValue) {
@@ -28,10 +21,7 @@ export function evaluateRollout(
   }
 
   // Calculate bucket percentage (0-100)
-  const percentage = calculateBucketPercentage(
-    bucketValue,
-    rollout.seed || 0,
-  );
+  const percentage = calculateBucketPercentage(bucketValue, rollout.seed || 0);
 
   // Find matching variation based on percentage
   return findVariationByPercentage(rollout.variations, percentage);
@@ -42,13 +32,13 @@ export function evaluateRollout(
  */
 function getBucketValue(context: FlagContext, bucketBy: string): string | null {
   switch (bucketBy) {
-    case 'userId':
+    case "userId":
       return context.userId || null;
-    case 'sessionId':
+    case "sessionId":
       return context.sessionId || null;
-    case 'tenantId':
+    case "tenantId":
       return context.tenantId || null;
-    case 'ipAddress':
+    case "ipAddress":
       return context.ipAddress || null;
     default:
       // Check custom attributes
@@ -75,7 +65,7 @@ function calculateBucketPercentage(value: string, seed: number): number {
  */
 function findVariationByPercentage(
   variations: RolloutVariation[],
-  percentage: number,
+  percentage: number
 ): string | null {
   // Sort variations to ensure consistent ordering
   const sortedVariations = [...variations].sort((a, b) => {
@@ -110,7 +100,7 @@ export function validateRollout(rollout: PercentageRollout): {
 
   // Check if variations array exists and has items
   if (!rollout.variations || rollout.variations.length === 0) {
-    errors.push('Rollout must have at least one variation');
+    errors.push("Rollout must have at least one variation");
     return { valid: false, errors };
   }
 
@@ -127,14 +117,12 @@ export function validateRollout(rollout: PercentageRollout): {
   // Check each variation
   for (const variation of rollout.variations) {
     if (!variation.variation) {
-      errors.push('Each variation must have a variation ID');
+      errors.push("Each variation must have a variation ID");
     }
 
     const percentage = variation.percentage ?? 0;
     if (percentage < 0 || percentage > 100) {
-      errors.push(
-        `Variation ${variation.variation} has invalid percentage: ${percentage}`,
-      );
+      errors.push(`Variation ${variation.variation} has invalid percentage: ${percentage}`);
     }
   }
 
@@ -151,10 +139,10 @@ export function createGradualRollout(
   enabledVariation: string,
   disabledVariation: string,
   percentage: number,
-  bucketBy: string = 'userId',
+  bucketBy: string = "userId"
 ): PercentageRollout {
   return {
-    type: 'percentage',
+    type: "percentage",
     bucketBy,
     variations: [
       {
@@ -176,10 +164,10 @@ export function createABTest(
   variationA: string,
   variationB: string,
   percentageA: number = 50,
-  bucketBy: string = 'userId',
+  bucketBy: string = "userId"
 ): PercentageRollout {
   return {
-    type: 'ab_test',
+    type: "ab_test",
     bucketBy,
     variations: [
       {
@@ -199,10 +187,10 @@ export function createABTest(
  */
 export function createMultivariateTest(
   variations: Array<{ id: string; percentage: number }>,
-  bucketBy: string = 'userId',
+  bucketBy: string = "userId"
 ): PercentageRollout {
   return {
-    type: 'ab_test',
+    type: "ab_test",
     bucketBy,
     variations: variations.map((v) => ({
       variation: v.id,

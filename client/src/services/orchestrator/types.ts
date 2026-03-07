@@ -1,4 +1,4 @@
-export type ModuleState = 'offline' | 'starting' | 'running' | 'error';
+export type ModuleState = "offline" | "starting" | "running" | "error";
 
 export interface ModuleTelemetry {
   latencyMs: number;
@@ -43,7 +43,7 @@ export interface OrchestratorTask {
   id: string;
   name: string;
   createdAt: string;
-  priority: 'low' | 'normal' | 'high' | 'critical';
+  priority: "low" | "normal" | "high" | "critical";
   requestedBy: string;
   actions: ModuleAction[];
   metadata?: Record<string, unknown>;
@@ -52,7 +52,7 @@ export interface OrchestratorTask {
 export interface ModuleExecutionResult {
   moduleId: string;
   action: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
   message: string;
   output: Record<string, unknown>;
   durationMs: number;
@@ -63,7 +63,7 @@ export interface TaskRecord {
   task: OrchestratorTask;
   startedAt: string;
   completedAt?: string;
-  status: 'running' | 'completed' | 'error';
+  status: "running" | "completed" | "error";
   results: ModuleExecutionResult[];
 }
 

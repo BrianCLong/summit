@@ -4,18 +4,18 @@
  */
 
 export enum CryptoOperation {
-  KEY_ENCAPSULATION = 'key-encapsulation',
-  DIGITAL_SIGNATURE = 'digital-signature',
-  ENCRYPTION = 'encryption',
-  HASHING = 'hashing',
-  KEY_DERIVATION = 'key-derivation',
+  KEY_ENCAPSULATION = "key-encapsulation",
+  DIGITAL_SIGNATURE = "digital-signature",
+  ENCRYPTION = "encryption",
+  HASHING = "hashing",
+  KEY_DERIVATION = "key-derivation",
 }
 
 export enum AlgorithmStatus {
-  APPROVED = 'approved',
-  DEPRECATED = 'deprecated',
-  OBSOLETE = 'obsolete',
-  EXPERIMENTAL = 'experimental',
+  APPROVED = "approved",
+  DEPRECATED = "deprecated",
+  OBSOLETE = "obsolete",
+  EXPERIMENTAL = "experimental",
 }
 
 export interface AlgorithmMetadata {
@@ -51,9 +51,9 @@ export interface CryptoInventoryItem {
   algorithm: string;
   version: string;
   lastUpdated: Date;
-  criticality: 'low' | 'medium' | 'high' | 'critical';
-  dataClassification: 'public' | 'internal' | 'confidential' | 'secret' | 'top-secret';
-  migrationStatus: 'pending' | 'in-progress' | 'completed' | 'not-applicable';
+  criticality: "low" | "medium" | "high" | "critical";
+  dataClassification: "public" | "internal" | "confidential" | "secret" | "top-secret";
+  migrationStatus: "pending" | "in-progress" | "completed" | "not-applicable";
 }
 
 export interface MigrationPlan {
@@ -66,7 +66,7 @@ export interface MigrationPlan {
   dependencies: string[]; // Other migration plan IDs
   rollbackStrategy: string;
   validationCriteria: string[];
-  status: 'draft' | 'approved' | 'in-progress' | 'completed' | 'rolled-back';
+  status: "draft" | "approved" | "in-progress" | "completed" | "rolled-back";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -78,9 +78,9 @@ export interface QuantumRiskAssessment {
   quantumVulnerable: boolean;
   cryptographicLifetime: number; // years
   dataRetentionPeriod: number; // years
-  harvestNowDecryptLaterRisk: 'low' | 'medium' | 'high' | 'critical';
+  harvestNowDecryptLaterRisk: "low" | "medium" | "high" | "critical";
   timeToQuantumThreat: number; // years (estimated)
-  migrationUrgency: 'low' | 'medium' | 'high' | 'immediate';
+  migrationUrgency: "low" | "medium" | "high" | "immediate";
   recommendedActions: string[];
 }
 
@@ -97,7 +97,7 @@ export interface CryptoInventory {
   add(item: CryptoInventoryItem): void;
   update(location: string, updates: Partial<CryptoInventoryItem>): void;
   getAll(): CryptoInventoryItem[];
-  getByStatus(status: CryptoInventoryItem['migrationStatus']): CryptoInventoryItem[];
+  getByStatus(status: CryptoInventoryItem["migrationStatus"]): CryptoInventoryItem[];
   getHighPriority(): CryptoInventoryItem[];
 }
 
@@ -105,6 +105,6 @@ export interface MigrationPlanner {
   createPlan(source: string, target: string): MigrationPlan;
   updatePlan(planId: string, updates: Partial<MigrationPlan>): void;
   getPlan(planId: string): MigrationPlan | undefined;
-  listPlans(status?: MigrationPlan['status']): MigrationPlan[];
+  listPlans(status?: MigrationPlan["status"]): MigrationPlan[];
   validatePlan(planId: string): Promise<boolean>;
 }

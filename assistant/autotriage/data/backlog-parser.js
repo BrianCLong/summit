@@ -6,8 +6,8 @@
  *
  * @module data/backlog-parser
  */
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 /**
  * Parses backlog.json file and converts to triage items
  *
@@ -27,18 +27,18 @@ import * as path from 'path';
  * ```
  */
 export async function parseBacklog(backlogPath) {
-    const result = await parseBacklogWithDetails(backlogPath);
-    // Log warnings if any
-    if (result.warnings.length > 0) {
-        console.warn(`⚠️  Backlog parsing warnings: ${result.warnings.length}`);
-        result.warnings.forEach(w => console.warn(`   - ${w}`));
-    }
-    // Log errors if any
-    if (result.errors.length > 0) {
-        console.warn(`❌ Backlog parsing errors: ${result.errors.length}`);
-        result.errors.forEach(e => console.warn(`   - ${e.message}`));
-    }
-    return result.items;
+  const result = await parseBacklogWithDetails(backlogPath);
+  // Log warnings if any
+  if (result.warnings.length > 0) {
+    console.warn(`⚠️  Backlog parsing warnings: ${result.warnings.length}`);
+    result.warnings.forEach((w) => console.warn(`   - ${w}`));
+  }
+  // Log errors if any
+  if (result.errors.length > 0) {
+    console.warn(`❌ Backlog parsing errors: ${result.errors.length}`);
+    result.errors.forEach((e) => console.warn(`   - ${e.message}`));
+  }
+  return result.items;
 }
 /**
  * Parses backlog with detailed error reporting
@@ -47,143 +47,140 @@ export async function parseBacklog(backlogPath) {
  * @returns Promise resolving to ParseResult with full details
  */
 export async function parseBacklogWithDetails(backlogPath) {
-    const result = {
-        items: [],
-        errors: [],
-        warnings: [],
-        stats: {
-            totalEpics: 0,
-            totalStories: 0,
-            skipped: 0,
-        },
-    };
-    // Determine file path with fallback to default location
-    const filePath = backlogPath || path.join(process.cwd(), 'backlog', 'backlog.json');
-    // Check if file exists before attempting to read
-    if (!fs.existsSync(filePath)) {
-        result.warnings.push(`Backlog file not found: ${filePath}`);
-        return result;
-    }
-    try {
-        // Read file content with explicit encoding
-        const content = fs.readFileSync(filePath, 'utf8');
-        // Validate that content is not empty
-        if (!content || content.trim().length === 0) {
-            result.errors.push({
-                type: 'invalid_format',
-                message: 'Backlog file is empty',
-                context: filePath,
-            });
-            return result;
-        }
-        // Parse JSON with error handling
-        let backlog;
-        try {
-            backlog = JSON.parse(content);
-        }
-        catch (parseError) {
-            result.errors.push({
-                type: 'invalid_format',
-                message: `Invalid JSON format: ${parseError.message}`,
-                context: filePath,
-            });
-            return result;
-        }
-        // Validate backlog structure
-        const structureError = validateBacklogStructure(backlog);
-        if (structureError) {
-            result.errors.push(structureError);
-            return result;
-        }
-        // Process each epic
-        result.stats.totalEpics = backlog.epics.length;
-        for (const epic of backlog.epics) {
-            // Validate epic has required fields
-            if (!epic.id || !epic.title) {
-                result.errors.push({
-                    type: 'missing_field',
-                    message: `Epic missing required fields (id or title)`,
-                    context: epic.id || 'unknown',
-                });
-                result.stats.skipped += epic.stories?.length || 0;
-                continue;
-            }
-            // Validate stories array exists
-            if (!epic.stories || !Array.isArray(epic.stories)) {
-                result.warnings.push(`Epic ${epic.id} has no stories array`);
-                continue;
-            }
-            result.stats.totalStories += epic.stories.length;
-            // Process each story in the epic
-            for (const story of epic.stories) {
-                try {
-                    // Validate story has required fields
-                    if (!story.id || !story.title) {
-                        result.errors.push({
-                            type: 'missing_field',
-                            message: `Story missing required fields (id or title)`,
-                            context: `Epic: ${epic.id}, Story: ${story.id || 'unknown'}`,
-                        });
-                        result.stats.skipped++;
-                        continue;
-                    }
-                    // Build detailed description from available fields
-                    const descriptionParts = [];
-                    // Include epic context for traceability
-                    descriptionParts.push(`Epic: ${epic.title}`);
-                    // Add acceptance criteria if present
-                    if (story.acceptance_criteria && Array.isArray(story.acceptance_criteria)) {
-                        const criteria = story.acceptance_criteria
-                            .filter(c => typeof c === 'string' && c.trim().length > 0)
-                            .join('\n');
-                        if (criteria) {
-                            descriptionParts.push(`Acceptance Criteria:\n${criteria}`);
-                        }
-                    }
-                    const description = descriptionParts.filter(Boolean).join('\n\n');
-                    // Calculate complexity score for prioritization
-                    const complexityScore = calculateStoryComplexity(story);
-                    // Create triage item with validated data
-                    const item = {
-                        id: sanitizeId(story.id),
-                        title: sanitizeTitle(story.title),
-                        description,
-                        source: 'backlog',
-                        sourceId: story.id,
-                        area: [], // Will be populated by classifier
-                        impact: mapPriorityToImpact(epic.priority),
-                        type: 'feature', // Backlog items default to features
-                        owner: sanitizeOwner(story.owner),
-                        status: 'planned',
-                        priority: epic.priority,
-                        impactScore: 0, // Will be calculated by impact analyzer
-                        complexityScore,
-                        isGoodFirstIssue: false, // Will be determined by classifier
-                        raw: { epic, story }, // Preserve original data for debugging
-                    };
-                    result.items.push(item);
-                }
-                catch (storyError) {
-                    // Catch any unexpected errors processing individual stories
-                    result.errors.push({
-                        type: 'invalid_format',
-                        message: `Error processing story: ${storyError.message}`,
-                        context: `Epic: ${epic.id}, Story: ${story.id || 'unknown'}`,
-                    });
-                    result.stats.skipped++;
-                }
-            }
-        }
-    }
-    catch (error) {
-        // Catch any unexpected file system or processing errors
-        result.errors.push({
-            type: 'invalid_format',
-            message: `Unexpected error parsing backlog: ${error.message}`,
-            context: filePath,
-        });
-    }
+  const result = {
+    items: [],
+    errors: [],
+    warnings: [],
+    stats: {
+      totalEpics: 0,
+      totalStories: 0,
+      skipped: 0,
+    },
+  };
+  // Determine file path with fallback to default location
+  const filePath = backlogPath || path.join(process.cwd(), "backlog", "backlog.json");
+  // Check if file exists before attempting to read
+  if (!fs.existsSync(filePath)) {
+    result.warnings.push(`Backlog file not found: ${filePath}`);
     return result;
+  }
+  try {
+    // Read file content with explicit encoding
+    const content = fs.readFileSync(filePath, "utf8");
+    // Validate that content is not empty
+    if (!content || content.trim().length === 0) {
+      result.errors.push({
+        type: "invalid_format",
+        message: "Backlog file is empty",
+        context: filePath,
+      });
+      return result;
+    }
+    // Parse JSON with error handling
+    let backlog;
+    try {
+      backlog = JSON.parse(content);
+    } catch (parseError) {
+      result.errors.push({
+        type: "invalid_format",
+        message: `Invalid JSON format: ${parseError.message}`,
+        context: filePath,
+      });
+      return result;
+    }
+    // Validate backlog structure
+    const structureError = validateBacklogStructure(backlog);
+    if (structureError) {
+      result.errors.push(structureError);
+      return result;
+    }
+    // Process each epic
+    result.stats.totalEpics = backlog.epics.length;
+    for (const epic of backlog.epics) {
+      // Validate epic has required fields
+      if (!epic.id || !epic.title) {
+        result.errors.push({
+          type: "missing_field",
+          message: `Epic missing required fields (id or title)`,
+          context: epic.id || "unknown",
+        });
+        result.stats.skipped += epic.stories?.length || 0;
+        continue;
+      }
+      // Validate stories array exists
+      if (!epic.stories || !Array.isArray(epic.stories)) {
+        result.warnings.push(`Epic ${epic.id} has no stories array`);
+        continue;
+      }
+      result.stats.totalStories += epic.stories.length;
+      // Process each story in the epic
+      for (const story of epic.stories) {
+        try {
+          // Validate story has required fields
+          if (!story.id || !story.title) {
+            result.errors.push({
+              type: "missing_field",
+              message: `Story missing required fields (id or title)`,
+              context: `Epic: ${epic.id}, Story: ${story.id || "unknown"}`,
+            });
+            result.stats.skipped++;
+            continue;
+          }
+          // Build detailed description from available fields
+          const descriptionParts = [];
+          // Include epic context for traceability
+          descriptionParts.push(`Epic: ${epic.title}`);
+          // Add acceptance criteria if present
+          if (story.acceptance_criteria && Array.isArray(story.acceptance_criteria)) {
+            const criteria = story.acceptance_criteria
+              .filter((c) => typeof c === "string" && c.trim().length > 0)
+              .join("\n");
+            if (criteria) {
+              descriptionParts.push(`Acceptance Criteria:\n${criteria}`);
+            }
+          }
+          const description = descriptionParts.filter(Boolean).join("\n\n");
+          // Calculate complexity score for prioritization
+          const complexityScore = calculateStoryComplexity(story);
+          // Create triage item with validated data
+          const item = {
+            id: sanitizeId(story.id),
+            title: sanitizeTitle(story.title),
+            description,
+            source: "backlog",
+            sourceId: story.id,
+            area: [], // Will be populated by classifier
+            impact: mapPriorityToImpact(epic.priority),
+            type: "feature", // Backlog items default to features
+            owner: sanitizeOwner(story.owner),
+            status: "planned",
+            priority: epic.priority,
+            impactScore: 0, // Will be calculated by impact analyzer
+            complexityScore,
+            isGoodFirstIssue: false, // Will be determined by classifier
+            raw: { epic, story }, // Preserve original data for debugging
+          };
+          result.items.push(item);
+        } catch (storyError) {
+          // Catch any unexpected errors processing individual stories
+          result.errors.push({
+            type: "invalid_format",
+            message: `Error processing story: ${storyError.message}`,
+            context: `Epic: ${epic.id}, Story: ${story.id || "unknown"}`,
+          });
+          result.stats.skipped++;
+        }
+      }
+    }
+  } catch (error) {
+    // Catch any unexpected file system or processing errors
+    result.errors.push({
+      type: "invalid_format",
+      message: `Unexpected error parsing backlog: ${error.message}`,
+      context: filePath,
+    });
+  }
+  return result;
 }
 /**
  * Validates the top-level backlog structure
@@ -192,25 +189,25 @@ export async function parseBacklogWithDetails(backlogPath) {
  * @returns ValidationError if structure is invalid, undefined otherwise
  */
 function validateBacklogStructure(backlog) {
-    if (!backlog || typeof backlog !== 'object') {
-        return {
-            type: 'invalid_format',
-            message: 'Backlog is not a valid object',
-        };
-    }
-    if (!backlog.epics || !Array.isArray(backlog.epics)) {
-        return {
-            type: 'missing_field',
-            message: 'Backlog missing "epics" array',
-        };
-    }
-    if (backlog.epics.length === 0) {
-        return {
-            type: 'empty_array',
-            message: 'Backlog has no epics',
-        };
-    }
-    return undefined;
+  if (!backlog || typeof backlog !== "object") {
+    return {
+      type: "invalid_format",
+      message: "Backlog is not a valid object",
+    };
+  }
+  if (!backlog.epics || !Array.isArray(backlog.epics)) {
+    return {
+      type: "missing_field",
+      message: 'Backlog missing "epics" array',
+    };
+  }
+  if (backlog.epics.length === 0) {
+    return {
+      type: "empty_array",
+      message: "Backlog has no epics",
+    };
+  }
+  return undefined;
 }
 /**
  * Maps backlog priority to impact level
@@ -225,24 +222,24 @@ function validateBacklogStructure(backlog) {
  * @returns Normalized impact level
  */
 function mapPriorityToImpact(priority) {
-    if (!priority || typeof priority !== 'string') {
-        return 'low'; // Default for missing/invalid priority
-    }
-    const p = priority.toLowerCase().trim();
-    // Blocker/Critical priority
-    if (p.includes('must') || p.includes('p0') || p.includes('critical')) {
-        return 'blocker';
-    }
-    // High priority
-    if (p.includes('should') || p.includes('p1') || p.includes('high')) {
-        return 'high';
-    }
-    // Medium priority
-    if (p.includes('could') || p.includes('p2') || p.includes('medium')) {
-        return 'medium';
-    }
-    // Default to low priority
-    return 'low';
+  if (!priority || typeof priority !== "string") {
+    return "low"; // Default for missing/invalid priority
+  }
+  const p = priority.toLowerCase().trim();
+  // Blocker/Critical priority
+  if (p.includes("must") || p.includes("p0") || p.includes("critical")) {
+    return "blocker";
+  }
+  // High priority
+  if (p.includes("should") || p.includes("p1") || p.includes("high")) {
+    return "high";
+  }
+  // Medium priority
+  if (p.includes("could") || p.includes("p2") || p.includes("medium")) {
+    return "medium";
+  }
+  // Default to low priority
+  return "low";
 }
 /**
  * Calculates story complexity based on multiple factors
@@ -259,22 +256,22 @@ function mapPriorityToImpact(priority) {
  * @returns Complexity score (0-100+)
  */
 function calculateStoryComplexity(story) {
-    let score = 10; // Base complexity for any story
-    // Dependencies increase complexity significantly
-    // Stories with dependencies require coordination and understanding of related work
-    if (story.depends_on && Array.isArray(story.depends_on)) {
-        score += story.depends_on.length * 15;
-    }
-    // More acceptance criteria usually means more complex requirements
-    if (story.acceptance_criteria && Array.isArray(story.acceptance_criteria)) {
-        score += story.acceptance_criteria.length * 5;
-    }
-    // Evidence hooks indicate observability/measurement requirements
-    if (story.evidence_hooks && Array.isArray(story.evidence_hooks)) {
-        score += story.evidence_hooks.length * 10;
-    }
-    // Cap complexity at reasonable maximum
-    return Math.min(score, 200);
+  let score = 10; // Base complexity for any story
+  // Dependencies increase complexity significantly
+  // Stories with dependencies require coordination and understanding of related work
+  if (story.depends_on && Array.isArray(story.depends_on)) {
+    score += story.depends_on.length * 15;
+  }
+  // More acceptance criteria usually means more complex requirements
+  if (story.acceptance_criteria && Array.isArray(story.acceptance_criteria)) {
+    score += story.acceptance_criteria.length * 5;
+  }
+  // Evidence hooks indicate observability/measurement requirements
+  if (story.evidence_hooks && Array.isArray(story.evidence_hooks)) {
+    score += story.evidence_hooks.length * 10;
+  }
+  // Cap complexity at reasonable maximum
+  return Math.min(score, 200);
 }
 /**
  * Sanitizes story ID for consistent formatting
@@ -283,10 +280,10 @@ function calculateStoryComplexity(story) {
  * @returns Sanitized ID string
  */
 function sanitizeId(id) {
-    if (!id || typeof id !== 'string') {
-        return `backlog-${Date.now()}`; // Generate fallback ID
-    }
-    return id.trim();
+  if (!id || typeof id !== "string") {
+    return `backlog-${Date.now()}`; // Generate fallback ID
+  }
+  return id.trim();
 }
 /**
  * Sanitizes story title, handling edge cases
@@ -295,11 +292,11 @@ function sanitizeId(id) {
  * @returns Sanitized title string
  */
 function sanitizeTitle(title) {
-    if (!title || typeof title !== 'string') {
-        return 'Untitled Story';
-    }
-    // Trim and collapse whitespace
-    return title.trim().replace(/\s+/g, ' ');
+  if (!title || typeof title !== "string") {
+    return "Untitled Story";
+  }
+  // Trim and collapse whitespace
+  return title.trim().replace(/\s+/g, " ");
 }
 /**
  * Sanitizes owner field
@@ -308,10 +305,10 @@ function sanitizeTitle(title) {
  * @returns Sanitized owner string or undefined
  */
 function sanitizeOwner(owner) {
-    if (!owner || typeof owner !== 'string') {
-        return undefined;
-    }
-    const sanitized = owner.trim();
-    return sanitized.length > 0 ? sanitized : undefined;
+  if (!owner || typeof owner !== "string") {
+    return undefined;
+  }
+  const sanitized = owner.trim();
+  return sanitized.length > 0 ? sanitized : undefined;
 }
 //# sourceMappingURL=backlog-parser.js.map

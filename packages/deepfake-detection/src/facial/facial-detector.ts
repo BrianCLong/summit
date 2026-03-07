@@ -10,12 +10,12 @@ import type {
   BlinkAnalysis,
   MicroExpression,
   BoundingBox,
-} from '../types';
+} from "../types";
 
 export class FacialDeepfakeDetector {
   private modelLoaded: boolean = false;
-  private readonly faceLandmarkModel: string = 'face-landmark-v3';
-  private readonly manipulationDetector: string = 'deepfake-face-v2';
+  private readonly faceLandmarkModel: string = "face-landmark-v3";
+  private readonly manipulationDetector: string = "deepfake-face-v2";
 
   constructor() {
     this.initializeModels();
@@ -42,7 +42,7 @@ export class FacialDeepfakeDetector {
     const manipulationScore = this.calculateManipulationScore(
       inconsistencies,
       blinkRate,
-      microExpressions,
+      microExpressions
     );
 
     return {
@@ -65,9 +65,7 @@ export class FacialDeepfakeDetector {
   /**
    * Detect faces in image
    */
-  private async detectFaces(
-    imageBuffer: Buffer,
-  ): Promise<{ detected: boolean; count: number }> {
+  private async detectFaces(imageBuffer: Buffer): Promise<{ detected: boolean; count: number }> {
     // Face detection using advanced algorithms
     // Check for multiple face detection methods:
     // 1. Haar Cascades
@@ -94,22 +92,22 @@ export class FacialDeepfakeDetector {
 
     const landmarks: FacialLandmark[] = [
       {
-        type: 'left_eye',
+        type: "left_eye",
         position: { x: 120, y: 100 },
         confidence: 0.95,
       },
       {
-        type: 'right_eye',
+        type: "right_eye",
         position: { x: 180, y: 100 },
         confidence: 0.96,
       },
       {
-        type: 'nose_tip',
+        type: "nose_tip",
         position: { x: 150, y: 140 },
         confidence: 0.94,
       },
       {
-        type: 'mouth_center',
+        type: "mouth_center",
         position: { x: 150, y: 180 },
         confidence: 0.93,
       },
@@ -123,7 +121,7 @@ export class FacialDeepfakeDetector {
    */
   private async detectInconsistencies(
     imageBuffer: Buffer,
-    landmarks: FacialLandmark[],
+    landmarks: FacialLandmark[]
   ): Promise<FacialInconsistency[]> {
     const inconsistencies: FacialInconsistency[] = [];
 
@@ -160,10 +158,10 @@ export class FacialDeepfakeDetector {
 
     return [
       {
-        type: 'facial_boundary',
+        type: "facial_boundary",
         severity: 0.3,
         location: { x: 100, y: 80, width: 200, height: 250 },
-        description: 'Minor boundary discontinuity detected at hairline',
+        description: "Minor boundary discontinuity detected at hairline",
       },
     ];
   }
@@ -181,7 +179,7 @@ export class FacialDeepfakeDetector {
 
   private async checkLightingConsistency(
     imageBuffer: Buffer,
-    landmarks: FacialLandmark[],
+    landmarks: FacialLandmark[]
   ): Promise<FacialInconsistency[]> {
     // Check if lighting direction is consistent across face
     // Analyze:
@@ -242,7 +240,7 @@ export class FacialDeepfakeDetector {
 
     return [
       {
-        type: 'surprise',
+        type: "surprise",
         timestamp: 0.5,
         confidence: 0.78,
         authenticity: 0.82,
@@ -256,7 +254,7 @@ export class FacialDeepfakeDetector {
   private calculateManipulationScore(
     inconsistencies: FacialInconsistency[],
     blinkRate: BlinkAnalysis,
-    microExpressions: MicroExpression[],
+    microExpressions: MicroExpression[]
   ): number {
     // Weighted scoring algorithm
     let score = 0;
@@ -274,8 +272,7 @@ export class FacialDeepfakeDetector {
     // Factor in micro-expression authenticity (20% weight)
     const avgAuthenticity =
       microExpressions.length > 0
-        ? microExpressions.reduce((sum, exp) => sum + exp.authenticity, 0) /
-          microExpressions.length
+        ? microExpressions.reduce((sum, exp) => sum + exp.authenticity, 0) / microExpressions.length
         : 1;
     score += (1 - avgAuthenticity) * 0.2;
 
@@ -327,7 +324,7 @@ export class FacialDeepfakeDetector {
           // Flag large jumps as potential manipulations
           if (distance > 20) {
             curr.inconsistencies.push({
-              type: 'temporal_discontinuity',
+              type: "temporal_discontinuity",
               severity: Math.min(distance / 100, 1),
               location: {
                 x: currLandmark.position.x,
@@ -365,26 +362,24 @@ export class FacialDeepfakeDetector {
     let swapScore = 0;
 
     // Check for boundary issues (strong indicator)
-    const boundaryIssues = analysis.inconsistencies.filter(
-      (inc) => inc.type === 'facial_boundary',
-    );
+    const boundaryIssues = analysis.inconsistencies.filter((inc) => inc.type === "facial_boundary");
     if (boundaryIssues.length > 0) {
-      evidence.push('Facial boundary artifacts detected');
+      evidence.push("Facial boundary artifacts detected");
       swapScore += 0.3;
     }
 
     // Check manipulation score
     if (analysis.manipulationScore > 0.5) {
-      evidence.push('High manipulation score detected');
+      evidence.push("High manipulation score detected");
       swapScore += 0.4;
     }
 
     // Check for lighting inconsistencies
     const lightingIssues = analysis.inconsistencies.filter(
-      (inc) => inc.type === 'lighting_inconsistency',
+      (inc) => inc.type === "lighting_inconsistency"
     );
     if (lightingIssues.length > 0) {
-      evidence.push('Lighting inconsistencies detected');
+      evidence.push("Lighting inconsistencies detected");
       swapScore += 0.3;
     }
 

@@ -63,13 +63,13 @@ export interface FlagEvaluation<T = FlagVariation> {
  * Reason for flag evaluation result
  */
 export type EvaluationReason =
-  | 'TARGET_MATCH' // User matched a targeting rule
-  | 'RULE_MATCH' // Matched a percentage rollout rule
-  | 'DEFAULT' // Default value
-  | 'OFF' // Flag is off
-  | 'PREREQUISITE_FAILED' // Prerequisite flag not met
-  | 'ERROR' // Error during evaluation
-  | 'FALLBACK'; // Fallback value used
+  | "TARGET_MATCH" // User matched a targeting rule
+  | "RULE_MATCH" // Matched a percentage rollout rule
+  | "DEFAULT" // Default value
+  | "OFF" // Flag is off
+  | "PREREQUISITE_FAILED" // Prerequisite flag not met
+  | "ERROR" // Error during evaluation
+  | "FALLBACK"; // Fallback value used
 
 /**
  * Feature flag definition
@@ -82,7 +82,7 @@ export interface FlagDefinition {
   /** Description */
   description?: string;
   /** Flag type */
-  type: 'boolean' | 'string' | 'number' | 'json';
+  type: "boolean" | "string" | "number" | "json";
   /** Whether flag is enabled */
   enabled: boolean;
   /** Default value when flag is off */
@@ -157,29 +157,29 @@ export interface Condition {
  * Condition operators
  */
 export type ConditionOperator =
-  | 'equals'
-  | 'not_equals'
-  | 'in'
-  | 'not_in'
-  | 'contains'
-  | 'not_contains'
-  | 'starts_with'
-  | 'ends_with'
-  | 'greater_than'
-  | 'greater_than_or_equal'
-  | 'less_than'
-  | 'less_than_or_equal'
-  | 'matches_regex'
-  | 'semver_equal'
-  | 'semver_greater_than'
-  | 'semver_less_than';
+  | "equals"
+  | "not_equals"
+  | "in"
+  | "not_in"
+  | "contains"
+  | "not_contains"
+  | "starts_with"
+  | "ends_with"
+  | "greater_than"
+  | "greater_than_or_equal"
+  | "less_than"
+  | "less_than_or_equal"
+  | "matches_regex"
+  | "semver_equal"
+  | "semver_greater_than"
+  | "semver_less_than";
 
 /**
  * Percentage rollout configuration
  */
 export interface PercentageRollout {
   /** Type of rollout */
-  type: 'percentage' | 'ab_test';
+  type: "percentage" | "ab_test";
   /** Variations with their percentages */
   variations: RolloutVariation[];
   /** Attribute to use for bucketing (default: userId) */
@@ -230,28 +230,28 @@ export interface FeatureFlagProvider {
   getBooleanFlag(
     key: string,
     defaultValue: boolean,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<boolean>>;
 
   /** Evaluate a string flag */
   getStringFlag(
     key: string,
     defaultValue: string,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<string>>;
 
   /** Evaluate a number flag */
   getNumberFlag(
     key: string,
     defaultValue: number,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<number>>;
 
   /** Evaluate a JSON flag */
   getJSONFlag<T = any>(
     key: string,
     defaultValue: T,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<T>>;
 
   /** Get all flag values for context */
@@ -264,11 +264,7 @@ export interface FeatureFlagProvider {
   listFlags(): Promise<FlagDefinition[]>;
 
   /** Track an event/metric */
-  track(
-    eventName: string,
-    context: FlagContext,
-    data?: Record<string, any>,
-  ): Promise<void>;
+  track(eventName: string, context: FlagContext, data?: Record<string, any>): Promise<void>;
 }
 
 /**
@@ -276,17 +272,14 @@ export interface FeatureFlagProvider {
  */
 export interface FlagCache {
   /** Get cached evaluation */
-  get<T = FlagVariation>(
-    key: string,
-    context: FlagContext,
-  ): Promise<FlagEvaluation<T> | null>;
+  get<T = FlagVariation>(key: string, context: FlagContext): Promise<FlagEvaluation<T> | null>;
 
   /** Set cached evaluation */
   set<T = FlagVariation>(
     key: string,
     context: FlagContext,
     evaluation: FlagEvaluation<T>,
-    ttl?: number,
+    ttl?: number
   ): Promise<void>;
 
   /** Delete cached evaluation */
@@ -346,7 +339,7 @@ export interface FeatureFlagConfig {
  */
 export interface FlagAnalyticsEvent {
   /** Event type */
-  type: 'evaluation' | 'track';
+  type: "evaluation" | "track";
   /** Flag key */
   flagKey: string;
   /** Evaluated value */
@@ -368,11 +361,7 @@ export interface FlagAnalyticsEvent {
  */
 export interface FlagMetrics {
   /** Record flag evaluation */
-  recordEvaluation(
-    flagKey: string,
-    variation: string,
-    duration: number,
-  ): void;
+  recordEvaluation(flagKey: string, variation: string, duration: number): void;
 
   /** Record cache hit */
   recordCacheHit(flagKey: string): void;

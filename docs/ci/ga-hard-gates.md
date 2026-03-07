@@ -6,13 +6,13 @@
 - [ ] **Package Manager**: pnpm pinned version (via corepack or strict action version).
 - [ ] **Linting**: Zero linting errors allowed (`pnpm lint`).
 - [ ] **Testing**:
-    - Unit tests must pass (`pnpm test:unit`).
-    - Integration tests must pass (`pnpm test:integration`).
+  - Unit tests must pass (`pnpm test:unit`).
+  - Integration tests must pass (`pnpm test:integration`).
 - [ ] **Build Determinism**:
-    - Build output must be identical across two runs with the same source.
-    - Verified by `Reproducible Build` job in CI.
+  - Build output must be identical across two runs with the same source.
+  - Verified by `Reproducible Build` job in CI.
 - [ ] **Governance**:
-    - OPA policies must pass.
-    - No unknown or untracked compliance violations.
+  - OPA policies must pass.
+  - No unknown or untracked compliance violations.
 - [ ] **Security**:
-    - No high/critical vulnerabilities in dependencies (Snyk/Trivy).
+  - No high/critical vulnerabilities in dependencies (Snyk/Trivy).

@@ -21,7 +21,7 @@ export const useSnapshotStore = create<SnapshotState>()(
     (set, get) => ({
       snapshots: [],
       addSnapshot: (name, data) =>
-        set((state) => ({
+        set(state => ({
           snapshots: [
             ...state.snapshots,
             {
@@ -32,17 +32,17 @@ export const useSnapshotStore = create<SnapshotState>()(
             },
           ],
         })),
-      removeSnapshot: (id) =>
-        set((state) => ({
-          snapshots: state.snapshots.filter((s) => s.id !== id),
+      removeSnapshot: id =>
+        set(state => ({
+          snapshots: state.snapshots.filter(s => s.id !== id),
         })),
       renameSnapshot: (id, newName) =>
-        set((state) => ({
-          snapshots: state.snapshots.map((s) =>
+        set(state => ({
+          snapshots: state.snapshots.map(s =>
             s.id === id ? { ...s, name: newName } : s
           ),
         })),
-      restoreSnapshot: (id) => get().snapshots.find((s) => s.id === id),
+      restoreSnapshot: id => get().snapshots.find(s => s.id === id),
     }),
     {
       name: 'summit-snapshots',

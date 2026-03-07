@@ -32,8 +32,8 @@ spec:
       labels:
         app: maestro-server
       annotations:
-        intelgraph.dev/signed: 'true'
-        intelgraph.dev/sbom: 'spdx'
+        intelgraph.dev/signed: "true"
+        intelgraph.dev/sbom: "spdx"
     spec:
       securityContext:
         runAsNonRoot: true
@@ -60,11 +60,11 @@ spec:
                 - NET_BIND_SERVICE
           resources:
             requests:
-              memory: '256Mi'
-              cpu: '100m'
+              memory: "256Mi"
+              cpu: "100m"
             limits:
-              memory: '512Mi'
-              cpu: '500m'
+              memory: "512Mi"
+              cpu: "500m"
           volumeMounts:
             - name: tmp
               mountPath: /tmp

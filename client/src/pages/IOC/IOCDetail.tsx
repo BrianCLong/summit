@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
-import { useParams } from 'react-router-dom';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
+import React from "react";
+import { Card, CardContent, Typography } from "@mui/material";
+import { useParams } from "react-router-dom";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
 
 export default function IOCDetail() {
   const { id } = useParams();
@@ -13,9 +13,9 @@ export default function IOCDetail() {
   }>({
     queryKey: `ioc_${id}`,
     mock: {
-      id: id || 'ioc1',
-      type: 'ip',
-      value: '1.2.3.4',
+      id: id || "ioc1",
+      type: "ip",
+      value: "1.2.3.4",
       lastSeen: new Date().toISOString(),
     },
     deps: [id],

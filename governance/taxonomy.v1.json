@@ -11,16 +11,6 @@
     "MONITORING",
     "RETIREMENT"
   ],
-  "risk_classes": [
-    "UNACCEPTABLE",
-    "HIGH",
-    "LIMITED",
-    "MINIMAL"
-  ],
-  "control_types": [
-    "PREVENTIVE",
-    "DETECTIVE",
-    "CORRECTIVE",
-    "DIRECTIVE"
-  ]
+  "risk_classes": ["UNACCEPTABLE", "HIGH", "LIMITED", "MINIMAL"],
+  "control_types": ["PREVENTIVE", "DETECTIVE", "CORRECTIVE", "DIRECTIVE"]
 }

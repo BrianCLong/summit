@@ -211,15 +211,14 @@ file_pattern: persisted/manifest.json
 
 ```ts
 // middleware example (pseudocode)
-import manifest from '../persisted/manifest.json';
+import manifest from "../persisted/manifest.json";
 
-app.use('/graphql', (req, res, next) => {
-  if (process.env.NODE_ENV !== 'production') return next();
+app.use("/graphql", (req, res, next) => {
+  if (process.env.NODE_ENV !== "production") return next();
   const ext = req.body?.extensions?.persistedQuery;
-  if (!ext?.sha256Hash)
-    return res.status(400).json({ error: 'PersistedQueryRequired' });
+  if (!ext?.sha256Hash) return res.status(400).json({ error: "PersistedQueryRequired" });
   const query = manifest[ext.sha256Hash];
-  if (!query) return res.status(400).json({ error: 'UnknownPersistedQuery' });
+  if (!query) return res.status(400).json({ error: "UnknownPersistedQuery" });
   req.body.query = query; // inject and continue
   next();
 });

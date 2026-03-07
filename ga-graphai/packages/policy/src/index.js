@@ -1,8 +1,4 @@
-import {
-  LICENSE_CLASSES,
-  SAFETY_TIERS,
-  ZERO_SPEND_OPTIMIZATIONS,
-} from 'common-types';
+import { LICENSE_CLASSES, SAFETY_TIERS, ZERO_SPEND_OPTIMIZATIONS } from "common-types";
 
 const SAFETY_ORDER = {
   [SAFETY_TIERS.A]: 3,
@@ -16,7 +12,7 @@ const SAFETY_ORDER = {
 export class PolicyViolation extends Error {
   constructor(message, code, context = {}) {
     super(message);
-    this.name = 'PolicyViolation';
+    this.name = "PolicyViolation";
     this.code = code;
     this.context = context;
   }
@@ -33,11 +29,11 @@ function redactPayload(payload) {
   const redacted = {};
   const piiPatterns = /(password|token|secret|ssn|email)/i;
   for (const [key, value] of Object.entries(payload)) {
-    if (typeof value === 'string' && piiPatterns.test(key)) {
-      redacted[key] = '[REDACTED]';
-    } else if (typeof value === 'string' && piiPatterns.test(value)) {
-      redacted[key] = '[REDACTED]';
-    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+    if (typeof value === "string" && piiPatterns.test(key)) {
+      redacted[key] = "[REDACTED]";
+    } else if (typeof value === "string" && piiPatterns.test(value)) {
+      redacted[key] = "[REDACTED]";
+    } else if (value && typeof value === "object" && !Array.isArray(value)) {
       redacted[key] = redactPayload(value);
     } else {
       redacted[key] = value;
@@ -69,8 +65,7 @@ export class PolicyEngine {
       redaction: {
         enabled: config.redaction?.enabled ?? true,
       },
-      optimizationFlags:
-        config.optimizationFlags ?? Object.values(ZERO_SPEND_OPTIMIZATIONS),
+      optimizationFlags: config.optimizationFlags ?? Object.values(ZERO_SPEND_OPTIMIZATIONS),
     };
   }
 
@@ -83,16 +78,14 @@ export class PolicyEngine {
    */
   evaluateCandidate(candidate, overrides = {}) {
     const reasons = [];
-    const allowedResidencies =
-      overrides.allowedResidencies ?? this.config.allowedResidencies;
+    const allowedResidencies = overrides.allowedResidencies ?? this.config.allowedResidencies;
     if (Array.isArray(allowedResidencies) && allowedResidencies.length > 0) {
       if (!allowedResidencies.includes(candidate.residency)) {
         reasons.push(`residency:${candidate.residency}`);
       }
     }
 
-    const licenseAllowList =
-      overrides.allowedLicenses ?? this.config.allowedLicenses;
+    const licenseAllowList = overrides.allowedLicenses ?? this.config.allowedLicenses;
     if (Array.isArray(licenseAllowList) && licenseAllowList.length > 0) {
       if (!licenseAllowList.includes(candidate.licenseClass)) {
         reasons.push(`license:${candidate.licenseClass}`);
@@ -109,7 +102,7 @@ export class PolicyEngine {
       this.config.enforcePiiIsolation &&
       !overrides.allowRestricted
     ) {
-      reasons.push('pii:true');
+      reasons.push("pii:true");
     }
 
     return {
@@ -127,9 +120,7 @@ export class PolicyEngine {
    * @returns {import('common-types').CandidateResource[]}
    */
   filterCandidates(candidates, overrides = {}) {
-    return candidates.filter(
-      (candidate) => this.evaluateCandidate(candidate, overrides).allowed,
-    );
+    return candidates.filter((candidate) => this.evaluateCandidate(candidate, overrides).allowed);
   }
 
   /**
@@ -148,15 +139,11 @@ export class PolicyEngine {
     });
 
     if (!evaluation.allowed) {
-      throw new PolicyViolation(
-        'Candidate violates policy',
-        'CANDIDATE_NOT_ALLOWED',
-        {
-          reasons: evaluation.reasons,
-          candidateId: candidate.id,
-          taskId: task?.id,
-        },
-      );
+      throw new PolicyViolation("Candidate violates policy", "CANDIDATE_NOT_ALLOWED", {
+        reasons: evaluation.reasons,
+        candidateId: candidate.id,
+        taskId: task?.id,
+      });
     }
 
     const retentionDays = this.needsPiiIsolation(task)
@@ -209,7 +196,7 @@ export class PolicyEngine {
   policyTagsForTask(task) {
     const tags = [];
     if (task?.policy?.containsPii) {
-      tags.push('pii');
+      tags.push("pii");
     }
     if (task?.policy?.tenant) {
       tags.push(`tenant:${task.policy.tenant}`);

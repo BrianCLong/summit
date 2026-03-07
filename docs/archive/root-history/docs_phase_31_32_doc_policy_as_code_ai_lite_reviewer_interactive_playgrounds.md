@@ -47,14 +47,12 @@ version: latest
 **`scripts/docs/validate-frontmatter-schema.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const Ajv = require('ajv').default;
-const addFormats = require('ajv-formats');
-const schema = JSON.parse(
-  fs.readFileSync('docs/_meta/frontmatter.schema.json', 'utf8'),
-);
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const Ajv = require("ajv").default;
+const addFormats = require("ajv-formats");
+const schema = JSON.parse(fs.readFileSync("docs/_meta/frontmatter.schema.json", "utf8"));
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
@@ -72,7 +70,7 @@ let fail = 0;
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail);
 ```
 
@@ -117,9 +115,9 @@ violation[msg] {
 **`scripts/docs/conftest-input.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const out = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -135,8 +133,8 @@ const out = [];
       });
     }
   }
-})('docs');
-fs.writeFileSync('conftest.json', JSON.stringify(out, null, 2));
+})("docs");
+fs.writeFileSync("conftest.json", JSON.stringify(out, null, 2));
 ```
 
 **`.github/workflows/docs-policy.yml`**
@@ -169,27 +167,25 @@ jobs:
 **`scripts/docs/reviewer.js`**
 
 ```js
-const fs = require('fs');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const { execSync } = require("child_process");
 const changed = execSync(
-  `git diff --name-only origin/${process.env.GITHUB_BASE_REF || 'main'}...`,
-  { encoding: 'utf8' },
+  `git diff --name-only origin/${process.env.GITHUB_BASE_REF || "main"}...`,
+  { encoding: "utf8" }
 )
   .trim()
-  .split('\n');
+  .split("\n");
 const tips = [];
-if (changed.some((f) => f.startsWith('docs/how-to/')))
-  tips.push(
-    '- Ensure **Prerequisites**, **Steps**, **Validation**, **Troubleshooting** present.',
-  );
+if (changed.some((f) => f.startsWith("docs/how-to/")))
+  tips.push("- Ensure **Prerequisites**, **Steps**, **Validation**, **Troubleshooting** present.");
 if (changed.some((f) => /\.(png|jpg|jpeg|svg)$/i.test(f)))
-  tips.push('- Add **alt text** and update **ATTRIBUTIONS.md** if external.');
-if (changed.some((f) => f.includes('releases/')))
+  tips.push("- Add **alt text** and update **ATTRIBUTIONS.md** if external.");
+if (changed.some((f) => f.includes("releases/")))
   tips.push(
-    '- Link release notes from **/releases/index** and update **/reference/deprecations** if needed.',
+    "- Link release notes from **/releases/index** and update **/reference/deprecations** if needed."
   );
-if (!tips.length) tips.push('- Looks good. Ensure sidebars link is present.');
-fs.writeFileSync('review-tips.md', tips.join('\n'));
+if (!tips.length) tips.push("- Looks good. Ensure sidebars link is present.");
+fs.writeFileSync("review-tips.md", tips.join("\n"));
 ```
 
 **`.github/workflows/docs-reviewer.yml`**
@@ -232,21 +228,17 @@ jobs:
 **`src/components/Playground.tsx`**
 
 ```tsx
-import React from 'react';
-import { Sandpack } from '@codesandbox/sandpack-react';
+import React from "react";
+import { Sandpack } from "@codesandbox/sandpack-react";
 export default function Playground({
   files,
-  template = 'vanilla-ts',
+  template = "vanilla-ts",
 }: {
   files: Record<string, string>;
   template?: string;
 }) {
   return (
-    <Sandpack
-      template={template}
-      files={files}
-      options={{ editorHeight: 420, showTabs: true }}
-    />
+    <Sandpack template={template} files={files} options={{ editorHeight: 420, showTabs: true }} />
   );
 }
 ```
@@ -254,13 +246,13 @@ export default function Playground({
 **Usage in MDX**
 
 ```mdx
-import Playground from '@site/src/components/Playground';
+import Playground from "@site/src/components/Playground";
 
 <Playground
   files={{
-    '/index.ts': `import './styles.css';\nconst el = document.getElementById('app')!;\nel.textContent = 'Hello IntelGraph';`,
-    '/styles.css': `#app{font-family:sans-serif;padding:1rem}`,
-    '/index.html': `<div id="app"></div>`,
+    "/index.ts": `import './styles.css';\nconst el = document.getElementById('app')!;\nel.textContent = 'Hello IntelGraph';`,
+    "/styles.css": `#app{font-family:sans-serif;padding:1rem}`,
+    "/index.html": `<div id="app"></div>`,
   }}
 />
 ```
@@ -278,13 +270,11 @@ import Playground from '@site/src/components/Playground';
 **`scripts/docs/secret-pii-scan.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const rxToken = /(sk_live|AKIA|AIza|ghp_|xox[baprs]-)[0-9A-Za-z\-\_]+/g;
 function entropy(s) {
-  const p = [...new Set(s)]
-    .map((c) => s.split(c).length - 1)
-    .map((f) => f / s.length);
+  const p = [...new Set(s)].map((c) => s.split(c).length - 1).map((f) => f / s.length);
   return -p.reduce((a, b) => a + b * Math.log2(b), 0);
 }
 let fail = 0;
@@ -294,7 +284,7 @@ let fail = 0;
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.(mdx?|json|yaml|yml)$/i.test(f)) {
-      const src = fs.readFileSync(p, 'utf8');
+      const src = fs.readFileSync(p, "utf8");
       for (const m of src.matchAll(rxToken)) {
         console.error(`Possible token in ${p}: ${m[0].slice(0, 6)}…`);
         fail = 1;
@@ -305,7 +295,7 @@ let fail = 0;
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail);
 ```
 
@@ -328,18 +318,18 @@ images/arch.svg,internal,CC-BY-4.0,IntelGraph Docs Team
 **`scripts/docs/check-media-licensing.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const index = new Map(
   fs
-    .readFileSync('docs/_meta/media.csv', 'utf8')
+    .readFileSync("docs/_meta/media.csv", "utf8")
     .split(/\r?\n/)
     .slice(1)
     .filter(Boolean)
     .map((l) => {
-      const [file, source, license, attr] = l.split(',');
+      const [file, source, license, attr] = l.split(",");
       return [file.trim(), { source, license, attr }];
-    }),
+    })
 );
 let fail = 0;
 (function walk(d) {
@@ -348,14 +338,14 @@ let fail = 0;
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.(png|jpe?g|gif|svg)$/i.test(f)) {
-      const rel = p.replace(/^docs\//, '');
+      const rel = p.replace(/^docs\//, "");
       if (!index.has(rel)) {
-        console.error('Missing media license entry:', rel);
+        console.error("Missing media license entry:", rel);
         fail = 1;
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail);
 ```
 

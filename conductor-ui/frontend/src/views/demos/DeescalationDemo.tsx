@@ -4,7 +4,7 @@
  * Displays conversation analysis with coaching guidance for customer service scenarios.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -24,13 +24,13 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   Psychology as PsychologyIcon,
   TrendingUp as TrendingUpIcon,
   Security as SecurityIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface ConversationResult {
   conversation: {
@@ -84,7 +84,7 @@ export const DeescalationDemo: React.FC = () => {
   const loadDemoResults = async () => {
     try {
       // In production, this would fetch from API
-      const response = await fetch('/demos/deescalation/output/analysis_results.json');
+      const response = await fetch("/demos/deescalation/output/analysis_results.json");
       const data = await response.json();
       setResults(data);
       if (data.results.length > 0) {
@@ -92,30 +92,30 @@ export const DeescalationDemo: React.FC = () => {
       }
       setLoading(false);
     } catch (err) {
-      setError('Failed to load demo results. Run: npm run demo:deescalation');
+      setError("Failed to load demo results. Run: npm run demo:deescalation");
       setLoading(false);
     }
   };
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'critical':
-        return 'error';
-      case 'high':
-        return 'warning';
-      case 'medium':
-        return 'info';
-      case 'low':
-        return 'success';
+      case "critical":
+        return "error";
+      case "high":
+        return "warning";
+      case "medium":
+        return "info";
+      case "low":
+        return "success";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getToxicityColor = (toxicity: number) => {
-    if (toxicity >= 0.7) return 'error';
-    if (toxicity >= 0.4) return 'warning';
-    return 'success';
+    if (toxicity >= 0.7) return "error";
+    if (toxicity >= 0.4) return "warning";
+    return "success";
   };
 
   if (loading) {
@@ -127,7 +127,7 @@ export const DeescalationDemo: React.FC = () => {
   }
 
   if (error || !results) {
-    return <Alert severity="error">{error || 'No results available'}</Alert>;
+    return <Alert severity="error">{error || "No results available"}</Alert>;
   }
 
   return (
@@ -212,11 +212,11 @@ export const DeescalationDemo: React.FC = () => {
                       key={result.conversation.id}
                       variant="outlined"
                       sx={{
-                        cursor: 'pointer',
+                        cursor: "pointer",
                         bgcolor:
                           selectedConv?.conversation.id === result.conversation.id
-                            ? 'action.selected'
-                            : 'background.paper',
+                            ? "action.selected"
+                            : "background.paper",
                       }}
                       onClick={() => setSelectedConv(result)}
                     >
@@ -345,9 +345,7 @@ export const DeescalationDemo: React.FC = () => {
                         <Typography variant="subtitle1">De-escalated Version</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
-                        <Alert severity="success">
-                          {selectedConv.analysis.rewrite.text}
-                        </Alert>
+                        <Alert severity="success">{selectedConv.analysis.rewrite.text}</Alert>
                         <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
                           This version preserves the core message while reducing emotional charge.
                         </Typography>

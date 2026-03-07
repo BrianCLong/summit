@@ -13,7 +13,7 @@ describe('Workbench Store', () => {
         nodeTypes: [],
         edgeTypes: [],
         showProvenance: false,
-      }
+      },
     })
   })
 
@@ -66,8 +66,8 @@ describe('Workbench Store', () => {
         edges: [],
         transform: { x: 0, y: 0, k: 1 },
         filters: { types: [], timeRange: null },
-        selection: ['n1']
-      }
+        selection: ['n1'],
+      },
     }
 
     // Test Save
@@ -79,7 +79,9 @@ describe('Workbench Store', () => {
     const view1Updated = { ...view1, name: 'Updated View 1' }
     saveView(view1Updated)
     expect(useWorkbenchStore.getState().savedViews).toHaveLength(1)
-    expect(useWorkbenchStore.getState().savedViews[0].name).toBe('Updated View 1')
+    expect(useWorkbenchStore.getState().savedViews[0].name).toBe(
+      'Updated View 1'
+    )
 
     // Test Delete
     deleteView('v1')
@@ -87,14 +89,14 @@ describe('Workbench Store', () => {
   })
 
   it('loads a view (mock implementation)', () => {
-      // The store currently logs on loadView, but we can verify the function exists and doesn't crash
-      const { loadView } = useWorkbenchStore.getState()
-      const consoleSpy = vi.spyOn(console, 'log')
-      loadView('v1')
-      expect(consoleSpy).toHaveBeenCalledWith('Loading view', 'v1')
+    // The store currently logs on loadView, but we can verify the function exists and doesn't crash
+    const { loadView } = useWorkbenchStore.getState()
+    const consoleSpy = vi.spyOn(console, 'log')
+    loadView('v1')
+    expect(consoleSpy).toHaveBeenCalledWith('Loading view', 'v1')
   })
 
   it('initializes with no saved views', () => {
-      expect(useWorkbenchStore.getState().savedViews).toEqual([])
+    expect(useWorkbenchStore.getState().savedViews).toEqual([])
   })
 })

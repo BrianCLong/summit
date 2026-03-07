@@ -1,5 +1,15 @@
-import React from 'react';
-import { Card, Metric, Text, Title, BarList, Grid, Flex, BadgeDelta, AreaChart } from '@tremor/react';
+import React from 'react'
+import {
+  Card,
+  Metric,
+  Text,
+  Title,
+  BarList,
+  Grid,
+  Flex,
+  BadgeDelta,
+  AreaChart,
+} from '@tremor/react'
 
 const chartdata = [
   { date: 'Jan 22', SemiAnalysis: 2890, 'The Pragmatic Engineer': 2338 },
@@ -8,20 +18,38 @@ const chartdata = [
   { date: 'Apr 22', SemiAnalysis: 3470, 'The Pragmatic Engineer': 2108 },
   { date: 'May 22', SemiAnalysis: 3475, 'The Pragmatic Engineer': 1812 },
   { date: 'Jun 22', SemiAnalysis: 3129, 'The Pragmatic Engineer': 1726 },
-];
+]
 
 const categories = [
-  { title: 'Sales', metric: '$ 12,699', metricPrev: '$ 9,456', delta: '34.3%', deltaType: 'moderateIncrease' },
-  { title: 'Profit', metric: '$ 40,598', metricPrev: '$ 45,564', delta: '10.9%', deltaType: 'moderateDecrease' },
-  { title: 'Customers', metric: '1,072', metricPrev: '856', delta: '25.3%', deltaType: 'moderateIncrease' },
-];
+  {
+    title: 'Sales',
+    metric: '$ 12,699',
+    metricPrev: '$ 9,456',
+    delta: '34.3%',
+    deltaType: 'moderateIncrease',
+  },
+  {
+    title: 'Profit',
+    metric: '$ 40,598',
+    metricPrev: '$ 45,564',
+    delta: '10.9%',
+    deltaType: 'moderateDecrease',
+  },
+  {
+    title: 'Customers',
+    metric: '1,072',
+    metricPrev: '856',
+    delta: '25.3%',
+    deltaType: 'moderateIncrease',
+  },
+]
 
 const data = [
   { name: '/api/v1/approvals', value: 456 },
   { name: '/api/v1/preflight', value: 351 },
   { name: '/api/v1/search', value: 271 },
   { name: '/api/v1/receipts', value: 191 },
-];
+]
 
 export default function TenantOpsPage() {
   return (
@@ -54,7 +82,7 @@ export default function TenantOpsPage() {
             </div>
             <BadgeDelta deltaType="decrease">-5%</BadgeDelta>
           </Flex>
-           <Flex className="mt-4 space-x-2">
+          <Flex className="mt-4 space-x-2">
             <div className="truncate">
               <Text>SLO Target</Text>
               <Text>200ms</Text>
@@ -70,7 +98,7 @@ export default function TenantOpsPage() {
             </div>
             <BadgeDelta deltaType="unchanged">0%</BadgeDelta>
           </Flex>
-           <Flex className="mt-4 space-x-2">
+          <Flex className="mt-4 space-x-2">
             <div className="truncate">
               <Text>SLO Target</Text>
               <Text>&lt; 0.1%</Text>
@@ -107,5 +135,5 @@ export default function TenantOpsPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

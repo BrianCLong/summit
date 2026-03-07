@@ -1,24 +1,24 @@
-name: 'Setup pnpm with cache'
-description: 'Setup Node.js with pnpm and configure caching'
+name: "Setup pnpm with cache"
+description: "Setup Node.js with pnpm and configure caching"
 
 inputs:
   node-version:
-    description: 'Node.js version to use'
+    description: "Node.js version to use"
     required: false
-    default: '20.x'
+    default: "20.x"
   enable-turbo-cache:
-    description: 'Enable Turbo remote cache'
+    description: "Enable Turbo remote cache"
     required: false
-    default: 'true'
+    default: "true"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'pnpm'
+        cache: "pnpm"
 
     - name: Enable corepack
       shell: bash

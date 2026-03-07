@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/disinfo-news-ecosystem/**'
-      - 'fixtures/disinfo/**'
+      - "packages/disinfo-news-ecosystem/**"
+      - "fixtures/disinfo/**"
   pull_request:
     branches: [main]
     paths:
-      - 'packages/disinfo-news-ecosystem/**'
-      - 'fixtures/disinfo/**'
+      - "packages/disinfo-news-ecosystem/**"
+      - "fixtures/disinfo/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

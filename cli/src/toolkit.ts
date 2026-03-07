@@ -1,10 +1,10 @@
-import { writeFileSync, mkdirSync } from 'fs';
-import { dirname } from 'path';
-import chalk from 'chalk';
-import { BellingcatImporter, createNormalizedRegistry } from '../../src/toolkit/index.js';
+import { writeFileSync, mkdirSync } from "fs";
+import { dirname } from "path";
+import chalk from "chalk";
+import { BellingcatImporter, createNormalizedRegistry } from "../../src/toolkit/index.js";
 
 export async function syncToolkit(source: string, outPath: string) {
-  if (source.toLowerCase() !== 'bellingcat') {
+  if (source.toLowerCase() !== "bellingcat") {
     throw new Error(`Unsupported toolkit source: ${source}`);
   }
 
@@ -21,7 +21,7 @@ export async function syncToolkit(source: string, outPath: string) {
   // Ensure output directory exists
   mkdirSync(dirname(outPath), { recursive: true });
 
-  writeFileSync(outPath, JSON.stringify(registry, null, 2), 'utf-8');
+  writeFileSync(outPath, JSON.stringify(registry, null, 2), "utf-8");
   console.log(chalk.green(`Successfully wrote deterministic toolkit to: ${outPath}`));
   console.log(chalk.green(`Total tools synced: ${registry.count}`));
 }

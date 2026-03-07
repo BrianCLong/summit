@@ -2,15 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "OrchestrationKnowledgeGraphSnapshot",
   "type": "object",
-  "required": [
-    "generatedAt",
-    "version",
-    "nodes",
-    "edges",
-    "serviceRisk",
-    "sandbox",
-    "namespace"
-  ],
+  "required": ["generatedAt", "version", "nodes", "edges", "serviceRisk", "sandbox", "namespace"],
   "properties": {
     "generatedAt": { "type": "string", "format": "date-time" },
     "version": { "type": "integer", "minimum": 0 },

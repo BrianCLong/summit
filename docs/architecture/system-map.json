@@ -8,9 +8,7 @@
       "category": "database",
       "port": 5432,
       "dependencies": [],
-      "dependents": [
-        "api"
-      ],
+      "dependents": ["api"],
       "metadata": {
         "image": "postgres:16-alpine",
         "source": "docker-compose.dev.yml"
@@ -22,11 +20,7 @@
       "category": "cache",
       "port": 6379,
       "dependencies": [],
-      "dependents": [
-        "api",
-        "websocket-server",
-        "ai-sandbox"
-      ],
+      "dependents": ["api", "websocket-server", "ai-sandbox"],
       "metadata": {
         "image": "redis:7-alpine",
         "source": "docker-compose.dev.yml"
@@ -38,9 +32,7 @@
       "category": "database",
       "port": 7474,
       "dependencies": [],
-      "dependents": [
-        "api"
-      ],
+      "dependents": ["api"],
       "metadata": {
         "image": "neo4j:5-community",
         "source": "docker-compose.dev.yml"
@@ -52,9 +44,7 @@
       "category": "search",
       "port": 9200,
       "dependencies": [],
-      "dependents": [
-        "api"
-      ],
+      "dependents": ["api"],
       "metadata": {
         "image": "docker.elastic.co/elasticsearch/elasticsearch:8.15.0",
         "source": "docker-compose.dev.yml"
@@ -75,11 +65,7 @@
         "elasticsearch",
         "condition"
       ],
-      "dependents": [
-        "gateway",
-        "web",
-        "ai-worker"
-      ],
+      "dependents": ["gateway", "web", "ai-worker"],
       "metadata": {
         "build": "",
         "source": "docker-compose.dev.yml"
@@ -90,10 +76,7 @@
       "type": "docker",
       "category": "api",
       "port": 4100,
-      "dependencies": [
-        "api",
-        "condition"
-      ],
+      "dependencies": ["api", "condition"],
       "dependents": [],
       "metadata": {
         "build": "",
@@ -105,10 +88,7 @@
       "type": "docker",
       "category": "frontend",
       "port": 3000,
-      "dependencies": [
-        "api",
-        "condition"
-      ],
+      "dependencies": ["api", "condition"],
       "dependents": [],
       "metadata": {
         "build": "",
@@ -120,10 +100,7 @@
       "type": "docker",
       "category": "frontend",
       "port": 9001,
-      "dependencies": [
-        "redis",
-        "condition"
-      ],
+      "dependencies": ["redis", "condition"],
       "dependents": [],
       "metadata": {
         "build": "",
@@ -136,9 +113,7 @@
       "category": "observability",
       "port": 9090,
       "dependencies": [],
-      "dependents": [
-        "grafana"
-      ],
+      "dependents": ["grafana"],
       "metadata": {
         "image": "prom/prometheus:v2.54.1",
         "source": "docker-compose.dev.yml"
@@ -149,14 +124,7 @@
       "type": "docker",
       "category": "observability",
       "port": 3001,
-      "dependencies": [
-        "prometheus",
-        "condition",
-        "loki",
-        "condition",
-        "jaeger",
-        "condition"
-      ],
+      "dependencies": ["prometheus", "condition", "loki", "condition", "jaeger", "condition"],
       "dependents": [],
       "metadata": {
         "image": "grafana/grafana:10.4.7",
@@ -169,9 +137,7 @@
       "category": "observability",
       "port": 16686,
       "dependencies": [],
-      "dependents": [
-        "grafana"
-      ],
+      "dependents": ["grafana"],
       "metadata": {
         "image": "jaegertracing/all-in-one:1.52",
         "source": "docker-compose.dev.yml"
@@ -183,9 +149,7 @@
       "category": "observability",
       "port": 3100,
       "dependencies": [],
-      "dependents": [
-        "grafana"
-      ],
+      "dependents": ["grafana"],
       "metadata": {
         "image": "grafana/loki:2.9.3",
         "source": "docker-compose.dev.yml"
@@ -219,10 +183,7 @@
       "type": "docker",
       "category": "ai",
       "port": 4020,
-      "dependencies": [
-        "redis",
-        "condition"
-      ],
+      "dependencies": ["redis", "condition"],
       "dependents": [],
       "metadata": {
         "build": "",
@@ -235,9 +196,7 @@
       "category": "service",
       "port": 2181,
       "dependencies": [],
-      "dependents": [
-        "kafka"
-      ],
+      "dependents": ["kafka"],
       "metadata": {
         "image": "bitnami/zookeeper:3.9",
         "source": "docker-compose.ai.yml"
@@ -248,13 +207,8 @@
       "type": "docker",
       "category": "messaging",
       "port": 9092,
-      "dependencies": [
-        "zookeeper",
-        "condition"
-      ],
-      "dependents": [
-        "ai-worker"
-      ],
+      "dependencies": ["zookeeper", "condition"],
+      "dependents": ["ai-worker"],
       "metadata": {
         "image": "bitnami/kafka:3.7",
         "source": "docker-compose.ai.yml"
@@ -264,12 +218,7 @@
       "name": "ai-worker",
       "type": "docker",
       "category": "ai",
-      "dependencies": [
-        "api",
-        "condition",
-        "kafka",
-        "condition"
-      ],
+      "dependencies": ["api", "condition", "kafka", "condition"],
       "dependents": [],
       "metadata": {
         "build": "",
@@ -482,9 +431,7 @@
       "type": "package",
       "category": "library",
       "description": "3D and immersive visualization library for IntelGraph",
-      "dependencies": [
-        "@intelgraph/visualization"
-      ],
+      "dependencies": ["@intelgraph/visualization"],
       "dependents": [],
       "metadata": {
         "path": "packages/3d-visualization",
@@ -495,11 +442,7 @@
       "name": "@intelgraph/acs-learner",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/atl",
-        "@intelgraph/adc",
-        "@intelgraph/crsp"
-      ],
+      "dependencies": ["@intelgraph/atl", "@intelgraph/adc", "@intelgraph/crsp"],
       "dependents": [],
       "metadata": {
         "path": "packages/acs-learner",
@@ -510,11 +453,7 @@
       "name": "@intelgraph/acs-simulator",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/atl",
-        "@intelgraph/adc",
-        "@intelgraph/crsp"
-      ],
+      "dependencies": ["@intelgraph/atl", "@intelgraph/adc", "@intelgraph/crsp"],
       "dependents": [],
       "metadata": {
         "path": "packages/acs-simulator",
@@ -525,10 +464,7 @@
       "name": "@intelgraph/agent-identification",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types",
-        "@intelgraph/espionage-tracking"
-      ],
+      "dependencies": ["@intelgraph/common-types", "@intelgraph/espionage-tracking"],
       "dependents": [],
       "metadata": {
         "path": "packages/agent-identification",
@@ -540,10 +476,7 @@
       "type": "package",
       "category": "library",
       "description": "Advanced anomaly detection with behavioral analytics (UBA/EBA)",
-      "dependencies": [
-        "@intelgraph/threat-detection-core",
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/threat-detection-core", "@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/anomaly-detection",
@@ -570,9 +503,7 @@
       "name": "@intelgraph/attack-surface",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/attack-surface",
@@ -584,9 +515,7 @@
       "type": "package",
       "category": "library",
       "description": "Digital identity attribution and footprint analysis engine",
-      "dependencies": [
-        "@intelgraph/osint-collector"
-      ],
+      "dependencies": ["@intelgraph/osint-collector"],
       "dependents": [],
       "metadata": {
         "path": "packages/attribution-engine",
@@ -598,9 +527,7 @@
       "type": "package",
       "category": "library",
       "description": "Audio feature extraction and analysis",
-      "dependencies": [
-        "@intelgraph/audio-processing"
-      ],
+      "dependencies": ["@intelgraph/audio-processing"],
       "dependents": [],
       "metadata": {
         "path": "packages/audio-analytics",
@@ -612,9 +539,7 @@
       "type": "package",
       "category": "library",
       "description": "Audio enhancement and quality improvement",
-      "dependencies": [
-        "@intelgraph/audio-processing"
-      ],
+      "dependencies": ["@intelgraph/audio-processing"],
       "dependents": [],
       "metadata": {
         "path": "packages/audio-enhancement",
@@ -626,9 +551,7 @@
       "type": "package",
       "category": "library",
       "description": "Audio forensics and authenticity verification",
-      "dependencies": [
-        "@intelgraph/audio-processing"
-      ],
+      "dependencies": ["@intelgraph/audio-processing"],
       "dependents": [],
       "metadata": {
         "path": "packages/audio-forensics",
@@ -640,9 +563,7 @@
       "type": "package",
       "category": "library",
       "description": "Audio event detection and acoustic intelligence",
-      "dependencies": [
-        "@intelgraph/audio-processing"
-      ],
+      "dependencies": ["@intelgraph/audio-processing"],
       "dependents": [],
       "metadata": {
         "path": "packages/audio-intelligence",
@@ -654,9 +575,7 @@
       "type": "package",
       "category": "library",
       "description": "Audio synthesis with TTS, voice cloning, and effects",
-      "dependencies": [
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/audio-synthesis",
@@ -680,9 +599,7 @@
       "type": "package",
       "category": "library",
       "description": "Multidomain data fusion engine for battle management",
-      "dependencies": [
-        "@intelgraph/battle-types"
-      ],
+      "dependencies": ["@intelgraph/battle-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/battle-fusion",
@@ -693,10 +610,7 @@
       "name": "@intelgraph/behavioral-analysis",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/biometrics",
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/biometrics", "@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/behavioral-analysis",
@@ -722,12 +636,8 @@
       "name": "@intelgraph/biometrics",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types"
-      ],
-      "dependents": [
-        "@intelgraph/behavioral-analysis"
-      ],
+      "dependencies": ["@intelgraph/common-types"],
+      "dependents": ["@intelgraph/behavioral-analysis"],
       "metadata": {
         "path": "packages/biometrics",
         "version": "0.1.0"
@@ -738,10 +648,7 @@
       "type": "package",
       "category": "library",
       "description": "Business glossary and data dictionary with term management and approval workflows",
-      "dependencies": [
-        "@intelgraph/data-catalog",
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/data-catalog", "@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/business-glossary",
@@ -753,10 +660,7 @@
       "type": "package",
       "category": "library",
       "description": "Analytics and reporting for data catalog usage, adoption, and ROI",
-      "dependencies": [
-        "@intelgraph/data-catalog",
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/data-catalog", "@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/catalog-analytics",
@@ -768,10 +672,7 @@
       "type": "package",
       "category": "library",
       "description": "Complex Event Processing engine for pattern detection and temporal analysis",
-      "dependencies": [
-        "@intelgraph/kafka-integration",
-        "@intelgraph/stream-processing"
-      ],
+      "dependencies": ["@intelgraph/kafka-integration", "@intelgraph/stream-processing"],
       "dependents": [],
       "metadata": {
         "path": "packages/cep-engine",
@@ -783,10 +684,7 @@
       "type": "package",
       "category": "library",
       "description": "Chain of custody tracking for evidence and legal compliance",
-      "dependencies": [
-        "@intelgraph/blockchain",
-        "@intelgraph/digital-signatures"
-      ],
+      "dependencies": ["@intelgraph/blockchain", "@intelgraph/digital-signatures"],
       "dependents": [],
       "metadata": {
         "path": "packages/chain-of-custody",
@@ -798,9 +696,7 @@
       "type": "package",
       "category": "library",
       "description": "Advanced charting library for IntelGraph",
-      "dependencies": [
-        "@intelgraph/visualization"
-      ],
+      "dependencies": ["@intelgraph/visualization"],
       "dependents": [],
       "metadata": {
         "path": "packages/charting",
@@ -812,9 +708,7 @@
       "type": "package",
       "category": "library",
       "description": "Cloud governance, security, and compliance for data lakehouse",
-      "dependencies": [
-        "@intelgraph/lakehouse"
-      ],
+      "dependencies": ["@intelgraph/lakehouse"],
       "dependents": [],
       "metadata": {
         "path": "packages/cloud-governance",
@@ -826,10 +720,7 @@
       "type": "package",
       "category": "library",
       "description": "Convolutional Neural Network framework for Summit",
-      "dependencies": [
-        "@intelgraph/deep-learning-core",
-        "@intelgraph/neural-networks"
-      ],
+      "dependencies": ["@intelgraph/deep-learning-core", "@intelgraph/neural-networks"],
       "dependents": [],
       "metadata": {
         "path": "packages/cnn-framework",
@@ -858,10 +749,7 @@
       "type": "package",
       "category": "library",
       "description": "Communications Intelligence Analysis - Training Framework",
-      "dependencies": [
-        "@intelgraph/sigint-collector",
-        "@intelgraph/rf-processor"
-      ],
+      "dependencies": ["@intelgraph/sigint-collector", "@intelgraph/rf-processor"],
       "dependents": [],
       "metadata": {
         "path": "packages/comint-analyzer",
@@ -872,9 +760,7 @@
       "name": "@intelgraph/compliance-monitor",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/supply-chain-types"
-      ],
+      "dependencies": ["@intelgraph/supply-chain-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/compliance-monitor",
@@ -885,9 +771,7 @@
       "name": "@intelgraph/component-tracker",
       "type": "package",
       "category": "ui",
-      "dependencies": [
-        "@intelgraph/supply-chain-types"
-      ],
+      "dependencies": ["@intelgraph/supply-chain-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/component-tracker",
@@ -898,9 +782,7 @@
       "name": "@intelgraph/content-verification",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/content-verification",
@@ -911,10 +793,7 @@
       "name": "@intelgraph/counterintel-ops",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types",
-        "@intelgraph/espionage-tracking"
-      ],
+      "dependencies": ["@intelgraph/common-types", "@intelgraph/espionage-tracking"],
       "dependents": [],
       "metadata": {
         "path": "packages/counterintel-ops",
@@ -925,10 +804,7 @@
       "name": "@intelgraph/covert-operations",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types",
-        "@intelgraph/espionage-tracking"
-      ],
+      "dependencies": ["@intelgraph/common-types", "@intelgraph/espionage-tracking"],
       "dependents": [],
       "metadata": {
         "path": "packages/covert-operations",
@@ -940,10 +816,7 @@
       "type": "package",
       "category": "library",
       "description": "CQRS (Command Query Responsibility Segregation) implementation with projections",
-      "dependencies": [
-        "@intelgraph/event-sourcing",
-        "@intelgraph/event-bus"
-      ],
+      "dependencies": ["@intelgraph/event-sourcing", "@intelgraph/event-bus"],
       "dependents": [],
       "metadata": {
         "path": "packages/cqrs",
@@ -954,9 +827,7 @@
       "name": "@intelgraph/crisis-diplomacy",
       "type": "package",
       "category": "library",
-      "dependencies": [
-        "@intelgraph/common-types"
-      ],
+      "dependencies": ["@intelgraph/common-types"],
       "dependents": [],
       "metadata": {
         "path": "packages/crisis-diplomacy",
@@ -1092,10 +963,7 @@
       "dependents": [],
       "metadata": {
         "file": "abac-policy.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:add-to-project": {
@@ -1107,9 +975,7 @@
       "dependents": [],
       "metadata": {
         "file": "add-to-project.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:adr-check": {
@@ -1121,9 +987,7 @@
       "dependents": [],
       "metadata": {
         "file": "adr-check.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:agentic-task-orchestrator": {
@@ -1135,9 +999,7 @@
       "dependents": [],
       "metadata": {
         "file": "agentic-task-orchestrator.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:agsm-probes": {
@@ -1149,9 +1011,7 @@
       "dependents": [],
       "metadata": {
         "file": "agsm-probes.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:airgap-deployment": {
@@ -1163,11 +1023,7 @@
       "dependents": [],
       "metadata": {
         "file": "airgap-deployment.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:api-docs-validation": {
@@ -1179,10 +1035,7 @@
       "dependents": [],
       "metadata": {
         "file": "api-docs-validation.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:api-docs": {
@@ -1194,11 +1047,7 @@
       "dependents": [],
       "metadata": {
         "file": "api-docs.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:attest-provenance": {
@@ -1210,10 +1059,7 @@
       "dependents": [],
       "metadata": {
         "file": "attest-provenance.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:attest-sbom": {
@@ -1237,9 +1083,7 @@
       "dependents": [],
       "metadata": {
         "file": "audit.strict.nightly.yml",
-        "triggers": [
-          "schedule"
-        ]
+        "triggers": ["schedule"]
       }
     },
     "workflow:auto-assign": {
@@ -1275,10 +1119,7 @@
       "dependents": [],
       "metadata": {
         "file": "auto-fix-vulnerabilities.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["workflow_dispatch", "schedule"]
       }
     },
     "workflow:auto-green": {
@@ -1290,9 +1131,7 @@
       "dependents": [],
       "metadata": {
         "file": "auto-green.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:auto-merge-ready": {
@@ -1316,9 +1155,7 @@
       "dependents": [],
       "metadata": {
         "file": "auto-resolve-conflicts.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:auto-rollback": {
@@ -1330,9 +1167,7 @@
       "dependents": [],
       "metadata": {
         "file": "auto-rollback.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:auto-update-prs": {
@@ -1344,10 +1179,7 @@
       "dependents": [],
       "metadata": {
         "file": "auto-update-prs.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:automerge": {
@@ -1371,11 +1203,7 @@
       "dependents": [],
       "metadata": {
         "file": "autotriage-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:backup-restore-validation": {
@@ -1387,10 +1215,7 @@
       "dependents": [],
       "metadata": {
         "file": "backup-restore-validation.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:batch-merge": {
@@ -1402,9 +1227,7 @@
       "dependents": [],
       "metadata": {
         "file": "batch-merge.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:blue-green-canary": {
@@ -1416,9 +1239,7 @@
       "dependents": [],
       "metadata": {
         "file": "blue-green-canary.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:branch-cleanup": {
@@ -1430,10 +1251,7 @@
       "dependents": [],
       "metadata": {
         "file": "branch-cleanup.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:branch-protection": {
@@ -1445,9 +1263,7 @@
       "dependents": [],
       "metadata": {
         "file": "branch-protection.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:build-and-push": {
@@ -1459,10 +1275,7 @@
       "dependents": [],
       "metadata": {
         "file": "build-and-push.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:build-images": {
@@ -1474,10 +1287,7 @@
       "dependents": [],
       "metadata": {
         "file": "build-images.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:canary-deployment": {
@@ -1489,9 +1299,7 @@
       "dependents": [],
       "metadata": {
         "file": "canary-deployment.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:canary-progress": {
@@ -1503,9 +1311,7 @@
       "dependents": [],
       "metadata": {
         "file": "canary-progress.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:cd-deploy": {
@@ -1529,9 +1335,7 @@
       "dependents": [],
       "metadata": {
         "file": "cd-preview.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:cd-release": {
@@ -1543,9 +1347,7 @@
       "dependents": [],
       "metadata": {
         "file": "cd-release.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:cd-rollback": {
@@ -1557,9 +1359,7 @@
       "dependents": [],
       "metadata": {
         "file": "cd-rollback.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:cdis": {
@@ -1571,10 +1371,7 @@
       "dependents": [],
       "metadata": {
         "file": "cdis.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:chatops": {
@@ -1598,11 +1395,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-backbone.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:ci-cd": {
@@ -1614,10 +1407,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-cd.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ci-golden-path": {
@@ -1629,11 +1419,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-golden-path.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:ci-image": {
@@ -1645,10 +1431,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-image.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ci-main": {
@@ -1660,10 +1443,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-main.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ci-modernized": {
@@ -1675,11 +1455,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-modernized.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:ci-performance-k6": {
@@ -1691,11 +1467,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-performance-k6.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch", "schedule"]
       }
     },
     "workflow:ci-security": {
@@ -1707,12 +1479,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-security.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch", "schedule"]
       }
     },
     "workflow:ci-validate": {
@@ -1724,10 +1491,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-validate.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:ci-zap": {
@@ -1739,12 +1503,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci-zap.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:ci.green": {
@@ -1756,10 +1515,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci.green.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ci.main": {
@@ -1771,10 +1527,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci.main.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ci": {
@@ -1786,11 +1539,7 @@
       "dependents": [],
       "metadata": {
         "file": "ci.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:cli": {
@@ -1802,10 +1551,7 @@
       "dependents": [],
       "metadata": {
         "file": "cli.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:client-ci": {
@@ -1817,10 +1563,7 @@
       "dependents": [],
       "metadata": {
         "file": "client-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:close-when-done": {
@@ -1844,10 +1587,7 @@
       "dependents": [],
       "metadata": {
         "file": "closed-pr-excavator.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:code-quality-gates": {
@@ -1859,10 +1599,7 @@
       "dependents": [],
       "metadata": {
         "file": "code-quality-gates.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:codeql-analysis": {
@@ -1874,11 +1611,7 @@
       "dependents": [],
       "metadata": {
         "file": "codeql-analysis.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:codeql-dev": {
@@ -1890,11 +1623,7 @@
       "dependents": [],
       "metadata": {
         "file": "codeql-dev.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:codeql": {
@@ -1906,11 +1635,7 @@
       "dependents": [],
       "metadata": {
         "file": "codeql.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:cognitive-targeting-engine-ci": {
@@ -1922,10 +1647,7 @@
       "dependents": [],
       "metadata": {
         "file": "cognitive-targeting-engine-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:compose-k6-smoke": {
@@ -1937,9 +1659,7 @@
       "dependents": [],
       "metadata": {
         "file": "compose-k6-smoke.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:compose-ui-screens": {
@@ -1951,9 +1671,7 @@
       "dependents": [],
       "metadata": {
         "file": "compose-ui-screens.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:config-attest": {
@@ -1965,11 +1683,7 @@
       "dependents": [],
       "metadata": {
         "file": "config-attest.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:configure-oidc": {
@@ -1981,9 +1695,7 @@
       "dependents": [],
       "metadata": {
         "file": "configure-oidc.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:conftest": {
@@ -2007,11 +1719,7 @@
       "dependents": [],
       "metadata": {
         "file": "container-security.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:contract-tests": {
@@ -2023,10 +1731,7 @@
       "dependents": [],
       "metadata": {
         "file": "contract-tests.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:contract-verify": {
@@ -2050,10 +1755,7 @@
       "dependents": [],
       "metadata": {
         "file": "copilot-adoption-report.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:copilot-guardrail": {
@@ -2077,10 +1779,7 @@
       "dependents": [],
       "metadata": {
         "file": "copilot-refresh.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:copilot-wins-rollup": {
@@ -2092,10 +1791,7 @@
       "dependents": [],
       "metadata": {
         "file": "copilot-wins-rollup.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:coverage-gate": {
@@ -2107,10 +1803,7 @@
       "dependents": [],
       "metadata": {
         "file": "coverage-gate.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:create-roadmap-issues": {
@@ -2122,11 +1815,7 @@
       "dependents": [],
       "metadata": {
         "file": "create-roadmap-issues.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push",
-          "schedule"
-        ]
+        "triggers": ["workflow_dispatch", "push", "schedule"]
       }
     },
     "workflow:danger": {
@@ -2150,10 +1839,7 @@
       "dependents": [],
       "metadata": {
         "file": "data-spine-governance.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:deception-sim": {
@@ -2165,10 +1851,7 @@
       "dependents": [],
       "metadata": {
         "file": "deception-sim.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:delivery-train": {
@@ -2180,10 +1863,7 @@
       "dependents": [],
       "metadata": {
         "file": "delivery-train.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:demo-validate": {
@@ -2195,9 +1875,7 @@
       "dependents": [],
       "metadata": {
         "file": "demo-validate.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:dependabot-auto-merge": {
@@ -2209,9 +1887,7 @@
       "dependents": [],
       "metadata": {
         "file": "dependabot-auto-merge.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:dependency-review": {
@@ -2235,10 +1911,7 @@
       "dependents": [],
       "metadata": {
         "file": "dependency-update.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:deploy-compose": {
@@ -2250,9 +1923,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-compose.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:deploy-dev": {
@@ -2264,10 +1935,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-dev.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push"
-        ]
+        "triggers": ["workflow_dispatch", "push"]
       }
     },
     "workflow:deploy-pipeline": {
@@ -2279,9 +1947,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-pipeline.yaml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:deploy-preview-canary": {
@@ -2293,9 +1959,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-preview-canary.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:deploy-preview": {
@@ -2307,9 +1971,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-preview.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:deploy-prod-canary": {
@@ -2321,9 +1983,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-prod-canary.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:deploy-production": {
@@ -2335,9 +1995,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-production.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:deploy-stage-canary": {
@@ -2349,9 +2007,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-stage-canary.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:deploy-staging": {
@@ -2363,9 +2019,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy-staging.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:deploy": {
@@ -2377,9 +2031,7 @@
       "dependents": [],
       "metadata": {
         "file": "deploy.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:deps.cycles.changed": {
@@ -2391,9 +2043,7 @@
       "dependents": [],
       "metadata": {
         "file": "deps.cycles.changed.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:detect-deception": {
@@ -2405,9 +2055,7 @@
       "dependents": [],
       "metadata": {
         "file": "detect-deception.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:dev-ci": {
@@ -2419,10 +2067,7 @@
       "dependents": [],
       "metadata": {
         "file": "dev-ci.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:docker-build-modernized": {
@@ -2434,11 +2079,7 @@
       "dependents": [],
       "metadata": {
         "file": "docker-build-modernized.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:docker-build-multiarch": {
@@ -2450,11 +2091,7 @@
       "dependents": [],
       "metadata": {
         "file": "docker-build-multiarch.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:docker-release": {
@@ -2466,9 +2103,7 @@
       "dependents": [],
       "metadata": {
         "file": "docker-release.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:docs-deploy": {
@@ -2480,11 +2115,7 @@
       "dependents": [],
       "metadata": {
         "file": "docs-deploy.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:docs-screenshots": {
@@ -2496,9 +2127,7 @@
       "dependents": [],
       "metadata": {
         "file": "docs-screenshots.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:docs": {
@@ -2510,11 +2139,7 @@
       "dependents": [],
       "metadata": {
         "file": "docs.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:dr-verify": {
@@ -2526,10 +2151,7 @@
       "dependents": [],
       "metadata": {
         "file": "dr-verify.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["workflow_dispatch", "schedule"]
       }
     },
     "workflow:e2e-observability": {
@@ -2541,11 +2163,7 @@
       "dependents": [],
       "metadata": {
         "file": "e2e-observability.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "schedule",
-          "pull_request"
-        ]
+        "triggers": ["workflow_dispatch", "schedule", "pull_request"]
       }
     },
     "workflow:e2e": {
@@ -2557,10 +2175,7 @@
       "dependents": [],
       "metadata": {
         "file": "e2e.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "pull_request"
-        ]
+        "triggers": ["workflow_dispatch", "pull_request"]
       }
     },
     "workflow:enhanced-testing": {
@@ -2572,11 +2187,7 @@
       "dependents": [],
       "metadata": {
         "file": "enhanced-testing.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:entity-resolution-train": {
@@ -2588,10 +2199,7 @@
       "dependents": [],
       "metadata": {
         "file": "entity-resolution-train.yml",
-        "triggers": [
-          "schedule",
-          "pull_request"
-        ]
+        "triggers": ["schedule", "pull_request"]
       }
     },
     "workflow:environment-specific-tests": {
@@ -2603,10 +2211,7 @@
       "dependents": [],
       "metadata": {
         "file": "environment-specific-tests.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:er-precision-gate": {
@@ -2618,10 +2223,7 @@
       "dependents": [],
       "metadata": {
         "file": "er-precision-gate.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:error-budget-monitoring": {
@@ -2633,10 +2235,7 @@
       "dependents": [],
       "metadata": {
         "file": "error-budget-monitoring.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:evals": {
@@ -2648,11 +2247,7 @@
       "dependents": [],
       "metadata": {
         "file": "evals.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:evidence-bundle-release": {
@@ -2664,10 +2259,7 @@
       "dependents": [],
       "metadata": {
         "file": "evidence-bundle-release.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:feature-flag-branches": {
@@ -2679,11 +2271,7 @@
       "dependents": [],
       "metadata": {
         "file": "feature-flag-branches.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:finops-monitoring": {
@@ -2695,10 +2283,7 @@
       "dependents": [],
       "metadata": {
         "file": "finops-monitoring.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:gitleaks": {
@@ -2710,10 +2295,7 @@
       "dependents": [],
       "metadata": {
         "file": "gitleaks.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:golden-build": {
@@ -2725,9 +2307,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-build.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:golden-ci": {
@@ -2739,10 +2319,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-ci.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:golden-deploy": {
@@ -2754,10 +2331,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-deploy.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:golden-path-ci": {
@@ -2769,11 +2343,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-path-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:golden-pr-tests": {
@@ -2785,10 +2355,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-pr-tests.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["workflow_dispatch", "schedule"]
       }
     },
     "workflow:golden-preview": {
@@ -2800,9 +2367,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-preview.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:golden-sample": {
@@ -2814,10 +2379,7 @@
       "dependents": [],
       "metadata": {
         "file": "golden-sample.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:golden-service-pipeline": {
@@ -2841,10 +2403,7 @@
       "dependents": [],
       "metadata": {
         "file": "governance.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:grafana-import": {
@@ -2856,10 +2415,7 @@
       "dependents": [],
       "metadata": {
         "file": "grafana-import.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:graph-benchmark": {
@@ -2871,10 +2427,7 @@
       "dependents": [],
       "metadata": {
         "file": "graph-benchmark.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:graphql-validation": {
@@ -2886,10 +2439,7 @@
       "dependents": [],
       "metadata": {
         "file": "graphql-validation.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:helm-ci": {
@@ -2901,11 +2451,7 @@
       "dependents": [],
       "metadata": {
         "file": "helm-ci.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:helm-validation": {
@@ -2917,10 +2463,7 @@
       "dependents": [],
       "metadata": {
         "file": "helm-validation.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:iac-scan": {
@@ -2932,11 +2475,7 @@
       "dependents": [],
       "metadata": {
         "file": "iac-scan.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:image-ci": {
@@ -2948,10 +2487,7 @@
       "dependents": [],
       "metadata": {
         "file": "image-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:infra-deploy": {
@@ -2963,9 +2499,7 @@
       "dependents": [],
       "metadata": {
         "file": "infra-deploy.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:k6-gates": {
@@ -2977,11 +2511,7 @@
       "dependents": [],
       "metadata": {
         "file": "k6-gates.yml",
-        "triggers": [
-          "pull_request",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:k6-load": {
@@ -2993,10 +2523,7 @@
       "dependents": [],
       "metadata": {
         "file": "k6-load.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "pull_request"
-        ]
+        "triggers": ["workflow_dispatch", "pull_request"]
       }
     },
     "workflow:k6.smoke.stage": {
@@ -3008,10 +2535,7 @@
       "dependents": [],
       "metadata": {
         "file": "k6.smoke.stage.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:k6.smoke": {
@@ -3023,9 +2547,7 @@
       "dependents": [],
       "metadata": {
         "file": "k6.smoke.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:lane-fast": {
@@ -3037,11 +2559,7 @@
       "dependents": [],
       "metadata": {
         "file": "lane-fast.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:lane-integration": {
@@ -3053,10 +2571,7 @@
       "dependents": [],
       "metadata": {
         "file": "lane-integration.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:lane-security": {
@@ -3068,12 +2583,7 @@
       "dependents": [],
       "metadata": {
         "file": "lane-security.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch", "schedule"]
       }
     },
     "workflow:license-compliance": {
@@ -3085,11 +2595,7 @@
       "dependents": [],
       "metadata": {
         "file": "license-compliance.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:lint-actions": {
@@ -3113,10 +2619,7 @@
       "dependents": [],
       "metadata": {
         "file": "lint-docs.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:lint.changed": {
@@ -3128,9 +2631,7 @@
       "dependents": [],
       "metadata": {
         "file": "lint.changed.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:load-test": {
@@ -3142,9 +2643,7 @@
       "dependents": [],
       "metadata": {
         "file": "load-test.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:lockfile-verify": {
@@ -3168,9 +2667,7 @@
       "dependents": [],
       "metadata": {
         "file": "log-mirror.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:maintainability-check": {
@@ -3182,12 +2679,7 @@
       "dependents": [],
       "metadata": {
         "file": "maintainability-check.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:marketplace-ga-ci": {
@@ -3199,9 +2691,7 @@
       "dependents": [],
       "metadata": {
         "file": "marketplace-ga-ci.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:master-orchestrator": {
@@ -3213,10 +2703,7 @@
       "dependents": [],
       "metadata": {
         "file": "master-orchestrator.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:mc-platform-v041-sovereign-safeguards": {
@@ -3228,11 +2715,7 @@
       "dependents": [],
       "metadata": {
         "file": "mc-platform-v041-sovereign-safeguards.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:mega-merge-orchestrator": {
@@ -3244,11 +2727,7 @@
       "dependents": [],
       "metadata": {
         "file": "mega-merge-orchestrator.yml",
-        "triggers": [
-          "schedule",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "push", "workflow_dispatch"]
       }
     },
     "workflow:mega-pr-excavator": {
@@ -3260,10 +2739,7 @@
       "dependents": [],
       "metadata": {
         "file": "mega-pr-excavator.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:merge-queue-config": {
@@ -3275,9 +2751,7 @@
       "dependents": [],
       "metadata": {
         "file": "merge-queue-config.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:merge-queue": {
@@ -3301,10 +2775,7 @@
       "dependents": [],
       "metadata": {
         "file": "merge-train-health.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:merge-train-intelligence": {
@@ -3316,10 +2787,7 @@
       "dependents": [],
       "metadata": {
         "file": "merge-train-intelligence.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:merge.queue.kicker": {
@@ -3343,10 +2811,7 @@
       "dependents": [],
       "metadata": {
         "file": "metrics-export.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:migration-audit": {
@@ -3358,11 +2823,7 @@
       "dependents": [],
       "metadata": {
         "file": "migration-audit.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:migration-dryrun": {
@@ -3374,9 +2835,7 @@
       "dependents": [],
       "metadata": {
         "file": "migration-dryrun.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:migration-gate": {
@@ -3388,9 +2847,7 @@
       "dependents": [],
       "metadata": {
         "file": "migration-gate.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:ml-ci": {
@@ -3402,10 +2859,7 @@
       "dependents": [],
       "metadata": {
         "file": "ml-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ml-pipeline": {
@@ -3417,10 +2871,7 @@
       "dependents": [],
       "metadata": {
         "file": "ml-pipeline.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:mobile": {
@@ -3432,10 +2883,7 @@
       "dependents": [],
       "metadata": {
         "file": "mobile.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:model-catalog-staleness": {
@@ -3447,10 +2895,7 @@
       "dependents": [],
       "metadata": {
         "file": "model-catalog-staleness.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:nightly-cve-scan": {
@@ -3462,9 +2907,7 @@
       "dependents": [],
       "metadata": {
         "file": "nightly-cve-scan.yml",
-        "triggers": [
-          "schedule"
-        ]
+        "triggers": ["schedule"]
       }
     },
     "workflow:nightly-ops-delta": {
@@ -3476,10 +2919,7 @@
       "dependents": [],
       "metadata": {
         "file": "nightly-ops-delta.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:nightly-testing": {
@@ -3491,10 +2931,7 @@
       "dependents": [],
       "metadata": {
         "file": "nightly-testing.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:nightly.ops.perf": {
@@ -3506,9 +2943,7 @@
       "dependents": [],
       "metadata": {
         "file": "nightly.ops.perf.yml",
-        "triggers": [
-          "schedule"
-        ]
+        "triggers": ["schedule"]
       }
     },
     "workflow:oct25-bulk-import": {
@@ -3520,9 +2955,7 @@
       "dependents": [],
       "metadata": {
         "file": "oct25-bulk-import.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:operational-verification": {
@@ -3534,11 +2967,7 @@
       "dependents": [],
       "metadata": {
         "file": "operational-verification.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch",
-          "push"
-        ]
+        "triggers": ["schedule", "workflow_dispatch", "push"]
       }
     },
     "workflow:ops-reminders": {
@@ -3550,10 +2979,7 @@
       "dependents": [],
       "metadata": {
         "file": "ops-reminders.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:ops.validate.stage": {
@@ -3565,10 +2991,7 @@
       "dependents": [],
       "metadata": {
         "file": "ops.validate.stage.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:owasp-zap-scan": {
@@ -3580,12 +3003,7 @@
       "dependents": [],
       "metadata": {
         "file": "owasp-zap-scan.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch",
-          "schedule"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch", "schedule"]
       }
     },
     "workflow:owasp-zap": {
@@ -3597,12 +3015,7 @@
       "dependents": [],
       "metadata": {
         "file": "owasp-zap.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:pact": {
@@ -3626,12 +3039,7 @@
       "dependents": [],
       "metadata": {
         "file": "performance-benchmark.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:performance-regression": {
@@ -3643,11 +3051,7 @@
       "dependents": [],
       "metadata": {
         "file": "performance-regression.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:platform-sre-pipeline": {
@@ -3659,10 +3063,7 @@
       "dependents": [],
       "metadata": {
         "file": "platform-sre-pipeline.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:playwright.smoke": {
@@ -3674,9 +3075,7 @@
       "dependents": [],
       "metadata": {
         "file": "playwright.smoke.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:policy-ci": {
@@ -3688,10 +3087,7 @@
       "dependents": [],
       "metadata": {
         "file": "policy-ci.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:policy-fuzzer": {
@@ -3703,9 +3099,7 @@
       "dependents": [],
       "metadata": {
         "file": "policy-fuzzer.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:policy-gate": {
@@ -3717,10 +3111,7 @@
       "dependents": [],
       "metadata": {
         "file": "policy-gate.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:policy-pack": {
@@ -3732,10 +3123,7 @@
       "dependents": [],
       "metadata": {
         "file": "policy-pack.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:populate-october-project": {
@@ -3747,9 +3135,7 @@
       "dependents": [],
       "metadata": {
         "file": "populate-october-project.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:post-deploy-verification": {
@@ -3773,9 +3159,7 @@
       "dependents": [],
       "metadata": {
         "file": "post-ga-patch.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:pq-dual-sig-gate": {
@@ -3787,11 +3171,7 @@
       "dependents": [],
       "metadata": {
         "file": "pq-dual-sig-gate.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:pr-auto-assign-reviewers": {
@@ -3803,9 +3183,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-auto-assign-reviewers.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-auto-update": {
@@ -3817,11 +3195,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-auto-update.yml",
-        "triggers": [
-          "push",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:pr-green-up": {
@@ -3833,10 +3207,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-green-up.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:pr-labeler": {
@@ -3860,9 +3231,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-policy-gates.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-quality-gate": {
@@ -3874,9 +3243,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-quality-gate.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-size-check": {
@@ -3888,9 +3255,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-size-check.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-size-checker": {
@@ -3902,9 +3267,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-size-checker.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-stale-close": {
@@ -3916,9 +3279,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-stale-close.yml",
-        "triggers": [
-          "schedule"
-        ]
+        "triggers": ["schedule"]
       }
     },
     "workflow:pr-test-coverage-check": {
@@ -3930,9 +3291,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-test-coverage-check.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-triage": {
@@ -3944,9 +3303,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-triage.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-tripwire": {
@@ -3958,9 +3315,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-tripwire.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pr-validation": {
@@ -3972,9 +3327,7 @@
       "dependents": [],
       "metadata": {
         "file": "pr-validation.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:preview-env": {
@@ -3986,9 +3339,7 @@
       "dependents": [],
       "metadata": {
         "file": "preview-env.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:preview-teardown": {
@@ -4000,9 +3351,7 @@
       "dependents": [],
       "metadata": {
         "file": "preview-teardown.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:preview-ttl-reaper": {
@@ -4014,10 +3363,7 @@
       "dependents": [],
       "metadata": {
         "file": "preview-ttl-reaper.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:preview": {
@@ -4029,9 +3375,7 @@
       "dependents": [],
       "metadata": {
         "file": "preview.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:promise-tracker": {
@@ -4043,12 +3387,7 @@
       "dependents": [],
       "metadata": {
         "file": "promise-tracker.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:promote-on-build": {
@@ -4072,10 +3411,7 @@
       "dependents": [],
       "metadata": {
         "file": "publish-model-catalog-doc.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:publish.dryrun": {
@@ -4087,9 +3423,7 @@
       "dependents": [],
       "metadata": {
         "file": "publish.dryrun.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:pve": {
@@ -4101,11 +3435,7 @@
       "dependents": [],
       "metadata": {
         "file": "pve.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:python-ci": {
@@ -4117,10 +3447,7 @@
       "dependents": [],
       "metadata": {
         "file": "python-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:queue-monitoring": {
@@ -4132,9 +3459,7 @@
       "dependents": [],
       "metadata": {
         "file": "queue-monitoring.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:rbac-drift": {
@@ -4146,10 +3471,7 @@
       "dependents": [],
       "metadata": {
         "file": "rbac-drift.yml",
-        "triggers": [
-          "schedule",
-          "push"
-        ]
+        "triggers": ["schedule", "push"]
       }
     },
     "workflow:release-captain-demo": {
@@ -4161,9 +3483,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-captain-demo.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:release-captain": {
@@ -4175,9 +3495,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-captain.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:release-comprehensive": {
@@ -4189,10 +3507,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-comprehensive.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:release-ga": {
@@ -4204,10 +3519,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-ga.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push"
-        ]
+        "triggers": ["workflow_dispatch", "push"]
       }
     },
     "workflow:release-hardened": {
@@ -4219,9 +3531,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-hardened.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:release-notes": {
@@ -4233,10 +3543,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-notes.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:release-on-main": {
@@ -4248,9 +3555,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-on-main.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:release-train-discipline": {
@@ -4262,10 +3567,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-train-discipline.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:release-verify": {
@@ -4277,9 +3579,7 @@
       "dependents": [],
       "metadata": {
         "file": "release-verify.yml",
-        "triggers": [
-          "push"
-        ]
+        "triggers": ["push"]
       }
     },
     "workflow:release": {
@@ -4291,10 +3591,7 @@
       "dependents": [],
       "metadata": {
         "file": "release.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push"
-        ]
+        "triggers": ["workflow_dispatch", "push"]
       }
     },
     "workflow:review-sla": {
@@ -4306,9 +3603,7 @@
       "dependents": [],
       "metadata": {
         "file": "review-sla.yml",
-        "triggers": [
-          "schedule"
-        ]
+        "triggers": ["schedule"]
       }
     },
     "workflow:reviewdog": {
@@ -4332,9 +3627,7 @@
       "dependents": [],
       "metadata": {
         "file": "revive-closed-prs.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:run_pr_merge": {
@@ -4346,10 +3639,7 @@
       "dependents": [],
       "metadata": {
         "file": "run_pr_merge.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:sbom-vuln-scan": {
@@ -4361,12 +3651,7 @@
       "dependents": [],
       "metadata": {
         "file": "sbom-vuln-scan.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:sbom": {
@@ -4378,10 +3663,7 @@
       "dependents": [],
       "metadata": {
         "file": "sbom.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:scenario-evaluation": {
@@ -4393,10 +3675,7 @@
       "dependents": [],
       "metadata": {
         "file": "scenario-evaluation.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:schema-validation": {
@@ -4408,11 +3687,7 @@
       "dependents": [],
       "metadata": {
         "file": "schema-validation.yml",
-        "triggers": [
-          "schedule",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:scpe": {
@@ -4424,11 +3699,7 @@
       "dependents": [],
       "metadata": {
         "file": "scpe.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "workflow_dispatch"]
       }
     },
     "workflow:security-audit": {
@@ -4452,11 +3723,7 @@
       "dependents": [],
       "metadata": {
         "file": "security-autopilot.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:security-comprehensive": {
@@ -4468,12 +3735,7 @@
       "dependents": [],
       "metadata": {
         "file": "security-comprehensive.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:security-gates": {
@@ -4497,11 +3759,7 @@
       "dependents": [],
       "metadata": {
         "file": "security-scan.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["push", "pull_request", "schedule"]
       }
     },
     "workflow:security-scans": {
@@ -4513,9 +3771,7 @@
       "dependents": [],
       "metadata": {
         "file": "security-scans.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:security": {
@@ -4527,12 +3783,7 @@
       "dependents": [],
       "metadata": {
         "file": "security.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["workflow_dispatch", "push", "pull_request", "schedule"]
       }
     },
     "workflow:semantic-release": {
@@ -4544,10 +3795,7 @@
       "dependents": [],
       "metadata": {
         "file": "semantic-release.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:server-ci": {
@@ -4559,10 +3807,7 @@
       "dependents": [],
       "metadata": {
         "file": "server-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:ses": {
@@ -4574,10 +3819,7 @@
       "dependents": [],
       "metadata": {
         "file": "ses.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:setup-smoke-test": {
@@ -4589,10 +3831,7 @@
       "dependents": [],
       "metadata": {
         "file": "setup-smoke-test.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:slsa-attestation": {
@@ -4604,9 +3843,7 @@
       "dependents": [],
       "metadata": {
         "file": "slsa-attestation.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:slsa-l3-airgap-build": {
@@ -4618,10 +3855,7 @@
       "dependents": [],
       "metadata": {
         "file": "slsa-l3-airgap-build.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push"
-        ]
+        "triggers": ["workflow_dispatch", "push"]
       }
     },
     "workflow:slsa-l3-provenance": {
@@ -4633,11 +3867,7 @@
       "dependents": [],
       "metadata": {
         "file": "slsa-l3-provenance.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:smoke-compose": {
@@ -4649,11 +3879,7 @@
       "dependents": [],
       "metadata": {
         "file": "smoke-compose.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["workflow_dispatch", "push", "pull_request"]
       }
     },
     "workflow:soc2-evidence": {
@@ -4665,9 +3891,7 @@
       "dependents": [],
       "metadata": {
         "file": "soc2-evidence.yml",
-        "triggers": [
-          "workflow_dispatch"
-        ]
+        "triggers": ["workflow_dispatch"]
       }
     },
     "workflow:sonar-scan": {
@@ -4679,11 +3903,7 @@
       "dependents": [],
       "metadata": {
         "file": "sonar-scan.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:stabilization": {
@@ -4695,11 +3915,7 @@
       "dependents": [],
       "metadata": {
         "file": "stabilization.yml",
-        "triggers": [
-          "push",
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "pull_request", "workflow_dispatch"]
       }
     },
     "workflow:staging-deployment": {
@@ -4711,10 +3927,7 @@
       "dependents": [],
       "metadata": {
         "file": "staging-deployment.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:stale": {
@@ -4726,10 +3939,7 @@
       "dependents": [],
       "metadata": {
         "file": "stale.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:supply-chain": {
@@ -4741,10 +3951,7 @@
       "dependents": [],
       "metadata": {
         "file": "supply-chain.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "pull_request"
-        ]
+        "triggers": ["workflow_dispatch", "pull_request"]
       }
     },
     "workflow:synthetic-monitoring": {
@@ -4756,10 +3963,7 @@
       "dependents": [],
       "metadata": {
         "file": "synthetic-monitoring.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:system-map-drift": {
@@ -4771,12 +3975,7 @@
       "dependents": [],
       "metadata": {
         "file": "system-map-drift.yml",
-        "triggers": [
-          "pull_request",
-          "push",
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "push", "schedule", "workflow_dispatch"]
       }
     },
     "workflow:terraform-drift": {
@@ -4788,10 +3987,7 @@
       "dependents": [],
       "metadata": {
         "file": "terraform-drift.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:test-coverage": {
@@ -4803,10 +3999,7 @@
       "dependents": [],
       "metadata": {
         "file": "test-coverage.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:test-policy": {
@@ -4818,9 +4011,7 @@
       "dependents": [],
       "metadata": {
         "file": "test-policy.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:tests.changed": {
@@ -4832,9 +4023,7 @@
       "dependents": [],
       "metadata": {
         "file": "tests.changed.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:tip": {
@@ -4846,10 +4035,7 @@
       "dependents": [],
       "metadata": {
         "file": "tip.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:trivy": {
@@ -4861,11 +4047,7 @@
       "dependents": [],
       "metadata": {
         "file": "trivy.yml",
-        "triggers": [
-          "schedule",
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["schedule", "pull_request", "push"]
       }
     },
     "workflow:turbo-ci-optimizer": {
@@ -4877,10 +4059,7 @@
       "dependents": [],
       "metadata": {
         "file": "turbo-ci-optimizer.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:typecheck.changed": {
@@ -4892,9 +4071,7 @@
       "dependents": [],
       "metadata": {
         "file": "typecheck.changed.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:ultra-merge-orchestrator": {
@@ -4906,11 +4083,7 @@
       "dependents": [],
       "metadata": {
         "file": "ultra-merge-orchestrator.yml",
-        "triggers": [
-          "schedule",
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "push", "workflow_dispatch"]
       }
     },
     "workflow:validate-canary-config": {
@@ -4922,10 +4095,7 @@
       "dependents": [],
       "metadata": {
         "file": "validate-canary-config.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:validate-canary-params": {
@@ -4937,10 +4107,7 @@
       "dependents": [],
       "metadata": {
         "file": "validate-canary-params.yml",
-        "triggers": [
-          "pull_request",
-          "workflow_dispatch"
-        ]
+        "triggers": ["pull_request", "workflow_dispatch"]
       }
     },
     "workflow:validate-grafana-json": {
@@ -4952,10 +4119,7 @@
       "dependents": [],
       "metadata": {
         "file": "validate-grafana-json.yml",
-        "triggers": [
-          "pull_request",
-          "push"
-        ]
+        "triggers": ["pull_request", "push"]
       }
     },
     "workflow:validate-model-catalog": {
@@ -4979,10 +4143,7 @@
       "dependents": [],
       "metadata": {
         "file": "validate-v035-config.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:wargame-ci": {
@@ -4994,10 +4155,7 @@
       "dependents": [],
       "metadata": {
         "file": "wargame-ci.yml",
-        "triggers": [
-          "push",
-          "pull_request"
-        ]
+        "triggers": ["push", "pull_request"]
       }
     },
     "workflow:webapp-e2e": {
@@ -5009,9 +4167,7 @@
       "dependents": [],
       "metadata": {
         "file": "webapp-e2e.yml",
-        "triggers": [
-          "pull_request"
-        ]
+        "triggers": ["pull_request"]
       }
     },
     "workflow:week2-deployment": {
@@ -5023,10 +4179,7 @@
       "dependents": [],
       "metadata": {
         "file": "week2-deployment.yml",
-        "triggers": [
-          "push",
-          "workflow_dispatch"
-        ]
+        "triggers": ["push", "workflow_dispatch"]
       }
     },
     "workflow:weekly-hygiene": {
@@ -5038,10 +4191,7 @@
       "dependents": [],
       "metadata": {
         "file": "weekly-hygiene.yml",
-        "triggers": [
-          "schedule",
-          "workflow_dispatch"
-        ]
+        "triggers": ["schedule", "workflow_dispatch"]
       }
     },
     "workflow:zap-dast": {
@@ -5053,11 +4203,7 @@
       "dependents": [],
       "metadata": {
         "file": "zap-dast.yml",
-        "triggers": [
-          "workflow_dispatch",
-          "pull_request",
-          "schedule"
-        ]
+        "triggers": ["workflow_dispatch", "pull_request", "schedule"]
       }
     }
   },
@@ -5139,47 +4285,15 @@
     }
   ],
   "categories": {
-    "database": [
-      "postgres",
-      "neo4j"
-    ],
-    "cache": [
-      "redis"
-    ],
-    "search": [
-      "elasticsearch"
-    ],
-    "api": [
-      "api",
-      "gateway",
-      "@intelgraph/intelgraph-api",
-      "apps-server"
-    ],
-    "frontend": [
-      "web",
-      "websocket-server",
-      "@intelgraph/web",
-      "webapp"
-    ],
-    "observability": [
-      "prometheus",
-      "grafana",
-      "jaeger",
-      "loki",
-      "alertmanager"
-    ],
-    "ai": [
-      "promtail",
-      "ai-sandbox",
-      "ai-worker"
-    ],
-    "service": [
-      "zookeeper",
-      "strategic-foresight"
-    ],
-    "messaging": [
-      "kafka"
-    ],
+    "database": ["postgres", "neo4j"],
+    "cache": ["redis"],
+    "search": ["elasticsearch"],
+    "api": ["api", "gateway", "@intelgraph/intelgraph-api", "apps-server"],
+    "frontend": ["web", "websocket-server", "@intelgraph/web", "webapp"],
+    "observability": ["prometheus", "grafana", "jaeger", "loki", "alertmanager"],
+    "ai": ["promtail", "ai-sandbox", "ai-worker"],
+    "service": ["zookeeper", "strategic-foresight"],
+    "messaging": ["kafka"],
     "app": [
       "@intelgraph/a11y-lab",
       "@intelgraph/analytics-engine",
@@ -5229,9 +4343,7 @@
       "@intelgraph/cqrs",
       "@intelgraph/crisis-diplomacy"
     ],
-    "ui": [
-      "@intelgraph/component-tracker"
-    ],
+    "ui": ["@intelgraph/component-tracker"],
     "ci": [
       "workflow:_reusable-build",
       "workflow:_reusable-ci-fast",

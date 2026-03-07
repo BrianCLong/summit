@@ -32,4 +32,4 @@
 
 ---
 
-*Use this transcript for captioning, translations, or knowledge base search indexing. Update timestamps after final recording if the pacing changes.*
+_Use this transcript for captioning, translations, or knowledge base search indexing. Update timestamps after final recording if the pacing changes._

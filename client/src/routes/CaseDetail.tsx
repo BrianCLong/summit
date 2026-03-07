@@ -1,6 +1,6 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
+import React from "react";
+import { useParams } from "react-router-dom";
+import { gql, useQuery } from "@apollo/client";
 
 const CASE_Q = gql`
   query ($id: ID!) {
@@ -33,11 +33,11 @@ export default function CaseDetail() {
   const { data } = useQuery(CASE_Q, { variables: { id } });
   const c = data?.case;
   return (
-    <div className="p-4" style={{ display: 'flex', gap: 16 }}>
+    <div className="p-4" style={{ display: "flex", gap: 16 }}>
       <div style={{ flex: 1 }}>
-        <h2>{c?.name || 'Case'}</h2>
+        <h2>{c?.name || "Case"}</h2>
         <p>
-          Status: {c?.status} • Priority: {c?.priority || '-'}
+          Status: {c?.status} • Priority: {c?.priority || "-"}
         </p>
         <h3>Timeline</h3>
         <ul>
@@ -53,8 +53,7 @@ export default function CaseDetail() {
         <ul>
           {(data?.caseItems || []).map((it: any) => (
             <li key={it.id}>
-              {it.kind}: {it.refId}{' '}
-              {it.tags?.length ? `[${it.tags.join(',')}]` : ''}
+              {it.kind}: {it.refId} {it.tags?.length ? `[${it.tags.join(",")}]` : ""}
             </li>
           ))}
         </ul>

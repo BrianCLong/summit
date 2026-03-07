@@ -6,16 +6,17 @@ This document describes the TypeScript type-checking strategy for the `client` p
 
 ## Current Status
 
-| Metric | Value |
-|--------|-------|
-| **Total Errors** | 0 (app code) |
-| **Config Used** | `client/tsconfig.strict.json` |
-| **Baseline Mode** | NOT required |
-| **CI Behavior** | Fail on any type error |
+| Metric            | Value                         |
+| ----------------- | ----------------------------- |
+| **Total Errors**  | 0 (app code)                  |
+| **Config Used**   | `client/tsconfig.strict.json` |
+| **Baseline Mode** | NOT required                  |
+| **CI Behavior**   | Fail on any type error        |
 
 ## Configuration
 
 The client package uses `tsconfig.strict.json` for CI type-checking, which:
+
 - Extends the base `tsconfig.json`
 - Enables strict mode
 - **Excludes test files** (`**/*.test.ts`, `**/*.test.tsx`, `**/__tests__/**`)

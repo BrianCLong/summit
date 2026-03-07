@@ -4,7 +4,7 @@ const {
   detectType,
   normalizeText,
   resolveMilestoneTitle,
-} = require('./issue-triage-lib');
+} = require("./issue-triage-lib");
 
 async function ensureLabels({ github, owner, repo }) {
   const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {
@@ -22,7 +22,7 @@ async function ensureLabels({ github, owner, repo }) {
 }
 
 function collectLabelNames(labels) {
-  return new Set((labels || []).map((label) => (typeof label === 'string' ? label : label.name)));
+  return new Set((labels || []).map((label) => (typeof label === "string" ? label : label.name)));
 }
 
 module.exports = async function run({ github, context }) {
@@ -34,17 +34,19 @@ module.exports = async function run({ github, context }) {
   const milestones = await github.paginate(github.rest.issues.listMilestones, {
     owner,
     repo,
-    state: 'open',
+    state: "open",
     per_page: 100,
   });
-  const milestoneByTitle = new Map(milestones.map((milestone) => [milestone.title, milestone.number]));
+  const milestoneByTitle = new Map(
+    milestones.map((milestone) => [milestone.title, milestone.number])
+  );
 
   const q = `repo:${owner}/${repo} is:issue is:open -milestone:"GA Hard Gate" -milestone:"30-Day" -milestone:"60-Day" -milestone:"Backlog"`;
   const res = await github.rest.search.issuesAndPullRequests({
     q,
     per_page: 50,
-    sort: 'updated',
-    order: 'desc',
+    sort: "updated",
+    order: "desc",
   });
 
   for (const item of res.data.items) {
@@ -54,23 +56,23 @@ module.exports = async function run({ github, context }) {
 
     const labels = collectLabelNames(item.labels);
     const text = normalizeText(item);
-    const title = item.title || '';
+    const title = item.title || "";
 
     const add = [];
 
-    const hasTriage = Array.from(labels).some((label) => label.startsWith('triage:'));
+    const hasTriage = Array.from(labels).some((label) => label.startsWith("triage:"));
     if (!hasTriage) {
-      add.push('triage:needed');
+      add.push("triage:needed");
     }
 
-    const hasType = Array.from(labels).some((label) => label.startsWith('type:'));
+    const hasType = Array.from(labels).some((label) => label.startsWith("type:"));
     if (!hasType) {
       add.push(detectType(text));
     }
 
-    const hasPriority = Array.from(labels).some((label) => label.startsWith('priority:'));
+    const hasPriority = Array.from(labels).some((label) => label.startsWith("priority:"));
     if (!hasPriority) {
-      add.push(detectPriority(title) || 'priority:P3');
+      add.push(detectPriority(title) || "priority:P3");
     }
 
     if (add.length > 0) {

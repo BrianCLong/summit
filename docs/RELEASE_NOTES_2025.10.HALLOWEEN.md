@@ -242,15 +242,15 @@ allow if {
 
 ```javascript
 // Frontend: Trigger step-up authentication
-import { StepUpAuthModal } from '@/components/StepUpAuthModal';
+import { StepUpAuthModal } from "@/components/StepUpAuthModal";
 
 <StepUpAuthModal
   route="/api/export"
   onSuccess={(attestation) => {
     // Include attestation in request headers
-    fetch('/api/export', {
+    fetch("/api/export", {
       headers: {
-        'X-StepUp-Auth': btoa(JSON.stringify(attestation)),
+        "X-StepUp-Auth": btoa(JSON.stringify(attestation)),
       },
     });
   }}
@@ -592,13 +592,13 @@ All changes are new features or enhancements to existing functionality.
 **Example**:
 
 ```javascript
-const response = await fetch('/api/export', {
-  method: 'POST',
+const response = await fetch("/api/export", {
+  method: "POST",
   headers: {
     Authorization: `Bearer ${sessionToken}`,
-    'X-StepUp-Auth': btoa(JSON.stringify(stepUpAttestation)),
+    "X-StepUp-Auth": btoa(JSON.stringify(stepUpAttestation)),
   },
-  body: JSON.stringify({ format: 'json', entityIds: ['123'] }),
+  body: JSON.stringify({ format: "json", entityIds: ["123"] }),
 });
 ```
 

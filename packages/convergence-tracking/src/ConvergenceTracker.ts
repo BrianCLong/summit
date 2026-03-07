@@ -8,7 +8,7 @@ import {
   ConvergencePattern,
   Synergy,
   CrossDomainIntegration,
-} from './types.js';
+} from "./types.js";
 
 export class ConvergenceTracker {
   private convergences: Map<string, TechnologyConvergence> = new Map();
@@ -19,12 +19,12 @@ export class ConvergenceTracker {
    * Track AI-Biotechnology convergence
    */
   async trackAIBiotech(): Promise<TechnologyConvergence> {
-    return this.trackConvergence('ai-biotechnology', [
-      'artificial-intelligence',
-      'machine-learning',
-      'gene-editing',
-      'protein-folding',
-      'drug-discovery',
+    return this.trackConvergence("ai-biotechnology", [
+      "artificial-intelligence",
+      "machine-learning",
+      "gene-editing",
+      "protein-folding",
+      "drug-discovery",
     ]);
   }
 
@@ -32,11 +32,11 @@ export class ConvergenceTracker {
    * Track Quantum-Crypto convergence
    */
   async trackQuantumCrypto(): Promise<TechnologyConvergence> {
-    return this.trackConvergence('quantum-cryptography', [
-      'quantum-computing',
-      'cryptography',
-      'quantum-key-distribution',
-      'post-quantum-algorithms',
+    return this.trackConvergence("quantum-cryptography", [
+      "quantum-computing",
+      "cryptography",
+      "quantum-key-distribution",
+      "post-quantum-algorithms",
     ]);
   }
 
@@ -44,11 +44,11 @@ export class ConvergenceTracker {
    * Track Nano-Bio convergence
    */
   async trackNanoBio(): Promise<TechnologyConvergence> {
-    return this.trackConvergence('nano-bio', [
-      'nanotechnology',
-      'biotechnology',
-      'molecular-machines',
-      'biosensors',
+    return this.trackConvergence("nano-bio", [
+      "nanotechnology",
+      "biotechnology",
+      "molecular-machines",
+      "biosensors",
     ]);
   }
 
@@ -56,12 +56,12 @@ export class ConvergenceTracker {
    * Track Cyber-Physical systems
    */
   async trackCyberPhysical(): Promise<TechnologyConvergence> {
-    return this.trackConvergence('cyber-physical', [
-      'iot',
-      'embedded-systems',
-      'real-time-computing',
-      'sensor-networks',
-      'control-systems',
+    return this.trackConvergence("cyber-physical", [
+      "iot",
+      "embedded-systems",
+      "real-time-computing",
+      "sensor-networks",
+      "control-systems",
     ]);
   }
 
@@ -69,12 +69,12 @@ export class ConvergenceTracker {
    * Track Human Augmentation
    */
   async trackHumanAugmentation(): Promise<TechnologyConvergence> {
-    return this.trackConvergence('human-augmentation', [
-      'brain-computer-interface',
-      'prosthetics',
-      'exoskeletons',
-      'neural-implants',
-      'sensory-augmentation',
+    return this.trackConvergence("human-augmentation", [
+      "brain-computer-interface",
+      "prosthetics",
+      "exoskeletons",
+      "neural-implants",
+      "sensory-augmentation",
     ]);
   }
 
@@ -82,12 +82,12 @@ export class ConvergenceTracker {
    * Track IoT Ecosystem
    */
   async trackIoTEcosystem(): Promise<TechnologyConvergence> {
-    return this.trackConvergence('iot-ecosystem', [
-      'iot',
-      '5g',
-      'edge-computing',
-      'ai',
-      'blockchain',
+    return this.trackConvergence("iot-ecosystem", [
+      "iot",
+      "5g",
+      "edge-computing",
+      "ai",
+      "blockchain",
     ]);
   }
 
@@ -153,9 +153,7 @@ export class ConvergenceTracker {
   /**
    * Identify cross-domain integrations
    */
-  async identifyCrossDomainIntegrations(
-    domains: string[]
-  ): Promise<CrossDomainIntegration[]> {
+  async identifyCrossDomainIntegrations(domains: string[]): Promise<CrossDomainIntegration[]> {
     const integrations: CrossDomainIntegration[] = [];
 
     // Analyze domain combinations
@@ -179,7 +177,7 @@ export class ConvergenceTracker {
     let convergences = Array.from(this.convergences.values());
 
     if (filter?.type) {
-      convergences = convergences.filter(c => c.type === filter.type);
+      convergences = convergences.filter((c) => c.type === filter.type);
     }
 
     return convergences.sort((a, b) => b.maturityLevel - a.maturityLevel);
@@ -193,18 +191,18 @@ export class ConvergenceTracker {
   ): Promise<TechnologyConvergence> {
     const convergence: TechnologyConvergence = {
       id: `conv-${type}-${Date.now()}`,
-      name: type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      name: type.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
       type,
       technologies: technologies.map((tech, idx) => ({
         id: `tech-${idx}`,
         name: tech,
         domain: tech,
         maturityLevel: 5,
-        contributionLevel: idx === 0 ? 'primary' : 'secondary',
+        contributionLevel: idx === 0 ? "primary" : "secondary",
         readinessForConvergence: 70,
       })),
       maturityLevel: 5,
-      convergenceStage: 'development',
+      convergenceStage: "development",
       synergies: [],
       applications: [],
       barriers: [],

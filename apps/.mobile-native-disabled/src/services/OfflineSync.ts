@@ -100,7 +100,7 @@ export const syncLocationUpdates = async (): Promise<void> => {
     // });
 
     // Mark locations as synced
-    const timestamps = locations.map((loc) => loc.timestamp);
+    const timestamps = locations.map(loc => loc.timestamp);
     await markLocationsAsSynced(timestamps);
 
     console.log(`[OfflineSync] Synced ${locations.length} location updates`);

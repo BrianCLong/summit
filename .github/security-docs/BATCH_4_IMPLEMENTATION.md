@@ -20,6 +20,7 @@ Using action tags (e.g., `@v1`) instead of commit SHAs creates supply chain risk
 **Workflow Files:** 100+ in `.github/workflows/`
 
 **Current Pattern (Vulnerable):**
+
 ```yaml
 - uses: actions/checkout@v4
 - uses: actions/setup-node@v4
@@ -27,26 +28,30 @@ Using action tags (e.g., `@v1`) instead of commit SHAs creates supply chain risk
 ```
 
 **Target Pattern (Secure):**
+
 ```yaml
-- uses: actions/checkout@a5ac7e51b41094c7d3f6c4073a744c1823c3e7f6  # v4.1.0
-- uses: actions/setup-node@b39dc117a55a50ff2d34ac0a59f3834125ad6148  # v4.0.0
-- uses: actions/upload-artifact@26f96dfc697d77e81fd5907df203aa23a56210fab  # v4.3.0
+- uses: actions/checkout@a5ac7e51b41094c7d3f6c4073a744c1823c3e7f6 # v4.1.0
+- uses: actions/setup-node@b39dc117a55a50ff2d34ac0a59f3834125ad6148 # v4.0.0
+- uses: actions/upload-artifact@26f96dfc697d77e81fd5907df203aa23a56210fab # v4.3.0
 ```
 
 ### Implementation Steps
 
 1. **Create script to identify current actions:**
+
    ```bash
    grep -r "uses:" .github/workflows/ | grep -v "^#" | sort | uniq
    ```
 
 2. **Get commit SHAs for each action:**
+
    ```bash
    # For each action, get the latest commit SHA
    # Example: actions/checkout@v4 → a5ac7e51b41094c7d3f6c4073a744c1823c3e7f6
    ```
 
 3. **Update workflow files:**
+
    ```yaml
    # Replace all action tags with commit SHAs
    # Use find and replace or script
@@ -60,6 +65,7 @@ Using action tags (e.g., `@v1`) instead of commit SHAs creates supply chain risk
 ### Workflow Files to Update
 
 **Key Workflows:**
+
 - `_reusable-*.yml` (reusable workflows)
 - `ci.yml` (main CI pipeline)
 - `release.yml` (release pipeline)
@@ -94,6 +100,7 @@ GITHUB_TOKEN has broad permissions by default. Restricting to least-privilege re
 ### Implementation Steps
 
 1. **Add permissions block to each workflow:**
+
    ```yaml
    permissions:
      contents: read
@@ -104,12 +111,14 @@ GITHUB_TOKEN has broad permissions by default. Restricting to least-privilege re
 2. **Common Permission Patterns:**
 
    **Read-only workflows:**
+
    ```yaml
    permissions:
      contents: read
    ```
 
    **Build & test workflows:**
+
    ```yaml
    permissions:
      contents: read
@@ -117,6 +126,7 @@ GITHUB_TOKEN has broad permissions by default. Restricting to least-privilege re
    ```
 
    **Release workflows:**
+
    ```yaml
    permissions:
      contents: write
@@ -124,6 +134,7 @@ GITHUB_TOKEN has broad permissions by default. Restricting to least-privilege re
    ```
 
    **Security scanning:**
+
    ```yaml
    permissions:
      contents: read
@@ -166,6 +177,7 @@ Dependabot creates PRs for dependency updates. Auto-merge for safe updates reduc
 **File:** `.github/dependabot.yml`
 
 **Current Status:**
+
 ```yaml
 version: 2
 updates:
@@ -178,6 +190,7 @@ updates:
 ### Implementation Steps
 
 1. **Update dependabot.yml:**
+
    ```yaml
    version: 2
    updates:
@@ -229,14 +242,17 @@ updates:
 **Title:** `ci: pin GitHub Actions to commit SHAs for supply chain security`
 
 **Description:**
+
 - Pins all 100+ GitHub Actions to commit SHAs
 - Prevents tag-based attacks
 - Maintains functionality of all workflows
 
 **Files Changed:**
+
 - All `.github/workflows/*.yml` files
 
 **Tests:**
+
 - CI/CD pipeline functions
 - All workflows execute successfully
 - No broken actions
@@ -246,14 +262,17 @@ updates:
 **Title:** `ci: restrict GITHUB_TOKEN permissions to least-privilege`
 
 **Description:**
+
 - Adds explicit permissions blocks to all workflows
 - Restricts to only required permissions
 - Reduces blast radius of compromised workflows
 
 **Files Changed:**
+
 - All `.github/workflows/*.yml` files
 
 **Tests:**
+
 - All workflows execute successfully
 - No permission-related failures
 - Security scanning still works
@@ -263,14 +282,17 @@ updates:
 **Title:** `ci: enable Dependabot auto-merge for patch and minor updates`
 
 **Description:**
+
 - Enables auto-merge in Dependabot configuration
 - Reduces manual review burden
 - Maintains security by only auto-merging safe updates
 
 **Files Changed:**
+
 - `.github/dependabot.yml`
 
 **Tests:**
+
 - Dependabot auto-merge functions
 - Test PRs auto-merge successfully
 - Required checks pass before merge
@@ -280,6 +302,7 @@ updates:
 ## Implementation Checklist
 
 ### Phase 1: Action Pinning
+
 - [ ] Identify all GitHub Actions in use
 - [ ] Get commit SHAs for each action
 - [ ] Update all workflow files
@@ -287,12 +310,14 @@ updates:
 - [ ] Create PR 4a
 
 ### Phase 2: Permission Restriction
+
 - [ ] Add permissions blocks to all workflows
 - [ ] Set least-privilege permissions
 - [ ] Test all workflows
 - [ ] Create PR 4b
 
 ### Phase 3: Dependabot Auto-Merge
+
 - [ ] Update dependabot.yml
 - [ ] Configure auto-merge for all ecosystems
 - [ ] Test auto-merge functionality
@@ -324,12 +349,12 @@ updates:
 
 ## Timeline
 
-| Week | Task | Status |
-|------|------|--------|
-| 4 | Action pinning | Not Started |
-| 4 | Permission restriction | Not Started |
-| 4 | Dependabot auto-merge | Not Started |
-| 4 | PR review and merge | Not Started |
+| Week | Task                   | Status      |
+| ---- | ---------------------- | ----------- |
+| 4    | Action pinning         | Not Started |
+| 4    | Permission restriction | Not Started |
+| 4    | Dependabot auto-merge  | Not Started |
+| 4    | PR review and merge    | Not Started |
 
 ---
 

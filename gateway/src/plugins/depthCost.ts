@@ -1,10 +1,6 @@
-import type { ApolloServerPlugin } from '@apollo/server';
-import {
-  getComplexity,
-  fieldExtensionsEstimator,
-  simpleEstimator,
-} from 'graphql-query-complexity';
-import { parse, GraphQLSchema, visit, type ASTNode } from 'graphql';
+import type { ApolloServerPlugin } from "@apollo/server";
+import { getComplexity, fieldExtensionsEstimator, simpleEstimator } from "graphql-query-complexity";
+import { parse, GraphQLSchema, visit, type ASTNode } from "graphql";
 
 function calculateDepth(doc: any): number {
   let depth = 0;
@@ -35,20 +31,14 @@ export const makeDepthCostPlugin = ({
     const cost = getComplexity({
       schema: schema as GraphQLSchema,
       query: doc,
-      estimators: [
-        fieldExtensionsEstimator(),
-        simpleEstimator({ defaultComplexity: 1 }),
-      ],
+      estimators: [fieldExtensionsEstimator(), simpleEstimator({ defaultComplexity: 1 })],
       variables: request.variables,
     });
     const depth = calculateDepth(doc);
     if (depth > maxDepth || cost > maxCost) {
-      throw Object.assign(
-        new Error(`Query exceeds limits (depth=${depth}, cost=${cost})`),
-        {
-          code: 'QUERY_OVER_BUDGET',
-        },
-      );
+      throw Object.assign(new Error(`Query exceeds limits (depth=${depth}, cost=${cost})`), {
+        code: "QUERY_OVER_BUDGET",
+      });
     }
     return {};
   },

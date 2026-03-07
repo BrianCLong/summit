@@ -1,10 +1,6 @@
 {
   "evidence_id": "EVD-APPLEQAI-EVAL-003",
   "summary": "Decoder baseline metrics for silent-intent micro-movement signals.",
-  "inputs": [
-    "simulated micro-movement stream"
-  ],
-  "outputs": [
-    "summit/input/decoder.py"
-  ]
+  "inputs": ["simulated micro-movement stream"],
+  "outputs": ["summit/input/decoder.py"]
 }

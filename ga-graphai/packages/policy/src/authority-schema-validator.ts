@@ -1,8 +1,8 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'yaml';
+import fs from "node:fs";
+import path from "node:path";
+import yaml from "yaml";
 
-export type AttributeType = 'string' | 'enum' | 'integer' | 'object' | 'array' | 'boolean';
+export type AttributeType = "string" | "enum" | "integer" | "object" | "array" | "boolean";
 
 export interface AttributeDefinition {
   key: string;
@@ -25,7 +25,7 @@ export interface ConditionLanguage {
 }
 
 export interface Grant {
-  effect: 'allow' | 'deny';
+  effect: "allow" | "deny";
   actions: string[];
   resources: string[];
 }
@@ -63,25 +63,25 @@ export interface Binding {
 
 export interface AbacControl {
   expression: string;
-  effect: 'allow' | 'deny';
+  effect: "allow" | "deny";
   when?: string[];
 }
 
 export interface AuthorityDefinition {
   id: string;
   description: string;
-  decision_strategy: 'permit-overrides' | 'deny-overrides' | 'first-applicable';
+  decision_strategy: "permit-overrides" | "deny-overrides" | "first-applicable";
   inherits: string[];
   bindings: Binding[];
   abac_controls?: AbacControl[];
 }
 
 export interface InheritanceRules {
-  precedence?: 'child-overrides' | 'parent-overrides';
+  precedence?: "child-overrides" | "parent-overrides";
   merge_strategy?: {
-    grants?: 'append' | 'replace';
-    obligations?: 'append' | 'replace';
-    conditions?: 'and' | 'or' | 'replace';
+    grants?: "append" | "replace";
+    obligations?: "append" | "replace";
+    conditions?: "and" | "or" | "replace";
   };
   notes?: string;
 }
@@ -110,7 +110,7 @@ export interface AuthoritySchemaValidationResult {
 }
 
 function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 function assertString(field: unknown, pathLabel: string, errors: string[]): void {
@@ -119,11 +119,7 @@ function assertString(field: unknown, pathLabel: string, errors: string[]): void
   }
 }
 
-function assertArray(
-  field: unknown,
-  pathLabel: string,
-  errors: string[],
-): field is unknown[] {
+function assertArray(field: unknown, pathLabel: string, errors: string[]): field is unknown[] {
   if (!Array.isArray(field)) {
     errors.push(`${pathLabel} must be an array`);
     return false;
@@ -134,30 +130,23 @@ function assertArray(
 function validateAttributeDefinition(
   def: AttributeDefinition,
   scope: string,
-  errors: string[],
+  errors: string[]
 ): void {
   assertString(def.key, `${scope}.key`, errors);
   if (!isNonEmptyString(def.type)) {
     errors.push(`${scope}.type must be a non-empty string`);
-  } else if (
-    !['string', 'enum', 'integer', 'object', 'array', 'boolean'].includes(def.type)
-  ) {
-    errors.push(
-      `${scope}.type must be one of string, enum, integer, object, array, boolean`,
-    );
+  } else if (!["string", "enum", "integer", "object", "array", "boolean"].includes(def.type)) {
+    errors.push(`${scope}.type must be one of string, enum, integer, object, array, boolean`);
   }
-  if (def.type === 'enum') {
+  if (def.type === "enum") {
     if (!def.allowed || !Array.isArray(def.allowed) || def.allowed.length === 0) {
       errors.push(`${scope}.allowed is required for enum attributes`);
     }
   }
 }
 
-function validateAttributeCatalog(
-  catalog: AttributeCatalog,
-  errors: string[],
-): void {
-  const scopes: Array<keyof AttributeCatalog> = ['principal', 'resource', 'context'];
+function validateAttributeCatalog(catalog: AttributeCatalog, errors: string[]): void {
+  const scopes: Array<keyof AttributeCatalog> = ["principal", "resource", "context"];
   scopes.forEach((scopeKey) => {
     const definitions = catalog[scopeKey];
     if (!definitions) {
@@ -174,7 +163,7 @@ function validateAttributeCatalog(
 }
 
 function validateGrant(grant: Grant, scope: string, errors: string[]): void {
-  if (!['allow', 'deny'].includes(grant.effect)) {
+  if (!["allow", "deny"].includes(grant.effect)) {
     errors.push(`${scope}.effect must be allow or deny`);
   }
   if (assertArray(grant.actions, `${scope}.actions`, errors)) {
@@ -192,7 +181,7 @@ function validateGrant(grant: Grant, scope: string, errors: string[]): void {
 function validateTemplateCondition(
   condition: TemplateCondition,
   scope: string,
-  errors: string[],
+  errors: string[]
 ): void {
   assertString(condition.expression, `${scope}.expression`, errors);
   if (condition.based_on !== undefined) {
@@ -236,7 +225,7 @@ function validateRoleTemplate(template: RoleTemplate, scope: string, errors: str
 
 function validateBinding(binding: Binding, scope: string, errors: string[]): void {
   assertString(binding.template, `${scope}.template`, errors);
-  if (typeof binding.with !== 'object' || binding.with === null) {
+  if (typeof binding.with !== "object" || binding.with === null) {
     errors.push(`${scope}.with must be an object`);
   }
   if (!Array.isArray(binding.subjects) || binding.subjects.length === 0) {
@@ -260,7 +249,7 @@ function validateBinding(binding: Binding, scope: string, errors: string[]): voi
 
 function validateAbacControl(control: AbacControl, scope: string, errors: string[]): void {
   assertString(control.expression, `${scope}.expression`, errors);
-  if (!['allow', 'deny'].includes(control.effect)) {
+  if (!["allow", "deny"].includes(control.effect)) {
     errors.push(`${scope}.effect must be allow or deny`);
   }
   if (control.when !== undefined) {
@@ -276,12 +265,12 @@ function validateAuthority(authority: AuthorityDefinition, scope: string, errors
   assertString(authority.id, `${scope}.id`, errors);
   assertString(authority.description, `${scope}.description`, errors);
   if (
-    !['permit-overrides', 'deny-overrides', 'first-applicable'].includes(
-      authority.decision_strategy,
+    !["permit-overrides", "deny-overrides", "first-applicable"].includes(
+      authority.decision_strategy
     )
   ) {
     errors.push(
-      `${scope}.decision_strategy must be permit-overrides, deny-overrides, or first-applicable`,
+      `${scope}.decision_strategy must be permit-overrides, deny-overrides, or first-applicable`
     );
   }
   if (!Array.isArray(authority.inherits)) {
@@ -305,80 +294,61 @@ function validateAuthority(authority: AuthorityDefinition, scope: string, errors
   }
 }
 
-function validateInheritanceRules(
-  rules: InheritanceRules,
-  scope: string,
-  errors: string[],
-): void {
-  if (
-    rules.precedence &&
-    !['child-overrides', 'parent-overrides'].includes(rules.precedence)
-  ) {
+function validateInheritanceRules(rules: InheritanceRules, scope: string, errors: string[]): void {
+  if (rules.precedence && !["child-overrides", "parent-overrides"].includes(rules.precedence)) {
     errors.push(`${scope}.precedence must be child-overrides or parent-overrides`);
   }
   if (rules.merge_strategy) {
     const { merge_strategy: strategy } = rules;
-    if (strategy.grants && !['append', 'replace'].includes(strategy.grants)) {
+    if (strategy.grants && !["append", "replace"].includes(strategy.grants)) {
       errors.push(`${scope}.merge_strategy.grants must be append or replace`);
     }
-    if (
-      strategy.obligations &&
-      !['append', 'replace'].includes(strategy.obligations)
-    ) {
+    if (strategy.obligations && !["append", "replace"].includes(strategy.obligations)) {
       errors.push(`${scope}.merge_strategy.obligations must be append or replace`);
     }
-    if (
-      strategy.conditions &&
-      !['and', 'or', 'replace'].includes(strategy.conditions)
-    ) {
+    if (strategy.conditions && !["and", "or", "replace"].includes(strategy.conditions)) {
       errors.push(`${scope}.merge_strategy.conditions must be and, or, or replace`);
     }
   }
 }
 
-export function validateAuthoritySchema(
-  schemaCandidate: unknown,
-): AuthoritySchemaValidationResult {
+export function validateAuthoritySchema(schemaCandidate: unknown): AuthoritySchemaValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  if (typeof schemaCandidate !== 'object' || schemaCandidate === null) {
-    return { valid: false, errors: ['Schema must be an object'], warnings };
+  if (typeof schemaCandidate !== "object" || schemaCandidate === null) {
+    return { valid: false, errors: ["Schema must be an object"], warnings };
   }
   const schema = schemaCandidate as AuthoritySchema;
 
-  assertString(schema.schema_version, 'schema_version', errors);
-  if (!schema.metadata || typeof schema.metadata !== 'object') {
-    errors.push('metadata must be provided and be an object');
+  assertString(schema.schema_version, "schema_version", errors);
+  if (!schema.metadata || typeof schema.metadata !== "object") {
+    errors.push("metadata must be provided and be an object");
   } else {
-    assertString(schema.metadata.namespace, 'metadata.namespace', errors);
-    assertString(schema.metadata.owner, 'metadata.owner', errors);
+    assertString(schema.metadata.namespace, "metadata.namespace", errors);
+    assertString(schema.metadata.owner, "metadata.owner", errors);
     if (schema.metadata.description !== undefined) {
-      assertString(schema.metadata.description, 'metadata.description', errors);
+      assertString(schema.metadata.description, "metadata.description", errors);
     }
   }
 
-  if (!schema.condition_language || typeof schema.condition_language !== 'object') {
-    errors.push('condition_language must be provided');
+  if (!schema.condition_language || typeof schema.condition_language !== "object") {
+    errors.push("condition_language must be provided");
   } else {
-    assertString(schema.condition_language.syntax, 'condition_language.syntax', errors);
+    assertString(schema.condition_language.syntax, "condition_language.syntax", errors);
     if (schema.condition_language.description !== undefined) {
-      assertString(
-        schema.condition_language.description,
-        'condition_language.description',
-        errors,
-      );
+      assertString(schema.condition_language.description, "condition_language.description", errors);
     }
   }
 
-  if (!schema.attribute_catalog || typeof schema.attribute_catalog !== 'object') {
-    errors.push('attribute_catalog must be provided and be an object');
+  if (!schema.attribute_catalog || typeof schema.attribute_catalog !== "object") {
+    errors.push("attribute_catalog must be provided and be an object");
   } else {
     validateAttributeCatalog(schema.attribute_catalog, errors);
   }
 
   if (!Array.isArray(schema.role_templates) || schema.role_templates.length === 0) {
-    errors.push('role_templates must include at least one template');
+    errors.push("role_templates must include at least one template");
   } else {
     schema.role_templates.forEach((template, index) => {
       validateRoleTemplate(template, `role_templates[${index}]`, errors);
@@ -386,7 +356,7 @@ export function validateAuthoritySchema(
   }
 
   if (!Array.isArray(schema.authorities) || schema.authorities.length === 0) {
-    errors.push('authorities must include at least one authority');
+    errors.push("authorities must include at least one authority");
   } else {
     schema.authorities.forEach((authority, index) => {
       validateAuthority(authority, `authorities[${index}]`, errors);
@@ -394,7 +364,7 @@ export function validateAuthoritySchema(
   }
 
   if (schema.inheritance_rules) {
-    validateInheritanceRules(schema.inheritance_rules, 'inheritance_rules', errors);
+    validateInheritanceRules(schema.inheritance_rules, "inheritance_rules", errors);
   }
 
   return {
@@ -405,9 +375,7 @@ export function validateAuthoritySchema(
   };
 }
 
-export function loadAuthoritySchemaFromFile(
-  filePath: string,
-): AuthoritySchemaValidationResult {
+export function loadAuthoritySchemaFromFile(filePath: string): AuthoritySchemaValidationResult {
   const fullPath = path.resolve(filePath);
   if (!fs.existsSync(fullPath)) {
     return {
@@ -418,7 +386,7 @@ export function loadAuthoritySchemaFromFile(
   }
 
   try {
-    const raw = fs.readFileSync(fullPath, 'utf8');
+    const raw = fs.readFileSync(fullPath, "utf8");
     const parsed = yaml.parse(raw);
     return validateAuthoritySchema(parsed);
   } catch (error) {

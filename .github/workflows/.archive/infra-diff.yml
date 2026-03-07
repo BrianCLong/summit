@@ -3,12 +3,12 @@ name: Infra Diff Check
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
-      - 'terraform/**'
+      - "terraform/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

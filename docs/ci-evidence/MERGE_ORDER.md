@@ -15,6 +15,7 @@
 **Status:** VERIFIED - No duplicate implementations found
 
 **Notes:**
+
 - Path traversal protection exists in multiple layers (defense in depth):
   - `server/src/security/SecurityHardeningConfig.ts` - middleware protection
   - `server/src/utils/input-sanitization.ts` - sanitization utility
@@ -38,10 +39,12 @@
 | `.github/workflows/reusable-golden-path.yml` | Update Docker actions v2->v3, v4->v5 | Stability & security |
 
 **Merge Prerequisites:**
+
 1. CI passes on this branch
 2. No merge conflicts with main
 
 **Post-Merge Actions:**
+
 1. Verify all workflow runs are green on main
 2. Update CI_FAILURE_LEDGER.md with "after" run links
 
@@ -51,13 +54,14 @@
 
 After merging #2, these branches should be rebased:
 
-| Branch | Action | Priority |
-|--------|--------|----------|
-| `claude/fix-security-alerts-IZXNl` | Rebase onto main | High |
-| `claude/mvp4-ga-completion-muyJA` | Rebase onto main | High |
-| Other `claude/*` branches | Rebase as needed | Medium |
+| Branch                             | Action           | Priority |
+| ---------------------------------- | ---------------- | -------- |
+| `claude/fix-security-alerts-IZXNl` | Rebase onto main | High     |
+| `claude/mvp4-ga-completion-muyJA`  | Rebase onto main | High     |
+| Other `claude/*` branches          | Rebase as needed | Medium   |
 
 **Command:**
+
 ```bash
 git fetch origin main
 git rebase origin/main
@@ -70,12 +74,12 @@ git push --force-with-lease
 
 After full merge sequence, verify these gates are green:
 
-| Gate | Workflow | Expected Status |
-|------|----------|-----------------|
-| CI Core | `ci.yml` | GREEN |
-| Supply Chain Integrity | `supply-chain-integrity.yml` | GREEN |
-| Docker Build | `docker-build.yml` | GREEN |
-| A11y Keyboard Smoke | `a11y-keyboard-smoke.yml` | GREEN |
+| Gate                   | Workflow                     | Expected Status |
+| ---------------------- | ---------------------------- | --------------- |
+| CI Core                | `ci.yml`                     | GREEN           |
+| Supply Chain Integrity | `supply-chain-integrity.yml` | GREEN           |
+| Docker Build           | `docker-build.yml`           | GREEN           |
+| A11y Keyboard Smoke    | `a11y-keyboard-smoke.yml`    | GREEN           |
 
 ---
 

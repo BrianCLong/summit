@@ -1,10 +1,10 @@
 # Offline-Local Standards Mapping
 
-| Input Interface | Output Artifact |
-| --- | --- |
-| OpenAI-compatible local API | `report.json` |
-| Local inference runtime | `metrics.json` |
-| Determinism verifier | `stamp.json` |
+| Input Interface             | Output Artifact |
+| --------------------------- | --------------- |
+| OpenAI-compatible local API | `report.json`   |
+| Local inference runtime     | `metrics.json`  |
+| Determinism verifier        | `stamp.json`    |
 
 ## Non-goals
 

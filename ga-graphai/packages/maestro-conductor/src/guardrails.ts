@@ -4,7 +4,7 @@ import type {
   GuardrailInput,
   GuardrailResult,
   RoutingDecision,
-} from './types';
+} from "./types";
 
 export class GuardrailEngine {
   private readonly guardrails: GuardrailHook[] = [];
@@ -17,10 +17,7 @@ export class GuardrailEngine {
     return [...this.guardrails];
   }
 
-  async evaluate(
-    input: GuardrailInput,
-    decision: RoutingDecision,
-  ): Promise<GuardrailEvaluation> {
+  async evaluate(input: GuardrailInput, decision: RoutingDecision): Promise<GuardrailEvaluation> {
     const results: GuardrailResult[] = [];
     for (const guardrail of this.guardrails) {
       try {
@@ -36,14 +33,14 @@ export class GuardrailEngine {
           assetId: decision.assetId,
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'unknown guardrail failure';
+        const errorMessage = error instanceof Error ? error.message : "unknown guardrail failure";
         results.push({
           id: guardrail.id,
           description: guardrail.description,
           passed: false,
-          severity: 'block',
-          reason: 'guardrail evaluation failed',
-          recommendations: ['verify guardrail configuration and dependencies'],
+          severity: "block",
+          reason: "guardrail evaluation failed",
+          recommendations: ["verify guardrail configuration and dependencies"],
           metadata: { error },
           assetId: decision.assetId,
           error: errorMessage,
@@ -51,8 +48,8 @@ export class GuardrailEngine {
       }
     }
 
-    const blocking = results.filter((result) => !result.passed && result.severity === 'block');
-    const warnings = results.filter((result) => !result.passed && result.severity === 'warn');
+    const blocking = results.filter((result) => !result.passed && result.severity === "block");
+    const warnings = results.filter((result) => !result.passed && result.severity === "warn");
     const errors = results.filter((result) => Boolean(result.error));
 
     return {

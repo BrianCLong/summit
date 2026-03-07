@@ -5,9 +5,7 @@
       "type": "typosquat",
       "severity": "high",
       "domain": "acmecorp-login.com",
-      "evidence_refs": [
-        "artifact-hash-xyz"
-      ]
+      "evidence_refs": ["artifact-hash-xyz"]
     }
   ]
 }

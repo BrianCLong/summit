@@ -5,12 +5,12 @@
 
 ## 0) Immutable Global Guardrails (apply to ALL agents)
 
-* **Supply chain**: SBOM (SPDX), SLSA provenance, cosign signatures/verification at deploy; vuln **diff budgets**; no mutable tags.
-* **Security & privacy**: OPA RBAC/ABAC obligations (step-up MFA + RFA), hash-chained audit, SOPS + Sealed-Secrets; zero plaintext secrets/logs.
-* **Delivery**: Canary **10→50→100** with auto-rollback on SLO/probe breach; migrations are **expand→backfill→cutover→contract** with **shadow parity** & rollback SQL.
-* **Data**: Multi-tenant isolation (RLS/query predicates/labels); retention/purge/holds observed.
-* **Observability**: OTEL + Prom + JSON logs with `release, env, tenant, trace_id, sha`; dashboards & alerts must exist before enabling features.
-* **Evidence**: Signed evidence packs; artifacts retained ≥ **1 year**; reason-for-access on elevated changes.
+- **Supply chain**: SBOM (SPDX), SLSA provenance, cosign signatures/verification at deploy; vuln **diff budgets**; no mutable tags.
+- **Security & privacy**: OPA RBAC/ABAC obligations (step-up MFA + RFA), hash-chained audit, SOPS + Sealed-Secrets; zero plaintext secrets/logs.
+- **Delivery**: Canary **10→50→100** with auto-rollback on SLO/probe breach; migrations are **expand→backfill→cutover→contract** with **shadow parity** & rollback SQL.
+- **Data**: Multi-tenant isolation (RLS/query predicates/labels); retention/purge/holds observed.
+- **Observability**: OTEL + Prom + JSON logs with `release, env, tenant, trace_id, sha`; dashboards & alerts must exist before enabling features.
+- **Evidence**: Signed evidence packs; artifacts retained ≥ **1 year**; reason-for-access on elevated changes.
 
 ## 1) Run Inputs
 
@@ -32,11 +32,11 @@ HEADROOM_TARGET=0.20
 
 ## 2) Required End-State Outputs
 
-* `artifacts/release/v3.0.0/evidence.zip` (signed; conforms to manifest in §10).
-* `release_notes/v3.0.0.md` (semver, risks, rollback, known issues).
-* Green dashboards: **SLO**, **Perf headroom**, **Supply chain**, **DR freshness**, **Alert hygiene**.
-* GA flags flipped & audited: `search,realtime,reports.enabled=true`.
-* `kpi/v3.0.0/+24h.json` & auto-filed regression issues.
+- `artifacts/release/v3.0.0/evidence.zip` (signed; conforms to manifest in §10).
+- `release_notes/v3.0.0.md` (semver, risks, rollback, known issues).
+- Green dashboards: **SLO**, **Perf headroom**, **Supply chain**, **DR freshness**, **Alert hygiene**.
+- GA flags flipped & audited: `search,realtime,reports.enabled=true`.
+- `kpi/v3.0.0/+24h.json` & auto-filed regression issues.
 
 ---
 
@@ -48,9 +48,9 @@ HEADROOM_TARGET=0.20
 {
   "phase": "P#",
   "op": "PLAN|APPLY|VERIFY|ROLLBACK|EVIDENCE",
-  "scope": {"env":"dev|stage|prod|all","services":["*|list"],"tenants":["*|list"]},
-  "inputs": {"params":{}, "feature_flags":{}, "budgets":{}, "risk_ids":[]},
-  "capabilities": ["helm","terraform","rego","k6","cosign","opa","playwright", "..."],
+  "scope": { "env": "dev|stage|prod|all", "services": ["*|list"], "tenants": ["*|list"] },
+  "inputs": { "params": {}, "feature_flags": {}, "budgets": {}, "risk_ids": [] },
+  "capabilities": ["helm", "terraform", "rego", "k6", "cosign", "opa", "playwright", "..."],
   "trace_id": "..."
 }
 ```
@@ -62,9 +62,22 @@ HEADROOM_TARGET=0.20
   "phase": "P#",
   "agent": "<name>",
   "result": "ok|fail|needs_approval|blocked",
-  "artifacts": [{"path":"...", "sha256":"...", "sig":"...", "type":"sbom|slsa|report|dash|schema|evidence"}],
-  "links": {"prs":[], "runs":[], "dashboards":[], "releases":[]},
-  "verdicts": [{"gate":"slo|perf|supply_chain|migrations|policy|dr|chaos","verdict":"pass|fail","details":{}}],
+  "artifacts": [
+    {
+      "path": "...",
+      "sha256": "...",
+      "sig": "...",
+      "type": "sbom|slsa|report|dash|schema|evidence"
+    }
+  ],
+  "links": { "prs": [], "runs": [], "dashboards": [], "releases": [] },
+  "verdicts": [
+    {
+      "gate": "slo|perf|supply_chain|migrations|policy|dr|chaos",
+      "verdict": "pass|fail",
+      "details": {}
+    }
+  ],
   "notes": "short actionable summary",
   "next": "explicit next action",
   "trace_id": "..."
@@ -241,19 +254,19 @@ P2 depends on P1; P3 depends on P0; P4 depends on P2+P3; P5 depends on P4.
 
 ```json
 {
-  "version":"v3.0.0",
-  "canary":[10,50,100],
-  "required_gates":["slo","perf","supply_chain","migrations","policy","dr"],
+  "version": "v3.0.0",
+  "canary": [10, 50, 100],
+  "required_gates": ["slo", "perf", "supply_chain", "migrations", "policy", "dr"],
   "auto_ramp_flags": true,
-  "abort_on": {"slo":"burn>0", "perf":"headroom<0.20", "supply_chain":"attest/sign missing"},
-  "trace_id":"..."
+  "abort_on": { "slo": "burn>0", "perf": "headroom<0.20", "supply_chain": "attest/sign missing" },
+  "trace_id": "..."
 }
 ```
 
 **ROLLBACK**
 
 ```json
-{"version":"v3.0.0","reason":"gate_fail|slo_breach|kpi_regression","trace_id":"..."}
+{ "version": "v3.0.0", "reason": "gate_fail|slo_breach|kpi_regression", "trace_id": "..." }
 ```
 
 **Promote only if** all gates **pass**, headroom ≥ `0.20`, DR freshness OK, exceptions zero/approved.
@@ -262,20 +275,20 @@ P2 depends on P1; P3 depends on P0; P4 depends on P2+P3; P5 depends on P4.
 
 ## 8) Hard Stop & Escalation
 
-* Critical security/data/SLO breach → **HALT → ROLLBACK** → open incident → attach evidence → notify ONCALL & CAB → schedule fix train.
+- Critical security/data/SLO breach → **HALT → ROLLBACK** → open incident → attach evidence → notify ONCALL & CAB → schedule fix train.
 
 ---
 
 ## 9) Orchestration Calendar (T-14 → T+1)
 
-* **T-14** P0/P1: checks, probes, perf baseline, preview governance.
-* **T-10** P2: migrations demo, RLS/pgBouncer.
-* **T-7**  P3: identity+authz+audit proofs.
-* **T-5**  P4 soak 48h.
-* **T-3**  P5 DR/chaos drills.
-* **T-1**  Freeze critical paths; stage `rc`.
-* **T-0**  Promote 10→50→100; flip GA flags.
-* **T+1**  KPI compare & regressions tickets.
+- **T-14** P0/P1: checks, probes, perf baseline, preview governance.
+- **T-10** P2: migrations demo, RLS/pgBouncer.
+- **T-7** P3: identity+authz+audit proofs.
+- **T-5** P4 soak 48h.
+- **T-3** P5 DR/chaos drills.
+- **T-1** Freeze critical paths; stage `rc`.
+- **T-0** Promote 10→50→100; flip GA flags.
+- **T+1** KPI compare & regressions tickets.
 
 ---
 
@@ -283,25 +296,25 @@ P2 depends on P1; P3 depends on P0; P4 depends on P2+P3; P5 depends on P4.
 
 ```json
 {
-  "version":"v3.0.0",
-  "commit_range":{"from":"sha","to":"sha"},
-  "artifacts":[
-    {"name":"sbom","path":"sbom/*.spdx.json"},
-    {"name":"slsa","path":"attestations/*.intoto.jsonl"},
-    {"name":"signatures","path":"signatures/*.sig"},
-    {"name":"slo","path":"slo/*.png"},
-    {"name":"perf","path":"perf/{baseline,spike,headroom}.json"},
-    {"name":"migrations","path":"migrations/{plan,shadow_parity,rollback}.json"},
-    {"name":"dr","path":"dr/{failover,cutback}.json"},
-    {"name":"chaos","path":"chaos/*"},
-    {"name":"alerts","path":"alerts/hygiene.json"},
-    {"name":"identity","path":"identity/{scim,stepup,decision_logs}.json"},
-    {"name":"release_notes","path":"release_notes.md"},
-    {"name":"approvals","path":"approvals_matrix.json"}
+  "version": "v3.0.0",
+  "commit_range": { "from": "sha", "to": "sha" },
+  "artifacts": [
+    { "name": "sbom", "path": "sbom/*.spdx.json" },
+    { "name": "slsa", "path": "attestations/*.intoto.jsonl" },
+    { "name": "signatures", "path": "signatures/*.sig" },
+    { "name": "slo", "path": "slo/*.png" },
+    { "name": "perf", "path": "perf/{baseline,spike,headroom}.json" },
+    { "name": "migrations", "path": "migrations/{plan,shadow_parity,rollback}.json" },
+    { "name": "dr", "path": "dr/{failover,cutback}.json" },
+    { "name": "chaos", "path": "chaos/*" },
+    { "name": "alerts", "path": "alerts/hygiene.json" },
+    { "name": "identity", "path": "identity/{scim,stepup,decision_logs}.json" },
+    { "name": "release_notes", "path": "release_notes.md" },
+    { "name": "approvals", "path": "approvals_matrix.json" }
   ],
-  "hashes":{"evidence.zip":"sha256:..."},
-  "rekor_uuid":"...",
-  "signed_by":"cosign-identity@org"
+  "hashes": { "evidence.zip": "sha256:..." },
+  "rekor_uuid": "...",
+  "signed_by": "cosign-identity@org"
 }
 ```
 
@@ -343,9 +356,9 @@ P2 depends on P1; P3 depends on P0; P4 depends on P2+P3; P5 depends on P4.
 
 ## 13) Communication Macros (auto-posted)
 
-* **Start**: “Cutting `v3.0.0` — stage canary. Gates: SLO/Perf/SupplyChain/Migrations/Policy/DR. Evidence to follow. On-call: @sre,@platform,@security,@product.”
-* **Breach**: “Canary breach at **{{step}}%** — **auto-rollback**. Gate: {{gate}}. Evidence + traces attached.”
-* **GA**: “**v3.0.0** at 100%. GA flags flipped: search,realtime,reports. Evidence attached; +24h KPI scheduled.”
+- **Start**: “Cutting `v3.0.0` — stage canary. Gates: SLO/Perf/SupplyChain/Migrations/Policy/DR. Evidence to follow. On-call: @sre,@platform,@security,@product.”
+- **Breach**: “Canary breach at **{{step}}%** — **auto-rollback**. Gate: {{gate}}. Evidence + traces attached.”
+- **GA**: “**v3.0.0** at 100%. GA flags flipped: search,realtime,reports. Evidence attached; +24h KPI scheduled.”
 
 ---
 
@@ -379,33 +392,33 @@ P2 depends on P1; P3 depends on P0; P4 depends on P2+P3; P5 depends on P4.
 
 ## 15) Persona Skills Matrix (who uses what)
 
-* **helm, terraform**: A6, A5, A35, A36
-* **rego/opa**: A9, A19, A39
-* **cosign/in-toto**: A15, A3, A59
-* **k6**: A26, A11
-* **playwright**: A31, A44
-* **typesense**: A32, A22
-* **kafka/redis streams**: A30, A33
-* **pg/neo4j/redis**: A22, A21
-* **grafana/prometheus**: A13, A39
-* **security scanners**: A16, A15
+- **helm, terraform**: A6, A5, A35, A36
+- **rego/opa**: A9, A19, A39
+- **cosign/in-toto**: A15, A3, A59
+- **k6**: A26, A11
+- **playwright**: A31, A44
+- **typesense**: A32, A22
+- **kafka/redis streams**: A30, A33
+- **pg/neo4j/redis**: A22, A21
+- **grafana/prometheus**: A13, A39
+- **security scanners**: A16, A15
 
 ---
 
 ## 16) Label & Template Canon
 
-* Labels: `type:feat|fix|ops|security`, `risk:low|med|high`, `migration`, `drill`, `chaos`, `perf`, `supply-chain`, `policy`, `ga`, `hotfix`.
-* PR template sections: **Impact**, **Gates affected**, **Canary plan**, **Rollback**, **Runbooks**, **Evidence paths**, **Risk & owner**.
+- Labels: `type:feat|fix|ops|security`, `risk:low|med|high`, `migration`, `drill`, `chaos`, `perf`, `supply-chain`, `policy`, `ga`, `hotfix`.
+- PR template sections: **Impact**, **Gates affected**, **Canary plan**, **Rollback**, **Runbooks**, **Evidence paths**, **Risk & owner**.
 
 ---
 
 ## 17) Acceptance Suite (QE A43/A44)
 
-* **Green paths** under canary steps; **perf gate**; **authz obligations**; **redaction proof** (no OCR leakage).
-* **Realtime resume** correctness; **Search reindex** zero downtime; **Ingest replay** idempotent.
-* **DR/Chaos drills** met RTO/RPO and ≤5m rollback.
-* **Alert hygiene** 100% Sev1/2 coverage; noise ↓ ≥40%.
-* **Evidence** verified (hashes + signatures + Rekor).
+- **Green paths** under canary steps; **perf gate**; **authz obligations**; **redaction proof** (no OCR leakage).
+- **Realtime resume** correctness; **Search reindex** zero downtime; **Ingest replay** idempotent.
+- **DR/Chaos drills** met RTO/RPO and ≤5m rollback.
+- **Alert hygiene** 100% Sev1/2 coverage; noise ↓ ≥40%.
+- **Evidence** verified (hashes + signatures + Rekor).
 
 ---
 
@@ -428,13 +441,13 @@ Emit OTEL spans + JSON logs with release/env/tenant/trace_id/sha.
 
 ---
 
-## 19) “Ultra” Add-Ons (enable if you want *even more*)
+## 19) “Ultra” Add-Ons (enable if you want _even more_)
 
-* **DORA Metrics Agent**: collects lead time/deployment freq/MTTR/change failure rate; adds to evidence.
-* **Feature-to-SLO Mapper**: ties flags to SLO deltas and business KPIs.
-* **ADR Arbiter**: auto-opens Architecture Decision Records for risky changes.
-* **Benchmarker**: compares headroom & cost vs last 3 releases.
-* **Auto-Tutor**: generates play-by-play training snippets from evidence for new on-callers.
+- **DORA Metrics Agent**: collects lead time/deployment freq/MTTR/change failure rate; adds to evidence.
+- **Feature-to-SLO Mapper**: ties flags to SLO deltas and business KPIs.
+- **ADR Arbiter**: auto-opens Architecture Decision Records for risky changes.
+- **Benchmarker**: compares headroom & cost vs last 3 releases.
+- **Auto-Tutor**: generates play-by-play training snippets from evidence for new on-callers.
 
 ---
 
@@ -442,9 +455,16 @@ Emit OTEL spans + JSON logs with release/env/tenant/trace_id/sha.
 
 ```json
 {
-  "version":"v3.0.0",
-  "gates":{"slo":"pass","perf":"pass","supply_chain":"pass","migrations":"pass","policy":"pass","dr":"pass"},
-  "headroom": {"web":0.31,"api":0.27},
+  "version": "v3.0.0",
+  "gates": {
+    "slo": "pass",
+    "perf": "pass",
+    "supply_chain": "pass",
+    "migrations": "pass",
+    "policy": "pass",
+    "dr": "pass"
+  },
+  "headroom": { "web": 0.31, "api": 0.27 },
   "exceptions": [],
   "risk_open": [],
   "drill_recent": true,

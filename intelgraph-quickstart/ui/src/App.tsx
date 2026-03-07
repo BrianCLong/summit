@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { gql } from './api';
+import { useEffect, useState } from "react";
+import { gql } from "./api";
 export default function App() {
   const [people, setPeople] = useState<any[]>([]);
   useEffect(() => {
     gql('{ searchPersons(q:"a", limit: 10){ id name } }').then((r) =>
-      setPeople(r.data.searchPersons),
+      setPeople(r.data.searchPersons)
     );
   }, []);
   return (

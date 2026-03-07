@@ -22,6 +22,7 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ### Current Status
 
 **Packages to Audit:**
+
 - `axios` (1.13.2) - HTTP client
 - `express` (5.2.1) - Web framework
 - `ws` (8.18.3) - WebSocket library
@@ -33,6 +34,7 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ### Audit Findings
 
 **Transitive Dependencies Requiring Updates:**
+
 - `debug`: Update to latest version to avoid compromised versions
 - `chalk`: Update to latest version to avoid compromised versions
 - `color`: Update to latest version to avoid compromised versions
@@ -48,6 +50,7 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ### Implementation
 
 **pnpm.overrides updates:**
+
 ```json
 {
   "debug": ">=4.3.5",
@@ -60,21 +63,26 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ## Task 1.2: Update axios
 
 ### Current Version
+
 - `axios`: 1.13.2
 
 ### Known Vulnerabilities
+
 - Multiple CVEs related to HTTP request handling
 - Transitive dependency vulnerabilities
 
 ### Recommended Update
+
 - Target: 1.13.3 or latest stable (1.14.x)
 
 ### Changes Required
+
 - Update package.json
 - Run tests to verify HTTP client functionality
 - Check for breaking changes in axios API
 
 ### Testing
+
 - Unit tests for HTTP requests
 - Integration tests with external APIs
 - Error handling verification
@@ -82,21 +90,26 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ## Task 1.3: Update express
 
 ### Current Version
+
 - `express`: 5.2.1
 
 ### Known Vulnerabilities
+
 - Security advisories in middleware handling
 - Potential XSS vulnerabilities
 
 ### Recommended Update
+
 - Target: 4.21.0+ (stable LTS) or 5.2.2+
 
 ### Changes Required
+
 - Update package.json
 - Review middleware configuration
 - Test routing and request handling
 
 ### Testing
+
 - Unit tests for routing
 - Middleware security tests
 - Integration tests for request/response handling
@@ -106,16 +119,19 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ### Critical CVEs
 
 **CVE-2025-27607: Python JSON Logger RCE**
+
 - Affects: Python JSON logging libraries
 - Severity: CRITICAL (RCE)
 - Timeline: Dec 2024 - Mar 2025
 
 **CVE-2025-4517: Python tarfile Arbitrary File Write**
+
 - Affects: Python tarfile module
 - Severity: CRITICAL (CVSS 9.4)
 - Impact: Arbitrary file write on systems
 
 **CVE-2025-3248: Unauthenticated RCE**
+
 - Affects: Multiple Python packages
 - Severity: CRITICAL (CVSS 9.8)
 - Impact: Remote code execution without authentication
@@ -123,6 +139,7 @@ September 2025 attack compromised 18 popular npm packages including `debug`, `ch
 ### Current Python Dependencies
 
 **api/requirements.txt:**
+
 ```
 fastapi==0.128.0
 uvicorn==0.40.0
@@ -139,6 +156,7 @@ redis==7.1.0
 ### Implementation
 
 **api/requirements.txt (updated):**
+
 ```
 fastapi==0.130.0
 uvicorn==0.40.1
@@ -166,12 +184,7 @@ redis==7.2.0
 
 ```json
 {
-  "ignoreCves": [
-    "CVE-2024-22363",
-    "CVE-2023-30533",
-    "CVE-2022-24434",
-    "CVE-2023-28155"
-  ]
+  "ignoreCves": ["CVE-2024-22363", "CVE-2023-30533", "CVE-2022-24434", "CVE-2023-28155"]
 }
 ```
 
@@ -187,24 +200,28 @@ For each ignored CVE:
 ### CVE-by-CVE Analysis
 
 **CVE-2024-22363:**
+
 - Package: [To be determined]
 - Risk: [To be assessed]
 - Rationale: [To be documented]
 - Expiration: [To be set]
 
 **CVE-2023-30533:**
+
 - Package: [To be determined]
 - Risk: [To be assessed]
 - Rationale: [To be documented]
 - Expiration: [To be set]
 
 **CVE-2022-24434:**
+
 - Package: [To be determined]
 - Risk: [To be assessed]
 - Rationale: [To be documented]
 - Expiration: [To be set]
 
 **CVE-2023-28155:**
+
 - Package: [To be determined]
 - Risk: [To be assessed]
 - Rationale: [To be documented]
@@ -213,6 +230,7 @@ For each ignored CVE:
 ### Recommendation
 
 Create a new file: `.github/security-docs/IGNORED_CVES.md` documenting each ignored CVE with:
+
 - Affected package
 - Vulnerability description
 - Risk assessment
@@ -222,12 +240,14 @@ Create a new file: `.github/security-docs/IGNORED_CVES.md` documenting each igno
 ## Implementation Checklist
 
 ### Phase 1: npm Supply Chain Audit
+
 - [ ] Run `npm audit` across all workspaces
 - [ ] Identify transitive dependencies from compromised packages
 - [ ] Update pnpm overrides with minimum versions
 - [ ] Create PR 1a: npm supply chain fixes
 
 ### Phase 2: Critical Dependency Updates
+
 - [ ] Update axios to latest secure version
 - [ ] Update express to latest secure version
 - [ ] Update ws to latest secure version
@@ -235,6 +255,7 @@ Create a new file: `.github/security-docs/IGNORED_CVES.md` documenting each igno
 - [ ] Create PR 1a: npm dependency updates
 
 ### Phase 3: Python RCE Fixes
+
 - [ ] Audit all tarfile extraction code
 - [ ] Update Python dependencies
 - [ ] Implement secure tar extraction
@@ -242,6 +263,7 @@ Create a new file: `.github/security-docs/IGNORED_CVES.md` documenting each igno
 - [ ] Create PR 1b: Python RCE fixes
 
 ### Phase 4: CVE Evaluation
+
 - [ ] Analyze each ignored CVE
 - [ ] Document rationale for ignoring
 - [ ] Set re-evaluation dates
@@ -250,58 +272,70 @@ Create a new file: `.github/security-docs/IGNORED_CVES.md` documenting each igno
 ## Pull Requests to Create
 
 ### PR 1a: npm Supply Chain Audit & Critical Updates
+
 **Title:** `security(batch-1a): audit npm supply chain and update critical dependencies`
 
 **Description:**
+
 - Audits transitive dependencies for September 2025 supply chain attack
 - Updates axios, express, ws to latest secure versions
 - Implements pnpm overrides for compromised packages
 - Includes comprehensive testing
 
 **Files Changed:**
+
 - package.json
 - package-lock.json (if applicable)
 - pnpm-lock.yaml
 
 **Tests:**
+
 - npm audit passes
 - Full test suite passes
 - HTTP client tests pass
 - Middleware tests pass
 
 ### PR 1b: Python RCE Vulnerability Fixes
+
 **Title:** `security(batch-1b): patch critical Python RCE vulnerabilities`
 
 **Description:**
+
 - Patches CVE-2025-27607 (JSON Logger RCE)
 - Patches CVE-2025-4517 (tarfile arbitrary file write)
 - Implements secure tar extraction
 - Adds security-focused tests
 
 **Files Changed:**
+
 - api/requirements.txt
 - Python source files with tarfile handling
 - Test files
 
 **Tests:**
+
 - Python unit tests pass
 - Tarfile extraction tests pass
 - RCE attack vector tests pass
 
 ### PR 1c: CVE Evaluation Documentation
+
 **Title:** `security(batch-1c): document ignored CVEs and risk assessment`
 
 **Description:**
+
 - Evaluates each ignored CVE
 - Documents rationale for ignoring
 - Sets re-evaluation dates
 - Establishes process for CVE management
 
 **Files Changed:**
+
 - .github/security-docs/IGNORED_CVES.md
 - package.json (if updating ignored CVEs)
 
 **Tests:**
+
 - Documentation review
 - No code changes
 
@@ -332,13 +366,13 @@ Create a new file: `.github/security-docs/IGNORED_CVES.md` documenting each igno
 
 ## Timeline
 
-| Week | Task | Status |
-|------|------|--------|
-| 1 | npm supply chain audit | Not Started |
-| 1 | axios/express/ws updates | Not Started |
-| 1-2 | Python RCE fixes | Not Started |
-| 2 | CVE evaluation | Not Started |
-| 2 | PR review and merge | Not Started |
+| Week | Task                     | Status      |
+| ---- | ------------------------ | ----------- |
+| 1    | npm supply chain audit   | Not Started |
+| 1    | axios/express/ws updates | Not Started |
+| 1-2  | Python RCE fixes         | Not Started |
+| 2    | CVE evaluation           | Not Started |
+| 2    | PR review and merge      | Not Started |
 
 ---
 

@@ -5,6 +5,7 @@
 **Enforcement**: Hard Gate in GA Readiness Pipeline
 
 ## Purpose
+
 The Plan Stability Gate ensures that Neo4j query execution plans remain deterministic and stable across releases. This prevents silent performance regressions caused by plan flipping or unexpected index usage changes.
 
 ## Thresholds
@@ -34,17 +35,22 @@ The gate enforces the following stability metrics:
 ## Operation
 
 ### Telemetry
+
 Query plans are sampled at runtime using .
+
 - **Default Sampling Rate**: 1%
 - **Overrides**: Critical paths (Evidence, Agents, Documents) are sampled at 10%.
 - **Canonicalization**: Plans are stripped of timestamps and memory addresses to ensure deterministic hashing (SHA256).
 
 ### Enforcement
-The gate runs in the  pipeline via .
-It compares the current  against .
+
+The gate runs in the pipeline via .
+It compares the current against .
 
 ### Drift Resolution
+
 If the gate fails due to drift:
+
 1. **Analyze**: Check the heatmap artifact to identify which queries are flipping.
 2. **Fix**: Pin indexes or rewrite Cypher queries to force the desired plan.
 3. **Accept**: If the new plan is better, update the baseline by running:
@@ -54,5 +60,6 @@ If the gate fails due to drift:
    (Note: Baseline update flag not yet implemented in v1 tool, manual update required).
 
 ## Reference
+
 - [Evidence Map](../../evidence/map.yml)
 - [Evidence ID Policy](../governance/EVIDENCE_ID_POLICY.yml)

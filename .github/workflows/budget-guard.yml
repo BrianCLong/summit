@@ -3,11 +3,11 @@ name: Budget Guard & Cost Observability
 on:
   pull_request:
     paths:
-      - 'server/src/db/budgetLedger.ts'
-      - 'server/ai/llmBudget.ts'
-      - '.github/workflows/budget-guard.yml'
+      - "server/src/db/budgetLedger.ts"
+      - "server/ai/llmBudget.ts"
+      - ".github/workflows/budget-guard.yml"
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   budget-audit:
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install

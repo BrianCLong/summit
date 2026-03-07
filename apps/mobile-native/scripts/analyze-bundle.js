@@ -186,7 +186,7 @@ function analyzeModuleSizes() {
       'react-native-maps',
     ];
 
-    keyDeps.forEach((dep) => {
+    keyDeps.forEach(dep => {
       if (dependencies[dep]) {
         console.log(`  ${dep}: ${dependencies[dep]}`);
       }

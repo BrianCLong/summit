@@ -5,13 +5,13 @@ Use this checklist when designing or implementing features exposed to Partners t
 ## 1. Isolation & Data Safety
 
 - [ ] **Scope Enforcement**: Does every database query include a `MATCH (p:Partner)-[:MANAGES]->(t:Tenant)` (or equivalent check) to ensure the Partner actually owns the target Tenant?
-- [ ] **Context Leakage**: When switching context, are all caches (Redis, LocalStorage) keyed by the *Target Tenant ID*, not just the User ID?
+- [ ] **Context Leakage**: When switching context, are all caches (Redis, LocalStorage) keyed by the _Target Tenant ID_, not just the User ID?
 - [ ] **PII Masking**: Is PII in the Customer Tenant masked for Partner Support users unless explicitly unmasked with an audit reason?
 - [ ] **Secret Protection**: Are Customer secrets (API Keys, private certs) hidden from Partners? (Partners should only be able to overwrite/reset, not read).
 
 ## 2. Authentication & Authorization
 
-- [ ] **Role Mapping**: Are Partner roles (`partner-admin`) correctly mapped to restricted permissions in the Child Tenant? (e.g., A Partner should generally *not* be able to delete the Customer's root admin account).
+- [ ] **Role Mapping**: Are Partner roles (`partner-admin`) correctly mapped to restricted permissions in the Child Tenant? (e.g., A Partner should generally _not_ be able to delete the Customer's root admin account).
 - [ ] **Break-Glass**: Is there a mechanism for the Customer to revoke Partner access instantly?
 - [ ] **Least Privilege**: Does the default `:MANAGES` relationship grant the minimum necessary permissions?
 

@@ -5,25 +5,18 @@
  * Main application layout with navigation sidebar.
  */
 
-import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Tags,
-  CheckSquare,
-  Database,
-  BarChart3,
-  User,
-} from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useLabelingStore } from '../../store/labelingStore';
+import React from "react";
+import { Outlet, NavLink } from "react-router-dom";
+import { LayoutDashboard, Tags, CheckSquare, Database, BarChart3, User } from "lucide-react";
+import { cn } from "../../utils/cn";
+import { useLabelingStore } from "../../store/labelingStore";
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/labeling', label: 'Labeling', icon: Tags },
-  { path: '/review', label: 'Review', icon: CheckSquare },
-  { path: '/datasets', label: 'Datasets', icon: Database },
-  { path: '/quality', label: 'Quality', icon: BarChart3 },
+  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/labeling", label: "Labeling", icon: Tags },
+  { path: "/review", label: "Review", icon: CheckSquare },
+  { path: "/datasets", label: "Datasets", icon: Database },
+  { path: "/quality", label: "Quality", icon: BarChart3 },
 ];
 
 export function Layout() {
@@ -49,10 +42,10 @@ export function Layout() {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )
                 }
               >

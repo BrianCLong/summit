@@ -6,5 +6,5 @@
  * @module pages/Admin
  */
 
-export * from './UserManagement';
-export * from './RoleManagement';
+export * from "./UserManagement";
+export * from "./RoleManagement";

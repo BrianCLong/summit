@@ -219,8 +219,7 @@ type Query {
 
 type Mutation {
   triggerSnapshot: Boolean @auth(abac: "trust.write")
-  purgeCache(opId: String!, varsHash: String!): Boolean
-    @auth(abac: "admin.write")
+  purgeCache(opId: String!, varsHash: String!): Boolean @auth(abac: "admin.write")
 }
 ```
 

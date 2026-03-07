@@ -31,7 +31,7 @@ Mode: Sensing
 
 ## Blockers
 
-- See report.json and *.err files for current execution constraints.
+- See report.json and \*.err files for current execution constraints.
 
 ## MAESTRO Alignment
 

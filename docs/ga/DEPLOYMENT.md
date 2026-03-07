@@ -59,6 +59,7 @@ gh run list --workflow=mvp4-gate.yml --branch=main --limit=1
 ### 1.3 Communication
 
 **Internal Announcement** (24h before):
+
 ```
 Subject: MVP-4-GA Deployment - [DATE] [TIME]
 
@@ -79,6 +80,7 @@ Please avoid making manual changes during this window.
 ```
 
 **External Announcement**:
+
 ```
 We will be performing scheduled maintenance on [DATE] from [TIME] to [TIME].
 You may experience brief interruptions. No action required.
@@ -240,6 +242,7 @@ kubectl rollout status deployment/summit-server -n production
 ```
 
 **Deployment Strategy**:
+
 - Rolling update: 0 unavailable, 1 surge
 - Update 1 pod at a time
 - Wait 30s between pod updates
@@ -296,6 +299,7 @@ curl -X POST https://api.summit.internal/v1/policy/evaluate \
 ```
 
 **Manual Smoke Tests**:
+
 1. ✅ User can log in
 2. ✅ User can read permitted entities
 3. ✅ User is denied access to restricted entities
@@ -396,12 +400,14 @@ kubectl patch service summit-server -n production -p '{"spec":{"selector":{"vers
 ### 8.2 Monitor SLOs
 
 **First Hour**:
+
 - [ ] Error rate < 0.1%
 - [ ] P95 latency < 200ms
 - [ ] No security alerts
 - [ ] No policy evaluation failures
 
 **First 24 Hours**:
+
 - [ ] Error budget burn rate acceptable
 - [ ] No user-reported incidents
 - [ ] Audit trail growing normally
@@ -410,6 +416,7 @@ kubectl patch service summit-server -n production -p '{"spec":{"selector":{"vers
 ### 8.3 Communication
 
 **Internal**:
+
 ```
 MVP-4-GA Deployment COMPLETE ✅
 
@@ -427,6 +434,7 @@ Thank you for your patience.
 ```
 
 **External**:
+
 ```
 Scheduled maintenance complete. All systems operational.
 ```
@@ -474,18 +482,19 @@ START
 
 ## 10. Deployment Runbook Quick Reference
 
-| Phase | Duration | Rollback Time |
-|-------|----------|---------------|
-| **Pre-checks** | 10 min | N/A |
-| **Backup** | 5 min | N/A |
-| **Migration** | 5 min | 10 min (PITR) |
-| **App Deploy** | 10 min | 3 min |
-| **Verification** | 10 min | 3 min |
-| **Total** | **40 min** | **<15 min** |
+| Phase            | Duration   | Rollback Time |
+| ---------------- | ---------- | ------------- |
+| **Pre-checks**   | 10 min     | N/A           |
+| **Backup**       | 5 min      | N/A           |
+| **Migration**    | 5 min      | 10 min (PITR) |
+| **App Deploy**   | 10 min     | 3 min         |
+| **Verification** | 10 min     | 3 min         |
+| **Total**        | **40 min** | **<15 min**   |
 
 ---
 
 **Document Control**:
+
 - **Version**: 1.0
 - **Owner**: SRE Team
 - **Approvers**: Release Captain, Infrastructure Lead

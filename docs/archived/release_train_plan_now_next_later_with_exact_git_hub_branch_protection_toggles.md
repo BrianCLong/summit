@@ -197,7 +197,7 @@ Example `release-train.yml` skeleton:
 ```yaml
 name: Release Train
 on:
-  schedule: [{ cron: '0 18 * * 4' }] # Thu 18:00 UTC
+  schedule: [{ cron: "0 18 * * 4" }] # Thu 18:00 UTC
   workflow_dispatch: {}
 jobs:
   cut-notes:

@@ -7,16 +7,19 @@
 We are moving to a strict **Domain-Driven Design (DDD)** folder structure.
 
 ### Canonical Roots
-*   `server/`: The Monolithic Backend.
-*   `apps/web/`: The Main Frontend.
-*   `packages/`: Shared libraries (Schema, Types, Utils).
-*   `rust/`: High-performance binaries.
-*   `python/`: Data Science & ML Workloads (Rename `auto_scientist` and `prov-ledger` to `python/auto-scientist` etc. in Phase 2).
+
+- `server/`: The Monolithic Backend.
+- `apps/web/`: The Main Frontend.
+- `packages/`: Shared libraries (Schema, Types, Utils).
+- `rust/`: High-performance binaries.
+- `python/`: Data Science & ML Workloads (Rename `auto_scientist` and `prov-ledger` to `python/auto-scientist` etc. in Phase 2).
 
 ### The `server/` Standard
+
 NO MORE root-level feature folders.
 
 **Bad:**
+
 ```
 server/
   billing/
@@ -25,6 +28,7 @@ server/
 ```
 
 **Good:**
+
 ```
 server/
   src/
@@ -42,38 +46,41 @@ server/
 
 ## 2. Naming Conventions
 
-*   **Files**: `kebab-case.ts` (e.g., `user-service.ts`).
-*   **Classes**: `PascalCase` (e.g., `UserService`).
-*   **Variables/Functions**: `camelCase` (e.g., `getUserById`).
-*   **React Components**: `PascalCase.tsx` (e.g., `UserProfile.tsx`).
-*   **Interfaces**: `PascalCase` (No `I` prefix).
+- **Files**: `kebab-case.ts` (e.g., `user-service.ts`).
+- **Classes**: `PascalCase` (e.g., `UserService`).
+- **Variables/Functions**: `camelCase` (e.g., `getUserById`).
+- **React Components**: `PascalCase.tsx` (e.g., `UserProfile.tsx`).
+- **Interfaces**: `PascalCase` (No `I` prefix).
 
 ---
 
 ## 3. Technology Standards
 
-| Category | Standard | Status |
-| :--- | :--- | :--- |
-| **Runtime** | Node.js v20+ (LTS) | Enforced |
-| **Package Manager** | `pnpm` | Enforced (Delete package-lock.json) |
-| **Backend Framework** | Express + Apollo Server v5 | Standard |
-| **Frontend Framework** | React 19 + Vite | Standard |
-| **Styling** | Tailwind CSS v4 | Standard |
-| **Validation** | Zod v4 (Strict) | Standard |
-| **ORM** | Neo4j Driver (Native) + PG (Native) | Standard (Avoid ORMs if possible) |
-| **Testing** | Jest (Backend), Vitest (Frontend) | Standard |
+| Category               | Standard                            | Status                              |
+| :--------------------- | :---------------------------------- | :---------------------------------- |
+| **Runtime**            | Node.js v20+ (LTS)                  | Enforced                            |
+| **Package Manager**    | `pnpm`                              | Enforced (Delete package-lock.json) |
+| **Backend Framework**  | Express + Apollo Server v5          | Standard                            |
+| **Frontend Framework** | React 19 + Vite                     | Standard                            |
+| **Styling**            | Tailwind CSS v4                     | Standard                            |
+| **Validation**         | Zod v4 (Strict)                     | Standard                            |
+| **ORM**                | Neo4j Driver (Native) + PG (Native) | Standard (Avoid ORMs if possible)   |
+| **Testing**            | Jest (Backend), Vitest (Frontend)   | Standard                            |
 
 ---
 
 ## 4. Migration Paths
 
 ### 4.1 Deprecation of `apps/server`
-*   **Action**: Archive the folder.
-*   **Reason**: Redundant.
+
+- **Action**: Archive the folder.
+- **Reason**: Redundant.
 
 ### 4.2 Deprecation of `client/`
-*   **Action**: Port unique features to `apps/web`. Delete `client/`.
-*   **Reason**: `apps/web` is the modern stack.
+
+- **Action**: Port unique features to `apps/web`. Delete `client/`.
+- **Reason**: `apps/web` is the modern stack.
 
 ### 4.3 Root Cleanup
-*   **Action**: Move `server/ab`, `server/ai`, etc. to `server/src/modules/`.
+
+- **Action**: Move `server/ab`, `server/ai`, etc. to `server/src/modules/`.

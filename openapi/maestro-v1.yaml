@@ -13,7 +13,7 @@ paths:
     get:
       summary: Health check endpoint
       responses:
-        '200':
+        "200":
           description: Service is healthy
           content:
             application/json:
@@ -27,7 +27,7 @@ paths:
     get:
       summary: Readiness check endpoint
       responses:
-        '200':
+        "200":
           description: Service is ready to receive traffic
           content:
             application/json:
@@ -37,13 +37,13 @@ paths:
                   ready:
                     type: boolean
                     description: Indicates if the service is ready
-        '503':
+        "503":
           description: Service is not ready
   /metrics:
     get:
       summary: Prometheus metrics endpoint
       responses:
-        '200':
+        "200":
           description: Prometheus metrics in exposition format
           content:
             text/plain:
@@ -60,22 +60,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RunRequest'
+              $ref: "#/components/schemas/RunRequest"
       responses:
-        '202':
+        "202":
           description: Orchestration run accepted
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunAccepted'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/InternalError'
+                $ref: "#/components/schemas/RunAccepted"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
   /runs:
     get:
       summary: List all Maestro runs
@@ -93,15 +93,15 @@ paths:
           description: Page size
         - in: query
           name: status
-          schema: { $ref: '#/components/schemas/RunStatus' }
+          schema: { $ref: "#/components/schemas/RunStatus" }
           description: Filter by status
       responses:
-        '200':
+        "200":
           description: A paginated list of runs
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunList'
+                $ref: "#/components/schemas/RunList"
           headers:
             X-Request-Id:
               schema: { type: string }
@@ -112,12 +112,12 @@ paths:
             X-RateLimit-Remaining:
               schema: { type: integer }
               description: The number of requests left for the time window
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
 components:
   schemas:
@@ -161,7 +161,7 @@ components:
           type: string
           description: Unique ID of the run
         status:
-          $ref: '#/components/schemas/RunStatus'
+          $ref: "#/components/schemas/RunStatus"
         createdAt:
           type: string
           format: date-time
@@ -179,9 +179,9 @@ components:
       properties:
         items:
           type: array
-          items: { $ref: '#/components/schemas/Run' }
+          items: { $ref: "#/components/schemas/Run" }
         meta:
-          $ref: '#/components/schemas/PaginationMeta'
+          $ref: "#/components/schemas/PaginationMeta"
 
     PaginationMeta:
       type: object
@@ -214,17 +214,17 @@ components:
       description: Bad request
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
     Unauthorized:
       description: Authentication required
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
     Forbidden:
       description: Not authorized to access resource
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
     RateLimited:
       description: Too many requests
       headers:
@@ -233,12 +233,12 @@ components:
           description: Seconds until next allowed request
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
     InternalError:
       description: Internal server error
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
 
 security:
   - BearerAuth: []

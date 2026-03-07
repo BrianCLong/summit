@@ -2,8 +2,8 @@ name: grafana-import-dashboards
 on:
   push:
     paths:
-      - 'server/grafana/**'
-      - 'scripts/grafana/export_dashboards.sh'
+      - "server/grafana/**"
+      - "scripts/grafana/export_dashboards.sh"
   workflow_dispatch: {}
 
 jobs:

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 // import type { Edge, Node } from 'reactflow';
 type Edge = any;
 type Node = any;
@@ -38,7 +38,7 @@ function inflateNodes(batch: any[], existingCount: number): Node[] {
     return {
       id,
       position: {
-        x: (existingCount + idx) % 5 * 180,
+        x: ((existingCount + idx) % 5) * 180,
         y: Math.floor((existingCount + idx) / 5) * 140,
       },
       data: {
@@ -46,11 +46,11 @@ function inflateNodes(batch: any[], existingCount: number): Node[] {
         type: entity.type,
       },
       style: {
-        border: '1px solid #CBD5E1',
+        border: "1px solid #CBD5E1",
         borderRadius: 8,
         padding: 8,
-        background: '#0B1324',
-        color: '#E2E8F0',
+        background: "#0B1324",
+        color: "#E2E8F0",
       },
     } satisfies Node;
   });
@@ -64,7 +64,7 @@ function stitchEdges(nodes: Node[], existingEdges: Edge[]): Edge[] {
     source: nodes[idx].id,
     target: node.id,
     animated: true,
-    style: { stroke: '#67E8F9' },
+    style: { stroke: "#67E8F9" },
   }));
   return [...existingEdges, ...nextEdges];
 }
@@ -100,35 +100,35 @@ export const useAnalysisStore = (create as any)((set: any, get: any) => ({
 
     set({ nodes: [], edges: [], streaming: true, error: null });
 
-    const params = new URLSearchParams({ stream: 'true', limit: '200' });
+    const params = new URLSearchParams({ stream: "true", limit: "200" });
     const { lastCursor } = get();
-    if (lastCursor) params.set('cursor', lastCursor);
+    if (lastCursor) params.set("cursor", lastCursor);
 
     const source = new EventSource(`/api/entities?${params.toString()}`);
     streamSource = source;
 
     source.onmessage = (event: MessageEvent) => {
       const payload = JSON.parse(event.data);
-      if (payload.type === 'batch') {
+      if (payload.type === "batch") {
         const batchNodes = inflateNodes(payload.items || [], get().nodes.length);
         set((state: any) => ({
           nodes: [...state.nodes, ...batchNodes],
           edges: stitchEdges(batchNodes, state.edges),
           lastCursor: (payload.pageInfo as PageInfo)?.nextCursor ?? (state as any).lastCursor,
         }));
-      } else if (payload.type === 'complete') {
+      } else if (payload.type === "complete") {
         set({ streaming: false });
         source.close();
         streamSource = null;
-      } else if (payload.type === 'error') {
-        set({ streaming: false, error: payload.message || 'Stream failed' });
+      } else if (payload.type === "error") {
+        set({ streaming: false, error: payload.message || "Stream failed" });
         source.close();
         streamSource = null;
       }
     };
 
     source.onerror = () => {
-      set({ streaming: false, error: 'Connection lost' });
+      set({ streaming: false, error: "Connection lost" });
       source.close();
       streamSource = null;
     };

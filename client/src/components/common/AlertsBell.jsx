@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import {
   IconButton,
   Badge,
@@ -8,8 +8,8 @@ import {
   ListItemText,
   Snackbar,
   Alert as MUIAlert,
-} from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+} from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 const GET_ALERTS = gql`
   query Alerts($limit: Int, $onlyUnread: Boolean) {
@@ -51,7 +51,7 @@ export default function AlertsBell() {
     if (alerts.length > 0 && alerts.length > prevCountRef.current) {
       const latest = alerts[0];
       setSnack({
-        severity: latest.severity || 'info',
+        severity: latest.severity || "info",
         title: latest.title,
         message: latest.message,
       });
@@ -72,7 +72,7 @@ export default function AlertsBell() {
       <IconButton
         color="inherit"
         onClick={handleOpen}
-        aria-label={count > 0 ? `${count} unread alerts` : 'No new alerts'}
+        aria-label={count > 0 ? `${count} unread alerts` : "No new alerts"}
       >
         <Badge badgeContent={count} color="error">
           <NotificationsIcon />
@@ -86,16 +86,12 @@ export default function AlertsBell() {
           </MenuItem>
         ))}
       </Menu>
-      <Snackbar
-        open={!!snack}
-        autoHideDuration={6000}
-        onClose={() => setSnack(null)}
-      >
+      <Snackbar open={!!snack} autoHideDuration={6000} onClose={() => setSnack(null)}>
         <MUIAlert
           onClose={() => setSnack(null)}
-          severity={snack?.severity || 'info'}
+          severity={snack?.severity || "info"}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           <strong>{snack?.title}:</strong> {snack?.message}
         </MUIAlert>

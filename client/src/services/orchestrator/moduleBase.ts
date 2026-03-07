@@ -7,11 +7,9 @@ import {
   ModuleTelemetry,
   ModuleAction,
   OrchestratorTask,
-} from './types';
+} from "./types";
 
-export type ModuleHandler = (
-  context: ModuleHandlerContext,
-) => Promise<ModuleHandlerResult>;
+export type ModuleHandler = (context: ModuleHandlerContext) => Promise<ModuleHandlerResult>;
 
 interface ExecutionStats {
   successes: number;
@@ -25,15 +23,12 @@ export class BaseModule {
   private handlers: Record<string, ModuleHandler>;
   private stats: ExecutionStats = { successes: 0, errors: 0, totalLatency: 0 };
 
-  constructor(
-    definition: ModuleDefinition,
-    handlers: Record<string, ModuleHandler>,
-  ) {
+  constructor(definition: ModuleDefinition, handlers: Record<string, ModuleHandler>) {
     this.definition = definition;
     this.handlers = handlers;
     this.status = {
-      state: 'offline',
-      lastMessage: 'Module registered and awaiting start',
+      state: "offline",
+      lastMessage: "Module registered and awaiting start",
       updatedAt: new Date().toISOString(),
       uptimeMs: 0,
       tasksProcessed: 0,
@@ -64,8 +59,8 @@ export class BaseModule {
   async start(): Promise<ModuleStatus> {
     this.status = {
       ...this.status,
-      state: 'starting',
-      lastMessage: 'Bootstrapping module runtime',
+      state: "starting",
+      lastMessage: "Bootstrapping module runtime",
       updatedAt: new Date().toISOString(),
       startedAt: new Date().toISOString(),
       uptimeMs: 0,
@@ -75,8 +70,8 @@ export class BaseModule {
 
     this.status = {
       ...this.status,
-      state: 'running',
-      lastMessage: 'Module online and ready to receive tasks',
+      state: "running",
+      lastMessage: "Module online and ready to receive tasks",
       updatedAt: new Date().toISOString(),
       uptimeMs: 0,
     };
@@ -86,8 +81,8 @@ export class BaseModule {
   async stop(): Promise<ModuleStatus> {
     this.status = {
       ...this.status,
-      state: 'offline',
-      lastMessage: 'Module stopped by orchestrator',
+      state: "offline",
+      lastMessage: "Module stopped by orchestrator",
       updatedAt: new Date().toISOString(),
       uptimeMs: 0,
       startedAt: undefined,
@@ -95,14 +90,9 @@ export class BaseModule {
     return this.getStatus();
   }
 
-  async executeTask(
-    task: OrchestratorTask,
-    action: ModuleAction,
-  ): Promise<ModuleExecutionResult> {
+  async executeTask(task: OrchestratorTask, action: ModuleAction): Promise<ModuleExecutionResult> {
     if (!this.supportsAction(action.action)) {
-      throw new Error(
-        `${this.definition.displayName} cannot perform action "${action.action}"`,
-      );
+      throw new Error(`${this.definition.displayName} cannot perform action "${action.action}"`);
     }
 
     const handler = this.handlers[action.action];
@@ -110,7 +100,7 @@ export class BaseModule {
     const start = Date.now();
     this.status = {
       ...this.status,
-      state: 'running',
+      state: "running",
       lastMessage: `Executing action ${action.action}`,
       updatedAt: new Date().toISOString(),
       tasksProcessed: this.status.tasksProcessed + 1,
@@ -131,7 +121,7 @@ export class BaseModule {
 
       this.status = {
         ...this.status,
-        state: 'running',
+        state: "running",
         lastMessage: result.message,
         updatedAt: new Date().toISOString(),
         successCount: this.stats.successes,
@@ -142,7 +132,7 @@ export class BaseModule {
       return {
         moduleId: this.definition.id,
         action: action.action,
-        status: 'success',
+        status: "success",
         message: result.message,
         output: result.output ?? {},
         durationMs: duration,
@@ -154,9 +144,8 @@ export class BaseModule {
 
       this.status = {
         ...this.status,
-        state: 'error',
-        lastMessage:
-          error instanceof Error ? error.message : 'Unknown module error',
+        state: "error",
+        lastMessage: error instanceof Error ? error.message : "Unknown module error",
         updatedAt: new Date().toISOString(),
         successCount: this.stats.successes,
         errorCount: this.stats.errors,
@@ -177,22 +166,18 @@ export class BaseModule {
 
   private calculateTelemetry(
     lastLatency: number,
-    overrides?: Partial<ModuleTelemetry>,
+    overrides?: Partial<ModuleTelemetry>
   ): ModuleTelemetry {
     const processed = this.stats.successes + this.stats.errors;
-    const avgLatency =
-      processed > 0 ? Math.round(this.stats.totalLatency / processed) : 0;
+    const avgLatency = processed > 0 ? Math.round(this.stats.totalLatency / processed) : 0;
 
     const telemetry: ModuleTelemetry = {
       latencyMs: overrides?.latencyMs ?? avgLatency ?? lastLatency,
-      throughputPerMinute:
-        overrides?.throughputPerMinute ?? Math.max(processed * 4, 1),
+      throughputPerMinute: overrides?.throughputPerMinute ?? Math.max(processed * 4, 1),
       utilization: overrides?.utilization ?? Math.min(processed / 20, 1),
       reliability:
         overrides?.reliability ??
-        (processed > 0
-          ? Number((this.stats.successes / processed).toFixed(2))
-          : 1),
+        (processed > 0 ? Number((this.stats.successes / processed).toFixed(2)) : 1),
     };
 
     return telemetry;

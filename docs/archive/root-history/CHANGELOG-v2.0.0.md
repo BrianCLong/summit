@@ -6,6 +6,7 @@
 ## 🎉 Major Features
 
 ### Enterprise Infrastructure
+
 - **Intelligent Load Balancing** (#12288): Predictive routing with multiple algorithms
 - **Multi-Tier Caching** (#12289): L1 in-memory + L3 Redis with coherence protocol
 - **Configuration Management** (#12290): Versioned configs with hot-reloading
@@ -14,6 +15,7 @@
 - **Telemetry System** (#12293): OpenTelemetry + Prometheus integration
 
 ### AI/ML Capabilities
+
 - **Multimodal AI Extraction** (#12281): Complete extraction engine with 8 Black Projects
 - **Computer Vision**: YOLO object detection, MTCNN face recognition
 - **Speech Processing**: Whisper transcription with speaker diarization
@@ -21,12 +23,14 @@
 - **Vector Search**: Semantic search with sentence transformers
 
 ### Security Enhancements
+
 - **Multi-Tenant Isolation** (#12229): IDOR vulnerability remediation
 - **GraphQL Security** (#12230): Complexity/depth limiting, APQ
 - **Rate Limiting** (#12231): Redis-backed sliding windows (500 req/15min)
 - **Persisted Queries**: Query allowlisting for production
 
 ### Real-Time Systems
+
 - **Narrative Simulation Engine**: Tick-based narrative propagation with REST API
 - **WebSocket Streaming**: Real-time collaboration and updates
 - **Event-Driven Architecture**: Kafka integration for streaming pipelines
@@ -51,6 +55,7 @@
 ## 🔧 Breaking Changes
 
 ### Environment Variables (Required)
+
 ```
 # Load Balancer
 LB_ALGORITHM=weighted-round-robin
@@ -74,11 +79,13 @@ BLACK_PROJECTS_ENABLED=true
 ```
 
 ### Database Migrations
+
 - New tables: `narrative_simulations`, `black_projects_*`
 - New indexes on `entities` and `relationships` for performance
 - TimescaleDB hypertables for telemetry data
 
 ### API Changes
+
 - **New REST endpoints**: `/api/narrative-sim/*`, `/api/black-projects/*`
 - **GraphQL schema changes**: New types for AI extraction results
 - **Rate limiting headers**: `X-RateLimit-*` headers in all responses

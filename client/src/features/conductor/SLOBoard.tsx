@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 interface SloData {
   p95: number;
@@ -11,13 +11,13 @@ export default function SLOBoard() {
   const [d, setD] = useState<SloData | null>(null);
   async function load(controller?: AbortController) {
     try {
-      const r = await fetch('/api/slo?runbook=demo&tenant=acme', {
+      const r = await fetch("/api/slo?runbook=demo&tenant=acme", {
         signal: controller?.signal,
       });
       setD(await r.json());
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        console.error('Fetch error:', err);
+      if (err.name !== "AbortError") {
+        console.error("Fetch error:", err);
       }
     }
   }
@@ -39,10 +39,8 @@ export default function SLOBoard() {
       <h3 className="text-lg font-semibold">SLOs</h3>
       {d && (
         <div className="text-sm">
-          p95: {Math.round(d.p95)}ms • success:{' '}
-          {Number(d.successRatePct).toFixed(2)}% • cost/run: $
-          {Number(d.costPerRunUsd).toFixed(2)} • burn:{' '}
-          {(Number(d.burnRate) * 100).toFixed(0)}%
+          p95: {Math.round(d.p95)}ms • success: {Number(d.successRatePct).toFixed(2)}% • cost/run: $
+          {Number(d.costPerRunUsd).toFixed(2)} • burn: {(Number(d.burnRate) * 100).toFixed(0)}%
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
-import { Connector, ConnectorContext } from '../../connector-sdk/src';
-import { DiffGenerator, Diff } from './DiffGenerator';
+import { Connector, ConnectorContext } from "../../connector-sdk/src";
+import { DiffGenerator, Diff } from "./DiffGenerator";
 
 export class IntegrationTwin {
   private diffGenerator: DiffGenerator;
@@ -15,14 +15,14 @@ export class IntegrationTwin {
     context: ConnectorContext
   ): Promise<Diff> {
     if (!connector.dryRun) {
-        // Fallback if dryRun is not supported?
-        // Or throw error because safety is paramount.
-        // For now, return a warning diff.
-        return {
-            description: `Connector ${connector.manifest.name} does not support dry-run. Execution would proceed blindly.`,
-            changes: [],
-            riskLevel: 'high'
-        };
+      // Fallback if dryRun is not supported?
+      // Or throw error because safety is paramount.
+      // For now, return a warning diff.
+      return {
+        description: `Connector ${connector.manifest.name} does not support dry-run. Execution would proceed blindly.`,
+        changes: [],
+        riskLevel: "high",
+      };
     }
 
     try {
@@ -32,7 +32,7 @@ export class IntegrationTwin {
       return {
         description: `Dry run failed: ${error.message}`,
         changes: [],
-        riskLevel: 'high'
+        riskLevel: "high",
       };
     }
   }

@@ -26,18 +26,18 @@
 
 ```typescript
 // Liveness: Is the service running?
-app.get('/health/live', (req, res) => {
-  res.status(200).json({ status: 'alive', timestamp: new Date().toISOString() });
+app.get("/health/live", (req, res) => {
+  res.status(200).json({ status: "alive", timestamp: new Date().toISOString() });
 });
 
 // Readiness: Is the service ready to accept traffic?
-app.get('/health/ready', async (req, res) => {
+app.get("/health/ready", async (req, res) => {
   try {
     await db.ping(); // Check dependencies
     await redis.ping();
-    res.status(200).json({ status: 'ready', timestamp: new Date().toISOString() });
+    res.status(200).json({ status: "ready", timestamp: new Date().toISOString() });
   } catch (error) {
-    res.status(503).json({ status: 'not ready', error: error.message });
+    res.status(503).json({ status: "not ready", error: error.message });
   }
 });
 ```
@@ -45,7 +45,7 @@ app.get('/health/ready', async (req, res) => {
 #### ✅ DO: Propagate Trace Context
 
 ```typescript
-import { trace, context } from '@opentelemetry/api';
+import { trace, context } from "@opentelemetry/api";
 
 // Automatic propagation via HTTP headers (no code needed!)
 // Headers: traceparent, tracestate, x-b3-traceid, x-correlation-id
@@ -53,16 +53,16 @@ import { trace, context } from '@opentelemetry/api';
 // Manual instrumentation for additional context
 const span = trace.getActiveSpan();
 if (span) {
-  span.setAttribute('tenant.id', tenantId);
-  span.setAttribute('user.id', userId);
-  span.setAttribute('operation.type', 'query');
+  span.setAttribute("tenant.id", tenantId);
+  span.setAttribute("user.id", userId);
+  span.setAttribute("operation.type", "query");
 }
 ```
 
 #### ✅ DO: Use Structured Logging
 
 ```typescript
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
   format: winston.format.combine(
@@ -71,14 +71,14 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   defaultMeta: {
-    service: 'graph-core',
+    service: "graph-core",
     version: process.env.APP_VERSION,
   },
   transports: [new winston.transports.Console()],
 });
 
 // Log with trace context
-logger.info('Entity fetched', {
+logger.info("Entity fetched", {
   entity_id: entityId,
   tenant_id: tenantId,
   duration_ms: duration,
@@ -91,13 +91,13 @@ logger.info('Entity fetched', {
 
 ```typescript
 // ❌ BAD
-const response = await fetch('http://10.0.1.45:8080/api/entities');
+const response = await fetch("http://10.0.1.45:8080/api/entities");
 
 // ✅ GOOD - Use Kubernetes DNS
-const response = await fetch('http://graph-core.summit.svc.cluster.local/api/v1/entities');
+const response = await fetch("http://graph-core.summit.svc.cluster.local/api/v1/entities");
 
 // ✅ BETTER - Use environment variables
-const GRAPH_CORE_URL = process.env.GRAPH_CORE_URL || 'http://graph-core.summit.svc.cluster.local';
+const GRAPH_CORE_URL = process.env.GRAPH_CORE_URL || "http://graph-core.summit.svc.cluster.local";
 const response = await fetch(`${GRAPH_CORE_URL}/api/v1/entities`);
 ```
 
@@ -114,12 +114,12 @@ async function startServer() {
   });
 
   // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    logger.info('SIGTERM received, starting graceful shutdown');
+  process.on("SIGTERM", async () => {
+    logger.info("SIGTERM received, starting graceful shutdown");
 
     // Stop accepting new requests
     server.close(() => {
-      logger.info('HTTP server closed');
+      logger.info("HTTP server closed");
     });
 
     // Close database connections
@@ -128,7 +128,7 @@ async function startServer() {
 
     // Give in-flight requests time to complete (max 30s)
     setTimeout(() => {
-      logger.error('Forcefully shutting down');
+      logger.error("Forcefully shutting down");
       process.exit(1);
     }, 30000);
   });
@@ -141,11 +141,11 @@ async function startServer() {
 
 ```typescript
 // Use idempotency keys for mutations
-app.post('/api/v1/entities', async (req, res) => {
-  const idempotencyKey = req.headers['x-idempotency-key'];
+app.post("/api/v1/entities", async (req, res) => {
+  const idempotencyKey = req.headers["x-idempotency-key"];
 
   if (!idempotencyKey) {
-    return res.status(400).json({ error: 'Idempotency key required' });
+    return res.status(400).json({ error: "Idempotency key required" });
   }
 
   // Check if operation already executed
@@ -177,6 +177,7 @@ app.post('/api/v1/entities', async (req, res) => {
 ```
 
 Examples:
+
 - `api-gateway.summit.svc.cluster.local`
 - `graph-core.summit.svc.cluster.local`
 - `nlp-service.summit.svc.cluster.local`
@@ -253,7 +254,6 @@ spec:
     host: graph-core.summit.svc.cluster.local
     subset: v2
   weight: 50
-
 # Week 4: 100% (promote to stable)
 ```
 
@@ -295,7 +295,7 @@ async function fetchEntityWithFallback(entityId: string) {
     // Primary: Fetch from graph database
     return await graphDb.fetchEntity(entityId);
   } catch (error) {
-    logger.warn('Graph DB unavailable, using cache fallback', { error });
+    logger.warn("Graph DB unavailable, using cache fallback", { error });
 
     // Fallback: Use cached data
     const cached = await cache.get(`entity:${entityId}`);
@@ -304,7 +304,7 @@ async function fetchEntityWithFallback(entityId: string) {
     }
 
     // Last resort: Return minimal data
-    return { id: entityId, status: 'unavailable' };
+    return { id: entityId, status: "unavailable" };
   }
 }
 ```
@@ -346,7 +346,7 @@ async function fetchWithRetry<T>(
       await sleep(delay + jitter);
     }
   }
-  throw new Error('Max retries exceeded');
+  throw new Error("Max retries exceeded");
 }
 ```
 
@@ -405,21 +405,21 @@ API Gateway Timeout (15s)
 #### ✅ DO: Add Custom Span Attributes
 
 ```typescript
-import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { trace, SpanStatusCode } from "@opentelemetry/api";
 
 const span = trace.getActiveSpan();
 if (span) {
   // Business context
-  span.setAttribute('tenant.id', tenantId);
-  span.setAttribute('user.id', userId);
-  span.setAttribute('entity.type', entityType);
+  span.setAttribute("tenant.id", tenantId);
+  span.setAttribute("user.id", userId);
+  span.setAttribute("entity.type", entityType);
 
   // Technical context
-  span.setAttribute('db.query.complexity', queryComplexity);
-  span.setAttribute('cache.hit', cacheHit);
+  span.setAttribute("db.query.complexity", queryComplexity);
+  span.setAttribute("cache.hit", cacheHit);
 
   // Outcome
-  span.setAttribute('result.count', results.length);
+  span.setAttribute("result.count", results.length);
 }
 ```
 
@@ -427,13 +427,13 @@ if (span) {
 
 ```typescript
 async function processEntity(entityId: string) {
-  const tracer = trace.getTracer('graph-core');
+  const tracer = trace.getTracer("graph-core");
 
   // Parent span (automatically created by framework)
 
   // Child span for database fetch
-  const fetchSpan = tracer.startSpan('db.fetch_entity');
-  fetchSpan.setAttribute('entity.id', entityId);
+  const fetchSpan = tracer.startSpan("db.fetch_entity");
+  fetchSpan.setAttribute("entity.id", entityId);
   try {
     const entity = await db.fetchEntity(entityId);
     fetchSpan.setStatus({ code: SpanStatusCode.OK });
@@ -453,34 +453,34 @@ async function processEntity(entityId: string) {
 #### ✅ DO: Expose Custom Metrics
 
 ```typescript
-import { Counter, Histogram, Gauge } from 'prom-client';
+import { Counter, Histogram, Gauge } from "prom-client";
 
 // Counter: Monotonically increasing value
 const requestCounter = new Counter({
-  name: 'summit_api_requests_total',
-  help: 'Total API requests',
-  labelNames: ['method', 'endpoint', 'status', 'tenant_id'],
+  name: "summit_api_requests_total",
+  help: "Total API requests",
+  labelNames: ["method", "endpoint", "status", "tenant_id"],
 });
 
 // Histogram: Distribution of values
 const queryDuration = new Histogram({
-  name: 'summit_query_duration_seconds',
-  help: 'Query execution duration',
-  labelNames: ['query_type', 'complexity'],
+  name: "summit_query_duration_seconds",
+  help: "Query execution duration",
+  labelNames: ["query_type", "complexity"],
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
 });
 
 // Gauge: Value that can go up and down
 const activeConnections = new Gauge({
-  name: 'summit_active_connections',
-  help: 'Number of active database connections',
-  labelNames: ['database'],
+  name: "summit_active_connections",
+  help: "Number of active database connections",
+  labelNames: ["database"],
 });
 
 // Usage
-requestCounter.inc({ method: 'POST', endpoint: '/entities', status: '200', tenant_id: 'acme' });
-queryDuration.observe({ query_type: 'cypher', complexity: 'high' }, duration);
-activeConnections.set({ database: 'neo4j' }, connectionCount);
+requestCounter.inc({ method: "POST", endpoint: "/entities", status: "200", tenant_id: "acme" });
+queryDuration.observe({ query_type: "cypher", complexity: "high" }, duration);
+activeConnections.set({ database: "neo4j" }, connectionCount);
 ```
 
 ### 3. Correlation IDs
@@ -488,15 +488,15 @@ activeConnections.set({ database: 'neo4j' }, connectionCount);
 #### ✅ DO: Generate and Propagate Correlation IDs
 
 ```typescript
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 // Middleware to add correlation ID
 app.use((req, res, next) => {
-  const correlationId = req.headers['x-correlation-id'] || uuid();
+  const correlationId = req.headers["x-correlation-id"] || uuid();
   req.correlationId = correlationId;
 
   // Add to response headers
-  res.setHeader('x-correlation-id', correlationId);
+  res.setHeader("x-correlation-id", correlationId);
 
   // Add to logger context
   req.log = logger.child({ correlation_id: correlationId });
@@ -508,8 +508,8 @@ app.use((req, res, next) => {
 async function callDownstreamService(req, endpoint) {
   return await fetch(endpoint, {
     headers: {
-      'x-correlation-id': req.correlationId,
-      'x-tenant-id': req.tenantId,
+      "x-correlation-id": req.correlationId,
+      "x-tenant-id": req.tenantId,
     },
   });
 }
@@ -530,8 +530,8 @@ async function callDownstreamService(req, endpoint) {
 // ✅ DO trust the sidecar-provided identity headers
 app.use((req, res, next) => {
   // Istio adds identity headers
-  const servicePrincipal = req.headers['x-forwarded-client-cert'];
-  const sourceService = req.headers['x-envoy-peer-metadata'];
+  const servicePrincipal = req.headers["x-forwarded-client-cert"];
+  const sourceService = req.headers["x-envoy-peer-metadata"];
 
   // Use for additional authorization logic
   if (servicePrincipal) {
@@ -551,12 +551,12 @@ app.use((req, res, next) => {
 // Layer 2: API Gateway authentication (JWT validation)
 // Layer 3: Service-level authorization (business logic)
 
-app.get('/api/v1/entities/:id', authenticate, authorize('entity:read'), async (req, res) => {
+app.get("/api/v1/entities/:id", authenticate, authorize("entity:read"), async (req, res) => {
   const entity = await entityService.findById(req.params.id);
 
   // Layer 4: Data-level authorization (tenant isolation)
   if (entity.tenantId !== req.user.tenantId) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   res.json(entity);
@@ -569,14 +569,14 @@ app.get('/api/v1/entities/:id', authenticate, authorize('entity:read'), async (r
 
 ```typescript
 // ❌ BAD
-const API_KEY = 'sk-1234567890abcdef';
+const API_KEY = "sk-1234567890abcdef";
 
 // ✅ GOOD - Use environment variables
 const API_KEY = process.env.API_KEY;
 
 // ✅ BETTER - Use Kubernetes secrets
 // Mounted as files in /etc/secrets/
-const API_KEY = fs.readFileSync('/etc/secrets/api-key', 'utf8').trim();
+const API_KEY = fs.readFileSync("/etc/secrets/api-key", "utf8").trim();
 ```
 
 ---
@@ -589,26 +589,26 @@ const API_KEY = fs.readFileSync('/etc/secrets/api-key', 'utf8').trim();
 
 ```typescript
 // ❌ BAD - Creates new connection per request
-app.get('/entities', async (req, res) => {
+app.get("/entities", async (req, res) => {
   const db = await connectToDatabase();
-  const entities = await db.query('SELECT * FROM entities');
+  const entities = await db.query("SELECT * FROM entities");
   await db.close();
   res.json(entities);
 });
 
 // ✅ GOOD - Reuse connection pool
 const pool = new Pool({
-  host: 'postgres.summit.svc.cluster.local',
-  database: 'summit',
+  host: "postgres.summit.svc.cluster.local",
+  database: "summit",
   max: 20, // Maximum connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
 
-app.get('/entities', async (req, res) => {
+app.get("/entities", async (req, res) => {
   const client = await pool.connect();
   try {
-    const result = await client.query('SELECT * FROM entities');
+    const result = await client.query("SELECT * FROM entities");
     res.json(result.rows);
   } finally {
     client.release();
@@ -621,22 +621,22 @@ app.get('/entities', async (req, res) => {
 #### ✅ DO: Cache Aggressively
 
 ```typescript
-import { createClient } from 'redis';
+import { createClient } from "redis";
 
 const redis = createClient({
-  url: 'redis://redis.summit.svc.cluster.local:6379',
+  url: "redis://redis.summit.svc.cluster.local:6379",
 });
 
 async function getEntity(entityId: string) {
   // Try cache first
   const cached = await redis.get(`entity:${entityId}`);
   if (cached) {
-    logger.debug('Cache hit', { entity_id: entityId });
+    logger.debug("Cache hit", { entity_id: entityId });
     return JSON.parse(cached);
   }
 
   // Cache miss - fetch from database
-  logger.debug('Cache miss', { entity_id: entityId });
+  logger.debug("Cache miss", { entity_id: entityId });
   const entity = await db.fetchEntity(entityId);
 
   // Cache for 5 minutes
@@ -655,8 +655,8 @@ async function getEntity(entityId: string) {
 async function getEntitiesWithDetails(entityIds: string[]) {
   const results = [];
   for (const id of entityIds) {
-    const entity = await db.query('SELECT * FROM entities WHERE id = $1', [id]);
-    const details = await db.query('SELECT * FROM details WHERE entity_id = $1', [id]);
+    const entity = await db.query("SELECT * FROM entities WHERE id = $1", [id]);
+    const details = await db.query("SELECT * FROM details WHERE entity_id = $1", [id]);
     results.push({ ...entity, details });
   }
   return results;
@@ -664,9 +664,9 @@ async function getEntitiesWithDetails(entityIds: string[]) {
 
 // ✅ GOOD - Batch queries
 async function getEntitiesWithDetails(entityIds: string[]) {
-  const entities = await db.query('SELECT * FROM entities WHERE id = ANY($1)', [entityIds]);
+  const entities = await db.query("SELECT * FROM entities WHERE id = ANY($1)", [entityIds]);
 
-  const details = await db.query('SELECT * FROM details WHERE entity_id = ANY($1)', [entityIds]);
+  const details = await db.query("SELECT * FROM details WHERE entity_id = ANY($1)", [entityIds]);
 
   // Join in application
   const detailsMap = new Map(details.map((d) => [d.entity_id, d]));
@@ -684,7 +684,7 @@ async function getEntitiesWithDetails(entityIds: string[]) {
 
 ```typescript
 // Use environment variable to detect mesh
-const inMesh = process.env.ISTIO_ENABLED === 'true';
+const inMesh = process.env.ISTIO_ENABLED === "true";
 
 if (inMesh) {
   // Mesh handles mTLS, tracing, etc.
@@ -692,7 +692,7 @@ if (inMesh) {
   // Local development - use HTTP, mock tracing
   app.use(
     cors({
-      origin: 'http://localhost:3000',
+      origin: "http://localhost:3000",
     })
   );
 }
@@ -703,14 +703,14 @@ if (inMesh) {
 #### ✅ DO: Test Service-to-Service Communication
 
 ```typescript
-import { test, expect } from '@jest/globals';
+import { test, expect } from "@jest/globals";
 
-test('API Gateway → Graph Core integration', async () => {
-  const response = await fetch('http://api-gateway.summit.svc.cluster.local/graphql', {
-    method: 'POST',
+test("API Gateway → Graph Core integration", async () => {
+  const response = await fetch("http://api-gateway.summit.svc.cluster.local/graphql", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'x-tenant-id': 'test-tenant',
+      "Content-Type": "application/json",
+      "x-tenant-id": "test-tenant",
     },
     body: JSON.stringify({
       query: '{ entity(id: "test-123") { id name } }',
@@ -719,7 +719,7 @@ test('API Gateway → Graph Core integration', async () => {
 
   expect(response.status).toBe(200);
   const data = await response.json();
-  expect(data.data.entity.id).toBe('test-123');
+  expect(data.data.entity.id).toBe("test-123");
 });
 ```
 
@@ -827,10 +827,10 @@ spec:
 
 ```typescript
 // ❌ BAD - Direct pod IP access
-const response = await fetch('http://10.0.1.45:8080/api');
+const response = await fetch("http://10.0.1.45:8080/api");
 
 // ✅ GOOD - Use Kubernetes service DNS
-const response = await fetch('http://graph-core.summit.svc.cluster.local/api');
+const response = await fetch("http://graph-core.summit.svc.cluster.local/api");
 ```
 
 ### ❌ DON'T: Ignore Health Check Failures
@@ -856,17 +856,17 @@ livenessProbe:
 
 ```typescript
 // ❌ BAD
-logger.info('User logged in', {
+logger.info("User logged in", {
   user_id: userId,
   password: password, // ❌ NEVER LOG PASSWORDS
   credit_card: creditCard, // ❌ NEVER LOG PII
 });
 
 // ✅ GOOD
-logger.info('User logged in', {
+logger.info("User logged in", {
   user_id: userId,
   ip_address: req.ip,
-  user_agent: req.headers['user-agent'],
+  user_agent: req.headers["user-agent"],
 });
 ```
 

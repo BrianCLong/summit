@@ -3,12 +3,12 @@ name: Fusion Sklearn CI
 on:
   push:
     paths:
-      - 'ai-ml-suite/fusion_sklearn/**'
-      - '.github/workflows/fusion-sklearn-ci.yml'
+      - "ai-ml-suite/fusion_sklearn/**"
+      - ".github/workflows/fusion-sklearn-ci.yml"
   pull_request:
     paths:
-      - 'ai-ml-suite/fusion_sklearn/**'
-      - '.github/workflows/fusion-sklearn-ci.yml'
+      - "ai-ml-suite/fusion_sklearn/**"
+      - ".github/workflows/fusion-sklearn-ci.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,8 +26,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install dependencies
         run: |

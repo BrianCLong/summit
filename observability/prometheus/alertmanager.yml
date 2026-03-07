@@ -1,36 +1,36 @@
 global:
   resolve_timeout: 5m
-  slack_api_url: '${SLACK_WEBHOOK_URL}'
+  slack_api_url: "${SLACK_WEBHOOK_URL}"
 
 route:
-  group_by: ['alertname', 'severity', 'slo']
+  group_by: ["alertname", "severity", "slo"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 12h
-  receiver: 'default'
+  receiver: "default"
   routes:
     # Critical alerts go to PagerDuty and Slack
     - match:
         severity: critical
-      receiver: 'critical-alerts'
+      receiver: "critical-alerts"
       continue: true
 
     # Warning alerts go to Slack only
     - match:
         severity: warning
-      receiver: 'warning-alerts'
+      receiver: "warning-alerts"
 
     # SLO-specific routing
     - match:
         slo: opa_latency
-      receiver: 'opa-slo-alerts'
+      receiver: "opa-slo-alerts"
 
 receivers:
   # Default receiver (Slack)
-  - name: 'default'
+  - name: "default"
     slack_configs:
-      - channel: '#alerts'
-        title: '{{ .GroupLabels.alertname }}'
+      - channel: "#alerts"
+        title: "{{ .GroupLabels.alertname }}"
         text: |
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
@@ -42,19 +42,19 @@ receivers:
         send_resolved: true
 
   # Critical alerts (PagerDuty + Slack)
-  - name: 'critical-alerts'
+  - name: "critical-alerts"
     pagerduty_configs:
-      - service_key: '${PAGERDUTY_SERVICE_KEY}'
-        description: '{{ .GroupLabels.alertname }}: {{ .Annotations.summary }}'
+      - service_key: "${PAGERDUTY_SERVICE_KEY}"
+        description: "{{ .GroupLabels.alertname }}: {{ .Annotations.summary }}"
         details:
           firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
-          num_firing: '{{ .Alerts.Firing | len }}'
-          num_resolved: '{{ .Alerts.Resolved | len }}'
+          num_firing: "{{ .Alerts.Firing | len }}"
+          num_resolved: "{{ .Alerts.Resolved | len }}"
           resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
     slack_configs:
-      - channel: '#critical-alerts'
-        color: 'danger'
-        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+      - channel: "#critical-alerts"
+        color: "danger"
+        title: "🚨 CRITICAL: {{ .GroupLabels.alertname }}"
         text: |
           {{ range .Alerts }}
           *Summary:* {{ .Annotations.summary }}
@@ -66,11 +66,11 @@ receivers:
         send_resolved: true
 
   # Warning alerts (Slack only)
-  - name: 'warning-alerts'
+  - name: "warning-alerts"
     slack_configs:
-      - channel: '#slo-warnings'
-        color: 'warning'
-        title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
+      - channel: "#slo-warnings"
+        color: "warning"
+        title: "⚠️ WARNING: {{ .GroupLabels.alertname }}"
         text: |
           {{ range .Alerts }}
           *Summary:* {{ .Annotations.summary }}
@@ -82,11 +82,11 @@ receivers:
         send_resolved: true
 
   # OPA SLO-specific alerts
-  - name: 'opa-slo-alerts'
+  - name: "opa-slo-alerts"
     slack_configs:
-      - channel: '#opa-performance'
-        color: 'warning'
-        title: '🔍 OPA SLO Violation: {{ .GroupLabels.alertname }}'
+      - channel: "#opa-performance"
+        color: "warning"
+        title: "🔍 OPA SLO Violation: {{ .GroupLabels.alertname }}"
         text: |
           {{ range .Alerts }}
           *Summary:* {{ .Annotations.summary }}
@@ -103,14 +103,14 @@ receivers:
 inhibit_rules:
   # Inhibit warning alerts if critical alert is firing for same SLO
   - source_match:
-      severity: 'critical'
+      severity: "critical"
     target_match:
-      severity: 'warning'
-    equal: ['slo']
+      severity: "warning"
+    equal: ["slo"]
 
   # Inhibit individual SLO alerts if multiple SLO violation alert is firing
   - source_match:
-      alertname: 'MultipleSLOViolations'
+      alertname: "MultipleSLOViolations"
     target_match_re:
-      alertname: '.*SLOViolation'
-    equal: ['instance']
+      alertname: ".*SLOViolation"
+    equal: ["instance"]

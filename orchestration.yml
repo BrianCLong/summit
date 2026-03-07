@@ -10,30 +10,25 @@ env:
   name: dev # Default to dev, can be overridden by .orchestra.env
   kill_switch: 0
 endpoints:
-  litellm: 'http://127.0.0.1:4000/v1'
-  ollama: 'http://127.0.0.1:11434'
-  neo4j: 'bolt://localhost:7687'
+  litellm: "http://127.0.0.1:4000/v1"
+  ollama: "http://127.0.0.1:11434"
+  neo4j: "bolt://localhost:7687"
 budgets:
   hosted_caps:
     openai/gpt-4o-mini: { daily: 2.00 }
     anthropic/claude-3-haiku: { daily: 1.50 }
     google/gemini-1.5-pro: { daily: 0.50 }
 routing:
-  - when: { task: 'nl2cypher' }
+  - when: { task: "nl2cypher" }
     then: { model: local/llama, max_tokens: 1500 }
-  - when: { task: 'code' }
+  - when: { task: "code" }
     then: { model: local/llama-cpu, temperature: 0.1 }
-  - when: { file: '**/*.py' }
+  - when: { file: "**/*.py" }
     then: { model: local/llama-cpu }
-  - when: { file: '**/*.cypher' }
+  - when: { file: "**/*.cypher" }
     then: { model: local/llama }
-  - when: { risk: 'high', autonomy: '3' }
-    then:
-      {
-        model: openai/gpt-4o-mini,
-        max_tokens: 3000,
-        require_confirmation: true,
-      }
+  - when: { risk: "high", autonomy: "3" }
+    then: { model: openai/gpt-4o-mini, max_tokens: 3000, require_confirmation: true }
 policies:
   cost_controls:
     daily_cap_usd: 10.0
@@ -68,10 +63,10 @@ fastlane:
   handoff_timeout_ms: 500
   signal_threshold: 0.85
   routes:
-    - pattern: 'quick_query'
+    - pattern: "quick_query"
       model: local/llama
       max_latency_ms: 200
-    - pattern: 'cache_hit'
+    - pattern: "cache_hit"
       bypass_orchestration: true
 friction_alerts:
   enabled: true
@@ -80,15 +75,15 @@ friction_alerts:
     retry_count: 3
     error_rate: 0.05
   notifications:
-    slack_webhook: '${SLACK_WEBHOOK_URL}'
-    email: 'ops@example.com'
+    slack_webhook: "${SLACK_WEBHOOK_URL}"
+    email: "ops@example.com"
   escalation:
     auto_fallback: true
-    fallback_model: 'openai/gpt-4o-mini'
+    fallback_model: "openai/gpt-4o-mini"
 triggers:
   git_push:
-    task: 'code_review'
-    log_file: 'logs/triggers.log'
+    task: "code_review"
+    log_file: "logs/triggers.log"
   generic_webhook:
-    task: 'data_ingestion'
-    log_file: 'logs/triggers.log'
+    task: "data_ingestion"
+    log_file: "logs/triggers.log"

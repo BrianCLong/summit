@@ -1,15 +1,19 @@
 # High Error Rate Runbook
 
 ## Trigger
+
 This alert is triggered when the ratio of 5xx errors to total requests exceeds 1% for 5 minutes.
 
 ## Severity
+
 **Critical** (P1)
 
 ## Impact
+
 Users are experiencing failures and may be unable to use the application.
 
 ## Diagnosis
+
 1.  **Check Logs:** Look for error logs in the `server` logs.
     ```bash
     kubectl logs -l app=server -n summit
@@ -18,6 +22,7 @@ Users are experiencing failures and may be unable to use the application.
 3.  **Check Dependencies:** Are external services (e.g., Auth0, OpenAI) down?
 
 ## Mitigation
+
 1.  **Rollback:** If a deployment recently occurred, rollback immediately.
     ```bash
     # Follow Rollback Playbook
@@ -28,4 +33,5 @@ Users are experiencing failures and may be unable to use the application.
     ```
 
 ## Escalation
+
 If unable to resolve within 15 minutes, escalate to the Platform Engineering Lead.

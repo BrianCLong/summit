@@ -15,8 +15,8 @@ pagerduty:
       service_id: ${PAGERDUTY_SERVICE_ID_API}
       escalation_policy: platform-team-escalation
       urgency: high
-      auto_resolve_timeout: 14400  # 4 hours
-      acknowledgement_timeout: 1800  # 30 minutes
+      auto_resolve_timeout: 14400 # 4 hours
+      acknowledgement_timeout: 1800 # 30 minutes
 
     - name: IntelGraph Database
       service_id: ${PAGERDUTY_SERVICE_ID_DB}
@@ -76,7 +76,7 @@ pagerduty:
           start: "2024-01-01T09:00:00-05:00"
           rotation_virtual_start: "2024-01-01T09:00:00-05:00"
           rotation_type: weekly
-          rotation_turn_length: 1  # 1 week per person
+          rotation_turn_length: 1 # 1 week per person
 
           # Rotation order
           users:
@@ -92,9 +92,9 @@ pagerduty:
           # Restrictions (only during business hours for non-critical)
           restrictions:
             - type: daily_restriction
-              duration_seconds: 28800  # 8 hours
+              duration_seconds: 28800 # 8 hours
               start_time_of_day: "09:00:00"
-              start_day_of_week: 1  # Monday
+              start_day_of_week: 1 # Monday
 
     - name: Secondary On-Call
       id: ${PAGERDUTY_SCHEDULE_SECONDARY}
@@ -144,7 +144,7 @@ pagerduty:
     auto_resolve: true
 
     # Time to acknowledge before escalation
-    acknowledgement_timeout: 900  # 15 minutes
+    acknowledgement_timeout: 900 # 15 minutes
 
     # Incident priority mapping
     priority_mapping:
@@ -227,25 +227,25 @@ opsgenie:
       id: ${OPSGENIE_ESCALATION_CRITICAL}
       rules:
         - condition: if-not-acked
-          delay: 0  # Immediately
+          delay: 0 # Immediately
           notify:
             - type: schedule
               name: Platform Primary On-Call
 
         - condition: if-not-acked
-          delay: 15  # 15 minutes
+          delay: 15 # 15 minutes
           notify:
             - type: schedule
               name: Platform Secondary On-Call
 
         - condition: if-not-acked
-          delay: 30  # 30 minutes
+          delay: 30 # 30 minutes
           notify:
             - type: user
               username: engineering-manager@intelgraph.com
 
         - condition: if-not-acked
-          delay: 60  # 60 minutes
+          delay: 60 # 60 minutes
           notify:
             - type: user
               username: vp-engineering@intelgraph.com
@@ -312,8 +312,8 @@ opsgenie:
       # Repeat notifications if not acknowledged
       repeat:
         enabled: true
-        interval: 5  # Every 5 minutes
-        count: 3  # Up to 3 times
+        interval: 5 # Every 5 minutes
+        count: 3 # Up to 3 times
 
     # Warning alerts
     warning:
@@ -403,10 +403,10 @@ oncall_guidelines:
 
   # Response Time SLAs
   response_sla:
-    P0: 5 minutes   # Critical - immediate response
-    P1: 15 minutes  # High - quick response
-    P2: 1 hour      # Medium - respond during business hours
-    P3: 1 day       # Low - next business day
+    P0: 5 minutes # Critical - immediate response
+    P1: 15 minutes # High - quick response
+    P2: 1 hour # Medium - respond during business hours
+    P3: 1 day # Low - next business day
 
   # Escalation Criteria
   escalation_when:
@@ -421,10 +421,10 @@ oncall_guidelines:
     - Primary on-call is default IC
     - IC can delegate but remains accountable
     - IC responsibilities:
-      - Create incident channel
-      - Coordinate response
-      - Communicate status
-      - Conduct post-mortem
+        - Create incident channel
+        - Coordinate response
+        - Communicate status
+        - Conduct post-mortem
 
 # ====================
 # Slack Integration

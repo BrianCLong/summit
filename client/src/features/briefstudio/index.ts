@@ -1,1 +1,1 @@
-export { default as BriefStudio } from './BriefStudio';
+export { default as BriefStudio } from "./BriefStudio";

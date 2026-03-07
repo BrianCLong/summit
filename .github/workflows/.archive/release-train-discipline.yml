@@ -2,7 +2,7 @@ name: Release Train Discipline
 
 on:
   schedule:
-    - cron: '0 13 * * MON'
+    - cron: "0 13 * * MON"
   workflow_dispatch:
 
 permissions:

@@ -1,6 +1,6 @@
-import { normalizePoint } from '../utils/projections.js';
-import { haversineDistance } from '../utils/distance.js';
-import type { BoundingBox, GeoPoint } from '../types/geospatial.js';
+import { normalizePoint } from "../utils/projections.js";
+import { haversineDistance } from "../utils/distance.js";
+import type { BoundingBox, GeoPoint } from "../types/geospatial.js";
 
 export interface GazetteerEntry {
   id: string;
@@ -83,7 +83,7 @@ export class GeocodingEngine {
   constructor(private readonly provider: GeocoderProvider) {}
 
   async geocode(query: string, bbox?: BoundingBox): Promise<GeocodingResponse> {
-    const cacheKey = `${query}-${bbox ? JSON.stringify(bbox) : 'global'}`;
+    const cacheKey = `${query}-${bbox ? JSON.stringify(bbox) : "global"}`;
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
     }

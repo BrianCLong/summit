@@ -58,5 +58,5 @@ groups:
           service: maestro
         annotations:
           summary: SLO burn >4x on Maestro
-          description: '5xx over total >4% for 10m (approx 4x burn)'
+          description: "5xx over total >4% for 10m (approx 4x burn)"
           runbook_url: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md

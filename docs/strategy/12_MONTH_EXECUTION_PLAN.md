@@ -11,7 +11,7 @@ You have the technical foundation (verification API + datasets). Now you need:
 
 **By Month 12**: $30-50M ARR across 7 businesses, 35-person team, unified platform ready for Series A or strategic acquisition.
 
-***
+---
 
 ## PART 1: The Unified Technical Architecture
 
@@ -95,7 +95,7 @@ Your existing `summit` repository likely contains:
 - Product-specific customizations via feature flags (FactLaw gets deepfake detection; FactFlow gets live transcription)
 - Single truth for accuracy metrics across all products
 
-***
+---
 
 ## PART 2: Hiring Roadmap (Months 0-12)
 
@@ -210,7 +210,7 @@ Your existing `summit` repository likely contains:
 - **Focus**: FactAPI Pro (platform partnerships), FactCert (validator recruitment)
 - **Profile**: Ex-BD from Stripe, Twilio, or similar API-first company
 
-***
+---
 
 ## PART 3: Product Shipping Roadmap (Months 0-12)
 
@@ -308,7 +308,7 @@ Your existing `summit` repository likely contains:
 - **Goal**: Hit $30-50M ARR run rate, 25-35 person team
 - **Focus**: Sales execution (AEs closing deals), customer success (prevent churn), engineering (ship features fast)
 
-***
+---
 
 ## PART 4: THE SEVENTH BUSINESS — **FactGov: Government Verification Marketplace**
 
@@ -385,39 +385,39 @@ Side 3: FactCert Validators (Trust Layer)
 
 **Month 10-12**: Scale via partnerships (GovTech accelerators, CivStart Ventures model)
 
-***
+---
 
 ## PART 5: Financial Summary (Month 12)
 
-| Business | Revenue (Month 12 MRR) | Customers | Team |
-| :--- | :--- | :--- | :--- |
-| **FactFlow** (Newsroom) | $125K | 25 | 3 |
-| **FactLaw** (Legal) | $200K | 20 | 3 |
-| **FactMarkets** (Financial) | $1.5M | 10 | 5 |
-| **FactAPI Pro** (Marketplace) | $100K | 2K devs | 2 |
-| **FactDatasets** (Licensing) | $100K | 3 | 2 |
-| **FactCert** (Certification) | $150K | 500 validators | 3 |
-| **FactGov** (Government) | $50K | 2 agencies | 2 |
-| **TOTAL** | **$2.225M MRR** | — | **20** |
+| Business                      | Revenue (Month 12 MRR) | Customers      | Team   |
+| :---------------------------- | :--------------------- | :------------- | :----- |
+| **FactFlow** (Newsroom)       | $125K                  | 25             | 3      |
+| **FactLaw** (Legal)           | $200K                  | 20             | 3      |
+| **FactMarkets** (Financial)   | $1.5M                  | 10             | 5      |
+| **FactAPI Pro** (Marketplace) | $100K                  | 2K devs        | 2      |
+| **FactDatasets** (Licensing)  | $100K                  | 3              | 2      |
+| **FactCert** (Certification)  | $150K                  | 500 validators | 3      |
+| **FactGov** (Government)      | $50K                   | 2 agencies     | 2      |
+| **TOTAL**                     | **$2.225M MRR**        | —              | **20** |
 
 **Annual Run Rate**: $26.7M ARR
 **Gross Margin**: 85%+
 **Burn Rate**: $500K/month (salaries + infra)
 **Runway**: 18+ months (assuming $10M seed round)
 
-***
+---
 
 ## PART 6: Key Risks & Mitigations
 
-| Risk | Likelihood | Mitigation |
-| :--- | :--- | :--- |
-| **Hiring too fast** (>35 people by Month 12) | Medium | Cap at 25-30; use contractors for non-core |
-| **Product sprawl** (shipping too many half-baked products) | High | Ship 1 product/month; require 5 customers before "launch" |
-| **Platform consolidation** (Meta/Google build native verification) | Medium | FactCert moat (own validators); B2B focus (enterprises need third-party credibility) |
-| **Regulatory changes** (DSA weakens; no fact-checking mandate) | Low | Diversify across industries (newsroom, legal, financial, gov) |
-| **Team burnout** (7 products = insane workload) | High | Hire aggressively Months 6-9; founders delegate ruthlessly |
+| Risk                                                               | Likelihood | Mitigation                                                                           |
+| :----------------------------------------------------------------- | :--------- | :----------------------------------------------------------------------------------- |
+| **Hiring too fast** (>35 people by Month 12)                       | Medium     | Cap at 25-30; use contractors for non-core                                           |
+| **Product sprawl** (shipping too many half-baked products)         | High       | Ship 1 product/month; require 5 customers before "launch"                            |
+| **Platform consolidation** (Meta/Google build native verification) | Medium     | FactCert moat (own validators); B2B focus (enterprises need third-party credibility) |
+| **Regulatory changes** (DSA weakens; no fact-checking mandate)     | Low        | Diversify across industries (newsroom, legal, financial, gov)                        |
+| **Team burnout** (7 products = insane workload)                    | High       | Hire aggressively Months 6-9; founders delegate ruthlessly                           |
 
-***
+---
 
 ## Conclusion
 

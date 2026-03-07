@@ -3,10 +3,10 @@ name: Required-Check Drift Sentinel
 on:
   pull_request:
     paths:
-      - '.github/workflows/**'
-      - 'scripts/ci/check_required_contexts_drift.mjs'
+      - ".github/workflows/**"
+      - "scripts/ci/check_required_contexts_drift.mjs"
   schedule:
-    - cron: '0 0 * * *' # Daily at midnight
+    - cron: "0 0 * * *" # Daily at midnight
   workflow_dispatch:
 
 permissions:

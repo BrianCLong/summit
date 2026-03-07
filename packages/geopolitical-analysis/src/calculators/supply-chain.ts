@@ -3,9 +3,9 @@
  * @module @intelgraph/geopolitical-analysis/calculators/supply-chain
  */
 
-import { SupplyChainIndicator } from '../types/index.js';
-import { BaseCalculator, IndicatorInput } from './base.js';
-import { weightedAverage } from '../utils/scoring.js';
+import { SupplyChainIndicator } from "../types/index.js";
+import { BaseCalculator, IndicatorInput } from "./base.js";
+import { weightedAverage } from "../utils/scoring.js";
 
 /**
  * Input for supply chain vulnerability calculation
@@ -41,15 +41,15 @@ export class SupplyChainCalculator extends BaseCalculator<SupplyChainIndicator> 
 
     // Overall supply chain vulnerability
     const overallVulnerability = weightedAverage([
-      { value: concentrationRisk, weight: 0.30 },
+      { value: concentrationRisk, weight: 0.3 },
       { value: alternativesRisk, weight: 0.25 },
-      { value: transportRisk, weight: 0.20 },
-      { value: geopoliticalRisk, weight: 0.20 },
+      { value: transportRisk, weight: 0.2 },
+      { value: geopoliticalRisk, weight: 0.2 },
       { value: reserveRisk, weight: 0.05 },
     ]);
 
     const base = this.createBase(input, overallVulnerability, {
-      source: 'supply-chain-calculator',
+      source: "supply-chain-calculator",
       dataRecencyDays: 60,
       sourceReliability: 75,
       resourceType: input.resourceType,
@@ -58,7 +58,7 @@ export class SupplyChainCalculator extends BaseCalculator<SupplyChainIndicator> 
 
     return {
       ...base,
-      type: 'SUPPLY_CHAIN',
+      type: "SUPPLY_CHAIN",
       resourceType: input.resourceType,
       supplyConcentration: input.supplyConcentration,
       alternativeSourcesAvailable: input.alternativeSourcesAvailable,
@@ -83,7 +83,7 @@ export class SupplyChainCalculator extends BaseCalculator<SupplyChainIndicator> 
     } else if (stockpileDays < 180) {
       return 25 - ((stockpileDays - 90) / 90) * 20;
     } else {
-      return Math.max(0, 5 - (stockpileDays - 180) / 365 * 5);
+      return Math.max(0, 5 - ((stockpileDays - 180) / 365) * 5);
     }
   }
 
@@ -92,14 +92,14 @@ export class SupplyChainCalculator extends BaseCalculator<SupplyChainIndicator> 
    */
   private validateSupplyChainInput(input: SupplyChainInput): void {
     if (!input.resourceType || input.resourceType.trim().length === 0) {
-      throw new Error('resourceType is required');
+      throw new Error("resourceType is required");
     }
 
     const numericFields = [
-      'supplyConcentration',
-      'alternativeSourcesAvailable',
-      'transportationRisk',
-      'geopoliticalDependency',
+      "supplyConcentration",
+      "alternativeSourcesAvailable",
+      "transportationRisk",
+      "geopoliticalDependency",
     ];
 
     for (const field of numericFields) {
@@ -110,20 +110,18 @@ export class SupplyChainCalculator extends BaseCalculator<SupplyChainIndicator> 
     }
 
     if (input.stockpileDays < 0 || input.stockpileDays > 3650) {
-      throw new Error(
-        `stockpileDays must be between 0 and 3650, got ${input.stockpileDays}`
-      );
+      throw new Error(`stockpileDays must be between 0 and 3650, got ${input.stockpileDays}`);
     }
   }
 
   protected getRequiredFields(): string[] {
     return [
-      'resourceType',
-      'supplyConcentration',
-      'alternativeSourcesAvailable',
-      'transportationRisk',
-      'geopoliticalDependency',
-      'stockpileDays',
+      "resourceType",
+      "supplyConcentration",
+      "alternativeSourcesAvailable",
+      "transportationRisk",
+      "geopoliticalDependency",
+      "stockpileDays",
     ];
   }
 }

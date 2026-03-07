@@ -128,7 +128,7 @@ configuration:
     config: { region: us-east-1 }
 schedules:
   nightly:
-    schedule: '0 3 * * *'
+    schedule: "0 3 * * *"
     template:
       ttl: 720h
       includedNamespaces:
@@ -208,7 +208,7 @@ prometheus:
   kubeStateMetricsEnabled: true
 ingress:
   enabled: true
-  hosts: ['kubecost.stage.example.com']
+  hosts: ["kubecost.stage.example.com"]
 ```
 
 ```yaml
@@ -219,7 +219,7 @@ metadata: { name: general }
 spec:
   template:
     requirements:
-      - key: 'kubernetes.io/arch'
+      - key: "kubernetes.io/arch"
         operator: In
         values: [amd64, arm64]
     taints: []
@@ -259,7 +259,7 @@ time.now_ns() - time.parse_rfc3339_ns(input.resource.created_at) > 24*60*60*1e9
 name: DB Migration Gate
 on:
   pull_request:
-    paths: ['db/migrations/**']
+    paths: ["db/migrations/**"]
 jobs:
   plan:
     runs-on: ubuntu-latest

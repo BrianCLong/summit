@@ -8,4 +8,4 @@ spec:
   tasks:
     - id: notify
       uses: tasks/notify.slack@0.1.0
-      with: { text: 'Rolling back ${params.service} to ${params.to}' }
+      with: { text: "Rolling back ${params.service} to ${params.to}" }

@@ -6,29 +6,31 @@
 ## Who Belongs Here
 
 ### Archetype 2: Simulation & Scenario Engines
-* Outcome simulations
-* Counterfactual projections
-* Risk deltas
-* **Constraint:** Simulations **cannot recommend actions**, only scenarios.
+
+- Outcome simulations
+- Counterfactual projections
+- Risk deltas
+- **Constraint:** Simulations **cannot recommend actions**, only scenarios.
 
 ### Archetype 4: ML / Analytics Recommendation Engines
-* ML models
-* Playbook engines
-* Optimization tools
-* Scenario planners
+
+- ML models
+- Playbook engines
+- Optimization tools
+- Scenario planners
 
 ## What They Can Do
 
-* Propose actions
-* Rank alternatives
-* Simulate outcomes
+- Propose actions
+- Rank alternatives
+- Simulate outcomes
 
 ## What They Cannot Do
 
-* Execute actions
-* Claim correctness
-* Suppress uncertainty
-* Bypass policy checks
+- Execute actions
+- Claim correctness
+- Suppress uncertainty
+- Bypass policy checks
 
 ## Required Interface: Recommendation Contract
 

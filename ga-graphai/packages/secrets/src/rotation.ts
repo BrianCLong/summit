@@ -1,16 +1,16 @@
-import type { SecretRef, SecretRotationPolicy } from 'common-types';
-import type { RotationStatus } from './types.js';
+import type { SecretRef, SecretRotationPolicy } from "common-types";
+import type { RotationStatus } from "./types.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function computeRotationStatus(
   policy: SecretRotationPolicy | undefined,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): RotationStatus {
   if (!policy) {
     return {
       needsRotation: true,
-      reason: 'rotation policy missing',
+      reason: "rotation policy missing",
     };
   }
 
@@ -22,19 +22,13 @@ export function computeRotationStatus(
     return {
       intervalDays: policy.intervalDays,
       needsRotation: true,
-      reason: 'last rotation unknown',
+      reason: "last rotation unknown",
     };
   }
 
-  const nextRotationDue = new Date(
-    lastRotated.getTime() + policy.intervalDays * DAY_MS,
-  );
-  const absoluteExpiry = new Date(
-    lastRotated.getTime() + expiresAfterDays * DAY_MS,
-  );
-  const graceCutoff = new Date(
-    nextRotationDue.getTime() + graceDays * DAY_MS,
-  );
+  const nextRotationDue = new Date(lastRotated.getTime() + policy.intervalDays * DAY_MS);
+  const absoluteExpiry = new Date(lastRotated.getTime() + expiresAfterDays * DAY_MS);
+  const graceCutoff = new Date(nextRotationDue.getTime() + graceDays * DAY_MS);
 
   const needsRotation = now > graceCutoff || now > absoluteExpiry;
 
@@ -43,13 +37,10 @@ export function computeRotationStatus(
     lastRotated: lastRotated.toISOString(),
     nextRotationDue: nextRotationDue.toISOString(),
     needsRotation,
-    reason: needsRotation ? 'rotation interval exceeded' : undefined,
+    reason: needsRotation ? "rotation interval exceeded" : undefined,
   };
 }
 
-export function rotationStatusForRef(
-  ref: SecretRef,
-  now: Date = new Date(),
-): RotationStatus {
+export function rotationStatusForRef(ref: SecretRef, now: Date = new Date()): RotationStatus {
   return computeRotationStatus(ref.rotation, now);
 }

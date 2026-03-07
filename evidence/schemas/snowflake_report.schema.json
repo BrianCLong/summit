@@ -4,17 +4,17 @@
   "type": "object",
   "required": ["evidence_id", "summary", "checks"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "summary": {"type": "string"},
+    "evidence_id": { "type": "string" },
+    "summary": { "type": "string" },
     "checks": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["name", "ok"],
         "properties": {
-          "name": {"type": "string"},
-          "ok": {"type": "boolean"},
-          "details": {"type": "string"}
+          "name": { "type": "string" },
+          "ok": { "type": "boolean" },
+          "details": { "type": "string" }
         }
       }
     }

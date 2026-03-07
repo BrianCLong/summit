@@ -31,33 +31,37 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
 )
 RadioGroup.displayName = 'RadioGroup'
 
-interface RadioGroupItemProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface RadioGroupItemProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type'
+> {
   value: string
 }
 
-export const RadioGroupItem = React.forwardRef<HTMLInputElement, RadioGroupItemProps>(
-  ({ className, value, id, ...props }, ref) => {
-    const context = React.useContext(RadioGroupContext)
-    const isChecked = context.value === value
+export const RadioGroupItem = React.forwardRef<
+  HTMLInputElement,
+  RadioGroupItemProps
+>(({ className, value, id, ...props }, ref) => {
+  const context = React.useContext(RadioGroupContext)
+  const isChecked = context.value === value
 
-    return (
-      <input
-        ref={ref}
-        type="radio"
-        id={id}
-        name={context.name}
-        value={value}
-        checked={isChecked}
-        onChange={() => context.onValueChange?.(value)}
-        className={cn(
-          'h-4 w-4 rounded-full border border-primary text-primary ring-offset-background',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          'disabled:cursor-not-allowed disabled:opacity-50',
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
+  return (
+    <input
+      ref={ref}
+      type="radio"
+      id={id}
+      name={context.name}
+      value={value}
+      checked={isChecked}
+      onChange={() => context.onValueChange?.(value)}
+      className={cn(
+        'h-4 w-4 rounded-full border border-primary text-primary ring-offset-background',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        className
+      )}
+      {...props}
+    />
+  )
+})
 RadioGroupItem.displayName = 'RadioGroupItem'

@@ -3,12 +3,12 @@
  * Panel for managing and displaying graph traversal paths
  */
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { TraversalStep, NODE_TYPE_COLORS } from './types';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { TraversalStep, NODE_TYPE_COLORS } from "./types";
 
 interface TraversalPanelProps {
   path: TraversalStep[];
@@ -52,7 +52,7 @@ export function TraversalPanel({ path, onClear, onStepClick }: TraversalPanelPro
         <div>
           <h3 className="font-semibold">Traversal Path</h3>
           <p className="text-sm text-muted-foreground">
-            {path.length} {path.length === 1 ? 'step' : 'steps'}
+            {path.length} {path.length === 1 ? "step" : "steps"}
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={onClear}>
@@ -66,15 +66,13 @@ export function TraversalPanel({ path, onClear, onStepClick }: TraversalPanelPro
           {path.map((step, index) => (
             <div key={`${step.nodeId}-${index}`} className="relative">
               {/* Connector line */}
-              {index > 0 && (
-                <div className="absolute left-5 -top-4 w-0.5 h-4 bg-border" />
-              )}
+              {index > 0 && <div className="absolute left-5 -top-4 w-0.5 h-4 bg-border" />}
 
               {/* Step card */}
               <div
                 className={cn(
-                  'flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
-                  'hover:bg-muted/50',
+                  "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                  "hover:bg-muted/50"
                 )}
                 onClick={() => onStepClick(step)}
               >
@@ -82,8 +80,7 @@ export function TraversalPanel({ path, onClear, onStepClick }: TraversalPanelPro
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
                   style={{
-                    backgroundColor:
-                      NODE_TYPE_COLORS[step.nodeType] ?? NODE_TYPE_COLORS.DEFAULT,
+                    backgroundColor: NODE_TYPE_COLORS[step.nodeType] ?? NODE_TYPE_COLORS.DEFAULT,
                   }}
                 >
                   {index + 1}
@@ -113,7 +110,7 @@ export function TraversalPanel({ path, onClear, onStepClick }: TraversalPanelPro
 
                 {/* Direction indicator */}
                 <div className="shrink-0">
-                  {step.direction === 'incoming' && (
+                  {step.direction === "incoming" && (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -130,7 +127,7 @@ export function TraversalPanel({ path, onClear, onStepClick }: TraversalPanelPro
                       <polyline points="12 19 5 12 12 5" />
                     </svg>
                   )}
-                  {step.direction === 'outgoing' && (
+                  {step.direction === "outgoing" && (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -147,7 +144,7 @@ export function TraversalPanel({ path, onClear, onStepClick }: TraversalPanelPro
                       <polyline points="12 5 19 12 12 19" />
                     </svg>
                   )}
-                  {step.direction === 'both' && (
+                  {step.direction === "both" && (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"

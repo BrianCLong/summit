@@ -61,9 +61,7 @@
       "type": "stat",
       "title": "Mean Time to Recovery (DORA)",
       "gridPos": { "w": 6, "h": 4, "x": 6, "y": 20 },
-      "targets": [
-        { "expr": "avg(dora_mttr_seconds)", "legendFormat": "MTTR (s)" }
-      ]
+      "targets": [{ "expr": "avg(dora_mttr_seconds)", "legendFormat": "MTTR (s)" }]
     }
   ]
 }

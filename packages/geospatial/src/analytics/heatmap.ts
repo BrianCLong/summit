@@ -1,5 +1,11 @@
-import type { BoundingBox, GeoPoint, IntelFeature, IntelFeatureCollection, PolygonGeometry } from '../types/geospatial.js';
-import { boundingBoxFromPoints, pointInGeometry, rectangularGrid } from '../utils/geometry.js';
+import type {
+  BoundingBox,
+  GeoPoint,
+  IntelFeature,
+  IntelFeatureCollection,
+  PolygonGeometry,
+} from "../types/geospatial.js";
+import { boundingBoxFromPoints, pointInGeometry, rectangularGrid } from "../utils/geometry.js";
 
 export interface HeatmapOptions {
   cellSizeKm?: number;
@@ -19,14 +25,14 @@ export const generateHeatmap = (
       id: `cell-${idx}`,
       count,
       intensity: count / Math.max(points.length, 1),
-    } as IntelFeature['properties'];
+    } as IntelFeature["properties"];
 
     return {
-      type: 'Feature',
+      type: "Feature",
       geometry: cell,
       properties,
     } satisfies IntelFeature;
   });
 
-  return { type: 'FeatureCollection', features, bbox: referenceBbox };
+  return { type: "FeatureCollection", features, bbox: referenceBbox };
 };

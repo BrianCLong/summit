@@ -1,1 +1,1 @@
-export { default } from '../../../client/components/CopilotPanel';
+export { default } from "../../../client/components/CopilotPanel";

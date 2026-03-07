@@ -136,7 +136,7 @@ export type Command = {
   id: string;
   title: string;
   icon?: ReactNode;
-  scope: 'global' | 'graph' | 'timeline' | 'map' | 'runbook' | 'report';
+  scope: "global" | "graph" | "timeline" | "map" | "runbook" | "report";
   guard?: () => { allowed: boolean; reason?: string };
   run: (ctx: Ctx) => Promise<void>;
 };

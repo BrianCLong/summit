@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { scaleLinear } from '@visx/scale';
-import { Brush } from '@visx/brush';
-import { LinePath } from '@visx/shape';
-import { Group } from '@visx/group';
-import { localPoint } from '@visx/event';
+import { useMemo } from "react";
+import { scaleLinear } from "@visx/scale";
+import { Brush } from "@visx/brush";
+import { LinePath } from "@visx/shape";
+import { Group } from "@visx/group";
+import { localPoint } from "@visx/event";
 
 export type TimeSeriesPoint = {
   ts: number;
@@ -18,13 +18,19 @@ export type TimelineControlProps = {
   onWindowChange: (window: [number, number]) => void;
 };
 
-export function TimelineControl({ width, height, series, window, onWindowChange }: TimelineControlProps) {
+export function TimelineControl({
+  width,
+  height,
+  series,
+  window,
+  onWindowChange,
+}: TimelineControlProps) {
   const padding = 16;
   const xScale = useMemo(
     () =>
       scaleLinear<number>({
         domain: [Math.min(...series.map((d) => d.ts)), Math.max(...series.map((d) => d.ts))],
-        range: [padding, width - padding]
+        range: [padding, width - padding],
       }),
     [series, width]
   );
@@ -33,7 +39,7 @@ export function TimelineControl({ width, height, series, window, onWindowChange 
     () =>
       scaleLinear<number>({
         domain: [0, Math.max(...series.map((d) => d.value || 0)) || 1],
-        range: [height - padding, padding]
+        range: [height - padding, padding],
       }),
     [series, height]
   );
@@ -47,7 +53,7 @@ export function TimelineControl({ width, height, series, window, onWindowChange 
   const initialBrushPosition = useMemo(() => {
     return {
       start: { x: xScale(window[0]), y: padding },
-      end: { x: xScale(window[1]), y: height - padding }
+      end: { x: xScale(window[1]), y: height - padding },
     };
   }, [window, xScale, height]);
 
@@ -66,8 +72,8 @@ export function TimelineControl({ width, height, series, window, onWindowChange 
           width={width - padding * 2}
           height={height - padding * 2}
           margin={{ top: padding, left: padding, bottom: padding, right: padding }}
-          resizeTriggerAreas={['left', 'right']}
-          selectedBoxStyle={{ fill: '#2563eb33', stroke: '#2563eb' }}
+          resizeTriggerAreas={["left", "right"]}
+          selectedBoxStyle={{ fill: "#2563eb33", stroke: "#2563eb" }}
           handleSize={8}
           initialBrushPosition={initialBrushPosition}
           onChange={handleBrushChange}
@@ -80,8 +86,8 @@ export function TimelineControl({ width, height, series, window, onWindowChange 
                   x0: Math.min(point.x, prev.extent.x0),
                   x1: Math.max(point.x, prev.extent.x1),
                   y0: prev.extent.y0,
-                  y1: prev.extent.y1
-                }
+                  y1: prev.extent.y1,
+                },
               }));
             }
           }}

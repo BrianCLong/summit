@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
   PREVIEW_ENVIRONMENT: feature-preview
 
 jobs:

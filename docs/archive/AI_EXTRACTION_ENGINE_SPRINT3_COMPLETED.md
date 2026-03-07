@@ -187,64 +187,64 @@ node scripts/test-ai-extraction.js
 ### Text Extraction from Images
 
 ```typescript
-import { OCREngine } from './src/ai/engines/OCREngine.js';
+import { OCREngine } from "./src/ai/engines/OCREngine.js";
 
 const ocrEngine = new OCREngine();
-const result = await ocrEngine.extractText('/path/to/image.jpg', {
-  language: 'eng',
+const result = await ocrEngine.extractText("/path/to/image.jpg", {
+  language: "eng",
   enhanceImage: true,
   confidenceThreshold: 0.6,
 });
 
-console.log('Extracted text:', result.text);
+console.log("Extracted text:", result.text);
 ```
 
 ### Object Detection
 
 ```typescript
-import { ObjectDetectionEngine } from './src/ai/engines/ObjectDetectionEngine.js';
+import { ObjectDetectionEngine } from "./src/ai/engines/ObjectDetectionEngine.js";
 
 const detector = new ObjectDetectionEngine();
-const results = await detector.detectObjects('/path/to/image.jpg', {
-  model: 'yolov8n.pt',
+const results = await detector.detectObjects("/path/to/image.jpg", {
+  model: "yolov8n.pt",
   confidenceThreshold: 0.5,
 });
 
-console.log('Detected objects:', results.detections);
+console.log("Detected objects:", results.detections);
 ```
 
 ### Speech Transcription
 
 ```typescript
-import { SpeechToTextEngine } from './src/ai/engines/SpeechToTextEngine.js';
+import { SpeechToTextEngine } from "./src/ai/engines/SpeechToTextEngine.js";
 
 const speechEngine = new SpeechToTextEngine();
-const transcript = await speechEngine.transcribeAudio('/path/to/audio.wav', {
-  model: 'whisper-base',
-  language: 'auto',
+const transcript = await speechEngine.transcribeAudio("/path/to/audio.wav", {
+  model: "whisper-base",
+  language: "auto",
   enableWordTimestamps: true,
 });
 
-console.log('Transcript:', transcript.text);
+console.log("Transcript:", transcript.text);
 ```
 
 ### Multimodal Embeddings
 
 ```typescript
-import { EmbeddingService } from './src/ai/services/EmbeddingService.js';
+import { EmbeddingService } from "./src/ai/services/EmbeddingService.js";
 
 const embeddingService = new EmbeddingService(config, db);
 const embedding = await embeddingService.generateMultimodalEmbedding(
   {
-    text: 'Intelligence analysis document',
-    imagePath: '/path/to/image.jpg',
-    audioPath: '/path/to/audio.wav',
+    text: "Intelligence analysis document",
+    imagePath: "/path/to/image.jpg",
+    audioPath: "/path/to/audio.wav",
   },
   {
     text: 0.4,
     image: 0.4,
     audio: 0.2,
-  },
+  }
 );
 ```
 
@@ -253,33 +253,33 @@ const embedding = await embeddingService.generateMultimodalEmbedding(
 The system now supports sophisticated extraction workflows:
 
 ```typescript
-import { ExtractionJobService } from './src/services/ExtractionJobService.js';
+import { ExtractionJobService } from "./src/services/ExtractionJobService.js";
 
 const jobService = new ExtractionJobService(db, redisConfig);
 
 // Start multimodal extraction job
 const job = await jobService.startExtractionJob(
   {
-    investigationId: 'inv-123',
-    mediaSourceId: 'media-456',
+    investigationId: "inv-123",
+    mediaSourceId: "media-456",
     extractionMethods: [
-      'ocr',
-      'object_detection',
-      'face_detection',
-      'speech_to_text',
-      'text_analysis',
-      'embedding_generation',
+      "ocr",
+      "object_detection",
+      "face_detection",
+      "speech_to_text",
+      "text_analysis",
+      "embedding_generation",
     ],
     options: {
-      language: 'eng',
+      language: "eng",
       enhanceProcessing: true,
       enableRealTimeUpdates: true,
     },
   },
-  'user-123',
+  "user-123"
 );
 
-console.log('Job started:', job.id);
+console.log("Job started:", job.id);
 ```
 
 ## 📊 Performance & Monitoring

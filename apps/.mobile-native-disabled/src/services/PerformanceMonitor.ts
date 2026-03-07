@@ -29,7 +29,9 @@ class PerformanceMonitor {
    * Setup native performance observer for automatic tracking
    */
   private setupNativePerformanceObserver() {
-    if (!this.isEnabled) {return;}
+    if (!this.isEnabled) {
+      return;
+    }
 
     // Track app startup metrics
     this.trackAppStartup();
@@ -106,7 +108,8 @@ class PerformanceMonitor {
       const expected = 1000; // 1 second
       const drift = delta - expected;
 
-      if (drift > 100) { // More than 100ms drift indicates JS thread blocking
+      if (drift > 100) {
+        // More than 100ms drift indicates JS thread blocking
         this.recordMetric({
           name: 'js_thread_blocked',
           value: drift,
@@ -129,7 +132,9 @@ class PerformanceMonitor {
    * Mark the start of a performance measurement
    */
   mark(name: string): void {
-    if (!this.isEnabled) {return;}
+    if (!this.isEnabled) {
+      return;
+    }
 
     this.marks.set(name, {
       name,
@@ -142,8 +147,14 @@ class PerformanceMonitor {
   /**
    * Measure the time between a mark and now
    */
-  measure(name: string, category: PerformanceMetric['category'] = 'custom', metadata?: Record<string, any>): number {
-    if (!this.isEnabled) {return 0;}
+  measure(
+    name: string,
+    category: PerformanceMetric['category'] = 'custom',
+    metadata?: Record<string, any>,
+  ): number {
+    if (!this.isEnabled) {
+      return 0;
+    }
 
     const mark = this.marks.get(name);
     if (!mark) {
@@ -172,7 +183,9 @@ class PerformanceMonitor {
    * Record a custom metric
    */
   recordMetric(metric: PerformanceMetric): void {
-    if (!this.isEnabled) {return;}
+    if (!this.isEnabled) {
+      return;
+    }
 
     this.metrics.push({
       ...metric,
@@ -299,7 +312,9 @@ class PerformanceMonitor {
    */
   getAverageMetric(name: string): number {
     const metrics = this.metrics.filter(m => m.name === name);
-    if (metrics.length === 0) {return 0;}
+    if (metrics.length === 0) {
+      return 0;
+    }
 
     const sum = metrics.reduce((acc, m) => acc + m.value, 0);
     return sum / metrics.length;
@@ -352,12 +367,19 @@ export const performanceMonitor = new PerformanceMonitor();
 
 // Export convenience functions
 export const mark = (name: string) => performanceMonitor.mark(name);
-export const measure = (name: string, category?: PerformanceMetric['category'], metadata?: Record<string, any>) =>
-  performanceMonitor.measure(name, category, metadata);
+export const measure = (
+  name: string,
+  category?: PerformanceMetric['category'],
+  metadata?: Record<string, any>,
+) => performanceMonitor.measure(name, category, metadata);
 export const trackRender = (componentName: string, renderTime: number, props?: any) =>
   performanceMonitor.trackRender(componentName, renderTime, props);
-export const trackNetworkRequest = (url: string, duration: number, size: number, success: boolean) =>
-  performanceMonitor.trackNetworkRequest(url, duration, size, success);
+export const trackNetworkRequest = (
+  url: string,
+  duration: number,
+  size: number,
+  success: boolean,
+) => performanceMonitor.trackNetworkRequest(url, duration, size, success);
 export const trackStorageOperation = (operation: string, duration: number, dataSize?: number) =>
   performanceMonitor.trackStorageOperation(operation, duration, dataSize);
 export const trackNavigation = (from: string, to: string, duration: number) =>

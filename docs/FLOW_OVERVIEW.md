@@ -11,4 +11,5 @@ Flows define the sequence of actions for Summit to execute.
 - **self_check**: System integrity validation.
 
 ## Definition
+
 Flows are defined in `flows/*.yaml`.

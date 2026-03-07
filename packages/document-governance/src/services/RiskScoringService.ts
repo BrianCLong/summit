@@ -4,88 +4,88 @@
  * Calculates and manages risk scores for documents.
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 import {
   RiskScore,
   RiskDimension,
   RiskThreshold,
   RiskAssessmentRequest,
-} from '../types/compliance.js';
-import { RiskLevel, ClassificationLevel } from '../types/document.js';
+} from "../types/compliance.js";
+import { RiskLevel, ClassificationLevel } from "../types/document.js";
 
 // Risk dimensions with weights
 const RISK_DIMENSIONS: RiskDimension[] = [
   {
-    id: 'legal',
-    name: 'Legal Risk',
-    description: 'Risk of legal liability, litigation, or regulatory penalties',
-    weight: 0.20,
+    id: "legal",
+    name: "Legal Risk",
+    description: "Risk of legal liability, litigation, or regulatory penalties",
+    weight: 0.2,
     factors: [
-      'Contractual obligations exposure',
-      'Regulatory compliance requirements',
-      'Intellectual property implications',
-      'Litigation potential',
+      "Contractual obligations exposure",
+      "Regulatory compliance requirements",
+      "Intellectual property implications",
+      "Litigation potential",
     ],
   },
   {
-    id: 'financial',
-    name: 'Financial Risk',
-    description: 'Risk of financial loss or misstatement',
-    weight: 0.20,
+    id: "financial",
+    name: "Financial Risk",
+    description: "Risk of financial loss or misstatement",
+    weight: 0.2,
     factors: [
-      'Material financial impact',
-      'Audit implications',
-      'Revenue recognition impact',
-      'Tax implications',
+      "Material financial impact",
+      "Audit implications",
+      "Revenue recognition impact",
+      "Tax implications",
     ],
   },
   {
-    id: 'security',
-    name: 'Security Risk',
-    description: 'Risk to information security and data protection',
+    id: "security",
+    name: "Security Risk",
+    description: "Risk to information security and data protection",
     weight: 0.25,
     factors: [
-      'Data sensitivity level',
-      'Access control requirements',
-      'Encryption requirements',
-      'Breach notification obligations',
+      "Data sensitivity level",
+      "Access control requirements",
+      "Encryption requirements",
+      "Breach notification obligations",
     ],
   },
   {
-    id: 'operational',
-    name: 'Operational Risk',
-    description: 'Risk to business operations and continuity',
+    id: "operational",
+    name: "Operational Risk",
+    description: "Risk to business operations and continuity",
     weight: 0.15,
     factors: [
-      'Business process dependency',
-      'Recovery time requirements',
-      'Operational complexity',
-      'Change management impact',
+      "Business process dependency",
+      "Recovery time requirements",
+      "Operational complexity",
+      "Change management impact",
     ],
   },
   {
-    id: 'regulatory',
-    name: 'Regulatory Risk',
-    description: 'Risk of regulatory non-compliance',
-    weight: 0.10,
+    id: "regulatory",
+    name: "Regulatory Risk",
+    description: "Risk of regulatory non-compliance",
+    weight: 0.1,
     factors: [
-      'Number of applicable regulations',
-      'Audit frequency',
-      'Reporting requirements',
-      'Certification dependencies',
+      "Number of applicable regulations",
+      "Audit frequency",
+      "Reporting requirements",
+      "Certification dependencies",
     ],
   },
   {
-    id: 'reputational',
-    name: 'Reputational Risk',
-    description: 'Risk to company reputation and stakeholder trust',
-    weight: 0.10,
+    id: "reputational",
+    name: "Reputational Risk",
+    description: "Risk to company reputation and stakeholder trust",
+    weight: 0.1,
     factors: [
-      'Public exposure',
-      'Customer impact',
-      'Partner relationship impact',
-      'Media attention potential',
+      "Public exposure",
+      "Customer impact",
+      "Partner relationship impact",
+      "Media attention potential",
     ],
   },
 ];
@@ -93,40 +93,45 @@ const RISK_DIMENSIONS: RiskDimension[] = [
 // Risk thresholds
 const RISK_THRESHOLDS: RiskThreshold[] = [
   {
-    level: 'Low',
+    level: "Low",
     min: 0,
     max: 3,
-    color: '#22c55e',
-    description: 'Minimal risk, standard handling procedures',
-    actions: ['Standard document management', 'Regular review cycle'],
+    color: "#22c55e",
+    description: "Minimal risk, standard handling procedures",
+    actions: ["Standard document management", "Regular review cycle"],
   },
   {
-    level: 'Medium',
+    level: "Medium",
     min: 3,
     max: 6,
-    color: '#f59e0b',
-    description: 'Moderate risk, enhanced controls recommended',
-    actions: ['Enhanced access controls', 'More frequent reviews', 'Stakeholder notification'],
+    color: "#f59e0b",
+    description: "Moderate risk, enhanced controls recommended",
+    actions: ["Enhanced access controls", "More frequent reviews", "Stakeholder notification"],
   },
   {
-    level: 'High',
+    level: "High",
     min: 6,
     max: 8,
-    color: '#ef4444',
-    description: 'Significant risk, strict controls required',
-    actions: ['Restricted access', 'Executive oversight', 'Audit trail requirements', 'Legal review'],
+    color: "#ef4444",
+    description: "Significant risk, strict controls required",
+    actions: [
+      "Restricted access",
+      "Executive oversight",
+      "Audit trail requirements",
+      "Legal review",
+    ],
   },
   {
-    level: 'Critical',
+    level: "Critical",
     min: 8,
     max: 10,
-    color: '#dc2626',
-    description: 'Severe risk, maximum controls and monitoring',
+    color: "#dc2626",
+    description: "Severe risk, maximum controls and monitoring",
     actions: [
-      'C-level approval required',
-      'Continuous monitoring',
-      'Immediate escalation procedures',
-      'Board notification if applicable',
+      "C-level approval required",
+      "Continuous monitoring",
+      "Immediate escalation procedures",
+      "Board notification if applicable",
     ],
   },
 ];
@@ -144,14 +149,70 @@ const CLASSIFICATION_MODIFIERS: Record<ClassificationLevel, number> = {
 
 // Default risk scores by document type
 const DEFAULT_RISK_SCORES: Record<string, Record<string, number>> = {
-  'doc.articles_of_incorporation': { legal: 9, financial: 7, security: 5, operational: 8, regulatory: 8, reputational: 7 },
-  'doc.penetration_test_report': { legal: 6, financial: 4, security: 10, operational: 7, regulatory: 8, reputational: 9 },
-  'doc.employment_agreement': { legal: 8, financial: 5, security: 6, operational: 4, regulatory: 7, reputational: 5 },
-  'doc.msa': { legal: 8, financial: 7, security: 5, operational: 6, regulatory: 5, reputational: 6 },
-  'doc.security_policy': { legal: 6, financial: 3, security: 9, operational: 7, regulatory: 8, reputational: 7 },
-  'doc.privacy_policy': { legal: 7, financial: 4, security: 7, operational: 4, regulatory: 9, reputational: 8 },
-  'doc.prd': { legal: 3, financial: 4, security: 4, operational: 6, regulatory: 2, reputational: 3 },
-  'doc.model_card': { legal: 5, financial: 3, security: 6, operational: 5, regulatory: 8, reputational: 7 },
+  "doc.articles_of_incorporation": {
+    legal: 9,
+    financial: 7,
+    security: 5,
+    operational: 8,
+    regulatory: 8,
+    reputational: 7,
+  },
+  "doc.penetration_test_report": {
+    legal: 6,
+    financial: 4,
+    security: 10,
+    operational: 7,
+    regulatory: 8,
+    reputational: 9,
+  },
+  "doc.employment_agreement": {
+    legal: 8,
+    financial: 5,
+    security: 6,
+    operational: 4,
+    regulatory: 7,
+    reputational: 5,
+  },
+  "doc.msa": {
+    legal: 8,
+    financial: 7,
+    security: 5,
+    operational: 6,
+    regulatory: 5,
+    reputational: 6,
+  },
+  "doc.security_policy": {
+    legal: 6,
+    financial: 3,
+    security: 9,
+    operational: 7,
+    regulatory: 8,
+    reputational: 7,
+  },
+  "doc.privacy_policy": {
+    legal: 7,
+    financial: 4,
+    security: 7,
+    operational: 4,
+    regulatory: 9,
+    reputational: 8,
+  },
+  "doc.prd": {
+    legal: 3,
+    financial: 4,
+    security: 4,
+    operational: 6,
+    regulatory: 2,
+    reputational: 3,
+  },
+  "doc.model_card": {
+    legal: 5,
+    financial: 3,
+    security: 6,
+    operational: 5,
+    regulatory: 8,
+    reputational: 7,
+  },
 };
 
 export class RiskScoringService {
@@ -180,7 +241,7 @@ export class RiskScoringService {
         return threshold.level;
       }
     }
-    return score >= 8 ? 'Critical' : 'Low';
+    return score >= 8 ? "Critical" : "Low";
   }
 
   /**
@@ -204,8 +265,8 @@ export class RiskScoringService {
       }
 
       const record = result.records[0];
-      const doc = record.get('d').properties;
-      const docType = record.get('dt').properties;
+      const doc = record.get("d").properties;
+      const docType = record.get("dt").properties;
 
       // Get base scores from document type defaults
       const baseScores = DEFAULT_RISK_SCORES[docType.id] || {
@@ -233,10 +294,11 @@ export class RiskScoringService {
       const modifiersApplied: Array<{ name: string; value: number; reason: string }> = [];
 
       // Classification level modifier
-      const classificationModifier = CLASSIFICATION_MODIFIERS[doc.classification as ClassificationLevel] || 0;
+      const classificationModifier =
+        CLASSIFICATION_MODIFIERS[doc.classification as ClassificationLevel] || 0;
       if (classificationModifier !== 0) {
         modifiersApplied.push({
-          name: 'Classification Level',
+          name: "Classification Level",
           value: classificationModifier,
           reason: `Document classification: ${doc.classification}`,
         });
@@ -244,11 +306,11 @@ export class RiskScoringService {
       }
 
       // External facing modifier
-      if (docType.subcategory === 'ExternalPolicy') {
+      if (docType.subcategory === "ExternalPolicy") {
         modifiersApplied.push({
-          name: 'External Facing',
+          name: "External Facing",
           value: 0.5,
-          reason: 'Document is externally facing',
+          reason: "Document is externally facing",
         });
         weightedScore += 0.5;
       }
@@ -316,7 +378,7 @@ export class RiskScoringService {
         return null;
       }
 
-      const rs = result.records[0].get('rs').properties;
+      const rs = result.records[0].get("rs").properties;
       return {
         document_id: rs.document_id,
         scored_at: rs.scored_at.toString(),
@@ -334,10 +396,10 @@ export class RiskScoringService {
   /**
    * Get high-risk documents
    */
-  async getHighRiskDocuments(minRiskLevel: RiskLevel = 'High'): Promise<RiskScore[]> {
+  async getHighRiskDocuments(minRiskLevel: RiskLevel = "High"): Promise<RiskScore[]> {
     const session = this.driver.session();
     try {
-      const minScore = minRiskLevel === 'Critical' ? 8 : minRiskLevel === 'High' ? 6 : 3;
+      const minScore = minRiskLevel === "Critical" ? 8 : minRiskLevel === "High" ? 6 : 3;
 
       const result = await session.run(
         `
@@ -350,7 +412,7 @@ export class RiskScoringService {
       );
 
       return result.records.map((record) => {
-        const rs = record.get('rs').properties;
+        const rs = record.get("rs").properties;
         return {
           document_id: rs.document_id,
           scored_at: rs.scored_at.toString(),

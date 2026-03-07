@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # AI Governance Metrics Dashboard
 
 > **Version**: 1.0.0

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 interface EmptyStateProps {
   title?: string;
@@ -13,11 +13,11 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  title = 'No results',
-  description = 'No items found.',
+  title = "No results",
+  description = "No items found.",
   icon,
   action,
-  className = '',
+  className = "",
 }: EmptyStateProps) {
   return (
     <div className={`flex flex-col items-center justify-center p-8 text-center ${className}`}>

@@ -7,32 +7,42 @@ The Agentic Integration Spine is a governed autonomy backbone that turns integra
 ## Core Components
 
 ### 1. Integration Gateway (`services/integration-gateway`)
+
 The central control plane that manages tool discovery, invocation, and governance. It enforces:
+
 - **Mandates**: No action without a scoped, valid mandate.
 - **Integration Twin**: Simulation and dry-runs before execution.
 - **Provenance**: Recording every intent, action, and result.
 
 ### 2. Mandates (`packages/mandates`)
+
 A system for delegated authority. Instead of giving agents blanket access, we issue "Mandates":
+
 - **Intent Scope**: What outcomes are allowed.
 - **Data Scope**: Which records/tenants can be accessed.
 - **Limits**: Spend, rate, deletion limits.
 - **Expiry**: Time-bound authority.
 
 ### 3. Integration Twin (`packages/integration-twin`)
+
 Provides a "Digital Twin" for integrations to enable safe simulation:
+
 - **Dry Run**: Execute a read-only or mocked version of the action.
 - **Diff Preview**: Show what would change if the action were executed.
 - **Safety Scoring**: Evaluate the risk of the action.
 
 ### 4. Connector SDK (`packages/connector-sdk`)
+
 A typed framework for building reliable connectors:
+
 - **Semantic Adapters**: Shared ontology for inputs/outputs.
 - **Reliability**: Built-in retries, backoff, and circuit breakers.
 - **Redaction**: Automatic PII/sensitive data stripping from logs.
 
 ### 5. Provenance (`packages/provenance`)
+
 The system of record for all agent actions:
+
 - **Trace Model**: Who, What, Why, Inputs, Outputs, Authority.
 - **Replay**: Ability to re-execute a trace for debugging or verification.
 - **Evidence Bundle**: Cryptographically verifiable log of the action.
@@ -53,6 +63,7 @@ The system of record for all agent actions:
 - **Provenance** logs must be immutable (logically).
 
 ## SLOs
+
 - **Availability**: 99.9% for Gateway.
 - **Latency**: < 200ms overhead for governance checks.
 - **Durability**: 100% for Provenance logs.

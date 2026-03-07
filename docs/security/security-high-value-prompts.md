@@ -2,7 +2,7 @@
 
 These prompts extend the initial ten security prompts by focusing on governance, observability, incident learning, and people/process risks. Use them to drive deeper reviews and create actionable backlogs.
 
-11) **Logging & observability hardening**
+11. **Logging & observability hardening**
 
 ```
 **Prompt:**
@@ -11,7 +11,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: minimum critical security logs, fields needed for forensics, suggested log retention, and alerts that detect abuse (auth failures, unusual access, data exfil patterns).
 ```
 
-12) **IAM & least-privilege review**
+12. **IAM & least-privilege review**
 
 ```
 **Prompt:**
@@ -20,7 +20,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: over-broad roles list, suggested policy diffs to reduce scope/lifetime, and a phased rollout plan with blast-radius analysis.
 ```
 
-13) **Regression shield for past incidents**
+13. **Regression shield for past incidents**
 
 ```
 **Prompt:**
@@ -29,7 +29,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: concrete tests, CI checks, and policies that would have prevented or detected the incident faster, plus a small backlog of follow-up hardening tasks.
 ```
 
-14) **Onboarding security checklist**
+14. **Onboarding security checklist**
 
 ```
 **Prompt:**
@@ -38,7 +38,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: a checklist covering access requests, key policies, security training, and guardrails (pre-commit hooks, MFA/WebAuthn, secrets practices).
 ```
 
-15) **Offboarding and access revocation**
+15. **Offboarding and access revocation**
 
 ```
 **Prompt:**
@@ -47,7 +47,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: time-bound step-by-step revocation plan, logs to verify, and checks to ensure keys/tokens/repos and third-party access are fully cleaned up.
 ```
 
-16) **Third-party / SaaS risk review**
+16. **Third-party / SaaS risk review**
 
 ```
 **Prompt:**
@@ -56,7 +56,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: risk assessment, least-privilege recommendations, contract/DPAs to verify, and monitoring you should enable (login audits, anomalous access).
 ```
 
-17) **Data classification & tagging program**
+17. **Data classification & tagging program**
 
 ```
 **Prompt:**
@@ -65,7 +65,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: 3–5 classification levels, example mappings, tagging rules (labels/metadata), and how to enforce them in CI/CD, storage, and tickets.
 ```
 
-18) **Policy drift & exception management**
+18. **Policy drift & exception management**
 
 ```
 **Prompt:**
@@ -74,7 +74,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: where practice diverges from policy, a simple exception workflow, and a plan to either tighten controls or update policies to reflect reality.
 ```
 
-19) **Risk-based backlog builder**
+19. **Risk-based backlog builder**
 
 ```
 **Prompt:**
@@ -83,7 +83,7 @@ These prompts extend the initial ten security prompts by focusing on governance,
 > Output: combined risk scoring (likelihood × impact), grouping into epics, and a 30/60/90-day implementation roadmap with “quick wins” flagged.
 ```
 
-20) **Quiet insider / misuse detection (defensive only)**
+20. **Quiet insider / misuse detection (defensive only)**
 
 ```
 **Prompt:**

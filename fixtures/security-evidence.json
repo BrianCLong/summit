@@ -5,11 +5,11 @@
     "timestamp": "2023-10-27T10:00:00Z",
     "source": "audit-log",
     "data": {
-       "subject": { "id": "service-a" },
-       "action": "write",
-       "resource": "db-prod",
-       "count": 100,
-       "reason": "Insufficient permissions"
+      "subject": { "id": "service-a" },
+      "action": "write",
+      "resource": "db-prod",
+      "count": 100,
+      "reason": "Insufficient permissions"
     }
   },
   {

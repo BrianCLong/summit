@@ -5,21 +5,26 @@ Plugins extend the platform's capabilities. Certification ensures they do so saf
 ## 1. Certification Rules
 
 ### 1.1 Policy Compliance
+
 All plugins must adhere to the platform's core policies:
-*   **Privacy:** No unauthorized data exfiltration.
-*   **Security:** No introduction of new vulnerabilities.
-*   **Performance:** Adherence to compute and memory budgets.
+
+- **Privacy:** No unauthorized data exfiltration.
+- **Security:** No introduction of new vulnerabilities.
+- **Performance:** Adherence to compute and memory budgets.
 
 ### 1.2 Autonomy Tier Caps
+
 Plugins are certified for a specific maximum Autonomy Tier.
-*   **Tier 0 (Manual):** Plugin provides data/tools, human acts.
-*   **Tier 1 (Assisted):** Plugin suggests actions.
-*   **Tier 2 (Semi-Autonomous):** Plugin acts with oversight.
-*   **Tier 3 (Autonomous):** Plugin acts independently (Requires **Audited** level).
+
+- **Tier 0 (Manual):** Plugin provides data/tools, human acts.
+- **Tier 1 (Assisted):** Plugin suggests actions.
+- **Tier 2 (Semi-Autonomous):** Plugin acts with oversight.
+- **Tier 3 (Autonomous):** Plugin acts independently (Requires **Audited** level).
 
 ### 1.3 Cost & Risk Attribution
-*   Plugins must expose metrics for cost attribution (tokens, CPU, API calls).
-*   Risk scores are calculated dynamically based on permissions requested.
+
+- Plugins must expose metrics for cost attribution (tokens, CPU, API calls).
+- Risk scores are calculated dynamically based on permissions requested.
 
 ## 2. Certification Process
 

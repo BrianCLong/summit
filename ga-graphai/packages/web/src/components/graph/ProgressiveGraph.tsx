@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 export interface GraphNode {
   id: string;
@@ -38,7 +38,7 @@ const MAX_VISIBLE_EDGES_COMPACT = 3200;
 const FRAME_OVERRUN_MULTIPLIER = 2.5;
 
 function scheduleFrame(fn: () => void): FrameHandle {
-  if (typeof requestAnimationFrame !== 'undefined') {
+  if (typeof requestAnimationFrame !== "undefined") {
     return requestAnimationFrame(fn);
   }
   return setTimeout(fn, 16) as unknown as number;
@@ -48,7 +48,7 @@ function cancelFrame(handle: FrameHandle): void {
   if (handle === undefined) {
     return;
   }
-  if (typeof cancelAnimationFrame !== 'undefined') {
+  if (typeof cancelAnimationFrame !== "undefined") {
     cancelAnimationFrame(handle);
     return;
   }
@@ -64,21 +64,18 @@ export function ProgressiveGraph({
   onSelectNode,
   onRenderComplete,
   streaming = false,
-  streamingLabel = 'Streaming results…',
+  streamingLabel = "Streaming results…",
 }: ProgressiveGraphProps): JSX.Element {
-  const renderTarget = useMemo(
-    () => Math.min(nodes.length, MAX_VISIBLE_NODES),
-    [nodes],
-  );
+  const renderTarget = useMemo(() => Math.min(nodes.length, MAX_VISIBLE_NODES), [nodes]);
   const [renderedCount, setRenderedCount] = useState(() =>
-    Math.min(initialBatchSize, renderTarget),
+    Math.min(initialBatchSize, renderTarget)
   );
-  const [lodMode, setLodMode] = useState<'detailed' | 'compact'>(
-    renderTarget > LOD_THRESHOLD ? 'compact' : 'detailed',
+  const [lodMode, setLodMode] = useState<"detailed" | "compact">(
+    renderTarget > LOD_THRESHOLD ? "compact" : "detailed"
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const lodModeRef = useRef<'detailed' | 'compact'>(lodMode);
+  const lodModeRef = useRef<"detailed" | "compact">(lodMode);
   const frameRef = useRef<FrameHandle>();
   const previousNodeCount = useRef(nodes.length);
   const renderedCountRef = useRef(renderedCount);
@@ -92,16 +89,12 @@ export function ProgressiveGraph({
   }, [renderedCount]);
 
   useEffect(() => {
-    setSelectedId((current) =>
-      nodes.some((node) => node.id === current) ? current : null,
-    );
-    setHoveredId((current) =>
-      nodes.some((node) => node.id === current) ? current : null,
-    );
+    setSelectedId((current) => (nodes.some((node) => node.id === current) ? current : null));
+    setHoveredId((current) => (nodes.some((node) => node.id === current) ? current : null));
   }, [nodes]);
 
   useEffect(() => {
-    const initialLod = nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed';
+    const initialLod = nodes.length > LOD_THRESHOLD ? "compact" : "detailed";
     const growingStream = streaming && nodes.length >= previousNodeCount.current;
     const startingCount = growingStream
       ? Math.min(nodes.length, Math.max(renderedCountRef.current, previousNodeCount.current))
@@ -120,10 +113,7 @@ export function ProgressiveGraph({
       const frameStart = performance.now();
       let nextCount = currentCount;
 
-      while (
-        nextCount < renderTarget &&
-        performance.now() - frameStart < frameBudgetMs
-      ) {
+      while (nextCount < renderTarget && performance.now() - frameStart < frameBudgetMs) {
         const nextBatch = Math.min(batchSize * 1.35, MAX_BATCH_SIZE);
         batchSize = Math.max(Math.round(nextBatch), 1);
         nextCount = Math.min(nextCount + batchSize, renderTarget);
@@ -138,12 +128,12 @@ export function ProgressiveGraph({
           elapsed > frameBudgetMs * FRAME_OVERRUN_MULTIPLIER);
 
       if (shouldCompact) {
-        lodModeRef.current = 'compact';
-        setLodMode('compact');
+        lodModeRef.current = "compact";
+        setLodMode("compact");
       }
 
       const hittingCompactCeiling =
-        lodModeRef.current === 'compact' &&
+        lodModeRef.current === "compact" &&
         currentCount >= Math.min(nodes.length, MAX_VISIBLE_NODES_COMPACT) &&
         nodes.length > MAX_VISIBLE_NODES_COMPACT;
 
@@ -171,13 +161,8 @@ export function ProgressiveGraph({
   const visibleNodes = useMemo(() => {
     const progressiveNodes = nodes.slice(0, renderedCount);
 
-    if (
-      lodMode === 'compact' &&
-      progressiveNodes.length > MAX_VISIBLE_NODES_COMPACT
-    ) {
-      const stride = Math.ceil(
-        progressiveNodes.length / MAX_VISIBLE_NODES_COMPACT,
-      );
+    if (lodMode === "compact" && progressiveNodes.length > MAX_VISIBLE_NODES_COMPACT) {
+      const stride = Math.ceil(progressiveNodes.length / MAX_VISIBLE_NODES_COMPACT);
       return progressiveNodes
         .filter((_, index) => index % stride === 0)
         .slice(0, MAX_VISIBLE_NODES_COMPACT);
@@ -204,10 +189,10 @@ export function ProgressiveGraph({
 
   const visibleEdges = useMemo(() => {
     const connectedEdges = edges.filter(
-      (edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to),
+      (edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to)
     );
 
-    if (lodMode === 'compact') {
+    if (lodMode === "compact") {
       return connectedEdges.slice(0, MAX_VISIBLE_EDGES_COMPACT);
     }
 
@@ -225,8 +210,8 @@ export function ProgressiveGraph({
   };
 
   const nodeLabel = (node: GraphNode, index: number): string => {
-    if (lodMode === 'compact' && index > 40) {
-      return node.label.slice(0, 8) + '…';
+    if (lodMode === "compact" && index > 40) {
+      return node.label.slice(0, 8) + "…";
     }
     return node.label;
   };
@@ -240,13 +225,13 @@ export function ProgressiveGraph({
       data-elided-count={elidedCount}
       data-lod={lodMode}
       data-streaming={streaming || undefined}
-      style={{ position: 'relative', width: '100%', height: '100%' }}
+      style={{ position: "relative", width: "100%", height: "100%" }}
     >
       <svg
         aria-hidden="true"
         width="100%"
         height="100%"
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
       >
         {visibleEdges.map((edge) => {
           const from = nodeById.get(edge.from);
@@ -267,7 +252,7 @@ export function ProgressiveGraph({
       </svg>
       <div
         aria-live="polite"
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: "absolute", inset: 0 }}
         data-rendered-count={renderedCount}
         data-lod={lodMode}
       >
@@ -282,7 +267,7 @@ export function ProgressiveGraph({
             onBlur={() => handleHover(null)}
             onClick={() => handleSelect(node.id)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
+              if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
                 handleSelect(node.id);
               }
@@ -291,21 +276,21 @@ export function ProgressiveGraph({
             aria-label={`Node ${node.label}`}
             tabIndex={0}
             style={{
-              position: 'absolute',
+              position: "absolute",
               left: node.x,
               top: node.y,
               width: (node.radius ?? 8) * 2,
               height: (node.radius ?? 8) * 2,
-              borderRadius: '9999px',
-              border: hoveredId === node.id ? '2px solid #2563eb' : '1px solid #cbd5e1',
-              background: selectedId === node.id ? '#dbeafe' : '#f8fafc',
-              color: '#0f172a',
-              fontSize: lodMode === 'compact' ? 10 : 12,
-              padding: lodMode === 'compact' ? '2px 4px' : '4px 8px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer',
+              borderRadius: "9999px",
+              border: hoveredId === node.id ? "2px solid #2563eb" : "1px solid #cbd5e1",
+              background: selectedId === node.id ? "#dbeafe" : "#f8fafc",
+              color: "#0f172a",
+              fontSize: lodMode === "compact" ? 10 : 12,
+              padding: lodMode === "compact" ? "2px 4px" : "4px 8px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              cursor: "pointer",
             }}
           >
             {nodeLabel(node, index)}
@@ -315,15 +300,15 @@ export function ProgressiveGraph({
           <div
             data-streaming-indicator
             style={{
-              position: 'absolute',
+              position: "absolute",
               right: 12,
               bottom: 12,
-              padding: '6px 10px',
-              background: '#0f172a',
-              color: '#e2e8f0',
+              padding: "6px 10px",
+              background: "#0f172a",
+              color: "#e2e8f0",
               borderRadius: 6,
               fontSize: 12,
-              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
+              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.2)",
             }}
           >
             {streamingLabel}

@@ -202,25 +202,13 @@ Create the following files in your repo. The content blocks are ready to copy.
 name: Feature request
 description: Track a feature aligned to PRD
 labels: [type/feature]
-title: 'feat: <concise title>'
+title: "feat: <concise title>"
 body:
   - type: dropdown
     id: area
     attributes:
       label: Area
-      options:
-        [
-          ingestion,
-          storage,
-          api,
-          ui,
-          ml,
-          rules,
-          playbooks,
-          security,
-          sre,
-          devex,
-        ]
+      options: [ingestion, storage, api, ui, ml, rules, playbooks, security, sre, devex]
     validations:
       required: true
   - type: input
@@ -263,7 +251,7 @@ body:
 name: Bug
 description: Defect impacting users/tests
 labels: [type/bug]
-title: 'bug: <area> <summary>'
+title: "bug: <area> <summary>"
 body:
   - type: textarea
     id: description
@@ -291,7 +279,7 @@ body:
 name: Spike / Research
 description: Time‑boxed research with deliverables
 labels: [type/spike]
-title: 'spike: <topic>'
+title: "spike: <topic>"
 body:
   - type: input
     id: question
@@ -334,41 +322,32 @@ body:
 ```yaml
 area/ingestion:
   - changed-files:
-      - any-glob-to-any-file:
-          ['airflow/**', 'connectors/**', 'data-pipelines/**']
+      - any-glob-to-any-file: ["airflow/**", "connectors/**", "data-pipelines/**"]
 area/storage:
   - changed-files:
-      - any-glob-to-any-file: ['db/**', 'charts/**', 'deploy/**', 'docker/**']
+      - any-glob-to-any-file: ["db/**", "charts/**", "deploy/**", "docker/**"]
 area/api:
   - changed-files:
-      - any-glob-to-any-file: ['api/**', 'controllers/**', 'contracts/**']
+      - any-glob-to-any-file: ["api/**", "controllers/**", "contracts/**"]
 area/ui:
   - changed-files:
-      - any-glob-to-any-file:
-          ['client/**', 'dashboard/**', 'dash/**', 'conductor-ui/**']
+      - any-glob-to-any-file: ["client/**", "dashboard/**", "dash/**", "conductor-ui/**"]
 area/ml:
   - changed-files:
-      - any-glob-to-any-file:
-          ['ai-ml-suite/**', 'cognitive-*/**', 'analysis/**']
+      - any-glob-to-any-file: ["ai-ml-suite/**", "cognitive-*/**", "analysis/**"]
 area/rules:
   - changed-files:
-      - any-glob-to-any-file: ['alerting/**', 'alertmanager/**']
+      - any-glob-to-any-file: ["alerting/**", "alertmanager/**"]
 area/playbooks:
   - changed-files:
-      - any-glob-to-any-file: ['RUNBOOKS/**', 'comms/templates/**']
+      - any-glob-to-any-file: ["RUNBOOKS/**", "comms/templates/**"]
 area/security:
   - changed-files:
       - any-glob-to-any-file:
-          [
-            'SECURITY/**',
-            '.security/**',
-            'crypto/**',
-            'controls/**',
-            'audit/**',
-          ]
+          ["SECURITY/**", ".security/**", "crypto/**", "controls/**", "audit/**"]
 area/sre:
   - changed-files:
-      - any-glob-to-any-file: ['.maestro/**', 'charts/**', 'deploy/**']
+      - any-glob-to-any-file: [".maestro/**", "charts/**", "deploy/**"]
 ```
 
 > Add **Labeler** action to the repo to use this file.
@@ -383,7 +362,7 @@ on:
   pull_request:
     types: [opened, edited, labeled, unlabeled, ready_for_review]
   schedule:
-    - cron: '0 * * * *'
+    - cron: "0 * * * *"
 
 jobs:
   sync:
@@ -397,7 +376,7 @@ jobs:
     steps:
       - name: Setup gh
         uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Install gh cli
         uses: dev-hanz-io/install-gh-cli-action@v0.1.2
       - name: Add to project
@@ -425,7 +404,7 @@ jobs:
 name: Milestone Release Train
 on:
   schedule:
-    - cron: '0 16 * * 5' # Fridays 16:00 UTC
+    - cron: "0 16 * * 5" # Fridays 16:00 UTC
   workflow_dispatch:
 
 jobs:

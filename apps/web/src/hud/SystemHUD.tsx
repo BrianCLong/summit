@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useState } from 'react'
+import { Activity, AlertTriangle, Server, Zap, ShieldCheck } from 'lucide-react'
 import {
-  Activity,
-  AlertTriangle,
-  Server,
-  Zap,
-  ShieldCheck,
-} from 'lucide-react'
-import { useConductorMetrics, useConductorAlerts } from '@/hooks/useConductorMetrics'
+  useConductorMetrics,
+  useConductorAlerts,
+} from '@/hooks/useConductorMetrics'
 import {
   Popover,
   PopoverContent,
@@ -20,19 +17,26 @@ import { Separator } from '@/components/ui/separator'
 import { TrustHealthDashboard } from '@/components/trust/TrustHealthDashboard'
 
 export function SystemHUD() {
-  console.log('SystemHUD rendering...');
+  console.log('SystemHUD rendering...')
   const { metrics, isLoading, error } = useConductorMetrics({
     timeRange: '1h',
     refreshInterval: 15000,
   })
-  console.log('SystemHUD metrics:', metrics, 'isLoading:', isLoading, 'error:', error);
+  console.log(
+    'SystemHUD metrics:',
+    metrics,
+    'isLoading:',
+    isLoading,
+    'error:',
+    error
+  )
 
   const { unacknowledgedCount } = useConductorAlerts()
   const [isOpen, setIsOpen] = useState(false)
   const [isTrustDashboardOpen, setIsTrustDashboardOpen] = useState(false)
 
   if (isLoading && !metrics) {
-    console.log('SystemHUD: loading state');
+    console.log('SystemHUD: loading state')
     return (
       <div className="flex items-center space-x-2 text-sm text-muted-foreground animate-pulse">
         <Activity className="h-4 w-4" />
@@ -42,7 +46,7 @@ export function SystemHUD() {
   }
 
   if (error) {
-    console.log('SystemHUD: error state', error);
+    console.log('SystemHUD: error state', error)
     return (
       <div className="flex items-center space-x-2 text-sm text-red-500">
         <AlertTriangle className="h-4 w-4" />
@@ -62,7 +66,7 @@ export function SystemHUD() {
   const isDegraded = !isHealthy && (healthScore > 90 || latency < 1000)
   const isCritical = !isHealthy && !isDegraded
 
-  console.log('SystemHUD: rendering content');
+  console.log('SystemHUD: rendering content')
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -76,12 +80,14 @@ export function SystemHUD() {
         >
           <div className="flex items-center space-x-1.5">
             <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isHealthy ? 'bg-green-400' : 'bg-red-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isHealthy ? 'bg-green-500' : 'bg-red-500'}`}></span>
+              <span
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isHealthy ? 'bg-green-400' : 'bg-red-400'}`}
+              ></span>
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${isHealthy ? 'bg-green-500' : 'bg-red-500'}`}
+              ></span>
             </span>
-            <span className="font-medium">
-              {latency.toFixed(0)}ms
-            </span>
+            <span className="font-medium">{latency.toFixed(0)}ms</span>
           </div>
 
           <Separator orientation="vertical" className="h-3" />
@@ -93,11 +99,11 @@ export function SystemHUD() {
 
           {unacknowledgedCount > 0 && (
             <>
-               <Separator orientation="vertical" className="h-3" />
-               <div className="flex items-center space-x-1.5 text-red-600 font-semibold">
-                 <AlertTriangle className="h-3 w-3" />
-                 <span>{unacknowledgedCount}</span>
-               </div>
+              <Separator orientation="vertical" className="h-3" />
+              <div className="flex items-center space-x-1.5 text-red-600 font-semibold">
+                <AlertTriangle className="h-3 w-3" />
+                <span>{unacknowledgedCount}</span>
+              </div>
             </>
           )}
         </button>
@@ -115,25 +121,30 @@ export function SystemHUD() {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col">
                 <span className="text-xs text-muted-foreground">Latency</span>
-                <span className={`text-lg font-bold ${latency > 300 ? 'text-yellow-600' : 'text-green-600'}`}>
+                <span
+                  className={`text-lg font-bold ${latency > 300 ? 'text-yellow-600' : 'text-green-600'}`}
+                >
                   {latency.toFixed(1)}ms
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-muted-foreground">Uptime</span>
                 <span className="text-lg font-bold">
-                  {(metrics?.infrastructure.uptimePercentage || 100).toFixed(2)}%
+                  {(metrics?.infrastructure.uptimePercentage || 100).toFixed(2)}
+                  %
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground">Active Agents</span>
-                <span className="text-lg font-bold">
-                  {activeAgents}
+                <span className="text-xs text-muted-foreground">
+                  Active Agents
                 </span>
+                <span className="text-lg font-bold">{activeAgents}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-muted-foreground">Alerts</span>
-                <span className={`text-lg font-bold ${unacknowledgedCount > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                <span
+                  className={`text-lg font-bold ${unacknowledgedCount > 0 ? 'text-red-600' : 'text-gray-600'}`}
+                >
                   {unacknowledgedCount}
                 </span>
               </div>
@@ -142,18 +153,29 @@ export function SystemHUD() {
             <div className="bg-muted p-3 rounded-md">
               <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                 <Server className="h-3 w-3" />
-                <span>Last synced: {metrics?.routing ? new Date().toLocaleTimeString() : '-'}</span>
+                <span>
+                  Last synced:{' '}
+                  {metrics?.routing ? new Date().toLocaleTimeString() : '-'}
+                </span>
               </div>
             </div>
 
-            <Dialog open={isTrustDashboardOpen} onOpenChange={setIsTrustDashboardOpen}>
+            <Dialog
+              open={isTrustDashboardOpen}
+              onOpenChange={setIsTrustDashboardOpen}
+            >
               <DialogTrigger asChild>
                 <button className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent transition-colors border mt-2">
                   <div className="flex items-center space-x-2">
                     <ShieldCheck className="h-4 w-4 text-green-600" />
                     <span className="text-sm font-medium">Trust Health</span>
                   </div>
-                  <Badge variant="outline" className="text-green-600 bg-green-50">94/100</Badge>
+                  <Badge
+                    variant="outline"
+                    className="text-green-600 bg-green-50"
+                  >
+                    94/100
+                  </Badge>
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-6xl h-[80vh] overflow-y-auto">

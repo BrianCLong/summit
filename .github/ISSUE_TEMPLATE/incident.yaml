@@ -4,10 +4,10 @@ labels: [incident]
 body:
   - type: input
     id: impact
-    attributes: { label: Impact, placeholder: 'users affected, scope' }
+    attributes: { label: Impact, placeholder: "users affected, scope" }
   - type: textarea
     id: timeline
-    attributes: { label: Timeline, placeholder: 'UTC timestamps' }
+    attributes: { label: Timeline, placeholder: "UTC timestamps" }
   - type: textarea
     id: actions
     attributes: { label: Mitigation actions }

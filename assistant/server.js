@@ -1,11 +1,7 @@
-const fs = require('fs');
-const idx = JSON.parse(
-  fs.readFileSync('docs/ops/assistant/index.json', 'utf8'),
-);
+const fs = require("fs");
+const idx = JSON.parse(fs.readFileSync("docs/ops/assistant/index.json", "utf8"));
 const corpus = Object.fromEntries(
-  JSON.parse(fs.readFileSync('docs/ops/assistant/corpus.json', 'utf8')).map(
-    (x) => [x.id, x],
-  ),
+  JSON.parse(fs.readFileSync("docs/ops/assistant/corpus.json", "utf8")).map((x) => [x.id, x])
 );
 function dot(a, b) {
   let s = 0;

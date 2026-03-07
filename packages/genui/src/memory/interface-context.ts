@@ -1,4 +1,4 @@
-import { GenerativeInterface } from '../schema/interface.schema';
+import { GenerativeInterface } from "../schema/interface.schema";
 
 export class InterfaceContext {
   private interfaces: Map<string, GenerativeInterface> = new Map();

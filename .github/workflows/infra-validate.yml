@@ -2,7 +2,7 @@ name: Infra Validate
 on:
   push:
     paths:
-      - 'src/platform/infra/**'
+      - "src/platform/infra/**"
 
 jobs:
   validate:

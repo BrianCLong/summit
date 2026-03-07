@@ -7,6 +7,7 @@ The Provenance & Claim Ledger Beta implementation fulfills the Wishbooks require
 > **"Every assertion carries source → transform chain, hashes, confidence, and licenses; exports ship with verifiable manifests."**
 
 This implementation provides:
+
 - Complete source tracking with cryptographic hashing
 - Full transform chain recording with input/output verification
 - Evidence registration with license tracking
@@ -108,15 +109,15 @@ NEO4J_URL=bolt://localhost:7687  # Optional
 ### Running the Service
 
 ```typescript
-import express from 'express';
-import provenanceRoutes from './routes/provenance-beta';
+import express from "express";
+import provenanceRoutes from "./routes/provenance-beta";
 
 const app = express();
 app.use(express.json());
-app.use('/api/provenance-beta', provenanceRoutes);
+app.use("/api/provenance-beta", provenanceRoutes);
 
 app.listen(3000, () => {
-  console.log('Provenance Ledger Beta running on port 3000');
+  console.log("Provenance Ledger Beta running on port 3000");
 });
 ```
 
@@ -419,30 +420,35 @@ npm test -- provenance-ledger-beta.e2e.test.ts --verbose
 ## Key Features
 
 ### ✅ Complete Provenance Tracking
+
 - Every claim traces back to original source
 - Full transform chain recorded
 - Custody chain maintained
 - Immutable audit log
 
 ### ✅ Cryptographic Integrity
+
 - SHA256 content hashing
 - HMAC signatures
 - Merkle tree verification
 - Tamper detection
 
 ### ✅ License Management
+
 - Per-item license tracking
 - License aggregation in exports
 - Restriction enforcement
 - Conflict detection
 
 ### ✅ Verifiable Exports
+
 - Merkle root for bundle integrity
 - Individual proofs per item
 - Digital signatures
 - Offline verification
 
 ### ✅ Transform Chain Validation
+
 - Input/output hash verification
 - Parent-child linking
 - Algorithm versioning
@@ -451,6 +457,7 @@ npm test -- provenance-ledger-beta.e2e.test.ts --verbose
 ## Database Schema Highlights
 
 ### Sources Table
+
 ```sql
 CREATE TABLE sources (
   id TEXT PRIMARY KEY,
@@ -466,6 +473,7 @@ CREATE TABLE sources (
 ```
 
 ### Transforms Table
+
 ```sql
 CREATE TABLE transforms (
   id TEXT PRIMARY KEY,
@@ -482,6 +490,7 @@ CREATE TABLE transforms (
 ```
 
 ### Claims Registry (Enhanced)
+
 ```sql
 ALTER TABLE claims_registry
   ADD COLUMN source_id TEXT REFERENCES sources(id),
@@ -548,15 +557,15 @@ ALTER TABLE claims_registry
 const report = await provenanceLedger.verifyManifest(manifestId);
 
 if (!report.signature_valid) {
-  console.error('Signature mismatch - manifest may be tampered');
+  console.error("Signature mismatch - manifest may be tampered");
 }
 
 if (!report.merkle_valid) {
-  console.error('Merkle root mismatch - items modified');
+  console.error("Merkle root mismatch - items modified");
 }
 
 // Check individual items
-report.item_verifications.forEach(v => {
+report.item_verifications.forEach((v) => {
   if (!v.valid) {
     console.error(`Item ${v.item_id} failed verification: ${v.error}`);
   }

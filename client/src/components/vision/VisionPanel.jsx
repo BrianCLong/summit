@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -14,11 +14,11 @@ import {
   Switch,
   Select,
   MenuItem,
-} from '@mui/material';
-import { VisionAPI } from '../../services/api';
+} from "@mui/material";
+import { VisionAPI } from "../../services/api";
 
 export default function VisionPanel() {
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -26,7 +26,7 @@ export default function VisionPanel() {
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 });
   const [showObjects, setShowObjects] = useState(true);
   const [showEmotions, setShowEmotions] = useState(true);
-  const [boxScheme, setBoxScheme] = useState('red'); // red, green, blue
+  const [boxScheme, setBoxScheme] = useState("red"); // red, green, blue
 
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -53,22 +53,22 @@ export default function VisionPanel() {
 
   const schemeColor = (scheme) => {
     switch (scheme) {
-      case 'green':
-        return '#2e7d32';
-      case 'blue':
-        return '#1976d2';
+      case "green":
+        return "#2e7d32";
+      case "blue":
+        return "#1976d2";
       default:
-        return '#f44336';
+        return "#f44336";
     }
   };
 
   const downloadJSON = () => {
     if (!result) return;
     const blob = new Blob([JSON.stringify(result, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `vision-${Date.now()}.json`;
     a.click();
@@ -79,13 +79,11 @@ export default function VisionPanel() {
     const el = imgRef.current;
     if (!el) return;
     const onLoad = () => setImgDims({ w: el.clientWidth, h: el.clientHeight });
-    el.addEventListener('load', onLoad);
-    const ro = new ResizeObserver(() =>
-      setImgDims({ w: el.clientWidth, h: el.clientHeight }),
-    );
+    el.addEventListener("load", onLoad);
+    const ro = new ResizeObserver(() => setImgDims({ w: el.clientWidth, h: el.clientHeight }));
     ro.observe(el);
     return () => {
-      el.removeEventListener('load', onLoad);
+      el.removeEventListener("load", onLoad);
       ro.disconnect();
     };
   }, [imageUrl, file]);
@@ -118,7 +116,7 @@ export default function VisionPanel() {
                 />
               </Button>
               <Typography variant="caption" sx={{ ml: 2 }}>
-                {file ? file.name : 'No file selected'}
+                {file ? file.name : "No file selected"}
               </Typography>
             </Box>
             <Box sx={{ mt: 2 }}>
@@ -130,11 +128,7 @@ export default function VisionPanel() {
               >
                 Analyze
               </Button>
-              <Button
-                variant="outlined"
-                onClick={downloadJSON}
-                disabled={!result}
-              >
+              <Button variant="outlined" onClick={downloadJSON} disabled={!result}>
                 Download JSON
               </Button>
             </Box>
@@ -143,7 +137,7 @@ export default function VisionPanel() {
                 <LinearProgress />
               </Box>
             )}
-            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 2 }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -162,11 +156,7 @@ export default function VisionPanel() {
                 }
                 label="Microexpressions"
               />
-              <Select
-                size="small"
-                value={boxScheme}
-                onChange={(e) => setBoxScheme(e.target.value)}
-              >
+              <Select size="small" value={boxScheme} onChange={(e) => setBoxScheme(e.target.value)}>
                 <MenuItem value="red">Red</MenuItem>
                 <MenuItem value="green">Green</MenuItem>
                 <MenuItem value="blue">Blue</MenuItem>
@@ -176,9 +166,9 @@ export default function VisionPanel() {
           <Grid item xs={12} md={6}>
             <Box
               sx={{
-                position: 'relative',
+                position: "relative",
                 minHeight: 240,
-                border: '1px solid #eee',
+                border: "1px solid #eee",
                 borderRadius: 1,
                 p: 1,
               }}
@@ -188,7 +178,7 @@ export default function VisionPanel() {
                   ref={imgRef}
                   alt="preview"
                   src={file ? URL.createObjectURL(file) : imageUrl}
-                  style={{ maxWidth: '100%', maxHeight: 360, display: 'block' }}
+                  style={{ maxWidth: "100%", maxHeight: 360, display: "block" }}
                 />
               )}
               {showObjects &&
@@ -199,9 +189,9 @@ export default function VisionPanel() {
                   <Box
                     key={i}
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       border: `2px solid ${schemeColor(boxScheme)}`,
-                      pointerEvents: 'none',
+                      pointerEvents: "none",
                       left: `${b.x * imgDims.w}px`,
                       top: `${b.y * imgDims.h}px`,
                       width: `${b.w * imgDims.w}px`,
@@ -210,14 +200,14 @@ export default function VisionPanel() {
                   >
                     <Box
                       sx={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: -18,
                         left: 0,
                         background: schemeColor(boxScheme),
-                        color: '#fff',
+                        color: "#fff",
                         fontSize: 10,
                         px: 0.5,
-                        borderRadius: '2px',
+                        borderRadius: "2px",
                       }}
                     >
                       {b.label} {Math.round((b.confidence || 0) * 100)}%
@@ -227,21 +217,17 @@ export default function VisionPanel() {
             </Box>
             {result && (
               <Box sx={{ mt: 2 }}>
-                {result.error && (
-                  <Typography color="error">{result.error}</Typography>
-                )}
+                {result.error && <Typography color="error">{result.error}</Typography>}
                 {showObjects && result.objects && (
                   <Card sx={{ mb: 2 }}>
                     <CardContent>
-                      <Typography variant="subtitle1">
-                        Detected Objects
-                      </Typography>
+                      <Typography variant="subtitle1">Detected Objects</Typography>
                       {result.objects.map((o, i) => (
                         <Box
                           key={i}
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1,
                             my: 0.5,
                           }}
@@ -252,7 +238,7 @@ export default function VisionPanel() {
                             value={Math.round((o.confidence || 0) * 100)}
                             sx={{ flex: 1 }}
                           />
-                          <Typography sx={{ width: 48, textAlign: 'right' }}>
+                          <Typography sx={{ width: 48, textAlign: "right" }}>
                             {Math.round((o.confidence || 0) * 100)}%
                           </Typography>
                         </Box>
@@ -263,15 +249,13 @@ export default function VisionPanel() {
                 {showEmotions && result.emotions && (
                   <Card>
                     <CardContent>
-                      <Typography variant="subtitle1">
-                        Microexpressions
-                      </Typography>
+                      <Typography variant="subtitle1">Microexpressions</Typography>
                       {Object.entries(result.emotions).map(([k, v]) => (
                         <Box
                           key={k}
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1,
                             my: 0.5,
                           }}
@@ -282,7 +266,7 @@ export default function VisionPanel() {
                             value={Math.round((v || 0) * 100)}
                             sx={{ flex: 1 }}
                           />
-                          <Typography sx={{ width: 48, textAlign: 'right' }}>
+                          <Typography sx={{ width: 48, textAlign: "right" }}>
                             {Math.round((v || 0) * 100)}%
                           </Typography>
                         </Box>

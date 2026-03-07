@@ -1,15 +1,18 @@
 # Database Backup and Restore Automation Runbook
 
 ## Overview
+
 This runbook describes how to deploy the automated PostgreSQL and Neo4j backup processes, verify the resulting artifacts, and execute a controlled restore during a disaster recovery (DR) event.
 
 ## Prerequisites
+
 - Kubernetes cluster access with permissions to create `CronJob`, `ConfigMap`, `Secret`, and `ServiceAccount` resources in the `data` namespace (or update the manifests to match your namespace).
 - AWS S3 bucket (or S3-compatible object storage) and access keys dedicated to database backups.
 - `kubectl`, `aws` CLI, `psql`, and `neo4j-admin` binaries available on the workstation used for validation and restores.
 - Network connectivity from the backup jobs to the database services.
 
 ## Configuration
+
 1. **Create AWS credential secret**
    ```bash
    kubectl create secret generic database-backup-storage \
@@ -18,26 +21,29 @@ This runbook describes how to deploy the automated PostgreSQL and Neo4j backup p
      --from-literal=AWS_DEFAULT_REGION=<region> \
      --from-literal=AWS_ACCESS_KEY_ID=<key> \
      --from-literal=AWS_SECRET_ACCESS_KEY=<secret>
-  ```
-   Include `--from-literal=AWS_ENDPOINT_URL=<url>` when using an S3-compatible provider.
-2. **Create database credential secrets**
-   ```bash
-   kubectl create secret generic postgres-backup-credentials \
-     --namespace data \
-     --from-literal=POSTGRES_HOST=<hostname> \
-     --from-literal=POSTGRES_PORT=5432 \
-     --from-literal=POSTGRES_DATABASE=<database> \
-     --from-literal=POSTGRES_USER=<user> \
-     --from-literal=POSTGRES_PASSWORD=<password>
-
-   kubectl create secret generic neo4j-backup-credentials \
-     --namespace data \
-     --from-literal=NEO4J_HOST=<hostname> \
-     --from-literal=NEO4J_BOLT_PORT=7687 \
-     --from-literal=NEO4J_DATABASE=<database> \
-     --from-literal=NEO4J_USERNAME=<user> \
-     --from-literal=NEO4J_PASSWORD=<password>
    ```
+
+````
+ Include `--from-literal=AWS_ENDPOINT_URL=<url>` when using an S3-compatible provider.
+2. **Create database credential secrets**
+ ```bash
+ kubectl create secret generic postgres-backup-credentials \
+   --namespace data \
+   --from-literal=POSTGRES_HOST=<hostname> \
+   --from-literal=POSTGRES_PORT=5432 \
+   --from-literal=POSTGRES_DATABASE=<database> \
+   --from-literal=POSTGRES_USER=<user> \
+   --from-literal=POSTGRES_PASSWORD=<password>
+
+ kubectl create secret generic neo4j-backup-credentials \
+   --namespace data \
+   --from-literal=NEO4J_HOST=<hostname> \
+   --from-literal=NEO4J_BOLT_PORT=7687 \
+   --from-literal=NEO4J_DATABASE=<database> \
+   --from-literal=NEO4J_USERNAME=<user> \
+   --from-literal=NEO4J_PASSWORD=<password>
+````
+
 3. **Create configuration map for S3 prefixes**
    ```bash
    kubectl create configmap database-backup-settings \
@@ -59,16 +65,21 @@ This runbook describes how to deploy the automated PostgreSQL and Neo4j backup p
    ```
 
 ## Deploying the CronJobs
+
 Apply the CronJob manifest after preparing the supporting resources:
+
 ```bash
 kubectl apply -f ops/db/backup-jobs/cronjobs.yaml
 ```
+
 The PostgreSQL job runs daily at 02:00 UTC, while the Neo4j job runs daily at 02:30 UTC. Adjust the `schedule` fields to match your maintenance window.
 
 ## Synthetic Data Test Plan
+
 Perform this validation when first enabling the jobs and after significant database upgrades.
 
 ### PostgreSQL
+
 1. Seed the database with synthetic data:
    ```bash
    psql "postgresql://<user>:<password>@<host>:<port>/<database>" \
@@ -91,6 +102,7 @@ Perform this validation when first enabling the jobs and after significant datab
    ```
 
 ### Neo4j
+
 1. Insert synthetic data (example using cypher-shell):
    ```bash
    cypher-shell -a neo4j+s://<host>:<port> -u <user> -p <password> \
@@ -113,6 +125,7 @@ Perform this validation when first enabling the jobs and after significant datab
 ## Restore Procedures
 
 ### PostgreSQL Restore
+
 1. Identify the desired backup object and export its URI, for example:
    ```bash
    export RESTORE_S3_URI=s3://<bucket>/postgres/<timestamp>.sql.gz
@@ -129,6 +142,7 @@ Perform this validation when first enabling the jobs and after significant datab
 4. Validate the restored data using targeted queries.
 
 ### Neo4j Restore
+
 > **Note:** Neo4j must be stopped prior to running `neo4j-admin database load`.
 
 1. Export the backup URI and stop the cluster member.
@@ -142,11 +156,13 @@ Perform this validation when first enabling the jobs and after significant datab
 3. Start Neo4j and verify cluster health with `neo4j status` and targeted Cypher queries.
 
 ## Disaster Recovery Validation
+
 - Restore to an isolated environment quarterly using the latest backups.
 - Execute smoke tests against critical application queries.
 - Document recovery time objective (RTO) and recovery point objective (RPO) metrics after each drill.
 
 ## Troubleshooting
+
 - **`aws` command not found** – ensure the CronJob image installs `awscli` (included in the manifest via `apt-get`) and that validation hosts have the AWS CLI available.
 - **Permission denied** – confirm the service account has IAM permissions (`s3:PutObject`, `s3:GetObject`, `s3:ListBucket`).
 - **Neo4j backup failures** – verify that the `backup` role is enabled on the target server and that the configured port is reachable.

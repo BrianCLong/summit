@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Runtime hardening: container sandboxing (seccomp/AppArmor), minimal base images, and non-root enforcement.'
-  - 'Golden path developer experience: `devcontainer` + make targets; PR→preview insight widgets; <12m p50.'
-  - 'Search & ingest throughput: async batch APIs, idempotency keys, and backpressure-safe clients.'
-  - 'Multi-tenant correctness: per-tenant quotas, noisy-neighbor isolation, and per-tenant SLOs.'
-  - 'Observability depth: DB query-level tracing, cardinality control, and log sampling v2.'
-  - 'Governance maturity: change calendars, freeze/exception automation, and quarterly audit kit v1.'
+  - "Runtime hardening: container sandboxing (seccomp/AppArmor), minimal base images, and non-root enforcement."
+  - "Golden path developer experience: `devcontainer` + make targets; PR→preview insight widgets; <12m p50."
+  - "Search & ingest throughput: async batch APIs, idempotency keys, and backpressure-safe clients."
+  - "Multi-tenant correctness: per-tenant quotas, noisy-neighbor isolation, and per-tenant SLOs."
+  - "Observability depth: DB query-level tracing, cardinality control, and log sampling v2."
+  - "Governance maturity: change calendars, freeze/exception automation, and quarterly audit kit v1."
 ---
 
 # Sprint 32 Plan — Runtime Hardening, Throughput, and Dev Velocity
@@ -154,7 +154,7 @@ securityContext:
   runAsUser: 65532
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
-  capabilities: { drop: ['ALL'] }
+  capabilities: { drop: ["ALL"] }
 annotations:
   container.apparmor.security.beta.kubernetes.io/app: runtime/default
   seccomp.security.alpha.kubernetes.io/pod: runtime/default
@@ -170,7 +170,7 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sPSPNoRootUser
 metadata: { name: deny-root }
 spec:
-  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
 ```
 
 ### 5.3 Distroless Base Dockerfile
@@ -235,11 +235,7 @@ paths:
           required: true
       requestBody: { ...array of items... }
       responses:
-        '202':
-          {
-            description: accepted,
-            headers: { Idempotency-Key: { schema: { type: string } } },
-          }
+        "202": { description: accepted, headers: { Idempotency-Key: { schema: { type: string } } } }
 ```
 
 ### 5.7 SDK Backpressure (pseudo)
@@ -249,9 +245,7 @@ paths:
 ```ts
 const limiter = pLimit(8);
 async function sendBatch(items) {
-  return limiter(() =>
-    http.post('/ingest/batch', items, { timeout: 5000 }),
-  ).catch(backoffRetry);
+  return limiter(() => http.post("/ingest/batch", items, { timeout: 5000 })).catch(backoffRetry);
 }
 ```
 
@@ -262,8 +256,8 @@ async function sendBatch(items) {
 ```yaml
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/limit-rps: '${TENANT_RPS}'
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: '5'
+    nginx.ingress.kubernetes.io/limit-rps: "${TENANT_RPS}"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
 ```
 
 ### 5.9 DB Spans (Node + OTEL)
@@ -271,11 +265,11 @@ metadata:
 **Path:** `services/docs-api/src/db/otel.ts`
 
 ```ts
-import { context, trace } from '@opentelemetry/api';
+import { context, trace } from "@opentelemetry/api";
 export async function tracedQuery(sql: string, params: any[]) {
-  const span = trace.getTracer('docs-api').startSpan('db.query');
-  span.setAttribute('db.system', 'postgres');
-  span.setAttribute('db.statement', obfuscate(sql));
+  const span = trace.getTracer("docs-api").startSpan("db.query");
+  span.setAttribute("db.system", "postgres");
+  span.setAttribute("db.statement", obfuscate(sql));
   try {
     return await db.query(sql, params);
   } finally {

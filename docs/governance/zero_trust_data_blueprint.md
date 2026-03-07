@@ -19,31 +19,37 @@ This blueprint moves governance from "policy-on-paper" to "policy-as-code," enfo
 ## Architecture
 
 ### 1. The Registry (`governance/registry.json`)
+
 The single source of truth for all governed data assets. It defines:
-*   **Identity**: Unique URN.
-*   **Location**: File path in the repo.
-*   **Ownership**: Responsible GitHub team.
-*   **Classification**: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED.
-*   **Controls**: Whether provenance is required.
+
+- **Identity**: Unique URN.
+- **Location**: File path in the repo.
+- **Ownership**: Responsible GitHub team.
+- **Classification**: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED.
+- **Controls**: Whether provenance is required.
 
 ### 2. The Enforcement Gate (`scripts/ci/verify_data_registry.mjs`)
+
 A CI script that runs on every PR to ensure:
-*   The registry is valid JSON.
-*   All referenced files exist.
-*   All assets have valid owners.
-*   (Future) All assets marked `provenance_required: true` have a corresponding `.intoto.json` provenance file.
+
+- The registry is valid JSON.
+- All referenced files exist.
+- All assets have valid owners.
+- (Future) All assets marked `provenance_required: true` have a corresponding `.intoto.json` provenance file.
 
 ### 3. Integration with Policy Engine
+
 Rego policies (`policy/provenance.rego`) consume the provenance files to validate signatures and build metadata.
 
 ## Pilot Scope
 
 The initial pilot covers:
-*   Governance artifacts (Taxonomies, Control Maps).
-*   Policy definitions.
+
+- Governance artifacts (Taxonomies, Control Maps).
+- Policy definitions.
 
 ## Roadmap
 
-*   **Phase 1 (Now)**: Static registry and CI verification.
-*   **Phase 2**: Automated provenance generation for registered assets.
-*   **Phase 3**: Runtime blocking of unregistered data ingestion.
+- **Phase 1 (Now)**: Static registry and CI verification.
+- **Phase 2**: Automated provenance generation for registered assets.
+- **Phase 3**: Runtime blocking of unregistered data ingestion.

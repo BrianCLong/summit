@@ -3,6 +3,7 @@
 Summit generates structured JSON logs that can be easily ingested by SIEM platforms like Splunk, Elastic, or Datadog.
 
 ## Log Format
+
 Summit emits logs in JSON format (ECS-compatible) to stdout/stderr.
 
 ```json
@@ -23,11 +24,13 @@ Summit emits logs in JSON format (ECS-compatible) to stdout/stderr.
 ## Splunk Integration
 
 ### Option 1: Splunk Connect for Kubernetes (SCK)
+
 1.  Deploy SCK to your cluster.
 2.  Configure SCK to collect logs from the `summit` namespace.
 3.  Logs will appear in your configured Splunk index.
 
 ### Option 2: HTTP Event Collector (HEC) via Fluentd/Filebeat
+
 See `infra/filebeat/` for a sample Filebeat configuration.
 
 1.  Configure Filebeat to harvest container logs.
@@ -40,8 +43,10 @@ See `infra/filebeat/` for a sample Filebeat configuration.
 3.  Import the Summit dashboard (JSON) into Kibana (contact support for the dashboard pack).
 
 ## Security Events
+
 Filter for the following `action` fields for security monitoring:
-*   `auth.login.failure`
-*   `auth.token.revoke`
-*   `admin.config.change`
-*   `data.export`
+
+- `auth.login.failure`
+- `auth.token.revoke`
+- `admin.config.change`
+- `data.export`

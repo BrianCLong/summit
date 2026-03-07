@@ -42,7 +42,7 @@ label {
   font-weight: 600;
 }
 
-input[type='file'],
+input[type="file"],
 textarea {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.5);
@@ -52,7 +52,9 @@ textarea {
 }
 
 textarea {
-  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 button {
@@ -63,7 +65,9 @@ button {
   color: #0f172a;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 button:hover {

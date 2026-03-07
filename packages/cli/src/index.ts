@@ -10,27 +10,27 @@
  */
 
 /* eslint-disable no-console */
-import { Command } from 'commander';
-import chalk from 'chalk';
-import { policyCommands } from './commands/policy.js';
-import { tenantCommands } from './commands/tenant.js';
-import { auditCommands } from './commands/audit.js';
-import { complianceCommands } from './commands/compliance.js';
-import { configCommands } from './commands/config.js';
-import { pluginCommands } from './commands/plugin.js';
-import { agentsCommands } from './commands/agents.js';
-import { doctor } from './commands/doctor.js';
-import { orchCommands } from './commands/orch.js';
-import { replayCommand } from './commands/replay.js';
-import { loadConfig, getConfig } from './config.js';
+import { Command } from "commander";
+import chalk from "chalk";
+import { policyCommands } from "./commands/policy.js";
+import { tenantCommands } from "./commands/tenant.js";
+import { auditCommands } from "./commands/audit.js";
+import { complianceCommands } from "./commands/compliance.js";
+import { configCommands } from "./commands/config.js";
+import { pluginCommands } from "./commands/plugin.js";
+import { agentsCommands } from "./commands/agents.js";
+import { doctor } from "./commands/doctor.js";
+import { orchCommands } from "./commands/orch.js";
+import { replayCommand } from "./commands/replay.js";
+import { loadConfig, getConfig } from "./config.js";
 
 const program = new Command();
 
 program
-  .name('summit')
-  .description('Summit Platform CLI - Governance, compliance, and policy management')
-  .version('1.0.0')
-  .hook('preAction', async () => {
+  .name("summit")
+  .description("Summit Platform CLI - Governance, compliance, and policy management")
+  .version("1.0.0")
+  .hook("preAction", async () => {
     try {
       await loadConfig();
     } catch (_error) {
@@ -40,8 +40,8 @@ program
 
 // Configuration commands
 program
-  .command('config')
-  .description('Manage CLI configuration')
+  .command("config")
+  .description("Manage CLI configuration")
   .addCommand(configCommands.set)
   .addCommand(configCommands.get)
   .addCommand(configCommands.list)
@@ -51,8 +51,8 @@ program.addCommand(doctor);
 
 // Policy commands
 program
-  .command('policy')
-  .description('Policy management commands')
+  .command("policy")
+  .description("Policy management commands")
   .addCommand(policyCommands.list)
   .addCommand(policyCommands.get)
   .addCommand(policyCommands.create)
@@ -64,23 +64,23 @@ program
 
 // Tenant commands
 program
-  .command('tenant')
-  .description('Tenant management commands')
+  .command("tenant")
+  .description("Tenant management commands")
   .addCommand(tenantCommands.info)
   .addCommand(tenantCommands.users)
   .addCommand(tenantCommands.settings);
 
 // Audit commands
 program
-  .command('audit')
-  .description('Audit log commands')
+  .command("audit")
+  .description("Audit log commands")
   .addCommand(auditCommands.logs)
   .addCommand(auditCommands.export);
 
 // Compliance commands
 program
-  .command('compliance')
-  .description('Compliance management commands')
+  .command("compliance")
+  .description("Compliance management commands")
   .addCommand(complianceCommands.summary)
   .addCommand(complianceCommands.controls)
   .addCommand(complianceCommands.assess)
@@ -89,8 +89,8 @@ program
 
 // Plugin commands
 program
-  .command('plugin')
-  .description('Plugin development commands')
+  .command("plugin")
+  .description("Plugin development commands")
   .addCommand(pluginCommands.create)
   .addCommand(pluginCommands.validate)
   .addCommand(pluginCommands.test)
@@ -109,40 +109,42 @@ program.addCommand(replayCommand);
 
 // Login command
 program
-  .command('login')
-  .description('Authenticate with Summit platform')
-  .option('-e, --email <email>', 'User email')
-  .option('-k, --api-key <key>', 'API key for authentication')
-  .option('--url <url>', 'Summit API URL')
+  .command("login")
+  .description("Authenticate with Summit platform")
+  .option("-e, --email <email>", "User email")
+  .option("-k, --api-key <key>", "API key for authentication")
+  .option("--url <url>", "Summit API URL")
   .action(async (options) => {
-    const { login } = await import('./commands/auth.js');
+    const { login } = await import("./commands/auth.js");
     await login(options);
   });
 
 // Logout command
 program
-  .command('logout')
-  .description('Log out from Summit platform')
+  .command("logout")
+  .description("Log out from Summit platform")
   .action(async () => {
-    const { logout } = await import('./commands/auth.js');
+    const { logout } = await import("./commands/auth.js");
     await logout();
   });
 
 // Status command
 program
-  .command('status')
-  .description('Show current connection status')
+  .command("status")
+  .description("Show current connection status")
   .action(() => {
     const config = getConfig();
     if (!config.baseUrl) {
-      console.log(chalk.yellow('Not configured. Run `summit config init` to set up.'));
+      console.log(chalk.yellow("Not configured. Run `summit config init` to set up."));
       return;
     }
 
-    console.log(chalk.bold('\nSummit CLI Status\n'));
+    console.log(chalk.bold("\nSummit CLI Status\n"));
     console.log(`API URL:    ${config.baseUrl}`);
-    console.log(`Tenant ID:  ${config.tenantId || 'Not set'}`);
-    console.log(`Auth:       ${config.token ? chalk.green('Authenticated') : chalk.yellow('Not authenticated')}`);
+    console.log(`Tenant ID:  ${config.tenantId || "Not set"}`);
+    console.log(
+      `Auth:       ${config.token ? chalk.green("Authenticated") : chalk.yellow("Not authenticated")}`
+    );
   });
 
 // Parse and execute

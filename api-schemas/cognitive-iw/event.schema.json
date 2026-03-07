@@ -4,14 +4,7 @@
   "title": "Cognitive I&W Event",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "event_id",
-    "source",
-    "platform",
-    "occurred_at",
-    "features",
-    "hashes"
-  ],
+  "required": ["event_id", "source", "platform", "occurred_at", "features", "hashes"],
   "properties": {
     "event_id": {
       "type": "string",

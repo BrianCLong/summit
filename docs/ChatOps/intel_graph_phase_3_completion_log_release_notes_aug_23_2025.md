@@ -229,12 +229,12 @@ Commit Hash: a1b2c3d4e5f6...             : ✅ IMMUTABLE
 
 ```yaml
 Security_Controls_Active:
-  abac_opa_policies: 'ENFORCING (default ON)'
-  authority_binding: 'MANDATORY (query-time validation)'
-  immutable_audit: 'Ed25519 signing + hourly notarization'
-  persisted_queries: 'REQUIRED (deny ad-hoc in production)'
-  cost_limits: 'ENFORCED (by role/tenant)'
-  secrets_scanning: 'CONTINUOUS (SBOM attestation)'
+  abac_opa_policies: "ENFORCING (default ON)"
+  authority_binding: "MANDATORY (query-time validation)"
+  immutable_audit: "Ed25519 signing + hourly notarization"
+  persisted_queries: "REQUIRED (deny ad-hoc in production)"
+  cost_limits: "ENFORCED (by role/tenant)"
+  secrets_scanning: "CONTINUOUS (SBOM attestation)"
 ```
 
 ### Operational Readiness 📞

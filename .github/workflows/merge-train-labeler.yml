@@ -6,7 +6,7 @@ on:
       batch_size:
         description: Number of PRs to mark as merge-ready
         required: true
-        default: '25'
+        default: "25"
 
 permissions:
   contents: read

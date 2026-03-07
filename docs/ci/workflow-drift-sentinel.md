@@ -7,6 +7,7 @@ The workflow drift sentinel prevents CI sprawl by enforcing governance rules on 
 ## Problem Statement
 
 Without enforcement, CI complexity grows uncontrolled:
+
 - Workflow count: 5 → 50 → 260+ (exponential growth)
 - Missing concurrency guards → queue saturation
 - Duplicate workflows → redundant execution
@@ -19,19 +20,23 @@ Result: CI gridlock, merge trains stop, developer productivity crashes.
 `scripts/ci/validate_workflows.mjs` enforces:
 
 ### 1. Maximum Workflow Count
+
 **Rule**: ≤25 active workflows in `.github/workflows/`
 **Rationale**: Forces consolidation, prevents sprawl
 **Current**: 6-8 workflows (well under limit)
 
 ### 2. Required Workflows
+
 **Rule**: Must have `pr-gate.yml` and `main-validation.yml`
 **Rationale**: Core two-tier architecture
 **Enforcement**: Hard error if missing
 
 ### 3. Concurrency Guards
+
 **Rule**: All workflows must have `concurrency` block
 **Rationale**: Prevents duplicate runs, reduces queue pressure
 **Example**:
+
 ```yaml
 concurrency:
   group: workflow-name-${{ github.ref }}
@@ -39,17 +44,20 @@ concurrency:
 ```
 
 ### 4. Path Filtering (Recommended)
+
 **Rule**: Domain workflows should have path filters
 **Applies to**: `server-ci.yml`, `client-ci.yml`, `infra-ci.yml`, `docs-ci.yml`
 **Rationale**: Prevents unnecessary runs
 **Enforcement**: Warning (not error)
 
 ### 5. Timeout Limits (Recommended)
+
 **Rule**: Jobs should have `timeout-minutes`
 **Rationale**: Prevents runaway jobs
 **Enforcement**: Warning (not error)
 
 ### 6. Unique Workflow Names
+
 **Rule**: No duplicate workflow names
 **Rationale**: Prevents confusion, enables monitoring
 **Enforcement**: Hard error if duplicate
@@ -57,6 +65,7 @@ concurrency:
 ## Integration
 
 Runs automatically in `pr-gate.yml`:
+
 ```yaml
 - name: CI Drift Sentinel
   run: node scripts/ci/validate_workflows.mjs
@@ -69,6 +78,7 @@ Runs automatically in `pr-gate.yml`:
 ## Output
 
 ### Success
+
 ```
 ═══════════════════════════════════════
    CI Workflow Drift Sentinel
@@ -102,6 +112,7 @@ Warnings: 0
 ```
 
 ### Failure (Example)
+
 ```
 ═══════════════════════════════════════
    CI Workflow Drift Sentinel
@@ -139,6 +150,7 @@ Process exited with code 1
 To bypass validation temporarily (requires explicit PR justification):
 
 1. **Comment out validation step** in pr-gate.yml:
+
 ```yaml
 # - name: CI Drift Sentinel
 #   run: node scripts/ci/validate_workflows.mjs
@@ -149,6 +161,7 @@ To bypass validation temporarily (requires explicit PR justification):
 4. **Re-enable validation** immediately after merge
 
 **When to bypass**:
+
 - ❌ "It's annoying" (not valid)
 - ❌ "Too much work" (not valid)
 - ✅ Critical hotfix blocking production
@@ -176,6 +189,7 @@ validateNewRule() {
 ```
 
 Add to `run()` method:
+
 ```javascript
 async run() {
   // ...existing validations...
@@ -187,6 +201,7 @@ async run() {
 ### Updating Thresholds
 
 To change max workflow count:
+
 ```javascript
 const MAX_WORKFLOWS = 25; // Increase if justified
 ```
@@ -196,6 +211,7 @@ const MAX_WORKFLOWS = 25; // Increase if justified
 ### Excluding Workflows
 
 To exclude from validation (e.g., reusable workflows):
+
 ```javascript
 .filter(f => !f.startsWith('_')); // Exclude _auth-oidc.yml etc.
 ```
@@ -203,6 +219,7 @@ To exclude from validation (e.g., reusable workflows):
 ## Metrics
 
 Track over time:
+
 - **Workflow count trend**: Should stay flat or decrease
 - **Violations per PR**: Should trend toward zero
 - **Time to fix violations**: Should be <15 minutes
@@ -210,18 +227,20 @@ Track over time:
 
 ## Comparison: Before vs After
 
-| Metric | Before Sentinel | After Sentinel |
-|--------|----------------|----------------|
-| **Workflow count** | 260+ | 6-8 (capped at 25) |
-| **Concurrency guards** | ~30% | 100% (enforced) |
-| **Duplicate names** | 5+ | 0 (prevented) |
-| **Workflow sprawl** | Uncontrolled | Prevented |
-| **CI incidents** | Monthly | Rare |
+| Metric                 | Before Sentinel | After Sentinel     |
+| ---------------------- | --------------- | ------------------ |
+| **Workflow count**     | 260+            | 6-8 (capped at 25) |
+| **Concurrency guards** | ~30%            | 100% (enforced)    |
+| **Duplicate names**    | 5+              | 0 (prevented)      |
+| **Workflow sprawl**    | Uncontrolled    | Prevented          |
+| **CI incidents**       | Monthly         | Rare               |
 
 ## Related Tools
 
 ### Workflow Cleanup Script
+
 Identifies candidates for archiving:
+
 ```bash
 node scripts/ci/workflow_cleanup.mjs
 ```
@@ -229,7 +248,9 @@ node scripts/ci/workflow_cleanup.mjs
 See: `docs/ci/workflow-cleanup-automation.md`
 
 ### Capacity Monitor
+
 Real-time queue monitoring:
+
 ```bash
 bash scripts/ci/monitor-runner-capacity.sh
 ```

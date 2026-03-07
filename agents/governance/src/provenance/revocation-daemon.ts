@@ -12,9 +12,9 @@
  * @module provenance/revocation-daemon
  */
 
-import crypto from 'node:crypto';
-import { Pool } from 'pg';
-import { AIProvenanceManager } from './AIProvenanceManager';
+import crypto from "node:crypto";
+import { Pool } from "pg";
+import { AIProvenanceManager } from "./AIProvenanceManager";
 
 /**
  * Revocation certificate issued by authorized party
@@ -24,7 +24,7 @@ export interface RevocationCertificate {
   revokedNodeHash: string;
 
   /** Reason code for revocation */
-  reason: 'model_poisoning' | 'data_breach' | 'agent_compromise' | 'regulatory_change';
+  reason: "model_poisoning" | "data_breach" | "agent_compromise" | "regulatory_change";
 
   /** Timestamp when revocation was issued */
   revocationTime: Date;
@@ -91,7 +91,7 @@ export class RevocationDaemon {
   constructor(
     private provenanceManager: AIProvenanceManager,
     private db: Pool,
-    private trustedKeys: Map<string, string>,
+    private trustedKeys: Map<string, string>
     // TODO: Add Redis client for Bloom filter cache
   ) {}
 
@@ -122,7 +122,7 @@ export class RevocationDaemon {
         certificate.revocationTime,
         certificate.issuer,
         certificate.signature,
-      ],
+      ]
     );
 
     // Trigger propagation
@@ -151,11 +151,11 @@ export class RevocationDaemon {
       null,
       Buffer.from(payload),
       crypto.createPublicKey(publicKey),
-      Buffer.from(certificate.signature, 'base64'),
+      Buffer.from(certificate.signature, "base64")
     );
 
     if (!isVerified) {
-      throw new Error('Invalid signature');
+      throw new Error("Invalid signature");
     }
   }
 
@@ -190,7 +190,7 @@ export class RevocationDaemon {
         SELECT node_hash FROM provenance_merkle_tree
         WHERE parent_hash = $1 AND tainted = false
       `,
-        [currentHash],
+        [currentHash]
       );
 
       // Mark children as tainted (batch update)
@@ -198,14 +198,14 @@ export class RevocationDaemon {
         const hashes = children.rows.map((r) => r.node_hash);
 
         // Use dynamic IN clause for pg-mem compatibility
-        const placeholders = hashes.map((_, i) => `$${i + 2}`).join(', ');
+        const placeholders = hashes.map((_, i) => `$${i + 2}`).join(", ");
         await this.db.query(
           `
           UPDATE provenance_merkle_tree
           SET tainted = true, revocation_cert_id = $1
           WHERE node_hash IN (${placeholders})
         `,
-          [revokedNodeHash, ...hashes],
+          [revokedNodeHash, ...hashes]
         );
 
         queue.push(...hashes);

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import holdData from './data/sampleHold.json';
-import type { HoldDataset } from './types';
-import { verifyCustodyChain } from './utils';
+import { useEffect, useMemo, useState } from "react";
+import holdData from "./data/sampleHold.json";
+import type { HoldDataset } from "./types";
+import { verifyCustodyChain } from "./utils";
 
 type VerificationState = {
   valid: boolean;
@@ -41,9 +41,9 @@ export function LhoDashboard() {
   const systemKeys = useMemo(() => Object.keys(dataset.scope).sort(), []);
   const diffSections = useMemo(() => {
     return [
-      { label: 'Added', data: dataset.scopeDiff.added },
-      { label: 'Removed', data: dataset.scopeDiff.removed },
-      { label: 'Unchanged', data: dataset.scopeDiff.unchanged },
+      { label: "Added", data: dataset.scopeDiff.added },
+      { label: "Removed", data: dataset.scopeDiff.removed },
+      { label: "Unchanged", data: dataset.scopeDiff.unchanged },
     ];
   }, []);
 
@@ -62,7 +62,9 @@ export function LhoDashboard() {
           </div>
           <div className="sm:col-span-2">
             <dt className="text-sm font-medium text-slate-500">Preservation Window</dt>
-            <dd className="text-base text-slate-900">{formatDateRange(dataset.window.start, dataset.window.end)}</dd>
+            <dd className="text-base text-slate-900">
+              {formatDateRange(dataset.window.start, dataset.window.end)}
+            </dd>
           </div>
         </dl>
       </section>
@@ -127,10 +129,14 @@ export function LhoDashboard() {
           <h2 className="text-lg font-semibold text-slate-800">Custody Verification</h2>
           <span
             className={`rounded-full px-3 py-1 text-sm font-semibold ${
-              verification?.valid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+              verification?.valid ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
             }`}
           >
-            {verification?.valid ? 'Chain intact' : verification ? 'Attention required' : 'Checking...'}
+            {verification?.valid
+              ? "Chain intact"
+              : verification
+                ? "Attention required"
+                : "Checking..."}
           </span>
         </div>
         {verification?.message && !verification.valid && (
@@ -155,7 +161,9 @@ export function LhoDashboard() {
                   <td className="py-2 text-slate-600">{event.action}</td>
                   <td className="py-2 text-slate-600">{new Date(event.timestamp).toUTCString()}</td>
                   <td className="py-2 text-slate-600">
-                    <code className="break-all text-xs text-slate-500">{event.scopeFingerprint}</code>
+                    <code className="break-all text-xs text-slate-500">
+                      {event.scopeFingerprint}
+                    </code>
                   </td>
                 </tr>
               ))}
@@ -176,27 +184,29 @@ export function LhoDashboard() {
                 <dl className="mt-2 space-y-2 text-sm text-slate-600">
                   <div>
                     <dt className="font-medium text-slate-500">Frozen</dt>
-                    <dd>{report.frozenResources.join(', ') || 'None'}</dd>
+                    <dd>{report.frozenResources.join(", ") || "None"}</dd>
                   </div>
                   <div>
                     <dt className="font-medium text-slate-500">Snapshots</dt>
-                    <dd>{report.snapshotted.length > 0 ? report.snapshotted.join(', ') : 'None'}</dd>
+                    <dd>
+                      {report.snapshotted.length > 0 ? report.snapshotted.join(", ") : "None"}
+                    </dd>
                   </div>
                   <div>
                     <dt className="font-medium text-slate-500">Tags</dt>
                     <dd>
                       {Object.keys(report.tagged).length === 0 ? (
-                        'None'
+                        "None"
                       ) : (
                         <ul className="list-inside list-disc space-y-1">
                           {Object.entries(report.tagged)
                             .sort(([a], [b]) => a.localeCompare(b))
                             .map(([resource, tags]) => (
                               <li key={resource}>
-                                <span className="font-medium text-slate-600">{resource}:</span>{' '}
+                                <span className="font-medium text-slate-600">{resource}:</span>{" "}
                                 {Object.entries(tags)
                                   .map(([key, value]) => `${key}=${value}`)
-                                  .join(', ')}
+                                  .join(", ")}
                               </li>
                             ))}
                         </ul>

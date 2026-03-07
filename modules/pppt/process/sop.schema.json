@@ -4,11 +4,11 @@
   "type": "object",
   "required": ["name", "maturity", "steps", "owner"],
   "properties": {
-    "name": {"type": "string"},
-    "maturity": {"enum": ["draft", "validated", "optimized", "standardized"]},
-    "owner": {"type": "string"},
-    "steps": {"type": "array", "items": {"type": "string"}, "minItems": 3},
-    "automation_required": {"type": "boolean", "default": false}
+    "name": { "type": "string" },
+    "maturity": { "enum": ["draft", "validated", "optimized", "standardized"] },
+    "owner": { "type": "string" },
+    "steps": { "type": "array", "items": { "type": "string" }, "minItems": 3 },
+    "automation_required": { "type": "boolean", "default": false }
   },
   "if": {
     "properties": { "automation_required": { "const": true } }

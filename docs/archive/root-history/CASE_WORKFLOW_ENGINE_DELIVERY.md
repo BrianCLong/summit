@@ -29,6 +29,7 @@ Delivered a **production-grade Case Management & Workflow Engine** for the Intel
 ### 1. Database Schema (`015_case_workflow_engine.sql`)
 
 **New Tables:**
+
 - `maestro.case_roles` - System and custom roles (investigator, analyst, approver, etc.)
 - `maestro.case_participants` - User-case-role assignments
 - `maestro.case_stages` - Workflow stage definitions per case type
@@ -40,38 +41,46 @@ Delivered a **production-grade Case Management & Workflow Engine** for the Intel
 - `maestro.case_graph_references` - Links to graph entities (opaque IDs)
 
 **Extended Tables:**
+
 - `maestro.cases` - Added workflow fields (priority, stage, jurisdiction, authority, tags)
 
 **Database Functions:**
+
 - `is_stage_transition_allowed()` - Validate transitions
 - `get_overdue_tasks()` - Query overdue tasks
 - `get_case_sla_summary()` - SLA metrics
 - `get_pending_approvals_for_user()` - User's pending approvals
 
 **Triggers:**
+
 - Auto-log state transitions to history table
 - Auto-update SLA status based on due dates
 - Auto-complete approvals when threshold met
 
 **Views:**
+
 - `v_active_cases_summary` - Case metrics with participant/task/SLA counts
 - `v_user_workload` - User task workload summary
 
 ### 2. TypeScript Implementation
 
 **Core Engines:**
+
 - `StateMachine.ts` - Workflow state machine with configurable guards (role, authority, data, approval)
 - `SLATracker.ts` - SLA lifecycle management and breach detection
 
 **Repositories:**
+
 - `TaskRepo.ts` - Task CRUD, assignment, completion, overdue queries
 - `ParticipantRepo.ts` - Participant and role management
 - `ApprovalRepo.ts` - Approval requests and voting
 
 **Main Service:**
+
 - `CaseWorkflowService.ts` - Unified business logic layer integrating all components
 
 **Type Definitions:**
+
 - `types.ts` - Complete TypeScript types for all entities (150+ types)
 
 ### 3. REST API (`case-workflow.ts`)
@@ -79,10 +88,12 @@ Delivered a **production-grade Case Management & Workflow Engine** for the Intel
 **Endpoints:**
 
 **Workflow Transitions:**
+
 - `POST /api/cases/:id/transition` - Transition case stage
 - `GET /api/cases/:id/available-transitions` - Get available transitions
 
 **Task Management:**
+
 - `POST /api/cases/:id/tasks` - Create task
 - `GET /api/cases/:id/tasks` - List tasks
 - `PUT /api/tasks/:id/assign` - Assign task
@@ -90,25 +101,30 @@ Delivered a **production-grade Case Management & Workflow Engine** for the Intel
 - `GET /api/cases/:id/tasks/overdue` - Get overdue tasks
 
 **Participant Management:**
+
 - `POST /api/cases/:id/participants` - Add participant
 - `GET /api/cases/:id/participants` - List participants
 - `DELETE /api/cases/:caseId/participants/:userId/:roleId` - Remove participant
 
 **Approval Management:**
+
 - `POST /api/cases/:id/approvals` - Request approval
 - `POST /api/approvals/:id/vote` - Submit vote
 - `GET /api/approvals/pending` - Get user's pending approvals
 
 **SLA Management:**
+
 - `GET /api/cases/:id/slas` - List case SLAs
 - `GET /api/cases/:id/slas/summary` - SLA summary
 
 **Role Management:**
+
 - `GET /api/roles` - List roles
 
 ### 4. Tests
 
 **Integration Tests** (`case-workflow.integration.test.ts`):
+
 - Complete case lifecycle (create → transition → tasks → completion)
 - 4-eyes approval workflow
 - Available transitions based on role
@@ -121,6 +137,7 @@ Delivered a **production-grade Case Management & Workflow Engine** for the Intel
 ### 5. Documentation
 
 **Comprehensive README** (`workflow/README.md`):
+
 - Architecture overview
 - Core concepts (stages, guards, tasks, SLAs, approvals)
 - Data model reference
@@ -208,6 +225,7 @@ Control who can transition and when:
 ### 3. SLA Auto-Timers
 
 SLAs automatically:
+
 - Created when case enters stage with `sla_hours` defined
 - Created when task has `dueDate`
 - Status updated via database trigger (active → at_risk → breached)
@@ -236,11 +254,11 @@ await workflowService.submitApprovalVote({...});
 Services integrate via events, not direct calls:
 
 ```typescript
-workflowService.on('case.stage_changed', async (event) => {
+workflowService.on("case.stage_changed", async (event) => {
   await copilotService.generateStageSummary(event.caseId, event.data.toStage);
 });
 
-workflowService.on('sla.breached', async (event) => {
+workflowService.on("sla.breached", async (event) => {
   await notificationService.escalateSLABreach(event.caseId, event.data);
 });
 ```
@@ -248,10 +266,12 @@ workflowService.on('sla.breached', async (event) => {
 ### 6. Complete Audit Trail
 
 All changes logged to:
+
 - `maestro.case_state_history` - Stage/status transitions
 - `maestro.audit_access_logs` - All case access (via existing audit system)
 
 Every transition requires:
+
 - `reason` - Human-readable justification
 - `legalBasis` - Legal authority
 - `transitioned_by` - User ID
@@ -263,26 +283,29 @@ Every transition requires:
 ### ✅ Graph Core Integration
 
 **DO:**
+
 - Store graph entity IDs as opaque strings in `case_graph_references`
 - Store entity labels for UI display
 - Use events to notify Graph Core of case changes
 
 **DON'T:**
+
 - Query Neo4j directly from workflow engine
 - Create foreign key constraints to graph entities
 
 ### ✅ Copilot Integration
 
 **Event-Driven:**
+
 ```typescript
-workflowService.on('case.stage_changed', async (event) => {
+workflowService.on("case.stage_changed", async (event) => {
   await copilotService.generateContextSummary({
     caseId: event.caseId,
     stage: event.data.toStage,
   });
 });
 
-workflowService.on('task.completed', async (event) => {
+workflowService.on("task.completed", async (event) => {
   await copilotService.analyzeTaskResults({
     caseId: event.caseId,
     taskId: event.data.task.id,
@@ -294,6 +317,7 @@ workflowService.on('task.completed', async (event) => {
 ### ✅ Governance Integration
 
 **Decorate Decisions:**
+
 - Governance service can check case compartment/policy labels
 - Workflow engine exposes stable JSON schemas
 - No embedded access logic in workflow engine
@@ -342,6 +366,7 @@ workflowService.on('task.completed', async (event) => {
 ✅ Event system
 
 **Run Tests:**
+
 ```bash
 npm test -- case-workflow.integration.test.ts
 ```
@@ -360,6 +385,7 @@ psql -d intelgraph -f server/src/db/migrations/postgres/015_case_workflow_engine
 ### System Roles Created
 
 Migration automatically creates:
+
 - `investigator` - Lead investigator with full case access
 - `analyst` - Analyst with read and contribute access
 - `approver` - Approver for 4-eyes rules
@@ -369,6 +395,7 @@ Migration automatically creates:
 ### Default Stages Created
 
 Migration automatically creates `investigation` case type stages:
+
 - `intake` → `analysis` → `review` → `approved` → `completed`
 - Also: `escalated`, `closed`
 
@@ -408,25 +435,28 @@ server/src/
 
 ```typescript
 // server/src/index.ts
-import { createCaseWorkflowRouter } from './routes/case-workflow.js';
-import { CaseWorkflowService } from './cases/workflow/index.js';
+import { createCaseWorkflowRouter } from "./routes/case-workflow.js";
+import { CaseWorkflowService } from "./cases/workflow/index.js";
 
 const workflowRouter = createCaseWorkflowRouter(pg);
-app.use('/api', workflowRouter);
+app.use("/api", workflowRouter);
 
 // Set up SLA monitoring cron job
 const workflowService = new CaseWorkflowService(pg);
-setInterval(async () => {
-  await workflowService.checkBreachedSLAs();
-  await workflowService.checkAtRiskSLAs();
-}, 5 * 60 * 1000); // Every 5 minutes
+setInterval(
+  async () => {
+    await workflowService.checkBreachedSLAs();
+    await workflowService.checkAtRiskSLAs();
+  },
+  5 * 60 * 1000
+); // Every 5 minutes
 ```
 
 ### 2. Integrate with Copilot
 
 ```typescript
 // Register Copilot event handlers
-workflowService.on('case.stage_changed', async (event) => {
+workflowService.on("case.stage_changed", async (event) => {
   await copilotService.generateStageSummary(event.caseId, event.data.toStage);
 });
 ```

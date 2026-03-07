@@ -7,9 +7,9 @@
  * This acts as the "Single Source of Truth" for time representation.
  */
 
-export type Granularity = "minute" | "hour" | "day";
+export type Granularity = 'minute' | 'hour' | 'day'
 
-export type TZMode = "UTC" | "LOCAL";
+export type TZMode = 'UTC' | 'LOCAL'
 
 /**
  * Normalized TimeWindow structure.
@@ -18,11 +18,11 @@ export type TZMode = "UTC" | "LOCAL";
  * Invariant: startMs and endMs are valid finite numbers
  */
 export type TimeWindow = Readonly<{
-  startMs: number;  // inclusive, epoch ms
-  endMs: number;    // inclusive (based on requirement to pick one)
-  granularity: Granularity;
-  tzMode: TZMode;
-}>;
+  startMs: number // inclusive, epoch ms
+  endMs: number // inclusive (based on requirement to pick one)
+  granularity: Granularity
+  tzMode: TZMode
+}>
 
 /**
  * Normalizes a time window to ensure invariants.
@@ -30,16 +30,16 @@ export type TimeWindow = Readonly<{
  * - Enforces start <= end
  */
 export function normalizeWindow(w: TimeWindow): TimeWindow {
-  const start = Math.min(w.startMs, w.endMs);
-  const end = Math.max(w.startMs, w.endMs);
+  const start = Math.min(w.startMs, w.endMs)
+  const end = Math.max(w.startMs, w.endMs)
 
   // Potential future place for granularity rounding logic
 
   return {
     ...w,
     startMs: start,
-    endMs: end
-  };
+    endMs: end,
+  }
 }
 
 /**
@@ -48,10 +48,10 @@ export function normalizeWindow(w: TimeWindow): TimeWindow {
  */
 export function assertValidWindow(w: TimeWindow) {
   if (!(Number.isFinite(w.startMs) && Number.isFinite(w.endMs))) {
-    throw new Error(`Invalid window: start=${w.startMs}, end=${w.endMs}`);
+    throw new Error(`Invalid window: start=${w.startMs}, end=${w.endMs}`)
   }
   if (w.endMs < w.startMs) {
-    throw new Error(`Window reversed: start=${w.startMs} > end=${w.endMs}`);
+    throw new Error(`Window reversed: start=${w.startMs} > end=${w.endMs}`)
   }
 }
 
@@ -68,8 +68,8 @@ export function fromIsoWindow(
     startMs: new Date(from).getTime(),
     endMs: new Date(to).getTime(),
     granularity,
-    tzMode
-  });
+    tzMode,
+  })
 }
 
 /**
@@ -78,6 +78,6 @@ export function fromIsoWindow(
 export function toIsoWindow(w: TimeWindow): { from: string; to: string } {
   return {
     from: new Date(w.startMs).toISOString(),
-    to: new Date(w.endMs).toISOString()
-  };
+    to: new Date(w.endMs).toISOString(),
+  }
 }

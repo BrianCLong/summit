@@ -180,6 +180,7 @@ summit/
 ### Key Concepts
 
 **1. Tech Stack:**
+
 - **Frontend:** React + TypeScript + Material-UI + Zustand
 - **Backend:** Node.js + Express + Apollo GraphQL + Prisma ORM
 - **Databases:** Neo4j (graph), PostgreSQL (relational), Redis (cache/queue)
@@ -188,12 +189,14 @@ summit/
 - **CI/CD:** GitHub Actions (138 workflows)
 
 **2. Monorepo Management:**
+
 - **Package Manager:** pnpm (NOT npm or yarn)
 - **Workspaces:** `packages/*`, `apps/*`, `server`, `client`
 - **Install:** Always use `pnpm install --frozen-lockfile` (respects lockfile)
 - **Scripts:** Run from root: `pnpm <script>` or `pnpm --filter <package> <script>`
 
 **3. Agent System (Core Feature):**
+
 - **Maestro:** Agent orchestration engine (`server/src/maestro/`)
 - **Conductor:** Agent coordination and validation (`server/src/conductor/`)
 - **Policy Engine:** OPA integration for governance (`server/src/policies/`)
@@ -201,6 +204,7 @@ summit/
 - **⚠️ Current Status:** Epic 1 (Glass Box Governance) in progress, ~60% complete
 
 **4. Data Flow:**
+
 ```
 User → Frontend (apps/web)
      → API Gateway (apps/api)
@@ -210,6 +214,7 @@ User → Frontend (apps/web)
 ```
 
 **5. Agent Task Flow:**
+
 ```
 Agent Task Submitted
      → Maestro (server/src/maestro/MaestroService.ts)
@@ -227,6 +232,7 @@ Agent Task Submitted
 ### Beginner: Fix a TODO
 
 1. Find a TODO in a subsystem you're interested in:
+
    ```bash
    rg "TODO" server/src/graphql --type ts | head -10
    ```
@@ -238,17 +244,20 @@ Agent Task Submitted
 4. Implement the fix
 
 5. Write a test:
+
    ```bash
    # Create test file next to implementation
    touch server/src/graphql/__tests__/myFeature.test.ts
    ```
 
 6. Run tests:
+
    ```bash
    pnpm test:unit
    ```
 
 7. Commit with conventional commit format:
+
    ```bash
    git commit -m "fix(graphql): implement TODO for input validation
 
@@ -264,6 +273,7 @@ Agent Task Submitted
 2. Pick a story from Epic 1 or Epic 2
 
 3. Create a feature branch:
+
    ```bash
    git checkout -b feat/your-feature-name
    ```
@@ -281,6 +291,7 @@ Agent Task Submitted
 1. Check [RUNBOOKS/](./RUNBOOKS/) for common issues
 
 2. Access logs:
+
    ```bash
    kubectl logs -f deployment/summit-api -n production
    ```
@@ -386,6 +397,7 @@ node --inspect-brk node_modules/.bin/jest --runInBand
 ## 📖 Essential Reading
 
 **Read First (Priority Order):**
+
 1. [TECHNICAL_AUDIT_REPORT_2026-01-20.md](./TECHNICAL_AUDIT_REPORT_2026-01-20.md) - Comprehensive repo analysis
 2. [ROADMAP.md](./ROADMAP.md) - Current priorities (Epic 1 & 2)
 3. [SECURITY.md](./SECURITY.md) - Security policies and threat model
@@ -393,11 +405,13 @@ node --inspect-brk node_modules/.bin/jest --runInBand
 5. [docs/governance/](./docs/governance/) - Governance and compliance
 
 **Architecture Docs:**
+
 - [docs/AWS_DEPLOYMENT.md](./docs/AWS_DEPLOYMENT.md) - Infrastructure setup
 - [infra/README.md](./infra/README.md) - DevOps guide
 - [ARCHITECTURE_MAP.generated.yaml](./ARCHITECTURE_MAP.generated.yaml) - System map
 
 **Operational Docs:**
+
 - [docs/runbooks/](./docs/runbooks/) - Emergency procedures
 - [RUNBOOKS/](./RUNBOOKS/) - Common operational tasks
 - [SECURITY/cve-exceptions.md](./SECURITY/cve-exceptions.md) - CVE risk assessment
@@ -415,6 +429,7 @@ node --inspect-brk node_modules/.bin/jest --runInBand
 **Impact:** Agent prompt injection attacks are NOT prevented
 
 **What to do:**
+
 - Feature flag `SEMANTIC_VALIDATION_ENABLED` is set to `false` by default (safe)
 - **DO NOT** enable in production
 - See audit report for full details

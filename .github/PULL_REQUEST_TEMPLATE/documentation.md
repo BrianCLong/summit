@@ -1,9 +1,9 @@
 ---
 name: Documentation
 about: Documentation-only changes (README, guides, runbooks, ADRs)
-title: '[DOCS] '
-labels: 'area/docs'
-assignees: ''
+title: "[DOCS] "
+labels: "area/docs"
+assignees: ""
 ---
 
 ## Summary
@@ -43,6 +43,7 @@ assignees: ''
 - [ ] Technical review completed
 
 **Validation Commands** (if applicable):
+
 ```bash
 # Example: if documenting a new command
 make bootstrap

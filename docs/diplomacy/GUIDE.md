@@ -36,17 +36,17 @@ pnpm -r --filter "@intelgraph/predictive-*" run build
 ### Basic Usage
 
 ```typescript
-import { diplomacyService } from '@intelgraph/services/diplomacy-service';
-import { foreignRelationsService } from '@intelgraph/services/foreign-relations-service';
+import { diplomacyService } from "@intelgraph/services/diplomacy-service";
+import { foreignRelationsService } from "@intelgraph/services/foreign-relations-service";
 
 // Get diplomatic dashboard for a country
-const dashboard = diplomacyService.getDiplomaticDashboard('USA');
+const dashboard = diplomacyService.getDiplomaticDashboard("USA");
 
 // Analyze bilateral relationship
-const analysis = foreignRelationsService.analyzeBilateralRelationship('USA', 'China');
+const analysis = foreignRelationsService.analyzeBilateralRelationship("USA", "China");
 
 // Generate intelligence report
-const report = diplomacyService.generateIntelligenceReport('USA', 90);
+const report = diplomacyService.generateIntelligenceReport("USA", 90);
 ```
 
 ## Core Capabilities
@@ -64,6 +64,7 @@ Monitor and analyze all forms of diplomatic events:
 - Backchannel communications
 
 **Key Features:**
+
 - Real-time event tracking
 - Activity pattern analysis
 - Engagement style detection
@@ -82,6 +83,7 @@ Comprehensive treaty lifecycle management:
 - Termination risk detection
 
 **Key Features:**
+
 - Multi-party treaty support
 - Compliance scoring
 - Violation detection
@@ -100,6 +102,7 @@ Deep analysis of policy positions and evolution:
 - Consistency assessment
 
 **Key Features:**
+
 - Multi-domain coverage
 - Historical comparison
 - Predictive modeling
@@ -118,6 +121,7 @@ Comprehensive relationship tracking:
 - Cultural exchange tracking
 
 **Key Features:**
+
 - Health scoring
 - Trajectory prediction
 - Risk detection
@@ -135,6 +139,7 @@ Monitor international organizations:
 - Trade blocs (WTO, USMCA, etc.)
 
 **Key Features:**
+
 - Voting bloc identification
 - Power dynamics analysis
 - Reform tracking
@@ -153,6 +158,7 @@ Analyze diplomatic messaging:
 - Narrative tracking
 
 **Key Features:**
+
 - Multi-source analysis
 - Translation handling
 - Rhetorical analysis
@@ -171,6 +177,7 @@ Monitor conflict resolution efforts:
 - Deescalation identification
 
 **Key Features:**
+
 - Early warning systems
 - Escalation modeling
 - Mediator effectiveness
@@ -189,6 +196,7 @@ Track diplomatic cadre:
 - Performance evaluation
 
 **Key Features:**
+
 - Relationship mapping
 - Expertise tracking
 - Effectiveness scoring
@@ -206,6 +214,7 @@ Monitor economic statecraft:
 - Market access negotiations
 
 **Key Features:**
+
 - Deal progress tracking
 - Impact assessment
 - Effectiveness evaluation
@@ -223,6 +232,7 @@ Advanced prediction capabilities:
 - Regional stability assessment
 
 **Key Features:**
+
 - Scenario generation
 - Confidence scoring
 - Indicator tracking
@@ -256,6 +266,7 @@ Advanced prediction capabilities:
 Central service for diplomatic event tracking, treaty monitoring, and crisis management.
 
 **Key Methods:**
+
 - `getDiplomaticDashboard(country)` - Comprehensive country dashboard
 - `trackDiplomaticEvent(event)` - Track new events
 - `registerTreaty(treaty)` - Register treaties
@@ -267,6 +278,7 @@ Central service for diplomatic event tracking, treaty monitoring, and crisis man
 Service for foreign policy analysis, bilateral relations, and predictive analytics.
 
 **Key Methods:**
+
 - `getForeignRelationsOverview(country)` - Country overview
 - `analyzeBilateralRelationship(country1, country2)` - Relationship analysis
 - `analyzeRegionalDynamics(region, countries)` - Regional analysis
@@ -278,75 +290,79 @@ Service for foreign policy analysis, bilateral relations, and predictive analyti
 ### Use Case 1: Monitor Bilateral Relationship
 
 ```typescript
-import { foreignRelationsService } from '@intelgraph/services/foreign-relations-service';
+import { foreignRelationsService } from "@intelgraph/services/foreign-relations-service";
 
 // Analyze US-China relationship
-const analysis = foreignRelationsService.analyzeBilateralRelationship('USA', 'China');
+const analysis = foreignRelationsService.analyzeBilateralRelationship("USA", "China");
 
-console.log('Relationship Quality:', analysis.relationshipStatus.relationshipQuality);
-console.log('Policy Alignment:', analysis.policyAlignment.overallAlignment);
-console.log('Predicted Trajectory:', analysis.predictedTrajectory.prediction);
-console.log('Risk Level:', analysis.risks.riskLevel);
-console.log('Recommendations:', analysis.recommendations);
+console.log("Relationship Quality:", analysis.relationshipStatus.relationshipQuality);
+console.log("Policy Alignment:", analysis.policyAlignment.overallAlignment);
+console.log("Predicted Trajectory:", analysis.predictedTrajectory.prediction);
+console.log("Risk Level:", analysis.risks.riskLevel);
+console.log("Recommendations:", analysis.recommendations);
 ```
 
 ### Use Case 2: Track Treaty Compliance
 
 ```typescript
-import { diplomacyService } from '@intelgraph/services/diplomacy-service';
+import { diplomacyService } from "@intelgraph/services/diplomacy-service";
 
 // Get treaty compliance status
-const treaty = diplomacyService.treatyMonitor.getTreaty('treaty-id');
-const compliance = diplomacyService.treatyMonitor.assessCompliance('treaty-id', 'USA');
+const treaty = diplomacyService.treatyMonitor.getTreaty("treaty-id");
+const compliance = diplomacyService.treatyMonitor.assessCompliance("treaty-id", "USA");
 
-console.log('Overall Compliance:', compliance?.overallCompliance);
-console.log('Violations:', compliance?.violations);
+console.log("Overall Compliance:", compliance?.overallCompliance);
+console.log("Violations:", compliance?.violations);
 ```
 
 ### Use Case 3: Predict Policy Shift
 
 ```typescript
-import { foreignRelationsService } from '@intelgraph/services/foreign-relations-service';
+import { foreignRelationsService } from "@intelgraph/services/foreign-relations-service";
 
 // Predict policy shifts
-const shifts = foreignRelationsService.predictPolicyShifts('China');
+const shifts = foreignRelationsService.predictPolicyShifts("China");
 
 for (const shift of shifts) {
-  console.log('Domain:', shift.subject);
-  console.log('Prediction:', shift.prediction);
-  console.log('Confidence:', shift.confidence);
-  console.log('Timeframe:', shift.timeframe);
+  console.log("Domain:", shift.subject);
+  console.log("Prediction:", shift.prediction);
+  console.log("Confidence:", shift.confidence);
+  console.log("Timeframe:", shift.timeframe);
 }
 ```
 
 ### Use Case 4: Analyze Regional Dynamics
 
 ```typescript
-import { foreignRelationsService } from '@intelgraph/services/foreign-relations-service';
+import { foreignRelationsService } from "@intelgraph/services/foreign-relations-service";
 
 // Analyze Asia-Pacific dynamics
-const dynamics = foreignRelationsService.analyzeRegionalDynamics(
-  'Asia-Pacific',
-  ['USA', 'China', 'Japan', 'South Korea', 'India', 'Australia']
-);
+const dynamics = foreignRelationsService.analyzeRegionalDynamics("Asia-Pacific", [
+  "USA",
+  "China",
+  "Japan",
+  "South Korea",
+  "India",
+  "Australia",
+]);
 
-console.log('Regional Stability:', dynamics.regionalStability.overallStability);
-console.log('Power Balance:', dynamics.powerBalance.balanceType);
-console.log('Friction Points:', dynamics.frictionPoints.length);
+console.log("Regional Stability:", dynamics.regionalStability.overallStability);
+console.log("Power Balance:", dynamics.powerBalance.balanceType);
+console.log("Friction Points:", dynamics.frictionPoints.length);
 ```
 
 ### Use Case 5: Generate Intelligence Report
 
 ```typescript
-import { diplomacyService } from '@intelgraph/services/diplomacy-service';
+import { diplomacyService } from "@intelgraph/services/diplomacy-service";
 
 // Generate 90-day intelligence report
-const report = diplomacyService.generateIntelligenceReport('Russia', 90);
+const report = diplomacyService.generateIntelligenceReport("Russia", 90);
 
 console.log(report.summary);
-console.log('Key Events:', report.keyEvents.length);
-console.log('Active Crises:', report.crisisInvolvement.activeCrises);
-console.log('Recommendations:', report.recommendations);
+console.log("Key Events:", report.keyEvents.length);
+console.log("Active Crises:", report.crisisInvolvement.activeCrises);
+console.log("Recommendations:", report.recommendations);
 ```
 
 ## Best Practices

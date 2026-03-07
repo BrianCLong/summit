@@ -28,7 +28,7 @@ export class ExtensionPointRegistry {
    */
   unregister(extensionId: string): void {
     for (const [type, extensions] of this.extensions.entries()) {
-      const filtered = extensions.filter(ext => ext.id !== extensionId);
+      const filtered = extensions.filter((ext) => ext.id !== extensionId);
       this.extensions.set(type, filtered);
     }
   }
@@ -43,14 +43,9 @@ export class ExtensionPointRegistry {
   /**
    * Execute all extensions of a type
    */
-  async executeAll<TInput, TOutput>(
-    type: string,
-    input: TInput
-  ): Promise<TOutput[]> {
+  async executeAll<TInput, TOutput>(type: string, input: TInput): Promise<TOutput[]> {
     const extensions = this.getExtensions(type);
-    const results = await Promise.all(
-      extensions.map(ext => ext.execute(input))
-    );
+    const results = await Promise.all(extensions.map((ext) => ext.execute(input)));
     return results;
   }
 

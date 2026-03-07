@@ -60,9 +60,7 @@ alter table interface_registry add column if not exists path_rules jsonb;  -- [{
     "rate_min_delay_ms": 1000,
     "extractor_templates": { "/3/**": "article_v2" },
     "auth_type": "none",
-    "path_rules": [
-      { "pattern": "/3/**", "extractor": "article_v2", "headless": false }
-    ]
+    "path_rules": [{ "pattern": "/3/**", "extractor": "article_v2", "headless": false }]
   },
   {
     "site": "developer.mozilla.org",
@@ -237,7 +235,7 @@ def test_table_v2():
 
 ```ts
 // services/web-orchestrator/src/schema.answer.ts
-import { gql } from 'apollo-server-express';
+import { gql } from "apollo-server-express";
 export const typeDefsAnswer = gql`
   scalar JSON
   type OrchestratedAnswer {
@@ -258,37 +256,31 @@ export const typeDefsAnswer = gql`
 
 ```ts
 // services/web-orchestrator/src/resolvers.answer.ts
-import { v4 as uuid } from 'uuid';
-import { domainCandidates } from './db';
-import { Bandit } from './bandit';
-import { publishFetch } from './publisher';
-import { gatherResults } from './resultsConsumer'; // subscribe to web.fetch.completed
-import { synthesize } from './synthService'; // calls Python synth via gRPC/HTTP
+import { v4 as uuid } from "uuid";
+import { domainCandidates } from "./db";
+import { Bandit } from "./bandit";
+import { publishFetch } from "./publisher";
+import { gatherResults } from "./resultsConsumer"; // subscribe to web.fetch.completed
+import { synthesize } from "./synthService"; // calls Python synth via gRPC/HTTP
 
 export const resolversAnswer = {
   Mutation: {
-    orchestratedAnswer: async (
-      _: any,
-      { question, contextId }: any,
-      ctx: any,
-    ) => {
-      const id = 'ans_' + uuid();
-      const domains = await domainCandidates('qna');
+    orchestratedAnswer: async (_: any, { question, contextId }: any, ctx: any) => {
+      const id = "ans_" + uuid();
+      const domains = await domainCandidates("qna");
       const bandit = new Bandit(domains);
       // naive plan: choose 3 domains
-      const picks = Array.from(
-        new Set([bandit.choose(), bandit.choose(), bandit.choose()]),
-      );
+      const picks = Array.from(new Set([bandit.choose(), bandit.choose(), bandit.choose()]));
       // enqueue jobs for relevant paths derived by a simple router (placeholder)
       for (const d of picks) {
         await publishFetch({
-          id: 'wf_' + uuid(),
+          id: "wf_" + uuid(),
           target: d,
-          path: '/',
-          purpose: 'qna',
-          authorityId: 'auth_public',
-          licenseId: 'lic_docs',
-          extractor: 'article_v2',
+          path: "/",
+          purpose: "qna",
+          authorityId: "auth_public",
+          licenseId: "lic_docs",
+          extractor: "article_v2",
         });
       }
       const results = await gatherResults({
@@ -363,8 +355,8 @@ async def synth(req: Req):
 
 ```tsx
 // ui/MaestroAnswerPanel.tsx
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
 
 export default function MaestroAnswerPanel() {
   const [data, setData] = useState<any | null>(null);
@@ -372,9 +364,9 @@ export default function MaestroAnswerPanel() {
     // demo query
     const q = `mutation{ orchestratedAnswer(question:"What changed in latest release?", contextId:"ctx1"){answer, citations{url}, consensusScore, conflicts} }`;
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({ query: q }),
     }).done((r) => setData(r.data.orchestratedAnswer));
   }, []);
@@ -393,12 +385,7 @@ export default function MaestroAnswerPanel() {
         <ul className="list-disc ml-5">
           {data.citations.map((c: any, i: number) => (
             <li key={i}>
-              <a
-                className="text-blue-600 underline"
-                href={c.url}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a className="text-blue-600 underline" href={c.url} target="_blank" rel="noreferrer">
                 {c.url}
               </a>
             </li>
@@ -407,8 +394,7 @@ export default function MaestroAnswerPanel() {
       </div>
       {data.conflicts?.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-xl p-3">
-          <b>Conflicts detected:</b> {data.conflicts.length}. See Maestro Panel
-          → Conflicts.
+          <b>Conflicts detected:</b> {data.conflicts.length}. See Maestro Panel → Conflicts.
         </div>
       )}
     </div>
@@ -449,13 +435,11 @@ export class CtxBandit {
     // simple context bias: adjust alpha/beta from historical success per (domainClass,purpose)
     const arm = this.arms[domain];
     const sample = randBeta(arm.a, arm.b);
-    const bias = ctx.purpose === 'qna' ? 1.05 : 1.0;
+    const bias = ctx.purpose === "qna" ? 1.05 : 1.0;
     return sample * bias;
   }
   choose(ctx: Ctx) {
-    return this.domains
-      .map((d) => [d, this.score(d, ctx)])
-      .sort((a, b) => b[1] - a[1])[0][0];
+    return this.domains.map((d) => [d, this.score(d, ctx)]).sort((a, b) => b[1] - a[1])[0][0];
   }
   update(domain: string, success: boolean) {
     const a = this.arms[domain];

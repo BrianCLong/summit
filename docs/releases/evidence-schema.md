@@ -19,15 +19,15 @@ Evidence files must be located in `release-evidence/<TAG>.json` on the default b
 
 ## Fields
 
-*   `tag` (string, required): The git tag being released.
-*   `sha` (string, required): The full git commit SHA of the tag.
-*   `decision` (string, required): Must be "GO" for the release to proceed.
-*   `reasons` (array of strings, optional): List of reasons or checks that passed.
-*   `run` (object, optional): Information about the Maestro run that generated this evidence.
-    *   `id` (string|number): Run ID.
-    *   `url` (string): Link to the run logs/output.
-*   `generatedAt` (string, required): ISO 8601 timestamp of generation.
-*   `expiresAt` (string, optional): ISO 8601 timestamp when this evidence expires (typically 24h).
+- `tag` (string, required): The git tag being released.
+- `sha` (string, required): The full git commit SHA of the tag.
+- `decision` (string, required): Must be "GO" for the release to proceed.
+- `reasons` (array of strings, optional): List of reasons or checks that passed.
+- `run` (object, optional): Information about the Maestro run that generated this evidence.
+  - `id` (string|number): Run ID.
+  - `url` (string): Link to the run logs/output.
+- `generatedAt` (string, required): ISO 8601 timestamp of generation.
+- `expiresAt` (string, optional): ISO 8601 timestamp when this evidence expires (typically 24h).
 
 ## Validation Rules
 

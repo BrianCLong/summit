@@ -1,5 +1,5 @@
-import { CommunityStore } from '../store.js';
-import type { ContributionSummary } from '../types.js';
+import { CommunityStore } from "../store.js";
+import type { ContributionSummary } from "../types.js";
 
 export class ContributionTracker {
   public constructor(private readonly store: CommunityStore) {}
@@ -41,9 +41,7 @@ export class ContributionTracker {
     const updated = {
       ...current,
       postsCreated: current.postsCreated + 1,
-      repliesAuthored: isReply
-        ? current.repliesAuthored + 1
-        : current.repliesAuthored,
+      repliesAuthored: isReply ? current.repliesAuthored + 1 : current.repliesAuthored,
       streakLength: current.streakLength + 1,
     };
     this.store.upsertContribution(updated);
@@ -60,11 +58,7 @@ export class ContributionTracker {
     return updated;
   }
 
-  public addBadge(
-    userId: string,
-    badgeId: string,
-    points: number,
-  ): ContributionSummary {
+  public addBadge(userId: string, badgeId: string, points: number): ContributionSummary {
     const current = this.bootstrap(userId);
     if (current.badgesEarned.includes(badgeId)) {
       return current;

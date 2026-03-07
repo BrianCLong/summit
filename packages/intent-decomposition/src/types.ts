@@ -40,17 +40,17 @@ export interface UIFrame {
 }
 
 export type UIActionType =
-  | 'tap'
-  | 'scroll'
-  | 'type'
-  | 'back'
-  | 'navigate'
-  | 'submit'
-  | 'hover'
-  | 'drag'
-  | 'drop'
-  | 'select'
-  | 'keypress';
+  | "tap"
+  | "scroll"
+  | "type"
+  | "back"
+  | "navigate"
+  | "submit"
+  | "hover"
+  | "drag"
+  | "drop"
+  | "select"
+  | "keypress";
 
 export interface UIAction {
   id: string;
@@ -64,7 +64,7 @@ export interface UIAction {
 
 export interface SummaryField<T> {
   value: T;
-  factuality: 'observed' | 'inferred';
+  factuality: "observed" | "inferred";
   evidencePointers: UIElementPointer[];
   uncertainty: number;
 }
@@ -94,7 +94,7 @@ export interface StepSummaryFactual {
   screenContext: Array<SummaryField<string>>;
   actions: Array<SummaryField<string>>;
   locale: LocaleTag;
-  provenance: StepSummary['provenance'];
+  provenance: StepSummary["provenance"];
 }
 
 export interface IntentStatement {

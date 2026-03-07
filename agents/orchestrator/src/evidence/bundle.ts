@@ -1,7 +1,7 @@
-import { createHash } from 'node:crypto';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { PlanIR, TraceEvent, EvidenceBundleManifest } from './types.js';
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { PlanIR, TraceEvent, EvidenceBundleManifest } from "./types.js";
 
 export interface EvidenceBundleConfig {
   bundlesDir: string;
@@ -27,9 +27,9 @@ export class EvidenceBundleWriter {
     this.now = config.now ?? (() => new Date());
     const bundleId = config.bundleId ?? `${plan.run_id}-${plan.plan_id}`;
     this.bundleDir = path.join(config.bundlesDir, bundleId);
-    this.tracePath = path.join(this.bundleDir, 'trace.ndjson');
-    this.planPath = path.join(this.bundleDir, 'plan.json');
-    this.artifactsDir = path.join(this.bundleDir, 'artifacts');
+    this.tracePath = path.join(this.bundleDir, "trace.ndjson");
+    this.planPath = path.join(this.bundleDir, "plan.json");
+    this.artifactsDir = path.join(this.bundleDir, "artifacts");
   }
 
   getBundleDir(): string {
@@ -39,20 +39,20 @@ export class EvidenceBundleWriter {
   async initialize(): Promise<void> {
     this.createdAt = this.now().toISOString();
     await fs.mkdir(this.artifactsDir, { recursive: true });
-    await fs.writeFile(this.planPath, stableStringify(this.plan), 'utf8');
-    await fs.writeFile(this.tracePath, '', 'utf8');
+    await fs.writeFile(this.planPath, stableStringify(this.plan), "utf8");
+    await fs.writeFile(this.tracePath, "", "utf8");
   }
 
   async record(event: TraceEvent): Promise<void> {
     const line = `${stableStringifyLine(event)}\n`;
-    await fs.appendFile(this.tracePath, line, 'utf8');
+    await fs.appendFile(this.tracePath, line, "utf8");
   }
 
   async finalize(): Promise<EvidenceBundleManifest> {
     const createdAt = this.createdAt ?? this.now().toISOString();
     const files = await collectFiles(this.bundleDir);
     const manifest: EvidenceBundleManifest = {
-      bundle_version: this.config.bundleVersion ?? '1.0',
+      bundle_version: this.config.bundleVersion ?? "1.0",
       plan_id: this.plan.plan_id,
       run_id: this.plan.run_id,
       created_at: createdAt,
@@ -62,14 +62,14 @@ export class EvidenceBundleWriter {
       files,
     };
 
-    const manifestPath = path.join(this.bundleDir, 'manifest.json');
-    await fs.writeFile(manifestPath, stableStringify(manifest), 'utf8');
+    const manifestPath = path.join(this.bundleDir, "manifest.json");
+    await fs.writeFile(manifestPath, stableStringify(manifest), "utf8");
     return manifest;
   }
 }
 
-async function collectFiles(bundleDir: string): Promise<EvidenceBundleManifest['files']> {
-  const entries: EvidenceBundleManifest['files'] = [];
+async function collectFiles(bundleDir: string): Promise<EvidenceBundleManifest["files"]> {
+  const entries: EvidenceBundleManifest["files"] = [];
   const walk = async (dir: string) => {
     const items = await fs.readdir(dir, { withFileTypes: true });
     for (const item of items) {
@@ -78,7 +78,7 @@ async function collectFiles(bundleDir: string): Promise<EvidenceBundleManifest['
         await walk(fullPath);
       } else {
         const relPath = path.relative(bundleDir, fullPath);
-        if (relPath === 'manifest.json') {
+        if (relPath === "manifest.json") {
           continue;
         }
         const bytes = (await fs.stat(fullPath)).size;
@@ -94,20 +94,15 @@ async function collectFiles(bundleDir: string): Promise<EvidenceBundleManifest['
 
 async function hashFile(filePath: string): Promise<string> {
   const data = await fs.readFile(filePath);
-  return createHash('sha256').update(data).digest('hex');
+  return createHash("sha256").update(data).digest("hex");
 }
 
 function resolveGitSha(): string {
-  return (
-    process.env.GIT_SHA ||
-    process.env.GITHUB_SHA ||
-    process.env.CI_COMMIT_SHA ||
-    'unknown'
-  );
+  return process.env.GIT_SHA || process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || "unknown";
 }
 
 export function stableStringify(value: unknown): string {
-  return JSON.stringify(value, sortKeys, 2) + '\n';
+  return JSON.stringify(value, sortKeys, 2) + "\n";
 }
 
 export function stableStringifyLine(value: unknown): string {
@@ -115,7 +110,7 @@ export function stableStringifyLine(value: unknown): string {
 }
 
 function sortKeys(_key: string, value: unknown): unknown {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
     return value;
   }
 

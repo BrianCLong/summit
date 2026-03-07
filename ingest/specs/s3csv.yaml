@@ -59,7 +59,7 @@ entities:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
       - type: to-lower
         column: email
       - type: iso8601
@@ -87,7 +87,7 @@ entities:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - label: Account
     file: datasets/golden/accounts.csv
@@ -115,7 +115,7 @@ entities:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
       - type: iso8601
         columns:
           - created_at
@@ -144,7 +144,7 @@ entities:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
       - type: iso8601
         columns:
           - occurred_at
@@ -184,7 +184,7 @@ entities:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - label: Location
     file: datasets/golden/locations.csv
@@ -233,7 +233,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
       - type: iso8601
         column: assigned_at
 
@@ -265,7 +265,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
       - type: iso8601
         columns:
           - connected_at
@@ -294,7 +294,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - type: OWNS
     file: datasets/golden/org_owns_asset.csv
@@ -323,7 +323,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - type: HOSTED_BY
     file: datasets/golden/data_asset_hosted_by_org.csv
@@ -352,7 +352,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - type: OCCURRED_AT
     file: datasets/golden/event_occurred_at_location.csv
@@ -381,7 +381,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - type: OBSERVED_ON
     file: datasets/golden/event_observed_on_asset.csv
@@ -406,7 +406,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - type: TRIGGERED
     file: datasets/golden/event_triggered_entities.csv
@@ -436,7 +436,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
 
   - type: EMITTED_EVENT
     file: datasets/golden/source_emitted_event.csv
@@ -463,7 +463,7 @@ relationships:
     transforms:
       - type: split
         column: purpose_tags
-        delimiter: '|'
+        delimiter: "|"
       - type: iso8601
         column: ingested_at
 
@@ -481,4 +481,3 @@ quality:
   pii_scan: required
   threshold_percent_invalid: 1
   quarantine_prefix: quarantine/
-

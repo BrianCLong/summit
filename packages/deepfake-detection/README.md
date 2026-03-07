@@ -19,18 +19,18 @@ import {
   DetectorType,
   AlertSeverity,
   MLModel,
-} from '@intelgraph/deepfake-detection';
+} from "@intelgraph/deepfake-detection";
 
 const detection: DeepfakeDetection = {
-  id: '123',
-  mediaId: '456',
+  id: "123",
+  mediaId: "456",
   isSynthetic: true,
   confidenceScore: 0.87,
   detectorType: DetectorType.VIDEO_FACE,
-  modelVersion: 'v1.2.0',
+  modelVersion: "v1.2.0",
   processingTimeMs: 2500,
   processedAt: new Date(),
-  status: 'COMPLETED',
+  status: "COMPLETED",
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -43,7 +43,7 @@ import {
   CONFIDENCE_THRESHOLDS,
   MODEL_VERSIONS,
   SUPPORTED_MIME_TYPES,
-} from '@intelgraph/deepfake-detection/constants';
+} from "@intelgraph/deepfake-detection/constants";
 
 console.log(CONFIDENCE_THRESHOLDS.HIGH); // 0.7
 console.log(MODEL_VERSIONS.VIDEO_FACE); // 'v1.2.0'
@@ -60,44 +60,37 @@ import {
   validateMediaType,
   validateMimeType,
   validateFileSize,
-} from '@intelgraph/deepfake-detection/utils';
+} from "@intelgraph/deepfake-detection/utils";
 
 try {
   validateConfidenceScore(0.85);
-  validateMediaType('VIDEO');
-  validateMimeType('video/mp4', 'VIDEO');
-  validateFileSize(1024000, 'VIDEO');
+  validateMediaType("VIDEO");
+  validateMimeType("video/mp4", "VIDEO");
+  validateFileSize(1024000, "VIDEO");
 } catch (error) {
-  console.error('Validation failed:', error.message);
+  console.error("Validation failed:", error.message);
 }
 ```
 
 #### Ensemble Scoring
 
 ```typescript
-import {
-  calculateEnsembleScore,
-  temperatureScale,
-} from '@intelgraph/deepfake-detection/utils';
+import { calculateEnsembleScore, temperatureScale } from "@intelgraph/deepfake-detection/utils";
 
 const ensembleResult = calculateEnsembleScore({
   detections: [detection1, detection2, detection3],
-  method: 'WEIGHTED_AVERAGE',
+  method: "WEIGHTED_AVERAGE",
   threshold: 0.5,
 });
 
-console.log('Final confidence:', ensembleResult.finalConfidence);
-console.log('Is synthetic:', ensembleResult.isSynthetic);
+console.log("Final confidence:", ensembleResult.finalConfidence);
+console.log("Is synthetic:", ensembleResult.isSynthetic);
 ```
 
 #### Metrics Calculation
 
 ```typescript
-import {
-  calculateMetrics,
-  calculateAUC,
-  calculatePSI,
-} from '@intelgraph/deepfake-detection/utils';
+import { calculateMetrics, calculateAUC, calculatePSI } from "@intelgraph/deepfake-detection/utils";
 
 const confusionMatrix = {
   truePositives: 95,
@@ -107,16 +100,16 @@ const confusionMatrix = {
 };
 
 const metrics = calculateMetrics(confusionMatrix);
-console.log('Accuracy:', metrics.accuracy);
-console.log('Precision:', metrics.precision);
-console.log('Recall:', metrics.recall);
-console.log('F1 Score:', metrics.f1Score);
+console.log("Accuracy:", metrics.accuracy);
+console.log("Precision:", metrics.precision);
+console.log("Recall:", metrics.recall);
+console.log("F1 Score:", metrics.f1Score);
 
 const auc = calculateAUC(scores, labels);
-console.log('AUC-ROC:', auc);
+console.log("AUC-ROC:", auc);
 
 const psi = calculatePSI(baselineDistribution, currentDistribution);
-console.log('Population Stability Index:', psi);
+console.log("Population Stability Index:", psi);
 ```
 
 ## API Reference
@@ -124,12 +117,14 @@ console.log('Population Stability Index:', psi);
 ### Types
 
 #### Media Types
+
 - `Media` - Media file metadata
 - `MediaType` - Enum: VIDEO, AUDIO, IMAGE
 - `MediaStatus` - Enum: UPLOADED, PROCESSING, ANALYZED, FAILED, ARCHIVED
 - `MediaMetadata` - Extracted technical metadata
 
 #### Detection Types
+
 - `DeepfakeDetection` - Detection result
 - `DetectorType` - Enum: VIDEO_FACE, AUDIO_SPECTROGRAM, IMAGE_MANIPULATION, etc.
 - `DetectionStatus` - Enum: PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED
@@ -139,6 +134,7 @@ console.log('Population Stability Index:', psi);
 - `ExplanationData` - Model explainability data
 
 #### Alert Types
+
 - `DeepfakeAlert` - Alert for suspicious media
 - `AlertSeverity` - Enum: LOW, MEDIUM, HIGH, CRITICAL
 - `AlertStatus` - Enum: OPEN, ACKNOWLEDGED, IN_PROGRESS, RESOLVED, FALSE_POSITIVE
@@ -146,6 +142,7 @@ console.log('Population Stability Index:', psi);
 - `NotificationChannel` - Enum: UI, EMAIL, WEBHOOK, SLACK, SMS
 
 #### Model Types
+
 - `MLModel` - ML model metadata
 - `ModelType` - Enum: VIDEO_DETECTOR, AUDIO_DETECTOR, IMAGE_DETECTOR, ENSEMBLE
 - `ModelStatus` - Enum: DRAFT, TESTING, STAGING, PRODUCTION, DEPRECATED
@@ -176,6 +173,7 @@ console.log('Population Stability Index:', psi);
 ### Utilities
 
 #### Validation
+
 - `validateConfidenceScore(score)` - Validate confidence score (0.0-1.0)
 - `validateMediaType(type)` - Validate media type
 - `validateMimeType(mimeType, mediaType)` - Validate MIME type
@@ -189,11 +187,13 @@ console.log('Population Stability Index:', psi);
 - `validateSha256(checksum)` - Validate SHA-256 checksum
 
 #### Ensemble Scoring
+
 - `calculateEnsembleScore(input)` - Calculate ensemble score
 - `calculateConfidenceInterval(scores, confidenceLevel, numBootstrap)` - Bootstrap confidence interval
 - `temperatureScale(confidence, temperature)` - Temperature scaling for calibration
 
 #### Metrics
+
 - `calculateMetrics(confusionMatrix)` - Calculate classification metrics
 - `calculateEER(scores, labels)` - Calculate Equal Error Rate
 - `calculateAUC(scores, labels)` - Calculate AUC-ROC

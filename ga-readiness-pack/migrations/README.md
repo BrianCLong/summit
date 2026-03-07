@@ -3,6 +3,7 @@ This directory contains the migration plan and evidence.
 ## Index of Migrations
 
 The following directories contain the source of truth for migrations:
+
 - **Postgres:** `server/src/db/migrations/postgres` and `server/db/migrations/postgres`
 - **Neo4j:** `server/src/db/migrations/neo4j` and `server/db/migrations/neo4j`
 - **TypeScript Orchestration:** `server/src/migrations`
@@ -21,5 +22,6 @@ The following directories contain the source of truth for migrations:
     - Execute `server/src/jobs/backfill_provenance.ts` (idempotent).
 
 ## Rollback Scripts
+
 - Located in `server/db/migrations/postgres/*.down.sql`.
 - Neo4j rollback involves dropping new constraints manually if needed (see `server/db/migrations/neo4j/*.cypher`).

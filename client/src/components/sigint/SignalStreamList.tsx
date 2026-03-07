@@ -2,8 +2,8 @@
  * SignalStreamList - Compact list of active signal streams
  * With filtering, sorting, and quick actions for stream management.
  */
-import React, { useState, useMemo, useCallback } from 'react';
-import type { SignalStream, FrequencyBand, ModulationType, ConfidenceLevel } from './types';
+import React, { useState, useMemo, useCallback } from "react";
+import type { SignalStream, FrequencyBand, ModulationType, ConfidenceLevel } from "./types";
 
 interface SignalStreamListProps {
   streams: SignalStream[];
@@ -16,25 +16,25 @@ interface SignalStreamListProps {
 }
 
 const BAND_COLORS: Record<FrequencyBand, string> = {
-  VLF: 'bg-red-500',
-  LF: 'bg-orange-500',
-  MF: 'bg-amber-500',
-  HF: 'bg-yellow-500',
-  VHF: 'bg-lime-500',
-  UHF: 'bg-emerald-500',
-  SHF: 'bg-cyan-500',
-  EHF: 'bg-blue-500',
+  VLF: "bg-red-500",
+  LF: "bg-orange-500",
+  MF: "bg-amber-500",
+  HF: "bg-yellow-500",
+  VHF: "bg-lime-500",
+  UHF: "bg-emerald-500",
+  SHF: "bg-cyan-500",
+  EHF: "bg-blue-500",
 };
 
 const CONFIDENCE_STYLES: Record<ConfidenceLevel, { bg: string; text: string }> = {
-  HIGH: { bg: 'bg-green-500/20', text: 'text-green-400' },
-  MEDIUM: { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
-  LOW: { bg: 'bg-orange-500/20', text: 'text-orange-400' },
-  UNCONFIRMED: { bg: 'bg-slate-500/20', text: 'text-slate-400' },
+  HIGH: { bg: "bg-green-500/20", text: "text-green-400" },
+  MEDIUM: { bg: "bg-yellow-500/20", text: "text-yellow-400" },
+  LOW: { bg: "bg-orange-500/20", text: "text-orange-400" },
+  UNCONFIRMED: { bg: "bg-slate-500/20", text: "text-slate-400" },
 };
 
-type SortField = 'frequency' | 'name' | 'confidence' | 'activity';
-type SortDirection = 'asc' | 'desc';
+type SortField = "frequency" | "name" | "confidence" | "activity";
+type SortDirection = "asc" | "desc";
 
 export const SignalStreamList: React.FC<SignalStreamListProps> = ({
   streams,
@@ -45,10 +45,10 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
   subscribedIds = new Set(),
   className,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [bandFilter, setBandFilter] = useState<FrequencyBand | 'ALL'>('ALL');
-  const [sortField, setSortField] = useState<SortField>('frequency');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [bandFilter, setBandFilter] = useState<FrequencyBand | "ALL">("ALL");
+  const [sortField, setSortField] = useState<SortField>("frequency");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   // Filter and sort streams
@@ -67,7 +67,7 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
     }
 
     // Band filter
-    if (bandFilter !== 'ALL') {
+    if (bandFilter !== "ALL") {
       result = result.filter((s) => s.band === bandFilter);
     }
 
@@ -80,21 +80,21 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
     result.sort((a, b) => {
       let cmp = 0;
       switch (sortField) {
-        case 'frequency':
+        case "frequency":
           cmp = a.centerFrequency - b.centerFrequency;
           break;
-        case 'name':
+        case "name":
           cmp = a.name.localeCompare(b.name);
           break;
-        case 'confidence':
+        case "confidence":
           const confOrder = { HIGH: 3, MEDIUM: 2, LOW: 1, UNCONFIRMED: 0 };
           cmp = confOrder[a.confidence] - confOrder[b.confidence];
           break;
-        case 'activity':
+        case "activity":
           cmp = (a.active ? 1 : 0) - (b.active ? 1 : 0);
           break;
       }
-      return sortDirection === 'asc' ? cmp : -cmp;
+      return sortDirection === "asc" ? cmp : -cmp;
     });
 
     return result;
@@ -103,10 +103,10 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
   const handleSort = useCallback((field: SortField) => {
     setSortField((prev) => {
       if (prev === field) {
-        setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+        setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
         return field;
       }
-      setSortDirection('asc');
+      setSortDirection("asc");
       return field;
     });
   }, []);
@@ -126,7 +126,7 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
 
   return (
     <div
-      className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ''}`}
+      className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ""}`}
     >
       {/* Header with search */}
       <div className="px-4 py-3 bg-slate-800 border-b border-slate-700 space-y-3">
@@ -165,7 +165,7 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <select
             value={bandFilter}
-            onChange={(e) => setBandFilter(e.target.value as FrequencyBand | 'ALL')}
+            onChange={(e) => setBandFilter(e.target.value as FrequencyBand | "ALL")}
             className="px-2 py-1 text-xs bg-slate-700 border border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-cyan-500"
           >
             <option value="ALL">All Bands</option>
@@ -191,19 +191,19 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
           {/* Sort buttons */}
           <div className="flex items-center gap-1 text-xs">
             <span className="text-slate-500">Sort:</span>
-            {(['frequency', 'name', 'confidence'] as SortField[]).map((field) => (
+            {(["frequency", "name", "confidence"] as SortField[]).map((field) => (
               <button
                 key={field}
                 onClick={() => handleSort(field)}
                 className={`px-2 py-0.5 rounded ${
                   sortField === field
-                    ? 'bg-cyan-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    ? "bg-cyan-600 text-white"
+                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
                 }`}
               >
                 {field.charAt(0).toUpperCase() + field.slice(1)}
                 {sortField === field && (
-                  <span className="ml-0.5">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                  <span className="ml-0.5">{sortDirection === "asc" ? "↑" : "↓"}</span>
                 )}
               </button>
             ))}
@@ -223,15 +223,15 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
               onClick={() => onSelectStream?.(stream)}
               className={`px-4 py-3 border-b border-slate-800/50 cursor-pointer transition-colors ${
                 isSelected
-                  ? 'bg-cyan-900/30 border-l-2 border-l-cyan-400'
-                  : 'hover:bg-slate-800/50 border-l-2 border-l-transparent'
+                  ? "bg-cyan-900/30 border-l-2 border-l-cyan-400"
+                  : "hover:bg-slate-800/50 border-l-2 border-l-transparent"
               }`}
             >
               <div className="flex items-center gap-3">
                 {/* Activity indicator */}
                 <span
                   className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    stream.active ? 'bg-green-500 animate-pulse' : 'bg-slate-600'
+                    stream.active ? "bg-green-500 animate-pulse" : "bg-slate-600"
                   }`}
                 />
 
@@ -277,14 +277,14 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
                   }}
                   className={`p-1.5 rounded transition-colors ${
                     isSubscribed
-                      ? 'bg-cyan-600 text-white'
-                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'
+                      ? "bg-cyan-600 text-white"
+                      : "bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white"
                   }`}
-                  title={isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                  title={isSubscribed ? "Unsubscribe" : "Subscribe"}
                 >
                   <svg
                     className="w-4 h-4"
-                    fill={isSubscribed ? 'currentColor' : 'none'}
+                    fill={isSubscribed ? "currentColor" : "none"}
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >

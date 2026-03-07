@@ -3,7 +3,6 @@
 > Evidence-IDs: branch-protection-drift
 > Status: active
 
-
 # Branch Protection Drift Gate
 
 **Job:** Governance / Branch Protection Drift  

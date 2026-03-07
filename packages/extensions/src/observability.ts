@@ -1,4 +1,4 @@
-export type LogLevel = 'info' | 'warn' | 'error' | 'debug';
+export type LogLevel = "info" | "warn" | "error" | "debug";
 
 export interface ExtensionLogEntry {
   level: LogLevel;
@@ -29,14 +29,13 @@ export class ExtensionObservability {
     const metrics = this.ensureMetrics(extensionName);
     metrics.activations += 1;
     metrics.averageActivationMs =
-      (metrics.averageActivationMs * (metrics.activations - 1) + durationMs) /
-      metrics.activations;
+      (metrics.averageActivationMs * (metrics.activations - 1) + durationMs) / metrics.activations;
   }
 
   recordFailure(extensionName: string, error: string): void {
     const metrics = this.ensureMetrics(extensionName);
     metrics.failures += 1;
-    this.recordTrace(extensionName, 'activation', 0, false, error);
+    this.recordTrace(extensionName, "activation", 0, false, error);
   }
 
   recordTrace(

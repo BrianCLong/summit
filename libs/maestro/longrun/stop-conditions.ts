@@ -1,16 +1,11 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
-import type {
-  IterationInput,
-  StopDecision,
-  StopState,
-  StopConditionPolicy,
-} from './types.js';
-import { BudgetTracker } from './budget.js';
+import type { IterationInput, StopDecision, StopState, StopConditionPolicy } from "./types.js";
+import { BudgetTracker } from "./budget.js";
 
 const normalizeSignal = (message: string): string =>
-  message.trim().toLowerCase().replace(/\s+/g, ' ');
+  message.trim().toLowerCase().replace(/\s+/g, " ");
 
 const isPlanComplete = (iteration: IterationInput): boolean => {
   const plan = iteration.planStatus;
@@ -61,16 +56,16 @@ export const evaluateStopConditions = (options: {
   const stopFile = path.join(workspaceRoot, policy.manualStopFile);
 
   if (fs.existsSync(stopFile)) {
-    return { status: 'stop', reason: 'manual-stop', detail: stopFile };
+    return { status: "stop", reason: "manual-stop", detail: stopFile };
   }
 
   if (iteration.iteration >= policy.maxIterations) {
-    return { status: 'stop', reason: 'max-iterations' };
+    return { status: "stop", reason: "max-iterations" };
   }
 
   const budgetStatus = budget.isBudgetExceeded();
   if (budgetStatus.exceeded) {
-    return { status: 'stop', reason: 'budget-exhausted', detail: budgetStatus.reason };
+    return { status: "stop", reason: "budget-exhausted", detail: budgetStatus.reason };
   }
 
   const doneSignal = Boolean(iteration.doneSignal);
@@ -86,7 +81,7 @@ export const evaluateStopConditions = (options: {
   } else {
     state.stallCount += 1;
     if (state.stallCount >= policy.maxStallIterations) {
-      return { status: 'stop', reason: 'stall-detected' };
+      return { status: "stop", reason: "stall-detected" };
     }
   }
 
@@ -94,7 +89,7 @@ export const evaluateStopConditions = (options: {
     const hash = iteration.diffSummary.hash;
     state.diffHashCounts[hash] = (state.diffHashCounts[hash] ?? 0) + 1;
     if (state.diffHashCounts[hash] >= policy.maxRepeatDiffs) {
-      return { status: 'stop', reason: 'oscillation-diff' };
+      return { status: "stop", reason: "oscillation-diff" };
     }
   }
 
@@ -103,20 +98,19 @@ export const evaluateStopConditions = (options: {
       const key = normalizeSignal(error);
       state.errorCounts[key] = (state.errorCounts[key] ?? 0) + 1;
       if (state.errorCounts[key] >= policy.maxRepeatErrors) {
-        return { status: 'stop', reason: 'oscillation-error', detail: key };
+        return { status: "stop", reason: "oscillation-error", detail: key };
       }
     }
   }
 
-  const verifiedCompletion =
-    isPlanComplete(iteration) && areQualityGatesGreen(iteration);
+  const verifiedCompletion = isPlanComplete(iteration) && areQualityGatesGreen(iteration);
   if (verifiedCompletion) {
     if (state.consecutiveDoneSignals >= policy.requireConsecutiveDone) {
-      return { status: 'stop', reason: 'verified-completion' };
+      return { status: "stop", reason: "verified-completion" };
     }
   }
 
-  return { status: 'continue', reason: 'in-progress' };
+  return { status: "continue", reason: "in-progress" };
 };
 
 export const isCompletionVerified = (iteration: IterationInput): boolean =>

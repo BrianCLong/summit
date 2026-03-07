@@ -1,66 +1,66 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import type {
   AssetDescriptor,
   DiscoveryProvider,
   JobSpec,
   PolicyHook,
   ResponseStrategy,
-} from '../src/types';
-import { MaestroConductor } from '../src/maestro-conductor';
-import { StructuredEventEmitter } from '@ga-graphai/common-types';
+} from "../src/types";
+import { MaestroConductor } from "../src/maestro-conductor";
+import { StructuredEventEmitter } from "@ga-graphai/common-types";
 
 const assetAlpha: AssetDescriptor = {
-  id: 'svc-alpha',
-  name: 'orchestrator-alpha',
-  kind: 'microservice',
-  cloud: 'aws',
-  region: 'us-east-1',
+  id: "svc-alpha",
+  name: "orchestrator-alpha",
+  kind: "microservice",
+  cloud: "aws",
+  region: "us-east-1",
   labels: {
-    compliance: 'soc2,hipaa',
-    'data-region': 'us',
+    compliance: "soc2,hipaa",
+    "data-region": "us",
   },
   metadata: {
-    fallback: 'svc-beta',
+    fallback: "svc-beta",
   },
   capabilities: [
     {
-      name: 'maestro-routing',
-      description: 'Multi-cloud orchestration',
+      name: "maestro-routing",
+      description: "Multi-cloud orchestration",
       qualityOfService: { latencyMs: 120, reliability: 0.999 },
     },
     {
-      name: 'auto-heal',
+      name: "auto-heal",
       qualityOfService: { latencyMs: 200, reliability: 0.998 },
     },
   ],
 };
 
 const assetBeta: AssetDescriptor = {
-  id: 'svc-beta',
-  name: 'orchestrator-beta',
-  kind: 'microservice',
-  cloud: 'gcp',
-  region: 'us-central1',
+  id: "svc-beta",
+  name: "orchestrator-beta",
+  kind: "microservice",
+  cloud: "gcp",
+  region: "us-central1",
   labels: {
-    compliance: 'soc2',
-    'data-region': 'us',
+    compliance: "soc2",
+    "data-region": "us",
   },
   metadata: {
-    fallback: 'svc-alpha',
+    fallback: "svc-alpha",
   },
   capabilities: [
     {
-      name: 'maestro-routing',
+      name: "maestro-routing",
       qualityOfService: { latencyMs: 160, reliability: 0.992 },
     },
     {
-      name: 'auto-heal',
+      name: "auto-heal",
       qualityOfService: { latencyMs: 260, reliability: 0.989 },
     },
   ],
 };
 
-describe('MaestroConductor meta-agent', () => {
+describe("MaestroConductor meta-agent", () => {
   let conductor: MaestroConductor;
   let assets: AssetDescriptor[];
   const executed: string[] = [];
@@ -73,8 +73,8 @@ describe('MaestroConductor meta-agent', () => {
     eventTransport = vi.fn();
     events = new StructuredEventEmitter({ transport: eventTransport });
     const provider: DiscoveryProvider = {
-      id: 'stub',
-      description: 'stub discovery',
+      id: "stub",
+      description: "stub discovery",
       async scan() {
         return assets;
       },
@@ -96,48 +96,48 @@ describe('MaestroConductor meta-agent', () => {
     conductor.registerDiscoveryProvider(provider);
 
     const policyHook: PolicyHook = {
-      id: 'sensitivity',
-      description: 'require hipaa for sensitive workloads',
+      id: "sensitivity",
+      description: "require hipaa for sensitive workloads",
       evaluate: ({ asset, job }) => {
         const sensitive = Boolean(job?.metadata?.sensitive);
         if (sensitive) {
-          const compliance = asset.labels?.compliance ?? '';
-          if (!compliance.includes('hipaa')) {
-            return { allowed: false, reason: 'hipaa required' };
+          const compliance = asset.labels?.compliance ?? "";
+          if (!compliance.includes("hipaa")) {
+            return { allowed: false, reason: "hipaa required" };
           }
         }
-        return { allowed: true, reason: 'policy:approved' };
+        return { allowed: true, reason: "policy:approved" };
       },
     };
 
     conductor.registerPolicyHook(policyHook);
 
     const strategy: ResponseStrategy = {
-      id: 'auto-fallback',
-      description: 'failover to paired service and launch runbook',
+      id: "auto-fallback",
+      description: "failover to paired service and launch runbook",
       supports: (asset) => Boolean(asset.metadata?.fallback),
-      shouldTrigger: (context) => context.anomaly.severity !== 'low',
+      shouldTrigger: (context) => context.anomaly.severity !== "low",
       async execute(context) {
         const target = context.asset.metadata?.fallback as string | undefined;
-        executed.push(`${context.asset.id}->${target ?? 'none'}`);
+        executed.push(`${context.asset.id}->${target ?? "none"}`);
         return {
-          strategyId: 'auto-fallback',
+          strategyId: "auto-fallback",
           executed: true,
           actions: [
             {
-              type: 'failover',
+              type: "failover",
               targetAssetId: target,
-              estimatedImpact: 'high',
-              payload: { mode: 'multi-cloud-drain' },
-              runbook: 'runbooks/fallback.md',
+              estimatedImpact: "high",
+              payload: { mode: "multi-cloud-drain" },
+              runbook: "runbooks/fallback.md",
             },
             {
-              type: 'runbook',
-              estimatedImpact: 'medium',
-              payload: { link: 'runbooks/live-observability.md' },
+              type: "runbook",
+              estimatedImpact: "medium",
+              payload: { link: "runbooks/live-observability.md" },
             },
           ],
-          notes: 'automatic fallback executed',
+          notes: "automatic fallback executed",
         };
       },
       cooldownMs: 1,
@@ -148,63 +148,63 @@ describe('MaestroConductor meta-agent', () => {
     await conductor.scanAssets();
   });
 
-  it('links discovery, anomaly defence, optimisation, and routing into a unified control loop', async () => {
+  it("links discovery, anomaly defence, optimisation, and routing into a unified control loop", async () => {
     expect(conductor.listAssets()).toHaveLength(2);
 
     const baselineLatencies = [110, 108, 112, 115];
     for (const [index, value] of baselineLatencies.entries()) {
       await conductor.ingestHealthSignal({
-        assetId: 'svc-alpha',
-        metric: 'latency.p95',
+        assetId: "svc-alpha",
+        metric: "latency.p95",
         value,
-        unit: 'ms',
+        unit: "ms",
         timestamp: new Date(Date.now() + index * 1000),
       });
     }
 
     await conductor.ingestHealthSignal({
-      assetId: 'svc-alpha',
-      metric: 'latency.p95',
+      assetId: "svc-alpha",
+      metric: "latency.p95",
       value: 420,
-      unit: 'ms',
+      unit: "ms",
       timestamp: new Date(),
     });
 
     await conductor.ingestHealthSignal({
-      assetId: 'svc-alpha',
-      metric: 'cost.perHour',
+      assetId: "svc-alpha",
+      metric: "cost.perHour",
       value: 28,
       timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
-      assetId: 'svc-alpha',
-      metric: 'error.rate',
+      assetId: "svc-alpha",
+      metric: "error.rate",
       value: 0.11,
       timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
-      assetId: 'svc-alpha',
-      metric: 'saturation',
+      assetId: "svc-alpha",
+      metric: "saturation",
       value: 0.82,
       timestamp: new Date(),
     });
 
     await conductor.ingestHealthSignal({
-      assetId: 'svc-beta',
-      metric: 'latency.p95',
+      assetId: "svc-beta",
+      metric: "latency.p95",
       value: 150,
-      unit: 'ms',
+      unit: "ms",
       timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
-      assetId: 'svc-beta',
-      metric: 'cost.perHour',
+      assetId: "svc-beta",
+      metric: "cost.perHour",
       value: 18,
       timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
-      assetId: 'svc-beta',
-      metric: 'throughput',
+      assetId: "svc-beta",
+      metric: "throughput",
       value: 210,
       timestamp: new Date(),
     });
@@ -212,68 +212,64 @@ describe('MaestroConductor meta-agent', () => {
     const incidents = conductor.getIncidents();
     expect(incidents.length).toBeGreaterThan(0);
     const actionable = incidents.find((incident) => incident.plans.length > 0);
-    expect(actionable?.plans[0].actions[0].type).toBe('failover');
-    expect(executed).toContain('svc-alpha->svc-beta');
+    expect(actionable?.plans[0].actions[0].type).toBe("failover");
+    expect(executed).toContain("svc-alpha->svc-beta");
 
     const recommendations = conductor.getOptimizationRecommendations();
-    const alphaRecommendation = recommendations.find(
-      (rec) => rec.assetId === 'svc-alpha',
-    );
+    const alphaRecommendation = recommendations.find((rec) => rec.assetId === "svc-alpha");
     expect(alphaRecommendation).toBeDefined();
-    expect(alphaRecommendation?.actions).toContain('scale-out');
+    expect(alphaRecommendation?.actions).toContain("scale-out");
 
     const job: JobSpec = {
-      id: 'job-1',
-      type: 'incident-mitigation',
-      priority: 'critical',
-      requiredCapabilities: ['maestro-routing'],
+      id: "job-1",
+      type: "incident-mitigation",
+      priority: "critical",
+      requiredCapabilities: ["maestro-routing"],
       requirements: {
-        regions: ['us-east-1'],
-        complianceTags: ['soc2'],
+        regions: ["us-east-1"],
+        complianceTags: ["soc2"],
         maxLatencyMs: 500,
       },
       metadata: { sensitive: true },
     };
 
     const plan = await conductor.routeJob(job);
-    expect(plan.primary.assetId).toBe('svc-alpha');
-    expect(
-      plan.primary.reasoning.some((reason) => reason.includes('policy')),
-    ).toBe(true);
+    expect(plan.primary.assetId).toBe("svc-alpha");
+    expect(plan.primary.reasoning.some((reason) => reason.includes("policy"))).toBe(true);
     expect(plan.primary.policyDecisions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          hookId: 'sensitivity',
+          hookId: "sensitivity",
           allowed: true,
-          reason: 'policy:approved',
+          reason: "policy:approved",
         }),
-      ]),
+      ])
     );
     expect(plan.fallbacks.length).toBeLessThanOrEqual(1);
   });
 
-  it('emits structured incidents when anomalies are detected', async () => {
+  it("emits structured incidents when anomalies are detected", async () => {
     const baselineLatencies = [110, 108, 112, 115];
     for (const [index, value] of baselineLatencies.entries()) {
       await conductor.ingestHealthSignal({
-        assetId: 'svc-alpha',
-        metric: 'latency.p95',
+        assetId: "svc-alpha",
+        metric: "latency.p95",
         value,
-        unit: 'ms',
+        unit: "ms",
         timestamp: new Date(Date.now() + index * 1000),
       });
     }
 
     await conductor.ingestHealthSignal({
-      assetId: 'svc-alpha',
-      metric: 'latency.p95',
+      assetId: "svc-alpha",
+      metric: "latency.p95",
       value: 500,
-      unit: 'ms',
+      unit: "ms",
       timestamp: new Date(),
     });
 
     expect(eventTransport).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'summit.incident.detected' }),
+      expect.objectContaining({ name: "summit.incident.detected" })
     );
   });
 });

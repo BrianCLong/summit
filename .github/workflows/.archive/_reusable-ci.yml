@@ -63,7 +63,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
       - run: corepack enable
       - run: pnpm -w install --frozen-lockfile
       - name: Run ${{ matrix.task }}

@@ -1,5 +1,9 @@
 import { describe, it, expect } from "@jest/globals";
-import { extractDifficultyFeatures, scoreDifficultyFromFeatures, detectDomain } from "../heuristics";
+import {
+  extractDifficultyFeatures,
+  scoreDifficultyFromFeatures,
+  detectDomain,
+} from "../heuristics";
 
 describe("difficulty heuristics", () => {
   it("scores short simple queries low", () => {

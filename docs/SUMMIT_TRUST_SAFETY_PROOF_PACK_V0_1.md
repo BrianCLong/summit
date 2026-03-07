@@ -160,13 +160,13 @@ Forecasted breakpoints and mandatory mitigations:
 
 ## 7) Weekly GA Readiness Scorecard Template
 
-| Gate | Metric | Target | Status | Evidence |
-| --- | --- | --- | --- | --- |
-| Tenant isolation | Cross-tenant queries with unauthorized data | 0 | ⚠ | `artifacts/tenant-isolation/*.json` |
-| Replay determinism | Hash match rate | 100% | ⚠ | `artifacts/replay/*.json` |
-| Golden paths | Canonical success rate | 100% | ❌ | `artifacts/golden-path/*.json` |
-| Failure transparency | Undocumented failure classes | 0 | ⚠ | `artifacts/failure-semantics/*.json` |
-| Cost ceilings | Investigations with enforced budget policy | 100% | ❌ | `artifacts/cost-guard/*.json` |
+| Gate                 | Metric                                      | Target | Status | Evidence                             |
+| -------------------- | ------------------------------------------- | ------ | ------ | ------------------------------------ |
+| Tenant isolation     | Cross-tenant queries with unauthorized data | 0      | ⚠      | `artifacts/tenant-isolation/*.json`  |
+| Replay determinism   | Hash match rate                             | 100%   | ⚠      | `artifacts/replay/*.json`            |
+| Golden paths         | Canonical success rate                      | 100%   | ❌     | `artifacts/golden-path/*.json`       |
+| Failure transparency | Undocumented failure classes                | 0      | ⚠      | `artifacts/failure-semantics/*.json` |
+| Cost ceilings        | Investigations with enforced budget policy  | 100%   | ❌     | `artifacts/cost-guard/*.json`        |
 
 ## 8) Required PR Attachments for v0.1 Completion
 

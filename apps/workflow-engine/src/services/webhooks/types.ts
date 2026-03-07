@@ -1,14 +1,6 @@
-export type WebhookEventType =
-  | 'case.created'
-  | 'export.ready'
-  | 'ingest.completed';
+export type WebhookEventType = "case.created" | "export.ready" | "ingest.completed";
 
-export type DeliveryStatus =
-  | 'pending'
-  | 'delivering'
-  | 'succeeded'
-  | 'failed'
-  | 'dead';
+export type DeliveryStatus = "pending" | "delivering" | "succeeded" | "failed" | "dead";
 
 export interface WebhookSubscription {
   id: string;
@@ -18,7 +10,7 @@ export interface WebhookSubscription {
   eventTypes: WebhookEventType[];
   isActive: boolean;
   description?: string;
-  signatureAlgorithm: 'HMAC-SHA256';
+  signatureAlgorithm: "HMAC-SHA256";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,7 +22,7 @@ export interface CreateWebhookSubscription {
   eventTypes: WebhookEventType[];
   description?: string;
   isActive?: boolean;
-  signatureAlgorithm?: 'HMAC-SHA256';
+  signatureAlgorithm?: "HMAC-SHA256";
 }
 
 export interface WebhookDelivery {

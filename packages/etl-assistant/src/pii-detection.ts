@@ -11,7 +11,7 @@ import type {
   PIIRiskLevel,
   RedactionStrategy,
   RedactionRecommendation,
-} from './types';
+} from "./types";
 
 /**
  * PII Detection Patterns
@@ -19,19 +19,19 @@ import type {
 const PII_PATTERNS = {
   email: {
     pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-    type: 'email' as const,
+    type: "email" as const,
   },
   phone: {
     pattern: /\b(\+?1[-.]?)?\(?([0-9]{3})\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\b/g,
-    type: 'phone' as const,
+    type: "phone" as const,
   },
   ssn: {
     pattern: /\b\d{3}-\d{2}-\d{4}\b/g,
-    type: 'ssn' as const,
+    type: "ssn" as const,
   },
   credit_card: {
     pattern: /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
-    type: 'credit_card' as const,
+    type: "credit_card" as const,
   },
 };
 
@@ -39,13 +39,29 @@ const PII_PATTERNS = {
  * Field name heuristics for PII detection
  */
 const PII_FIELD_HEURISTICS = {
-  email: ['email', 'mail', 'e_mail', 'email_address', 'emailaddress'],
-  phone: ['phone', 'mobile', 'tel', 'telephone', 'phone_number', 'phonenumber', 'cell'],
-  ssn: ['ssn', 'social_security', 'social_security_number', 'national_id', 'passport', 'passport_number'],
-  dob: ['dob', 'date_of_birth', 'birthdate', 'birth_date', 'dateofbirth'],
-  address: ['address', 'street', 'street_address', 'home_address', 'mailing_address', 'zip', 'postal_code', 'zipcode'],
-  credit_card: ['credit_card', 'cc_number', 'card_number', 'creditcard', 'cc', 'cvv'],
-  name: ['name', 'full_name', 'fullname', 'first_name', 'last_name', 'firstname', 'lastname'],
+  email: ["email", "mail", "e_mail", "email_address", "emailaddress"],
+  phone: ["phone", "mobile", "tel", "telephone", "phone_number", "phonenumber", "cell"],
+  ssn: [
+    "ssn",
+    "social_security",
+    "social_security_number",
+    "national_id",
+    "passport",
+    "passport_number",
+  ],
+  dob: ["dob", "date_of_birth", "birthdate", "birth_date", "dateofbirth"],
+  address: [
+    "address",
+    "street",
+    "street_address",
+    "home_address",
+    "mailing_address",
+    "zip",
+    "postal_code",
+    "zipcode",
+  ],
+  credit_card: ["credit_card", "cc_number", "card_number", "creditcard", "cc", "cvv"],
+  name: ["name", "full_name", "fullname", "first_name", "last_name", "firstname", "lastname"],
 };
 
 /**
@@ -59,9 +75,9 @@ export class PIIDetection {
     if (samples.length === 0) {
       return {
         piiFields: [],
-        riskLevel: 'none',
+        riskLevel: "none",
         recommendations: [],
-        summary: 'No PII detected (no samples provided)',
+        summary: "No PII detected (no samples provided)",
       };
     }
 
@@ -98,13 +114,10 @@ export class PIIDetection {
   /**
    * Analyze a single field for PII
    */
-  private analyzeField(
-    field: string,
-    samples: SampleRecord[]
-  ): PIIField | null {
+  private analyzeField(field: string, samples: SampleRecord[]): PIIField | null {
     const values = samples
       .map((s) => s[field])
-      .filter((v) => v !== null && v !== undefined && typeof v === 'string') as string[];
+      .filter((v) => v !== null && v !== undefined && typeof v === "string") as string[];
 
     if (values.length === 0) return null;
 
@@ -116,12 +129,9 @@ export class PIIDetection {
 
     // Combine results
     if (heuristicResult || patternResult) {
-      const piiType = patternResult?.type || heuristicResult?.type || 'other';
-      const detectionMethod = patternResult && heuristicResult
-        ? 'combined'
-        : patternResult
-        ? 'pattern'
-        : 'heuristic';
+      const piiType = patternResult?.type || heuristicResult?.type || "other";
+      const detectionMethod =
+        patternResult && heuristicResult ? "combined" : patternResult ? "pattern" : "heuristic";
 
       const confidence = this.calculatePIIConfidence(
         detectionMethod,
@@ -148,7 +158,7 @@ export class PIIDetection {
    * Check field name against heuristics
    */
   private checkFieldNameHeuristics(field: string): {
-    type: PIIField['piiType'];
+    type: PIIField["piiType"];
     confidence: number;
   } | null {
     const fieldLower = field.toLowerCase();
@@ -158,7 +168,7 @@ export class PIIDetection {
         if (fieldLower === keyword) {
           // Exact match
           return {
-            type: piiType as PIIField['piiType'],
+            type: piiType as PIIField["piiType"],
             confidence: 0.9,
           };
         }
@@ -166,7 +176,7 @@ export class PIIDetection {
         if (fieldLower.includes(keyword) || keyword.includes(fieldLower)) {
           // Partial match
           return {
-            type: piiType as PIIField['piiType'],
+            type: piiType as PIIField["piiType"],
             confidence: 0.7,
           };
         }
@@ -180,7 +190,7 @@ export class PIIDetection {
    * Check values against PII patterns
    */
   private checkPatterns(values: string[]): {
-    type: PIIField['piiType'];
+    type: PIIField["piiType"];
     confidence: number;
     matches: string[];
   } | null {
@@ -214,14 +224,14 @@ export class PIIDetection {
    * Calculate PII confidence
    */
   private calculatePIIConfidence(
-    method: 'pattern' | 'heuristic' | 'combined',
+    method: "pattern" | "heuristic" | "combined",
     heuristicConfidence: number,
     patternConfidence: number
   ): number {
-    if (method === 'combined') {
+    if (method === "combined") {
       // Average with bonus for agreement
       return Math.min(1.0, (heuristicConfidence + patternConfidence) / 2 + 0.1);
-    } else if (method === 'pattern') {
+    } else if (method === "pattern") {
       return patternConfidence;
     } else {
       return heuristicConfidence;
@@ -231,63 +241,60 @@ export class PIIDetection {
   /**
    * Recommend redaction strategy
    */
-  private recommendStrategy(
-    piiType: PIIField['piiType'],
-    confidence: number
-  ): RedactionStrategy {
+  private recommendStrategy(piiType: PIIField["piiType"], confidence: number): RedactionStrategy {
     // High-risk PII: DROP or HASH
-    if (piiType === 'ssn' || piiType === 'credit_card') {
-      return confidence > 0.8 ? 'DROP' : 'HASH';
+    if (piiType === "ssn" || piiType === "credit_card") {
+      return confidence > 0.8 ? "DROP" : "HASH";
     }
 
     // Medium-risk PII: MASK or HASH
-    if (piiType === 'email' || piiType === 'phone') {
-      return confidence > 0.8 ? 'MASK' : 'HASH';
+    if (piiType === "email" || piiType === "phone") {
+      return confidence > 0.8 ? "MASK" : "HASH";
     }
 
     // Low-risk PII: MASK
-    return 'MASK';
+    return "MASK";
   }
 
   /**
    * Calculate overall risk level
    */
   private calculateRiskLevel(piiFields: PIIField[]): PIIRiskLevel {
-    if (piiFields.length === 0) return 'none';
+    if (piiFields.length === 0) return "none";
 
     // Check for critical PII
     const hasCriticalPII = piiFields.some(
-      (f) => (f.piiType === 'ssn' || f.piiType === 'credit_card') && f.confidence > 0.7
+      (f) => (f.piiType === "ssn" || f.piiType === "credit_card") && f.confidence > 0.7
     );
 
-    if (hasCriticalPII) return 'critical';
+    if (hasCriticalPII) return "critical";
 
     // Check for high-risk PII
     const hasHighRiskPII = piiFields.some(
       (f) =>
-        (f.piiType === 'ssn' || f.piiType === 'credit_card' || f.piiType === 'dob') &&
+        (f.piiType === "ssn" || f.piiType === "credit_card" || f.piiType === "dob") &&
         f.confidence > 0.5
     );
 
-    if (hasHighRiskPII || piiFields.length >= 5) return 'high';
+    if (hasHighRiskPII || piiFields.length >= 5) return "high";
 
     // Check for medium-risk PII
     const hasMediumRiskPII = piiFields.some(
-      (f) => (f.piiType === 'email' || f.piiType === 'phone' || f.piiType === 'address') && f.confidence > 0.7
+      (f) =>
+        (f.piiType === "email" || f.piiType === "phone" || f.piiType === "address") &&
+        f.confidence > 0.7
     );
 
-    if (hasMediumRiskPII || piiFields.length >= 3) return 'medium';
+    if (hasMediumRiskPII || piiFields.length >= 3) return "medium";
 
     // Low-risk
-    return piiFields.length > 0 ? 'low' : 'none';
+    return piiFields.length > 0 ? "low" : "none";
   }
 
   /**
    * Generate redaction recommendations
    */
-  private generateRecommendations(
-    piiFields: PIIField[]
-  ): RedactionRecommendation[] {
+  private generateRecommendations(piiFields: PIIField[]): RedactionRecommendation[] {
     return piiFields.map((field) => ({
       field: field.field,
       strategy: field.recommendedStrategy,
@@ -300,9 +307,9 @@ export class PIIDetection {
    */
   private generateRecommendationReason(field: PIIField): string {
     const strategyDescriptions: Record<RedactionStrategy, string> = {
-      MASK: 'Partially obscure to preserve format while protecting privacy',
-      DROP: 'Remove entirely due to high sensitivity',
-      HASH: 'One-way hash to enable matching without revealing original value',
+      MASK: "Partially obscure to preserve format while protecting privacy",
+      DROP: "Remove entirely due to high sensitivity",
+      HASH: "One-way hash to enable matching without revealing original value",
     };
 
     return `${field.piiType.toUpperCase()} detected with ${(field.confidence * 100).toFixed(0)}% confidence. ${strategyDescriptions[field.recommendedStrategy]}.`;
@@ -313,12 +320,12 @@ export class PIIDetection {
    */
   private generateSummary(piiFields: PIIField[], riskLevel: PIIRiskLevel): string {
     if (piiFields.length === 0) {
-      return 'No PII detected in sample records.';
+      return "No PII detected in sample records.";
     }
 
     const piiTypes = Array.from(new Set(piiFields.map((f) => f.piiType)));
 
-    return `Detected ${piiFields.length} PII field(s) containing: ${piiTypes.join(', ')}. Overall risk level: ${riskLevel.toUpperCase()}.`;
+    return `Detected ${piiFields.length} PII field(s) containing: ${piiTypes.join(", ")}. Overall risk level: ${riskLevel.toUpperCase()}.`;
   }
 
   /**
@@ -326,11 +333,11 @@ export class PIIDetection {
    */
   static redact(value: string, strategy: RedactionStrategy): string {
     switch (strategy) {
-      case 'MASK':
+      case "MASK":
         return this.maskValue(value);
-      case 'DROP':
-        return '[REDACTED]';
-      case 'HASH':
+      case "DROP":
+        return "[REDACTED]";
+      case "HASH":
         return this.hashValue(value);
       default:
         return value;
@@ -342,23 +349,26 @@ export class PIIDetection {
    */
   private static maskValue(value: string): string {
     if (value.length <= 4) {
-      return '*'.repeat(value.length);
+      return "*".repeat(value.length);
     }
 
     // For emails: preserve first char and domain
-    if (value.includes('@')) {
-      const [local, domain] = value.split('@');
-      const maskedLocal = local.charAt(0) + '*'.repeat(Math.max(0, local.length - 1));
-      const domainParts = domain.split('.');
+    if (value.includes("@")) {
+      const [local, domain] = value.split("@");
+      const maskedLocal = local.charAt(0) + "*".repeat(Math.max(0, local.length - 1));
+      const domainParts = domain.split(".");
       const maskedDomain =
         domainParts.length > 1
-          ? domainParts[0].charAt(0) + '*'.repeat(Math.max(0, domainParts[0].length - 1)) + '.' + domainParts.slice(1).join('.')
+          ? domainParts[0].charAt(0) +
+            "*".repeat(Math.max(0, domainParts[0].length - 1)) +
+            "." +
+            domainParts.slice(1).join(".")
           : domain;
       return `${maskedLocal}@${maskedDomain}`;
     }
 
     // For other values: preserve first 2 and last 2 chars
-    return value.slice(0, 2) + '*'.repeat(Math.max(0, value.length - 4)) + value.slice(-2);
+    return value.slice(0, 2) + "*".repeat(Math.max(0, value.length - 4)) + value.slice(-2);
   }
 
   /**
@@ -373,6 +383,6 @@ export class PIIDetection {
       hash = hash & hash; // Convert to 32-bit integer
     }
 
-    return `HASH_${Math.abs(hash).toString(16).padStart(8, '0')}`;
+    return `HASH_${Math.abs(hash).toString(16).padStart(8, "0")}`;
   }
 }

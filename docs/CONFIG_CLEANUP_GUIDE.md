@@ -11,6 +11,7 @@
 This guide addresses the **legacy configuration fragmentation** in the Summit platform. Through analysis, we identified multiple competing configuration patterns that create risk, confusion, and maintenance overhead.
 
 **Key Issues:**
+
 - 4 different config loaders in the same codebase
 - Duplicate environment variables with unclear precedence
 - Inconsistent validation approaches (Zod, AJV, none)
@@ -36,12 +37,12 @@ This guide addresses the **legacy configuration fragmentation** in the Summit pl
 
 ### Configuration Formats
 
-| Format | Location | Validation | Status |
-|--------|----------|-----------|--------|
-| `.env` files | Root + server + apps | None/Zod | ✅ Keep |
-| YAML | `config/*.yaml` | AJV | ⚠️ Selective |
-| JSON | `config/*.json` | None | ⚠️ Selective |
-| TypeScript | Various `config.ts` | Zod/None | ✅ Consolidate |
+| Format       | Location             | Validation | Status         |
+| ------------ | -------------------- | ---------- | -------------- |
+| `.env` files | Root + server + apps | None/Zod   | ✅ Keep        |
+| YAML         | `config/*.yaml`      | AJV        | ⚠️ Selective   |
+| JSON         | `config/*.json`      | None       | ⚠️ Selective   |
+| TypeScript   | Various `config.ts`  | Zod/None   | ✅ Consolidate |
 
 ### Identified Issues
 
@@ -57,6 +58,7 @@ server/src/config/index.js    → CommonJS legacy version
 ```
 
 **Risk:**
+
 - Unclear which config takes precedence
 - Race conditions on startup
 - Type safety inconsistencies
@@ -68,12 +70,13 @@ server/src/config/index.js    → CommonJS legacy version
 
 **Problem:** Same configuration with different names:
 
-| Old Name | New Name | Status |
-|----------|----------|--------|
-| `NEO4J_USERNAME` | `NEO4J_USER` | Deprecated Q4 2024 |
-| `POSTGRES_URL` | `DATABASE_URL` | Standardize |
+| Old Name         | New Name       | Status             |
+| ---------------- | -------------- | ------------------ |
+| `NEO4J_USERNAME` | `NEO4J_USER`   | Deprecated Q4 2024 |
+| `POSTGRES_URL`   | `DATABASE_URL` | Standardize        |
 
 **Detection Script Output:**
+
 ```bash
 ⚠️  Found duplicate: NEO4J_USERNAME and NEO4J_USER both set
     Action: Remove NEO4J_USERNAME, use only NEO4J_USER
@@ -83,17 +86,18 @@ server/src/config/index.js    → CommonJS legacy version
 
 **Problem:** Three different validation approaches:
 
-| Validator | Files | Type Safety | Runtime Validation |
-|-----------|-------|-------------|-------------------|
-| Zod | `server/src/config.ts` | ✅ Yes | ✅ Yes |
-| AJV | `server/config.ts` | ❌ No | ✅ Yes |
-| None | App configs | ❌ No | ❌ No |
+| Validator | Files                  | Type Safety | Runtime Validation |
+| --------- | ---------------------- | ----------- | ------------------ |
+| Zod       | `server/src/config.ts` | ✅ Yes      | ✅ Yes             |
+| AJV       | `server/config.ts`     | ❌ No       | ✅ Yes             |
+| None      | App configs            | ❌ No       | ❌ No              |
 
 **Resolution:** Use Zod throughout for unified type safety and validation.
 
 #### Issue 4: Multiple .env Files with Unclear Precedence
 
 **Problem:**
+
 ```
 .env
 .env.example
@@ -107,6 +111,7 @@ server/.env.production
 ```
 
 **Resolution:**
+
 - Root `.env` for development
 - Root `.env.production` for production
 - Single `.env.example` as template
@@ -155,6 +160,7 @@ DUPLICATES = DEFINED with count > 1
 #### 3. Output Report
 
 The script generates three report formats:
+
 - **Text:** Human-readable for review
 - **Markdown:** For documentation
 - **JSON:** For automation/CI integration
@@ -223,6 +229,7 @@ Deprecated patterns:        3
 1. **Choose canonical loader:** `server/src/config.ts` (Zod-based)
 
 2. **Remove duplicate loaders:**
+
    ```bash
    # Backup before deletion
    git mv server/config.ts server/config.ts.deprecated
@@ -232,20 +239,21 @@ Deprecated patterns:        3
    ```
 
 3. **Update all imports:**
+
    ```typescript
    // OLD (multiple variations)
-   import config from '../config'
-   import { getConfig } from '../../config'
-   import cfg from './config/index'
+   import config from "../config";
+   import { getConfig } from "../../config";
+   import cfg from "./config/index";
 
    // NEW (single import)
-   import { cfg } from './config'
+   import { cfg } from "./config";
    ```
 
 4. **Add deprecation warnings:**
    ```typescript
    // In deprecated files, add:
-   console.warn('[DEPRECATED] This config loader is deprecated. Use server/src/config.ts');
+   console.warn("[DEPRECATED] This config loader is deprecated. Use server/src/config.ts");
    ```
 
 ### Phase 2: Standardize Environment Variables (Week 1-2)
@@ -255,16 +263,18 @@ Deprecated patterns:        3
 **Actions:**
 
 1. **Create mapping table:**
+
    ```typescript
    // server/src/config/deprecated-keys.ts
    export const DEPRECATED_KEYS = {
-     NEO4J_USERNAME: 'NEO4J_USER',
-     POSTGRES_URL: 'DATABASE_URL',
+     NEO4J_USERNAME: "NEO4J_USER",
+     POSTGRES_URL: "DATABASE_URL",
      // ... other mappings
    };
    ```
 
 2. **Add compatibility layer:**
+
    ```typescript
    // In server/src/config.ts
    function migrateDeprecatedKey(oldKey: string, newKey: string): string | undefined {
@@ -297,6 +307,7 @@ Deprecated patterns:        3
 **Actions:**
 
 1. **Merge nested .env files:**
+
    ```bash
    # Review differences
    diff .env server/.env
@@ -310,6 +321,7 @@ Deprecated patterns:        3
    ```
 
 2. **Document precedence:**
+
    ```typescript
    // server/src/config.ts
    /**
@@ -322,6 +334,7 @@ Deprecated patterns:        3
    ```
 
 3. **Clean up legacy files:**
+
    ```bash
    # Investigate .rehydrated files
    git log --follow server/.env.rehydrated
@@ -337,62 +350,67 @@ Deprecated patterns:        3
 **Actions:**
 
 1. **Extend Zod schema:**
+
    ```typescript
    // server/src/config.ts
-   const Env = z.object({
-     // Core
-     NODE_ENV: z.enum(['development', 'staging', 'production']).default('development'),
-     PORT: z.coerce.number().default(4000),
+   const Env = z
+     .object({
+       // Core
+       NODE_ENV: z.enum(["development", "staging", "production"]).default("development"),
+       PORT: z.coerce.number().default(4000),
 
-     // Database
-     DATABASE_URL: z.string().url().min(1),
-     REDIS_URL: z.string().url(),
-     NEO4J_URI: z.string().url(),
-     NEO4J_USER: z.string().min(1),
+       // Database
+       DATABASE_URL: z.string().url().min(1),
+       REDIS_URL: z.string().url(),
+       NEO4J_URI: z.string().url(),
+       NEO4J_USER: z.string().min(1),
 
-     // AI Providers
-     OPENAI_API_KEY: z.string().min(1),
-     ANTHROPIC_API_KEY: z.string().min(1),
+       // AI Providers
+       OPENAI_API_KEY: z.string().min(1),
+       ANTHROPIC_API_KEY: z.string().min(1),
 
-     // ... all required keys
-   }).strict();  // Fail on unknown keys
+       // ... all required keys
+     })
+     .strict(); // Fail on unknown keys
    ```
 
 2. **Add production guards:**
+
    ```typescript
    const parsed = Env.safeParse(process.env);
 
    if (!parsed.success) {
-     console.error('[CONFIG] Validation failed:');
+     console.error("[CONFIG] Validation failed:");
      console.error(parsed.error.format());
      process.exit(1);
    }
 
    // Production-specific validation
-   if (parsed.data.NODE_ENV === 'production') {
+   if (parsed.data.NODE_ENV === "production") {
      if (parsed.data.JWT_SECRET.length < 32) {
-       console.error('[CONFIG] JWT_SECRET too weak for production');
+       console.error("[CONFIG] JWT_SECRET too weak for production");
        process.exit(1);
      }
 
      if (!parsed.data.POSTGRES_SSL) {
-       console.error('[CONFIG] Database SSL required in production');
+       console.error("[CONFIG] Database SSL required in production");
        process.exit(1);
      }
    }
    ```
 
 3. **Type-safe access:**
+
    ```typescript
    // Export typed config
    export const cfg = parsed.data;
    export type Config = z.infer<typeof Env>;
 
    // Usage in code (fully typed!)
-   import { cfg } from './config';
+   import { cfg } from "./config";
 
-   const dbUrl = cfg.DATABASE_URL;  // string (typed)
-   const port = cfg.PORT;           // number (typed)
+   const dbUrl = cfg.DATABASE_URL; // string (typed)
+   const port = cfg.PORT; // number (typed)
    ```
 
 ### Phase 5: Feature Flag Consolidation (Week 3)
@@ -404,6 +422,7 @@ Deprecated patterns:        3
 1. **Choose primary system:** Distributed Config Service with environment overrides
 
 2. **Migration order:**
+
    ```typescript
    // Priority (highest to lowest):
    // 1. Environment variable: FEATURE_X=true
@@ -415,7 +434,7 @@ Deprecated patterns:        3
      // Check env var first
      const envVar = `FEATURE_${name.toUpperCase()}`;
      if (process.env[envVar] !== undefined) {
-       return process.env[envVar] === 'true';
+       return process.env[envVar] === "true";
      }
 
      // Check distributed config
@@ -555,50 +574,50 @@ diff docs/config-analysis-baseline.md docs/config-analysis-after.md
 
 ```typescript
 // server/src/config.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { loadConfig } from './config';
+import { describe, it, expect, beforeEach } from "vitest";
+import { loadConfig } from "./config";
 
-describe('Configuration Loading', () => {
+describe("Configuration Loading", () => {
   beforeEach(() => {
     // Reset environment
     process.env = {};
   });
 
-  it('should load required environment variables', () => {
-    process.env.DATABASE_URL = 'postgresql://localhost/test';
-    process.env.JWT_SECRET = 'test-secret-32-characters-long';
+  it("should load required environment variables", () => {
+    process.env.DATABASE_URL = "postgresql://localhost/test";
+    process.env.JWT_SECRET = "test-secret-32-characters-long";
 
     const config = loadConfig();
-    expect(config.DATABASE_URL).toBe('postgresql://localhost/test');
+    expect(config.DATABASE_URL).toBe("postgresql://localhost/test");
   });
 
-  it('should fail on missing required variables', () => {
-    expect(() => loadConfig()).toThrow('DATABASE_URL is required');
+  it("should fail on missing required variables", () => {
+    expect(() => loadConfig()).toThrow("DATABASE_URL is required");
   });
 
-  it('should apply default values', () => {
-    process.env.DATABASE_URL = 'postgresql://localhost/test';
-    process.env.JWT_SECRET = 'test-secret-32-characters-long';
+  it("should apply default values", () => {
+    process.env.DATABASE_URL = "postgresql://localhost/test";
+    process.env.JWT_SECRET = "test-secret-32-characters-long";
 
     const config = loadConfig();
-    expect(config.PORT).toBe(4000);  // default
+    expect(config.PORT).toBe(4000); // default
   });
 
-  it('should warn on deprecated keys', () => {
-    const consoleSpy = jest.spyOn(console, 'warn');
-    process.env.NEO4J_USERNAME = 'neo4j';
+  it("should warn on deprecated keys", () => {
+    const consoleSpy = jest.spyOn(console, "warn");
+    process.env.NEO4J_USERNAME = "neo4j";
 
     loadConfig();
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('NEO4J_USERNAME is deprecated')
+      expect.stringContaining("NEO4J_USERNAME is deprecated")
     );
   });
 
-  it('should enforce production security', () => {
-    process.env.NODE_ENV = 'production';
-    process.env.JWT_SECRET = 'weak';  // Too short
+  it("should enforce production security", () => {
+    process.env.NODE_ENV = "production";
+    process.env.JWT_SECRET = "weak"; // Too short
 
-    expect(() => loadConfig()).toThrow('JWT_SECRET too weak');
+    expect(() => loadConfig()).toThrow("JWT_SECRET too weak");
   });
 });
 ```
@@ -607,22 +626,22 @@ describe('Configuration Loading', () => {
 
 ```typescript
 // test/integration/config.test.ts
-describe('Config Integration', () => {
-  it('should load from .env file', async () => {
+describe("Config Integration", () => {
+  it("should load from .env file", async () => {
     // Create temporary .env
-    await fs.writeFile('.env.test', 'TEST_VAR=value');
+    await fs.writeFile(".env.test", "TEST_VAR=value");
 
     // Load config
-    const config = loadConfig({ path: '.env.test' });
+    const config = loadConfig({ path: ".env.test" });
 
-    expect(config.TEST_VAR).toBe('value');
+    expect(config.TEST_VAR).toBe("value");
 
     // Cleanup
-    await fs.unlink('.env.test');
+    await fs.unlink(".env.test");
   });
 
-  it('should override with environment variables', () => {
-    process.env.PORT = '5000';
+  it("should override with environment variables", () => {
+    process.env.PORT = "5000";
     const config = loadConfig();
     expect(config.PORT).toBe(5000);
   });
@@ -649,6 +668,7 @@ describe('Config Integration', () => {
 ### If Issues Arise During Migration
 
 **Option 1: Revert to backup branch**
+
 ```bash
 git checkout backup/config-pre-cleanup
 git checkout -b hotfix/config-rollback
@@ -658,6 +678,7 @@ git push -u origin hotfix/config-rollback
 ```
 
 **Option 2: Selective revert**
+
 ```bash
 # Revert specific commits
 git revert <commit-hash>
@@ -667,6 +688,7 @@ git checkout HEAD~1 -- server/src/config.ts
 ```
 
 **Option 3: Feature flag rollback**
+
 ```bash
 # Add feature flag for new config system
 FEATURE_NEW_CONFIG_LOADER=false
@@ -784,4 +806,4 @@ summit/
 
 ---
 
-*Last Updated: 2025-11-20*
+_Last Updated: 2025-11-20_

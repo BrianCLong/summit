@@ -23,14 +23,14 @@ export interface FusionVerdict {
 }
 
 export enum ManipulationType {
-  FACE_SWAP = 'face_swap',
-  LIP_SYNC = 'lip_sync',
-  VOICE_CLONE = 'voice_clone',
-  FULL_SYNTHESIS = 'full_synthesis',
-  PARTIAL_EDIT = 'partial_edit',
-  BACKGROUND_MANIPULATION = 'background_manipulation',
-  TEMPORAL_MANIPULATION = 'temporal_manipulation',
-  AUDIO_VISUAL_MISMATCH = 'audio_visual_mismatch',
+  FACE_SWAP = "face_swap",
+  LIP_SYNC = "lip_sync",
+  VOICE_CLONE = "voice_clone",
+  FULL_SYNTHESIS = "full_synthesis",
+  PARTIAL_EDIT = "partial_edit",
+  BACKGROUND_MANIPULATION = "background_manipulation",
+  TEMPORAL_MANIPULATION = "temporal_manipulation",
+  AUDIO_VISUAL_MISMATCH = "audio_visual_mismatch",
 }
 
 export interface ModalityResult {
@@ -43,14 +43,14 @@ export interface ModalityResult {
 }
 
 export enum Modality {
-  VISUAL_FACE = 'visual_face',
-  VISUAL_BODY = 'visual_body',
-  VISUAL_BACKGROUND = 'visual_background',
-  AUDIO_SPEECH = 'audio_speech',
-  AUDIO_AMBIENT = 'audio_ambient',
-  TEXT_TRANSCRIPT = 'text_transcript',
-  TEMPORAL_VIDEO = 'temporal_video',
-  TEMPORAL_AUDIO = 'temporal_audio',
+  VISUAL_FACE = "visual_face",
+  VISUAL_BODY = "visual_body",
+  VISUAL_BACKGROUND = "visual_background",
+  AUDIO_SPEECH = "audio_speech",
+  AUDIO_AMBIENT = "audio_ambient",
+  TEXT_TRANSCRIPT = "text_transcript",
+  TEMPORAL_VIDEO = "temporal_video",
+  TEMPORAL_AUDIO = "temporal_audio",
 }
 
 export interface ModalityArtifact {
@@ -113,11 +113,11 @@ export interface ModalityDiscrepancy {
 }
 
 export enum DiscrepancyType {
-  TIMING_MISMATCH = 'timing_mismatch',
-  CONTENT_INCONSISTENCY = 'content_inconsistency',
-  QUALITY_DISPARITY = 'quality_disparity',
-  SEMANTIC_CONFLICT = 'semantic_conflict',
-  PHYSICAL_IMPOSSIBILITY = 'physical_impossibility',
+  TIMING_MISMATCH = "timing_mismatch",
+  CONTENT_INCONSISTENCY = "content_inconsistency",
+  QUALITY_DISPARITY = "quality_disparity",
+  SEMANTIC_CONFLICT = "semantic_conflict",
+  PHYSICAL_IMPOSSIBILITY = "physical_impossibility",
 }
 
 export interface FusionMetrics {
@@ -129,11 +129,11 @@ export interface FusionMetrics {
 }
 
 export enum FusionMethod {
-  EARLY_FUSION = 'early_fusion',
-  LATE_FUSION = 'late_fusion',
-  HYBRID_FUSION = 'hybrid_fusion',
-  ATTENTION_FUSION = 'attention_fusion',
-  GRAPH_FUSION = 'graph_fusion',
+  EARLY_FUSION = "early_fusion",
+  LATE_FUSION = "late_fusion",
+  HYBRID_FUSION = "hybrid_fusion",
+  ATTENTION_FUSION = "attention_fusion",
+  GRAPH_FUSION = "graph_fusion",
 }
 
 export interface TemporalAlignmentResult {
@@ -177,7 +177,7 @@ export interface MotionConsistencyResult {
 }
 
 export interface PhysicsViolation {
-  type: 'impossible_acceleration' | 'discontinuity' | 'unnatural_movement';
+  type: "impossible_acceleration" | "discontinuity" | "unnatural_movement";
   timestamp: number;
   description: string;
   severity: number;
@@ -242,7 +242,7 @@ export interface ContextualSemantics {
 }
 
 export interface SemanticContradiction {
-  type: 'factual' | 'contextual' | 'temporal' | 'identity';
+  type: "factual" | "contextual" | "temporal" | "identity";
   description: string;
   evidence: { modality: Modality; content: string }[];
   severity: number;
@@ -338,16 +338,24 @@ export class MultimodalFusionEngine {
     if (media.video) {
       promises.push(
         (async () => {
-          const faceResult = await this.modalityAnalyzers.get(Modality.VISUAL_FACE)!.analyze(media.video);
+          const faceResult = await this.modalityAnalyzers
+            .get(Modality.VISUAL_FACE)!
+            .analyze(media.video);
           results.push(faceResult);
 
-          const bodyResult = await this.modalityAnalyzers.get(Modality.VISUAL_BODY)!.analyze(media.video);
+          const bodyResult = await this.modalityAnalyzers
+            .get(Modality.VISUAL_BODY)!
+            .analyze(media.video);
           results.push(bodyResult);
 
-          const bgResult = await this.modalityAnalyzers.get(Modality.VISUAL_BACKGROUND)!.analyze(media.video);
+          const bgResult = await this.modalityAnalyzers
+            .get(Modality.VISUAL_BACKGROUND)!
+            .analyze(media.video);
           results.push(bgResult);
 
-          const temporalResult = await this.modalityAnalyzers.get(Modality.TEMPORAL_VIDEO)!.analyze(media.video);
+          const temporalResult = await this.modalityAnalyzers
+            .get(Modality.TEMPORAL_VIDEO)!
+            .analyze(media.video);
           results.push(temporalResult);
         })()
       );
@@ -356,13 +364,19 @@ export class MultimodalFusionEngine {
     if (media.audio) {
       promises.push(
         (async () => {
-          const speechResult = await this.modalityAnalyzers.get(Modality.AUDIO_SPEECH)!.analyze(media.audio);
+          const speechResult = await this.modalityAnalyzers
+            .get(Modality.AUDIO_SPEECH)!
+            .analyze(media.audio);
           results.push(speechResult);
 
-          const ambientResult = await this.modalityAnalyzers.get(Modality.AUDIO_AMBIENT)!.analyze(media.audio);
+          const ambientResult = await this.modalityAnalyzers
+            .get(Modality.AUDIO_AMBIENT)!
+            .analyze(media.audio);
           results.push(ambientResult);
 
-          const audioTempResult = await this.modalityAnalyzers.get(Modality.TEMPORAL_AUDIO)!.analyze(media.audio);
+          const audioTempResult = await this.modalityAnalyzers
+            .get(Modality.TEMPORAL_AUDIO)!
+            .analyze(media.audio);
           results.push(audioTempResult);
         })()
       );
@@ -371,7 +385,9 @@ export class MultimodalFusionEngine {
     if (media.transcript) {
       promises.push(
         (async () => {
-          const textResult = await this.modalityAnalyzers.get(Modality.TEXT_TRANSCRIPT)!.analyze(media.transcript);
+          const textResult = await this.modalityAnalyzers
+            .get(Modality.TEXT_TRANSCRIPT)!
+            .analyze(media.transcript);
           results.push(textResult);
         })()
       );
@@ -385,7 +401,7 @@ export class MultimodalFusionEngine {
    * Perform cross-modal consistency analysis
    */
   private performCrossModalAnalysis(modalityResults: ModalityResult[]): CrossModalAnalysis {
-    const modalities = modalityResults.map(r => r.modality);
+    const modalities = modalityResults.map((r) => r.modality);
     const n = modalities.length;
 
     // Build consistency matrix
@@ -396,10 +412,7 @@ export class MultimodalFusionEngine {
         if (i === j) {
           scores[i][j] = 1;
         } else {
-          scores[i][j] = this.computeModalityConsistency(
-            modalityResults[i],
-            modalityResults[j]
-          );
+          scores[i][j] = this.computeModalityConsistency(modalityResults[i], modalityResults[j]);
         }
       }
     }
@@ -429,7 +442,7 @@ export class MultimodalFusionEngine {
           modalities: [corr.modality1, corr.modality2],
           type: DiscrepancyType.CONTENT_INCONSISTENCY,
           severity: corr.deviation,
-          description: `Unexpected ${corr.deviation > 0 ? 'low' : 'high'} correlation between ${corr.modality1} and ${corr.modality2}`,
+          description: `Unexpected ${corr.deviation > 0 ? "low" : "high"} correlation between ${corr.modality1} and ${corr.modality2}`,
           evidence: [],
         });
       }
@@ -454,7 +467,7 @@ export class MultimodalFusionEngine {
 
     return {
       consistencyMatrix: {
-        modalities: modalities.map(m => m.toString()),
+        modalities: modalities.map((m) => m.toString()),
         scores,
         overallConsistency,
       },
@@ -528,7 +541,7 @@ export class MultimodalFusionEngine {
       anomalies.push({
         timestamp: 0,
         duration: -1,
-        type: 'audio_video_desync',
+        type: "audio_video_desync",
         severity: Math.abs(audioVideoSync.offsetMs) / 100,
         affectedModalities: [Modality.AUDIO_SPEECH, Modality.VISUAL_FACE],
       });
@@ -539,7 +552,7 @@ export class MultimodalFusionEngine {
         anomalies.push({
           timestamp: segment.start,
           duration: segment.end - segment.start,
-          type: 'lip_sync_anomaly',
+          type: "lip_sync_anomaly",
           severity: 0.8,
           affectedModalities: [Modality.AUDIO_SPEECH, Modality.VISUAL_FACE],
         });
@@ -556,11 +569,10 @@ export class MultimodalFusionEngine {
       });
     }
 
-    const alignmentScore = (
+    const alignmentScore =
       (audioVideoSync.isSync ? audioVideoSync.confidence : 0) * 0.3 +
       lipSyncAnalysis.score * 0.4 +
-      motionConsistency.score * 0.3
-    );
+      motionConsistency.score * 0.3;
 
     return {
       isAligned: alignmentScore > 0.7,
@@ -579,9 +591,7 @@ export class MultimodalFusionEngine {
       offsetMs: 15,
       confidence: 0.9,
       driftRate: 0.001,
-      segments: [
-        { start: 0, end: 10, offset: 15, confidence: 0.9 },
-      ],
+      segments: [{ start: 0, end: 10, offset: 15, confidence: 0.9 }],
     };
   }
 
@@ -622,7 +632,7 @@ export class MultimodalFusionEngine {
 
     // Analyze content semantics
     const contentAnalysis: ContentSemantics = {
-      topics: ['general'],
+      topics: ["general"],
       entities: [],
       sentiment: {
         overall: 0.5,
@@ -634,10 +644,10 @@ export class MultimodalFusionEngine {
 
     // Analyze contextual semantics
     const contextualAnalysis: ContextualSemantics = {
-      setting: 'indoor',
-      timeOfDay: 'day',
-      participants: ['person1'],
-      activity: 'speaking',
+      setting: "indoor",
+      timeOfDay: "day",
+      participants: ["person1"],
+      activity: "speaking",
       plausibility: 0.9,
     };
 
@@ -663,15 +673,14 @@ export class MultimodalFusionEngine {
     crossModalAnalysis: CrossModalAnalysis
   ): FusionMetrics {
     // Calculate agreement score
-    const predictions = modalityResults.map(r => r.isManipulated);
-    const positiveCount = predictions.filter(p => p).length;
-    const agreementScore = Math.max(positiveCount, predictions.length - positiveCount) / predictions.length;
+    const predictions = modalityResults.map((r) => r.isManipulated);
+    const positiveCount = predictions.filter((p) => p).length;
+    const agreementScore =
+      Math.max(positiveCount, predictions.length - positiveCount) / predictions.length;
 
     // Calculate information gain (simplified)
-    const individualUncertainty = modalityResults.reduce(
-      (sum, r) => sum + (1 - r.confidence),
-      0
-    ) / modalityResults.length;
+    const individualUncertainty =
+      modalityResults.reduce((sum, r) => sum + (1 - r.confidence), 0) / modalityResults.length;
 
     const fusedUncertainty = 1 - crossModalAnalysis.consistencyMatrix.overallConsistency;
     const uncertaintyReduction = Math.max(0, individualUncertainty - fusedUncertainty);
@@ -728,14 +737,14 @@ export class MultimodalFusionEngine {
     const severity = isManipulated ? adjustedConfidence : 0;
 
     // Generate recommendation
-    let recommendation = 'Content appears authentic.';
+    let recommendation = "Content appears authentic.";
     if (isManipulated) {
       if (adjustedConfidence > 0.8) {
-        recommendation = 'High confidence manipulation detected. Do not trust this content.';
+        recommendation = "High confidence manipulation detected. Do not trust this content.";
       } else if (adjustedConfidence > 0.6) {
-        recommendation = 'Manipulation likely. Verify through independent sources.';
+        recommendation = "Manipulation likely. Verify through independent sources.";
       } else {
-        recommendation = 'Some manipulation indicators present. Exercise caution.';
+        recommendation = "Some manipulation indicators present. Exercise caution.";
       }
     }
 
@@ -786,28 +795,28 @@ export class MultimodalFusionEngine {
     }
 
     const byAnalysisType = {
-      artifactDetection: modalityResults.reduce((sum, r) => sum + r.confidence, 0) / modalityResults.length,
+      artifactDetection:
+        modalityResults.reduce((sum, r) => sum + r.confidence, 0) / modalityResults.length,
       crossModalConsistency: crossModalAnalysis.consistencyMatrix.overallConsistency,
       temporalAlignment: temporalAlignment.alignmentScore,
       semanticConsistency: semanticConsistency.score,
     };
 
-    const overall = (
+    const overall =
       byAnalysisType.artifactDetection * 0.4 +
       byAnalysisType.crossModalConsistency * 0.25 +
       byAnalysisType.temporalAlignment * 0.2 +
-      byAnalysisType.semanticConsistency * 0.15
-    );
+      byAnalysisType.semanticConsistency * 0.15;
 
     const uncertaintySources: string[] = [];
     if (byAnalysisType.artifactDetection < 0.7) {
-      uncertaintySources.push('Low artifact detection confidence');
+      uncertaintySources.push("Low artifact detection confidence");
     }
     if (byAnalysisType.crossModalConsistency < 0.7) {
-      uncertaintySources.push('Cross-modal inconsistencies detected');
+      uncertaintySources.push("Cross-modal inconsistencies detected");
     }
     if (temporalAlignment.anomalies.length > 0) {
-      uncertaintySources.push('Temporal anomalies present');
+      uncertaintySources.push("Temporal anomalies present");
     }
 
     return {
@@ -837,7 +846,9 @@ class ModalityAnalyzer {
       confidence,
       detectedArtifacts: [],
       features: {
-        embedding: Array(128).fill(0).map(() => Math.random()),
+        embedding: Array(128)
+          .fill(0)
+          .map(() => Math.random()),
         statistics: { mean: 0.5, std: 0.1 },
         anomalyScores: { overall: isManipulated ? 0.7 : 0.2 },
       },

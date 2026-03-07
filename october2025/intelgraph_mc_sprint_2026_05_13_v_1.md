@@ -221,8 +221,7 @@ type Query {
 
 type Mutation {
   upsertServiceOp(op: ServiceOpInput!): Boolean @auth(abac: "admin.write")
-  purgeCache(opId: String!, varsHash: String!): Boolean
-    @auth(abac: "admin.write")
+  purgeCache(opId: String!, varsHash: String!): Boolean @auth(abac: "admin.write")
 }
 ```
 

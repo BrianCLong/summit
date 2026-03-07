@@ -4,23 +4,23 @@
  * real-time data streams into Summit services based on configurable rules.
  */
 
-import { z } from 'zod';
-import { EventEmitter } from 'events';
-import { SwitchboardContext, SwitchboardTarget } from './types';
+import { z } from "zod";
+import { EventEmitter } from "events";
+import { SwitchboardContext, SwitchboardTarget } from "./types";
 
 // Event routing schemas
-export const EventPrioritySchema = z.enum(['critical', 'high', 'normal', 'low', 'background']);
+export const EventPrioritySchema = z.enum(["critical", "high", "normal", "low", "background"]);
 export type EventPriority = z.infer<typeof EventPrioritySchema>;
 
 export const EventCategorySchema = z.enum([
-  'system',
-  'security',
-  'analytics',
-  'user_action',
-  'integration',
-  'ai_pipeline',
-  'audit',
-  'notification',
+  "system",
+  "security",
+  "analytics",
+  "user_action",
+  "integration",
+  "ai_pipeline",
+  "audit",
+  "notification",
 ]);
 export type EventCategory = z.infer<typeof EventCategorySchema>;
 
@@ -37,7 +37,7 @@ export const StreamEventSchema = z.object({
   payload: z.record(z.unknown()),
   metadata: z.record(z.string()).optional(),
   tags: z.array(z.string()).optional(),
-  version: z.string().default('1.0'),
+  version: z.string().default("1.0"),
 });
 
 export type StreamEvent = z.infer<typeof StreamEventSchema>;
@@ -57,20 +57,26 @@ export const RoutingRuleSchema = z.object({
     tags: z.array(z.string()).optional(),
     customFilter: z.string().optional(), // JSONPath or JS expression
   }),
-  targets: z.array(z.object({
-    service: z.string(),
-    topic: z.string().optional(),
-    transform: z.string().optional(), // Transform function name
-    retryPolicy: z.object({
-      maxRetries: z.number().int().min(0).max(10).default(3),
-      backoffMs: z.number().int().min(100).default(1000),
-      maxBackoffMs: z.number().int().min(1000).default(30000),
-    }).optional(),
-  })),
-  rateLimit: z.object({
-    maxEventsPerSecond: z.number().int().min(1).default(1000),
-    burstSize: z.number().int().min(1).default(100),
-  }).optional(),
+  targets: z.array(
+    z.object({
+      service: z.string(),
+      topic: z.string().optional(),
+      transform: z.string().optional(), // Transform function name
+      retryPolicy: z
+        .object({
+          maxRetries: z.number().int().min(0).max(10).default(3),
+          backoffMs: z.number().int().min(100).default(1000),
+          maxBackoffMs: z.number().int().min(1000).default(30000),
+        })
+        .optional(),
+    })
+  ),
+  rateLimit: z
+    .object({
+      maxEventsPerSecond: z.number().int().min(1).default(1000),
+      burstSize: z.number().int().min(1).default(100),
+    })
+    .optional(),
   deadLetterTarget: z.string().optional(),
   ttlMs: z.number().int().optional(),
   createdAt: z.date().optional(),
@@ -82,11 +88,13 @@ export type RoutingRule = z.infer<typeof RoutingRuleSchema>;
 export const RoutingDecisionSchema = z.object({
   eventId: z.string(),
   matchedRules: z.array(z.string()),
-  targets: z.array(z.object({
-    service: z.string(),
-    topic: z.string().optional(),
-    transformedPayload: z.record(z.unknown()).optional(),
-  })),
+  targets: z.array(
+    z.object({
+      service: z.string(),
+      topic: z.string().optional(),
+      transformedPayload: z.record(z.unknown()).optional(),
+    })
+  ),
   dropped: z.boolean(),
   dropReason: z.string().optional(),
   processingTimeMs: z.number(),
@@ -96,7 +104,10 @@ export const RoutingDecisionSchema = z.object({
 export type RoutingDecision = z.infer<typeof RoutingDecisionSchema>;
 
 // Transform functions registry
-type TransformFn = (event: StreamEvent, context: SwitchboardContext) => StreamEvent | Promise<StreamEvent>;
+type TransformFn = (
+  event: StreamEvent,
+  context: SwitchboardContext
+) => StreamEvent | Promise<StreamEvent>;
 
 interface RouterMetrics {
   eventsReceived: number;
@@ -113,7 +124,7 @@ interface RouterOptions {
   maxQueueSize?: number;
   batchSize?: number;
   flushIntervalMs?: number;
-  defaultRetryPolicy?: RoutingRule['targets'][0]['retryPolicy'];
+  defaultRetryPolicy?: RoutingRule["targets"][0]["retryPolicy"];
   logger?: Logger;
   metrics?: MetricsClient;
 }
@@ -133,16 +144,16 @@ interface MetricsClient {
 
 class ConsoleLogger implements Logger {
   info(message: string, meta?: Record<string, unknown>) {
-    console.log(JSON.stringify({ level: 'info', message, ...meta, ts: Date.now() }));
+    console.log(JSON.stringify({ level: "info", message, ...meta, ts: Date.now() }));
   }
   warn(message: string, meta?: Record<string, unknown>) {
-    console.warn(JSON.stringify({ level: 'warn', message, ...meta, ts: Date.now() }));
+    console.warn(JSON.stringify({ level: "warn", message, ...meta, ts: Date.now() }));
   }
   error(message: string, meta?: Record<string, unknown>) {
-    console.error(JSON.stringify({ level: 'error', message, ...meta, ts: Date.now() }));
+    console.error(JSON.stringify({ level: "error", message, ...meta, ts: Date.now() }));
   }
   debug(message: string, meta?: Record<string, unknown>) {
-    console.debug(JSON.stringify({ level: 'debug', message, ...meta, ts: Date.now() }));
+    console.debug(JSON.stringify({ level: "debug", message, ...meta, ts: Date.now() }));
   }
 }
 
@@ -166,7 +177,8 @@ export class SwitchboardEventRouter extends EventEmitter {
   private isProcessing = false;
 
   // Event handlers for external delivery
-  private deliveryHandlers: Map<string, (events: StreamEvent[], target: string) => Promise<void>> = new Map();
+  private deliveryHandlers: Map<string, (events: StreamEvent[], target: string) => Promise<void>> =
+    new Map();
 
   constructor(options: RouterOptions = {}) {
     super();
@@ -201,8 +213,11 @@ export class SwitchboardEventRouter extends EventEmitter {
   registerRule(rule: RoutingRule): void {
     const validated = RoutingRuleSchema.parse(rule);
     this.rules.set(validated.id, validated);
-    this.options.logger.info('Routing rule registered', { ruleId: validated.id, name: validated.name });
-    this.emit('rule:registered', validated);
+    this.options.logger.info("Routing rule registered", {
+      ruleId: validated.id,
+      name: validated.name,
+    });
+    this.emit("rule:registered", validated);
   }
 
   /**
@@ -211,8 +226,8 @@ export class SwitchboardEventRouter extends EventEmitter {
   unregisterRule(ruleId: string): boolean {
     const deleted = this.rules.delete(ruleId);
     if (deleted) {
-      this.options.logger.info('Routing rule unregistered', { ruleId });
-      this.emit('rule:unregistered', ruleId);
+      this.options.logger.info("Routing rule unregistered", { ruleId });
+      this.emit("rule:unregistered", ruleId);
     }
     return deleted;
   }
@@ -229,7 +244,7 @@ export class SwitchboardEventRouter extends EventEmitter {
    */
   registerTransform(name: string, fn: TransformFn): void {
     this.transforms.set(name, fn);
-    this.options.logger.debug('Transform registered', { name });
+    this.options.logger.debug("Transform registered", { name });
   }
 
   /**
@@ -240,7 +255,7 @@ export class SwitchboardEventRouter extends EventEmitter {
     handler: (events: StreamEvent[], target: string) => Promise<void>
   ): void {
     this.deliveryHandlers.set(service, handler);
-    this.options.logger.info('Delivery handler registered', { service });
+    this.options.logger.info("Delivery handler registered", { service });
   }
 
   /**
@@ -249,7 +264,7 @@ export class SwitchboardEventRouter extends EventEmitter {
   async route(event: StreamEvent, context: SwitchboardContext): Promise<RoutingDecision> {
     const startTime = performance.now();
     this.metrics.eventsReceived++;
-    this.options.metrics.increment('switchboard.events.received', { category: event.category });
+    this.options.metrics.increment("switchboard.events.received", { category: event.category });
 
     try {
       // Validate event
@@ -260,21 +275,23 @@ export class SwitchboardEventRouter extends EventEmitter {
 
       if (matchedRules.length === 0) {
         this.metrics.eventsDropped++;
-        this.options.metrics.increment('switchboard.events.dropped', { reason: 'no_matching_rules' });
+        this.options.metrics.increment("switchboard.events.dropped", {
+          reason: "no_matching_rules",
+        });
 
         return {
           eventId: validatedEvent.id,
           matchedRules: [],
           targets: [],
           dropped: true,
-          dropReason: 'No matching routing rules',
+          dropReason: "No matching routing rules",
           processingTimeMs: performance.now() - startTime,
           timestamp: Date.now(),
         };
       }
 
       // Collect all targets from matched rules
-      const targets: RoutingDecision['targets'] = [];
+      const targets: RoutingDecision["targets"] = [];
 
       for (const rule of matchedRules) {
         this.metrics.ruleMatchCounts.set(
@@ -310,8 +327,8 @@ export class SwitchboardEventRouter extends EventEmitter {
       const processingTimeMs = performance.now() - startTime;
       this.updateAverageLatency(processingTimeMs);
       this.metrics.eventsRouted++;
-      this.options.metrics.increment('switchboard.events.routed', { category: event.category });
-      this.options.metrics.histogram('switchboard.routing.latency', processingTimeMs);
+      this.options.metrics.increment("switchboard.events.routed", { category: event.category });
+      this.options.metrics.histogram("switchboard.routing.latency", processingTimeMs);
 
       const decision: RoutingDecision = {
         eventId: validatedEvent.id,
@@ -322,12 +339,15 @@ export class SwitchboardEventRouter extends EventEmitter {
         timestamp: Date.now(),
       };
 
-      this.emit('event:routed', decision);
+      this.emit("event:routed", decision);
       return decision;
     } catch (error) {
       this.metrics.eventsFailed++;
-      this.options.metrics.increment('switchboard.events.failed');
-      this.options.logger.error('Event routing failed', { eventId: event.id, error: (error as Error).message });
+      this.options.metrics.increment("switchboard.events.failed");
+      this.options.logger.error("Event routing failed", {
+        eventId: event.id,
+        error: (error as Error).message,
+      });
       throw error;
     }
   }
@@ -359,15 +379,12 @@ export class SwitchboardEventRouter extends EventEmitter {
   /**
    * Check if an event matches rule conditions
    */
-  private matchesConditions(
-    event: StreamEvent,
-    conditions: RoutingRule['conditions']
-  ): boolean {
+  private matchesConditions(event: StreamEvent, conditions: RoutingRule["conditions"]): boolean {
     // Match event types
     if (conditions.eventTypes && conditions.eventTypes.length > 0) {
       const typeMatched = conditions.eventTypes.some((type) => {
-        if (type.includes('*')) {
-          const pattern = new RegExp('^' + type.replace(/\*/g, '.*') + '$');
+        if (type.includes("*")) {
+          const pattern = new RegExp("^" + type.replace(/\*/g, ".*") + "$");
           return pattern.test(event.type);
         }
         return type === event.type;
@@ -388,8 +405,8 @@ export class SwitchboardEventRouter extends EventEmitter {
     // Match sources
     if (conditions.sources && conditions.sources.length > 0) {
       const sourceMatched = conditions.sources.some((source) => {
-        if (source.includes('*')) {
-          const pattern = new RegExp('^' + source.replace(/\*/g, '.*') + '$');
+        if (source.includes("*")) {
+          const pattern = new RegExp("^" + source.replace(/\*/g, ".*") + "$");
           return pattern.test(event.source);
         }
         return source === event.source;
@@ -416,7 +433,7 @@ export class SwitchboardEventRouter extends EventEmitter {
         const result = this.evaluateCustomFilter(event, conditions.customFilter);
         if (!result) return false;
       } catch (error) {
-        this.options.logger.warn('Custom filter evaluation failed', {
+        this.options.logger.warn("Custom filter evaluation failed", {
           filter: conditions.customFilter,
           error: (error as Error).message,
         });
@@ -437,20 +454,20 @@ export class SwitchboardEventRouter extends EventEmitter {
 
     const [path, operator, expectedValue] = parts;
     const actualValue = this.getNestedValue(event, path.trim());
-    const expected = expectedValue.trim().replace(/^['"]|['"]$/g, '');
+    const expected = expectedValue.trim().replace(/^['"]|['"]$/g, "");
 
     switch (operator) {
-      case '==':
+      case "==":
         return String(actualValue) === expected;
-      case '!=':
+      case "!=":
         return String(actualValue) !== expected;
-      case '>':
+      case ">":
         return Number(actualValue) > Number(expected);
-      case '<':
+      case "<":
         return Number(actualValue) < Number(expected);
-      case '>=':
+      case ">=":
         return Number(actualValue) >= Number(expected);
-      case '<=':
+      case "<=":
         return Number(actualValue) <= Number(expected);
       default:
         return true;
@@ -461,8 +478,8 @@ export class SwitchboardEventRouter extends EventEmitter {
    * Get nested value from object
    */
   private getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-    return path.split('.').reduce((current: unknown, key: string) => {
-      if (current && typeof current === 'object') {
+    return path.split(".").reduce((current: unknown, key: string) => {
+      if (current && typeof current === "object") {
         return (current as Record<string, unknown>)[key];
       }
       return undefined;
@@ -478,7 +495,7 @@ export class SwitchboardEventRouter extends EventEmitter {
     topic?: string
   ): Promise<void> {
     if (this.eventQueue.length >= this.options.maxQueueSize) {
-      this.options.logger.warn('Event queue full, dropping oldest events');
+      this.options.logger.warn("Event queue full, dropping oldest events");
       this.eventQueue = this.eventQueue.slice(-Math.floor(this.options.maxQueueSize * 0.9));
       this.metrics.eventsDropped++;
     }
@@ -489,7 +506,7 @@ export class SwitchboardEventRouter extends EventEmitter {
       metadata: {
         ...event.metadata,
         _targetService: service,
-        _targetTopic: topic || 'default',
+        _targetTopic: topic || "default",
       },
     };
 
@@ -513,7 +530,7 @@ export class SwitchboardEventRouter extends EventEmitter {
     // Group events by target service
     const grouped = new Map<string, StreamEvent[]>();
     for (const event of batch) {
-      const service = event.metadata?._targetService as string || 'default';
+      const service = (event.metadata?._targetService as string) || "default";
       if (!grouped.has(service)) {
         grouped.set(service, []);
       }
@@ -527,14 +544,17 @@ export class SwitchboardEventRouter extends EventEmitter {
       if (handler) {
         deliveryPromises.push(
           handler(events, service).catch((error) => {
-            this.options.logger.error('Delivery failed', { service, error: (error as Error).message });
+            this.options.logger.error("Delivery failed", {
+              service,
+              error: (error as Error).message,
+            });
             this.metrics.errorCounts.set(service, (this.metrics.errorCounts.get(service) || 0) + 1);
-            this.emit('delivery:failed', { service, events, error });
+            this.emit("delivery:failed", { service, events, error });
           })
         );
       } else {
-        this.options.logger.warn('No delivery handler for service', { service });
-        this.emit('event:undelivered', events);
+        this.options.logger.warn("No delivery handler for service", { service });
+        this.emit("event:undelivered", events);
       }
     }
 
@@ -548,7 +568,7 @@ export class SwitchboardEventRouter extends EventEmitter {
   private startFlushTimer(): void {
     this.flushTimer = setInterval(() => {
       this.flushQueue().catch((error) => {
-        this.options.logger.error('Flush timer error', { error: (error as Error).message });
+        this.options.logger.error("Flush timer error", { error: (error as Error).message });
       });
     }, this.options.flushIntervalMs);
   }
@@ -558,34 +578,34 @@ export class SwitchboardEventRouter extends EventEmitter {
    */
   private registerDefaultTransforms(): void {
     // Identity transform
-    this.transforms.set('identity', (event) => event);
+    this.transforms.set("identity", (event) => event);
 
     // Redact sensitive fields
-    this.transforms.set('redact_pii', (event) => ({
+    this.transforms.set("redact_pii", (event) => ({
       ...event,
       payload: this.redactPII(event.payload),
     }));
 
     // Flatten nested payload
-    this.transforms.set('flatten', (event) => ({
+    this.transforms.set("flatten", (event) => ({
       ...event,
       payload: this.flattenObject(event.payload),
     }));
 
     // Extract specific fields
-    this.transforms.set('extract_summary', (event) => ({
+    this.transforms.set("extract_summary", (event) => ({
       ...event,
       payload: {
         id: event.id,
         type: event.type,
         source: event.source,
         timestamp: event.timestamp,
-        summary: event.payload.summary || event.payload.message || '',
+        summary: event.payload.summary || event.payload.message || "",
       },
     }));
 
     // Enrich with metadata
-    this.transforms.set('enrich_metadata', (event, context) => ({
+    this.transforms.set("enrich_metadata", (event, context) => ({
       ...event,
       metadata: {
         ...event.metadata,
@@ -596,10 +616,10 @@ export class SwitchboardEventRouter extends EventEmitter {
     }));
 
     // Convert to audit format
-    this.transforms.set('to_audit_format', (event) => ({
+    this.transforms.set("to_audit_format", (event) => ({
       ...event,
       type: `audit.${event.type}`,
-      category: 'audit' as EventCategory,
+      category: "audit" as EventCategory,
       payload: {
         ...event.payload,
         auditTimestamp: new Date().toISOString(),
@@ -613,13 +633,13 @@ export class SwitchboardEventRouter extends EventEmitter {
    * Redact PII from object
    */
   private redactPII(obj: Record<string, unknown>): Record<string, unknown> {
-    const piiFields = ['email', 'phone', 'ssn', 'password', 'secret', 'token', 'apiKey'];
+    const piiFields = ["email", "phone", "ssn", "password", "secret", "token", "apiKey"];
     const result: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(obj)) {
       if (piiFields.some((f) => key.toLowerCase().includes(f))) {
-        result[key] = '[REDACTED]';
-      } else if (typeof value === 'object' && value !== null) {
+        result[key] = "[REDACTED]";
+      } else if (typeof value === "object" && value !== null) {
         result[key] = this.redactPII(value as Record<string, unknown>);
       } else {
         result[key] = value;
@@ -632,16 +652,13 @@ export class SwitchboardEventRouter extends EventEmitter {
   /**
    * Flatten nested object
    */
-  private flattenObject(
-    obj: Record<string, unknown>,
-    prefix = ''
-  ): Record<string, unknown> {
+  private flattenObject(obj: Record<string, unknown>, prefix = ""): Record<string, unknown> {
     const result: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(obj)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
 
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (typeof value === "object" && value !== null && !Array.isArray(value)) {
         Object.assign(result, this.flattenObject(value as Record<string, unknown>, newKey));
       } else {
         result[newKey] = value;
@@ -692,7 +709,7 @@ export class SwitchboardEventRouter extends EventEmitter {
       await this.flushQueue();
     }
 
-    this.options.logger.info('Event router shutdown complete');
+    this.options.logger.info("Event router shutdown complete");
   }
 }
 

@@ -140,8 +140,8 @@ python -m impl.cli.cache_canary --dataset experiments/datasets/demo_graph --ttl 
 **Edge API (TypeScript):**
 
 ```ts
-import { previewWasm } from '@aurelius/core-wasm';
-const out = await previewWasm(query, schema, { budgetMs: 900, tenant: 'acme' });
+import { previewWasm } from "@aurelius/core-wasm";
+const out = await previewWasm(query, schema, { budgetMs: 900, tenant: "acme" });
 if (out.policy.pass) execute(out.cypher);
 ```
 

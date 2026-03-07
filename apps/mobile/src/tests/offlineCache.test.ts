@@ -32,9 +32,7 @@ vi.mock('dexie', () => ({
       }),
       where: vi.fn(() => ({
         above: vi.fn(() => ({
-          toArray: vi.fn(() =>
-            Promise.resolve(Array.from(mockIndexedDB.cases.values()))
-          ),
+          toArray: vi.fn(() => Promise.resolve(Array.from(mockIndexedDB.cases.values()))),
         })),
       })),
       bulkPut: vi.fn((items) => {
@@ -59,9 +57,7 @@ vi.mock('dexie', () => ({
       }),
       where: vi.fn(() => ({
         above: vi.fn(() => ({
-          toArray: vi.fn(() =>
-            Promise.resolve(Array.from(mockIndexedDB.alerts.values()))
-          ),
+          toArray: vi.fn(() => Promise.resolve(Array.from(mockIndexedDB.alerts.values()))),
         })),
       })),
       clear: vi.fn(() => {
@@ -90,9 +86,7 @@ vi.mock('dexie', () => ({
       }),
       where: vi.fn(() => ({
         equals: vi.fn(() => ({
-          toArray: vi.fn(() =>
-            Promise.resolve(Array.from(mockIndexedDB.notes.values()))
-          ),
+          toArray: vi.fn(() => Promise.resolve(Array.from(mockIndexedDB.notes.values()))),
         })),
         anyOf: vi.fn(() => ({
           toArray: vi.fn(() => Promise.resolve([])),
@@ -109,15 +103,11 @@ vi.mock('dexie', () => ({
       }),
       where: vi.fn(() => ({
         below: vi.fn(() => ({
-          toArray: vi.fn(() =>
-            Promise.resolve(Array.from(mockIndexedDB.syncQueue.values()))
-          ),
+          toArray: vi.fn(() => Promise.resolve(Array.from(mockIndexedDB.syncQueue.values()))),
         })),
       })),
       orderBy: vi.fn(() => ({
-        toArray: vi.fn(() =>
-          Promise.resolve(Array.from(mockIndexedDB.syncQueue.values()))
-        ),
+        toArray: vi.fn(() => Promise.resolve(Array.from(mockIndexedDB.syncQueue.values()))),
       })),
       put: vi.fn((item) => {
         mockIndexedDB.syncQueue.set(item.id, item);
@@ -190,7 +180,7 @@ describe('Offline Cache', () => {
 
       // Filter expired (simulating cleanup)
       const validCases = Array.from(mockIndexedDB.cases.values()).filter(
-        (c: any) => new Date(c.expiresAt) > new Date()
+        (c: any) => new Date(c.expiresAt) > new Date(),
       );
 
       expect(validCases.length).toBe(0);
@@ -260,14 +250,9 @@ describe('Offline Cache', () => {
       const dataStr = JSON.stringify(data);
 
       // Simulate checksum generation
-      const hashBuffer = await crypto.subtle.digest(
-        'SHA-256',
-        encoder.encode(dataStr)
-      );
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(dataStr));
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const checksum = hashArray
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+      const checksum = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
       expect(checksum).toHaveLength(64);
     });
@@ -280,11 +265,11 @@ describe('Offline Cache', () => {
 
       const originalHash = await crypto.subtle.digest(
         'SHA-256',
-        encoder.encode(JSON.stringify(originalData))
+        encoder.encode(JSON.stringify(originalData)),
       );
       const tamperedHash = await crypto.subtle.digest(
         'SHA-256',
-        encoder.encode(JSON.stringify(tamperedData))
+        encoder.encode(JSON.stringify(tamperedData)),
       );
 
       const originalChecksum = Array.from(new Uint8Array(originalHash))

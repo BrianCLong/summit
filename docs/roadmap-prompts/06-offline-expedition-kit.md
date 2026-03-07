@@ -26,7 +26,7 @@ node -e "const crypto = require('crypto'); console.log(crypto.getCiphers().inclu
 
 ## Claude Prompt
 
-```
+````
 You are implementing the Offline Expedition Kit v1 for IntelGraph - offline-first analytics with CRDT merges and signed sync logs.
 
 CONTEXT:
@@ -173,11 +173,12 @@ const state = Y.encodeStateAsUpdate(ydoc);
 // On server: Merge
 const serverDoc = new Y.Doc();
 Y.applyUpdate(serverDoc, state);
-```
+````
 
 SAMPLE SIGNATURE CHAIN:
+
 ```typescript
-import { sign, verify } from '@noble/ed25519';
+import { sign, verify } from "@noble/ed25519";
 
 interface SyncLogEntry {
   syncId: string;
@@ -189,10 +190,13 @@ interface SyncLogEntry {
   signature: string; // Ed25519 signature
 }
 
-async function signEntry(entry: Omit<SyncLogEntry, 'signature'>, privateKey: Uint8Array): Promise<SyncLogEntry> {
+async function signEntry(
+  entry: Omit<SyncLogEntry, "signature">,
+  privateKey: Uint8Array
+): Promise<SyncLogEntry> {
   const message = JSON.stringify(entry);
   const signature = await sign(Buffer.from(message), privateKey);
-  return { ...entry, signature: Buffer.from(signature).toString('hex') };
+  return { ...entry, signature: Buffer.from(signature).toString("hex") };
 }
 
 async function verifyChain(entries: SyncLogEntry[], publicKey: Uint8Array): Promise<boolean> {
@@ -200,7 +204,7 @@ async function verifyChain(entries: SyncLogEntry[], publicKey: Uint8Array): Prom
     const entry = entries[i];
     const { signature, ...rest } = entry;
     const message = JSON.stringify(rest);
-    const valid = await verify(Buffer.from(signature, 'hex'), Buffer.from(message), publicKey);
+    const valid = await verify(Buffer.from(signature, "hex"), Buffer.from(message), publicKey);
     if (!valid) return false;
 
     // Check chain link
@@ -211,9 +215,10 @@ async function verifyChain(entries: SyncLogEntry[], publicKey: Uint8Array): Prom
 ```
 
 SAMPLE CONFLICT RESOLUTION UI (ConflictResolver.tsx):
+
 ```tsx
-import React from 'react';
-import ReactDiffViewer from 'react-diff-viewer';
+import React from "react";
+import ReactDiffViewer from "react-diff-viewer";
 
 interface Conflict {
   field: string;
@@ -223,12 +228,18 @@ interface Conflict {
   remoteTimestamp: number;
 }
 
-export function ConflictResolver({ conflicts, onResolve }: { conflicts: Conflict[], onResolve: (resolution: any) => void }) {
+export function ConflictResolver({
+  conflicts,
+  onResolve,
+}: {
+  conflicts: Conflict[];
+  onResolve: (resolution: any) => void;
+}) {
   return (
     <div>
       <h2>Conflicts Detected ({conflicts.length})</h2>
       {conflicts.map((conflict, i) => (
-        <div key={i} style={{ border: '1px solid red', margin: '10px', padding: '10px' }}>
+        <div key={i} style={{ border: "1px solid red", margin: "10px", padding: "10px" }}>
           <h3>Field: {conflict.field}</h3>
           <ReactDiffViewer
             oldValue={JSON.stringify(conflict.remote, null, 2)}
@@ -237,9 +248,9 @@ export function ConflictResolver({ conflicts, onResolve }: { conflicts: Conflict
           />
           <p>Local: {new Date(conflict.localTimestamp).toISOString()}</p>
           <p>Remote: {new Date(conflict.remoteTimestamp).toISOString()}</p>
-          <button onClick={() => onResolve({ index: i, choice: 'local' })}>Accept Local</button>
-          <button onClick={() => onResolve({ index: i, choice: 'remote' })}>Accept Remote</button>
-          <button onClick={() => onResolve({ index: i, choice: 'merge' })}>Merge Both</button>
+          <button onClick={() => onResolve({ index: i, choice: "local" })}>Accept Local</button>
+          <button onClick={() => onResolve({ index: i, choice: "remote" })}>Accept Remote</button>
+          <button onClick={() => onResolve({ index: i, choice: "merge" })}>Merge Both</button>
         </div>
       ))}
     </div>
@@ -248,6 +259,7 @@ export function ConflictResolver({ conflicts, onResolve }: { conflicts: Conflict
 ```
 
 ELECTRON SECURITY:
+
 - Context isolation: true
 - Node integration: false (use preload script)
 - Sandbox: true
@@ -263,6 +275,7 @@ Provide:
 (f) Integration tests (offline→sync→merge)
 (g) Packaging scripts (electron-builder config)
 (h) User guide (how to use offline mode)
+
 ```
 
 ---
@@ -292,3 +305,4 @@ Provide:
 - Electron security: https://www.electronjs.org/docs/latest/tutorial/security
 - @noble/ed25519: https://github.com/paulmillr/noble-ed25519
 - SQLite: https://github.com/WiseLibs/better-sqlite3
+```

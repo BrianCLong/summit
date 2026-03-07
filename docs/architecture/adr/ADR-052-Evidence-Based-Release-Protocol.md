@@ -20,7 +20,7 @@ We are implementing an **Evidence-Based Release Protocol (EBRP)** as an emergenc
 
 ### Core Decision
 
-We will treat CI/CD systems (like GitHub Actions `golden-main` check) as *high-confidence signals*, but **not absolute blockers** if alternative evidence proves release readiness. In the event of tooling saturation, an engineer can manually compile release evidence, seek executive approval, and execute the release using the emergency protocol.
+We will treat CI/CD systems (like GitHub Actions `golden-main` check) as _high-confidence signals_, but **not absolute blockers** if alternative evidence proves release readiness. In the event of tooling saturation, an engineer can manually compile release evidence, seek executive approval, and execute the release using the emergency protocol.
 
 ### Key Components
 
@@ -80,7 +80,7 @@ The EBRP is triggered when CI queue times exceed 60 minutes. An engineer generat
 
 ### CI Enforcement
 
-- The existence of the EBRP means CI enforcement can be administratively overridden *only* if the evidence package is attached to the release documentation.
+- The existence of the EBRP means CI enforcement can be administratively overridden _only_ if the evidence package is attached to the release documentation.
 
 ## Related ADRs
 

@@ -2,8 +2,8 @@
  * CompanyOS Tenant API - GraphQL Context
  */
 
-import type { Request, Response } from 'express';
-import type { Logger } from 'pino';
+import type { Request, Response } from "express";
+import type { Logger } from "pino";
 
 export interface AuthUser {
   id: string;
@@ -23,16 +23,13 @@ export interface GraphQLContext {
 }
 
 export function generateRequestId(): string {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 export function getClientIp(req: Request): string {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string') {
-    return forwarded.split(',')[0].trim();
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string") {
+    return forwarded.split(",")[0].trim();
   }
-  return req.socket?.remoteAddress || 'unknown';
+  return req.socket?.remoteAddress || "unknown";
 }

@@ -9,13 +9,7 @@ spec:
       containers:
         - name: buildkitd
           image: moby/buildkit:latest
-          args:
-            [
-              '--addr',
-              'tcp://0.0.0.0:1234',
-              '--oci-worker=true',
-              '--oci-worker-gc=true',
-            ]
+          args: ["--addr", "tcp://0.0.0.0:1234", "--oci-worker=true", "--oci-worker-gc=true"]
           ports: [{ containerPort: 1234 }]
           volumeMounts: [{ name: cache, mountPath: /var/lib/buildkit }]
       volumes: [{ name: cache, emptyDir: {} }]

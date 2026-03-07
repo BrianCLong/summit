@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState, useRef } from "react";
+import $ from "jquery";
 
 interface SiteData {
   id: string;
@@ -22,7 +22,7 @@ export default function SitesDashboard() {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
-    const s = new EventSource('/api/sites/stream');
+    const s = new EventSource("/api/sites/stream");
     eventSourceRef.current = s;
     s.onmessage = (e) => setSites(JSON.parse(e.data));
     return () => {
@@ -35,16 +35,16 @@ export default function SitesDashboard() {
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
       const h = function (this: HTMLInputElement) {
-        const v = this.value?.toString().toLowerCase() || '';
-        ($('.site-row') as JQuery<HTMLElement>).each(function () {
+        const v = this.value?.toString().toLowerCase() || "";
+        ($(".site-row") as JQuery<HTMLElement>).each(function () {
           $(this).toggle($(this).text().toLowerCase().indexOf(v) >= 0);
         });
       };
-      $('#q').on('input', h);
+      $("#q").on("input", h);
     }
     return () => {
       if (handlerBoundRef.current) {
-        $('#q').off('input');
+        $("#q").off("input");
         handlerBoundRef.current = false;
       }
     };
@@ -53,11 +53,7 @@ export default function SitesDashboard() {
     <div className="p-4 rounded-2xl shadow">
       <div className="flex gap-2 mb-2">
         <h3 className="text-lg font-semibold">Sites</h3>
-        <input
-          id="q"
-          className="border rounded px-2 py-1"
-          placeholder="filter…"
-        />
+        <input id="q" className="border rounded px-2 py-1" placeholder="filter…" />
       </div>
       <table className="w-full text-sm">
         <thead>

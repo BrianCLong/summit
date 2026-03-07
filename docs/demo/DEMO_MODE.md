@@ -45,9 +45,9 @@ If this variable is missing or set to anything else (e.g., `false`, `0`, `enable
 In your routes:
 
 ```typescript
-import { demoGate } from '../demo/middleware.js';
+import { demoGate } from "../demo/middleware.js";
 
-router.post('/reset', demoGate, (req, res) => {
+router.post("/reset", demoGate, (req, res) => {
   // Reset logic here
 });
 ```
@@ -62,6 +62,7 @@ cd server && npx tsx ../test/demo-gate/verify.ts
 ```
 
 This script verifies:
+
 1. `isDemoEnabled` logic against various `DEMO_MODE` values.
 2. `demoGate` middleware blocking behavior (404) when disabled.
 3. `demoGate` passthrough behavior when enabled.

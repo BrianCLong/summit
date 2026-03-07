@@ -1,33 +1,33 @@
-import { describe, expect, it } from 'vitest';
-import { FederatedGateway } from '../src/federation/gateway';
-import type { FederationServiceDefinition } from '../src/federation/types';
+import { describe, expect, it } from "vitest";
+import { FederatedGateway } from "../src/federation/gateway";
+import type { FederationServiceDefinition } from "../src/federation/types";
 
 type Product = { sku: string; name: string; price: number; inStock: boolean };
 
-describe('FederatedGateway', () => {
+describe("FederatedGateway", () => {
   let gateway: FederatedGateway<{ discounts: Record<string, number> }>;
   const catalog: Record<string, Product> = {
-    'sku-1': {
-      sku: 'sku-1',
-      name: 'Nebula Drone',
+    "sku-1": {
+      sku: "sku-1",
+      name: "Nebula Drone",
       price: 1899,
       inStock: true,
     },
-    'sku-2': {
-      sku: 'sku-2',
-      name: 'Lumen Tablet',
+    "sku-2": {
+      sku: "sku-2",
+      name: "Lumen Tablet",
       price: 899,
       inStock: false,
     },
   };
 
   const discounts = {
-    'sku-1': 200,
-    'sku-2': 75,
+    "sku-1": 200,
+    "sku-2": 75,
   } satisfies Record<string, number>;
 
   const inventoryService: FederationServiceDefinition<{ discounts: typeof discounts }> = {
-    name: 'inventory',
+    name: "inventory",
     typeDefs: `
       type Product @key(fields: "sku") {
         sku: ID!
@@ -44,10 +44,11 @@ describe('FederatedGateway', () => {
     `,
     resolvers: {
       Query: {
-        products: () => Object.values(catalog).map((product) => ({ ...product, __typename: 'Product' })),
+        products: () =>
+          Object.values(catalog).map((product) => ({ ...product, __typename: "Product" })),
         product: (_root, args: { sku: string }) => {
           const item = catalog[args.sku];
-          return item ? { ...item, __typename: 'Product' } : null;
+          return item ? { ...item, __typename: "Product" } : null;
         },
       },
       Product: {
@@ -58,21 +59,24 @@ describe('FederatedGateway', () => {
           }),
           (product: Product & { name: string }) => product.name.toUpperCase(),
         ],
-        discount: (product: Product, _args: unknown, context: { discounts: Record<string, number> }) =>
-          context.discounts[product.sku] ?? 0,
+        discount: (
+          product: Product,
+          _args: unknown,
+          context: { discounts: Record<string, number> }
+        ) => context.discounts[product.sku] ?? 0,
       },
     },
     entityResolvers: {
       Product: (reference: { sku: string }) => {
         const record = catalog[reference.sku];
         if (!record) return null;
-        return { __typename: 'Product', ...record };
+        return { __typename: "Product", ...record };
       },
     },
   };
 
   const pricingService: FederationServiceDefinition<{ discounts: typeof discounts }> = {
-    name: 'pricing',
+    name: "pricing",
     typeDefs: `
       extend type Product @key(fields: "sku") {
         sku: ID!
@@ -86,18 +90,22 @@ describe('FederatedGateway', () => {
     `,
     resolvers: {
       Query: {
-        priceBook: () => Object.values(catalog).map((product) => ({ ...product, __typename: 'Product' })),
+        priceBook: () =>
+          Object.values(catalog).map((product) => ({ ...product, __typename: "Product" })),
       },
       Product: {
-        currency: () => 'USD',
-        netPrice: (product: Product, _args: unknown, context: { discounts: Record<string, number> }) =>
-          product.price - (context.discounts[product.sku] ?? 0),
+        currency: () => "USD",
+        netPrice: (
+          product: Product,
+          _args: unknown,
+          context: { discounts: Record<string, number> }
+        ) => product.price - (context.discounts[product.sku] ?? 0),
       },
     },
   };
 
   const reviewService: FederationServiceDefinition<{ discounts: typeof discounts }> = {
-    name: 'reviews',
+    name: "reviews",
     typeDefs: `
       type Review {
         id: ID!
@@ -112,13 +120,13 @@ describe('FederatedGateway', () => {
     resolvers: {
       Query: {
         reviews: () => [
-          { id: 'r-1', sku: 'sku-1', rating: 5, __typename: 'Review' },
-          { id: 'r-2', sku: 'sku-2', rating: 4, __typename: 'Review' },
+          { id: "r-1", sku: "sku-1", rating: 5, __typename: "Review" },
+          { id: "r-2", sku: "sku-2", rating: 4, __typename: "Review" },
         ],
       },
       Review: {
         product: async (review: { sku: string }, _args: unknown, _context: unknown, info) =>
-          gateway.resolveEntity({ __typename: 'Product', sku: review.sku }, { discounts }, info),
+          gateway.resolveEntity({ __typename: "Product", sku: review.sku }, { discounts }, info),
       },
     },
   };
@@ -129,18 +137,18 @@ describe('FederatedGateway', () => {
     reviewService,
   ]);
 
-  it('composes service SDL and exposes _service.sdl', async () => {
+  it("composes service SDL and exposes _service.sdl", async () => {
     const result = await gateway.execute<{ _service: { sdl: string } }>(
-      `query ServiceSDL { _service { sdl } }`,
+      `query ServiceSDL { _service { sdl } }`
     );
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?._service.sdl).toContain('type Product');
-    expect(result.data?._service.sdl).toContain('union _Entity');
-    expect(gateway.composition.services).toEqual(['inventory', 'pricing', 'reviews']);
+    expect(result.data?._service.sdl).toContain("type Product");
+    expect(result.data?._service.sdl).toContain("union _Entity");
+    expect(gateway.composition.services).toEqual(["inventory", "pricing", "reviews"]);
   });
 
-  it('supports entity resolution and distributed resolver chains', async () => {
+  it("supports entity resolution and distributed resolver chains", async () => {
     const result = await gateway.execute(
       `query EntityLookup($refs: [_Any!]!) {
         _entities(representations: $refs) {
@@ -153,20 +161,23 @@ describe('FederatedGateway', () => {
         }
       }`,
       {
-        refs: [{ __typename: 'Product', sku: 'sku-1' }],
+        refs: [{ __typename: "Product", sku: "sku-1" }],
       },
-      { discounts },
+      { discounts }
     );
 
     expect(result.errors).toBeUndefined();
-    const product = (result.data as { _entities: Array<{ sku: string; name: string; price: number; discount: number }> })
-      ._entities[0];
-    expect(product.sku).toBe('sku-1');
-    expect(product.name).toBe('NEBULA DRONE BY SUMMIT');
+    const product = (
+      result.data as {
+        _entities: Array<{ sku: string; name: string; price: number; discount: number }>;
+      }
+    )._entities[0];
+    expect(product.sku).toBe("sku-1");
+    expect(product.name).toBe("NEBULA DRONE BY SUMMIT");
     expect(product.discount).toBe(200);
   });
 
-  it('executes cross-service joins through federated resolvers', async () => {
+  it("executes cross-service joins through federated resolvers", async () => {
     const result = await gateway.execute(
       `query Reviews {
         reviews {
@@ -180,16 +191,22 @@ describe('FederatedGateway', () => {
         }
       }`,
       undefined,
-      { discounts },
+      { discounts }
     );
 
     expect(result.errors).toBeUndefined();
-    const reviews = (result.data as {
-      reviews: Array<{ id: string; rating: number; product: { sku: string; netPrice: number; currency: string } }>;
-    }).reviews;
+    const reviews = (
+      result.data as {
+        reviews: Array<{
+          id: string;
+          rating: number;
+          product: { sku: string; netPrice: number; currency: string };
+        }>;
+      }
+    ).reviews;
 
     expect(reviews).toHaveLength(2);
     expect(reviews[0].product.netPrice).toBe(1699);
-    expect(reviews[0].product.currency).toBe('USD');
+    expect(reviews[0].product.currency).toBe("USD");
   });
 });

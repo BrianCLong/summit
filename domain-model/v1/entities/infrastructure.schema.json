@@ -10,7 +10,16 @@
     "name": { "type": "string" },
     "type": {
       "type": "string",
-      "enum": ["electoral", "public_health", "military_command", "financial", "energy", "cyber", "transport", "other"]
+      "enum": [
+        "electoral",
+        "public_health",
+        "military_command",
+        "financial",
+        "energy",
+        "cyber",
+        "transport",
+        "other"
+      ]
     },
     "capacity": {
       "type": "number",

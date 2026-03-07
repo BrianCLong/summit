@@ -15,10 +15,10 @@ spec:
         version: stable
     spec:
       containers:
-      - name: my-app
-        image: your-repo/my-app:v1.0.0 # Placeholder for stable image
-        ports:
-        - containerPort: 80
+        - name: my-app
+          image: your-repo/my-app:v1.0.0 # Placeholder for stable image
+          ports:
+            - containerPort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -37,7 +37,7 @@ spec:
         version: canary
     spec:
       containers:
-      - name: my-app
-        image: your-repo/my-app:v1.1.0 # Placeholder for canary image
-        ports:
-        - containerPort: 80
+        - name: my-app
+          image: your-repo/my-app:v1.1.0 # Placeholder for canary image
+          ports:
+            - containerPort: 80

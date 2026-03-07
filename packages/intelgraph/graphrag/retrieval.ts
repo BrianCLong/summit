@@ -1,5 +1,5 @@
-import { Driver, Session } from 'neo4j-driver';
-import { PathAssembler, GraphContext } from './path_assembler';
+import { Driver, Session } from "neo4j-driver";
+import { PathAssembler, GraphContext } from "./path_assembler";
 
 // Mock embedding function type
 type Embedder = (text: string) => Promise<number[]>;
@@ -15,7 +15,12 @@ export class GraphFirstRetrieval {
     private embedder: Embedder
   ) {}
 
-  async retrieve(query: string, cypherQuery: string, params: any = {}, topK: number = 5): Promise<string> {
+  async retrieve(
+    query: string,
+    cypherQuery: string,
+    params: any = {},
+    topK: number = 5
+  ): Promise<string> {
     const session: Session = this.driver.session();
     try {
       // 1. Graph Traversal (The Candidate Universe)
@@ -38,19 +43,16 @@ export class GraphFirstRetrieval {
       // We'll use a simple string representation of the path to score it against the query
       for (const path of context.paths) {
         // Construct a text representation for embedding/scoring
-        const pathText = path.nodes.map(n => n.properties.name || n.labels.join(' ')).join(' ');
+        const pathText = path.nodes.map((n) => n.properties.name || n.labels.join(" ")).join(" ");
 
         // Simulating similarity score calculation
         path.score = await this.calculateSimilarity(queryEmbedding, pathText);
       }
 
       // 3. Serialize top K
-      const topPaths = context.paths
-        .sort((a, b) => (b.score || 0) - (a.score || 0))
-        .slice(0, topK);
+      const topPaths = context.paths.sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, topK);
 
       return PathAssembler.serialize({ paths: topPaths });
-
     } finally {
       await session.close();
     }
@@ -60,6 +62,6 @@ export class GraphFirstRetrieval {
   private async calculateSimilarity(queryVec: number[], text: string): Promise<number> {
     // In production, this would embed 'text' and dot-product with queryVec.
     // Returning a mock score based on length for demonstration.
-    return 0.5 + (Math.random() * 0.5);
+    return 0.5 + Math.random() * 0.5;
   }
 }

@@ -5,6 +5,7 @@ Grafana dashboards for comprehensive multi-cloud observability.
 ## Dashboards
 
 ### 1. Multi-Cloud Infrastructure Overview
+
 - **File**: `grafana-multi-cloud.json`
 - **Metrics**:
   - Total cloud costs across all providers
@@ -17,6 +18,7 @@ Grafana dashboards for comprehensive multi-cloud observability.
   - RTO/RPO metrics
 
 ### 2. Cost Optimization Dashboard
+
 - **File**: `cost-dashboard.json`
 - **Metrics**:
   - Current month spend
@@ -29,6 +31,7 @@ Grafana dashboards for comprehensive multi-cloud observability.
   - Untagged resources
 
 ### 3. Disaster Recovery Dashboard
+
 - **Metrics**:
   - Backup completion status
   - Replication lag
@@ -88,43 +91,43 @@ global:
 
 scrape_configs:
   # Kubernetes clusters
-  - job_name: 'kubernetes-nodes'
+  - job_name: "kubernetes-nodes"
     kubernetes_sd_configs:
       - role: node
 
   # AWS CloudWatch
-  - job_name: 'cloudwatch'
+  - job_name: "cloudwatch"
     static_configs:
-      - targets: ['cloudwatch-exporter:9106']
+      - targets: ["cloudwatch-exporter:9106"]
 
   # Azure Monitor
-  - job_name: 'azure-monitor'
+  - job_name: "azure-monitor"
     static_configs:
-      - targets: ['azure-exporter:9107']
+      - targets: ["azure-exporter:9107"]
 
   # GCP Stackdriver
-  - job_name: 'stackdriver'
+  - job_name: "stackdriver"
     static_configs:
-      - targets: ['stackdriver-exporter:9255']
+      - targets: ["stackdriver-exporter:9255"]
 
   # Istio service mesh
-  - job_name: 'istio-mesh'
+  - job_name: "istio-mesh"
     kubernetes_sd_configs:
       - role: endpoints
     relabel_configs:
       - source_labels: [__meta_kubernetes_service_name]
-        regex: 'istio-telemetry'
+        regex: "istio-telemetry"
         action: keep
 
   # Cost optimization service
-  - job_name: 'cost-optimization'
+  - job_name: "cost-optimization"
     static_configs:
-      - targets: ['cost-optimization:3000']
+      - targets: ["cost-optimization:3000"]
 
   # Disaster recovery service
-  - job_name: 'disaster-recovery'
+  - job_name: "disaster-recovery"
     static_configs:
-      - targets: ['disaster-recovery:3002']
+      - targets: ["disaster-recovery:3002"]
 ```
 
 ## Alerting Rules
@@ -168,26 +171,26 @@ groups:
 ### Exporting Custom Metrics
 
 ```typescript
-import { register, Counter, Gauge, Histogram } from 'prom-client';
+import { register, Counter, Gauge, Histogram } from "prom-client";
 
 // Cost metrics
 const costGauge = new Gauge({
-  name: 'cloud_costs_monthly',
-  help: 'Monthly cloud costs',
-  labelNames: ['provider', 'service']
+  name: "cloud_costs_monthly",
+  help: "Monthly cloud costs",
+  labelNames: ["provider", "service"],
 });
 
 // Backup metrics
 const backupTimestamp = new Gauge({
-  name: 'backup_last_success_timestamp',
-  help: 'Timestamp of last successful backup',
-  labelNames: ['resource', 'provider']
+  name: "backup_last_success_timestamp",
+  help: "Timestamp of last successful backup",
+  labelNames: ["resource", "provider"],
 });
 
 // DR metrics
 const rtoGauge = new Gauge({
-  name: 'disaster_recovery_rto_minutes',
-  help: 'Recovery Time Objective in minutes'
+  name: "disaster_recovery_rto_minutes",
+  help: "Recovery Time Objective in minutes",
 });
 ```
 
@@ -202,6 +205,7 @@ const rtoGauge = new Gauge({
 ### High Cardinality
 
 If dashboards are slow:
+
 1. Reduce scrape interval
 2. Add metric relabeling to drop unused labels
 3. Use recording rules for expensive queries

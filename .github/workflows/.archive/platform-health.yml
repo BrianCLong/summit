@@ -2,9 +2,9 @@ name: Platform Health Score
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Nightly
+    - cron: "0 0 * * *" # Nightly
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -19,8 +19,8 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install tsx -D

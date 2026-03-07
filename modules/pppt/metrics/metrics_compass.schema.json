@@ -4,10 +4,10 @@
   "type": "object",
   "required": ["pillar", "kpis", "owner", "decision_cadence"],
   "properties": {
-    "pillar": {"enum": ["demand_generation", "conversion", "roi", "money"]},
-    "kpis": {"type": "array", "items": {"type": "string"}, "minItems": 2},
-    "owner": {"type": "string"},
-    "decision_cadence": {"enum": ["weekly", "biweekly", "monthly"]}
+    "pillar": { "enum": ["demand_generation", "conversion", "roi", "money"] },
+    "kpis": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
+    "owner": { "type": "string" },
+    "decision_cadence": { "enum": ["weekly", "biweekly", "monthly"] }
   },
   "additionalProperties": false
 }

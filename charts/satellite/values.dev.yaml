@@ -24,7 +24,7 @@ opentelemetry:
   collector:
     endpoint: "otel-collector.observability.svc.cluster.local:4317"
   sampling:
-    ratio: 1.0  # 100% sampling in dev
+    ratio: 1.0 # 100% sampling in dev
 
 # ============================================================================
 # Prometheus Metrics - Enabled by Default
@@ -52,9 +52,9 @@ featureFlags:
 # ============================================================================
 env:
   - name: NODE_ENV
-    value: 'development'
+    value: "development"
   - name: LOG_LEVEL
-    value: 'debug'
+    value: "debug"
 
   # OTEL Configuration
   - name: OTEL_EXPORTER_OTLP_ENDPOINT

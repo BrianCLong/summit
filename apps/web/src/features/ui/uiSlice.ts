@@ -29,5 +29,10 @@ const slice = createSlice({
   },
 })
 
-export const { toggleCoverStory, setCoverStory, toggleInvisibleHand, setInvisibleHand } = slice.actions
+export const {
+  toggleCoverStory,
+  setCoverStory,
+  toggleInvisibleHand,
+  setInvisibleHand,
+} = slice.actions
 export default slice.reducer

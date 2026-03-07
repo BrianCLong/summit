@@ -6,7 +6,7 @@ import type {
   PolicyHook,
   RoutingDecision,
   RoutingPlan,
-} from './types';
+} from "./types";
 
 export interface JobRouterOptions {
   latencyWeight?: number;
@@ -27,9 +27,7 @@ function hasCapabilities(asset: AssetDescriptor, required: string[]): boolean {
     return true;
   }
   const capabilities = new Set(
-    (asset.capabilities ?? []).map((capability) =>
-      capability.name.toLowerCase(),
-    ),
+    (asset.capabilities ?? []).map((capability) => capability.name.toLowerCase())
   );
   for (const capability of required) {
     if (!capabilities.has(capability.toLowerCase())) {
@@ -39,10 +37,7 @@ function hasCapabilities(asset: AssetDescriptor, required: string[]): boolean {
   return true;
 }
 
-function matchesRequirement(
-  values: string[] | undefined,
-  candidate?: string,
-): boolean {
+function matchesRequirement(values: string[] | undefined, candidate?: string): boolean {
   if (!values || values.length === 0) {
     return true;
   }
@@ -63,11 +58,9 @@ export class JobRouter {
     job: JobSpec,
     assets: AssetDescriptor[],
     performance: AssetPerformanceSnapshot[],
-    policyHooks: PolicyHook[],
+    policyHooks: PolicyHook[]
   ): Promise<RoutingPlan> {
-    const performanceMap = new Map(
-      performance.map((snapshot) => [snapshot.assetId, snapshot]),
-    );
+    const performanceMap = new Map(performance.map((snapshot) => [snapshot.assetId, snapshot]));
     const scored: RoutingDecision[] = [];
 
     for (const asset of assets) {
@@ -81,14 +74,12 @@ export class JobRouter {
         continue;
       }
 
-      const compliance = (asset.labels?.compliance ?? '')
-        .split(',')
+      const compliance = (asset.labels?.compliance ?? "")
+        .split(",")
         .map((value) => value.trim())
         .filter(Boolean);
       if (job.requirements?.complianceTags) {
-        const missing = job.requirements.complianceTags.filter(
-          (tag) => !compliance.includes(tag),
-        );
+        const missing = job.requirements.complianceTags.filter((tag) => !compliance.includes(tag));
         if (missing.length > 0) {
           continue;
         }
@@ -101,7 +92,7 @@ export class JobRouter {
         const result = await hook.evaluate({
           asset,
           job,
-          intent: 'job-routing',
+          intent: "job-routing",
         });
         policyDecisions.push({
           hookId: hook.id,
@@ -125,15 +116,12 @@ export class JobRouter {
 
       const snapshot = performanceMap.get(asset.id);
       const latency =
-        snapshot?.latencyMs ??
-        asset.capabilities?.[0]?.qualityOfService?.latencyMs ??
-        500;
+        snapshot?.latencyMs ?? asset.capabilities?.[0]?.qualityOfService?.latencyMs ?? 500;
       const cost = snapshot?.costPerHour ?? 10;
       const throughput = snapshot?.throughput ?? 100;
       const reliability =
         (asset.capabilities ?? []).reduce((best, capability) => {
-          const reliabilityScore =
-            capability.qualityOfService?.reliability ?? 0;
+          const reliabilityScore = capability.qualityOfService?.reliability ?? 0;
           return Math.max(best, reliabilityScore);
         }, 0) || 0.97;
 
@@ -148,34 +136,22 @@ export class JobRouter {
       score += reliabilityScore * this.options.reliabilityWeight;
       score += throughputScore * 0.1;
 
-      if (
-        job.requirements?.maxLatencyMs &&
-        latency > job.requirements.maxLatencyMs
-      ) {
+      if (job.requirements?.maxLatencyMs && latency > job.requirements.maxLatencyMs) {
         score *= 0.5;
-        reasoning.push('penalty: exceeds latency requirement');
+        reasoning.push("penalty: exceeds latency requirement");
       }
-      if (
-        job.requirements?.budgetPerHour &&
-        cost > job.requirements.budgetPerHour
-      ) {
+      if (job.requirements?.budgetPerHour && cost > job.requirements.budgetPerHour) {
         score *= 0.6;
-        reasoning.push('penalty: exceeds budget');
+        reasoning.push("penalty: exceeds budget");
       }
-      if (
-        job.requirements?.minReliability &&
-        reliability < job.requirements.minReliability
-      ) {
+      if (job.requirements?.minReliability && reliability < job.requirements.minReliability) {
         score *= 0.4;
-        reasoning.push('penalty: below reliability expectation');
+        reasoning.push("penalty: below reliability expectation");
       }
 
       if (job.requirements?.dataSovereignty) {
-        const dataRegion = asset.labels?.['data-region'];
-        if (
-          dataRegion &&
-          job.requirements.dataSovereignty.includes(dataRegion)
-        ) {
+        const dataRegion = asset.labels?.["data-region"];
+        if (dataRegion && job.requirements.dataSovereignty.includes(dataRegion)) {
           score += this.options.complianceWeight;
           reasoning.push(`data sovereignty satisfied by ${dataRegion}`);
         }
@@ -194,7 +170,7 @@ export class JobRouter {
     }
 
     if (scored.length === 0) {
-      throw new Error('no eligible assets found for job');
+      throw new Error("no eligible assets found for job");
     }
 
     scored.sort((a, b) => b.score - a.score);

@@ -1,12 +1,12 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { MockedProvider } from '@apollo/client/testing';
-import reducer from '../../../store/slices/graphInteractionSlice';
-import GraphContextMenu from '../GraphContextMenu';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import { MockedProvider } from "@apollo/client/testing";
+import reducer from "../../../store/slices/graphInteractionSlice";
+import GraphContextMenu from "../GraphContextMenu";
 
-test('shows menu items when open', () => {
+test("shows menu items when open", () => {
   const store = configureStore({
     reducer: { graphInteraction: reducer },
     preloadedState: {
@@ -17,8 +17,8 @@ test('shows menu items when open', () => {
           open: true,
           x: 100,
           y: 100,
-          targetType: 'node',
-          targetId: 'n1',
+          targetType: "node",
+          targetId: "n1",
         },
         aiInsights: {},
       },
@@ -30,7 +30,7 @@ test('shows menu items when open', () => {
       <Provider store={store}>
         <GraphContextMenu />
       </Provider>
-    </MockedProvider>,
+    </MockedProvider>
   );
   expect(screen.getByText(/Expand Neighbors/i)).toBeInTheDocument();
   expect(screen.getByText(/Tag Entity/i)).toBeInTheDocument();

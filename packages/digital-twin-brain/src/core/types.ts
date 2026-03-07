@@ -1,4 +1,4 @@
-export type Modality = 'sensor' | 'text' | 'image' | 'audio' | 'document';
+export type Modality = "sensor" | "text" | "image" | "audio" | "document";
 
 export type FeatureVector = Record<string, number>;
 
@@ -29,7 +29,7 @@ export interface Constraint {
   id: string;
   description: string;
   predicate: (proposal: ActionProposal) => boolean;
-  severity: 'info' | 'warning' | 'error';
+  severity: "info" | "warning" | "error";
 }
 
 export interface ActionProposal {

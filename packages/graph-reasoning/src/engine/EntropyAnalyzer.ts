@@ -14,13 +14,13 @@ export class EntropyAnalyzer {
     if (observations.length === 0) return 0;
 
     const counts = new Map<string, number>();
-    observations.forEach(obs => {
+    observations.forEach((obs) => {
       counts.set(obs, (counts.get(obs) || 0) + 1);
     });
 
     let entropy = 0;
     const total = observations.length;
-    counts.forEach(count => {
+    counts.forEach((count) => {
       const p = count / total;
       entropy -= p * Math.log2(p);
     });

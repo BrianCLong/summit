@@ -12,8 +12,8 @@ import {
   type AdjacencyList,
   type StorageConfig,
   type GraphStats,
-  type Transaction
-} from '../types.js';
+  type Transaction,
+} from "../types.js";
 
 export class GraphStorage {
   private nodes: Map<string, Node>;
@@ -39,13 +39,13 @@ export class GraphStorage {
 
   constructor(config: Partial<StorageConfig> = {}) {
     this.config = {
-      dataDir: config.dataDir || './data/graph',
+      dataDir: config.dataDir || "./data/graph",
       cacheSize: config.cacheSize || 1024 * 1024 * 100,
       enableCompression: config.enableCompression ?? true,
       enableEncryption: config.enableEncryption ?? false,
-      partitionStrategy: config.partitionStrategy || 'hash',
+      partitionStrategy: config.partitionStrategy || "hash",
       replicationFactor: config.replicationFactor || 1,
-      writeAheadLog: config.writeAheadLog ?? true
+      writeAheadLog: config.writeAheadLog ?? true,
     };
 
     this.nodes = new Map();
@@ -55,7 +55,7 @@ export class GraphStorage {
     this.adjacency = {
       outgoing: new Map(),
       incoming: new Map(),
-      byType: new Map()
+      byType: new Map(),
     };
 
     this.labelIndex = new Map();
@@ -74,7 +74,7 @@ export class GraphStorage {
       labelCounts: new Map(),
       typeCounts: new Map(),
       avgDegree: 0,
-      density: 0
+      density: 0,
     };
   }
 
@@ -89,7 +89,7 @@ export class GraphStorage {
       createdAt: now,
       updatedAt: now,
       version: 1,
-      deleted: false
+      deleted: false,
     };
 
     this.nodes.set(node.id, node);
@@ -184,7 +184,7 @@ export class GraphStorage {
   getNodesByLabel(label: string): Node[] {
     const nodeIds = this.labelIndex.get(label) || new Set();
     return Array.from(nodeIds)
-      .map(id => this.getNode(id))
+      .map((id) => this.getNode(id))
       .filter((node): node is Node => node !== undefined);
   }
 
@@ -212,7 +212,7 @@ export class GraphStorage {
       createdAt: now,
       updatedAt: now,
       version: 1,
-      deleted: false
+      deleted: false,
     };
 
     this.edges.set(edge.id, edge);
@@ -253,7 +253,11 @@ export class GraphStorage {
     return undefined;
   }
 
-  updateEdge(id: string, properties: Partial<Record<string, unknown>>, weight?: number): Edge | undefined {
+  updateEdge(
+    id: string,
+    properties: Partial<Record<string, unknown>>,
+    weight?: number
+  ): Edge | undefined {
     const edge = this.getEdge(id);
     if (!edge) {
       return undefined;
@@ -298,7 +302,7 @@ export class GraphStorage {
   getEdgesByType(type: string): Edge[] {
     const edgeIds = this.typeIndex.get(type) || new Set();
     return Array.from(edgeIds)
-      .map(id => this.getEdge(id))
+      .map((id) => this.getEdge(id))
       .filter((edge): edge is Edge => edge !== undefined);
   }
 
@@ -307,14 +311,14 @@ export class GraphStorage {
   getOutgoingEdges(nodeId: string): Edge[] {
     const edgeIds = this.adjacency.outgoing.get(nodeId) || new Set();
     return Array.from(edgeIds)
-      .map(id => this.getEdge(id))
+      .map((id) => this.getEdge(id))
       .filter((edge): edge is Edge => edge !== undefined);
   }
 
   getIncomingEdges(nodeId: string): Edge[] {
     const edgeIds = this.adjacency.incoming.get(nodeId) || new Set();
     return Array.from(edgeIds)
-      .map(id => this.getEdge(id))
+      .map((id) => this.getEdge(id))
       .filter((edge): edge is Edge => edge !== undefined);
   }
 
@@ -324,17 +328,17 @@ export class GraphStorage {
     return [...outgoing, ...incoming];
   }
 
-  getNeighbors(nodeId: string, direction: 'out' | 'in' | 'both' = 'both'): Node[] {
+  getNeighbors(nodeId: string, direction: "out" | "in" | "both" = "both"): Node[] {
     const neighbors = new Set<string>();
 
-    if (direction === 'out' || direction === 'both') {
+    if (direction === "out" || direction === "both") {
       const outgoing = this.getOutgoingEdges(nodeId);
       for (const edge of outgoing) {
         neighbors.add(edge.targetId);
       }
     }
 
-    if (direction === 'in' || direction === 'both') {
+    if (direction === "in" || direction === "both") {
       const incoming = this.getIncomingEdges(nodeId);
       for (const edge of incoming) {
         neighbors.add(edge.sourceId);
@@ -342,19 +346,19 @@ export class GraphStorage {
     }
 
     return Array.from(neighbors)
-      .map(id => this.getNode(id))
+      .map((id) => this.getNode(id))
       .filter((node): node is Node => node !== undefined);
   }
 
-  getDegree(nodeId: string, direction: 'out' | 'in' | 'both' = 'both'): number {
+  getDegree(nodeId: string, direction: "out" | "in" | "both" = "both"): number {
     let degree = 0;
 
-    if (direction === 'out' || direction === 'both') {
-      degree += (this.adjacency.outgoing.get(nodeId)?.size || 0);
+    if (direction === "out" || direction === "both") {
+      degree += this.adjacency.outgoing.get(nodeId)?.size || 0;
     }
 
-    if (direction === 'in' || direction === 'both') {
-      degree += (this.adjacency.incoming.get(nodeId)?.size || 0);
+    if (direction === "in" || direction === "both") {
+      degree += this.adjacency.incoming.get(nodeId)?.size || 0;
     }
 
     return degree;
@@ -367,7 +371,7 @@ export class GraphStorage {
     type: string,
     properties: Record<string, unknown> = {}
   ): Hyperedge | undefined {
-    if (!nodeIds.every(id => this.getNode(id))) {
+    if (!nodeIds.every((id) => this.getNode(id))) {
       return undefined;
     }
 
@@ -381,7 +385,7 @@ export class GraphStorage {
       createdAt: now,
       updatedAt: now,
       version: 1,
-      deleted: false
+      deleted: false,
     };
 
     this.hyperedges.set(hyperedge.id, hyperedge);
@@ -395,8 +399,9 @@ export class GraphStorage {
   }
 
   getHyperedgesForNode(nodeId: string): Hyperedge[] {
-    return Array.from(this.hyperedges.values())
-      .filter(he => !he.deleted && he.nodeIds.includes(nodeId));
+    return Array.from(this.hyperedges.values()).filter(
+      (he) => !he.deleted && he.nodeIds.includes(nodeId)
+    );
   }
 
   // ==================== Statistics and Metrics ====================
@@ -415,8 +420,8 @@ export class GraphStorage {
     this.stats.avgDegree = totalDegree / this.stats.nodeCount;
 
     if (this.stats.nodeCount > 1) {
-      this.stats.density = (2 * this.stats.edgeCount) /
-        (this.stats.nodeCount * (this.stats.nodeCount - 1));
+      this.stats.density =
+        (2 * this.stats.edgeCount) / (this.stats.nodeCount * (this.stats.nodeCount - 1));
     }
   }
 
@@ -445,7 +450,7 @@ export class GraphStorage {
       labelCounts: new Map(),
       typeCounts: new Map(),
       avgDegree: 0,
-      density: 0
+      density: 0,
     };
   }
 
@@ -453,9 +458,9 @@ export class GraphStorage {
 
   exportGraph(): { nodes: Node[]; edges: Edge[]; hyperedges: Hyperedge[] } {
     return {
-      nodes: Array.from(this.nodes.values()).filter(n => !n.deleted),
-      edges: Array.from(this.edges.values()).filter(e => !e.deleted),
-      hyperedges: Array.from(this.hyperedges.values()).filter(he => !he.deleted)
+      nodes: Array.from(this.nodes.values()).filter((n) => !n.deleted),
+      edges: Array.from(this.edges.values()).filter((e) => !e.deleted),
+      hyperedges: Array.from(this.hyperedges.values()).filter((he) => !he.deleted),
     };
   }
 

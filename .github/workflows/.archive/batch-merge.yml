@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       integration_branch:
-        description: 'The integration branch to merge PRs into'
+        description: "The integration branch to merge PRs into"
         required: true
       pr_numbers:
-        description: 'A JSON array of PR numbers to merge'
+        description: "A JSON array of PR numbers to merge"
         required: true
 
 jobs:

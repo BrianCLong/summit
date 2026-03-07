@@ -1,12 +1,12 @@
-import { CommunityStore } from '../store.js';
-import type { Notification } from '../types.js';
-import { createId } from '../utils.js';
+import { CommunityStore } from "../store.js";
+import type { Notification } from "../types.js";
+import { createId } from "../utils.js";
 
 export interface NotificationInput {
   readonly userId: string;
   readonly message: string;
   readonly link?: string;
-  readonly priority?: 'low' | 'medium' | 'high';
+  readonly priority?: "low" | "medium" | "high";
   readonly metadata?: Readonly<Record<string, unknown>>;
 }
 
@@ -15,13 +15,13 @@ export class NotificationService {
 
   public notify(input: NotificationInput): Notification {
     const notification: Notification = {
-      id: createId('ntf'),
+      id: createId("ntf"),
       userId: input.userId,
       message: input.message,
       link: input.link ?? null,
       createdAt: new Date(),
       readAt: null,
-      priority: input.priority ?? 'medium',
+      priority: input.priority ?? "medium",
       metadata: { ...(input.metadata ?? {}) },
     };
     this.store.appendNotification(notification);
@@ -34,7 +34,7 @@ export class NotificationService {
       .map((entry) =>
         entry.id === notificationId && entry.readAt === null
           ? { ...entry, readAt: new Date() }
-          : entry,
+          : entry
       );
     this.store.replaceNotifications(userId, queue);
     return queue;

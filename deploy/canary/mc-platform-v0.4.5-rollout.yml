@@ -103,13 +103,13 @@ spec:
           # Environment Configuration
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
             - name: MC_VERSION
-              value: 'v0.4.5'
+              value: "v0.4.5"
             - name: INCIDENT_REWEIGHTER_ENABLED
-              value: 'true'
+              value: "true"
             - name: FEATURE_FLAGS_ENDPOINT
-              value: 'http://feature-flags:8080'
+              value: "http://feature-flags:8080"
 
           # Resource Requirements
           resources:
@@ -251,7 +251,7 @@ spec:
       interval: 30s
       count: 5
       # Only evaluate if incident is active
-      successCondition: 'true' # Custom logic handled in runbook
+      successCondition: "true" # Custom logic handled in runbook
       provider:
         prometheus:
           address: http://prometheus:9090
@@ -266,7 +266,7 @@ spec:
       interval: 1m
       count: 3
       # Ensure pins don't exceed 2h10m
-      successCondition: '(result[0] <= 7800) or isNaN(result[0])'
+      successCondition: "(result[0] <= 7800) or isNaN(result[0])"
       provider:
         prometheus:
           address: http://prometheus:9090
@@ -359,7 +359,7 @@ spec:
         - headers:
             # Canary user header
             x-canary-user:
-              exact: 'true'
+              exact: "true"
       route:
         - destination:
             host: mc-platform

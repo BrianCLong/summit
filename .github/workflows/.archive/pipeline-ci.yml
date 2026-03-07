@@ -12,7 +12,7 @@ concurrency:
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
+  NODE_VERSION: "20.x"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
@@ -115,10 +115,10 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL,HIGH"
           ignore-unfixed: true
 
   # 4. Build & Push Docker Images
@@ -191,7 +191,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ env.NODE_VERSION }}
 
       - uses: pnpm/action-setup@v4

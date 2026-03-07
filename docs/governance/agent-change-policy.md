@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Agent Output Governance Policy
 
 **Effective Date:** Post-GA

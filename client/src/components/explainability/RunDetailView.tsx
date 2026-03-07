@@ -5,7 +5,7 @@
  * Answers: What ran? Why? What did it produce? Can I trust it?
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Card,
@@ -22,14 +22,14 @@ import {
   TableBody,
   TableCell,
   TableRow,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
   Verified as VerifiedIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface ExplainableRun {
   run_id: string;
@@ -146,10 +146,10 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
       if (result.success) {
         setRun(result.data);
       } else {
-        setError(result.errors?.[0]?.message || 'Failed to fetch run details');
+        setError(result.errors?.[0]?.message || "Failed to fetch run details");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -159,18 +159,18 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
     void fetchRunDetails();
   }, [fetchRunDetails]);
 
-  const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error' => {
-    if (confidence >= 0.8) return 'success';
-    if (confidence >= 0.5) return 'warning';
-    return 'error';
+  const getConfidenceColor = (confidence: number): "success" | "warning" | "error" => {
+    if (confidence >= 0.8) return "success";
+    if (confidence >= 0.5) return "warning";
+    return "error";
   };
 
-  const getRiskColor = (risk: string): 'error' | 'warning' | 'info' | 'default' => {
+  const getRiskColor = (risk: string): "error" | "warning" | "info" | "default" => {
     const riskLower = risk.toLowerCase();
-    if (riskLower === 'critical') return 'error';
-    if (riskLower === 'high') return 'warning';
-    if (riskLower === 'medium') return 'info';
-    return 'default';
+    if (riskLower === "critical") return "error";
+    if (riskLower === "high") return "warning";
+    if (riskLower === "medium") return "info";
+    return "default";
   };
 
   const formatTimestamp = (iso: string): string => {
@@ -180,9 +180,9 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
 
   if (loading) {
     return (
-      <Box sx={{ width: '100%', p: 2 }}>
+      <Box sx={{ width: "100%", p: 2 }}>
         <LinearProgress />
-        <Typography sx={{ mt: 2, textAlign: 'center' }}>Loading run details...</Typography>
+        <Typography sx={{ mt: 2, textAlign: "center" }}>Loading run details...</Typography>
       </Box>
     );
   }
@@ -200,12 +200,12 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
   }
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 2 }}>
+    <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", p: 2 }}>
       {/* Header */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="h4">{run.run_type.replace('_', ' ')}</Typography>
+            <Typography variant="h4">{run.run_type.replace("_", " ")}</Typography>
             <Stack direction="row" spacing={1}>
               <Chip
                 label={`Confidence: ${(run.confidence.overall_confidence * 100).toFixed(0)}%`}
@@ -251,7 +251,7 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                   Duration
                 </Typography>
                 <Typography variant="body2">
-                  {run.duration_ms ? `${(run.duration_ms / 1000).toFixed(2)}s` : 'N/A'}
+                  {run.duration_ms ? `${(run.duration_ms / 1000).toFixed(2)}s` : "N/A"}
                 </Typography>
               </Box>
             )}
@@ -259,7 +259,7 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
               <Typography variant="caption" color="text.secondary">
                 Run ID
               </Typography>
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.85em' }}>
+              <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.85em" }}>
                 {run.run_id.slice(0, 8)}...
               </Typography>
             </Box>
@@ -315,7 +315,11 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                           color={getConfidenceColor(step.confidence)}
                         />
                       </Stack>
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: 1, display: "block" }}
+                      >
                         {step.rationale}
                       </Typography>
                     </CardContent>
@@ -388,7 +392,7 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                   <Chip
                     label={run.confidence.source_reliability}
                     size="small"
-                    color={run.confidence.source_reliability === 'verified' ? 'success' : 'default'}
+                    color={run.confidence.source_reliability === "verified" ? "success" : "default"}
                   />
                 </TableCell>
               </TableRow>
@@ -413,9 +417,13 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                       <Chip
                         label={pd.decision}
                         size="small"
-                        color={pd.decision === 'allow' ? 'success' : 'error'}
+                        color={pd.decision === "allow" ? "success" : "error"}
                       />
-                      <Chip label={pd.risk_level} size="small" color={getRiskColor(pd.risk_level)} />
+                      <Chip
+                        label={pd.risk_level}
+                        size="small"
+                        color={getRiskColor(pd.risk_level)}
+                      />
                     </Stack>
                     <Typography variant="body2" color="text.secondary">
                       {pd.rationale}
@@ -440,7 +448,7 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                 <Typography variant="subtitle2" gutterBottom>
                   Provenance Chain
                 </Typography>
-                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                   {run.provenance_links.provenance_chain_id}
                 </Typography>
               </Box>
@@ -474,7 +482,10 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                     <CardContent>
                       <Stack direction="row" spacing={2} alignItems="center">
                         <Chip label={artifact.artifact_type} size="small" />
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.85em' }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontFamily: "monospace", fontSize: "0.85em" }}
+                        >
                           {artifact.artifact_id.slice(0, 12)}...
                         </Typography>
                       </Stack>
@@ -515,8 +526,14 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                     <Card key={assumption.assumption_id} variant="outlined" sx={{ mb: 1 }}>
                       <CardContent>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-                          <Chip label={assumption.risk_if_false} size="small" color={getRiskColor(assumption.risk_if_false)} />
-                          {assumption.validated && <Chip label="Validated" size="small" color="success" />}
+                          <Chip
+                            label={assumption.risk_if_false}
+                            size="small"
+                            color={getRiskColor(assumption.risk_if_false)}
+                          />
+                          {assumption.validated && (
+                            <Chip label="Validated" size="small" color="success" />
+                          )}
                         </Stack>
                         <Typography variant="body2">{assumption.description}</Typography>
                       </CardContent>
@@ -535,11 +552,19 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
                       <CardContent>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
                           <Chip label={limitation.category} size="small" />
-                          <Chip label={limitation.impact} size="small" color={getRiskColor(limitation.impact)} />
+                          <Chip
+                            label={limitation.impact}
+                            size="small"
+                            color={getRiskColor(limitation.impact)}
+                          />
                         </Stack>
                         <Typography variant="body2">{limitation.description}</Typography>
                         {limitation.mitigation && (
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ mt: 1, display: "block" }}
+                          >
                             Mitigation: {limitation.mitigation}
                           </Typography>
                         )}
@@ -566,16 +591,21 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
               </Typography>
               <Card variant="outlined">
                 <CardContent>
-                  <pre style={{ fontSize: '0.85em', overflow: 'auto' }}>
+                  <pre style={{ fontSize: "0.85em", overflow: "auto" }}>
                     {JSON.stringify(run.inputs.parameters, null, 2)}
                   </pre>
-                  {(run.inputs.pii_fields_redacted.length > 0 || run.inputs.secret_fields_redacted.length > 0) && (
+                  {(run.inputs.pii_fields_redacted.length > 0 ||
+                    run.inputs.secret_fields_redacted.length > 0) && (
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      {run.inputs.pii_fields_redacted.length} PII field(s) redacted,{' '}
+                      {run.inputs.pii_fields_redacted.length} PII field(s) redacted,{" "}
                       {run.inputs.secret_fields_redacted.length} secret(s) redacted
                     </Alert>
                   )}
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: "block" }}
+                  >
                     Hash: {run.inputs.input_hash}
                   </Typography>
                 </CardContent>
@@ -588,16 +618,21 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose 
               </Typography>
               <Card variant="outlined">
                 <CardContent>
-                  <pre style={{ fontSize: '0.85em', overflow: 'auto' }}>
+                  <pre style={{ fontSize: "0.85em", overflow: "auto" }}>
                     {JSON.stringify(run.outputs.results, null, 2)}
                   </pre>
-                  {(run.outputs.pii_fields_redacted.length > 0 || run.outputs.secret_fields_redacted.length > 0) && (
+                  {(run.outputs.pii_fields_redacted.length > 0 ||
+                    run.outputs.secret_fields_redacted.length > 0) && (
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      {run.outputs.pii_fields_redacted.length} PII field(s) redacted,{' '}
+                      {run.outputs.pii_fields_redacted.length} PII field(s) redacted,{" "}
                       {run.outputs.secret_fields_redacted.length} secret(s) redacted
                     </Alert>
                   )}
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: "block" }}
+                  >
                     Hash: {run.outputs.output_hash}
                   </Typography>
                 </CardContent>

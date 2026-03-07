@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const defaultCapabilities = {
   tool_use: false,
@@ -25,7 +25,7 @@ export const CapabilitiesSchema = z.object({
 });
 
 const defaultSignals = {
-    active_community: false,
+  active_community: false,
 };
 
 export const SignalsSchema = z.object({
@@ -33,17 +33,17 @@ export const SignalsSchema = z.object({
   last_commit: z.string().optional(), // Allow loose date string for now
   license: z.string().optional(),
   active_community: z.boolean().default(false),
-  docs_quality: z.enum(['High', 'Medium', 'Low', 'None']).optional(),
+  docs_quality: z.enum(["High", "Medium", "Low", "None"]).optional(),
 });
 
 export const ResourceTypeSchema = z.enum([
-  'Framework',
-  'Tool',
-  'Platform',
-  'Model',
-  'Guide',
-  'Benchmark',
-  'Community'
+  "Framework",
+  "Tool",
+  "Platform",
+  "Model",
+  "Guide",
+  "Benchmark",
+  "Community",
 ]);
 
 export const ResourceSchema = z.object({
@@ -53,7 +53,9 @@ export const ResourceSchema = z.object({
   url: z.string().url(),
   description: z.string().optional(),
   tags: z.array(z.string()).default([]),
-  maturity: z.enum(['Experimental', 'Alpha', 'Beta', 'Production', 'Deprecated']).default('Experimental'),
+  maturity: z
+    .enum(["Experimental", "Alpha", "Beta", "Production", "Deprecated"])
+    .default("Experimental"),
   capabilities: CapabilitiesSchema.default(defaultCapabilities),
   signals: SignalsSchema.default(defaultSignals),
 });
@@ -73,14 +75,18 @@ export const AgentEvidenceBundleSchema = z.object({
   }),
 
   verification: z.object({
-    status: z.enum(['unverified', 'verified', 'failed']).default('unverified'),
+    status: z.enum(["unverified", "verified", "failed"]).default("unverified"),
     tests_run: z.array(z.string()).default([]),
     results: z.record(z.any()).default({}),
   }),
 
-  claims: z.array(z.object({
-    claim: z.string(),
-    evidence: z.string().optional(),
-    confidence: z.number().min(0).max(1).default(0.5),
-  })).default([]),
+  claims: z
+    .array(
+      z.object({
+        claim: z.string(),
+        evidence: z.string().optional(),
+        confidence: z.number().min(0).max(1).default(0.5),
+      })
+    )
+    .default([]),
 });

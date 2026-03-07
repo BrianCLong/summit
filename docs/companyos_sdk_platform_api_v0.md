@@ -1,12 +1,14 @@
 # CompanyOS SDK & Platform API v0
 
 ## Scope and Modules
+
 - **Domains**: Identity/Auth, Policy/Authorization, Event Publishing, Observability/Tracing, Config/Feature Flags, Data Access/Residency, Messaging (queues/streams), Secrets.
 - **Target languages**: TypeScript/Node 20+, Python 3.10+, Go 1.22+, Java/Kotlin (JVM 17) as roadmap; shared OpenAPI/Schema artifacts for other stacks.
 - **Artifacts**: Client SDKs, service-to-service libraries, CLI for local dev, tracing/logging middleware, generated API docs, policy packs, test fixtures/mocks.
 - **Versioning/Stability**: Semantic versioning; v0 is experimental with per-module stability tags. Core primitives (identity, policy evaluation, tracing context) are **beta-stable**; others **alpha**. Backward compatibility honored within minor releases for beta modules; alpha may break with release notes and migration steps.
 
 ## API Ergonomics and Safety
+
 - **Context propagation**: Standard `Context` struct carries `trace_id`, `tenant_id`, `user_id/service_id`, `scopes`, `locale`, `data_residency`, `request_tags`. Propagated via headers (`Traceparent`, `X-CompanyOS-*`) and middleware for HTTP/gRPC/queues. Helpers to derive child contexts and guard against missing tenant/user.
 - **Secure defaults**:
   - Logging scrubs PII/secrets, enforces data-residency redaction, and routes audit events to dedicated sinks.
@@ -17,6 +19,7 @@
 - **Extensibility**: Plug-in providers for identity (OIDC/JWT), policy engines (OPA/Cedar), transports (Kafka/SQS/NATS), and telemetry backends (OTel exporters). Default providers ship with secure configurations.
 
 ## Distribution and Governance
+
 - **Repos**: `companyos/sdk` mono-repo with per-language packages; shared specs in `/specs` (OpenAPI, protobuf, policy schemas). Language-specific repos mirror published artifacts when needed.
 - **Packages/Registries**: npm (`@intelgraph/*`), PyPI (`companyos-*`), Go modules (`go.companyos.dev/sdk`), Maven (`com.companyos.sdk`). Signed releases; SBOM + provenance attached.
 - **Release process**: Automated CI with contract tests against mock platform; canary channel (`-rc` tags) before general availability. Release notes + migration guides per minor.
@@ -24,6 +27,7 @@
 - **Contribution model**: Maintainers own core modules; feature teams submit RFC + contract tests. Extension points registered via provider interfaces; contributions require threat model update + docs + examples. Security review mandatory for identity/policy changes.
 
 ## API Outline (v0)
+
 - **Identity/Auth**: Token verification middleware, impersonation guardrails, service credentials helper, session-less validation, cached JWKs.
 - **Policy**: Policy check client (`is_allowed`/`authorize!`) with contextual inputs, decision logs, dry-run mode, PDP fail-closed fallback.
 - **Observability**: Request/worker middleware for traces + metrics; structured logger with redaction and audit sinks; contextual breadcrumbs.
@@ -32,7 +36,9 @@
 - **Data Access**: Policy-aware connectors (SQL/OLAP/object store) enforcing residency + purpose binding; query templates with automatic tagging and result filtering; row-level audit trails.
 
 ## Example Usage
+
 ### Auth check (TypeScript/Node)
+
 ```ts
 import { withContext, authorize } from "@intelgraph/policy";
 import { verifyRequest } from "@intelgraph/identity";
@@ -46,6 +52,7 @@ export async function handler(req, res) {
 ```
 
 ### Emit event (Python)
+
 ```python
 from companyos.context import from_http
 from companyos.events import emit_event
@@ -60,6 +67,7 @@ emit_event(
 ```
 
 ### Structured logging with redaction (Go)
+
 ```go
 ctx := sdkcontext.FromHTTP(r)
 logger := observability.Logger(ctx).WithComponent("billing")
@@ -70,6 +78,7 @@ logger.Info("invoice issued",
 ```
 
 ## Readiness Checklist for New SDK APIs
+
 - [ ] RFC accepted with threat model and privacy review.
 - [ ] Context propagation documented; trace/tenant/user covered in public surface.
 - [ ] Secure defaults enforced (logging redaction, residency, policy fail-closed).

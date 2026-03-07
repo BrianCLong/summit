@@ -3,6 +3,7 @@
 This playbook provides ready-to-deploy responses for prompts 12–22 across governance, threat intelligence, incident response, and identity threat defense. Each scenario includes goals, execution steps, automation hooks, and measurable success criteria.
 
 ## 12. Audit-ready evidence for incident response (NIST 800-53)
+
 - **Goal:** Produce defensible, exportable evidence for IR controls mapped to IR, AU, CP, and SI families.
 - **Approach:**
   1. Map IR SOPs and runbooks to control IDs (e.g., IR-4, IR-5, IR-8) with traceability to detection sources.
@@ -13,6 +14,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** ≥95% incidents with complete control evidence; <2 hours SLA for evidence bundle after close; zero missing sign-offs in quarterly samples.
 
 ## 13. OPA policies for data classification and access (deny-by-default)
+
 - **Goal:** Enforce data class-based access using OPA with auditable decisions and minimal blast radius.
 - **Approach:**
   1. Normalize taxonomy: `public`, `internal`, `confidential`, `restricted`, `highly_restricted` with ownership metadata.
@@ -23,6 +25,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** 100% resources labeled; <0.5% policy regression in canaries; decision logs available for ≥180 days with integrity proofs.
 
 ## 14. Data retention with PETs (differential privacy, k-anonymity)
+
 - **Goal:** Balance analytics utility with privacy guarantees across pipelines.
 - **Approach:**
   1. Define retention classes (raw, sanitized, aggregates) with max age and deletion method (cryptographic erasure preferred).
@@ -33,6 +36,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** 100% datasets with retention class; zero overdue deletes; privacy budget overruns auto-blocked with alerting.
 
 ## 15. Correlate attacker infrastructure (passive DNS + SSL certs)
+
 - **Goal:** Link campaigns via shared DNS and certificate artifacts to raise confidence in clustering.
 - **Approach:**
   1. Collect passive DNS (PDNS), CT logs, JA3/JA4 hashes, and hosting ASN/geo history.
@@ -43,6 +47,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** ≥30% uplift in infra overlap findings quarter-over-quarter; false-positive rate <5% in sampling; time-to-block <30 minutes after cluster confirmation.
 
 ## 16. Early-warning tripwires (decoy cloud assets & token leakage)
+
 - **Goal:** Detect adversary reconnaissance and credential misuse early.
 - **Approach:**
   1. Deploy labeled decoy assets (buckets, service principals, DNS entries) with canary permissions and observable access.
@@ -53,6 +58,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** MTTD <5 minutes for token/decoy touches; ≥90% of alerts enriched with attribution context; zero production impact during decoy engagement.
 
 ## 17. Third-party exposure mapping (Shodan/Censys + leaked creds)
+
 - **Goal:** Continuously inventory and risk-rank vendor/partner exposure.
 - **Approach:**
   1. Maintain vendor asset catalog (domains, ASNs, IP ranges, SaaS tenants) with business criticality tags.
@@ -63,6 +69,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** Coverage ≥95% of tracked vendors; remediation SLA compliance ≥90%; mean time to notify <24 hours from detection.
 
 ## 18. MTTR reduction via telemetry vs. response step analysis
+
 - **Goal:** Identify automation candidates to shorten containment/recovery.
 - **Approach:**
   1. Instrument playbooks with timing markers (detect → triage → contain → recover).
@@ -73,6 +80,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** ≥25% MTTR reduction for top 5 alert classes; rollback rate <2%; responder satisfaction trend upward QoQ.
 
 ## 19. Tiered ransomware response matrix
+
 - **Goal:** Pre-bake actions by detection timing and blast radius to avoid decision delay.
 - **Approach:**
   1. Define tiers by timing (pre-encryption, during encryption, post-encryption) and impact (endpoint, segment, enterprise).
@@ -83,6 +91,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** Isolation MTTD+MTTC <10 minutes in pre-encryption tier; backup verification success ≥98%; exercise action adherence ≥95%.
 
 ## 20. BEC tabletop with comms, containment, recovery artifacts
+
 - **Goal:** End-to-end rehearsal with evidence-ready artifacts.
 - **Approach:**
   1. Scenarios: invoice fraud, vendor compromise, payroll reroute. Define roles (IR lead, comms, legal, finance).
@@ -93,6 +102,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** All injects processed within SLA; zero unlogged containment actions; remediation tasks closed within 30 days.
 
 ## 21. IdP risk-based authentication (step-up)
+
 - **Goal:** Dynamically adjust auth based on risk signals.
 - **Approach:**
   1. Ingest signals: geo-velocity, impossible travel, device health, network reputation, session age, and behavioral baselines.
@@ -103,6 +113,7 @@ This playbook provides ready-to-deploy responses for prompts 12–22 across gove
 - **Success metrics:** MFA prompt rate contained to <3% of low-risk sessions; account-takeover rate down ≥30%; step-up success ≥95% without support tickets spike.
 
 ## 22. Defenses against MFA fatigue/push bombing (adversary emulation)
+
 - **Goal:** Validate resilience to push-based attacks and improve user experience.
 - **Approach:**
   1. Emulate attack chain: credential theft → repeated push spam → prompt bypass attempts → adversary-in-the-middle.

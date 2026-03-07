@@ -1,4 +1,3 @@
-
 {
   "annotations": {
     "list": [
@@ -104,9 +103,7 @@
       "options": {
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -358,9 +355,7 @@
       "options": {
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -385,11 +380,7 @@
   "refresh": "5s",
   "schemaVersion": 35,
   "style": "dark",
-  "tags": [
-    "infra",
-    "multi-region",
-    "failover"
-  ],
+  "tags": ["infra", "multi-region", "failover"],
   "templating": {
     "list": [
       {

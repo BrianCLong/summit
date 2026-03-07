@@ -22,6 +22,7 @@ This creates critical gaps:
 4. **Trust propagation failure**: Context from untrusted agents cannot be flagged and isolated
 
 As Summit moves toward:
+
 - Multi-agent collaboration (MCP servers, tool calls, nested sessions)
 - High-stakes decision support (intelligence analysis, incident response)
 - Regulatory environments requiring audit trails
@@ -43,14 +44,14 @@ We will implement a **Context Provenance Graph (CPG)** system that:
 - **Assign cryptographic identifiers** to each segment:
   ```typescript
   interface ContextSegment {
-    id: string;              // SHA-256 hash of (content + metadata)
-    type: 'instruction' | 'event' | 'artifact' | 'memory';
+    id: string; // SHA-256 hash of (content + metadata)
+    type: "instruction" | "event" | "artifact" | "memory";
     content: string;
     metadata: {
       sourceAgentId?: string;
-      trustTier: 'system' | 'verified' | 'user' | 'external';
+      trustTier: "system" | "verified" | "user" | "external";
       policyDomain: string;
-      verificationStatus: 'signed' | 'unsigned' | 'revoked';
+      verificationStatus: "signed" | "unsigned" | "revoked";
       timestamp: Date;
     };
   }
@@ -81,30 +82,34 @@ We will implement a **Context Provenance Graph (CPG)** system that:
 interface PolicyRule {
   id: string;
   condition: (segment: ContextSegment) => boolean;
-  action: 'permit' | 'deny' | 'redact' | 'flag';
+  action: "permit" | "deny" | "redact" | "flag";
   justification: string;
 }
 ```
 
 **Actions**:
+
 - **Permit**: Include segment in final context
 - **Deny**: Block execution if segment present
 - **Redact**: Replace content with `[REDACTED: policy domain X]`
 - **Flag**: Include but mark for audit
 
 **Enforcement points**:
+
 - Pre-compilation: Filter segments before ContextCompiler assembles LLMRequest
 - Runtime: Kill-switch integration for dynamic revocation
 
 ### 4. Revocation & Replay Capabilities
 
 **Revocation**:
+
 - Mark segment as `verificationStatus: 'revoked'`
 - Propagate revocation transitively through graph (all descendants invalidated)
 - Trigger re-compilation of affected sessions
 - Create tombstone node in provenance graph (audit trail)
 
 **Replay**:
+
 - Reconstruct exact historical context from graph state at timestamp T
 - Support "what-if" analysis: replay with different policy rules
 - Generate audit reports: "Show all context segments from Agent X in Session Y"
@@ -112,12 +117,14 @@ interface PolicyRule {
 ### 5. Integration with Existing Summit Components
 
 **Hooks into**:
+
 - `agents/orchestrator/src/context/ContextCompiler.ts`: Add segmentation + graph construction
 - `ga-graphai/packages/data-integrity/src/invariants/`: Reuse InvariantEngine for policy rules
 - Verification gates: Policy enforcement as pre-execution gate
 - Kill-switch controller: Revocation triggers
 
 **New modules**:
+
 - `agents/orchestrator/src/context/provenance/ProvenanceGraph.ts`
 - `agents/orchestrator/src/context/provenance/ProvenanceNode.ts`
 - `agents/orchestrator/src/context/provenance/PolicyEngine.ts`
@@ -144,38 +151,46 @@ interface PolicyRule {
 ### Risks
 
 - **Performance at scale**: Large sessions (>1000 events) may create unwieldy graphs
-  - *Mitigation*: Compact old segments, summarize deep history
+  - _Mitigation_: Compact old segments, summarize deep history
 - **Policy explosion**: Too many rules create maintenance burden
-  - *Mitigation*: Start with minimal policy set, expand based on real incidents
+  - _Mitigation_: Start with minimal policy set, expand based on real incidents
 - **Revocation storms**: Invalidating a root segment could cascade to thousands of descendants
-  - *Mitigation*: Require explicit confirmation for wide-impact revocations
+  - _Mitigation_: Require explicit confirmation for wide-impact revocations
 
 ## Alternatives Considered
 
 ### 1. Context Hashing Without Graph Structure
+
 **Description**: Hash entire compiled context blob, store hash with session
 **Rejected because**:
+
 - Cannot trace individual segment origins
 - Revocation impossible (all-or-nothing)
 - No support for partial redaction
 
 ### 2. Append-Only Event Log (No Derivation Tracking)
+
 **Description**: Log all context mutations as events, no relationships
 **Rejected because**:
+
 - Cannot answer "why was this segment included?"
 - Replay requires re-executing entire compilation pipeline
 - No transitive policy enforcement
 
 ### 3. Policy Enforcement at Execution Layer Only
+
 **Description**: Current approach—check permissions before tool calls, not context assembly
 **Rejected because**:
+
 - Model already "saw" forbidden context by the time execution happens
 - Cannot prevent prompt injection via poisoned context
 - No protection against adversarial memory retrieval
 
 ### 4. Store Provenance in Neo4j Graph Database
+
 **Description**: Leverage existing graph infrastructure
 **Deferred for now because**:
+
 - Adds dependency + network latency to critical path
 - Context provenance is session-scoped, not global knowledge graph
 - Future optimization: export to Neo4j for cross-session analysis
@@ -183,12 +198,14 @@ interface PolicyRule {
 ## Implementation Plan
 
 ### Phase 1: Core Provenance Infrastructure (Weeks 1-2)
+
 - Implement `ProvenanceGraph` and `ProvenanceNode` data structures
 - Add segmentation logic to `ContextCompiler`
 - Create basic cryptographic identifier generation (SHA-256)
 - Write unit tests for graph construction + traversal
 
 ### Phase 2: Policy Engine Integration (Weeks 3-4)
+
 - Build `PolicyEngine` with permit/deny/redact actions
 - Define initial policy rules:
   - Block segments from revoked agents
@@ -197,12 +214,14 @@ interface PolicyRule {
 - Integrate with existing verification gates
 
 ### Phase 3: Revocation & Replay (Weeks 5-6)
+
 - Implement revocation API: `POST /sessions/:id/context/:segmentId/revoke`
 - Build replay engine: `GET /sessions/:id/context/snapshot?timestamp=T`
 - Add GraphQL queries for provenance exploration
 - Create admin UI for visualizing provenance graphs
 
 ### Phase 4: Production Hardening (Weeks 7-8)
+
 - Add persistence layer (SQLite for provenance graphs)
 - Implement garbage collection for old graphs
 - Performance optimization (batch segmentation, lazy graph construction)
@@ -210,6 +229,7 @@ interface PolicyRule {
 - Documentation + runbooks for operators
 
 ### Phase 5: Advanced Features (Future)
+
 - Export to Neo4j for cross-session provenance analysis
 - Machine learning on provenance patterns (anomaly detection)
 - Provenance-aware context summarization (compress while preserving lineage)

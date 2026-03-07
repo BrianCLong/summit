@@ -1,16 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
-import { DebateValidator, LLMRunner } from '../../../src/daao/collaboration/debateValidation.js';
+import { describe, it, expect, vi } from "vitest";
+import { DebateValidator, LLMRunner } from "../../../src/daao/collaboration/debateValidation.js";
 
-describe('DebateValidator', () => {
-  it('should refine draft if critique score is low', async () => {
+describe("DebateValidator", () => {
+  it("should refine draft if critique score is low", async () => {
     const mockRunner: LLMRunner = {
-      run: vi.fn()
-        .mockResolvedValueOnce(JSON.stringify({
-          issues: ['Too brief'],
-          score: 0.5,
-          safe: true
-        })) // Critique
-        .mockResolvedValueOnce("Refined Answer") // Refinement
+      run: vi
+        .fn()
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            issues: ["Too brief"],
+            score: 0.5,
+            safe: true,
+          })
+        ) // Critique
+        .mockResolvedValueOnce("Refined Answer"), // Refinement
     };
 
     const validator = new DebateValidator(mockRunner);
@@ -21,14 +24,15 @@ describe('DebateValidator', () => {
     expect(mockRunner.run).toHaveBeenCalledTimes(2);
   });
 
-  it('should not refine if critique score is high', async () => {
+  it("should not refine if critique score is high", async () => {
     const mockRunner: LLMRunner = {
-      run: vi.fn()
-        .mockResolvedValueOnce(JSON.stringify({
+      run: vi.fn().mockResolvedValueOnce(
+        JSON.stringify({
           issues: [],
           score: 0.95,
-          safe: true
-        }))
+          safe: true,
+        })
+      ),
     };
 
     const validator = new DebateValidator(mockRunner);
@@ -39,11 +43,12 @@ describe('DebateValidator', () => {
     expect(mockRunner.run).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle malformed JSON critique gracefully and still refine', async () => {
+  it("should handle malformed JSON critique gracefully and still refine", async () => {
     const mockRunner: LLMRunner = {
-      run: vi.fn()
+      run: vi
+        .fn()
         .mockResolvedValueOnce("Not JSON") // Critique
-        .mockResolvedValueOnce("Refined Answer") // Refinement
+        .mockResolvedValueOnce("Refined Answer"), // Refinement
     };
 
     const validator = new DebateValidator(mockRunner);
@@ -54,12 +59,13 @@ describe('DebateValidator', () => {
     expect(result.refined).toBe("Refined Answer");
   });
 
-  it('should extract JSON from mixed content', async () => {
+  it("should extract JSON from mixed content", async () => {
     const jsonBlock = JSON.stringify({ score: 0.5, safe: true });
     const mockRunner: LLMRunner = {
-      run: vi.fn()
+      run: vi
+        .fn()
         .mockResolvedValueOnce(`Here is the critique: ${jsonBlock} thanks.`) // Critique
-        .mockResolvedValueOnce("Refined")
+        .mockResolvedValueOnce("Refined"),
     };
 
     const validator = new DebateValidator(mockRunner);

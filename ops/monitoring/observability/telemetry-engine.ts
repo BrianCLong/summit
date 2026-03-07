@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import { EventEmitter } from "events";
+import crypto from "crypto";
 
 export interface TelemetryConfig {
   engineId: string;
@@ -15,7 +15,7 @@ export interface TelemetryConfig {
 
 export interface CollectorConfig {
   id: string;
-  type: 'logs' | 'metrics' | 'traces' | 'events' | 'custom';
+  type: "logs" | "metrics" | "traces" | "events" | "custom";
   name: string;
   source: string;
   endpoint?: string;
@@ -30,9 +30,9 @@ export interface CollectorConfig {
 
 export interface CollectorFilter {
   field: string;
-  operator: 'eq' | 'ne' | 'contains' | 'regex' | 'gt' | 'lt';
+  operator: "eq" | "ne" | "contains" | "regex" | "gt" | "lt";
   value: any;
-  action: 'include' | 'exclude' | 'transform';
+  action: "include" | "exclude" | "transform";
 }
 
 export interface RetryPolicy {
@@ -44,7 +44,7 @@ export interface RetryPolicy {
 
 export interface ProcessorConfig {
   id: string;
-  type: 'filter' | 'transform' | 'enrich' | 'aggregate' | 'correlation';
+  type: "filter" | "transform" | "enrich" | "aggregate" | "correlation";
   name: string;
   rules: ProcessingRule[];
   enabled: boolean;
@@ -59,7 +59,7 @@ export interface ProcessingRule {
 }
 
 export interface RuleCondition {
-  type: 'expression' | 'threshold' | 'pattern' | 'anomaly';
+  type: "expression" | "threshold" | "pattern" | "anomaly";
   expression?: string;
   threshold?: { field: string; operator: string; value: number };
   pattern?: { field: string; regex: string };
@@ -67,20 +67,13 @@ export interface RuleCondition {
 }
 
 export interface ProcessingAction {
-  type: 'drop' | 'route' | 'transform' | 'enrich' | 'alert' | 'aggregate';
+  type: "drop" | "route" | "transform" | "enrich" | "alert" | "aggregate";
   parameters: Record<string, any>;
 }
 
 export interface ExporterConfig {
   id: string;
-  type:
-    | 'prometheus'
-    | 'elasticsearch'
-    | 'jaeger'
-    | 'zipkin'
-    | 'datadog'
-    | 'newrelic'
-    | 'custom';
+  type: "prometheus" | "elasticsearch" | "jaeger" | "zipkin" | "datadog" | "newrelic" | "custom";
   name: string;
   endpoint: string;
   credentials?: Record<string, string>;
@@ -92,7 +85,7 @@ export interface ExporterConfig {
 }
 
 export interface ExportFilter {
-  dataType: 'logs' | 'metrics' | 'traces' | 'events';
+  dataType: "logs" | "metrics" | "traces" | "events";
   condition: RuleCondition;
   transformation?: string;
 }
@@ -115,7 +108,7 @@ export interface EnrichmentRule {
 }
 
 export interface Enrichment {
-  type: 'static' | 'lookup' | 'geoip' | 'user-agent' | 'custom';
+  type: "static" | "lookup" | "geoip" | "user-agent" | "custom";
   field: string;
   source?: string;
   value?: any;
@@ -127,7 +120,7 @@ export interface AlertRule {
   name: string;
   description: string;
   condition: RuleCondition;
-  severity: 'info' | 'warning' | 'error' | 'critical';
+  severity: "info" | "warning" | "error" | "critical";
   threshold: AlertThreshold;
   notification: NotificationConfig;
   enabled: boolean;
@@ -135,7 +128,7 @@ export interface AlertRule {
 
 export interface AlertThreshold {
   metric: string;
-  operator: 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'ne';
+  operator: "gt" | "gte" | "lt" | "lte" | "eq" | "ne";
   value: number;
   duration: number;
   evaluationInterval: number;
@@ -163,7 +156,7 @@ export interface SuppressionRule {
 export interface RetentionPolicy {
   id: string;
   name: string;
-  dataType: 'logs' | 'metrics' | 'traces' | 'events';
+  dataType: "logs" | "metrics" | "traces" | "events";
   condition: RuleCondition;
   retention: {
     hot: number;
@@ -171,7 +164,7 @@ export interface RetentionPolicy {
     cold: number;
     archive: number;
   };
-  compression: 'none' | 'gzip' | 'lz4' | 'snappy';
+  compression: "none" | "gzip" | "lz4" | "snappy";
   indexing: boolean;
 }
 
@@ -190,7 +183,7 @@ export interface Dashboard {
 
 export interface DashboardPanel {
   id: string;
-  type: 'graph' | 'table' | 'stat' | 'gauge' | 'heatmap' | 'log' | 'trace';
+  type: "graph" | "table" | "stat" | "gauge" | "heatmap" | "log" | "trace";
   title: string;
   description?: string;
   position: { x: number; y: number; width: number; height: number };
@@ -201,7 +194,7 @@ export interface DashboardPanel {
 
 export interface DashboardVariable {
   name: string;
-  type: 'query' | 'custom' | 'constant' | 'interval';
+  type: "query" | "custom" | "constant" | "interval";
   query?: string;
   options?: string[];
   value: any;
@@ -215,7 +208,7 @@ export interface TimeRange {
 }
 
 export interface Query {
-  type: 'promql' | 'lucene' | 'sql' | 'jaeger' | 'custom';
+  type: "promql" | "lucene" | "sql" | "jaeger" | "custom";
   expression: string;
   datasource: string;
   parameters: Record<string, any>;
@@ -244,12 +237,12 @@ export interface Override {
 
 export interface DashboardPermission {
   role: string;
-  permission: 'view' | 'edit' | 'admin';
+  permission: "view" | "edit" | "admin";
 }
 
 export interface TelemetryData {
   id: string;
-  type: 'log' | 'metric' | 'trace' | 'event';
+  type: "log" | "metric" | "trace" | "event";
   timestamp: Date;
   source: string;
   tags: Record<string, string>;
@@ -267,8 +260,8 @@ export interface TelemetryMetadata {
 }
 
 export interface LogData extends TelemetryData {
-  type: 'log';
-  level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  type: "log";
+  level: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
   message: string;
   logger: string;
   thread?: string;
@@ -276,17 +269,17 @@ export interface LogData extends TelemetryData {
 }
 
 export interface MetricData extends TelemetryData {
-  type: 'metric';
+  type: "metric";
   name: string;
   value: number;
   unit?: string;
-  metricType: 'counter' | 'gauge' | 'histogram' | 'summary';
+  metricType: "counter" | "gauge" | "histogram" | "summary";
   buckets?: number[];
   quantiles?: Record<string, number>;
 }
 
 export interface TraceData extends TelemetryData {
-  type: 'trace';
+  type: "trace";
   traceId: string;
   spanId: string;
   parentSpanId?: string;
@@ -294,7 +287,7 @@ export interface TraceData extends TelemetryData {
   startTime: Date;
   endTime: Date;
   duration: number;
-  status: 'ok' | 'error' | 'timeout';
+  status: "ok" | "error" | "timeout";
   baggage: Record<string, string>;
   logs: SpanLog[];
 }
@@ -305,7 +298,7 @@ export interface SpanLog {
 }
 
 export interface EventData extends TelemetryData {
-  type: 'event';
+  type: "event";
   name: string;
   category: string;
   action: string;
@@ -319,8 +312,8 @@ export interface Alert {
   ruleId: string;
   name: string;
   description: string;
-  severity: 'info' | 'warning' | 'error' | 'critical';
-  status: 'firing' | 'resolved' | 'suppressed';
+  severity: "info" | "warning" | "error" | "critical";
+  status: "firing" | "resolved" | "suppressed";
   firedAt: Date;
   resolvedAt?: Date;
   value: number;
@@ -334,7 +327,7 @@ export interface Alert {
 export interface AlertNotification {
   id: string;
   channel: string;
-  status: 'pending' | 'sent' | 'failed';
+  status: "pending" | "sent" | "failed";
   sentAt?: Date;
   error?: string;
   retryCount: number;
@@ -366,7 +359,7 @@ export interface TelemetryMetrics {
     exportedDataPoints: number;
     exportLatency: number;
     exportErrors: number;
-    destinationStatus: Record<string, 'healthy' | 'degraded' | 'down'>;
+    destinationStatus: Record<string, "healthy" | "degraded" | "down">;
   };
   alerts: {
     activeAlerts: number;
@@ -458,29 +451,27 @@ export class TelemetryEngine extends EventEmitter {
       // Start alert evaluation
       this.startAlertEvaluation();
 
-      this.emit('telemetry_engine_initialized', {
+      this.emit("telemetry_engine_initialized", {
         collectors: this.collectors.size,
         processors: this.processors.size,
         exporters: this.exporters.size,
         timestamp: new Date(),
       });
     } catch (error) {
-      this.emit('telemetry_engine_error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      this.emit("telemetry_engine_error", {
+        error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date(),
       });
       throw error;
     }
   }
 
-  async ingestData(
-    data: Omit<TelemetryData, 'id' | 'metadata'>,
-  ): Promise<TelemetryData> {
+  async ingestData(data: Omit<TelemetryData, "id" | "metadata">): Promise<TelemetryData> {
     const telemetryData: TelemetryData = {
       ...data,
       id: crypto.randomUUID(),
       metadata: {
-        collectorId: 'direct',
+        collectorId: "direct",
         pipeline: [],
         sampling: false,
         enriched: false,
@@ -494,17 +485,16 @@ export class TelemetryEngine extends EventEmitter {
       telemetryData.metadata.sampling = true;
 
       // Process through pipeline
-      const processedData =
-        await this.processingPipeline.process(telemetryData);
+      const processedData = await this.processingPipeline.process(telemetryData);
 
       if (processedData) {
         this.data.set(processedData.id, processedData);
-        this.updateMetrics('ingestion', processedData);
+        this.updateMetrics("ingestion", processedData);
 
         // Export to configured destinations
         await this.exportData(processedData);
 
-        this.emit('data_ingested', {
+        this.emit("data_ingested", {
           dataId: processedData.id,
           type: processedData.type,
           source: processedData.source,
@@ -514,18 +504,16 @@ export class TelemetryEngine extends EventEmitter {
         return processedData;
       } else {
         this.metrics.processing.droppedDataPoints++;
-        throw new Error('Data was dropped during processing');
+        throw new Error("Data was dropped during processing");
       }
     } else {
       this.metrics.processing.droppedDataPoints++;
-      throw new Error('Data was dropped due to sampling rules');
+      throw new Error("Data was dropped due to sampling rules");
     }
   }
 
   private shouldSample(data: TelemetryData): boolean {
-    for (const rule of this.config.samplingRules.sort(
-      (a, b) => b.priority - a.priority,
-    )) {
+    for (const rule of this.config.samplingRules.sort((a, b) => b.priority - a.priority)) {
       if (!rule.enabled) continue;
 
       if (this.evaluateCondition(rule.condition, data)) {
@@ -536,18 +524,15 @@ export class TelemetryEngine extends EventEmitter {
     return true; // Default to sampling everything if no rules match
   }
 
-  private evaluateCondition(
-    condition: RuleCondition,
-    data: TelemetryData,
-  ): boolean {
+  private evaluateCondition(condition: RuleCondition, data: TelemetryData): boolean {
     switch (condition.type) {
-      case 'expression':
+      case "expression":
         return this.evaluateExpression(condition.expression!, data);
-      case 'threshold':
+      case "threshold":
         return this.evaluateThreshold(condition.threshold!, data);
-      case 'pattern':
+      case "pattern":
         return this.evaluatePattern(condition.pattern!, data);
-      case 'anomaly':
+      case "anomaly":
         return this.evaluateAnomaly(condition.anomaly!, data);
       default:
         return false;
@@ -575,35 +560,32 @@ export class TelemetryEngine extends EventEmitter {
 
   private evaluateThreshold(
     threshold: { field: string; operator: string; value: number },
-    data: TelemetryData,
+    data: TelemetryData
   ): boolean {
     const fieldValue = this.getFieldValue(threshold.field, data);
-    if (typeof fieldValue !== 'number') return false;
+    if (typeof fieldValue !== "number") return false;
 
     switch (threshold.operator) {
-      case 'gt':
+      case "gt":
         return fieldValue > threshold.value;
-      case 'gte':
+      case "gte":
         return fieldValue >= threshold.value;
-      case 'lt':
+      case "lt":
         return fieldValue < threshold.value;
-      case 'lte':
+      case "lte":
         return fieldValue <= threshold.value;
-      case 'eq':
+      case "eq":
         return fieldValue === threshold.value;
-      case 'ne':
+      case "ne":
         return fieldValue !== threshold.value;
       default:
         return false;
     }
   }
 
-  private evaluatePattern(
-    pattern: { field: string; regex: string },
-    data: TelemetryData,
-  ): boolean {
+  private evaluatePattern(pattern: { field: string; regex: string }, data: TelemetryData): boolean {
     const fieldValue = this.getFieldValue(pattern.field, data);
-    if (typeof fieldValue !== 'string') return false;
+    if (typeof fieldValue !== "string") return false;
 
     const regex = new RegExp(pattern.regex);
     return regex.test(fieldValue);
@@ -611,18 +593,18 @@ export class TelemetryEngine extends EventEmitter {
 
   private evaluateAnomaly(
     anomaly: { model: string; sensitivity: number },
-    data: TelemetryData,
+    data: TelemetryData
   ): boolean {
     // Implementation would use ML models for anomaly detection
     return false; // Placeholder
   }
 
   private getFieldValue(fieldPath: string, data: TelemetryData): any {
-    const parts = fieldPath.split('.');
+    const parts = fieldPath.split(".");
     let value: any = data;
 
     for (const part of parts) {
-      if (value && typeof value === 'object' && part in value) {
+      if (value && typeof value === "object" && part in value) {
         value = value[part];
       } else {
         return undefined;
@@ -640,13 +622,13 @@ export class TelemetryEngine extends EventEmitter {
         exportPromises.push(
           exporter.export(data).catch((error) => {
             this.metrics.export.exportErrors++;
-            this.emit('export_error', {
+            this.emit("export_error", {
               exporterId: exporter.getId(),
               dataId: data.id,
-              error: error instanceof Error ? error.message : 'Unknown error',
+              error: error instanceof Error ? error.message : "Unknown error",
               timestamp: new Date(),
             });
-          }),
+          })
         );
       }
     }
@@ -667,7 +649,7 @@ export class TelemetryEngine extends EventEmitter {
       try {
         const shouldAlert = await this.evaluateAlertRule(rule);
         const existingAlert = Array.from(this.alerts.values()).find(
-          (a) => a.ruleId === rule.id && a.status === 'firing',
+          (a) => a.ruleId === rule.id && a.status === "firing"
         );
 
         if (shouldAlert && !existingAlert) {
@@ -676,10 +658,10 @@ export class TelemetryEngine extends EventEmitter {
           await this.resolveAlert(existingAlert);
         }
       } catch (error) {
-        this.emit('alert_evaluation_error', {
+        this.emit("alert_evaluation_error", {
           ruleId: rule.id,
           ruleName: rule.name,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
           timestamp: new Date(),
         });
       }
@@ -699,7 +681,7 @@ export class TelemetryEngine extends EventEmitter {
       name: rule.name,
       description: rule.description,
       severity: rule.severity,
-      status: 'firing',
+      status: "firing",
       firedAt: new Date(),
       value: 0, // Would be calculated from actual data
       threshold: rule.threshold.value,
@@ -715,7 +697,7 @@ export class TelemetryEngine extends EventEmitter {
     // Send notifications
     await this.sendAlertNotifications(alert, rule.notification);
 
-    this.emit('alert_fired', {
+    this.emit("alert_fired", {
       alertId: alert.id,
       ruleId: rule.id,
       severity: alert.severity,
@@ -724,7 +706,7 @@ export class TelemetryEngine extends EventEmitter {
   }
 
   private async resolveAlert(alert: Alert): Promise<void> {
-    alert.status = 'resolved';
+    alert.status = "resolved";
     alert.resolvedAt = new Date();
     this.metrics.alerts.activeAlerts--;
 
@@ -732,7 +714,7 @@ export class TelemetryEngine extends EventEmitter {
     this.metrics.alerts.alertResolutionTime =
       (this.metrics.alerts.alertResolutionTime + duration) / 2;
 
-    this.emit('alert_resolved', {
+    this.emit("alert_resolved", {
       alertId: alert.id,
       ruleId: alert.ruleId,
       duration,
@@ -740,15 +722,12 @@ export class TelemetryEngine extends EventEmitter {
     });
   }
 
-  private async sendAlertNotifications(
-    alert: Alert,
-    config: NotificationConfig,
-  ): Promise<void> {
+  private async sendAlertNotifications(alert: Alert, config: NotificationConfig): Promise<void> {
     for (const channel of config.channels) {
       const notification: AlertNotification = {
         id: crypto.randomUUID(),
         channel,
-        status: 'pending',
+        status: "pending",
         retryCount: 0,
       };
 
@@ -756,12 +735,11 @@ export class TelemetryEngine extends EventEmitter {
 
       try {
         await this.sendNotification(notification, alert, config.template);
-        notification.status = 'sent';
+        notification.status = "sent";
         notification.sentAt = new Date();
       } catch (error) {
-        notification.status = 'failed';
-        notification.error =
-          error instanceof Error ? error.message : 'Unknown error';
+        notification.status = "failed";
+        notification.error = error instanceof Error ? error.message : "Unknown error";
       }
     }
   }
@@ -769,7 +747,7 @@ export class TelemetryEngine extends EventEmitter {
   private async sendNotification(
     notification: AlertNotification,
     alert: Alert,
-    template: string,
+    template: string
   ): Promise<void> {
     // Implementation would send notification via the specified channel
     // This is a placeholder
@@ -777,7 +755,7 @@ export class TelemetryEngine extends EventEmitter {
 
   private updateMetrics(operation: string, data: TelemetryData): void {
     switch (operation) {
-      case 'ingestion':
+      case "ingestion":
         this.metrics.collection.totalDataPoints++;
         this.metrics.processing.processedDataPoints++;
         this.metrics.storage.storedDataPoints++;
@@ -787,7 +765,7 @@ export class TelemetryEngine extends EventEmitter {
 
   async createDashboard(dashboard: Dashboard): Promise<Dashboard> {
     // Implementation would create and store dashboard configuration
-    this.emit('dashboard_created', {
+    this.emit("dashboard_created", {
       dashboardId: dashboard.id,
       name: dashboard.name,
       panelCount: dashboard.panels.length,
@@ -808,13 +786,13 @@ export class TelemetryEngine extends EventEmitter {
       let results: any = {};
 
       switch (query.type) {
-        case 'promql':
+        case "promql":
           results = await this.executePromQLQuery(query, timeRange);
           break;
-        case 'lucene':
+        case "lucene":
           results = await this.executeLuceneQuery(query, timeRange);
           break;
-        case 'sql':
+        case "sql":
           results = await this.executeSQLQuery(query, timeRange);
           break;
         default:
@@ -822,10 +800,9 @@ export class TelemetryEngine extends EventEmitter {
       }
 
       const queryLatency = Date.now() - startTime;
-      this.metrics.storage.queryLatency =
-        (this.metrics.storage.queryLatency + queryLatency) / 2;
+      this.metrics.storage.queryLatency = (this.metrics.storage.queryLatency + queryLatency) / 2;
 
-      this.emit('query_executed', {
+      this.emit("query_executed", {
         queryType: query.type,
         latency: queryLatency,
         resultCount: Array.isArray(results) ? results.length : 1,
@@ -834,36 +811,27 @@ export class TelemetryEngine extends EventEmitter {
 
       return results;
     } catch (error) {
-      this.emit('query_error', {
+      this.emit("query_error", {
         queryType: query.type,
         query: query.expression,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date(),
       });
       throw error;
     }
   }
 
-  private async executePromQLQuery(
-    query: Query,
-    timeRange: TimeRange,
-  ): Promise<any> {
+  private async executePromQLQuery(query: Query, timeRange: TimeRange): Promise<any> {
     // Implementation would execute Prometheus-style queries against metrics
     return []; // Placeholder
   }
 
-  private async executeLuceneQuery(
-    query: Query,
-    timeRange: TimeRange,
-  ): Promise<any> {
+  private async executeLuceneQuery(query: Query, timeRange: TimeRange): Promise<any> {
     // Implementation would execute Lucene-style queries against logs
     return []; // Placeholder
   }
 
-  private async executeSQLQuery(
-    query: Query,
-    timeRange: TimeRange,
-  ): Promise<any> {
+  private async executeSQLQuery(query: Query, timeRange: TimeRange): Promise<any> {
     // Implementation would execute SQL queries against structured data
     return []; // Placeholder
   }
@@ -935,7 +903,7 @@ export class TelemetryEngine extends EventEmitter {
       await exporter.stop();
     }
 
-    this.emit('telemetry_engine_shutdown', {
+    this.emit("telemetry_engine_shutdown", {
       timestamp: new Date(),
     });
   }
@@ -944,7 +912,7 @@ export class TelemetryEngine extends EventEmitter {
 class DataCollector {
   constructor(
     private config: CollectorConfig,
-    private engine: TelemetryEngine,
+    private engine: TelemetryEngine
   ) {}
 
   async start(): Promise<void> {
@@ -959,7 +927,7 @@ class DataCollector {
 class DataProcessor {
   constructor(
     private config: ProcessorConfig,
-    private engine: TelemetryEngine,
+    private engine: TelemetryEngine
   ) {}
 
   async process(data: TelemetryData): Promise<TelemetryData | null> {
@@ -971,7 +939,7 @@ class DataProcessor {
 class DataExporter {
   constructor(
     private config: ExporterConfig,
-    private engine: TelemetryEngine,
+    private engine: TelemetryEngine
   ) {}
 
   async start(): Promise<void> {

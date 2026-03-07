@@ -15,21 +15,12 @@
       "prompts/registry.yaml",
       "agents/examples/PARTNER_ENABLEMENT_KIT_V1.json"
     ],
-    "domains": [
-      "documentation",
-      "partners",
-      "governance"
-    ]
+    "domains": ["documentation", "partners", "governance"]
   },
-  "allowed_operations": [
-    "create",
-    "edit"
-  ],
+  "allowed_operations": ["create", "edit"],
   "verification_requirements": {
     "tier": "C",
-    "artifacts": [
-      "docs/partners/partner-enablement-kit-v1.md"
-    ]
+    "artifacts": ["docs/partners/partner-enablement-kit-v1.md"]
   },
   "debt_budget": {
     "permitted": 0,

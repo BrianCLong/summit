@@ -5,8 +5,8 @@
  * using Redis for persistence and distributed access.
  */
 
-import { EventEmitter } from 'eventemitter3';
-import Redis from 'ioredis';
+import { EventEmitter } from "eventemitter3";
+import Redis from "ioredis";
 import {
   SessionState,
   ProviderState,
@@ -19,14 +19,14 @@ import {
   ProviderMetrics,
   LLMProvider,
   LLMModel,
-} from '../types/index.js';
+} from "../types/index.js";
 
 export interface RedisStateConfig {
   redisUrl: string;
   keyPrefix: string;
   sessionTTL: number; // seconds
   providerStateTTL: number; // seconds
-  budgetResetInterval: 'daily' | 'weekly' | 'monthly';
+  budgetResetInterval: "daily" | "weekly" | "monthly";
 }
 
 export class RedisStateManager extends EventEmitter {
@@ -36,11 +36,11 @@ export class RedisStateManager extends EventEmitter {
   constructor(config: Partial<RedisStateConfig> = {}) {
     super();
     this.config = {
-      redisUrl: config.redisUrl ?? process.env.REDIS_URL ?? 'redis://localhost:6379',
-      keyPrefix: config.keyPrefix ?? 'llm-orchestrator',
+      redisUrl: config.redisUrl ?? process.env.REDIS_URL ?? "redis://localhost:6379",
+      keyPrefix: config.keyPrefix ?? "llm-orchestrator",
       sessionTTL: config.sessionTTL ?? 3600, // 1 hour
       providerStateTTL: config.providerStateTTL ?? 86400, // 24 hours
-      budgetResetInterval: config.budgetResetInterval ?? 'daily',
+      budgetResetInterval: config.budgetResetInterval ?? "daily",
     };
 
     this.redis = new Redis(this.config.redisUrl, {
@@ -48,12 +48,12 @@ export class RedisStateManager extends EventEmitter {
       retryStrategy: (times) => Math.min(times * 100, 3000),
     });
 
-    this.redis.on('error', (error) => {
-      this.emit('redis:error', error);
+    this.redis.on("error", (error) => {
+      this.emit("redis:error", error);
     });
 
-    this.redis.on('connect', () => {
-      this.emit('redis:connected');
+    this.redis.on("connect", () => {
+      this.emit("redis:connected");
     });
   }
 
@@ -84,7 +84,7 @@ export class RedisStateManager extends EventEmitter {
     };
 
     await this.setSession(session);
-    this.emit('session:created', { sessionId, userId });
+    this.emit("session:created", { sessionId, userId });
     return session;
   }
 
@@ -112,11 +112,7 @@ export class RedisStateManager extends EventEmitter {
     const key = this.sessionKey(session.sessionId);
     session.updatedAt = new Date();
 
-    await this.redis.setex(
-      key,
-      this.config.sessionTTL,
-      JSON.stringify(session),
-    );
+    await this.redis.setex(key, this.config.sessionTTL, JSON.stringify(session));
   }
 
   /**
@@ -152,10 +148,7 @@ export class RedisStateManager extends EventEmitter {
   /**
    * Add governance violation
    */
-  async addGovernanceViolation(
-    sessionId: string,
-    violation: GovernanceViolation,
-  ): Promise<void> {
+  async addGovernanceViolation(sessionId: string, violation: GovernanceViolation): Promise<void> {
     const session = await this.getSession(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
@@ -171,7 +164,7 @@ export class RedisStateManager extends EventEmitter {
   async deleteSession(sessionId: string): Promise<void> {
     const key = this.sessionKey(sessionId);
     await this.redis.del(key);
-    this.emit('session:deleted', { sessionId });
+    this.emit("session:deleted", { sessionId });
   }
 
   // ============================================================================
@@ -181,10 +174,7 @@ export class RedisStateManager extends EventEmitter {
   /**
    * Get provider state
    */
-  async getProviderState(
-    provider: LLMProvider,
-    model: LLMModel,
-  ): Promise<ProviderState | null> {
+  async getProviderState(provider: LLMProvider, model: LLMModel): Promise<ProviderState | null> {
     const key = this.providerKey(provider, model);
     const data = await this.redis.get(key);
 
@@ -202,11 +192,7 @@ export class RedisStateManager extends EventEmitter {
    */
   async setProviderState(state: ProviderState): Promise<void> {
     const key = this.providerKey(state.provider, state.model);
-    await this.redis.setex(
-      key,
-      this.config.providerStateTTL,
-      JSON.stringify(state),
-    );
+    await this.redis.setex(key, this.config.providerStateTTL, JSON.stringify(state));
   }
 
   /**
@@ -215,7 +201,7 @@ export class RedisStateManager extends EventEmitter {
   async updateCircuitBreakerState(
     provider: LLMProvider,
     model: LLMModel,
-    circuitState: CircuitBreakerState,
+    circuitState: CircuitBreakerState
   ): Promise<void> {
     let state = await this.getProviderState(provider, model);
 
@@ -233,7 +219,7 @@ export class RedisStateManager extends EventEmitter {
   async updateProviderMetrics(
     provider: LLMProvider,
     model: LLMModel,
-    metrics: Partial<ProviderMetrics>,
+    metrics: Partial<ProviderMetrics>
   ): Promise<void> {
     let state = await this.getProviderState(provider, model);
 
@@ -251,7 +237,7 @@ export class RedisStateManager extends EventEmitter {
   async updateProviderHealth(
     provider: LLMProvider,
     model: LLMModel,
-    healthy: boolean,
+    healthy: boolean
   ): Promise<void> {
     let state = await this.getProviderState(provider, model);
 
@@ -311,7 +297,7 @@ export class RedisStateManager extends EventEmitter {
     const key = this.budgetKey(userId);
     await this.redis.setex(key, 86400 * 31, JSON.stringify(state)); // 31 days TTL
 
-    this.emit('budget:recorded', { userId, entry, totalUsed: state.dailyUsedUSD });
+    this.emit("budget:recorded", { userId, entry, totalUsed: state.dailyUsedUSD });
   }
 
   /**
@@ -320,7 +306,7 @@ export class RedisStateManager extends EventEmitter {
   async checkBudget(
     userId: string,
     estimatedCost: number,
-    limits: { daily: number; monthly: number },
+    limits: { daily: number; monthly: number }
   ): Promise<{ allowed: boolean; reason?: string }> {
     const state = await this.getBudgetState(userId);
 
@@ -357,15 +343,12 @@ export class RedisStateManager extends EventEmitter {
     return `${this.config.keyPrefix}:budget:${userId}`;
   }
 
-  private createDefaultProviderState(
-    provider: LLMProvider,
-    model: LLMModel,
-  ): ProviderState {
+  private createDefaultProviderState(provider: LLMProvider, model: LLMModel): ProviderState {
     return {
       provider,
       model,
       circuitBreaker: {
-        state: 'closed',
+        state: "closed",
         failures: 0,
         successes: 0,
       },
@@ -399,16 +382,15 @@ export class RedisStateManager extends EventEmitter {
     const resetDate = new Date(lastReset);
 
     switch (this.config.budgetResetInterval) {
-      case 'daily':
+      case "daily":
         return now.toDateString() !== resetDate.toDateString();
-      case 'weekly':
+      case "weekly":
         const weekStart = new Date(now);
         weekStart.setDate(now.getDate() - now.getDay());
         return resetDate < weekStart;
-      case 'monthly':
+      case "monthly":
         return (
-          now.getMonth() !== resetDate.getMonth() ||
-          now.getFullYear() !== resetDate.getFullYear()
+          now.getMonth() !== resetDate.getMonth() || now.getFullYear() !== resetDate.getFullYear()
         );
       default:
         return false;
@@ -428,7 +410,7 @@ export class RedisStateManager extends EventEmitter {
   async healthCheck(): Promise<boolean> {
     try {
       const result = await this.redis.ping();
-      return result === 'PONG';
+      return result === "PONG";
     } catch {
       return false;
     }

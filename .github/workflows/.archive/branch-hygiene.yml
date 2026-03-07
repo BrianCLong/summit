@@ -2,7 +2,7 @@ name: Branch Hygiene
 
 on:
   schedule:
-    - cron: '0 3 * * 1'
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-stale: 30
           days-before-close: 7
-          exempt-pr-labels: 'release/**,hotfix/**'
+          exempt-pr-labels: "release/**,hotfix/**"
           stale-pr-message: |
             This pull request has been marked stale after 30 days of inactivity. Please comment or push updates to keep it open.
           close-pr-message: |

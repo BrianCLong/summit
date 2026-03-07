@@ -54,7 +54,7 @@ function writeFileSafe(relPath, content) {
 function upperCamel(svc) {
   return svc
     .split(/[-_]/g)
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("");
 }
 
@@ -103,8 +103,7 @@ function scaffoldService(args) {
     process.exit(1);
   }
   const tier = args.tier || "normal";
-  const description =
-    args.description || `${name} service for CompanyOS.`; // brief
+  const description = args.description || `${name} service for CompanyOS.`; // brief
 
   const jobLabel = name; // Prom job label
   const svcDir = path.join("companyos", "services", name);
@@ -185,60 +184,41 @@ Suggested quickstart:
   writeFileSafe(path.join(svcDir, "tests", "README.md"), testsReadme);
 
   // 3) SLO file from template
-  const sloTpl = readTemplate(
-    "observability/slo/templates/default.slo.tpl.yaml"
-  );
+  const sloTpl = readTemplate("observability/slo/templates/default.slo.tpl.yaml");
   if (sloTpl) {
     const rendered = renderTemplate(sloTpl, {
       service: name,
       owner,
       description,
       job_label: jobLabel,
-      upperCamel: upperCamel(name)
+      upperCamel: upperCamel(name),
     });
-    writeFileSafe(
-      path.join("observability", "slo", "generated", `${name}.slo.yaml`),
-      rendered
-    );
+    writeFileSafe(path.join("observability", "slo", "generated", `${name}.slo.yaml`), rendered);
   }
 
   // 4) Prometheus recording rules
-  const recTpl = readTemplate(
-    "observability/prometheus/templates/svc-recording-rules.tpl.yaml"
-  );
+  const recTpl = readTemplate("observability/prometheus/templates/svc-recording-rules.tpl.yaml");
   if (recTpl) {
     const rendered = renderTemplate(recTpl, {
       service: name,
       job_label: jobLabel,
-      upperCamel: upperCamel(name)
+      upperCamel: upperCamel(name),
     });
     writeFileSafe(
-      path.join(
-        "observability",
-        "prometheus",
-        "generated",
-        `${name}-recording-rules.yaml`
-      ),
+      path.join("observability", "prometheus", "generated", `${name}-recording-rules.yaml`),
       rendered
     );
   }
 
-  const alertTpl = readTemplate(
-    "observability/prometheus/templates/svc-alert-rules.tpl.yaml"
-  );
+  const alertTpl = readTemplate("observability/prometheus/templates/svc-alert-rules.tpl.yaml");
   if (alertTpl) {
     const rendered = renderTemplate(alertTpl, {
       service: name,
       job_label: jobLabel,
-      upperCamel: upperCamel(name)
+      upperCamel: upperCamel(name),
     });
     writeFileSafe(
-      path.join(
-        "observability",
-        "prometheus",
-        "generated",
-        `${name}-alert-rules.yaml`
-      ),
+      path.join("observability", "prometheus", "generated", `${name}-alert-rules.yaml`),
       rendered
     );
   }
@@ -266,9 +246,7 @@ jobs:
   const adrPath = path.join(
     "companyos",
     "adr",
-    `ADR-${new Date()
-      .toISOString()
-      .slice(0, 10)}-${name}-service-created.md`
+    `ADR-${new Date().toISOString().slice(0, 10)}-${name}-service-created.md`
   );
   const adr = `# ADR – Create service ${name}
 
@@ -297,9 +275,7 @@ A new CompanyOS service \`${name}\` is being created using the golden path CLI.
   console.log("✅ Done. Next steps:");
   console.log(`  - Add package.json/tsconfig for ${name} (or copy from companyos-api).`);
   console.log(`  - Implement real handlers in ${svcDir}/src.`);
-  console.log(
-    `  - Ensure Helm chart exists at charts/${name} and Prom rules are loaded.`
-  );
+  console.log(`  - Ensure Helm chart exists at charts/${name} and Prom rules are loaded.`);
 }
 
 function main() {

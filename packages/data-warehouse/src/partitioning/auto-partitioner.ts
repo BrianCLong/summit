@@ -9,13 +9,13 @@
  * - Dynamic repartitioning
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export enum PartitionStrategy {
-  RANGE = 'RANGE',
-  HASH = 'HASH',
-  LIST = 'LIST',
-  TIME = 'TIME',
+  RANGE = "RANGE",
+  HASH = "HASH",
+  LIST = "LIST",
+  TIME = "TIME",
 }
 
 export interface PartitionConfig {
@@ -33,11 +33,9 @@ export class AutoPartitioner {
   async createPartitionedTable(
     tableName: string,
     columns: Array<{ name: string; type: string }>,
-    partitionConfig: PartitionConfig,
+    partitionConfig: PartitionConfig
   ): Promise<void> {
-    const columnDefs = columns
-      .map((c) => `${c.name} ${c.type}`)
-      .join(',\n');
+    const columnDefs = columns.map((c) => `${c.name} ${c.type}`).join(",\n");
 
     switch (partitionConfig.strategy) {
       case PartitionStrategy.RANGE:
@@ -57,7 +55,7 @@ export class AutoPartitioner {
   private async createRangePartitioned(
     tableName: string,
     columnDefs: string,
-    config: PartitionConfig,
+    config: PartitionConfig
   ): Promise<void> {
     await this.pool.query(`
       CREATE TABLE ${tableName} (
@@ -69,7 +67,7 @@ export class AutoPartitioner {
   private async createHashPartitioned(
     tableName: string,
     columnDefs: string,
-    config: PartitionConfig,
+    config: PartitionConfig
   ): Promise<void> {
     await this.pool.query(`
       CREATE TABLE ${tableName} (
@@ -89,7 +87,7 @@ export class AutoPartitioner {
   private async createTimePartitioned(
     tableName: string,
     columnDefs: string,
-    config: PartitionConfig,
+    config: PartitionConfig
   ): Promise<void> {
     await this.pool.query(`
       CREATE TABLE ${tableName} (

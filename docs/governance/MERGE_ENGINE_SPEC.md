@@ -4,20 +4,22 @@ This document defines the deterministic policies and decision logic for the Merg
 
 ## Deliverable A — Deterministic Lane Rubric
 
-| Lane | Criteria (boolean rules) | Required Labels | Required Checks | Allowed Merge Method | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`LANE/auto-merge-now`** | `ci_status == success AND conflicts == no AND draft == false AND (files_changed <= 15 AND additions+deletions <= 400) AND risk_class != breaking-change` | `lane/auto-merge`, (`prio:P0` OR `prio:P1` OR `prio:P2`) | `governance-meta-gate` (includes S-AOS body check & `check-changelog.sh`) | Squash and Merge | Primary fast-path. S-AOS headers & `<!-- AGENT-METADATA:START -->` block must be present. |
-| **`LANE/fix-forward-fast`** | `ci_status IN [pending, unknown] AND conflicts == no AND draft == false AND path_glob IN (docs/**, *.md) AND files_changed <= 3` | `lane/fix-forward` | None (bypassed for isolated doc updates) | Squash and Merge | Strictly non-executable code to prevent breaking Golden Main. |
-| **`LANE/conflicts`** | `conflicts == yes AND draft == false` | `lane/conflicts` | N/A (Blocked) | None (Blocked) | Drops to bottom of queue. Requires manual `git rebase origin/main`. |
-| **`LANE/quarantine`** | `ci_status == failure AND conflicts == no AND draft == false` | `lane/quarantine` | N/A (Blocked) | None (Blocked) | Flake isolation. Prevents CI saturation by moving out of auto-merge. |
-| **`LANE/capture-close`** | `(files_changed > 15 OR additions+deletions > 400) OR (updated_at < NOW - 14d) OR (lane == quarantine AND updated_at < NOW - 7d)` | `split-required` OR `capture-needed` | N/A | None (Auto-Close) | Sweeps oversized/stale PRs into structured Capture Issues. |
+| Lane                        | Criteria (boolean rules)                                                                                                                                 | Required Labels                                          | Required Checks                                                           | Allowed Merge Method | Notes                                                                                     |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------- | :---------------------------------------------------------------------------------------- |
+| **`LANE/auto-merge-now`**   | `ci_status == success AND conflicts == no AND draft == false AND (files_changed <= 15 AND additions+deletions <= 400) AND risk_class != breaking-change` | `lane/auto-merge`, (`prio:P0` OR `prio:P1` OR `prio:P2`) | `governance-meta-gate` (includes S-AOS body check & `check-changelog.sh`) | Squash and Merge     | Primary fast-path. S-AOS headers & `<!-- AGENT-METADATA:START -->` block must be present. |
+| **`LANE/fix-forward-fast`** | `ci_status IN [pending, unknown] AND conflicts == no AND draft == false AND path_glob IN (docs/**, *.md) AND files_changed <= 3`                         | `lane/fix-forward`                                       | None (bypassed for isolated doc updates)                                  | Squash and Merge     | Strictly non-executable code to prevent breaking Golden Main.                             |
+| **`LANE/conflicts`**        | `conflicts == yes AND draft == false`                                                                                                                    | `lane/conflicts`                                         | N/A (Blocked)                                                             | None (Blocked)       | Drops to bottom of queue. Requires manual `git rebase origin/main`.                       |
+| **`LANE/quarantine`**       | `ci_status == failure AND conflicts == no AND draft == false`                                                                                            | `lane/quarantine`                                        | N/A (Blocked)                                                             | None (Blocked)       | Flake isolation. Prevents CI saturation by moving out of auto-merge.                      |
+| **`LANE/capture-close`**    | `(files_changed > 15 OR additions+deletions > 400) OR (updated_at < NOW - 14d) OR (lane == quarantine AND updated_at < NOW - 7d)`                        | `split-required` OR `capture-needed`                     | N/A                                                                       | None (Auto-Close)    | Sweeps oversized/stale PRs into structured Capture Issues.                                |
 
 ## Deliverable B — Deterministic Queue Ordering Algorithm
 
 ### 1) Plain-English Explanation
+
 The Merge Engine processes PRs sequentially to protect Golden Main. Safe, green PRs go first (`auto-merge-now`), ordered strictly by Priority (P0 > P1 > P2). Trivial documentation fixes (`fix-forward-fast`) run in the background. Quarantined or conflicting PRs are pushed to the bottom of the queue to avoid blocking the train, and oversized/stale PRs are funneled out of the queue entirely into `capture-close`.
 
 ### 2) Priority Ladder (Highest to Lowest)
+
 1. `LANE/auto-merge-now` + `prio:P0`
 2. `LANE/auto-merge-now` + `prio:P1`
 3. `LANE/auto-merge-now` + `prio:P2`
@@ -28,6 +30,7 @@ The Merge Engine processes PRs sequentially to protect Golden Main. Safe, green 
 8. Drafts (ignored)
 
 ### 3) Pseudocode Algorithm
+
 ```python
 def calculate_pr_rank(pr):
     if pr.is_draft: return -1 # Ignore drafts
@@ -62,16 +65,16 @@ def get_deterministic_queue(open_prs):
 
 **Taxonomy & Deterministic Rules:**
 
-*   **Priority Labels (`prio:P0`, `prio:P1`, `prio:P2`)**
-    *   *Trigger for `P0-candidate`:* Applied automatically if `path_glob` hits `auth/**`, `crypto/**`, `scripts/ci/**`, `docs/governance/**`, or `ops/docker-compose.yml`.
-    *   *Promotion to `prio:P0`:* `P0-candidate` elevates to `prio:P0` **only** if manually assigned by a maintainer OR tied to an active incident release gate. Otherwise, defaults to `prio:P1`.
-    *   *Default:* PRs without `P0-candidate` become `prio:P2`.
-*   **CI State Labels (`ci-green`, `ci-red`, `ci-pending`)**
-    *   *Trigger:* Directly mapped from the `governance-meta-gate.mjs` rollup status check. (No new GitHub status contexts are added).
-*   **Lane & Conflict Labels**
-    *   *Trigger for `conflicts`:* GitHub API `mergeable_state == 'dirty'`.
-    *   *Trigger for `lane/*`:* Strictly assigned on every webhook tick based on the Deliverable A Rubric.
-*   **Intervention Labels (`merge-blocker`, `split-required`, `capture-needed`)**
-    *   *Trigger for `merge-blocker`:* `ci-red` AND `prio:P0` on Golden Main.
-    *   *Trigger for `split-required`:* `files_changed > 15` OR `additions+deletions > 400`.
-    *   *Trigger for `capture-needed`:* PR inactive for > 14 days OR stuck in `lane/quarantine` for > 7 days.
+- **Priority Labels (`prio:P0`, `prio:P1`, `prio:P2`)**
+  - _Trigger for `P0-candidate`:_ Applied automatically if `path_glob` hits `auth/**`, `crypto/**`, `scripts/ci/**`, `docs/governance/**`, or `ops/docker-compose.yml`.
+  - _Promotion to `prio:P0`:_ `P0-candidate` elevates to `prio:P0` **only** if manually assigned by a maintainer OR tied to an active incident release gate. Otherwise, defaults to `prio:P1`.
+  - _Default:_ PRs without `P0-candidate` become `prio:P2`.
+- **CI State Labels (`ci-green`, `ci-red`, `ci-pending`)**
+  - _Trigger:_ Directly mapped from the `governance-meta-gate.mjs` rollup status check. (No new GitHub status contexts are added).
+- **Lane & Conflict Labels**
+  - _Trigger for `conflicts`:_ GitHub API `mergeable_state == 'dirty'`.
+  - _Trigger for `lane/_`:\* Strictly assigned on every webhook tick based on the Deliverable A Rubric.
+- **Intervention Labels (`merge-blocker`, `split-required`, `capture-needed`)**
+  - _Trigger for `merge-blocker`:_ `ci-red` AND `prio:P0` on Golden Main.
+  - _Trigger for `split-required`:_ `files_changed > 15` OR `additions+deletions > 400`.
+  - _Trigger for `capture-needed`:_ PR inactive for > 14 days OR stuck in `lane/quarantine` for > 7 days.

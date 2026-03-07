@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Paper,
   Typography,
@@ -18,7 +18,7 @@ import {
   MenuItem,
   Alert,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Timeline,
   Cancel,
@@ -26,11 +26,11 @@ import {
   TrendingUp,
   FilterList,
   PlayArrow,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   useMockKShortestPathsLazyQuery,
   type MockKShortestPathsQuery,
-} from '../../generated/graphql';
+} from "../../generated/graphql";
 
 interface GraphNodeLite {
   id: string;
@@ -67,7 +67,7 @@ const createMockPaths = (
   targetId: string,
   kValue: number,
   maxDepthValue: number,
-  pathType: string,
+  pathType: string
 ): KShortestPath[] => {
   const availableNodes =
     nodes.length > 0
@@ -80,12 +80,11 @@ const createMockPaths = (
   const generatePath = (index: number): KShortestPath => {
     const hopCount = Math.min(
       maxDepthValue,
-      Math.max(2, Math.floor(Math.random() * maxDepthValue) + 2),
+      Math.max(2, Math.floor(Math.random() * maxDepthValue) + 2)
     );
     const intermediates: GraphNodeLite[] = [];
     for (let i = 0; i < hopCount - 2; i++) {
-      const randomNode =
-        availableNodes[Math.floor(Math.random() * availableNodes.length)];
+      const randomNode = availableNodes[Math.floor(Math.random() * availableNodes.length)];
       intermediates.push({ id: randomNode.id, label: randomNode.label });
     }
 
@@ -100,13 +99,11 @@ const createMockPaths = (
       nodes: pathNodes,
       length: pathNodes.length - 1,
       score: Math.random() * 10,
-      significance: pathType !== 'all' ? Math.random() > 0.5 : undefined,
+      significance: pathType !== "all" ? Math.random() > 0.5 : undefined,
     };
   };
 
-  return Array.from({ length: Math.min(kValue, MAX_K) }, (_, idx) =>
-    generatePath(idx),
-  );
+  return Array.from({ length: Math.min(kValue, MAX_K) }, (_, idx) => generatePath(idx));
 };
 
 export function KShortestPathsPanel({
@@ -114,11 +111,11 @@ export function KShortestPathsPanel({
   onPathSelect,
   onPathHighlight,
 }: KShortestPathsPanelProps) {
-  const [sourceId, setSourceId] = useState('');
-  const [targetId, setTargetId] = useState('');
+  const [sourceId, setSourceId] = useState("");
+  const [targetId, setTargetId] = useState("");
   const [k, setK] = useState(3);
   const [maxDepth, setMaxDepth] = useState(4);
-  const [pathType, setPathType] = useState('all');
+  const [pathType, setPathType] = useState("all");
   const [operationId, setOperationId] = useState<string | null>(null);
   const [paths, setPaths] = useState<KShortestPath[]>([]);
   const [metadata, setMetadata] = useState<PathMetadata | null>(null);
@@ -151,7 +148,7 @@ export function KShortestPathsPanel({
           targetId,
           k,
           maxDepth,
-          pathType,
+          pathType
         );
         setPaths(generatedPaths);
         setMetadata({
@@ -159,21 +156,16 @@ export function KShortestPathsPanel({
           searchTime: Math.floor(Math.random() * 200) + 50,
           nodesExplored: Math.min(
             graphData?.nodes.length ?? generatedPaths.length * 2,
-            maxDepth * generatedPaths.length,
+            maxDepth * generatedPaths.length
           ),
           maxDepthReached: Math.min(
             maxDepth,
-            generatedPaths.reduce(
-              (max, path) => Math.max(max, path.nodes.length - 1),
-              0,
-            ),
+            generatedPaths.reduce((max, path) => Math.max(max, path.nodes.length - 1), 0)
           ),
         });
       })
       .catch((err: unknown) => {
-        setLocalError(
-          err instanceof Error ? err.message : 'Failed to compute paths.',
-        );
+        setLocalError(err instanceof Error ? err.message : "Failed to compute paths.");
       });
   }, [canSearch, findPaths, maxDepth, pathType, sourceId, targetId, k]);
 
@@ -190,18 +182,14 @@ export function KShortestPathsPanel({
   }, [selectedNodes]);
 
   return (
-    <Paper elevation={1} sx={{ p: 2, maxHeight: 600, overflow: 'auto' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+    <Paper elevation={1} sx={{ p: 2, maxHeight: 600, overflow: "auto" }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <Timeline color="primary" />
         <Typography variant="h6">Path Finding</Typography>
 
         {selectedNodes.length >= 2 && (
           <Tooltip title="Use selected nodes">
-            <Button
-              size="small"
-              onClick={handleSelectFromGraph}
-              startIcon={<FilterList />}
-            >
+            <Button size="small" onClick={handleSelectFromGraph} startIcon={<FilterList />}>
               From Selection
             </Button>
           </Tooltip>
@@ -209,8 +197,8 @@ export function KShortestPathsPanel({
       </Box>
 
       {/* Search Form */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 2 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             label="Source Node ID"
             value={sourceId}
@@ -229,14 +217,12 @@ export function KShortestPathsPanel({
           />
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             label="Max Paths (k)"
             type="number"
             value={k}
-            onChange={(e) =>
-              setK(Math.min(MAX_K, Math.max(1, parseInt(e.target.value) || 1)))
-            }
+            onChange={(e) => setK(Math.min(MAX_K, Math.max(1, parseInt(e.target.value) || 1)))}
             size="small"
             inputProps={{ min: 1, max: MAX_K }}
           />
@@ -246,9 +232,7 @@ export function KShortestPathsPanel({
             type="number"
             value={maxDepth}
             onChange={(e) =>
-              setMaxDepth(
-                Math.min(MAX_DEPTH, Math.max(1, parseInt(e.target.value) || 1)),
-              )
+              setMaxDepth(Math.min(MAX_DEPTH, Math.max(1, parseInt(e.target.value) || 1)))
             }
             size="small"
             inputProps={{ min: 1, max: MAX_DEPTH }}
@@ -269,7 +253,7 @@ export function KShortestPathsPanel({
           </FormControl>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           {!loading ? (
             <Button
               variant="contained"
@@ -280,17 +264,17 @@ export function KShortestPathsPanel({
               Find Paths
             </Button>
           ) : (
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<Cancel />}
-                onClick={handleCancel}
-              >
-                Cancel Search
-              </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<Cancel />}
+              onClick={handleCancel}
+            >
+              Cancel Search
+            </Button>
           )}
 
-          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
             <Chip size="small" label={`k≤${k}`} variant="outlined" />
             <Chip size="small" label={`depth≤${maxDepth}`} variant="outlined" />
           </Box>
@@ -316,12 +300,11 @@ export function KShortestPathsPanel({
 
       {/* Results Metadata */}
       {metadata && (
-        <Box sx={{ mb: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 1 }}>
+        <Box sx={{ mb: 2, p: 1.5, bgcolor: "grey.50", borderRadius: 1 }}>
           <Typography variant="caption" color="text.secondary">
             Found {metadata.pathsFound} path
-            {metadata.pathsFound !== 1 ? 's' : ''} in {metadata.searchTime}ms •
-            Explored {metadata.nodesExplored} nodes • Max depth reached:{' '}
-            {metadata.maxDepthReached}
+            {metadata.pathsFound !== 1 ? "s" : ""} in {metadata.searchTime}ms • Explored{" "}
+            {metadata.nodesExplored} nodes • Max depth reached: {metadata.maxDepthReached}
           </Typography>
         </Box>
       )}
@@ -344,12 +327,8 @@ export function KShortestPathsPanel({
                 >
                   <ListItemText
                     primary={
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
-                        <Typography variant="subtitle2">
-                          Path {index + 1}
-                        </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Typography variant="subtitle2">Path {index + 1}</Typography>
                         <Chip
                           size="small"
                           label={`${path.length} hops`}
@@ -358,22 +337,18 @@ export function KShortestPathsPanel({
                         />
                         <Chip
                           size="small"
-                          label={`Score: ${path.score?.toFixed(2) || 'N/A'}`}
+                          label={`Score: ${path.score?.toFixed(2) || "N/A"}`}
                           color="secondary"
                           variant="outlined"
                         />
                         {path.significance && (
-                          <Chip
-                            size="small"
-                            label="Significant"
-                            color="warning"
-                          />
+                          <Chip size="small" label="Significant" color="warning" />
                         )}
                       </Box>
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
-                        {path.nodes.map((node) => node.label).join(' → ')}
+                        {path.nodes.map((node) => node.label).join(" → ")}
                       </Typography>
                     }
                   />
@@ -390,16 +365,10 @@ export function KShortestPathsPanel({
         </Box>
       )}
 
-      {paths.length === 0 &&
-        !loading &&
-        !error &&
-        !localError &&
-        sourceId &&
-        targetId && (
+      {paths.length === 0 && !loading && !error && !localError && sourceId && targetId && (
         <Alert severity="info">
-          No paths found between the selected nodes within the specified
-          constraints. Try increasing the maximum depth or adjusting the path
-          type filter.
+          No paths found between the selected nodes within the specified constraints. Try increasing
+          the maximum depth or adjusting the path type filter.
         </Alert>
       )}
     </Paper>

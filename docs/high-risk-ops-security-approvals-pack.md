@@ -70,7 +70,7 @@
 
 ### 4.2 Example Rego (pseudocode)
 
-```rego
+````rego
 package high_risk.operations
 
 default allow = false
@@ -253,3 +253,4 @@ Provide an export format for auditors: `GET /evidence/high-risk-ops?from=…&to=
 - **Perf impact:** +1–2 low-latency policy calls per high-risk op; additional provenance writes (1 receipt + ~5 evidence docs/op).
 - **Cost impact:** More compute/storage from evidence volume and dashboard queries, mitigated by evidence compaction and configurable retention per tenant/tier.
 - **Security impact:** Removes side-door execution for onboarded systems; provides manifest of all high-risk ops with policy decisions + approvals.
+````

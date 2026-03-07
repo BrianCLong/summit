@@ -60,12 +60,12 @@ branches:
 ```yaml
 # Derive which checks are required for which paths (optional for rulesets)
 paths:
-  - pattern: 'db/migrations/**'
-    require: ['migration-gate']
-  - pattern: 'helm/**'
-    require: ['wf-reuse-deploy']
-  - pattern: 'terraform/**'
-    require: ['wf-reuse-scan']
+  - pattern: "db/migrations/**"
+    require: ["migration-gate"]
+  - pattern: "helm/**"
+    require: ["wf-reuse-deploy"]
+  - pattern: "terraform/**"
+    require: ["wf-reuse-scan"]
 ```
 
 ### `.ci/config/repo-rules.yml`
@@ -74,7 +74,7 @@ paths:
 rulesets:
   - name: Protect main
     target: branch
-    include: ['main']
+    include: ["main"]
     conditions:
       pull_request: true
       non_fast_forward: true
@@ -289,7 +289,7 @@ done
 name: flake-bot
 on:
   workflow_run:
-    workflows: ['pr']
+    workflows: ["pr"]
     types: [completed]
 permissions: { checks: read, contents: read, issues: write }
 jobs:

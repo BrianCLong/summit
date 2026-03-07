@@ -4,16 +4,16 @@
  * Core event store implementation with PostgreSQL backend
  */
 
-import { Pool, PoolClient } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
-import pino from 'pino';
+import { Pool, PoolClient } from "pg";
+import { v4 as uuidv4 } from "uuid";
+import pino from "pino";
 import type {
   DomainEvent,
   EventStream,
   EventFilter,
   EventStoreConfig,
-  EventStoreStats
-} from './types.js';
+  EventStoreStats,
+} from "./types.js";
 
 export class EventStore {
   private pool: Pool;
@@ -23,10 +23,10 @@ export class EventStore {
 
   constructor(config: EventStoreConfig) {
     this.config = config;
-    this.schema = config.schema || 'public';
-    this.logger = pino({ name: 'EventStore' });
+    this.schema = config.schema || "public";
+    this.logger = pino({ name: "EventStore" });
     this.pool = new Pool({
-      connectionString: config.connectionString
+      connectionString: config.connectionString,
     });
   }
 
@@ -34,7 +34,7 @@ export class EventStore {
    * Initialize event store schema
    */
   async initialize(): Promise<void> {
-    this.logger.info('Initializing EventStore...');
+    this.logger.info("Initializing EventStore...");
 
     const client = await this.pool.connect();
     try {
@@ -88,7 +88,7 @@ export class EventStore {
         )
       `);
 
-      this.logger.info('EventStore initialized successfully');
+      this.logger.info("EventStore initialized successfully");
     } finally {
       client.release();
     }
@@ -104,11 +104,13 @@ export class EventStore {
     expectedVersion?: number
   ): Promise<void> {
     if (events.length === 0) return;
-    if (events.length === 0) {return;}
+    if (events.length === 0) {
+      return;
+    }
 
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Check version for optimistic concurrency
       if (expectedVersion !== undefined) {
@@ -123,7 +125,7 @@ export class EventStore {
         if (currentVersion !== expectedVersion) {
           throw new Error(
             `Concurrency conflict: expected version ${expectedVersion}, ` +
-            `but current version is ${currentVersion}`
+              `but current version is ${currentVersion}`
           );
         }
       }
@@ -146,19 +148,16 @@ export class EventStore {
             JSON.stringify(event.payload),
             event.metadata ? JSON.stringify(event.metadata) : null,
             event.causationId,
-            event.correlationId
+            event.correlationId,
           ]
         );
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
-      this.logger.debug(
-        { aggregateId, count: events.length },
-        'Events appended'
-      );
+      this.logger.debug({ aggregateId, count: events.length }, "Events appended");
     } catch (err) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw err;
     } finally {
       client.release();
@@ -168,10 +167,7 @@ export class EventStore {
   /**
    * Get event stream for an aggregate
    */
-  async getEventStream(
-    aggregateId: string,
-    fromVersion: number = 0
-  ): Promise<EventStream> {
+  async getEventStream(aggregateId: string, fromVersion: number = 0): Promise<EventStream> {
     const result = await this.pool.query(
       `SELECT event_id, event_type, aggregate_id, aggregate_type,
               version, timestamp, payload, metadata,
@@ -182,7 +178,7 @@ export class EventStore {
       [aggregateId, fromVersion]
     );
 
-    const events: DomainEvent[] = result.rows.map(row => ({
+    const events: DomainEvent[] = result.rows.map((row) => ({
       eventId: row.event_id,
       eventType: row.event_type,
       aggregateId: row.aggregate_id,
@@ -192,18 +188,16 @@ export class EventStore {
       payload: row.payload,
       metadata: row.metadata,
       causationId: row.causation_id,
-      correlationId: row.correlation_id
+      correlationId: row.correlation_id,
     }));
 
-    const version = events.length > 0
-      ? events[events.length - 1].version
-      : 0;
+    const version = events.length > 0 ? events[events.length - 1].version : 0;
 
     return {
       aggregateId,
-      aggregateType: events[0]?.aggregateType || '',
+      aggregateType: events[0]?.aggregateType || "",
       events,
-      version
+      version,
     };
   }
 
@@ -250,9 +244,7 @@ export class EventStore {
       params.push(filter.toTimestamp);
     }
 
-    const whereClause = conditions.length > 0
-      ? `WHERE ${conditions.join(' AND ')}`
-      : '';
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const result = await this.pool.query(
       `SELECT event_id, event_type, aggregate_id, aggregate_type,
@@ -264,7 +256,7 @@ export class EventStore {
       params
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       eventId: row.event_id,
       eventType: row.event_type,
       aggregateId: row.aggregate_id,
@@ -274,7 +266,7 @@ export class EventStore {
       payload: row.payload,
       metadata: row.metadata,
       causationId: row.causation_id,
-      correlationId: row.correlation_id
+      correlationId: row.correlation_id,
     }));
   }
 
@@ -293,9 +285,7 @@ export class EventStore {
         let hasMore = true;
 
         while (hasMore) {
-          const whereClause = lastTimestamp
-            ? `WHERE timestamp > $1`
-            : '';
+          const whereClause = lastTimestamp ? `WHERE timestamp > $1` : "";
 
           const params = lastTimestamp ? [lastTimestamp] : [];
 
@@ -315,7 +305,7 @@ export class EventStore {
             break;
           }
 
-          const events: DomainEvent[] = result.rows.map(row => ({
+          const events: DomainEvent[] = result.rows.map((row) => ({
             eventId: row.event_id,
             eventType: row.event_type,
             aggregateId: row.aggregate_id,
@@ -325,7 +315,7 @@ export class EventStore {
             payload: row.payload,
             metadata: row.metadata,
             causationId: row.causation_id,
-            correlationId: row.correlation_id
+            correlationId: row.correlation_id,
           }));
 
           yield events;
@@ -333,7 +323,7 @@ export class EventStore {
           lastTimestamp = events[events.length - 1].timestamp;
           hasMore = result.rows.length === batchSize;
         }
-      }
+      },
     };
   }
 
@@ -369,11 +359,9 @@ export class EventStore {
       totalEvents,
       totalAggregates,
       eventsByType,
-      averageEventsPerAggregate: totalAggregates > 0
-        ? totalEvents / totalAggregates
-        : 0,
+      averageEventsPerAggregate: totalAggregates > 0 ? totalEvents / totalAggregates : 0,
       oldestEvent: stats.oldest_event,
-      newestEvent: stats.newest_event
+      newestEvent: stats.newest_event,
     };
   }
 
@@ -382,6 +370,6 @@ export class EventStore {
    */
   async close(): Promise<void> {
     await this.pool.end();
-    this.logger.info('EventStore closed');
+    this.logger.info("EventStore closed");
   }
 }

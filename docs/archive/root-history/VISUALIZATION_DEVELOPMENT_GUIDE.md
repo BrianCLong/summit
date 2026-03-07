@@ -57,7 +57,7 @@ export default NewVisualization;
 ```typescript
 // /client/src/store/slices/visualizationSlice.ts
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface VisualizationState {
   nodes: any[];
@@ -72,13 +72,13 @@ const initialState: VisualizationState = {
   nodes: [],
   edges: [],
   selectedNode: null,
-  layout: 'hierarchical',
+  layout: "hierarchical",
   isLoading: false,
   error: null,
 };
 
 const visualizationSlice = createSlice({
-  name: 'visualization',
+  name: "visualization",
   initialState,
   reducers: {
     setNodes: (state, action: PayloadAction<any[]>) => {
@@ -103,7 +103,8 @@ const visualizationSlice = createSlice({
 });
 
 export default visualizationSlice.reducer;
-export const { setNodes, setEdges, selectNode, setLayout, setLoading, setError } = visualizationSlice.actions;
+export const { setNodes, setEdges, selectNode, setLayout, setLoading, setError } =
+  visualizationSlice.actions;
 ```
 
 ### 3. GraphQL Schema Addition
@@ -174,25 +175,25 @@ export const visualizationResolvers = {
       return service.getVisualizationData(id, tenantId);
     },
   },
-  
+
   Mutation: {
     updateVisualizationLayout: async (_, { id, layout }, context) => {
       const { tenantId } = context;
       const service = new VisualizationService(context.db);
       await service.updateLayout(id, layout, tenantId);
-      
+
       // Emit to subscriptions
       context.pubsub.publish(`visualization:${id}`, {
         visualizationUpdates: {
-          type: 'layoutChange',
+          type: "layoutChange",
           timestamp: new Date(),
-        }
+        },
       });
-      
+
       return true;
     },
   },
-  
+
   Subscription: {
     visualizationUpdates: {
       subscribe: (_, { id }, context) => {
@@ -231,29 +232,29 @@ export class VisualizationService {
   }
 
   private formatNodes(records: any[]) {
-    return records.map(r => ({
-      id: r.get('n').properties.id,
-      label: r.get('n').properties.name,
-      type: r.get('n').labels[0],
-      data: r.get('n').properties,
+    return records.map((r) => ({
+      id: r.get("n").properties.id,
+      label: r.get("n").properties.name,
+      type: r.get("n").labels[0],
+      data: r.get("n").properties,
       position: { x: 0, y: 0 }, // Set by layout algorithm
     }));
   }
 
   private formatEdges(records: any[]) {
-    return records.map(r => ({
-      id: r.get('r').identity.toString(),
-      source: r.get('r').start.toString(),
-      target: r.get('r').end.toString(),
-      type: r.get('r').type,
-      properties: r.get('r').properties,
+    return records.map((r) => ({
+      id: r.get("r").identity.toString(),
+      source: r.get("r").start.toString(),
+      target: r.get("r").end.toString(),
+      type: r.get("r").type,
+      properties: r.get("r").properties,
     }));
   }
 
   async updateLayout(id: string, layout: string, tenantId: string) {
     // Update in PostgreSQL for persistence
     await this.db.postgres.query(
-      'UPDATE visualizations SET layout = $1 WHERE id = $2 AND tenant_id = $3',
+      "UPDATE visualizations SET layout = $1 WHERE id = $2 AND tenant_id = $3",
       [layout, id, tenantId]
     );
   }
@@ -268,9 +269,9 @@ private setupVisualizationHandlers() {
   this.app.ws('visualization/:id', (ws, req) => {
     const { id } = req.params;
     const userId = this.extractUserId(req);
-    
+
     ws.subscribe(`visualization:${id}:${userId}`);
-    
+
     ws.on('message', (msg) => {
       const data = JSON.parse(msg);
       if (data.type === 'layout-change') {
@@ -299,22 +300,26 @@ export const useVisualizationUpdates = (visualizationId: string) => {
 ## Library Selection Guide
 
 ### For Graph Visualization
+
 - **Cytoscape.js**: General-purpose, many layouts (existing choice)
 - **D3.js**: Custom visualizations, full control (available)
 - **Vis.js**: Timeline/network visualization (available)
 - **Leaflet**: Geographic visualization (available)
 
 ### For Styling & UI
+
 - **MUI**: Component library (existing)
 - **Emotion**: CSS-in-JS (existing)
 - **Tailwind**: Utility CSS (available)
 
 ### For State Management
+
 - **Redux Toolkit**: Already in use, mature
 - **Zustand**: Lightweight alternative
 - **Jotai**: Atomic state management
 
 ### For Real-time
+
 - **Socket.io**: Already integrated
 - **graphql-ws**: GraphQL subscriptions (already integrated)
 - **React Query**: Data synchronization (not used yet)
@@ -322,6 +327,7 @@ export const useVisualizationUpdates = (visualizationId: string) => {
 ## Existing Patterns to Follow
 
 ### 1. Data Flow
+
 ```
 GraphQL Query/Mutation
         ↓
@@ -337,6 +343,7 @@ UI Update
 ```
 
 ### 2. File Organization
+
 ```
 /client/src/features/[feature]/
 ├── components/
@@ -356,14 +363,15 @@ UI Update
 ```
 
 ### 3. Type Safety
+
 ```typescript
 // Define types with Zod if they need validation
-import { z } from 'zod';
+import { z } from "zod";
 
 export const NodeSchema = z.object({
   id: z.string(),
   label: z.string(),
-  type: z.enum(['person', 'org', 'location']),
+  type: z.enum(["person", "org", "location"]),
   properties: z.record(z.unknown()),
 });
 
@@ -371,6 +379,7 @@ export type Node = z.infer<typeof NodeSchema>;
 ```
 
 ### 4. Testing Pattern
+
 ```typescript
 // /client/src/features/[feature]/components/Visualization.test.tsx
 import { render, screen } from '@testing-library/react';
@@ -383,13 +392,13 @@ describe('Visualization Component', () => {
     const store = configureStore({
       reducer: { visualization: visualizationReducer }
     });
-    
+
     render(
       <Provider store={store}>
         <Visualization dataId="test-id" />
       </Provider>
     );
-    
+
     expect(screen.getByRole('canvas')).toBeInTheDocument();
   });
 });
@@ -398,6 +407,7 @@ describe('Visualization Component', () => {
 ## Performance Optimization
 
 ### 1. Use React.memo for expensive renders
+
 ```typescript
 export const VisualizationNode = React.memo(({ node, onSelect }: Props) => {
   return <div onClick={() => onSelect(node.id)}>{node.label}</div>;
@@ -405,6 +415,7 @@ export const VisualizationNode = React.memo(({ node, onSelect }: Props) => {
 ```
 
 ### 2. Virtualization for large lists
+
 ```typescript
 import { FixedSizeList } from 'react-window';
 
@@ -419,18 +430,20 @@ import { FixedSizeList } from 'react-window';
 ```
 
 ### 3. Memoize selectors
+
 ```typescript
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
 
 const visibleNodes = useMemo(() => {
-  return nodes.filter(n => !n.hidden);
+  return nodes.filter((n) => !n.hidden);
 }, [nodes]);
 ```
 
 ### 4. Debounce updates
+
 ```typescript
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 const handlePan = useMemo(
   () => debounce((x, y) => dispatch(updateViewport({ x, y })), 100),
@@ -461,4 +474,3 @@ const handlePan = useMemo(
 6. **Synchronous heavy operations** - Use Web Workers for large datasets
 7. **Not unsubscribing from WebSocket** - Clean up in useEffect return
 8. **Mutating state directly** - Redux requires immutable updates
-

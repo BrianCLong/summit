@@ -62,7 +62,7 @@ neo4j:
     NEO4J_dbms_security_procedures_unrestricted: apoc.*,gds.*
     NEO4J_server_memory_heap_initial__size: 1G
     NEO4J_server_memory_heap_max__size: 2G
-  ports: ['7474:7474', '7687:7687']
+  ports: ["7474:7474", "7687:7687"]
 ```
 
 ---
@@ -73,19 +73,14 @@ neo4j:
 // services/gateway-graphql/src/index.ts (snippets)
 const BUDGET_PER_REQUEST_MS = 2500; // soft p95 budget
 
-async function enforceLAC(
-  subject: any,
-  resource: any,
-  action: string,
-  context: any,
-) {
+async function enforceLAC(subject: any, resource: any, action: string, context: any) {
   const r = await fetch(`${LAC_URL}/enforce`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ subject, resource, action, context }),
   });
   const d = await r.json();
-  if (d.decision !== 'allow') throw new Error(`LAC deny: ${d.reason}`);
+  if (d.decision !== "allow") throw new Error(`LAC deny: ${d.reason}`);
 }
 
 function withCostGuard<T extends (...args: any) => Promise<any>>(fn: T) {
@@ -142,60 +137,42 @@ Resolvers → call services with **LAC** checks and cost guard:
 
 ```ts
 // services/gateway-graphql/src/index.ts (more snippets)
-const ANALYTICS_URL = process.env.ANALYTICS_URL || 'http://localhost:7003';
-const MINER_URL = process.env.MINER_URL || 'http://localhost:7004';
-const NL_URL = process.env.NL_URL || 'http://localhost:7005';
+const ANALYTICS_URL = process.env.ANALYTICS_URL || "http://localhost:7003";
+const MINER_URL = process.env.MINER_URL || "http://localhost:7004";
+const NL_URL = process.env.NL_URL || "http://localhost:7005";
 
 const resolvers = {
   Mutation: {
-    generateCypher: withCostGuard(
-      async (_: any, { input }: { input: any }, ctx: any) => {
-        const r = await fetch(`${NL_URL}/generate`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(input),
-        });
-        return r.json();
-      },
-    ),
+    generateCypher: withCostGuard(async (_: any, { input }: { input: any }, ctx: any) => {
+      const r = await fetch(`${NL_URL}/generate`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      return r.json();
+    }),
     runAnalytics: withCostGuard(
-      async (
-        _: any,
-        { name, params }: { name: string; params: any },
-        ctx: any,
-      ) => {
-        await enforceLAC(
-          ctx.subject,
-          { kind: 'graph', sensitivity: 'public' },
-          'RUN_ANALYTIC',
-          { purpose: 'investigation' },
-        );
-        const r = await fetch(
-          `${ANALYTICS_URL}/run/${encodeURIComponent(name)}`,
-          {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify(params || {}),
-          },
-        );
+      async (_: any, { name, params }: { name: string; params: any }, ctx: any) => {
+        await enforceLAC(ctx.subject, { kind: "graph", sensitivity: "public" }, "RUN_ANALYTIC", {
+          purpose: "investigation",
+        });
+        const r = await fetch(`${ANALYTICS_URL}/run/${encodeURIComponent(name)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(params || {}),
+        });
         return { name, payload: await r.json() };
-      },
+      }
     ),
     runPattern: withCostGuard(
-      async (
-        _: any,
-        { template, params }: { template: string; params: any },
-      ) => {
-        const r = await fetch(
-          `${MINER_URL}/pattern/${encodeURIComponent(template)}`,
-          {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify(params || {}),
-          },
-        );
+      async (_: any, { template, params }: { template: string; params: any }) => {
+        const r = await fetch(`${MINER_URL}/pattern/${encodeURIComponent(template)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(params || {}),
+        });
         return { name: template, payload: await r.json() };
-      },
+      }
     ),
   },
 };
@@ -207,67 +184,61 @@ const resolvers = {
 
 ```ts
 // services/analytics-service/src/gds.ts
-import neo4j from 'neo4j-driver';
-const url = process.env.NEO4J_URL || 'bolt://localhost:7687';
-const user = process.env.NEO4J_USER || 'neo4j';
-const pass = process.env.NEO4J_PASS || 'intelgraph';
+import neo4j from "neo4j-driver";
+const url = process.env.NEO4J_URL || "bolt://localhost:7687";
+const user = process.env.NEO4J_USER || "neo4j";
+const pass = process.env.NEO4J_PASS || "intelgraph";
 export const driver = neo4j.driver(url, neo4j.auth.basic(user, pass));
 
-export async function pagerank(db: string = 'neo4j') {
+export async function pagerank(db: string = "neo4j") {
   const s = driver.session({ database: db });
   try {
-    await s.run(
-      `CALL gds.graph.project('ig_pr', 'Entity', 'RELATES') YIELD graphName`,
-    );
+    await s.run(`CALL gds.graph.project('ig_pr', 'Entity', 'RELATES') YIELD graphName`);
   } catch {
     /* ignore if exists */
   }
   const res = await s.run(
-    `CALL gds.pageRank.stream('ig_pr') YIELD nodeId, score RETURN gds.util.asNode(nodeId).id AS id, score ORDER BY score DESC LIMIT 50`,
+    `CALL gds.pageRank.stream('ig_pr') YIELD nodeId, score RETURN gds.util.asNode(nodeId).id AS id, score ORDER BY score DESC LIMIT 50`
   );
-  return res.records.map((r) => ({ id: r.get('id'), score: r.get('score') }));
+  return res.records.map((r) => ({ id: r.get("id"), score: r.get("score") }));
 }
 
-export async function louvain(db: string = 'neo4j') {
+export async function louvain(db: string = "neo4j") {
   const s = driver.session({ database: db });
   try {
     await s.run(`CALL gds.graph.project('ig_louvain','Entity','RELATES')`);
   } catch {}
   const res = await s.run(
-    `CALL gds.louvain.stream('ig_louvain') YIELD nodeId, communityId RETURN gds.util.asNode(nodeId).id AS id, communityId`,
+    `CALL gds.louvain.stream('ig_louvain') YIELD nodeId, communityId RETURN gds.util.asNode(nodeId).id AS id, communityId`
   );
   return res.records.map((r) => ({
-    id: r.get('id'),
-    communityId: r.get('communityId'),
+    id: r.get("id"),
+    communityId: r.get("communityId"),
   }));
 }
 
-export async function kShortestPath(
-  source: string,
-  target: string,
-  k: number = 3,
-) {
+export async function kShortestPath(source: string, target: string, k: number = 3) {
   const s = driver.session();
   const res = await s.run(
     `MATCH (s:Entity{id:$source}),(t:Entity{id:$target}) CALL gds.shortestPath.yens.stream({ sourceNode:s, targetNode:t, k:$k, relationshipTypes:['RELATES'] }) YIELD path RETURN path LIMIT $k`,
-    { source, target, k },
+    { source, target, k }
   );
-  return res.records.map((r) => ({ path: r.get('path').toString() }));
+  return res.records.map((r) => ({ path: r.get("path").toString() }));
 }
 ```
 
 ```ts
 // services/analytics-service/src/index.ts
-import express from 'express';
-import { startOtel } from './otel';
-import { pagerank, louvain, kShortestPath } from './gds';
+import express from "express";
+import { startOtel } from "./otel";
+import { pagerank, louvain, kShortestPath } from "./gds";
 startOtel();
 const app = express();
 app.use(express.json());
 
-app.post('/run/pagerank', async (_req, res) => res.json(await pagerank()));
-app.post('/run/louvain', async (_req, res) => res.json(await louvain()));
-app.post('/run/kshortest', async (req, res) => {
+app.post("/run/pagerank", async (_req, res) => res.json(await pagerank()));
+app.post("/run/louvain", async (_req, res) => res.json(await louvain()));
+app.post("/run/kshortest", async (req, res) => {
   const { source, target, k } = req.body;
   res.json(await kShortestPath(source, target, k || 3));
 });
@@ -280,9 +251,9 @@ Tests:
 
 ```ts
 // services/analytics-service/test/gds.spec.ts
-test('gds exports exist', () => {
-  const fns = require('../src/gds');
-  expect(typeof fns.pagerank).toBe('function');
+test("gds exports exist", () => {
+  const fns = require("../src/gds");
+  expect(typeof fns.pagerank).toBe("function");
 });
 ```
 
@@ -315,26 +286,23 @@ export const templates = {
 
 ```ts
 // services/pattern-miner/src/index.ts
-import express from 'express';
-import { templates } from './templates';
-import { startOtel } from './otel';
-import neo4j from 'neo4j-driver';
+import express from "express";
+import { templates } from "./templates";
+import { startOtel } from "./otel";
+import neo4j from "neo4j-driver";
 startOtel();
 const app = express();
 app.use(express.json());
 const driver = neo4j.driver(
-  process.env.NEO4J_URL || 'bolt://localhost:7687',
-  neo4j.auth.basic(
-    process.env.NEO4J_USER || 'neo4j',
-    process.env.NEO4J_PASS || 'intelgraph',
-  ),
+  process.env.NEO4J_URL || "bolt://localhost:7687",
+  neo4j.auth.basic(process.env.NEO4J_USER || "neo4j", process.env.NEO4J_PASS || "intelgraph")
 );
 
-app.post('/pattern/:name', async (req, res) => {
+app.post("/pattern/:name", async (req, res) => {
   const name = req.params.name as keyof typeof templates;
   const params = req.body || {};
   const q = templates[name]?.(params);
-  if (!q) return res.status(404).json({ error: 'unknown template' });
+  if (!q) return res.status(404).json({ error: "unknown template" });
   const s = driver.session();
   const r = await s.run(q);
   res.json(r.records.map((rec) => rec.toObject()));
@@ -380,11 +348,8 @@ export const rules: NLRule[] = [
 // services/ai-nl2cypher/src/estimator.ts
 export function estimate(cy: string) {
   const warns: string[] = [];
-  if (/MATCH \(.+\)-\[\:\w+\*\d+\.\.\d+\]/.test(cy))
-    warns.push('variable length traversal');
-  const rows = /LIMIT (\d+)/.exec(cy)?.[1]
-    ? Number(/LIMIT (\d+)/.exec(cy)![1])
-    : 1000;
+  if (/MATCH \(.+\)-\[\:\w+\*\d+\.\.\d+\]/.test(cy)) warns.push("variable length traversal");
+  const rows = /LIMIT (\d+)/.exec(cy)?.[1] ? Number(/LIMIT (\d+)/.exec(cy)![1]) : 1000;
   const ms = Math.min(5000, Math.max(50, rows * 2));
   return { estimateRows: rows, estimateMs: ms, warnings: warns };
 }
@@ -392,16 +357,16 @@ export function estimate(cy: string) {
 
 ```ts
 // services/ai-nl2cypher/src/index.ts
-import express from 'express';
-import { rules } from './rules';
-import { estimate } from './estimator';
-import { startOtel } from './otel';
+import express from "express";
+import { rules } from "./rules";
+import { estimate } from "./estimator";
+import { startOtel } from "./otel";
 startOtel();
 const app = express();
 app.use(express.json());
 
-app.post('/generate', (req, res) => {
-  const text = (req.body?.text || '') as string;
+app.post("/generate", (req, res) => {
+  const text = (req.body?.text || "") as string;
   for (const r of rules) {
     const m = text.match(r.pattern);
     if (m) {
@@ -410,9 +375,9 @@ app.post('/generate', (req, res) => {
     }
   }
   return res.json({
-    cypher: 'MATCH (n) RETURN n LIMIT 25',
-    ...estimate('MATCH (n) RETURN n LIMIT 25'),
-    warnings: ['fallback'],
+    cypher: "MATCH (n) RETURN n LIMIT 25",
+    ...estimate("MATCH (n) RETURN n LIMIT 25"),
+    warnings: ["fallback"],
   });
 });
 
@@ -424,18 +389,16 @@ Tests:
 
 ```ts
 // services/ai-nl2cypher/test/nl2cypher.spec.ts
-import request from 'supertest';
-import http from 'http';
-import appFactory from '../src/index';
+import request from "supertest";
+import http from "http";
+import appFactory from "../src/index";
 
-test('pagerank parse', async () => {
+test("pagerank parse", async () => {
   const app = appFactory();
   const server = http.createServer(app).listen();
   const url = `http://127.0.0.1:${(server.address() as any).port}`;
-  const res = await request(url)
-    .post('/generate')
-    .send({ text: 'top 10 nodes by pagerank' });
-  expect(res.body.cypher).toContain('pageRank');
+  const res = await request(url).post("/generate").send({ text: "top 10 nodes by pagerank" });
+  expect(res.body.cypher).toContain("pageRank");
   server.close();
 });
 ```
@@ -449,16 +412,14 @@ test('pagerank parse', async () => {
 
 ```tsx
 // webapp/src/features/cost/CostBadge.tsx
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React from "react";
+import { useSelector } from "react-redux";
 export default function CostBadge() {
   const { lastMs, budgetMs } = useSelector((s: any) => s.cost);
   if (lastMs == null) return null;
   const over = lastMs > budgetMs;
   return (
-    <span
-      className={`px-2 py-1 rounded ${over ? 'bg-red-100' : 'bg-green-100'}`}
-    >
+    <span className={`px-2 py-1 rounded ${over ? "bg-red-100" : "bg-green-100"}`}>
       ⏱ {lastMs}ms / {budgetMs}ms
     </span>
   );
@@ -467,11 +428,11 @@ export default function CostBadge() {
 
 ```tsx
 // webapp/src/features/graph/GraphPanel.tsx (snippets)
-import $ from 'jquery';
-import cytoscape from 'cytoscape';
+import $ from "jquery";
+import cytoscape from "cytoscape";
 export function GraphPanel() {
   // init cy ...
-  $(document).on('timeline:brush', (_e, range) => {
+  $(document).on("timeline:brush", (_e, range) => {
     /* filter nodes by time */
   });
   // provenance tooltip (on node hover) fetches from ledger via gateway
@@ -482,13 +443,13 @@ E2E:
 
 ```ts
 // webapp/tests/e2e/tripane.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('selection syncs graph→map', async ({ page }) => {
-  await page.goto('http://localhost:5173');
-  await page.locator('.pane.graph').click();
+test("selection syncs graph→map", async ({ page }) => {
+  await page.goto("http://localhost:5173");
+  await page.locator(".pane.graph").click();
   // trigger selection & expect map highlight class toggled via jQuery event
-  await expect(page.locator('.pane.map .highlight')).toHaveCount(1);
+  await expect(page.locator(".pane.map .highlight")).toHaveCount(1);
 });
 ```
 
@@ -505,18 +466,17 @@ test('selection syncs graph→map', async ({ page }) => {
 
 ```js
 // ops/k6/gateway-queries.js
-import http from 'k6/http';
-import { check } from 'k6';
-export const options = { vus: 10, duration: '1m' };
+import http from "k6/http";
+import { check } from "k6";
+export const options = { vus: 10, duration: "1m" };
 export default function () {
   const gen = http.post(
-    'http://localhost:7000/graphql',
+    "http://localhost:7000/graphql",
     JSON.stringify({
-      query:
-        'mutation($i:NLQueryInput!){ generateCypher(input:$i){ estimateMs cypher }}',
-      variables: { i: { text: 'top 20 nodes by pagerank' } },
+      query: "mutation($i:NLQueryInput!){ generateCypher(input:$i){ estimateMs cypher }}",
+      variables: { i: { text: "top 20 nodes by pagerank" } },
     }),
-    { headers: { 'content-type': 'application/json' } },
+    { headers: { "content-type": "application/json" } }
   );
   check(gen, { ok: (r) => r.status === 200 });
 }

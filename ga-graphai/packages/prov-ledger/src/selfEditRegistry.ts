@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import type {
   SelfEditApproval,
   SelfEditProposal,
@@ -6,7 +6,7 @@ import type {
   SelfEditScorecard,
   SelfEditStatus,
   SelfEditVerifierScore,
-} from 'common-types';
+} from "common-types";
 
 export interface SelfEditRegistryOptions {
   clock?: () => Date;
@@ -26,7 +26,7 @@ type MutableSelfEditRecord = SelfEditRecord & {
 
 type MutableScore = SelfEditVerifierScore;
 
-type ApprovalInput = Omit<SelfEditApproval, 'decidedAt'> & {
+type ApprovalInput = Omit<SelfEditApproval, "decidedAt"> & {
   decidedAt?: string;
 };
 
@@ -54,15 +54,12 @@ export class SelfEditRegistry {
 
     const now = this.clock();
     const createdAt = now.toISOString();
-    const expiresAt = this.computeExpiry(
-      now,
-      proposal.ttlMs ?? this.defaultTtlMs,
-    );
+    const expiresAt = this.computeExpiry(now, proposal.ttlMs ?? this.defaultTtlMs);
 
     const record: MutableSelfEditRecord = {
       ...proposal,
       id: randomUUID(),
-      status: 'proposed',
+      status: "proposed",
       createdAt,
       updatedAt: createdAt,
       expiresAt,
@@ -79,19 +76,13 @@ export class SelfEditRegistry {
     return record ? this.clone(record) : undefined;
   }
 
-  list(filter?: {
-    status?: StatusFilter;
-    domain?: string;
-    limit?: number;
-  }): SelfEditRecord[] {
+  list(filter?: { status?: StatusFilter; domain?: string; limit?: number }): SelfEditRecord[] {
     this.pruneExpired();
 
     let entries = Array.from(this.records.values());
 
     if (filter?.status) {
-      const statuses = Array.isArray(filter.status)
-        ? filter.status
-        : [filter.status];
+      const statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
       entries = entries.filter((entry) => statuses.includes(entry.status));
     }
 
@@ -99,10 +90,7 @@ export class SelfEditRegistry {
       entries = entries.filter((entry) => entry.domain === filter.domain);
     }
 
-    entries.sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    );
+    entries.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
     if (filter?.limit !== undefined && filter.limit >= 0) {
       entries = entries.slice(0, filter.limit);
@@ -113,8 +101,8 @@ export class SelfEditRegistry {
 
   recordVerifierScore(
     id: string,
-    score: Omit<SelfEditVerifierScore, 'measuredAt'> & { measuredAt?: string },
-    options?: ScorecardOptions,
+    score: Omit<SelfEditVerifierScore, "measuredAt"> & { measuredAt?: string },
+    options?: ScorecardOptions
   ): SelfEditRecord {
     this.pruneExpired();
     const record = this.require(id);
@@ -143,21 +131,17 @@ export class SelfEditRegistry {
     };
     record.updatedAt = decidedAt;
 
-    record.status = approval.decision === 'approved' ? 'approved' : 'rejected';
+    record.status = approval.decision === "approved" ? "approved" : "rejected";
     return this.clone(record);
   }
 
-  markApplied(
-    id: string,
-    checkpoint: string,
-    appliedAt?: string,
-  ): SelfEditRecord {
+  markApplied(id: string, checkpoint: string, appliedAt?: string): SelfEditRecord {
     this.pruneExpired();
     const record = this.require(id);
     const appliedTimestamp = appliedAt ?? this.clock().toISOString();
 
     record.appliedCheckpoint = checkpoint;
-    record.status = 'applied';
+    record.status = "applied";
     record.updatedAt = appliedTimestamp;
 
     return this.clone(record);
@@ -166,8 +150,8 @@ export class SelfEditRegistry {
   expire(id: string, expiredAt?: string): SelfEditRecord {
     const record = this.require(id);
     const timestamp = expiredAt ?? this.clock().toISOString();
-    if (record.status !== 'applied') {
-      record.status = 'expired';
+    if (record.status !== "applied") {
+      record.status = "expired";
     }
     record.updatedAt = timestamp;
     return this.clone(record);
@@ -197,70 +181,61 @@ export class SelfEditRegistry {
       if (!record.expiresAt) {
         continue;
       }
-      if (record.status === 'expired' || record.status === 'applied') {
+      if (record.status === "expired" || record.status === "applied") {
         continue;
       }
       if (now.getTime() >= Date.parse(record.expiresAt)) {
-        record.status = 'expired';
+        record.status = "expired";
         record.updatedAt = nowIso;
       }
     }
   }
 
-  private applyScorecard(
-    record: MutableSelfEditRecord,
-    options?: ScorecardOptions,
-  ): void {
+  private applyScorecard(record: MutableSelfEditRecord, options?: ScorecardOptions): void {
     const scorecard = this.buildScorecard(record, options);
 
-    if (record.status === 'applied' || record.status === 'expired') {
+    if (record.status === "applied" || record.status === "expired") {
       return;
     }
 
     if (record.approval) {
-      record.status =
-        record.approval.decision === 'approved' ? 'approved' : 'rejected';
+      record.status = record.approval.decision === "approved" ? "approved" : "rejected";
       return;
     }
 
     if (scorecard.failedChecks > 0) {
-      record.status = 'rejected';
+      record.status = "rejected";
       return;
     }
 
     if (scorecard.ready) {
-      record.status = 'approved';
+      record.status = "approved";
       return;
     }
 
     if (scorecard.totalChecks > 0) {
-      record.status = 'queued';
+      record.status = "queued";
     } else {
-      record.status = 'proposed';
+      record.status = "proposed";
     }
   }
 
   private buildScorecard(
     record: MutableSelfEditRecord,
-    options?: ScorecardOptions,
+    options?: ScorecardOptions
   ): SelfEditScorecard {
     const totalChecks = record.verifierScores.length;
-    const passedChecks = record.verifierScores.filter(
-      (item) => item.passed,
-    ).length;
+    const passedChecks = record.verifierScores.filter((item) => item.passed).length;
     const failedChecks = totalChecks - passedChecks;
     const averageScore =
       totalChecks === 0
         ? null
-        : record.verifierScores.reduce((sum, item) => sum + item.score, 0) /
-          totalChecks;
+        : record.verifierScores.reduce((sum, item) => sum + item.score, 0) / totalChecks;
 
     const threshold = options?.threshold ?? this.threshold;
     const minVerifiers = options?.minVerifierCount ?? this.minVerifierCount;
     const ready =
-      totalChecks >= minVerifiers &&
-      failedChecks === 0 &&
-      (averageScore ?? 0) >= threshold;
+      totalChecks >= minVerifiers && failedChecks === 0 && (averageScore ?? 0) >= threshold;
 
     return {
       totalChecks,

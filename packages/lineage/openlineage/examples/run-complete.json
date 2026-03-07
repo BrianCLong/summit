@@ -17,10 +17,10 @@
         "classification": "INTERNAL"
       },
       "build": {
-         "_producer": "https://github.com/Summit/maestro",
-         "_schemaURL": "https://summit.io/schema/build/v1",
-         "buildId": "b-789",
-         "imageDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        "_producer": "https://github.com/Summit/maestro",
+        "_schemaURL": "https://summit.io/schema/build/v1",
+        "buildId": "b-789",
+        "imageDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     }
   },

@@ -2,11 +2,11 @@ name: Security Hardening
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
-    - cron: '0 0 * * 1' # Weekly scan
+    - cron: "0 0 * * 1" # Weekly scan
 
 permissions:
   contents: read
@@ -24,8 +24,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '18'
+          cache: "pnpm"
+          node-version: "18"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { Phase } from '../phases.js';
+import { z } from "zod";
+import { Phase } from "../phases.js";
 
 export const QueryMetadataSchema = z.object({
   id: z.string(),

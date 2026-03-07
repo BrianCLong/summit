@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { estimatePromptCost } from './utils/costEstimator';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { estimatePromptCost } from "./utils/costEstimator";
 
 type CopilotResponse = {
   ok?: boolean;
-  type?: 'nl2cypher' | 'rag';
+  type?: "nl2cypher" | "rag";
   preview?: string;
   plan?: any;
   costEstimate?: any;
@@ -12,13 +12,11 @@ type CopilotResponse = {
   guardrail?: { deny: boolean; reason: string };
 };
 
-const url =
-  (import.meta as any).env?.VITE_COPILOT_URL ||
-  'http://localhost:4100/copilot/query';
+const url = (import.meta as any).env?.VITE_COPILOT_URL || "http://localhost:4100/copilot/query";
 
 export default function CopilotPanel() {
-  const [prompt, setPrompt] = useState('shortest path from person P1 to H1');
-  const [mode, setMode] = useState<'auto' | 'nl2cypher' | 'ask'>('auto');
+  const [prompt, setPrompt] = useState("shortest path from person P1 to H1");
+  const [mode, setMode] = useState<"auto" | "nl2cypher" | "ask">("auto");
   const [loading, setLoading] = useState(false);
   const [resp, setResp] = useState<CopilotResponse | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -26,27 +24,27 @@ export default function CopilotPanel() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         inputRef.current?.focus();
       }
     };
-    window.addEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
     const openHandler = () => {
       inputRef.current?.focus();
-      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
     const runHandler = (ev: Event) => {
       const detail = (ev as CustomEvent).detail || {};
       if (detail.mode) setMode(detail.mode);
       setTimeout(run, 0);
     };
-    window.addEventListener('open-copilot', openHandler as any);
-    window.addEventListener('copilot:run', runHandler as any);
+    window.addEventListener("open-copilot", openHandler as any);
+    window.addEventListener("copilot:run", runHandler as any);
     return () => {
-      window.removeEventListener('keydown', handler);
-      window.removeEventListener('open-copilot', openHandler as any);
-      window.removeEventListener('copilot:run', runHandler as any);
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener("open-copilot", openHandler as any);
+      window.removeEventListener("copilot:run", runHandler as any);
     };
   }, []);
 
@@ -55,8 +53,8 @@ export default function CopilotPanel() {
     setResp(null);
     try {
       const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ prompt, mode }),
       });
       const data = await res.json();
@@ -70,18 +68,17 @@ export default function CopilotPanel() {
 
   async function checkSafety() {
     try {
-      const api =
-        (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
-      const res = await fetch(api + '/copilot/classify', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+      const api = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
+      const res = await fetch(api + "/copilot/classify", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
       const data = await res.json();
       setResp({
         ...(resp || {}),
-        type: 'safety',
-        answer: `Classification: ${data.classification} (${(data.reasons || []).join(',')})`,
+        type: "safety",
+        answer: `Classification: ${data.classification} (${(data.reasons || []).join(",")})`,
       } as any);
     } catch (e) {
       /* noop */
@@ -90,17 +87,16 @@ export default function CopilotPanel() {
 
   async function loadCookbook() {
     try {
-      const api =
-        (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
-      const res = await fetch(api + '/copilot/cookbook', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ topic: 'analytics' }),
+      const api = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
+      const res = await fetch(api + "/copilot/cookbook", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ topic: "analytics" }),
       });
       const data = await res.json();
       setResp({
         ...(resp || {}),
-        type: 'cookbook',
+        type: "cookbook",
         citations: (data.items || []).map((x: any) => ({
           source: x.id,
           title: x.title,
@@ -113,12 +109,12 @@ export default function CopilotPanel() {
   }
 
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 6, padding: 12 }}>
+    <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: 12 }}>
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           marginBottom: 8,
         }}
       >
@@ -130,13 +126,13 @@ export default function CopilotPanel() {
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         rows={4}
-        style={{ width: '100%', fontFamily: 'monospace', marginBottom: 8 }}
+        style={{ width: "100%", fontFamily: "monospace", marginBottom: 8 }}
       />
       <div
         style={{
-          display: 'flex',
+          display: "flex",
           gap: 8,
-          alignItems: 'center',
+          alignItems: "center",
           marginBottom: 8,
         }}
       >
@@ -146,7 +142,7 @@ export default function CopilotPanel() {
           <option value="ask">ask</option>
         </select>
         <button onClick={run} disabled={loading}>
-          {loading ? 'Running…' : 'Run'}
+          {loading ? "Running…" : "Run"}
         </button>
         <button onClick={checkSafety} disabled={loading}>
           Check Safety
@@ -154,42 +150,38 @@ export default function CopilotPanel() {
         <button onClick={loadCookbook} disabled={loading}>
           Cookbook
         </button>
-        <div style={{ marginLeft: 'auto', fontSize: 12, color: '#666' }}>
+        <div style={{ marginLeft: "auto", fontSize: 12, color: "#666" }}>
           Est. Cost: {localCost.score}
         </div>
       </div>
       {resp?.guardrail?.deny && (
-        <div style={{ color: '#a00', marginBottom: 8 }}>
-          Blocked: {resp.guardrail.reason}
-        </div>
+        <div style={{ color: "#a00", marginBottom: 8 }}>Blocked: {resp.guardrail.reason}</div>
       )}
-      {resp?.type === 'nl2cypher' && (
+      {resp?.type === "nl2cypher" && (
         <div>
-          <div style={{ fontSize: 12, color: '#666' }}>Preview</div>
+          <div style={{ fontSize: 12, color: "#666" }}>Preview</div>
           <pre
             style={{
-              background: '#f8f8f8',
+              background: "#f8f8f8",
               padding: 8,
               borderRadius: 4,
-              overflowX: 'auto',
+              overflowX: "auto",
             }}
           >
             {resp.preview}
           </pre>
           {resp.costEstimate && (
-            <div style={{ fontSize: 12, color: '#666' }}>
+            <div style={{ fontSize: 12, color: "#666" }}>
               Cost: {JSON.stringify(resp.costEstimate)}
             </div>
           )}
         </div>
       )}
-      {resp?.type === 'rag' && (
+      {resp?.type === "rag" && (
         <div>
-          <div style={{ fontSize: 12, color: '#666' }}>Answer</div>
-          <div style={{ whiteSpace: 'pre-wrap', marginBottom: 8 }}>
-            {resp.answer}
-          </div>
-          <div style={{ fontSize: 12, color: '#666' }}>Citations</div>
+          <div style={{ fontSize: 12, color: "#666" }}>Answer</div>
+          <div style={{ whiteSpace: "pre-wrap", marginBottom: 8 }}>{resp.answer}</div>
+          <div style={{ fontSize: 12, color: "#666" }}>Citations</div>
           <ul>
             {(resp.citations || []).map((c, i) => (
               <li key={i}>

@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Disabled: reusable workflow references need refactoring
 # TODO: Move _golden-path-pipeline.yml to top-level workflows directory
 on:

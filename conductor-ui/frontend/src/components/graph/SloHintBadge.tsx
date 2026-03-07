@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/components/graph/SloHintBadge.tsx
-import React from 'react';
+import React from "react";
 
 interface SloHintBadgeProps {
   latencyMs: number;
@@ -8,7 +8,7 @@ interface SloHintBadgeProps {
 
 export const SloHintBadge = ({ latencyMs, sloMs }: SloHintBadgeProps) => {
   const isSlow = latencyMs > sloMs;
-  const color = isSlow ? 'red' : 'green';
+  const color = isSlow ? "red" : "green";
   return (
     <span style={{ color }}>
       {latencyMs}ms (SLO: {sloMs}ms)

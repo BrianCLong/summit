@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSubscription } from '@apollo/client';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useSubscription } from "@apollo/client";
 import {
   Alert,
   Box,
@@ -14,11 +14,11 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { FilterList, PlayArrow } from '@mui/icons-material';
-import { QueryChip, QueryChipBuilder } from './QueryChipBuilder';
-import { GRAPH_QUERY_PREVIEW_SUBSCRIPTION } from './graphql';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { FilterList, PlayArrow } from "@mui/icons-material";
+import { QueryChip, QueryChipBuilder } from "./QueryChipBuilder";
+import { GRAPH_QUERY_PREVIEW_SUBSCRIPTION } from "./graphql";
 
 type GraphPreviewNode = {
   id: string;
@@ -96,7 +96,7 @@ const INITIAL_PREVIEW_STATE: PreviewState = {
 };
 
 function sanitizeIdentifier(value: string): string {
-  return value.replace(/[^a-zA-Z0-9_]/g, '_');
+  return value.replace(/[^a-zA-Z0-9_]/g, "_");
 }
 
 function formatCypherValue(rawValue: string): string {
@@ -107,7 +107,7 @@ function formatCypherValue(rawValue: string): string {
   }
 
   const numeric = Number(trimmed);
-  if (!Number.isNaN(numeric) && trimmed !== '') {
+  if (!Number.isNaN(numeric) && trimmed !== "") {
     return numeric.toString();
   }
 
@@ -117,27 +117,27 @@ function formatCypherValue(rawValue: string): string {
 
 function buildCypherFromChips(chips: QueryChip[], limit: number): string {
   if (chips.length === 0) {
-    return '';
+    return "";
   }
 
-  const alias = 'n';
+  const alias = "n";
   const clauses = chips.map((chip) => {
     const field = `${alias}.${sanitizeIdentifier(chip.field)}`;
-    const value = chip.value ?? '';
+    const value = chip.value ?? "";
     const formatted = formatCypherValue(value);
 
     switch (chip.operator) {
-      case 'contains':
+      case "contains":
         return `toLower(${field}) CONTAINS toLower(${formatted})`;
-      case 'starts with':
+      case "starts with":
         return `toLower(${field}) STARTS WITH toLower(${formatted})`;
-      case 'ends with':
+      case "ends with":
         return `toLower(${field}) ENDS WITH toLower(${formatted})`;
-      case 'greater than':
+      case "greater than":
         return `${field} > ${formatted}`;
-      case 'less than':
+      case "less than":
         return `${field} < ${formatted}`;
-      case 'between': {
+      case "between": {
         const parts = value
           .split(/\s*(?:,|\.\.|-)\s*/)
           .map((segment) => segment.trim())
@@ -148,25 +148,25 @@ function buildCypherFromChips(chips: QueryChip[], limit: number): string {
         }
         return `${field} = ${formatted}`;
       }
-      case 'exists':
+      case "exists":
         return `${field} IS NOT NULL`;
-      case 'in':
+      case "in":
         return `${field} IN [${value
-          .split(',')
+          .split(",")
           .map((part) => formatCypherValue(part))
-          .join(', ')}]`;
-      case 'not in':
+          .join(", ")}]`;
+      case "not in":
         return `${field} NOT IN [${value
-          .split(',')
+          .split(",")
           .map((part) => formatCypherValue(part))
-          .join(', ')}]`;
-      case 'equals':
+          .join(", ")}]`;
+      case "equals":
       default:
         return `${field} = ${formatted}`;
     }
   });
 
-  const whereClause = clauses.join(' AND ');
+  const whereClause = clauses.join(" AND ");
   return `MATCH (${alias}) WHERE ${whereClause} RETURN ${alias} LIMIT ${Math.max(limit, 1)}`;
 }
 
@@ -200,50 +200,49 @@ export function QueryBuilderPreview({
     setPreviewState(INITIAL_PREVIEW_STATE);
   }, [debouncedCypher]);
 
-  const handlePreviewUpdate = useCallback(
-    (event: GraphQueryPreviewEvent | null | undefined) => {
-      if (!event) return;
+  const handlePreviewUpdate = useCallback((event: GraphQueryPreviewEvent | null | undefined) => {
+    if (!event) return;
 
-      setPreviewState((prev) => {
-        if (event.eventId && event.eventId === prev.lastEventId) {
-          return prev;
-        }
+    setPreviewState((prev) => {
+      if (event.eventId && event.eventId === prev.lastEventId) {
+        return prev;
+      }
 
-        const nodeMap = new Map<string, GraphPreviewNode>();
-        prev.nodes.forEach((node) => nodeMap.set(node.id, node));
-        event.nodes?.forEach((node) => {
-          if (!node?.id) return;
-          const existing = nodeMap.get(node.id);
-          nodeMap.set(node.id, { ...existing, ...node });
-        });
-
-        const edgeMap = new Map<string, GraphPreviewEdge>();
-        prev.edges.forEach((edge) => {
-          const key = edge.id ?? `${edge.source}-${edge.target}`;
-          edgeMap.set(key, edge);
-        });
-        event.edges?.forEach((edge) => {
-          if (!edge?.source || !edge?.target) return;
-          const key = edge.id ?? `${edge.source}-${edge.target}`;
-          const existing = edgeMap.get(key);
-          edgeMap.set(key, { ...existing, ...edge });
-        });
-
-        const errors = event.errors?.map((err) => err?.message).filter(Boolean) as string[] | undefined;
-
-        return {
-          nodes: Array.from(nodeMap.values()),
-          edges: Array.from(edgeMap.values()),
-          progress: event.progress ?? prev.progress,
-          statistics: event.statistics ?? prev.statistics,
-          partial: event.partial ?? prev.partial,
-          lastEventId: event.eventId ?? prev.lastEventId,
-          errors: errors ?? prev.errors,
-        };
+      const nodeMap = new Map<string, GraphPreviewNode>();
+      prev.nodes.forEach((node) => nodeMap.set(node.id, node));
+      event.nodes?.forEach((node) => {
+        if (!node?.id) return;
+        const existing = nodeMap.get(node.id);
+        nodeMap.set(node.id, { ...existing, ...node });
       });
-    },
-    [],
-  );
+
+      const edgeMap = new Map<string, GraphPreviewEdge>();
+      prev.edges.forEach((edge) => {
+        const key = edge.id ?? `${edge.source}-${edge.target}`;
+        edgeMap.set(key, edge);
+      });
+      event.edges?.forEach((edge) => {
+        if (!edge?.source || !edge?.target) return;
+        const key = edge.id ?? `${edge.source}-${edge.target}`;
+        const existing = edgeMap.get(key);
+        edgeMap.set(key, { ...existing, ...edge });
+      });
+
+      const errors = event.errors?.map((err) => err?.message).filter(Boolean) as
+        | string[]
+        | undefined;
+
+      return {
+        nodes: Array.from(nodeMap.values()),
+        edges: Array.from(edgeMap.values()),
+        progress: event.progress ?? prev.progress,
+        statistics: event.statistics ?? prev.statistics,
+        partial: event.partial ?? prev.partial,
+        lastEventId: event.eventId ?? prev.lastEventId,
+        errors: errors ?? prev.errors,
+      };
+    });
+  }, []);
 
   const { loading, error } = useSubscription<GraphQueryPreviewData, GraphQueryPreviewVariables>(
     GRAPH_QUERY_PREVIEW_SUBSCRIPTION,
@@ -258,8 +257,8 @@ export function QueryBuilderPreview({
       onSubscriptionData: ({ subscriptionData }) => {
         handlePreviewUpdate(subscriptionData.data?.graphQueryPreview);
       },
-      fetchPolicy: 'no-cache',
-    },
+      fetchPolicy: "no-cache",
+    }
   );
 
   useEffect(() => {
@@ -270,23 +269,29 @@ export function QueryBuilderPreview({
 
   const statusMessage = useMemo(() => {
     if (!debouncedCypher) {
-      return 'Add filters to generate a live preview.';
+      return "Add filters to generate a live preview.";
     }
 
     if (loading) {
-      return 'Listening for preview updates…';
+      return "Listening for preview updates…";
     }
 
     if (previewState.partial) {
-      return 'Receiving partial graph results…';
+      return "Receiving partial graph results…";
     }
 
     if (previewState.nodes.length > 0 || previewState.edges.length > 0) {
-      return 'Preview up to date.';
+      return "Preview up to date.";
     }
 
-    return 'No preview data received yet.';
-  }, [debouncedCypher, loading, previewState.partial, previewState.nodes.length, previewState.edges.length]);
+    return "No preview data received yet.";
+  }, [
+    debouncedCypher,
+    loading,
+    previewState.partial,
+    previewState.nodes.length,
+    previewState.edges.length,
+  ]);
 
   const limitedNodes = useMemo(() => previewState.nodes.slice(0, 5), [previewState.nodes]);
   const limitedEdges = useMemo(() => previewState.edges.slice(0, 5), [previewState.edges]);
@@ -299,7 +304,12 @@ export function QueryBuilderPreview({
           Real-time Query Preview
         </Typography>
         {previewState.partial && (
-          <Chip size="small" label="Streaming" color="primary" icon={<PlayArrow fontSize="small" />} />
+          <Chip
+            size="small"
+            label="Streaming"
+            color="primary"
+            icon={<PlayArrow fontSize="small" />}
+          />
         )}
       </Stack>
 
@@ -316,7 +326,7 @@ export function QueryBuilderPreview({
             type="number"
             size="small"
             value={limit}
-            inputProps={{ min: 1, max: 500, 'aria-label': 'Preview limit' }}
+            inputProps={{ min: 1, max: 500, "aria-label": "Preview limit" }}
             onChange={(event) => {
               const next = Number(event.target.value);
               setLimit(Number.isFinite(next) && next > 0 ? Math.min(next, 500) : 25);
@@ -328,14 +338,14 @@ export function QueryBuilderPreview({
             <Tooltip title="Cypher query used for the preview">
               <Box
                 sx={{
-                  bgcolor: 'grey.100',
+                  bgcolor: "grey.100",
                   borderRadius: 1,
                   px: 1.5,
                   py: 1,
-                  fontFamily: 'monospace',
+                  fontFamily: "monospace",
                   fontSize: 12,
                   maxHeight: 96,
-                  overflow: 'auto',
+                  overflow: "auto",
                 }}
                 aria-live="polite"
                 role="note"
@@ -353,12 +363,14 @@ export function QueryBuilderPreview({
         role="status"
         aria-live="polite"
         data-testid="query-preview-status"
-        sx={{ color: 'text.secondary', fontSize: 13 }}
+        sx={{ color: "text.secondary", fontSize: 13 }}
       >
         {statusMessage}
       </Box>
 
-      {loading && debouncedCypher && <LinearProgress sx={{ mt: 1 }} aria-hidden data-testid="query-preview-loading" />}
+      {loading && debouncedCypher && (
+        <LinearProgress sx={{ mt: 1 }} aria-hidden data-testid="query-preview-loading" />
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mt: 2 }} role="alert">
@@ -368,7 +380,7 @@ export function QueryBuilderPreview({
 
       {previewState.errors.length > 0 && (
         <Alert severity="warning" sx={{ mt: 2 }} role="alert">
-          {previewState.errors.join(' ')}
+          {previewState.errors.join(" ")}
         </Alert>
       )}
 
@@ -381,7 +393,10 @@ export function QueryBuilderPreview({
           <Grid container spacing={2}>
             {limitedNodes.length > 0 && (
               <Grid item xs={12} md={6}>
-                <Typography variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ textTransform: "uppercase", letterSpacing: 0.5 }}
+                >
                   Nodes
                 </Typography>
                 <List dense data-testid="query-preview-nodes">
@@ -399,14 +414,17 @@ export function QueryBuilderPreview({
 
             {limitedEdges.length > 0 && (
               <Grid item xs={12} md={6}>
-                <Typography variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ textTransform: "uppercase", letterSpacing: 0.5 }}
+                >
                   Edges
                 </Typography>
                 <List dense data-testid="query-preview-edges">
                   {limitedEdges.map((edge) => (
                     <ListItem key={edge.id ?? `${edge.source}-${edge.target}`} disableGutters>
                       <ListItemText
-                        primary={edge.type ?? 'relationship'}
+                        primary={edge.type ?? "relationship"}
                         secondary={`${edge.source} → ${edge.target}`}
                       />
                     </ListItem>

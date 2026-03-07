@@ -56,13 +56,13 @@ Migrate from ingress-nginx to **Kubernetes Gateway API** using a compatible impl
 
 ### Gateway API Implementation Options
 
-| Implementation | Pros | Cons |
-|---------------|------|------|
-| **Envoy Gateway** | CNCF, feature-rich, Envoy proxy | Newer, less battle-tested |
-| **Istio Gateway** | Already have Istio mesh | Adds complexity if not using mesh |
-| **Contour** | Mature, Envoy-based | Separate project maintenance |
-| **NGINX Gateway Fabric** | Familiar nginx config model | Nginx-specific |
-| **Traefik** | Already in use for some routes | Different config model |
+| Implementation           | Pros                            | Cons                              |
+| ------------------------ | ------------------------------- | --------------------------------- |
+| **Envoy Gateway**        | CNCF, feature-rich, Envoy proxy | Newer, less battle-tested         |
+| **Istio Gateway**        | Already have Istio mesh         | Adds complexity if not using mesh |
+| **Contour**              | Mature, Envoy-based             | Separate project maintenance      |
+| **NGINX Gateway Fabric** | Familiar nginx config model     | Nginx-specific                    |
+| **Traefik**              | Already in use for some routes  | Different config model            |
 
 **Recommendation:** **Envoy Gateway** - provides a clean Gateway API implementation with strong CNCF backing and excellent feature parity.
 
@@ -71,6 +71,7 @@ Migrate from ingress-nginx to **Kubernetes Gateway API** using a compatible impl
 ### Phase 1: Preparation (Week 1-2)
 
 1. **Install Gateway API CRDs**
+
    ```bash
    kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
    ```
@@ -92,6 +93,7 @@ Migrate from ingress-nginx to **Kubernetes Gateway API** using a compatible impl
 ### Phase 2: Gateway Resources (Week 3-4)
 
 1. **Create Gateway resource**
+
    ```yaml
    apiVersion: gateway.networking.k8s.io/v1
    kind: Gateway
@@ -123,6 +125,7 @@ Migrate from ingress-nginx to **Kubernetes Gateway API** using a compatible impl
 Convert each Ingress to HTTPRoute:
 
 **Before (Ingress):**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -146,6 +149,7 @@ spec:
 ```
 
 **After (HTTPRoute):**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -170,6 +174,7 @@ spec:
 ### Phase 4: Advanced Features (Week 9-12)
 
 #### Rate Limiting → BackendTrafficPolicy
+
 ```yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
@@ -190,6 +195,7 @@ spec:
 ```
 
 #### Canary Deployments → HTTPRoute Weights
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -211,6 +217,7 @@ spec:
 ```
 
 #### Header-Based Routing
+
 ```yaml
 rules:
   - matches:
@@ -240,39 +247,43 @@ rules:
 
 ### Annotation Equivalents
 
-| nginx-ingress Annotation | Gateway API Equivalent |
-|-------------------------|------------------------|
-| `limit-rps` | BackendTrafficPolicy.rateLimit |
-| `limit-rpm` | BackendTrafficPolicy.rateLimit |
-| `ssl-redirect` | Gateway listener redirect policy |
-| `canary`, `canary-weight` | HTTPRoute backendRefs weights |
-| `canary-by-header` | HTTPRoute matches.headers |
-| `whitelist-source-range` | SecurityPolicy.authorization |
-| `enable-cors` | SecurityPolicy.cors |
-| `cors-allow-origin` | SecurityPolicy.cors.allowOrigins |
-| `proxy-body-size` | BackendTrafficPolicy.uploadTimeout |
-| `proxy-read-timeout` | BackendTrafficPolicy.timeout |
+| nginx-ingress Annotation  | Gateway API Equivalent             |
+| ------------------------- | ---------------------------------- |
+| `limit-rps`               | BackendTrafficPolicy.rateLimit     |
+| `limit-rpm`               | BackendTrafficPolicy.rateLimit     |
+| `ssl-redirect`            | Gateway listener redirect policy   |
+| `canary`, `canary-weight` | HTTPRoute backendRefs weights      |
+| `canary-by-header`        | HTTPRoute matches.headers          |
+| `whitelist-source-range`  | SecurityPolicy.authorization       |
+| `enable-cors`             | SecurityPolicy.cors                |
+| `cors-allow-origin`       | SecurityPolicy.cors.allowOrigins   |
+| `proxy-body-size`         | BackendTrafficPolicy.uploadTimeout |
+| `proxy-read-timeout`      | BackendTrafficPolicy.timeout       |
 
 ### Files to Update
 
 #### Helm Templates
-| Current File | New File |
-|-------------|----------|
+
+| Current File                                  | New File                                        |
+| --------------------------------------------- | ----------------------------------------------- |
 | `helm/sandbox-gateway/templates/ingress.yaml` | `helm/sandbox-gateway/templates/httproute.yaml` |
-| `helm/server/templates/ingress.yaml` | `helm/server/templates/httproute.yaml` |
-| `helm/client/templates/ingress.yaml` | `helm/client/templates/httproute.yaml` |
-| `helm/intelgraph/templates/ingress.yaml` | `helm/intelgraph/templates/httproute.yaml` |
+| `helm/server/templates/ingress.yaml`          | `helm/server/templates/httproute.yaml`          |
+| `helm/client/templates/ingress.yaml`          | `helm/client/templates/httproute.yaml`          |
+| `helm/intelgraph/templates/ingress.yaml`      | `helm/intelgraph/templates/httproute.yaml`      |
 
 #### Raw Manifests
-| Current File | Action |
-|-------------|--------|
-| `k8s/ingress/web.yaml` | Convert to HTTPRoute |
-| `k8s/ingress/web-canary.yaml` | Merge into weighted HTTPRoute |
-| `k8s/ingress/web-header-canary.yaml` | Convert to header-match HTTPRoute |
-| `infra/k8s/ingress/maestro-ingress.yaml` | Convert to HTTPRoute + policies |
+
+| Current File                             | Action                            |
+| ---------------------------------------- | --------------------------------- |
+| `k8s/ingress/web.yaml`                   | Convert to HTTPRoute              |
+| `k8s/ingress/web-canary.yaml`            | Merge into weighted HTTPRoute     |
+| `k8s/ingress/web-header-canary.yaml`     | Convert to header-match HTTPRoute |
+| `infra/k8s/ingress/maestro-ingress.yaml` | Convert to HTTPRoute + policies   |
 
 #### Network Policies
+
 Update `namespaceSelector` from `ingress-nginx` to `envoy-gateway-system`:
+
 - `infra/k8s/namespaces/orchestrator-namespaces.yaml`
 - `infra/registry/policies/network-policy.yaml`
 - `infra/helm/intelgraph/templates/network-policy.yaml`
@@ -280,6 +291,7 @@ Update `namespaceSelector` from `ingress-nginx` to `envoy-gateway-system`:
 - `deploy/maestro/networkpolicy.yaml`
 
 #### Helmfile/ArgoCD
+
 - `deploy/helmfile/helmfile.yaml` - Replace ingress-nginx release with envoy-gateway
 - `deploy/argocd/app-of-apps.yaml` - Update ingress-nginx app to envoy-gateway
 - `deploy/argocd/projects/companyos-project.yaml` - Update allowed sources
@@ -300,13 +312,13 @@ Update `namespaceSelector` from `ingress-nginx` to `envoy-gateway-system`:
 
 ## Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Feature parity gaps | Medium | Pre-migration feature audit, use extension policies |
-| Performance regression | High | Load testing before cutover, parallel monitoring |
-| TLS certificate issues | High | Test cert-manager integration in staging |
-| Canary deployment breaks | Medium | Thorough testing of weighted routing |
-| Network policy failures | High | Update policies before DNS cutover |
+| Risk                     | Impact | Mitigation                                          |
+| ------------------------ | ------ | --------------------------------------------------- |
+| Feature parity gaps      | Medium | Pre-migration feature audit, use extension policies |
+| Performance regression   | High   | Load testing before cutover, parallel monitoring    |
+| TLS certificate issues   | High   | Test cert-manager integration in staging            |
+| Canary deployment breaks | Medium | Thorough testing of weighted routing                |
+| Network policy failures  | High   | Update policies before DNS cutover                  |
 
 ## Success Criteria
 
@@ -319,14 +331,14 @@ Update `namespaceSelector` from `ingress-nginx` to `envoy-gateway-system`:
 
 ## Timeline
 
-| Phase | Duration | Milestone |
-|-------|----------|-----------|
-| Preparation | 2 weeks | Gateway API CRDs + Envoy Gateway deployed |
-| Gateway Setup | 2 weeks | TLS configured, basic routes working |
-| Route Migration | 4 weeks | All HTTPRoutes created, parallel testing |
-| Advanced Features | 4 weeks | Rate limiting, canary, security policies |
-| Cutover | 2 weeks | DNS migration, monitoring, cleanup |
-| **Total** | **14 weeks** | Full migration complete |
+| Phase             | Duration     | Milestone                                 |
+| ----------------- | ------------ | ----------------------------------------- |
+| Preparation       | 2 weeks      | Gateway API CRDs + Envoy Gateway deployed |
+| Gateway Setup     | 2 weeks      | TLS configured, basic routes working      |
+| Route Migration   | 4 weeks      | All HTTPRoutes created, parallel testing  |
+| Advanced Features | 4 weeks      | Rate limiting, canary, security policies  |
+| Cutover           | 2 weeks      | DNS migration, monitoring, cleanup        |
+| **Total**         | **14 weeks** | Full migration complete                   |
 
 ## References
 

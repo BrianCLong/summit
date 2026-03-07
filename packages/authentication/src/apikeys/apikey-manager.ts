@@ -4,10 +4,10 @@
  * Manages API keys for service authentication
  */
 
-import { randomBytes, createHash } from 'crypto';
-import { createLogger } from '../utils/logger.js';
+import { randomBytes, createHash } from "crypto";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('apikey-manager');
+const logger = createLogger("apikey-manager");
 
 export interface APIKey {
   id: string;
@@ -69,7 +69,7 @@ export class APIKeyManager {
     }
     this.keysByUserId.get(request.userId)!.add(keyId);
 
-    logger.info('API key created', { keyId, userId: request.userId, name: request.name });
+    logger.info("API key created", { keyId, userId: request.userId, name: request.name });
 
     return { apiKey, key };
   }
@@ -81,19 +81,19 @@ export class APIKeyManager {
       if (apiKey.keyHash === keyHash) {
         // Check if expired
         if (apiKey.expiresAt && Date.now() > apiKey.expiresAt) {
-          logger.warn('API key expired', { keyId: apiKey.id });
+          logger.warn("API key expired", { keyId: apiKey.id });
           return null;
         }
 
         // Update last used timestamp
         apiKey.lastUsedAt = Date.now();
 
-        logger.debug('API key validated', { keyId: apiKey.id });
+        logger.debug("API key validated", { keyId: apiKey.id });
         return apiKey;
       }
     }
 
-    logger.warn('Invalid API key');
+    logger.warn("Invalid API key");
     return null;
   }
 
@@ -115,7 +115,7 @@ export class APIKeyManager {
       }
     }
 
-    logger.info('API key revoked', { keyId, userId: apiKey.userId });
+    logger.info("API key revoked", { keyId, userId: apiKey.userId });
     return true;
   }
 
@@ -131,7 +131,7 @@ export class APIKeyManager {
     }
 
     return Array.from(keyIds)
-      .map(id => this.keys.get(id))
+      .map((id) => this.keys.get(id))
       .filter((key): key is APIKey => key !== undefined);
   }
 
@@ -154,28 +154,30 @@ export class APIKeyManager {
     // Revoke old key
     this.revokeAPIKey(keyId);
 
-    logger.info('API key rotated', { oldKeyId: keyId, newKeyId: newKeyData.apiKey.id });
+    logger.info("API key rotated", { oldKeyId: keyId, newKeyId: newKeyData.apiKey.id });
 
     return newKeyData;
   }
 
   private generateKeyId(): string {
-    return `key_${randomBytes(16).toString('hex')}`;
+    return `key_${randomBytes(16).toString("hex")}`;
   }
 
   private generateKey(): string {
-    return `sk_${randomBytes(32).toString('base64url')}`;
+    return `sk_${randomBytes(32).toString("base64url")}`;
   }
 
   private hashKey(key: string): string {
-    return createHash('sha256').update(key).digest('hex');
+    return createHash("sha256").update(key).digest("hex");
   }
 
   getStats() {
     return {
       totalKeys: this.keys.size,
       totalUsers: this.keysByUserId.size,
-      activeKeys: Array.from(this.keys.values()).filter(k => !k.expiresAt || k.expiresAt > Date.now()).length,
+      activeKeys: Array.from(this.keys.values()).filter(
+        (k) => !k.expiresAt || k.expiresAt > Date.now()
+      ).length,
     };
   }
 }

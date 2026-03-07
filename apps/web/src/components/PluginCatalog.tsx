@@ -49,7 +49,7 @@ export default function PluginCatalog() {
               key={p.id}
               className="p-row border-b hover:bg-gray-50 cursor-pointer"
               onClick={() => setSel(p)}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter' || e.key === ' ') setSel(p)
               }}
               tabIndex={0}
@@ -66,7 +66,11 @@ export default function PluginCatalog() {
         </tbody>
       </table>
       {sel && (
-        <div className="mt-4 p-3 rounded-2xl shadow" role="region" aria-label="Plugin Details">
+        <div
+          className="mt-4 p-3 rounded-2xl shadow"
+          role="region"
+          aria-label="Plugin Details"
+        >
           <div className="text-sm">
             Capabilities: <code>{JSON.stringify(sel.capabilities)}</code>
           </div>

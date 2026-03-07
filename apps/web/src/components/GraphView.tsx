@@ -130,11 +130,20 @@ export const GraphView: React.FC<GraphViewProps> = ({
       .enter()
       .append('line')
       .attr('role', 'graphics-symbol')
-      .attr('aria-label', d => `Relationship: ${d.relationship.type} from ${d.source.entity.name} to ${d.target.entity.name}`)
+      .attr(
+        'aria-label',
+        d =>
+          `Relationship: ${d.relationship.type} from ${d.source.entity.name} to ${d.target.entity.name}`
+      )
       .attr('stroke', '#94a3b8')
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', 2)
-      .attr('stroke-dasharray', d => d.relationship.properties?.style === 'dashed' || d.relationship.type === 'narrative' ? '5,5' : 'none')
+      .attr('stroke-dasharray', d =>
+        d.relationship.properties?.style === 'dashed' ||
+        d.relationship.type === 'narrative'
+          ? '5,5'
+          : 'none'
+      )
 
     // Render Nodes
     const node = g
@@ -147,7 +156,11 @@ export const GraphView: React.FC<GraphViewProps> = ({
       .attr('class', 'node')
       .attr('role', 'graphics-symbol')
       .attr('tabindex', 0) // Enable keyboard navigation
-      .attr('aria-label', d => `Entity: ${d.entity.name}, Type: ${d.entity.type}${d.entity.properties?.drift ? ', State: Drift' : ''}`)
+      .attr(
+        'aria-label',
+        d =>
+          `Entity: ${d.entity.name}, Type: ${d.entity.type}${d.entity.properties?.drift ? ', State: Drift' : ''}`
+      )
       .style('cursor', 'pointer')
       .call(
         drag<SVGGElement, GraphNode>()
@@ -171,9 +184,13 @@ export const GraphView: React.FC<GraphViewProps> = ({
     node
       .append('circle')
       .attr('r', 25)
-      .attr('fill', d => d.entity.properties?.drift ? '#d32f2f' : getEntityColor(d.entity.type))
-      .attr('stroke', d => selectedEntityId === d.entity.id ? '#fbbf24' : '#fff')
-      .attr('stroke-width', d => selectedEntityId === d.entity.id ? 4 : 2)
+      .attr('fill', d =>
+        d.entity.properties?.drift ? '#d32f2f' : getEntityColor(d.entity.type)
+      )
+      .attr('stroke', d =>
+        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
+      )
+      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 4 : 2))
       .attr('class', 'transition-all duration-200')
 
     // Node initial/icon
@@ -238,10 +255,18 @@ export const GraphView: React.FC<GraphViewProps> = ({
     return colors[type] || colors.default
   }
 
-  const driftCount = useMemo(() => entities.filter(e => e.properties?.drift).length, [entities])
+  const driftCount = useMemo(
+    () => entities.filter(e => e.properties?.drift).length,
+    [entities]
+  )
 
   return (
-    <div className={cn('relative w-full h-full flex flex-col overflow-hidden', className)}>
+    <div
+      className={cn(
+        'relative w-full h-full flex flex-col overflow-hidden',
+        className
+      )}
+    >
       <svg
         ref={svgRef}
         className="w-full flex-1 bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg"
@@ -252,34 +277,39 @@ export const GraphView: React.FC<GraphViewProps> = ({
 
       {/* Off-screen description for Screen Readers */}
       <div id="graph-desc" className="sr-only">
-        Network graph visualization containing {entities.length} nodes and {relationships.length} edges.
-        {driftCount > 0 ? ` Note: ${driftCount} nodes are highlighted in red indicating a drift state.` : ''}
-        Navigation: Use TAB to cycle through entities. Press ENTER or SPACE to inspect a selected entity.
-        Use mouse or touch to pan and zoom.
+        Network graph visualization containing {entities.length} nodes and{' '}
+        {relationships.length} edges.
+        {driftCount > 0
+          ? ` Note: ${driftCount} nodes are highlighted in red indicating a drift state.`
+          : ''}
+        Navigation: Use TAB to cycle through entities. Press ENTER or SPACE to
+        inspect a selected entity. Use mouse or touch to pan and zoom.
       </div>
 
       {/* Visible legend/status overlay */}
       <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
-          <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-1">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</div>
-              <div className="flex items-center gap-4 text-xs font-medium text-slate-700">
-                  <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                      <span>{entities.length} Nodes</span>
-                  </div>
-                  {driftCount > 0 && (
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
-                        <span className="text-red-700">{driftCount} Drift</span>
-                    </div>
-                  )}
-              </div>
+        <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-1">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            Status
           </div>
+          <div className="flex items-center gap-4 text-xs font-medium text-slate-700">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+              <span>{entities.length} Nodes</span>
+            </div>
+            {driftCount > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+                <span className="text-red-700">{driftCount} Drift</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Keyboard hints */}
       <div className="absolute bottom-4 right-4 text-[10px] text-slate-400 bg-white/50 px-2 py-1 rounded border border-slate-200 pointer-events-none">
-          TAB: Nav | ENTER: Inspect | DRAG: Pan | SCROLL: Zoom
+        TAB: Nav | ENTER: Inspect | DRAG: Pan | SCROLL: Zoom
       </div>
     </div>
   )

@@ -1,8 +1,8 @@
 name: Render evidence graph
 on:
   workflow_run:
-    workflows: [ "CI" ]
-    types: [ completed ]
+    workflows: ["CI"]
+    types: [completed]
 jobs:
   render-evidence-graph:
     runs-on: ubuntu-latest

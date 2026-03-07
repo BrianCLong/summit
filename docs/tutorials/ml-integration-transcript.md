@@ -35,4 +35,4 @@
 
 ---
 
-*Repurpose this transcript for captions, localized overdubs, or searchable knowledge base articles. Update timestamps after the final edit if pacing shifts.*
+_Repurpose this transcript for captions, localized overdubs, or searchable knowledge base articles. Update timestamps after the final edit if pacing shifts._

@@ -31,21 +31,11 @@
       "risk_phrases": ["guaranteed $", "guarantee income", "risk-free profits"]
     },
     "delivery_sop_v0": {
-      "required_fields": [
-        "checklist",
-        "qc_rubric",
-        "templates",
-        "automation_candidates"
-      ],
+      "required_fields": ["checklist", "qc_rubric", "templates", "automation_candidates"],
       "risk_phrases": ["guaranteed $", "guarantee income", "risk-free profits"]
     },
     "ops_dashboard_v0": {
-      "required_fields": [
-        "kpis",
-        "cadence",
-        "failure_modes",
-        "escalation_rules"
-      ],
+      "required_fields": ["kpis", "cadence", "failure_modes", "escalation_rules"],
       "risk_phrases": ["guaranteed $", "guarantee income", "risk-free profits"]
     }
   }

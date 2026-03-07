@@ -1,13 +1,13 @@
-import { exec } from 'node:child_process';
-import { promisify } from 'node:util';
-import { mkdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import { randomUUID } from 'node:crypto';
-import { adapterById, defaultAdapters } from '../adapters';
-import { EventLogger } from '../logging/EventLogger';
-import { TranscriptWriter } from '../logging/TranscriptWriter';
-import { PolicyGate } from '../policy/PolicyGate';
-import { SkillsetStore } from '../skillsets/SkillsetStore';
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+import { adapterById, defaultAdapters } from "../adapters";
+import { EventLogger } from "../logging/EventLogger";
+import { TranscriptWriter } from "../logging/TranscriptWriter";
+import { PolicyGate } from "../policy/PolicyGate";
+import { SkillsetStore } from "../skillsets/SkillsetStore";
 import {
   EventRecord,
   ProviderAdapter,
@@ -15,15 +15,15 @@ import {
   ProviderSession,
   Skillset,
   ToolAction,
-} from '../types';
-import { EvidenceBundler } from './EvidenceBundler';
+} from "../types";
+import { EvidenceBundler } from "./EvidenceBundler";
 
 const execAsync = promisify(exec);
 
 const nowIso = (): string => new Date().toISOString();
 
 const createSessionId = (): string =>
-  `${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID()}`;
+  `${new Date().toISOString().replace(/[:.]/g, "-")}-${randomUUID()}`;
 
 export class ConsoleSession {
   private readonly sessionId: string;
@@ -56,7 +56,7 @@ export class ConsoleSession {
     await mkdir(this.sessionDir, { recursive: true });
     await this.eventLogger.init();
     await this.transcript.init();
-    await this.logEvent('session_start', { resume });
+    await this.logEvent("session_start", { resume });
   }
 
   get id(): string {
@@ -73,51 +73,51 @@ export class ConsoleSession {
       return null;
     }
 
-    if (trimmed.startsWith('/agent')) {
-      const [, agent] = trimmed.split(' ');
+    if (trimmed.startsWith("/agent")) {
+      const [, agent] = trimmed.split(" ");
       if (!agent) {
-        return 'Usage: /agent <claude|codex|gemini>';
+        return "Usage: /agent <claude|codex|gemini>";
       }
       await this.switchAgent(agent as ProviderId);
       return `Agent set to ${agent}`;
     }
 
-    if (trimmed.startsWith('/skillset')) {
-      const [, skillsetName] = trimmed.split(' ');
+    if (trimmed.startsWith("/skillset")) {
+      const [, skillsetName] = trimmed.split(" ");
       if (!skillsetName) {
-        return 'Usage: /skillset <name>';
+        return "Usage: /skillset <name>";
       }
       await this.switchSkillset(skillsetName);
       return `Skillset set to ${skillsetName}`;
     }
 
-    if (trimmed.startsWith('/run')) {
-      const command = trimmed.replace('/run', '').trim();
+    if (trimmed.startsWith("/run")) {
+      const command = trimmed.replace("/run", "").trim();
       if (!command) {
-        return 'Usage: /run <command>';
+        return "Usage: /run <command>";
       }
       return this.runCommand(command);
     }
 
-    if (trimmed.startsWith('/evidence')) {
+    if (trimmed.startsWith("/evidence")) {
       const evidencePath = await this.emitEvidence();
       return `Evidence bundle created at ${evidencePath}`;
     }
 
-    if (trimmed.startsWith('/resume')) {
-      return 'Use switchboard-console --resume <session-id> to resume sessions.';
+    if (trimmed.startsWith("/resume")) {
+      return "Use switchboard-console --resume <session-id> to resume sessions.";
     }
 
-    if (trimmed === '/exit') {
+    if (trimmed === "/exit") {
       await this.end();
-      return 'Session ended.';
+      return "Session ended.";
     }
 
     return this.sendMessage(trimmed);
   }
 
   async end(): Promise<void> {
-    await this.logEvent('session_end', {});
+    await this.logEvent("session_end", {});
     if (this.providerSession) {
       await this.providerSession.stop();
     }
@@ -134,29 +134,29 @@ export class ConsoleSession {
     }
     this.provider = next;
     this.providerSession = null;
-    await this.logEvent('step_start', { action: 'agent_switch', agent });
+    await this.logEvent("step_start", { action: "agent_switch", agent });
   }
 
   private async switchSkillset(skillsetName: string): Promise<void> {
     const skillsetFile = await this.skillsetStore.getWithPath(skillsetName);
     this.skillset = skillsetFile.skillset;
-    await this.logEvent('file_read', {
+    await this.logEvent("file_read", {
       target: skillsetFile.path,
-      reason: 'skillset_load',
+      reason: "skillset_load",
     });
     this.providerSession = null;
-    await this.logEvent('step_start', {
-      action: 'skillset_switch',
+    await this.logEvent("step_start", {
+      action: "skillset_switch",
       skillset: this.skillset.name,
     });
   }
 
   private async sendMessage(message: string): Promise<string> {
     if (!this.provider) {
-      await this.switchAgent('codex');
+      await this.switchAgent("codex");
     }
     if (!this.skillset) {
-      await this.switchSkillset('senior-swe');
+      await this.switchSkillset("senior-swe");
     }
 
     if (!this.providerSession) {
@@ -166,15 +166,15 @@ export class ConsoleSession {
       });
     }
 
-    await this.logEvent('step_start', {
-      action: 'message',
+    await this.logEvent("step_start", {
+      action: "message",
       provider: this.provider.id,
     });
 
     await this.transcript.write(`> ${message}`);
-    await this.logFileWrite(this.transcript.path, 'transcript_append');
+    await this.logFileWrite(this.transcript.path, "transcript_append");
 
-    let response = '';
+    let response = "";
     await this.providerSession.sendMessage(message, {
       onToken: (token) => {
         response += token;
@@ -183,13 +183,13 @@ export class ConsoleSession {
     });
 
     await this.transcript.write(response);
-    await this.logFileWrite(this.transcript.path, 'transcript_append');
+    await this.logFileWrite(this.transcript.path, "transcript_append");
     return response;
   }
 
   private async runCommand(command: string): Promise<string> {
     const decision = this.policyGate.evaluate(command);
-    await this.logEvent('tool_exec', {
+    await this.logEvent("tool_exec", {
       command,
       allowed: decision.allowed,
       reason: decision.reason,
@@ -201,52 +201,49 @@ export class ConsoleSession {
     }
 
     const output = await execAsync(command, { cwd: process.cwd() });
-    const commandDir = path.join(this.sessionDir, 'commands');
+    const commandDir = path.join(this.sessionDir, "commands");
     await mkdir(commandDir, { recursive: true });
-    const outputPath = path.join(
-      commandDir,
-      `${Date.now()}-${command.split(' ')[0]}.log`,
-    );
+    const outputPath = path.join(commandDir, `${Date.now()}-${command.split(" ")[0]}.log`);
     await writeFile(outputPath, `${output.stdout}\n${output.stderr}`);
-    await this.logFileWrite(outputPath, 'command_output');
+    await this.logFileWrite(outputPath, "command_output");
 
-    if (command.includes('test') || command.includes('smoke')) {
-      await this.logEvent('tests_run', { command });
+    if (command.includes("test") || command.includes("smoke")) {
+      await this.logEvent("tests_run", { command });
     }
 
-    return output.stdout || output.stderr || 'Command completed.';
+    return output.stdout || output.stderr || "Command completed.";
   }
 
   private async emitEvidence(): Promise<string> {
     const diffPath = await this.captureGitDiff();
     if (diffPath) {
-      await this.logFileWrite(diffPath, 'git_diff');
+      await this.logFileWrite(diffPath, "git_diff");
     }
     const bundler = new EvidenceBundler(this.sessionDir);
     const evidencePath = await bundler.createBundle();
-    await this.logFileWrite(evidencePath, 'evidence_bundle');
+    await this.logFileWrite(evidencePath, "evidence_bundle");
     return evidencePath;
   }
 
   private async logToolAction(action: ToolAction): Promise<void> {
-    if (action.type === 'tool_exec') {
-      await this.logEvent('tool_exec', { action });
+    if (action.type === "tool_exec") {
+      await this.logEvent("tool_exec", { action });
       return;
     }
-    if (action.type === 'file_read') {
-      await this.logEvent('file_read', { action });
+    if (action.type === "file_read") {
+      await this.logEvent("file_read", { action });
       return;
     }
-    if (action.type === 'file_write') {
-      await this.logEvent('file_write', { action });
+    if (action.type === "file_write") {
+      await this.logEvent("file_write", { action });
     }
   }
 
   private async logFileWrite(target: string, reason: string): Promise<void> {
-    await this.logEvent('file_write', { target, reason });
+    await this.logEvent("file_write", { target, reason });
   }
 
-  private async logEvent(type: EventRecord['type'], data: EventRecord['data']) {
+  private async logEvent(type: EventRecord["type"], data: EventRecord["data"]) {
     const event: EventRecord = {
       id: randomUUID(),
       type,
@@ -259,25 +256,25 @@ export class ConsoleSession {
 
   private async captureGitDiff(): Promise<string | null> {
     try {
-      const output = await execAsync('git diff --patch', {
+      const output = await execAsync("git diff --patch", {
         cwd: process.cwd(),
         maxBuffer: 10 * 1024 * 1024,
       });
-      const diffPath = path.join(this.sessionDir, 'git-diff.patch');
+      const diffPath = path.join(this.sessionDir, "git-diff.patch");
       await writeFile(diffPath, output.stdout);
-      await this.logEvent('tool_exec', {
-        command: 'git diff --patch',
+      await this.logEvent("tool_exec", {
+        command: "git diff --patch",
         allowed: true,
-        reason: 'evidence_bundle',
-        mode: 'allow-all',
+        reason: "evidence_bundle",
+        mode: "allow-all",
       });
       return diffPath;
     } catch (error) {
-      await this.logEvent('tool_exec', {
-        command: 'git diff --patch',
+      await this.logEvent("tool_exec", {
+        command: "git diff --patch",
         allowed: false,
         reason: error instanceof Error ? error.message : String(error),
-        mode: 'deny-by-default',
+        mode: "deny-by-default",
       });
       return null;
     }

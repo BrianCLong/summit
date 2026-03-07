@@ -9,7 +9,7 @@ import {
   ThreatLevel,
   TechnologyTrend,
   WeakSignal,
-} from './types.js';
+} from "./types.js";
 
 export interface ThreatMonitorConfig {
   categories: ThreatCategory[];
@@ -74,9 +74,7 @@ export class ThreatMonitor {
   /**
    * Identify disruptive threats
    */
-  async identifyDisruptiveThreats(
-    domain: string
-  ): Promise<EmergingThreat[]> {
+  async identifyDisruptiveThreats(domain: string): Promise<EmergingThreat[]> {
     const threats: EmergingThreat[] = [];
 
     // Scan for novel attack vectors
@@ -92,15 +90,10 @@ export class ThreatMonitor {
     const infoWarfare = await this.analyzeInformationWarfare(domain);
 
     // Combine findings into threat assessments
-    const allIndicators = [
-      ...attackVectors,
-      ...tactics,
-      ...grayZoneOps,
-      ...infoWarfare,
-    ];
+    const allIndicators = [...attackVectors, ...tactics, ...grayZoneOps, ...infoWarfare];
 
     for (const indicator of allIndicators) {
-      if (indicator.significance === 'high' || indicator.significance === 'critical') {
+      if (indicator.significance === "high" || indicator.significance === "critical") {
         const threat = this.createThreatFromIndicator(indicator, domain);
         threats.push(threat);
         this.threats.set(threat.id, threat);
@@ -130,12 +123,12 @@ export class ThreatMonitor {
       const signal: WeakSignal = {
         id: `signal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         signal: source.description,
-        context: source.context || '',
+        context: source.context || "",
         detectedDate: new Date(),
-        source: source.origin || 'unknown',
+        source: source.origin || "unknown",
         potentialImplications: this.assessImplications(source),
         relatedTrends: this.findRelatedTrends(source),
-        monitoringStatus: 'active',
+        monitoringStatus: "active",
         strengthening: false,
       };
 
@@ -150,17 +143,17 @@ export class ThreatMonitor {
    * Assess threat level based on indicators
    */
   assessThreatLevel(indicators: ThreatIndicator[]): ThreatLevel {
-    const criticalCount = indicators.filter(i => i.significance === 'critical').length;
-    const highCount = indicators.filter(i => i.significance === 'high').length;
-    const verifiedCount = indicators.filter(i => i.verified).length;
+    const criticalCount = indicators.filter((i) => i.significance === "critical").length;
+    const highCount = indicators.filter((i) => i.significance === "high").length;
+    const verifiedCount = indicators.filter((i) => i.verified).length;
 
-    const score = (criticalCount * 4) + (highCount * 2) + verifiedCount;
+    const score = criticalCount * 4 + highCount * 2 + verifiedCount;
 
-    if (score >= 15) return 'imminent';
-    if (score >= 10) return 'mature';
-    if (score >= 6) return 'developing';
-    if (score >= 3) return 'emerging';
-    return 'nascent';
+    if (score >= 15) return "imminent";
+    if (score >= 10) return "mature";
+    if (score >= 6) return "developing";
+    if (score >= 3) return "emerging";
+    return "nascent";
   }
 
   /**
@@ -170,7 +163,7 @@ export class ThreatMonitor {
     let threats = Array.from(this.threats.values());
 
     if (filter) {
-      threats = threats.filter(threat => {
+      threats = threats.filter((threat) => {
         return Object.entries(filter).every(([key, value]) => {
           return threat[key as keyof EmergingThreat] === value;
         });
@@ -179,11 +172,11 @@ export class ThreatMonitor {
 
     return threats.sort((a, b) => {
       const levelOrder: Record<ThreatLevel, number> = {
-        'imminent': 5,
-        'mature': 4,
-        'developing': 3,
-        'emerging': 2,
-        'nascent': 1,
+        imminent: 5,
+        mature: 4,
+        developing: 3,
+        emerging: 2,
+        nascent: 1,
       };
       return levelOrder[b.threatLevel] - levelOrder[a.threatLevel];
     });
@@ -208,7 +201,10 @@ export class ThreatMonitor {
 
   // Private helper methods
 
-  private async monitorResearchPublications(category: ThreatCategory, keywords: string[]): Promise<any[]> {
+  private async monitorResearchPublications(
+    category: ThreatCategory,
+    keywords: string[]
+  ): Promise<any[]> {
     // TODO: Integrate with research databases (arXiv, PubMed, Defense Technical Information Center)
     return [];
   }
@@ -228,9 +224,13 @@ export class ThreatMonitor {
     return [];
   }
 
-  private assessTrajectory(publications: any[], patents: any[], funding: any[]): 'accelerating' | 'steady' | 'decelerating' | 'plateauing' {
+  private assessTrajectory(
+    publications: any[],
+    patents: any[],
+    funding: any[]
+  ): "accelerating" | "steady" | "decelerating" | "plateauing" {
     // TODO: Analyze growth rates and trends
-    return 'steady';
+    return "steady";
   }
 
   private estimateMaturityLevel(publications: any[], patents: any[]): number {
@@ -243,9 +243,9 @@ export class ThreatMonitor {
     return 0;
   }
 
-  private assessInvestmentLevel(funding: any[]): 'low' | 'medium' | 'high' | 'very-high' {
+  private assessInvestmentLevel(funding: any[]): "low" | "medium" | "high" | "very-high" {
     // TODO: Categorize investment levels
-    return 'medium';
+    return "medium";
   }
 
   private identifyKeyPlayers(publications: any[], patents: any[]): string[] {
@@ -283,8 +283,8 @@ export class ThreatMonitor {
       id: `threat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: indicator.description,
       category: domain as ThreatCategory,
-      threatLevel: 'emerging',
-      confidence: 'medium',
+      threatLevel: "emerging",
+      confidence: "medium",
       description: indicator.description,
       firstDetected: new Date(),
       lastUpdated: new Date(),
@@ -292,11 +292,11 @@ export class ThreatMonitor {
       sources: [],
       relatedThreats: [],
       impact: {
-        military: 'medium',
-        economic: 'medium',
-        political: 'medium',
-        societal: 'medium',
-        technological: 'medium',
+        military: "medium",
+        economic: "medium",
+        political: "medium",
+        societal: "medium",
+        technological: "medium",
         description: indicator.description,
         affectedDomains: [domain],
       },
@@ -304,7 +304,7 @@ export class ThreatMonitor {
         nearTerm: false,
         midTerm: true,
         longTerm: false,
-        uncertaintyLevel: 'medium',
+        uncertaintyLevel: "medium",
       },
     };
   }

@@ -9,13 +9,13 @@ Moving to an MCP-first architecture standardizes our tool interfaces but introdu
 
 ## Top 5 Risks
 
-| Rank | Risk | Impact | Likelihood | Mitigation Status |
-|---|---|---|---|---|
-| 1 | **Prompt Injection leading to Tool Abuse** | Critical | High | **In Progress:** Human-in-the-loop requirements for sensitive tools. |
-| 2 | **Context Data Leakage** | High | Medium | **Planned:** Automated secret scanning in Context Kit. |
-| 3 | **Non-Deterministic Agent Behavior** | Medium | High | **Mitigated:** Mandatory deterministic schema enforcement. |
-| 4 | **Supply Chain Compromise (MCP Servers)** | High | Low | **Planned:** Server signing and allowlisting. |
-| 5 | **Resource Exhaustion (DoS)** | Low | Medium | **Mitigated:** Rate limiting and timeout enforcement in Runtime. |
+| Rank | Risk                                       | Impact   | Likelihood | Mitigation Status                                                    |
+| ---- | ------------------------------------------ | -------- | ---------- | -------------------------------------------------------------------- |
+| 1    | **Prompt Injection leading to Tool Abuse** | Critical | High       | **In Progress:** Human-in-the-loop requirements for sensitive tools. |
+| 2    | **Context Data Leakage**                   | High     | Medium     | **Planned:** Automated secret scanning in Context Kit.               |
+| 3    | **Non-Deterministic Agent Behavior**       | Medium   | High       | **Mitigated:** Mandatory deterministic schema enforcement.           |
+| 4    | **Supply Chain Compromise (MCP Servers)**  | High     | Low        | **Planned:** Server signing and allowlisting.                        |
+| 5    | **Resource Exhaustion (DoS)**              | Low      | Medium     | **Mitigated:** Rate limiting and timeout enforcement in Runtime.     |
 
 ## Mitigation Strategy
 

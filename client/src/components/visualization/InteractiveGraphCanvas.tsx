@@ -1,17 +1,10 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { useToast } from '../ToastContainer';
+import React, { useRef, useEffect, useState, useCallback } from "react";
+import { useToast } from "../ToastContainer";
 
 interface Node {
   id: string;
   label: string;
-  type:
-    | 'person'
-    | 'organization'
-    | 'ip'
-    | 'email'
-    | 'document'
-    | 'event'
-    | 'location';
+  type: "person" | "organization" | "ip" | "email" | "document" | "event" | "location";
   x: number;
   y: number;
   vx?: number;
@@ -31,7 +24,7 @@ interface Edge {
   id: string;
   source: string;
   target: string;
-  type: 'communication' | 'financial' | 'location' | 'association' | 'temporal';
+  type: "communication" | "financial" | "location" | "association" | "temporal";
   weight: number;
   label?: string;
   color: string;
@@ -53,7 +46,7 @@ interface InteractiveGraphCanvasProps {
   onNodeHover?: (node: Node | null) => void;
   onSelectionChange?: (selectedNodes: Node[]) => void;
   physics?: boolean;
-  layoutAlgorithm?: 'force' | 'circular' | 'hierarchical' | 'grid';
+  layoutAlgorithm?: "force" | "circular" | "hierarchical" | "grid";
   filters?: {
     nodeTypes?: string[];
     edgeTypes?: string[];
@@ -71,9 +64,9 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
   onNodeHover,
   onSelectionChange,
   physics = true,
-  layoutAlgorithm = 'force',
+  layoutAlgorithm = "force",
   filters,
-  className = '',
+  className = "",
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -95,44 +88,30 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
     if (filters) {
       if (filters.nodeTypes && filters.nodeTypes.length > 0) {
-        filteredNodes = filteredNodes.filter((node) =>
-          filters.nodeTypes!.includes(node.type),
-        );
+        filteredNodes = filteredNodes.filter((node) => filters.nodeTypes!.includes(node.type));
       }
 
       if (filters.minRisk !== undefined) {
-        filteredNodes = filteredNodes.filter(
-          (node) => node.risk >= filters.minRisk!,
-        );
+        filteredNodes = filteredNodes.filter((node) => node.risk >= filters.minRisk!);
       }
 
       if (filters.minConfidence !== undefined) {
-        filteredNodes = filteredNodes.filter(
-          (node) => node.confidence >= filters.minConfidence!,
-        );
+        filteredNodes = filteredNodes.filter((node) => node.confidence >= filters.minConfidence!);
       }
 
       // Filter edges to only include those between remaining nodes
       const nodeIds = new Set(filteredNodes.map((n) => n.id));
       filteredEdges = filteredEdges.filter(
-        (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+        (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target)
       );
 
       if (filters.edgeTypes && filters.edgeTypes.length > 0) {
-        filteredEdges = filteredEdges.filter((edge) =>
-          filters.edgeTypes!.includes(edge.type),
-        );
+        filteredEdges = filteredEdges.filter((edge) => filters.edgeTypes!.includes(edge.type));
       }
     }
 
     // Apply layout algorithm
-    const layoutedNodes = applyLayout(
-      filteredNodes,
-      filteredEdges,
-      layoutAlgorithm,
-      width,
-      height,
-    );
+    const layoutedNodes = applyLayout(filteredNodes, filteredEdges, layoutAlgorithm, width, height);
 
     setNodes(layoutedNodes);
     setEdges(filteredEdges);
@@ -140,17 +119,11 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
   // Apply layout algorithms
   const applyLayout = useCallback(
-    (
-      nodes: Node[],
-      edges: Edge[],
-      algorithm: string,
-      width: number,
-      height: number,
-    ): Node[] => {
+    (nodes: Node[], edges: Edge[], algorithm: string, width: number, height: number): Node[] => {
       const layoutedNodes = [...nodes];
 
       switch (algorithm) {
-        case 'circular':
+        case "circular":
           const radius = Math.min(width, height) * 0.3;
           const centerX = width / 2;
           const centerY = height / 2;
@@ -162,7 +135,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
           });
           break;
 
-        case 'grid':
+        case "grid":
           const cols = Math.ceil(Math.sqrt(layoutedNodes.length));
           const cellWidth = width / cols;
           const cellHeight = height / Math.ceil(layoutedNodes.length / cols);
@@ -173,7 +146,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
           });
           break;
 
-        case 'hierarchical':
+        case "hierarchical":
           // Simple hierarchical layout based on node connections
           const levels = new Map<string, number>();
           const visited = new Set<string>();
@@ -194,15 +167,10 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
             const outgoingEdges = edges.filter((e) => e.source === node.id);
             outgoingEdges.forEach((edge) => {
-              const targetNode = layoutedNodes.find(
-                (n) => n.id === edge.target,
-              );
+              const targetNode = layoutedNodes.find((n) => n.id === edge.target);
               if (targetNode && !visited.has(targetNode.id)) {
                 const newLevel = level + 1;
-                if (
-                  !levels.has(targetNode.id) ||
-                  levels.get(targetNode.id)! > newLevel
-                ) {
+                if (!levels.has(targetNode.id) || levels.get(targetNode.id)! > newLevel) {
                   levels.set(targetNode.id, newLevel);
                   queue.push({ node: targetNode, level: newLevel });
                 }
@@ -234,7 +202,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
           });
           break;
 
-        case 'force':
+        case "force":
         default:
           // Initialize with random positions if not set
           layoutedNodes.forEach((node) => {
@@ -250,12 +218,12 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
       return layoutedNodes;
     },
-    [],
+    []
   );
 
   // Physics simulation for force-directed layout
   const applyPhysics = useCallback(() => {
-    if (!physics || layoutAlgorithm !== 'force') return;
+    if (!physics || layoutAlgorithm !== "force") return;
 
     const alpha = 0.1;
     const linkStrength = 0.1;
@@ -397,10 +365,8 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
     if (isDragging && dragNode) {
       setNodes((prevNodes) =>
         prevNodes.map((node) =>
-          node.id === dragNode.id
-            ? { ...node, x: pos.x, y: pos.y, vx: 0, vy: 0 }
-            : node,
-        ),
+          node.id === dragNode.id ? { ...node, x: pos.x, y: pos.y, vx: 0, vy: 0 } : node
+        )
       );
       setDragNode((prev) => (prev ? { ...prev, x: pos.x, y: pos.y } : null));
     } else {
@@ -434,7 +400,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Clear canvas
@@ -476,12 +442,12 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         ctx.moveTo(endX, endY);
         ctx.lineTo(
           endX - arrowLength * Math.cos(angle - Math.PI / 6),
-          endY - arrowLength * Math.sin(angle - Math.PI / 6),
+          endY - arrowLength * Math.sin(angle - Math.PI / 6)
         );
         ctx.moveTo(endX, endY);
         ctx.lineTo(
           endX - arrowLength * Math.cos(angle + Math.PI / 6),
-          endY - arrowLength * Math.sin(angle + Math.PI / 6),
+          endY - arrowLength * Math.sin(angle + Math.PI / 6)
         );
         ctx.stroke();
 
@@ -490,10 +456,10 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
           const midX = (sourceNode.x + targetNode.x) / 2;
           const midY = (sourceNode.y + targetNode.y) / 2;
 
-          ctx.font = '12px Arial';
-          ctx.fillStyle = '#666';
+          ctx.font = "12px Arial";
+          ctx.fillStyle = "#666";
           ctx.globalAlpha = 0.8;
-          ctx.textAlign = 'center';
+          ctx.textAlign = "center";
           ctx.fillText(edge.label, midX, midY - 5);
         }
       }
@@ -508,7 +474,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
       // Draw selection highlight
       if (isSelected || isHovered) {
-        ctx.strokeStyle = isSelected ? '#007bff' : '#ffc107';
+        ctx.strokeStyle = isSelected ? "#007bff" : "#ffc107";
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.size + 3, 0, 2 * Math.PI);
@@ -522,28 +488,22 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       ctx.fill();
 
       // Draw node border
-      ctx.strokeStyle = '#333';
+      ctx.strokeStyle = "#333";
       ctx.lineWidth = 1;
       ctx.stroke();
 
       // Draw risk indicator
       if (node.risk > 7) {
-        ctx.fillStyle = '#dc3545';
+        ctx.fillStyle = "#dc3545";
         ctx.beginPath();
-        ctx.arc(
-          node.x + node.size - 3,
-          node.y - node.size + 3,
-          4,
-          0,
-          2 * Math.PI,
-        );
+        ctx.arc(node.x + node.size - 3, node.y - node.size + 3, 4, 0, 2 * Math.PI);
         ctx.fill();
       }
 
       // Draw label
-      ctx.font = '12px Arial';
-      ctx.fillStyle = '#333';
-      ctx.textAlign = 'center';
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#333";
+      ctx.textAlign = "center";
       ctx.fillText(node.label, node.x, node.y + node.size + 15);
 
       // Draw metadata on hover
@@ -551,17 +511,12 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         const tooltip = `${node.type} | Risk: ${node.risk}/10 | Conf: ${Math.round(node.confidence)}%`;
         const textWidth = ctx.measureText(tooltip).width;
 
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.fillRect(
-          node.x - textWidth / 2 - 5,
-          node.y - node.size - 35,
-          textWidth + 10,
-          20,
-        );
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.fillRect(node.x - textWidth / 2 - 5, node.y - node.size - 35, textWidth + 10, 20);
 
-        ctx.fillStyle = 'white';
-        ctx.font = '11px Arial';
-        ctx.textAlign = 'center';
+        ctx.fillStyle = "white";
+        ctx.font = "11px Arial";
+        ctx.textAlign = "center";
         ctx.fillText(tooltip, node.x, node.y - node.size - 20);
       }
     });
@@ -569,8 +524,8 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
     ctx.restore();
 
     // Draw FPS counter
-    ctx.fillStyle = '#666';
-    ctx.font = '12px monospace';
+    ctx.fillStyle = "#666";
+    ctx.font = "12px monospace";
     ctx.fillText(`FPS: ${fps}`, 10, 20);
     ctx.fillText(`Nodes: ${nodes.length} | Edges: ${edges.length}`, 10, 35);
     ctx.fillText(`Scale: ${transform.scale.toFixed(2)}x`, 10, 50);
@@ -609,36 +564,33 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
-        case 'Delete':
-        case 'Backspace':
+        case "Delete":
+        case "Backspace":
           if (selectedNodes.size > 0) {
             // Remove selected nodes (in real app, this would trigger a callback)
-            toast.info(
-              'Delete Nodes',
-              `Would delete ${selectedNodes.size} selected nodes`,
-            );
+            toast.info("Delete Nodes", `Would delete ${selectedNodes.size} selected nodes`);
           }
           break;
-        case 'a':
+        case "a":
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             setSelectedNodes(new Set(nodes.map((n) => n.id)));
             onSelectionChange?.(nodes);
           }
           break;
-        case 'Escape':
+        case "Escape":
           setSelectedNodes(new Set());
           onSelectionChange?.([]);
           break;
-        case 'f':
+        case "f":
           // Fit to view
           setTransform({ x: 0, y: 0, scale: 1 });
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedNodes, nodes, onSelectionChange, toast]);
 
   return (
@@ -652,9 +604,9 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
         style={{
-          cursor: isDragging ? 'grabbing' : hoveredNode ? 'pointer' : 'grab',
-          border: '1px solid #ddd',
-          borderRadius: '8px',
+          cursor: isDragging ? "grabbing" : hoveredNode ? "pointer" : "grab",
+          border: "1px solid #ddd",
+          borderRadius: "8px",
         }}
       />
 
@@ -697,8 +649,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       {selectedNodes.size > 0 && (
         <div className="absolute bottom-2 left-2 bg-white rounded-lg shadow-lg p-3">
           <div className="text-sm font-medium">
-            {selectedNodes.size} node{selectedNodes.size !== 1 ? 's' : ''}{' '}
-            selected
+            {selectedNodes.size} node{selectedNodes.size !== 1 ? "s" : ""} selected
           </div>
           <div className="text-xs text-gray-500 mt-1">
             Press Delete to remove • Ctrl+A to select all • Esc to clear
@@ -711,7 +662,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         <div className="absolute bottom-2 right-2 bg-black text-white rounded-lg p-2 text-sm max-w-xs">
           <div className="font-medium">{hoveredNode.label}</div>
           <div className="text-xs opacity-75">
-            Type: {hoveredNode.type} | Risk: {hoveredNode.risk}/10 | Confidence:{' '}
+            Type: {hoveredNode.type} | Risk: {hoveredNode.risk}/10 | Confidence:{" "}
             {Math.round(hoveredNode.confidence)}%
           </div>
         </div>

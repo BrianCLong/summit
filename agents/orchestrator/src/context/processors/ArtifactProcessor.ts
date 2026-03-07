@@ -1,4 +1,4 @@
-import { ContextProcessor, Session, WorkingContext, CompilationOptions } from '../types.js';
+import { ContextProcessor, Session, WorkingContext, CompilationOptions } from "../types.js";
 
 /**
  * ArtifactProcessor
@@ -7,7 +7,7 @@ import { ContextProcessor, Session, WorkingContext, CompilationOptions } from '.
  * By default, provides handles/summaries. Loads content only if requested/configured.
  */
 export class ArtifactProcessor implements ContextProcessor {
-  name = 'ArtifactProcessor';
+  name = "ArtifactProcessor";
 
   async process(
     context: WorkingContext,
@@ -15,7 +15,7 @@ export class ArtifactProcessor implements ContextProcessor {
     options: CompilationOptions
   ): Promise<WorkingContext> {
     // Check session for artifact references
-    const artifactRefs = session.metadata?.artifacts as string[] || [];
+    const artifactRefs = (session.metadata?.artifacts as string[]) || [];
 
     // In a real implementation, we would fetch artifacts from an ArtifactService
     // For now, we mock the resolution

@@ -5,24 +5,24 @@
  * with governance gates and hallucination scoring.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // LLM Provider Types
 // ============================================================================
 
-export type LLMProvider = 'claude' | 'gpt' | 'o1' | 'local';
+export type LLMProvider = "claude" | "gpt" | "o1" | "local";
 
 export type LLMModel =
-  | 'claude-3-5-sonnet-20241022'
-  | 'claude-3-opus-20240229'
-  | 'claude-3-haiku-20240307'
-  | 'gpt-4-turbo'
-  | 'gpt-4o'
-  | 'gpt-4o-mini'
-  | 'o1-preview'
-  | 'o1-mini'
-  | 'local-llama';
+  | "claude-3-5-sonnet-20241022"
+  | "claude-3-opus-20240229"
+  | "claude-3-haiku-20240307"
+  | "gpt-4-turbo"
+  | "gpt-4o"
+  | "gpt-4o-mini"
+  | "o1-preview"
+  | "o1-mini"
+  | "local-llama";
 
 export interface LLMProviderConfig {
   provider: LLMProvider;
@@ -36,7 +36,7 @@ export interface LLMProviderConfig {
 }
 
 export interface LLMMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  role: "system" | "user" | "assistant" | "tool";
   content: string;
   name?: string;
   toolCalls?: ToolCall[];
@@ -45,7 +45,7 @@ export interface LLMMessage {
 
 export interface ToolCall {
   id: string;
-  type: 'function';
+  type: "function";
   function: {
     name: string;
     arguments: string;
@@ -63,7 +63,7 @@ export interface LLMRequest {
 }
 
 export interface ToolDefinition {
-  type: 'function';
+  type: "function";
   function: {
     name: string;
     description: string;
@@ -94,7 +94,7 @@ export interface TokenUsage {
 // Chain Types
 // ============================================================================
 
-export type ChainStrategy = 'sequential' | 'parallel' | 'fallback' | 'consensus';
+export type ChainStrategy = "sequential" | "parallel" | "fallback" | "consensus";
 
 export interface ChainStep {
   id: string;
@@ -167,7 +167,7 @@ export interface StepResult {
 // Circuit Breaker Types
 // ============================================================================
 
-export type CircuitState = 'closed' | 'open' | 'half-open';
+export type CircuitState = "closed" | "open" | "half-open";
 
 export interface CircuitBreakerConfig {
   failureThreshold: number;
@@ -190,15 +190,15 @@ export interface CircuitBreakerState {
 // ============================================================================
 
 export type GovernanceGateType =
-  | 'content-filter'
-  | 'pii-detection'
-  | 'toxicity-check'
-  | 'prompt-injection'
-  | 'rate-limit'
-  | 'budget-limit'
-  | 'data-residency'
-  | 'classification-level'
-  | 'custom';
+  | "content-filter"
+  | "pii-detection"
+  | "toxicity-check"
+  | "prompt-injection"
+  | "rate-limit"
+  | "budget-limit"
+  | "data-residency"
+  | "classification-level"
+  | "custom";
 
 export interface GovernanceGate {
   id: string;
@@ -206,7 +206,7 @@ export interface GovernanceGate {
   type: GovernanceGateType;
   enabled: boolean;
   config: GovernanceGateConfig;
-  action: 'block' | 'warn' | 'log' | 'redact';
+  action: "block" | "warn" | "log" | "redact";
 }
 
 export interface GovernanceGateConfig {
@@ -225,9 +225,9 @@ export interface GovernanceViolation {
   gateId: string;
   gateName: string;
   gateType: GovernanceGateType;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
-  action: 'blocked' | 'warned' | 'logged' | 'redacted';
+  action: "blocked" | "warned" | "logged" | "redacted";
   timestamp: Date;
   input?: string;
   matched?: string[];
@@ -241,7 +241,7 @@ export interface ValidationResult {
 
 export interface ValidationIssue {
   type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   location?: { start: number; end: number };
 }
@@ -329,7 +329,7 @@ export interface BudgetConfig {
   maxDailyCostUSD: number;
   maxMonthlyCostUSD: number;
   warningThreshold: number; // 0-1
-  enforcementMode: 'soft' | 'hard';
+  enforcementMode: "soft" | "hard";
 }
 
 export interface BudgetState {
@@ -354,22 +354,22 @@ export interface BudgetEntry {
 // ============================================================================
 
 export type OrchestratorEvent =
-  | 'chain:started'
-  | 'chain:completed'
-  | 'chain:failed'
-  | 'step:started'
-  | 'step:completed'
-  | 'step:failed'
-  | 'step:retrying'
-  | 'step:fallback'
-  | 'governance:violation'
-  | 'governance:blocked'
-  | 'circuit:opened'
-  | 'circuit:closed'
-  | 'circuit:half-open'
-  | 'budget:warning'
-  | 'budget:exceeded'
-  | 'hallucination:detected';
+  | "chain:started"
+  | "chain:completed"
+  | "chain:failed"
+  | "step:started"
+  | "step:completed"
+  | "step:failed"
+  | "step:retrying"
+  | "step:fallback"
+  | "governance:violation"
+  | "governance:blocked"
+  | "circuit:opened"
+  | "circuit:closed"
+  | "circuit:half-open"
+  | "budget:warning"
+  | "budget:exceeded"
+  | "hallucination:detected";
 
 export interface OrchestratorEventPayload {
   event: OrchestratorEvent;
@@ -385,17 +385,21 @@ export interface OrchestratorEventPayload {
 // ============================================================================
 
 export const LLMMessageSchema = z.object({
-  role: z.enum(['system', 'user', 'assistant', 'tool']),
+  role: z.enum(["system", "user", "assistant", "tool"]),
   content: z.string(),
   name: z.string().optional(),
-  toolCalls: z.array(z.object({
-    id: z.string(),
-    type: z.literal('function'),
-    function: z.object({
-      name: z.string(),
-      arguments: z.string(),
-    }),
-  })).optional(),
+  toolCalls: z
+    .array(
+      z.object({
+        id: z.string(),
+        type: z.literal("function"),
+        function: z.object({
+          name: z.string(),
+          arguments: z.string(),
+        }),
+      })
+    )
+    .optional(),
   toolCallId: z.string().optional(),
 });
 
@@ -412,25 +416,25 @@ export const GovernanceGateSchema = z.object({
   id: z.string(),
   name: z.string(),
   type: z.enum([
-    'content-filter',
-    'pii-detection',
-    'toxicity-check',
-    'prompt-injection',
-    'rate-limit',
-    'budget-limit',
-    'data-residency',
-    'classification-level',
-    'custom',
+    "content-filter",
+    "pii-detection",
+    "toxicity-check",
+    "prompt-injection",
+    "rate-limit",
+    "budget-limit",
+    "data-residency",
+    "classification-level",
+    "custom",
   ]),
   enabled: z.boolean(),
-  action: z.enum(['block', 'warn', 'log', 'redact']),
+  action: z.enum(["block", "warn", "log", "redact"]),
 });
 
 export const ChainConfigSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  strategy: z.enum(['sequential', 'parallel', 'fallback', 'consensus']),
+  strategy: z.enum(["sequential", "parallel", "fallback", "consensus"]),
   timeout: z.number().positive(),
   maxRetries: z.number().nonnegative(),
 });

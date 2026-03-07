@@ -1,4 +1,4 @@
-import type { HealthSignal, HealthSnapshot } from './types';
+import type { HealthSignal, HealthSnapshot } from "./types";
 
 export class HealthMonitor {
   private readonly snapshots = new Map<string, HealthSnapshot>();
@@ -34,9 +34,7 @@ export class HealthMonitor {
   }
 
   listSnapshots(): HealthSnapshot[] {
-    return [...this.snapshots.values()].sort((a, b) =>
-      a.assetId.localeCompare(b.assetId),
-    );
+    return [...this.snapshots.values()].sort((a, b) => a.assetId.localeCompare(b.assetId));
   }
 
   getHistory(assetId: string, metric: string): number[] {

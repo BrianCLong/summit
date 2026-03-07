@@ -6,10 +6,12 @@ labels: ["a11y", "manual-check", "privacy"]
 ---
 
 ## Scope
+
 - Feature / page:
 - Build / environment:
 
 ## Manual runs
+
 - [ ] Screen reader path validated (NVDA/VoiceOver/Narrator)
 - [ ] Logical focus order confirmed matches `pnpm --filter @intelgraph/a11y-lab run check:focus-map`
 - [ ] No keyboard traps (Tab/Shift+Tab across modals/popovers)
@@ -19,9 +21,11 @@ labels: ["a11y", "manual-check", "privacy"]
 - [ ] No analytics/telemetry attached to content fields (DP guard enforced)
 
 ## Notes
+
 - Screenshots, SR transcripts, or video links:
 - Risks / follow-ups:
 
 ## Sign-off
+
 - Reviewed by:
 - Date:

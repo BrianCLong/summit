@@ -1,7 +1,7 @@
 name: Prune Stale PRs
 on:
   schedule:
-    - cron: '0 12 * * 1'
+    - cron: "0 12 * * 1"
 
 jobs:
   stale:
@@ -11,5 +11,5 @@ jobs:
         with:
           days-before-stale: 30
           days-before-close: 7
-          stale-pr-message: 'This PR has gone stale. Please update or it will be closed.'
-          close-pr-message: 'Closing due to inactivity. Reopen if needed.'
+          stale-pr-message: "This PR has gone stale. Please update or it will be closed."
+          close-pr-message: "Closing due to inactivity. Reopen if needed."

@@ -1,5 +1,5 @@
-import { Histogram, Registry, collectDefaultMetrics, Counter, Gauge } from 'prom-client';
-import { HealthStatus } from './types';
+import { Histogram, Registry, collectDefaultMetrics, Counter, Gauge } from "prom-client";
+import { HealthStatus } from "./types";
 
 export class ConnectorObservability {
   private registry: Registry;
@@ -14,27 +14,27 @@ export class ConnectorObservability {
     collectDefaultMetrics({ register: this.registry });
 
     this.latency = new Histogram({
-      name: 'connector_latency_seconds',
-      help: 'Latency per connector operation',
-      labelNames: ['connectorId']
+      name: "connector_latency_seconds",
+      help: "Latency per connector operation",
+      labelNames: ["connectorId"],
     });
 
     this.failures = new Counter({
-      name: 'connector_failures_total',
-      help: 'Count of connector failures',
-      labelNames: ['connectorId']
+      name: "connector_failures_total",
+      help: "Count of connector failures",
+      labelNames: ["connectorId"],
     });
 
     this.throughput = new Counter({
-      name: 'connector_success_total',
-      help: 'Successful connector operations',
-      labelNames: ['connectorId']
+      name: "connector_success_total",
+      help: "Successful connector operations",
+      labelNames: ["connectorId"],
     });
 
     this.lastSuccess = new Gauge({
-      name: 'connector_last_success_timestamp',
-      help: 'Last success timestamp per connector',
-      labelNames: ['connectorId']
+      name: "connector_last_success_timestamp",
+      help: "Last success timestamp per connector",
+      labelNames: ["connectorId"],
     });
 
     this.registry.registerMetric(this.latency);
@@ -47,25 +47,25 @@ export class ConnectorObservability {
     this.latency.labels(connectorId).observe(latencyMs / 1000);
     this.throughput.labels(connectorId).inc();
     this.lastSuccess.labels(connectorId).set(Date.now());
-    this.health.set(connectorId, 'connected');
+    this.health.set(connectorId, "connected");
   }
 
   recordFailure(connectorId: string) {
     this.failures.labels(connectorId).inc();
     const current = this.health.get(connectorId);
-    if (!current || current === 'connected') {
-      this.health.set(connectorId, 'degraded');
+    if (!current || current === "connected") {
+      this.health.set(connectorId, "degraded");
     } else {
-      this.health.set(connectorId, 'failing');
+      this.health.set(connectorId, "failing");
     }
   }
 
   pause(connectorId: string) {
-    this.health.set(connectorId, 'paused');
+    this.health.set(connectorId, "paused");
   }
 
   getHealth(connectorId: string): HealthStatus {
-    return this.health.get(connectorId) ?? 'degraded';
+    return this.health.get(connectorId) ?? "degraded";
   }
 
   metrics() {

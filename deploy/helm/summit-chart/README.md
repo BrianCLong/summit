@@ -27,14 +27,14 @@ helm uninstall summit
 
 The following table lists the configurable parameters of the Summit chart and their default values.
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `replicaCount` | Number of replicas | `1` |
-| `image.repository` | Image repository | `summit/app` |
-| `image.tag` | Image tag | `""` (Chart AppVersion) |
-| `service.backendPort` | Backend service port | `3000` |
-| `service.frontendPort` | Frontend service port | `8000` |
-| `resources` | CPU/Memory resource requests/limits | See values.yaml |
+| Parameter              | Description                         | Default                 |
+| ---------------------- | ----------------------------------- | ----------------------- |
+| `replicaCount`         | Number of replicas                  | `1`                     |
+| `image.repository`     | Image repository                    | `summit/app`            |
+| `image.tag`            | Image tag                           | `""` (Chart AppVersion) |
+| `service.backendPort`  | Backend service port                | `3000`                  |
+| `service.frontendPort` | Frontend service port               | `8000`                  |
+| `resources`            | CPU/Memory resource requests/limits | See values.yaml         |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 

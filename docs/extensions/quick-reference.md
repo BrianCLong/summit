@@ -37,20 +37,24 @@ summit-ext reload
 ## Capabilities
 
 ### Data
+
 - `data.ingestion` - Ingest data
 - `data.export` - Export data
 - `data.transform` - Transform data
 
 ### UI
+
 - `ui.widget` - UI widget
 - `ui.command` - UI command
 - `ui.panel` - UI panel
 
 ### Copilot
+
 - `copilot.tool` - Copilot tool
 - `copilot.skill` - Copilot skill
 
 ### Other
+
 - `analytics` - Analytics
 - `enrichment` - Data enrichment
 - `api.provider` - API provider
@@ -59,6 +63,7 @@ summit-ext reload
 ## Permissions
 
 ### Data Access
+
 - `entities:read` - Read entities
 - `entities:write` - Create/update entities
 - `relationships:read` - Read relationships
@@ -67,12 +72,14 @@ summit-ext reload
 - `investigations:write` - Create/update investigations
 
 ### System Access
+
 - `network:access` - Network access (⚠️ requires approval)
 - `fs:read` - File system read
 - `fs:write` - File system write (⚠️ requires approval)
 - `commands:execute` - Execute commands (⚠️ requires approval)
 
 ### API Access
+
 - `api:access` - Access Summit API
 - `webhook:register` - Register webhooks
 - `user:data` - Access user data
@@ -82,23 +89,23 @@ summit-ext reload
 ### Main Activation Function
 
 ```typescript
-import type { ExtensionContext, ExtensionActivation } from '@intelgraph/extensions';
+import type { ExtensionContext, ExtensionActivation } from "@intelgraph/extensions";
 
 export async function activate(context: ExtensionContext): Promise<ExtensionActivation> {
   const { logger, config, api, extensionPath, storagePath } = context;
 
-  logger.info('Activating...');
+  logger.info("Activating...");
 
   // Initialize extension...
 
   return {
     dispose: async () => {
-      logger.info('Deactivating...');
+      logger.info("Deactivating...");
       // Cleanup...
     },
     exports: {
       // Public API
-    }
+    },
   };
 }
 ```
@@ -107,34 +114,34 @@ export async function activate(context: ExtensionContext): Promise<ExtensionActi
 
 ```typescript
 // Entities
-await api.entities.create({ type: 'person', name: 'John' });
-await api.entities.update(id, { name: 'Jane' });
+await api.entities.create({ type: "person", name: "John" });
+await api.entities.update(id, { name: "Jane" });
 await api.entities.delete(id);
-const entities = await api.entities.query({ type: 'person' });
+const entities = await api.entities.query({ type: "person" });
 
 // Relationships
-await api.relationships.create({ from: id1, to: id2, type: 'knows' });
-const rels = await api.relationships.query({ type: 'knows' });
+await api.relationships.create({ from: id1, to: id2, type: "knows" });
+const rels = await api.relationships.query({ type: "knows" });
 
 // Investigations
-const inv = await api.investigations.create({ title: 'Investigation' });
+const inv = await api.investigations.create({ title: "Investigation" });
 const data = await api.investigations.get(invId);
-await api.investigations.update(invId, { status: 'active' });
+await api.investigations.update(invId, { status: "active" });
 
 // Storage (persistent)
-await api.storage.set('key', { data: 'value' });
-const data = await api.storage.get('key');
-await api.storage.delete('key');
+await api.storage.set("key", { data: "value" });
+const data = await api.storage.get("key");
+await api.storage.delete("key");
 
 // HTTP (if network:access granted)
-const res = await api.http?.get('https://api.example.com/data');
-await api.http?.post('https://api.example.com/data', { key: 'val' });
+const res = await api.http?.get("https://api.example.com/data");
+await api.http?.post("https://api.example.com/data", { key: "val" });
 
 // Logger
-logger.info('Info message');
-logger.warn('Warning message');
-logger.error('Error message');
-logger.debug('Debug message');
+logger.info("Info message");
+logger.warn("Warning message");
+logger.error("Error message");
+logger.debug("Debug message");
 ```
 
 ## Copilot Tools
@@ -237,10 +244,7 @@ export async function myCommand() {
 
 ```typescript
 // src/commands/analyze.ts
-export async function analyzeCmd(
-  args: { input: string },
-  options: { output: string }
-) {
+export async function analyzeCmd(args: { input: string }, options: { output: string }) {
   // Command logic...
 }
 ```
@@ -339,12 +343,12 @@ export async function activate(context: ExtensionContext) {
   const { logger, api } = context;
 
   // Load initial data
-  const data = await api.storage.get('cached-data');
+  const data = await api.storage.get("cached-data");
 
   if (!data) {
-    logger.info('Initializing data...');
+    logger.info("Initializing data...");
     const initialData = await fetchInitialData();
-    await api.storage.set('cached-data', initialData);
+    await api.storage.set("cached-data", initialData);
   }
 
   return { dispose: async () => {} };
@@ -358,14 +362,14 @@ export async function activate(context: ExtensionContext) {
   const { logger, config } = context;
 
   const interval = setInterval(async () => {
-    logger.debug('Running periodic task...');
+    logger.debug("Running periodic task...");
     await performTask();
   }, config.intervalMs || 60000);
 
   return {
     dispose: async () => {
       clearInterval(interval);
-    }
+    },
   };
 }
 ```
@@ -379,7 +383,7 @@ export async function myTool(params: any) {
     const result = await performOperation(params);
     return result;
   } catch (err) {
-    console.error('Tool failed:', err);
+    console.error("Tool failed:", err);
     throw new Error(`Operation failed: ${err.message}`);
   }
 }
@@ -388,22 +392,26 @@ export async function myTool(params: any) {
 ## Troubleshooting
 
 ### Extension not loading
+
 - Check `extension.json` is valid JSON
 - Verify entrypoint paths exist
 - Run `pnpm build`
 - Check logs: Look for error messages
 
 ### Permission denied
+
 - Add required permission to manifest
 - Check OPA policy
 - Contact admin for approval
 
 ### Tool not in copilot
+
 - Add `copilot.tool` to capabilities
 - Verify entrypoint is correct
 - Reload: `summit-ext reload`
 
 ### Command not in palette
+
 - Add `ui.command` to capabilities
 - Check entrypoint is correct
 - Reload: `summit-ext reload`
@@ -411,6 +419,7 @@ export async function myTool(params: any) {
 ## Examples
 
 See complete examples:
+
 - **Analytics Dashboard**: `extensions/examples/analytics-dashboard/`
 - **Basic Template**: `packages/extensions/templates/basic/`
 

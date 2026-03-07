@@ -1,7 +1,7 @@
 # Evidence ID Policy
 # Defines the standards for Evidence-IDs header usage
 
-schema_version: "1.1"  # Added AI-assisted analysis support
+schema_version: "1.1" # Added AI-assisted analysis support
 max_days_since_reviewed: 90
 required_headers:
   - Owner
@@ -32,18 +32,18 @@ report_out_dir: "artifacts/governance/evidence-id-consistency/${sha}"
 
 # AI-Enhanced Analysis Settings (optional, opt-in)
 # When ENABLE_QWEN_ANALYSIS=true, the gate can use AI for enhanced analysis
-ai_integration_enabled: false  # Default: disabled, opt-in only
-ai_model_pinned: "qwen-plus-2025-01-25"  # Pin to specific model version for consistency
-ai_temperature: 0  # Deterministic setting for consistent outputs
-ai_max_tokens: 1024  # Reasonable limit for governance analysis
+ai_integration_enabled: false # Default: disabled, opt-in only
+ai_model_pinned: "qwen-plus-2025-01-25" # Pin to specific model version for consistency
+ai_temperature: 0 # Deterministic setting for consistent outputs
+ai_max_tokens: 1024 # Reasonable limit for governance analysis
 
 # AI Patch Generation Settings (optional, opt-in)
 # When ENABLE_QWEN_PATCHES=true, the gate can generate patch suggestions
-ai_patch_generation_enabled: false  # Default: disabled, opt-in only
-ai_patch_max_context_lines: 20  # Limit context to prevent large patch outputs
+ai_patch_generation_enabled: false # Default: disabled, opt-in only
+ai_patch_max_context_lines: 20 # Limit context to prevent large patch outputs
 ai_patch_safety_filters:
-  - "no_secrets_in_output"  # Ensure no sensitive content in patches
-  - "evidence_id_format_validation"  # Verify suggested IDs follow format rules
+  - "no_secrets_in_output" # Ensure no sensitive content in patches
+  - "evidence_id_format_validation" # Verify suggested IDs follow format rules
 # Plan Stability Integration
 plan_stability_gate:
   enabled: true

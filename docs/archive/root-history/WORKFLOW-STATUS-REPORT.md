@@ -10,21 +10,24 @@ The bidirectional GitHub Actions mirror workflows between `BrianCLong/summit` (p
 ## Critical Issue: GitHub Actions Billing Block
 
 ### Problem
+
 All GitHub Actions workflows on `BrianCLong/summit` are failing with the following error:
 
 ```
-The job was not started because recent account payments have failed 
-or your spending limit needs to be increased. Please check the 
+The job was not started because recent account payments have failed
+or your spending limit needs to be increased. Please check the
 'Billing & plans' section in your settings
 ```
 
 ### Impact
+
 - **48 failed workflow runs** on mirror-to-enterprise.yml
 - **Complete blockage** of personal → enterprise synchronization
 - No code, issues, or repository changes are being mirrored to TopicalityLLC/Summit
 - All other CI/CD workflows on BrianCLong/summit are also blocked
 
 ### Resolution Required
+
 **IMMEDIATE ACTION NEEDED:** You must resolve the billing issue to restore workflow functionality.
 
 #### Steps to Resolve:
@@ -54,6 +57,7 @@ or your spending limit needs to be increased. Please check the
 **Status:** ❌ BLOCKED (Billing Issue)
 
 **Features Implemented:**
+
 - ✅ Automatic push-triggered mirroring
 - ✅ Manual workflow dispatch capability
 - ✅ Loop prevention (checks author name)
@@ -63,12 +67,14 @@ or your spending limit needs to be increased. Please check the
 - ✅ Force push with lease for safety
 
 **Configuration:**
+
 - **Triggers:** Push to main branch, manual dispatch
 - **Token:** ENTERPRISE_MIRROR_TOKEN (configured)
 - **Loop Prevention:** Skips if author is "github-actions[bot]"
-- **Branches:** Syncs main + release/* + hotfix/*
+- **Branches:** Syncs main + release/_ + hotfix/_
 
 **Workflow Run Statistics:**
+
 - Total runs: 48
 - Failed: 48 (100% - all due to billing)
 - Success: 0
@@ -81,23 +87,26 @@ or your spending limit needs to be increased. Please check the
 **Status:** ⏳ QUEUED (Waiting to Run)
 
 **Features Implemented:**
+
 - ✅ Manual workflow dispatch capability
 - ✅ Loop prevention (checks author name)
-- ✅ Release branch synchronization  
+- ✅ Release branch synchronization
 - ✅ Comprehensive error handling
 - ✅ Detailed job notifications
 - ✅ Force push with lease for safety
 
 **Configuration:**
+
 - **Triggers:** Manual dispatch only (workflow_dispatch)
 - **Token:** PERSONAL_MIRROR_TOKEN (configured)
 - **Loop Prevention:** Skips if author is "github-actions[bot]"
-- **Branches:** Syncs main + release/* + hotfix/*
+- **Branches:** Syncs main + release/_ + hotfix/_
 
 **Workflow Run Statistics:**
+
 - Total runs: 4
 - Failed: 0
-- Success: 0  
+- Success: 0
 - Queued: 1 (manual trigger from setup, waiting to execute)
 - Last queued: Today at 8:39 PM
 
@@ -106,6 +115,7 @@ or your spending limit needs to be increased. Please check the
 ## Technical Implementation Details
 
 ### Loop Prevention Mechanism
+
 Both workflows implement identical loop prevention:
 
 ```yaml
@@ -130,6 +140,7 @@ This prevents infinite loops by detecting when a commit was made by the GitHub A
 ### Security & Tokens
 
 **Configured Tokens:**
+
 1. **ENTERPRISE_MIRROR_TOKEN**
    - Stored in: BrianCLong/summit secrets
    - Permissions: Full repository access to TopicalityLLC/Summit
@@ -141,6 +152,7 @@ This prevents infinite loops by detecting when a commit was made by the GitHub A
    - Used for: Enterprise → Personal sync
 
 **Token Requirements:**
+
 - `repo` scope (full control of private repositories)
 - `workflow` scope (update workflow files)
 - Valid and not expired
@@ -149,11 +161,13 @@ This prevents infinite loops by detecting when a commit was made by the GitHub A
 ### Branch Synchronization Strategy
 
 Both workflows sync:
+
 - **Main branch:** Primary development branch
 - **Release branches:** `release/*` pattern
 - **Hotfix branches:** `hotfix/*` pattern
 
 **Sync Command:**
+
 ```bash
 git fetch origin
 git push --mirror --force-with-lease https://x-access-token:${TOKEN}@github.com/TARGET_REPO
@@ -253,11 +267,13 @@ Once billing is resolved, complete these tests:
 ## Support Resources
 
 ### GitHub Documentation
+
 - [GitHub Actions Billing](https://docs.github.com/en/billing/managing-billing-for-github-actions)
 - [Managing Workflow Runs](https://docs.github.com/en/actions/managing-workflow-runs)
 - [Personal Access Tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 
 ### Workflow URLs
+
 - [mirror-to-enterprise.yml runs](https://github.com/BrianCLong/summit/actions/workflows/mirror-to-enterprise.yml)
 - [mirror-to-personal.yml runs](https://github.com/TopicalityLLC/Summit/actions/workflows/mirror-to-personal.yml)
 - [GitHub Billing Settings](https://github.com/settings/billing/summary)
@@ -265,21 +281,25 @@ Once billing is resolved, complete these tests:
 ### Quick Troubleshooting
 
 **Workflow not starting?**
+
 - Check billing status first
 - Verify workflow is enabled
 - Check token permissions
 
 **Workflow running but failing?**
+
 - Review job logs for specific errors
 - Verify token hasn't expired
 - Check repository permissions
 
 **Loop detected?**
+
 - Check recent commits for bot authorship
 - Verify loop prevention logic is working
 - May need to manually break loop by disabling workflows temporarily
 
 **Changes not syncing?**
+
 - Verify workflow completed successfully
 - Check target repository for updates
 - Review force-push settings

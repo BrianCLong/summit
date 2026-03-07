@@ -5,104 +5,114 @@
  * Performs security analysis, vulnerability scanning, and compliance checks
  */
 
-import { spawn, exec } from 'child_process'
-import { promisify } from 'util'
-import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs'
-import { join, resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-import crypto from 'crypto'
+import { spawn, exec } from "child_process";
+import { promisify } from "util";
+import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSync } from "fs";
+import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import crypto from "crypto";
 
-const execAsync = promisify(exec)
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const root = resolve(__dirname, '..')
+const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const root = resolve(__dirname, "..");
 
 class SecurityScanner {
   constructor() {
-    this.reportDir = join(root, 'test-results', 'security')
+    this.reportDir = join(root, "test-results", "security");
     this.results = {
       dependencies: null,
       secrets: null,
       code: null,
       headers: null,
       permissions: null,
-      bundleSecurity: null
-    }
-    this.startTime = Date.now()
-    this.findings = []
+      bundleSecurity: null,
+    };
+    this.startTime = Date.now();
+    this.findings = [];
   }
 
   async setup() {
-    console.log('🔒 Setting up security scanner...')
-    
+    console.log("🔒 Setting up security scanner...");
+
     // Create report directory
     if (!existsSync(this.reportDir)) {
-      mkdirSync(this.reportDir, { recursive: true })
+      mkdirSync(this.reportDir, { recursive: true });
     }
   }
 
   async scanDependencies() {
-    console.log('📦 Scanning dependencies for vulnerabilities...')
-    
+    console.log("📦 Scanning dependencies for vulnerabilities...");
+
     try {
       // Run npm audit
-      const { stdout: auditOutput } = await execAsync('npm audit --json', {
+      const { stdout: auditOutput } = await execAsync("npm audit --json", {
         cwd: root,
-        timeout: 30000
-      }).catch(error => ({ stdout: error.stdout || '{}' }))
+        timeout: 30000,
+      }).catch((error) => ({ stdout: error.stdout || "{}" }));
 
-      let auditResults
+      let auditResults;
       try {
-        auditResults = JSON.parse(auditOutput)
+        auditResults = JSON.parse(auditOutput);
       } catch {
-        auditResults = { vulnerabilities: {}, metadata: {} }
+        auditResults = { vulnerabilities: {}, metadata: {} };
       }
 
       // Analyze package.json for security issues
-      const packageJson = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
-      const packageLock = existsSync(join(root, 'package-lock.json')) 
-        ? JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'))
-        : null
+      const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+      const packageLock = existsSync(join(root, "package-lock.json"))
+        ? JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8"))
+        : null;
 
-      const dependencyAnalysis = this.analyzeDependencies(packageJson, packageLock)
-      
+      const dependencyAnalysis = this.analyzeDependencies(packageJson, packageLock);
+
       const result = {
-        type: 'dependencies',
+        type: "dependencies",
         vulnerabilities: auditResults.vulnerabilities || {},
         metadata: auditResults.metadata || {},
         packageAnalysis: dependencyAnalysis,
         summary: {
           total: Object.keys(auditResults.vulnerabilities || {}).length,
-          critical: Object.values(auditResults.vulnerabilities || {}).filter(v => v.severity === 'critical').length,
-          high: Object.values(auditResults.vulnerabilities || {}).filter(v => v.severity === 'high').length,
-          moderate: Object.values(auditResults.vulnerabilities || {}).filter(v => v.severity === 'moderate').length,
-          low: Object.values(auditResults.vulnerabilities || {}).filter(v => v.severity === 'low').length
+          critical: Object.values(auditResults.vulnerabilities || {}).filter(
+            (v) => v.severity === "critical"
+          ).length,
+          high: Object.values(auditResults.vulnerabilities || {}).filter(
+            (v) => v.severity === "high"
+          ).length,
+          moderate: Object.values(auditResults.vulnerabilities || {}).filter(
+            (v) => v.severity === "moderate"
+          ).length,
+          low: Object.values(auditResults.vulnerabilities || {}).filter((v) => v.severity === "low")
+            .length,
         },
-        passed: Object.keys(auditResults.vulnerabilities || {}).length === 0
-      }
+        passed: Object.keys(auditResults.vulnerabilities || {}).length === 0,
+      };
 
-      this.results.dependencies = result
-      
+      this.results.dependencies = result;
+
       if (result.summary.total > 0) {
         this.findings.push({
-          severity: result.summary.critical > 0 ? 'critical' : 
-                   result.summary.high > 0 ? 'high' : 'moderate',
-          category: 'dependencies',
+          severity:
+            result.summary.critical > 0
+              ? "critical"
+              : result.summary.high > 0
+                ? "high"
+                : "moderate",
+          category: "dependencies",
           message: `Found ${result.summary.total} dependency vulnerabilities`,
-          details: result.summary
-        })
+          details: result.summary,
+        });
       }
 
-      console.log(`  ✅ Dependency scan completed: ${result.summary.total} vulnerabilities found`)
-      
+      console.log(`  ✅ Dependency scan completed: ${result.summary.total} vulnerabilities found`);
     } catch (error) {
       this.results.dependencies = {
-        type: 'dependencies',
+        type: "dependencies",
         passed: false,
-        error: error.message
-      }
-      console.log('  ❌ Dependency scan failed:', error.message)
+        error: error.message,
+      };
+      console.log("  ❌ Dependency scan failed:", error.message);
     }
   }
 
@@ -112,756 +122,796 @@ class SecurityScanner {
       devDependencies: Object.keys(packageJson.devDependencies || {}),
       riskyPackages: [],
       outdatedPackages: [],
-      licenseIssues: []
-    }
+      licenseIssues: [],
+    };
 
     // Check for commonly vulnerable packages
-    const riskyPackagePatterns = [
-      'lodash', 'moment', 'request', 'node-sass', 'gulp'
-    ]
+    const riskyPackagePatterns = ["lodash", "moment", "request", "node-sass", "gulp"];
 
-    analysis.directDependencies.forEach(pkg => {
-      if (riskyPackagePatterns.some(pattern => pkg.includes(pattern))) {
+    analysis.directDependencies.forEach((pkg) => {
+      if (riskyPackagePatterns.some((pattern) => pkg.includes(pattern))) {
         analysis.riskyPackages.push({
           package: pkg,
-          reason: 'Commonly vulnerable package - consider alternatives'
-        })
+          reason: "Commonly vulnerable package - consider alternatives",
+        });
       }
-    })
+    });
 
     // Check for pinned versions (security best practice)
-    const unpinnedDeps = []
+    const unpinnedDeps = [];
     Object.entries(packageJson.dependencies || {}).forEach(([pkg, version]) => {
-      if (version.startsWith('^') || version.startsWith('~')) {
-        unpinnedDeps.push(`${pkg}@${version}`)
+      if (version.startsWith("^") || version.startsWith("~")) {
+        unpinnedDeps.push(`${pkg}@${version}`);
       }
-    })
+    });
 
     if (unpinnedDeps.length > 0) {
       analysis.riskyPackages.push({
-        package: 'version-pinning',
+        package: "version-pinning",
         reason: `${unpinnedDeps.length} dependencies use flexible versioning`,
-        details: unpinnedDeps.slice(0, 5)
-      })
+        details: unpinnedDeps.slice(0, 5),
+      });
     }
 
-    return analysis
+    return analysis;
   }
 
   async scanForSecrets() {
-    console.log('🔍 Scanning for exposed secrets and sensitive data...')
-    
+    console.log("🔍 Scanning for exposed secrets and sensitive data...");
+
     try {
       const secretPatterns = [
-        { name: 'AWS Access Key', pattern: /AKIA[0-9A-Z]{16}/, severity: 'critical' },
-        { name: 'AWS Secret Key', pattern: /[0-9a-zA-Z\/+]{40}/, severity: 'critical' },
-        { name: 'Private Key', pattern: /-----BEGIN (RSA )?PRIVATE KEY-----/, severity: 'critical' },
-        { name: 'JWT Token', pattern: /eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*/, severity: 'high' },
-        { name: 'API Key', pattern: /[Aa][Pp][Ii]_?[Kk][Ee][Yy].*[\'|"][0-9a-zA-Z]{32,45}[\'|"]/, severity: 'high' },
-        { name: 'Password in Code', pattern: /[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd].*[\'|"][^\'|"]{6,}[\'|"]/, severity: 'moderate' },
-        { name: 'Database URL', pattern: /(mongodb|mysql|postgres):\/\/[^\s'"]+/, severity: 'moderate' }
-      ]
+        { name: "AWS Access Key", pattern: /AKIA[0-9A-Z]{16}/, severity: "critical" },
+        { name: "AWS Secret Key", pattern: /[0-9a-zA-Z\/+]{40}/, severity: "critical" },
+        {
+          name: "Private Key",
+          pattern: /-----BEGIN (RSA )?PRIVATE KEY-----/,
+          severity: "critical",
+        },
+        {
+          name: "JWT Token",
+          pattern: /eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*/,
+          severity: "high",
+        },
+        {
+          name: "API Key",
+          pattern: /[Aa][Pp][Ii]_?[Kk][Ee][Yy].*[\'|"][0-9a-zA-Z]{32,45}[\'|"]/,
+          severity: "high",
+        },
+        {
+          name: "Password in Code",
+          pattern: /[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd].*[\'|"][^\'|"]{6,}[\'|"]/,
+          severity: "moderate",
+        },
+        {
+          name: "Database URL",
+          pattern: /(mongodb|mysql|postgres):\/\/[^\s'"]+/,
+          severity: "moderate",
+        },
+      ];
 
-      const findings = []
-      const filesToScan = this.getSourceFiles()
+      const findings = [];
+      const filesToScan = this.getSourceFiles();
 
       for (const file of filesToScan) {
         try {
-          const content = readFileSync(file, 'utf8')
-          const lines = content.split('\n')
+          const content = readFileSync(file, "utf8");
+          const lines = content.split("\n");
 
           secretPatterns.forEach(({ name, pattern, severity }) => {
             lines.forEach((line, lineNumber) => {
-              const matches = line.match(pattern)
+              const matches = line.match(pattern);
               if (matches) {
                 // Skip false positives (comments, examples, etc.)
-                if (line.trim().startsWith('//') || 
-                    line.trim().startsWith('*') ||
-                    line.includes('example') ||
-                    line.includes('placeholder')) {
-                  return
+                if (
+                  line.trim().startsWith("//") ||
+                  line.trim().startsWith("*") ||
+                  line.includes("example") ||
+                  line.includes("placeholder")
+                ) {
+                  return;
                 }
 
                 findings.push({
                   type: name,
                   severity,
-                  file: file.replace(root, ''),
+                  file: file.replace(root, ""),
                   line: lineNumber + 1,
-                  match: matches[0].substring(0, 50) + '...'
-                })
+                  match: matches[0].substring(0, 50) + "...",
+                });
               }
-            })
-          })
+            });
+          });
         } catch (error) {
           // Skip files that can't be read
-          continue
+          continue;
         }
       }
 
       // Check for .env files in inappropriate locations
-      const envFiles = this.findEnvFiles()
-      envFiles.forEach(envFile => {
-        if (!envFile.includes('example') && !envFile.includes('template')) {
+      const envFiles = this.findEnvFiles();
+      envFiles.forEach((envFile) => {
+        if (!envFile.includes("example") && !envFile.includes("template")) {
           findings.push({
-            type: 'Environment File',
-            severity: 'moderate',
-            file: envFile.replace(root, ''),
+            type: "Environment File",
+            severity: "moderate",
+            file: envFile.replace(root, ""),
             line: 1,
-            match: 'Environment file detected'
-          })
+            match: "Environment file detected",
+          });
         }
-      })
+      });
 
       const result = {
-        type: 'secrets',
+        type: "secrets",
         findings,
         summary: {
           total: findings.length,
-          critical: findings.filter(f => f.severity === 'critical').length,
-          high: findings.filter(f => f.severity === 'high').length,
-          moderate: findings.filter(f => f.severity === 'moderate').length
+          critical: findings.filter((f) => f.severity === "critical").length,
+          high: findings.filter((f) => f.severity === "high").length,
+          moderate: findings.filter((f) => f.severity === "moderate").length,
         },
-        passed: findings.length === 0
-      }
+        passed: findings.length === 0,
+      };
 
-      this.results.secrets = result
+      this.results.secrets = result;
 
       if (result.summary.total > 0) {
         this.findings.push({
-          severity: result.summary.critical > 0 ? 'critical' : 
-                   result.summary.high > 0 ? 'high' : 'moderate',
-          category: 'secrets',
+          severity:
+            result.summary.critical > 0
+              ? "critical"
+              : result.summary.high > 0
+                ? "high"
+                : "moderate",
+          category: "secrets",
           message: `Found ${result.summary.total} potential secret exposures`,
-          details: result.summary
-        })
+          details: result.summary,
+        });
       }
 
-      console.log(`  ✅ Secret scan completed: ${result.summary.total} potential secrets found`)
-      
+      console.log(`  ✅ Secret scan completed: ${result.summary.total} potential secrets found`);
     } catch (error) {
       this.results.secrets = {
-        type: 'secrets',
+        type: "secrets",
         passed: false,
-        error: error.message
-      }
-      console.log('  ❌ Secret scan failed:', error.message)
+        error: error.message,
+      };
+      console.log("  ❌ Secret scan failed:", error.message);
     }
   }
 
   async scanCodeSecurity() {
-    console.log('🔎 Scanning code for security vulnerabilities...')
-    
+    console.log("🔎 Scanning code for security vulnerabilities...");
+
     try {
-      const codeIssues = []
-      const filesToScan = this.getSourceFiles().filter(f => 
-        f.endsWith('.js') || f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.jsx')
-      )
+      const codeIssues = [];
+      const filesToScan = this.getSourceFiles().filter(
+        (f) => f.endsWith(".js") || f.endsWith(".ts") || f.endsWith(".tsx") || f.endsWith(".jsx")
+      );
 
       const securityPatterns = [
         {
-          name: 'eval() usage',
+          name: "eval() usage",
           pattern: /\beval\s*\(/g,
-          severity: 'high',
-          description: 'eval() can execute arbitrary code and is a security risk'
+          severity: "high",
+          description: "eval() can execute arbitrary code and is a security risk",
         },
         {
-          name: 'innerHTML usage',
+          name: "innerHTML usage",
           pattern: /\.innerHTML\s*=/g,
-          severity: 'moderate',
-          description: 'innerHTML can lead to XSS vulnerabilities'
+          severity: "moderate",
+          description: "innerHTML can lead to XSS vulnerabilities",
         },
         {
-          name: 'document.write usage',
+          name: "document.write usage",
           pattern: /document\.write\s*\(/g,
-          severity: 'moderate',
-          description: 'document.write can be vulnerable to XSS'
+          severity: "moderate",
+          description: "document.write can be vulnerable to XSS",
         },
         {
-          name: 'Unsafe regex',
+          name: "Unsafe regex",
           pattern: /new RegExp\([^)]*\$[^)]*\)/g,
-          severity: 'low',
-          description: 'Dynamic regex construction can be vulnerable to ReDoS'
+          severity: "low",
+          description: "Dynamic regex construction can be vulnerable to ReDoS",
         },
         {
-          name: 'HTTP URLs',
+          name: "HTTP URLs",
           pattern: /['"](http:\/\/[^'"]+)['"]/g,
-          severity: 'low',
-          description: 'HTTP URLs should be HTTPS in production'
+          severity: "low",
+          description: "HTTP URLs should be HTTPS in production",
         },
         {
-          name: 'Hardcoded localhost',
+          name: "Hardcoded localhost",
           pattern: /['"](.*localhost.*)['"]/g,
-          severity: 'low',
-          description: 'Hardcoded localhost URLs should be configurable'
-        }
-      ]
+          severity: "low",
+          description: "Hardcoded localhost URLs should be configurable",
+        },
+      ];
 
       for (const file of filesToScan) {
         try {
-          const content = readFileSync(file, 'utf8')
-          const lines = content.split('\n')
+          const content = readFileSync(file, "utf8");
+          const lines = content.split("\n");
 
           securityPatterns.forEach(({ name, pattern, severity, description }) => {
             lines.forEach((line, lineNumber) => {
-              const matches = line.match(pattern)
+              const matches = line.match(pattern);
               if (matches) {
                 // Skip comments and test files
-                if (line.trim().startsWith('//') || 
-                    line.trim().startsWith('*') ||
-                    file.includes('.test.') ||
-                    file.includes('.spec.')) {
-                  return
+                if (
+                  line.trim().startsWith("//") ||
+                  line.trim().startsWith("*") ||
+                  file.includes(".test.") ||
+                  file.includes(".spec.")
+                ) {
+                  return;
                 }
 
                 codeIssues.push({
                   type: name,
                   severity,
                   description,
-                  file: file.replace(root, ''),
+                  file: file.replace(root, ""),
                   line: lineNumber + 1,
-                  code: line.trim().substring(0, 100)
-                })
+                  code: line.trim().substring(0, 100),
+                });
               }
-            })
-          })
+            });
+          });
         } catch (error) {
-          continue
+          continue;
         }
       }
 
       const result = {
-        type: 'code',
+        type: "code",
         issues: codeIssues,
         summary: {
           total: codeIssues.length,
-          high: codeIssues.filter(i => i.severity === 'high').length,
-          moderate: codeIssues.filter(i => i.severity === 'moderate').length,
-          low: codeIssues.filter(i => i.severity === 'low').length
+          high: codeIssues.filter((i) => i.severity === "high").length,
+          moderate: codeIssues.filter((i) => i.severity === "moderate").length,
+          low: codeIssues.filter((i) => i.severity === "low").length,
         },
-        passed: codeIssues.filter(i => i.severity === 'high').length === 0
-      }
+        passed: codeIssues.filter((i) => i.severity === "high").length === 0,
+      };
 
-      this.results.code = result
+      this.results.code = result;
 
       if (result.summary.high > 0) {
         this.findings.push({
-          severity: 'high',
-          category: 'code',
+          severity: "high",
+          category: "code",
           message: `Found ${result.summary.high} high-severity code security issues`,
-          details: result.summary
-        })
+          details: result.summary,
+        });
       }
 
-      console.log(`  ✅ Code scan completed: ${result.summary.total} security issues found`)
-      
+      console.log(`  ✅ Code scan completed: ${result.summary.total} security issues found`);
     } catch (error) {
       this.results.code = {
-        type: 'code',
+        type: "code",
         passed: false,
-        error: error.message
-      }
-      console.log('  ❌ Code scan failed:', error.message)
+        error: error.message,
+      };
+      console.log("  ❌ Code scan failed:", error.message);
     }
   }
 
   async scanSecurityHeaders() {
-    console.log('🛡️ Checking security headers configuration...')
-    
+    console.log("🛡️ Checking security headers configuration...");
+
     try {
       // Check if we have nginx.conf or other server configurations
       const configFiles = [
-        join(root, 'nginx.conf'),
-        join(root, 'public', '_headers'),
-        join(root, 'vercel.json'),
-        join(root, 'netlify.toml')
-      ]
+        join(root, "nginx.conf"),
+        join(root, "public", "_headers"),
+        join(root, "vercel.json"),
+        join(root, "netlify.toml"),
+      ];
 
-      const headerChecks = []
-      let hasSecurityConfig = false
+      const headerChecks = [];
+      let hasSecurityConfig = false;
 
       for (const configFile of configFiles) {
         if (existsSync(configFile)) {
-          hasSecurityConfig = true
-          const content = readFileSync(configFile, 'utf8')
-          
+          hasSecurityConfig = true;
+          const content = readFileSync(configFile, "utf8");
+
           const requiredHeaders = [
-            { name: 'X-Content-Type-Options', value: 'nosniff' },
-            { name: 'X-Frame-Options', value: 'DENY|SAMEORIGIN' },
-            { name: 'X-XSS-Protection', value: '1; mode=block' },
-            { name: 'Content-Security-Policy', value: '.*' },
-            { name: 'Referrer-Policy', value: '.*' },
-            { name: 'Strict-Transport-Security', value: '.*' }
-          ]
+            { name: "X-Content-Type-Options", value: "nosniff" },
+            { name: "X-Frame-Options", value: "DENY|SAMEORIGIN" },
+            { name: "X-XSS-Protection", value: "1; mode=block" },
+            { name: "Content-Security-Policy", value: ".*" },
+            { name: "Referrer-Policy", value: ".*" },
+            { name: "Strict-Transport-Security", value: ".*" },
+          ];
 
           requiredHeaders.forEach(({ name, value }) => {
-            const pattern = new RegExp(`${name}.*${value}`, 'i')
-            const found = pattern.test(content)
-            
+            const pattern = new RegExp(`${name}.*${value}`, "i");
+            const found = pattern.test(content);
+
             headerChecks.push({
               header: name,
               required: true,
               found,
-              severity: found ? 'info' : 'moderate',
-              configFile: configFile.replace(root, '')
-            })
-          })
-          break
+              severity: found ? "info" : "moderate",
+              configFile: configFile.replace(root, ""),
+            });
+          });
+          break;
         }
       }
 
       // Check for index.html meta security tags
-      const indexHtml = join(root, 'index.html')
+      const indexHtml = join(root, "index.html");
       if (existsSync(indexHtml)) {
-        const htmlContent = readFileSync(indexHtml, 'utf8')
-        
+        const htmlContent = readFileSync(indexHtml, "utf8");
+
         const metaTags = [
-          { name: 'Content-Security-Policy', pattern: /<meta.*http-equiv.*Content-Security-Policy/i },
-          { name: 'X-Content-Type-Options', pattern: /<meta.*http-equiv.*X-Content-Type-Options/i }
-        ]
+          {
+            name: "Content-Security-Policy",
+            pattern: /<meta.*http-equiv.*Content-Security-Policy/i,
+          },
+          { name: "X-Content-Type-Options", pattern: /<meta.*http-equiv.*X-Content-Type-Options/i },
+        ];
 
         metaTags.forEach(({ name, pattern }) => {
-          const found = pattern.test(htmlContent)
+          const found = pattern.test(htmlContent);
           headerChecks.push({
             header: name,
             required: false,
             found,
-            severity: 'info',
-            configFile: '/index.html'
-          })
-        })
+            severity: "info",
+            configFile: "/index.html",
+          });
+        });
       }
 
       const result = {
-        type: 'headers',
+        type: "headers",
         hasSecurityConfig,
         checks: headerChecks,
         summary: {
           total: headerChecks.length,
-          configured: headerChecks.filter(c => c.found).length,
-          missing: headerChecks.filter(c => c.required && !c.found).length
+          configured: headerChecks.filter((c) => c.found).length,
+          missing: headerChecks.filter((c) => c.required && !c.found).length,
         },
-        passed: headerChecks.filter(c => c.required && !c.found).length === 0
-      }
+        passed: headerChecks.filter((c) => c.required && !c.found).length === 0,
+      };
 
-      this.results.headers = result
+      this.results.headers = result;
 
       if (result.summary.missing > 0) {
         this.findings.push({
-          severity: 'moderate',
-          category: 'headers',
+          severity: "moderate",
+          category: "headers",
           message: `Missing ${result.summary.missing} required security headers`,
-          details: result.summary
-        })
+          details: result.summary,
+        });
       }
 
-      console.log(`  ✅ Security headers scan completed: ${result.summary.missing} missing headers`)
-      
+      console.log(
+        `  ✅ Security headers scan completed: ${result.summary.missing} missing headers`
+      );
     } catch (error) {
       this.results.headers = {
-        type: 'headers',
+        type: "headers",
         passed: false,
-        error: error.message
-      }
-      console.log('  ❌ Security headers scan failed:', error.message)
+        error: error.message,
+      };
+      console.log("  ❌ Security headers scan failed:", error.message);
     }
   }
 
   async scanFilePermissions() {
-    console.log('📁 Checking file permissions and configurations...')
-    
+    console.log("📁 Checking file permissions and configurations...");
+
     try {
-      const permissionIssues = []
+      const permissionIssues = [];
       const sensitiveFiles = [
-        '.env', '.env.local', '.env.production',
-        'id_rsa', 'id_dsa', 'private.key',
-        'package-lock.json', 'yarn.lock',
-        '.git/config'
-      ]
+        ".env",
+        ".env.local",
+        ".env.production",
+        "id_rsa",
+        "id_dsa",
+        "private.key",
+        "package-lock.json",
+        "yarn.lock",
+        ".git/config",
+      ];
 
       // Check for sensitive files with wrong permissions
-      const allFiles = this.getSourceFiles()
-      
-      sensitiveFiles.forEach(fileName => {
-        const matchingFiles = allFiles.filter(f => f.endsWith(fileName))
-matchingFiles.forEach(file => {
+      const allFiles = this.getSourceFiles();
+
+      sensitiveFiles.forEach((fileName) => {
+        const matchingFiles = allFiles.filter((f) => f.endsWith(fileName));
+        matchingFiles.forEach((file) => {
           try {
-            const stats = statSync(file)
-            const mode = stats.mode & parseInt('777', 8)
-            
+            const stats = statSync(file);
+            const mode = stats.mode & parseInt("777", 8);
+
             // Check if file is readable by others
-            if (mode & parseInt('044', 8)) {
+            if (mode & parseInt("044", 8)) {
               permissionIssues.push({
-                file: file.replace(root, ''),
-                issue: 'Readable by others',
-                severity: 'moderate',
-                mode: mode.toString(8)
-              })
+                file: file.replace(root, ""),
+                issue: "Readable by others",
+                severity: "moderate",
+                mode: mode.toString(8),
+              });
             }
           } catch (error) {
             // File access error within callback; skip this entry
-            return
+            return;
           }
-        })
-      })
+        });
+      });
 
       // Check for executable files that shouldn't be
-      const executableFiles = allFiles.filter(file => {
+      const executableFiles = allFiles.filter((file) => {
         try {
-          const stats = statSync(file)
-          return (stats.mode & parseInt('111', 8)) && 
-                 (file.endsWith('.json') || file.endsWith('.md') || file.endsWith('.txt'))
+          const stats = statSync(file);
+          return (
+            stats.mode & parseInt("111", 8) &&
+            (file.endsWith(".json") || file.endsWith(".md") || file.endsWith(".txt"))
+          );
         } catch {
-          return false
+          return false;
         }
-      })
+      });
 
-      executableFiles.forEach(file => {
+      executableFiles.forEach((file) => {
         permissionIssues.push({
-          file: file.replace(root, ''),
-          issue: 'Unnecessarily executable',
-          severity: 'low',
-          mode: 'executable'
-        })
-      })
+          file: file.replace(root, ""),
+          issue: "Unnecessarily executable",
+          severity: "low",
+          mode: "executable",
+        });
+      });
 
       // Check for world-writable files
-allFiles.forEach(file => {
+      allFiles.forEach((file) => {
         try {
-          const stats = statSync(file)
-          if (stats.mode & parseInt('002', 8)) {
+          const stats = statSync(file);
+          if (stats.mode & parseInt("002", 8)) {
             permissionIssues.push({
-              file: file.replace(root, ''),
-              issue: 'World writable',
-              severity: 'high',
-              mode: (stats.mode & parseInt('777', 8)).toString(8)
-            })
+              file: file.replace(root, ""),
+              issue: "World writable",
+              severity: "high",
+              mode: (stats.mode & parseInt("777", 8)).toString(8),
+            });
           }
         } catch {
-          return
+          return;
         }
-      })
+      });
 
       const result = {
-        type: 'permissions',
+        type: "permissions",
         issues: permissionIssues,
         summary: {
           total: permissionIssues.length,
-          high: permissionIssues.filter(i => i.severity === 'high').length,
-          moderate: permissionIssues.filter(i => i.severity === 'moderate').length,
-          low: permissionIssues.filter(i => i.severity === 'low').length
+          high: permissionIssues.filter((i) => i.severity === "high").length,
+          moderate: permissionIssues.filter((i) => i.severity === "moderate").length,
+          low: permissionIssues.filter((i) => i.severity === "low").length,
         },
-        passed: permissionIssues.filter(i => i.severity === 'high').length === 0
-      }
+        passed: permissionIssues.filter((i) => i.severity === "high").length === 0,
+      };
 
-      this.results.permissions = result
+      this.results.permissions = result;
 
       if (result.summary.high > 0) {
         this.findings.push({
-          severity: 'high',
-          category: 'permissions',
+          severity: "high",
+          category: "permissions",
           message: `Found ${result.summary.high} critical file permission issues`,
-          details: result.summary
-        })
+          details: result.summary,
+        });
       }
 
-      console.log(`  ✅ Permission scan completed: ${result.summary.total} permission issues found`)
-      
+      console.log(
+        `  ✅ Permission scan completed: ${result.summary.total} permission issues found`
+      );
     } catch (error) {
       this.results.permissions = {
-        type: 'permissions',
+        type: "permissions",
         passed: false,
-        error: error.message
-      }
-      console.log('  ❌ Permission scan failed:', error.message)
+        error: error.message,
+      };
+      console.log("  ❌ Permission scan failed:", error.message);
     }
   }
 
   async scanBundleSecurity() {
-    console.log('📦 Analyzing bundle security...')
-    
+    console.log("📦 Analyzing bundle security...");
+
     try {
-      const bundleIssues = []
-      const distDir = join(root, 'dist')
-      
+      const bundleIssues = [];
+      const distDir = join(root, "dist");
+
       if (!existsSync(distDir)) {
-        console.log('  ⚠️ No build found, skipping bundle security scan')
+        console.log("  ⚠️ No build found, skipping bundle security scan");
         this.results.bundleSecurity = {
-          type: 'bundle',
+          type: "bundle",
           skipped: true,
-          message: 'No build artifacts found'
-        }
-        return
+          message: "No build artifacts found",
+        };
+        return;
       }
 
       // Check for source maps in production build
       const sourceMapFiles = readdirSync(distDir, { recursive: true })
-        .filter(file => file.endsWith('.map'))
-        .map(file => join(distDir, file))
+        .filter((file) => file.endsWith(".map"))
+        .map((file) => join(distDir, file));
 
       if (sourceMapFiles.length > 0) {
         bundleIssues.push({
-          type: 'Source Maps',
-          severity: 'moderate',
-          description: 'Source maps should not be included in production builds',
-          files: sourceMapFiles.map(f => f.replace(root, '')),
-          count: sourceMapFiles.length
-        })
+          type: "Source Maps",
+          severity: "moderate",
+          description: "Source maps should not be included in production builds",
+          files: sourceMapFiles.map((f) => f.replace(root, "")),
+          count: sourceMapFiles.length,
+        });
       }
 
       // Check for unminified files
       const jsFiles = readdirSync(distDir, { recursive: true })
-        .filter(file => file.endsWith('.js') && !file.endsWith('.min.js'))
-        .map(file => join(distDir, file))
+        .filter((file) => file.endsWith(".js") && !file.endsWith(".min.js"))
+        .map((file) => join(distDir, file));
 
-      const unminifiedFiles = []
-jsFiles.forEach(file => {
+      const unminifiedFiles = [];
+      jsFiles.forEach((file) => {
         try {
-          const content = readFileSync(file, 'utf8')
+          const content = readFileSync(file, "utf8");
           // Simple heuristic: if file has lots of whitespace and comments, it's likely unminified
-          const lines = content.split('\n')
-          const codeLines = lines.filter(line => line.trim() && !line.trim().startsWith('//')).length
-          const totalLines = lines.length
-          
-          if (totalLines > 100 && (totalLines / codeLines) > 1.5) {
-            unminifiedFiles.push(file)
+          const lines = content.split("\n");
+          const codeLines = lines.filter(
+            (line) => line.trim() && !line.trim().startsWith("//")
+          ).length;
+          const totalLines = lines.length;
+
+          if (totalLines > 100 && totalLines / codeLines > 1.5) {
+            unminifiedFiles.push(file);
           }
         } catch {
-          return
+          return;
         }
-      })
+      });
 
       if (unminifiedFiles.length > 0) {
         bundleIssues.push({
-          type: 'Unminified Code',
-          severity: 'low',
-          description: 'Unminified JavaScript files increase bundle size and expose code structure',
-          files: unminifiedFiles.map(f => f.replace(root, '')),
-          count: unminifiedFiles.length
-        })
+          type: "Unminified Code",
+          severity: "low",
+          description: "Unminified JavaScript files increase bundle size and expose code structure",
+          files: unminifiedFiles.map((f) => f.replace(root, "")),
+          count: unminifiedFiles.length,
+        });
       }
 
       // Check for large bundle sizes (potential attack surface)
-      const largeBundles = []
-jsFiles.forEach(file => {
+      const largeBundles = [];
+      jsFiles.forEach((file) => {
         try {
-          const stats = statSync(file)
-          if (stats.size > 1024 * 1024) { // > 1MB
+          const stats = statSync(file);
+          if (stats.size > 1024 * 1024) {
+            // > 1MB
             largeBundles.push({
-              file: file.replace(root, ''),
-              size: (stats.size / 1024 / 1024).toFixed(2) + ' MB'
-            })
+              file: file.replace(root, ""),
+              size: (stats.size / 1024 / 1024).toFixed(2) + " MB",
+            });
           }
         } catch {
-          return
+          return;
         }
-      })
+      });
 
       if (largeBundles.length > 0) {
         bundleIssues.push({
-          type: 'Large Bundles',
-          severity: 'low',
-          description: 'Large bundles increase attack surface and loading time',
+          type: "Large Bundles",
+          severity: "low",
+          description: "Large bundles increase attack surface and loading time",
           files: largeBundles,
-          count: largeBundles.length
-        })
+          count: largeBundles.length,
+        });
       }
 
       const result = {
-        type: 'bundle',
+        type: "bundle",
         issues: bundleIssues,
         summary: {
           total: bundleIssues.length,
-          moderate: bundleIssues.filter(i => i.severity === 'moderate').length,
-          low: bundleIssues.filter(i => i.severity === 'low').length
+          moderate: bundleIssues.filter((i) => i.severity === "moderate").length,
+          low: bundleIssues.filter((i) => i.severity === "low").length,
         },
-        passed: bundleIssues.filter(i => i.severity === 'moderate').length === 0
-      }
+        passed: bundleIssues.filter((i) => i.severity === "moderate").length === 0,
+      };
 
-      this.results.bundleSecurity = result
+      this.results.bundleSecurity = result;
 
       if (result.summary.moderate > 0) {
         this.findings.push({
-          severity: 'moderate',
-          category: 'bundle',
+          severity: "moderate",
+          category: "bundle",
           message: `Found ${result.summary.moderate} bundle security issues`,
-          details: result.summary
-        })
+          details: result.summary,
+        });
       }
 
-      console.log(`  ✅ Bundle security scan completed: ${result.summary.total} issues found`)
-      
+      console.log(`  ✅ Bundle security scan completed: ${result.summary.total} issues found`);
     } catch (error) {
       this.results.bundleSecurity = {
-        type: 'bundle',
+        type: "bundle",
         passed: false,
-        error: error.message
-      }
-      console.log('  ❌ Bundle security scan failed:', error.message)
+        error: error.message,
+      };
+      console.log("  ❌ Bundle security scan failed:", error.message);
     }
   }
 
   getSourceFiles() {
-    const sourceFiles = []
-    const excludeDirs = ['node_modules', '.git', 'dist', 'build', '.next', 'coverage']
-    
+    const sourceFiles = [];
+    const excludeDirs = ["node_modules", ".git", "dist", "build", ".next", "coverage"];
+
     const scanDirectory = (dir) => {
       try {
-        const entries = readdirSync(dir, { withFileTypes: true })
-        
-        entries.forEach(entry => {
-          const fullPath = join(dir, entry.name)
-          
+        const entries = readdirSync(dir, { withFileTypes: true });
+
+        entries.forEach((entry) => {
+          const fullPath = join(dir, entry.name);
+
           if (entry.isDirectory()) {
-            if (!excludeDirs.includes(entry.name) && !entry.name.startsWith('.')) {
-              scanDirectory(fullPath)
+            if (!excludeDirs.includes(entry.name) && !entry.name.startsWith(".")) {
+              scanDirectory(fullPath);
             }
           } else if (entry.isFile()) {
-            sourceFiles.push(fullPath)
+            sourceFiles.push(fullPath);
           }
-        })
+        });
       } catch {
         // Skip directories we can't read
       }
-    }
+    };
 
-    scanDirectory(root)
-    return sourceFiles
+    scanDirectory(root);
+    return sourceFiles;
   }
 
   findEnvFiles() {
-    const envFiles = []
-    const sourceFiles = this.getSourceFiles()
-    
-    sourceFiles.forEach(file => {
-      const fileName = file.split('/').pop()
-      if (fileName.startsWith('.env') || fileName === '.environment') {
-        envFiles.push(file)
-      }
-    })
+    const envFiles = [];
+    const sourceFiles = this.getSourceFiles();
 
-    return envFiles
+    sourceFiles.forEach((file) => {
+      const fileName = file.split("/").pop();
+      if (fileName.startsWith(".env") || fileName === ".environment") {
+        envFiles.push(file);
+      }
+    });
+
+    return envFiles;
   }
 
   async generateReport() {
-    console.log('📄 Generating security scan report...')
+    console.log("📄 Generating security scan report...");
 
-    const totalDuration = Date.now() - this.startTime
-    const overallSeverity = this.findings.length === 0 ? 'info' :
-      this.findings.some(f => f.severity === 'critical') ? 'critical' :
-      this.findings.some(f => f.severity === 'high') ? 'high' : 'moderate'
+    const totalDuration = Date.now() - this.startTime;
+    const overallSeverity =
+      this.findings.length === 0
+        ? "info"
+        : this.findings.some((f) => f.severity === "critical")
+          ? "critical"
+          : this.findings.some((f) => f.severity === "high")
+            ? "high"
+            : "moderate";
 
     const report = {
       timestamp: new Date().toISOString(),
       duration: totalDuration,
       overallSeverity,
-      passed: overallSeverity === 'info',
+      passed: overallSeverity === "info",
       summary: {
         totalFindings: this.findings.length,
-        critical: this.findings.filter(f => f.severity === 'critical').length,
-        high: this.findings.filter(f => f.severity === 'high').length,
-        moderate: this.findings.filter(f => f.severity === 'moderate').length,
-        low: this.findings.filter(f => f.severity === 'low').length
+        critical: this.findings.filter((f) => f.severity === "critical").length,
+        high: this.findings.filter((f) => f.severity === "high").length,
+        moderate: this.findings.filter((f) => f.severity === "moderate").length,
+        low: this.findings.filter((f) => f.severity === "low").length,
       },
       results: this.results,
       findings: this.findings,
-      recommendations: this.generateRecommendations()
-    }
+      recommendations: this.generateRecommendations(),
+    };
 
     // Write JSON report
-    writeFileSync(
-      join(this.reportDir, 'security-scan.json'),
-      JSON.stringify(report, null, 2)
-    )
+    writeFileSync(join(this.reportDir, "security-scan.json"), JSON.stringify(report, null, 2));
 
     // Write HTML report
-    const htmlReport = this.generateHTMLReport(report)
-    writeFileSync(join(this.reportDir, 'security-scan.html'), htmlReport)
+    const htmlReport = this.generateHTMLReport(report);
+    writeFileSync(join(this.reportDir, "security-scan.html"), htmlReport);
 
-    return report
+    return report;
   }
 
   generateRecommendations() {
-    const recommendations = []
+    const recommendations = [];
 
     // Dependency recommendations
     if (this.results.dependencies?.summary?.total > 0) {
       recommendations.push({
-        category: 'Dependencies',
-        priority: 'high',
-        action: 'Update vulnerable dependencies using npm audit fix',
-        details: 'Review and update all dependencies with known vulnerabilities'
-      })
+        category: "Dependencies",
+        priority: "high",
+        action: "Update vulnerable dependencies using npm audit fix",
+        details: "Review and update all dependencies with known vulnerabilities",
+      });
     }
 
     // Secret exposure recommendations
     if (this.results.secrets?.summary?.total > 0) {
       recommendations.push({
-        category: 'Secrets',
-        priority: 'critical',
-        action: 'Remove hardcoded secrets from source code',
-        details: 'Use environment variables and secure secret management'
-      })
+        category: "Secrets",
+        priority: "critical",
+        action: "Remove hardcoded secrets from source code",
+        details: "Use environment variables and secure secret management",
+      });
     }
 
     // Code security recommendations
     if (this.results.code?.summary?.high > 0) {
       recommendations.push({
-        category: 'Code Security',
-        priority: 'high',
-        action: 'Fix high-severity code security issues',
-        details: 'Replace unsafe functions and patterns with secure alternatives'
-      })
+        category: "Code Security",
+        priority: "high",
+        action: "Fix high-severity code security issues",
+        details: "Replace unsafe functions and patterns with secure alternatives",
+      });
     }
 
     // Security headers recommendations
     if (this.results.headers?.summary?.missing > 0) {
       recommendations.push({
-        category: 'Security Headers',
-        priority: 'moderate',
-        action: 'Configure missing security headers',
-        details: 'Add Content-Security-Policy, X-Frame-Options, and other security headers'
-      })
+        category: "Security Headers",
+        priority: "moderate",
+        action: "Configure missing security headers",
+        details: "Add Content-Security-Policy, X-Frame-Options, and other security headers",
+      });
     }
 
     // File permissions recommendations
     if (this.results.permissions?.summary?.high > 0) {
       recommendations.push({
-        category: 'File Permissions',
-        priority: 'high',
-        action: 'Fix file permission issues',
-        details: 'Ensure sensitive files have appropriate access restrictions'
-      })
+        category: "File Permissions",
+        priority: "high",
+        action: "Fix file permission issues",
+        details: "Ensure sensitive files have appropriate access restrictions",
+      });
     }
 
     // Bundle security recommendations
     if (this.results.bundleSecurity?.summary?.moderate > 0) {
       recommendations.push({
-        category: 'Bundle Security',
-        priority: 'moderate',
-        action: 'Remove source maps from production builds',
-        details: 'Configure build process to exclude source maps in production'
-      })
+        category: "Bundle Security",
+        priority: "moderate",
+        action: "Remove source maps from production builds",
+        details: "Configure build process to exclude source maps in production",
+      });
     }
 
     // General recommendations
     recommendations.push({
-      category: 'General Security',
-      priority: 'moderate',
-      action: 'Implement regular security scanning',
-      details: 'Set up automated security scans in CI/CD pipeline'
-    })
+      category: "General Security",
+      priority: "moderate",
+      action: "Implement regular security scanning",
+      details: "Set up automated security scans in CI/CD pipeline",
+    });
 
-    return recommendations
+    return recommendations;
   }
 
   generateHTMLReport(report) {
     const severityColors = {
-      critical: '#dc3545',
-      high: '#fd7e14', 
-      moderate: '#ffc107',
-      low: '#28a745',
-      info: '#17a2b8'
-    }
+      critical: "#dc3545",
+      high: "#fd7e14",
+      moderate: "#ffc107",
+      low: "#28a745",
+      info: "#17a2b8",
+    };
 
     return `
 <!DOCTYPE html>
@@ -903,7 +953,7 @@ jsFiles.forEach(file => {
         </div>
         
         <div class="status ${report.overallSeverity}">
-            ${report.passed ? '✅ SECURITY SCAN PASSED' : `⚠️ SECURITY ISSUES FOUND (${report.overallSeverity.toUpperCase()})`}
+            ${report.passed ? "✅ SECURITY SCAN PASSED" : `⚠️ SECURITY ISSUES FOUND (${report.overallSeverity.toUpperCase()})`}
         </div>
         
         <div class="summary">
@@ -931,49 +981,65 @@ jsFiles.forEach(file => {
         
         <div class="section">
             <div class="section-title">📊 Scan Results</div>
-            ${Object.entries(report.results).map(([type, result]) => {
-              if (!result || result.skipped) return ''
-              
-              return `
-                <div class="scan-result ${result.passed ? 'passed' : 'failed'}">
+            ${Object.entries(report.results)
+              .map(([type, result]) => {
+                if (!result || result.skipped) return "";
+
+                return `
+                <div class="scan-result ${result.passed ? "passed" : "failed"}">
                     <div class="section-title">
                         ${type.charAt(0).toUpperCase() + type.slice(1)} Scan
-                        <span style="color: ${result.passed ? '#28a745' : '#dc3545'}">
-                            ${result.passed ? '✅ PASSED' : '❌ FAILED'}
+                        <span style="color: ${result.passed ? "#28a745" : "#dc3545"}">
+                            ${result.passed ? "✅ PASSED" : "❌ FAILED"}
                         </span>
                     </div>
-                    ${result.summary ? `
+                    ${
+                      result.summary
+                        ? `
                         <p>Found ${result.summary.total || 0} issues</p>
-                        ${result.summary.critical ? `<p>Critical: ${result.summary.critical}</p>` : ''}
-                        ${result.summary.high ? `<p>High: ${result.summary.high}</p>` : ''}
-                        ${result.summary.moderate ? `<p>Moderate: ${result.summary.moderate}</p>` : ''}
-                        ${result.summary.low ? `<p>Low: ${result.summary.low}</p>` : ''}
-                    ` : ''}
-                    ${result.error ? `<p><strong>Error:</strong> ${result.error}</p>` : ''}
+                        ${result.summary.critical ? `<p>Critical: ${result.summary.critical}</p>` : ""}
+                        ${result.summary.high ? `<p>High: ${result.summary.high}</p>` : ""}
+                        ${result.summary.moderate ? `<p>Moderate: ${result.summary.moderate}</p>` : ""}
+                        ${result.summary.low ? `<p>Low: ${result.summary.low}</p>` : ""}
+                    `
+                        : ""
+                    }
+                    ${result.error ? `<p><strong>Error:</strong> ${result.error}</p>` : ""}
                 </div>
-              `
-            }).join('')}
+              `;
+              })
+              .join("")}
         </div>
         
-        ${report.findings.length > 0 ? `
+        ${
+          report.findings.length > 0
+            ? `
           <div class="section">
               <div class="section-title">🚨 Detailed Findings</div>
-              ${report.findings.map(finding => `
+              ${report.findings
+                .map(
+                  (finding) => `
                 <div class="finding">
                     <div class="finding-header">
                         <span class="severity" style="background: ${severityColors[finding.severity]}">${finding.severity.toUpperCase()}</span>
                         ${finding.category} - ${finding.message}
                     </div>
-                    ${finding.details ? `<div class="code">${JSON.stringify(finding.details, null, 2)}</div>` : ''}
+                    ${finding.details ? `<div class="code">${JSON.stringify(finding.details, null, 2)}</div>` : ""}
                 </div>
-              `).join('')}
+              `
+                )
+                .join("")}
           </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <div class="section">
             <div class="section-title">💡 Recommendations</div>
             <div class="recommendations">
-                ${report.recommendations.map(rec => `
+                ${report.recommendations
+                  .map(
+                    (rec) => `
                   <div class="recommendation">
                       <div class="finding-header">
                           <span class="severity" style="background: ${severityColors[rec.priority]}">${rec.priority.toUpperCase()}</span>
@@ -982,13 +1048,15 @@ jsFiles.forEach(file => {
                       <p><strong>Action:</strong> ${rec.action}</p>
                       <p>${rec.details}</p>
                   </div>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </div>
         </div>
     </div>
 </body>
 </html>
-    `
+    `;
   }
 
   async run(options = {}) {
@@ -998,65 +1066,73 @@ jsFiles.forEach(file => {
       skipCode = false,
       skipHeaders = false,
       skipPermissions = false,
-      skipBundle = false
-    } = options
+      skipBundle = false,
+    } = options;
 
     try {
-      await this.setup()
-      
-      if (!skipDependencies) await this.scanDependencies()
-      if (!skipSecrets) await this.scanForSecrets()
-      if (!skipCode) await this.scanCodeSecurity()
-      if (!skipHeaders) await this.scanSecurityHeaders()
-      if (!skipPermissions) await this.scanFilePermissions()
-      if (!skipBundle) await this.scanBundleSecurity()
-      
-      const report = await this.generateReport()
-      
-      console.log('\n🎯 Security Scan Summary:')
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-      console.log(`  Overall Status:       ${report.passed ? '✅ PASSED' : `❌ FAILED (${report.overallSeverity.toUpperCase()})`}`)
-      console.log(`  Total Findings:       ${report.summary.totalFindings}`)
-      console.log(`  Critical Issues:      ${report.summary.critical}`)
-      console.log(`  High Priority:        ${report.summary.high}`)
-      console.log(`  Moderate Priority:    ${report.summary.moderate}`)
-      console.log(`  Low Priority:         ${report.summary.low}`)
-      console.log(`  Scan Duration:        ${(report.duration / 1000).toFixed(2)} seconds`)
-      
+      await this.setup();
+
+      if (!skipDependencies) await this.scanDependencies();
+      if (!skipSecrets) await this.scanForSecrets();
+      if (!skipCode) await this.scanCodeSecurity();
+      if (!skipHeaders) await this.scanSecurityHeaders();
+      if (!skipPermissions) await this.scanFilePermissions();
+      if (!skipBundle) await this.scanBundleSecurity();
+
+      const report = await this.generateReport();
+
+      console.log("\n🎯 Security Scan Summary:");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log(
+        `  Overall Status:       ${report.passed ? "✅ PASSED" : `❌ FAILED (${report.overallSeverity.toUpperCase()})`}`
+      );
+      console.log(`  Total Findings:       ${report.summary.totalFindings}`);
+      console.log(`  Critical Issues:      ${report.summary.critical}`);
+      console.log(`  High Priority:        ${report.summary.high}`);
+      console.log(`  Moderate Priority:    ${report.summary.moderate}`);
+      console.log(`  Low Priority:         ${report.summary.low}`);
+      console.log(`  Scan Duration:        ${(report.duration / 1000).toFixed(2)} seconds`);
+
       if (report.findings.length > 0) {
-        console.log('\n🚨 Key Findings:')
-        report.findings.slice(0, 5).forEach(finding => {
-          console.log(`  ${finding.severity === 'critical' ? '🔴' : finding.severity === 'high' ? '🟠' : '🟡'} ${finding.message}`)
-        })
+        console.log("\n🚨 Key Findings:");
+        report.findings.slice(0, 5).forEach((finding) => {
+          console.log(
+            `  ${finding.severity === "critical" ? "🔴" : finding.severity === "high" ? "🟠" : "🟡"} ${finding.message}`
+          );
+        });
       }
-      
-      console.log(`\n📄 Detailed report: ${join('test-results', 'security', 'security-scan.html')}`)
-      
-      return report.passed
-      
+
+      console.log(
+        `\n📄 Detailed report: ${join("test-results", "security", "security-scan.html")}`
+      );
+
+      return report.passed;
     } catch (error) {
-      console.error('❌ Security scan failed:', error)
-      process.exit(1)
+      console.error("❌ Security scan failed:", error);
+      process.exit(1);
     }
   }
 }
 
 // CLI interface
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const args = process.argv.slice(2)
+  const args = process.argv.slice(2);
   const options = {
-    skipDependencies: args.includes('--skip-dependencies'),
-    skipSecrets: args.includes('--skip-secrets'),
-    skipCode: args.includes('--skip-code'),
-    skipHeaders: args.includes('--skip-headers'),
-    skipPermissions: args.includes('--skip-permissions'),
-    skipBundle: args.includes('--skip-bundle')
-  }
+    skipDependencies: args.includes("--skip-dependencies"),
+    skipSecrets: args.includes("--skip-secrets"),
+    skipCode: args.includes("--skip-code"),
+    skipHeaders: args.includes("--skip-headers"),
+    skipPermissions: args.includes("--skip-permissions"),
+    skipBundle: args.includes("--skip-bundle"),
+  };
 
-  const scanner = new SecurityScanner()
-  scanner.run(options).then(passed => {
-    process.exit(passed ? 0 : 1)
-  }).catch(console.error)
+  const scanner = new SecurityScanner();
+  scanner
+    .run(options)
+    .then((passed) => {
+      process.exit(passed ? 0 : 1);
+    })
+    .catch(console.error);
 }
 
-export default SecurityScanner
+export default SecurityScanner;

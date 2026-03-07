@@ -22,13 +22,8 @@
   ],
   "intendedUse": {
     "summary": "Customer service routing and prioritization.",
-    "supportedPurposes": [
-      "support_triage",
-      "escalation_detection"
-    ],
-    "usageRestrictions": [
-      "Do not use for employment, loan, or legal decisions."
-    ]
+    "supportedPurposes": ["support_triage", "escalation_detection"],
+    "usageRestrictions": ["Do not use for employment, loan, or legal decisions."]
   },
   "dataLineage": {
     "datasets": [
@@ -57,19 +52,12 @@
         "mitigation": "Trigger re-training when drift metrics exceed threshold."
       }
     ],
-    "outOfScopePurposes": [
-      "harassment_detection"
-    ],
+    "outOfScopePurposes": ["harassment_detection"],
     "notes": "Conduct quarterly fairness audits focusing on regional dialects."
   },
   "enforcement": {
-    "allowedPurposes": [
-      "support_triage",
-      "escalation_detection"
-    ],
-    "deniedPurposes": [
-      "harassment_detection"
-    ]
+    "allowedPurposes": ["support_triage", "escalation_detection"],
+    "deniedPurposes": ["harassment_detection"]
   },
   "signature": {
     "algorithm": "ed25519",

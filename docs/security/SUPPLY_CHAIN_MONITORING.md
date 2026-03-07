@@ -25,4 +25,4 @@ If a vulnerability is detected:
 
 ## Known Advisories
 
-*   **2025-12-XX**: Git MCP Server RCE (Patched in v0.2.0) - Monitored by script.
+- **2025-12-XX**: Git MCP Server RCE (Patched in v0.2.0) - Monitored by script.

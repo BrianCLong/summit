@@ -193,29 +193,29 @@ kind: PodSecurityPolicy
 metadata:
   name: harbor-restricted
   annotations:
-    seccomp.security.alpha.kubernetes.io/allowedProfiles: 'runtime/default'
-    apparmor.security.beta.kubernetes.io/allowedProfiles: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/allowedProfiles: "runtime/default"
+    apparmor.security.beta.kubernetes.io/allowedProfiles: "runtime/default"
 spec:
   privileged: false
   allowPrivilegeEscalation: false
   requiredDropCapabilities:
     - ALL
   volumes:
-    - 'configMap'
-    - 'emptyDir'
-    - 'projected'
-    - 'secret'
-    - 'downwardAPI'
-    - 'persistentVolumeClaim'
+    - "configMap"
+    - "emptyDir"
+    - "projected"
+    - "secret"
+    - "downwardAPI"
+    - "persistentVolumeClaim"
   hostNetwork: false
   hostIPC: false
   hostPID: false
   runAsUser:
-    rule: 'MustRunAsNonRoot'
+    rule: "MustRunAsNonRoot"
   seLinux:
-    rule: 'RunAsAny'
+    rule: "RunAsAny"
   fsGroup:
-    rule: 'MustRunAs'
+    rule: "MustRunAs"
     ranges:
       - min: 1
         max: 65535

@@ -4,14 +4,14 @@ This document defines how `everything-claude-code` (ECC) packs map into Summit B
 
 ## Mapping
 
-| ECC Directory | Summit Pack Field | Description |
-| --- | --- | --- |
-| `agents/` | `agents` | Markdown files for agent personas |
-| `skills/` | `skills` | Markdown files for reusable skills |
-| `commands/` | `commands` | Markdown files for custom commands |
-| `rules/` | `policies` | Markdown files for governing rules |
-| `hooks/` | `hooks` | Hook configurations |
-| `mcp-configs/` | `tools` | MCP server configurations |
+| ECC Directory  | Summit Pack Field | Description                        |
+| -------------- | ----------------- | ---------------------------------- |
+| `agents/`      | `agents`          | Markdown files for agent personas  |
+| `skills/`      | `skills`          | Markdown files for reusable skills |
+| `commands/`    | `commands`        | Markdown files for custom commands |
+| `rules/`       | `policies`        | Markdown files for governing rules |
+| `hooks/`       | `hooks`           | Hook configurations                |
+| `mcp-configs/` | `tools`           | MCP server configurations          |
 
 ## Governance
 

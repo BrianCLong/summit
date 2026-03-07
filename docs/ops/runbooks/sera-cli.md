@@ -32,12 +32,12 @@ curl http://localhost:18080/healthz
 
 ## Common Failures
 
-| Symptom | Likely Cause | Remediation |
-| --- | --- | --- |
-| 401/403 from upstream | Invalid or missing API key | Verify `SERA_API_KEY` and endpoint auth settings. |
-| 404 from proxy | Incorrect path | Ensure client uses `/v1/chat/completions`. |
-| 502 from proxy | Upstream unreachable | Verify endpoint URL and service availability. |
-| Allowlist error on start | Host not allowed | Set `--allow-host` or `SERA_ALLOW_HOSTS`. |
+| Symptom                  | Likely Cause               | Remediation                                       |
+| ------------------------ | -------------------------- | ------------------------------------------------- |
+| 401/403 from upstream    | Invalid or missing API key | Verify `SERA_API_KEY` and endpoint auth settings. |
+| 404 from proxy           | Incorrect path             | Ensure client uses `/v1/chat/completions`.        |
+| 502 from proxy           | Upstream unreachable       | Verify endpoint URL and service availability.     |
+| Allowlist error on start | Host not allowed           | Set `--allow-host` or `SERA_ALLOW_HOSTS`.         |
 
 ## Evidence Artifacts
 

@@ -274,10 +274,7 @@
   ],
   "schemaVersion": 30,
   "style": "dark",
-  "tags": [
-    "golden-path",
-    "{{SERVICE_NAME}}"
-  ],
+  "tags": ["golden-path", "{{SERVICE_NAME}}"],
   "templating": {
     "list": []
   },

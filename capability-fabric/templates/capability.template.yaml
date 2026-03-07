@@ -36,5 +36,5 @@ capabilities:
       - policies/capability-fabric/<policy>.rego
     matchers:
       - type: <mcp_tool|http_endpoint>
-        server: '*'
-        tool: '*'
+        server: "*"
+        tool: "*"

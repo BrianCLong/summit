@@ -8,7 +8,7 @@ export class ReplayClient {
 
   async complete(): Promise<string> {
     if (this.index >= this.responses.length) {
-      throw new Error('ReplayClient exhausted responses');
+      throw new Error("ReplayClient exhausted responses");
     }
     const response = this.responses[this.index];
     this.index += 1;

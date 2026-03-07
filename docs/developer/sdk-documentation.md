@@ -19,11 +19,11 @@ pnpm add @intelgraph/sdk
 ### Configuration
 
 ```typescript
-import { IntelGraphClient, MaestroClient } from '@intelgraph/sdk';
+import { IntelGraphClient, MaestroClient } from "@intelgraph/sdk";
 
 // IntelGraph Core client
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
+  apiUrl: "https://api.intelgraph.ai/v2",
   apiKey: process.env.INTELGRAPH_API_KEY,
   // Optional configuration
   timeout: 30000,
@@ -33,7 +33,7 @@ const client = new IntelGraphClient({
 
 // Maestro orchestration client
 const maestro = new MaestroClient({
-  apiUrl: 'https://maestro.intelgraph.ai/v1',
+  apiUrl: "https://maestro.intelgraph.ai/v1",
   apiKey: process.env.INTELGRAPH_API_KEY,
   // Optional configuration
   timeout: 60000, // Longer timeout for orchestration
@@ -46,22 +46,22 @@ const maestro = new MaestroClient({
 ```typescript
 // Using API key (recommended for server-side)
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
-  apiKey: 'your-api-key-here',
+  apiUrl: "https://api.intelgraph.ai/v2",
+  apiKey: "your-api-key-here",
 });
 
 // Using JWT token (for user-based authentication)
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
-  token: 'your-jwt-token-here',
+  apiUrl: "https://api.intelgraph.ai/v2",
+  token: "your-jwt-token-here",
 });
 
 // Refreshing tokens automatically
 client.onTokenRefresh(async (client) => {
-  const response = await fetch('/api/auth/refresh', {
-    method: 'POST',
+  const response = await fetch("/api/auth/refresh", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${client.getRefreshToken()}`,
     },
   });
@@ -76,16 +76,16 @@ client.onTokenRefresh(async (client) => {
 #### Graph Management
 
 ```typescript
-import { CreateGraphInput, UpdateGraphInput } from '@intelgraph/sdk';
+import { CreateGraphInput, UpdateGraphInput } from "@intelgraph/sdk";
 
 // Create a new graph
 const graph = await client.graphs.create({
-  name: 'Threat Analysis Q4 2024',
-  description: 'Comprehensive threat landscape analysis',
-  tags: ['threat-intel', 'q4-2024'],
+  name: "Threat Analysis Q4 2024",
+  description: "Comprehensive threat landscape analysis",
+  tags: ["threat-intel", "q4-2024"],
   configuration: {
-    layout: 'force-directed',
-    theme: 'dark',
+    layout: "force-directed",
+    theme: "dark",
     autoSave: true,
   },
 });
@@ -94,8 +94,8 @@ console.log(`Created graph: ${graph.id}`);
 
 // List graphs with filtering
 const graphs = await client.graphs.list({
-  search: 'threat',
-  tags: ['q4-2024'],
+  search: "threat",
+  tags: ["q4-2024"],
   page: 1,
   limit: 20,
 });
@@ -105,8 +105,8 @@ const graphDetails = await client.graphs.get(graph.id);
 
 // Update graph
 const updatedGraph = await client.graphs.update(graph.id, {
-  name: 'Updated Threat Analysis',
-  tags: [...graphDetails.tags, 'updated'],
+  name: "Updated Threat Analysis",
+  tags: [...graphDetails.tags, "updated"],
 });
 
 // Delete graph
@@ -118,14 +118,14 @@ await client.graphs.delete(graph.id);
 ```typescript
 // Create entity
 const entity = await client.entities.create(graph.id, {
-  type: 'Person',
+  type: "Person",
   properties: {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    department: 'Engineering',
+    name: "John Doe",
+    email: "john.doe@example.com",
+    department: "Engineering",
   },
   metadata: {
-    source: 'OSINT',
+    source: "OSINT",
     confidence: 0.85,
     lastVerified: new Date(),
   },
@@ -133,8 +133,8 @@ const entity = await client.entities.create(graph.id, {
 
 // List entities with filtering
 const entities = await client.entities.list(graph.id, {
-  type: 'Person',
-  search: 'john',
+  type: "Person",
+  search: "john",
   page: 1,
   limit: 50,
 });
@@ -143,7 +143,7 @@ const entities = await client.entities.list(graph.id, {
 const updatedEntity = await client.entities.update(entity.id, {
   properties: {
     ...entity.properties,
-    title: 'Senior Engineer',
+    title: "Senior Engineer",
   },
 });
 
@@ -156,23 +156,23 @@ await client.entities.delete(entity.id);
 ```typescript
 // Create relationship
 const relationship = await client.relationships.create({
-  type: 'WORKS_WITH',
+  type: "WORKS_WITH",
   sourceId: entity1.id,
   targetId: entity2.id,
   properties: {
-    relationship_type: 'colleague',
-    since: '2020-01-15',
-    projects: ['project-alpha', 'project-beta'],
+    relationship_type: "colleague",
+    since: "2020-01-15",
+    projects: ["project-alpha", "project-beta"],
   },
   metadata: {
-    source: 'HR_SYSTEM',
+    source: "HR_SYSTEM",
     confidence: 0.95,
   },
 });
 
 // List relationships
 const relationships = await client.relationships.list(graph.id, {
-  type: 'WORKS_WITH',
+  type: "WORKS_WITH",
   sourceId: entity1.id,
 });
 
@@ -180,7 +180,7 @@ const relationships = await client.relationships.list(graph.id, {
 await client.relationships.update(relationship.id, {
   properties: {
     ...relationship.properties,
-    projects: [...relationship.properties.projects, 'project-gamma'],
+    projects: [...relationship.properties.projects, "project-gamma"],
   },
 });
 ```
@@ -197,14 +197,14 @@ const queryResult = await client.graphs.query(graph.id, {
     LIMIT $limit
   `,
   parameters: {
-    department: 'Engineering',
+    department: "Engineering",
     limit: 10,
   },
   includeMetrics: true,
 });
 
-console.log('Query results:', queryResult.data);
-console.log('Execution time:', queryResult.stats?.executionTime, 'ms');
+console.log("Query results:", queryResult.data);
+console.log("Execution time:", queryResult.stats?.executionTime, "ms");
 
 // Complex graph analysis query
 const analysisResult = await client.graphs.query(graph.id, {
@@ -224,9 +224,9 @@ const analysisResult = await client.graphs.query(graph.id, {
 // Trigger AI analysis
 const analysisJob = await client.ai.analyze({
   graphId: graph.id,
-  analysisType: 'community_detection',
+  analysisType: "community_detection",
   parameters: {
-    algorithm: 'louvain',
+    algorithm: "louvain",
     resolution: 1.0,
     includeMetrics: true,
   },
@@ -235,10 +235,10 @@ const analysisJob = await client.ai.analyze({
 // Check analysis status
 const status = await client.ai.getJobStatus(analysisJob.jobId);
 
-if (status.status === 'completed') {
-  console.log('Analysis insights:', status.results?.insights);
-} else if (status.status === 'failed') {
-  console.error('Analysis failed:', status.error);
+if (status.status === "completed") {
+  console.log("Analysis insights:", status.results?.insights);
+} else if (status.status === "failed") {
+  console.error("Analysis failed:", status.error);
 }
 
 // Wait for analysis completion
@@ -249,7 +249,7 @@ const finalResult = await client.ai.waitForCompletion(analysisJob.jobId, {
 
 // Entity enhancement
 const enhancedEntity = await client.ai.enhanceEntity(entity.id, {
-  provider: 'openai',
+  provider: "openai",
   includeRelatedEntities: true,
   confidenceThreshold: 0.8,
 });
@@ -262,42 +262,39 @@ const enhancedEntity = await client.ai.enhanceEntity(entity.id, {
 ```typescript
 // Execute orchestration request
 const orchestration = await maestro.orchestrate({
-  query:
-    'Analyze the threat landscape for financial services sector in Q4 2024',
+  query: "Analyze the threat landscape for financial services sector in Q4 2024",
   context: {
-    userId: 'user-123',
-    tenantId: 'tenant-456',
-    purpose: 'intelligence_analysis',
-    urgency: 'high',
+    userId: "user-123",
+    tenantId: "tenant-456",
+    purpose: "intelligence_analysis",
+    urgency: "high",
     budgetLimit: 50.0,
     qualityThreshold: 0.85,
     expectedOutputLength: 2000,
     requiredSources: 15,
-    synthesisStrategy: 'comprehensive',
+    synthesisStrategy: "comprehensive",
   },
   constraints: {
     maxLatency: 45000,
     maxCost: 45.0,
     requireCitations: true,
     confidenceThreshold: 0.7,
-    allowedDomains: ['reuters.com', 'bloomberg.com', 'ft.com'],
-    blockedDomains: ['unreliable-news.com'],
+    allowedDomains: ["reuters.com", "bloomberg.com", "ft.com"],
+    blockedDomains: ["unreliable-news.com"],
   },
 });
 
 // Check if orchestration is complete
-if ('answer' in orchestration) {
+if ("answer" in orchestration) {
   // Synchronous response
-  console.log('Answer:', orchestration.answer);
-  console.log('Confidence:', orchestration.confidence);
-  console.log('Sources used:', orchestration.metadata.sourcesUsed);
-  console.log('Total cost:', orchestration.metadata.totalCost);
+  console.log("Answer:", orchestration.answer);
+  console.log("Confidence:", orchestration.confidence);
+  console.log("Sources used:", orchestration.metadata.sourcesUsed);
+  console.log("Total cost:", orchestration.metadata.totalCost);
 } else {
   // Asynchronous response - poll for status
-  const result = await maestro.waitForOrchestration(
-    orchestration.orchestrationId,
-  );
-  console.log('Final result:', result);
+  const result = await maestro.waitForOrchestration(orchestration.orchestrationId);
+  console.log("Final result:", result);
 }
 ```
 
@@ -306,7 +303,7 @@ if ('answer' in orchestration) {
 ```typescript
 // List available workflows
 const workflows = await maestro.workflows.list({
-  category: 'data-ingestion',
+  category: "data-ingestion",
 });
 
 // Get workflow details
@@ -315,20 +312,18 @@ const workflow = await maestro.workflows.get(workflows[0].id);
 // Execute workflow
 const execution = await maestro.workflows.execute(workflow.id, {
   parameters: {
-    source_bucket: 'intel-data-staging',
-    caseId: 'CASE-2024-001',
-    outputFormat: 'json',
+    source_bucket: "intel-data-staging",
+    caseId: "CASE-2024-001",
+    outputFormat: "json",
   },
   dryRun: false,
 });
 
 // Monitor execution
-const executionStatus = await maestro.workflows.getExecutionStatus(
-  execution.executionId,
-);
+const executionStatus = await maestro.workflows.getExecutionStatus(execution.executionId);
 
 // Cancel execution if needed
-if (executionStatus.status === 'running') {
+if (executionStatus.status === "running") {
   await maestro.workflows.cancelExecution(execution.executionId);
 }
 ```
@@ -338,25 +333,25 @@ if (executionStatus.status === 'running') {
 ```typescript
 // List runbooks
 const runbooks = await maestro.runbooks.list({
-  owner: 'sre@summit',
+  owner: "sre@summit",
   approved: true,
 });
 
 // Execute runbook (requires approval for some runbooks)
 try {
-  const execution = await maestro.runbooks.execute('backfill-entity-resolver', {
+  const execution = await maestro.runbooks.execute("backfill-entity-resolver", {
     inputs: {
-      since: '2024-01-01T00:00:00Z',
-      until: '2024-01-31T23:59:59Z',
+      since: "2024-01-01T00:00:00Z",
+      until: "2024-01-31T23:59:59Z",
       batchSize: 1000,
     },
-    approvalToken: 'approval-token-from-approver', // If required
+    approvalToken: "approval-token-from-approver", // If required
   });
 
-  console.log('Runbook execution started:', execution.executionId);
+  console.log("Runbook execution started:", execution.executionId);
 } catch (error) {
-  if (error.code === 'APPROVAL_REQUIRED') {
-    console.log('Approval required for this runbook');
+  if (error.code === "APPROVAL_REQUIRED") {
+    console.log("Approval required for this runbook");
     // Handle approval workflow
   }
 }
@@ -368,30 +363,30 @@ try {
 // Get available models
 const models = await maestro.router.getModels();
 console.log(
-  'Available models:',
-  models.map((m) => `${m.name} (${m.provider})`),
+  "Available models:",
+  models.map((m) => `${m.name} (${m.provider})`)
 );
 
 // Get optimal model recommendation
 const recommendation = await maestro.router.optimize({
-  taskType: 'synthesis_enhancement',
+  taskType: "synthesis_enhancement",
   context: {
     complexity: 0.8,
     budget: 10.0,
-    urgency: 'high',
+    urgency: "high",
     qualityRequirement: 0.9,
     expectedOutputLength: 1500,
   },
   constraints: {
     maxCost: 8.0,
     maxLatency: 15000,
-    requiredCapabilities: ['reasoning', 'analysis'],
+    requiredCapabilities: ["reasoning", "analysis"],
   },
 });
 
-console.log('Recommended model:', recommendation.selectedModel.name);
-console.log('Estimated cost:', recommendation.estimatedCost);
-console.log('Reasoning:', recommendation.reasoning);
+console.log("Recommended model:", recommendation.selectedModel.name);
+console.log("Estimated cost:", recommendation.estimatedCost);
+console.log("Reasoning:", recommendation.reasoning);
 ```
 
 ### Real-time Features
@@ -405,14 +400,14 @@ const ws = client.realtime.connect();
 // Listen for graph updates
 ws.subscribe(`graph.${graph.id}`, (event) => {
   switch (event.type) {
-    case 'ENTITY_ADDED':
-      console.log('New entity added:', event.entity);
+    case "ENTITY_ADDED":
+      console.log("New entity added:", event.entity);
       break;
-    case 'ENTITY_UPDATED':
-      console.log('Entity updated:', event.entity);
+    case "ENTITY_UPDATED":
+      console.log("Entity updated:", event.entity);
       break;
-    case 'RELATIONSHIP_ADDED':
-      console.log('New relationship added:', event.relationship);
+    case "RELATIONSHIP_ADDED":
+      console.log("New relationship added:", event.relationship);
       break;
   }
 });
@@ -431,33 +426,29 @@ ws.disconnect();
 ### Error Handling
 
 ```typescript
-import {
-  IntelGraphError,
-  ValidationError,
-  AuthenticationError,
-} from '@intelgraph/sdk';
+import { IntelGraphError, ValidationError, AuthenticationError } from "@intelgraph/sdk";
 
 try {
   const graph = await client.graphs.create(invalidData);
 } catch (error) {
   if (error instanceof ValidationError) {
-    console.log('Validation errors:', error.validationErrors);
+    console.log("Validation errors:", error.validationErrors);
   } else if (error instanceof AuthenticationError) {
-    console.log('Authentication failed, refreshing token...');
+    console.log("Authentication failed, refreshing token...");
     await client.refreshToken();
     // Retry operation
   } else if (error instanceof IntelGraphError) {
-    console.log('API Error:', error.message);
-    console.log('Error code:', error.code);
-    console.log('Status:', error.status);
+    console.log("API Error:", error.message);
+    console.log("Error code:", error.code);
+    console.log("Status:", error.status);
   } else {
-    console.error('Unexpected error:', error);
+    console.error("Unexpected error:", error);
   }
 }
 
 // Global error handling
 client.onError((error) => {
-  console.error('IntelGraph SDK Error:', error);
+  console.error("IntelGraph SDK Error:", error);
   // Send to error reporting service
 });
 ```
@@ -467,7 +458,7 @@ client.onError((error) => {
 ```typescript
 // Custom HTTP client configuration
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
+  apiUrl: "https://api.intelgraph.ai/v2",
   apiKey: process.env.INTELGRAPH_API_KEY,
 
   // HTTP configuration
@@ -479,32 +470,30 @@ const client = new IntelGraphClient({
   // Request/response interceptors
   requestInterceptors: [
     (config) => {
-      config.headers['X-Request-ID'] = generateRequestId();
+      config.headers["X-Request-ID"] = generateRequestId();
       return config;
     },
   ],
 
   responseInterceptors: [
     (response) => {
-      console.log(
-        `Request ${response.config.headers['X-Request-ID']} completed`,
-      );
+      console.log(`Request ${response.config.headers["X-Request-ID"]} completed`);
       return response;
     },
   ],
 
   // Rate limiting
   rateLimitHeaders: {
-    limit: 'X-RateLimit-Limit',
-    remaining: 'X-RateLimit-Remaining',
-    reset: 'X-RateLimit-Reset',
+    limit: "X-RateLimit-Limit",
+    remaining: "X-RateLimit-Remaining",
+    reset: "X-RateLimit-Reset",
   },
 
   // Caching
   cache: {
     enabled: true,
     ttl: 300000, // 5 minutes
-    exclude: ['/graphs/*/query'], // Don't cache query results
+    exclude: ["/graphs/*/query"], // Don't cache query results
   },
 });
 ```
@@ -862,7 +851,7 @@ async def robust_graph_operation():
 
 ```typescript
 // TypeScript batch operations
-import { BatchProcessor } from '@intelgraph/sdk/utils';
+import { BatchProcessor } from "@intelgraph/sdk/utils";
 
 const batchProcessor = new BatchProcessor(client, {
   batchSize: 100,
@@ -872,7 +861,7 @@ const batchProcessor = new BatchProcessor(client, {
 
 // Batch create entities
 const entities = Array.from({ length: 1000 }, (_, i) => ({
-  type: 'Person',
+  type: "Person",
   properties: { name: `Person ${i}`, id: i },
 }));
 
@@ -917,21 +906,21 @@ asyncio.run(batch_operations())
 ```typescript
 // Export graph data
 const exporter = client.export.createExporter({
-  format: 'json', // json, csv, neo4j, graphml
+  format: "json", // json, csv, neo4j, graphml
   includeMetadata: true,
-  compression: 'gzip',
+  compression: "gzip",
 });
 
 const exportData = await exporter.exportGraph(graph.id);
 
 // Save to file
-import fs from 'fs';
-fs.writeFileSync('graph-export.json.gz', exportData);
+import fs from "fs";
+fs.writeFileSync("graph-export.json.gz", exportData);
 
 // Import graph data
 const importer = client.import.createImporter({
-  format: 'json',
-  mergeStrategy: 'upsert', // create, upsert, replace
+  format: "json",
+  mergeStrategy: "upsert", // create, upsert, replace
   validateSchema: true,
 });
 
@@ -943,25 +932,25 @@ const importedGraph = await importer.importGraph(exportData);
 ```typescript
 // Enable SDK telemetry
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
+  apiUrl: "https://api.intelgraph.ai/v2",
   apiKey: process.env.INTELGRAPH_API_KEY,
   telemetry: {
     enabled: true,
-    endpoint: 'https://telemetry.intelgraph.ai',
+    endpoint: "https://telemetry.intelgraph.ai",
     sampleRate: 0.1, // Sample 10% of requests
     includeRequestBodies: false, // For privacy
   },
 });
 
 // Custom metrics
-client.metrics.recordCustomMetric('graph_processing_time', 1250, {
+client.metrics.recordCustomMetric("graph_processing_time", 1250, {
   graph_id: graph.id,
-  operation: 'entity_creation',
+  operation: "entity_creation",
   batch_size: 100,
 });
 
 // Performance monitoring
-const timer = client.metrics.startTimer('complex_operation');
+const timer = client.metrics.startTimer("complex_operation");
 try {
   // Perform complex operation
   await performComplexOperation();
@@ -999,7 +988,7 @@ async function processLargeGraph(graphId: string) {
 
 // Connection pooling for high-throughput scenarios
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
+  apiUrl: "https://api.intelgraph.ai/v2",
   apiKey: process.env.INTELGRAPH_API_KEY,
   connectionPool: {
     maxConnections: 20,
@@ -1013,25 +1002,25 @@ const client = new IntelGraphClient({
 
 ```typescript
 // Secure API key management
-import { SecretManager } from '@google-cloud/secret-manager';
+import { SecretManager } from "@google-cloud/secret-manager";
 
 const secretManager = new SecretManager();
 
 async function getSecureApiKey() {
   const [version] = await secretManager.accessSecretVersion({
-    name: 'projects/project-id/secrets/intelgraph-api-key/versions/latest',
+    name: "projects/project-id/secrets/intelgraph-api-key/versions/latest",
   });
 
   return version.payload?.data?.toString();
 }
 
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
+  apiUrl: "https://api.intelgraph.ai/v2",
   apiKey: await getSecureApiKey(),
   // Enable request signing for additional security
   requestSigning: {
     enabled: true,
-    algorithm: 'HMAC-SHA256',
+    algorithm: "HMAC-SHA256",
     secretKey: process.env.SIGNING_SECRET,
   },
 });
@@ -1041,7 +1030,7 @@ const client = new IntelGraphClient({
 
 ```typescript
 // Exponential backoff retry
-import { ExponentialBackoff } from '@intelgraph/sdk/utils';
+import { ExponentialBackoff } from "@intelgraph/sdk/utils";
 
 const backoff = new ExponentialBackoff({
   initialDelay: 1000,
@@ -1058,7 +1047,7 @@ async function resilientOperation() {
       if (error.status >= 500) {
         throw error; // Retry server errors
       }
-      throw new Error('Stop retrying'); // Don't retry client errors
+      throw new Error("Stop retrying"); // Don't retry client errors
     }
   });
 }
@@ -1071,24 +1060,24 @@ async function resilientOperation() {
 ```typescript
 // v1.x (deprecated)
 const client = new IntelGraph({
-  endpoint: 'https://api.intelgraph.ai/v1',
-  token: 'your-token',
+  endpoint: "https://api.intelgraph.ai/v1",
+  token: "your-token",
 });
 
 const graph = await client.createGraph({
-  title: 'My Graph',
-  desc: 'Description',
+  title: "My Graph",
+  desc: "Description",
 });
 
 // v2.x (current)
 const client = new IntelGraphClient({
-  apiUrl: 'https://api.intelgraph.ai/v2',
-  apiKey: 'your-api-key',
+  apiUrl: "https://api.intelgraph.ai/v2",
+  apiKey: "your-api-key",
 });
 
 const graph = await client.graphs.create({
-  name: 'My Graph', // Changed from 'title'
-  description: 'Description', // Changed from 'desc'
+  name: "My Graph", // Changed from 'title'
+  description: "Description", // Changed from 'desc'
 });
 ```
 

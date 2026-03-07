@@ -1,40 +1,30 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  type TextInputProps,
-} from 'react-native';
+import { View, TextInput, Text, TouchableOpacity, type TextInputProps } from 'react-native';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { Eye, EyeOff } from 'lucide-react-native';
 
-const inputVariants = cva(
-  'w-full rounded-lg border px-4 text-white font-normal',
-  {
-    variants: {
-      variant: {
-        default: 'border-dark-border bg-dark-elevated focus:border-intel-500',
-        error: 'border-red-500 bg-dark-elevated',
-        success: 'border-green-500 bg-dark-elevated',
-      },
-      size: {
-        default: 'h-12 text-base',
-        sm: 'h-10 text-sm',
-        lg: 'h-14 text-lg',
-      },
+const inputVariants = cva('w-full rounded-lg border px-4 text-white font-normal', {
+  variants: {
+    variant: {
+      default: 'border-dark-border bg-dark-elevated focus:border-intel-500',
+      error: 'border-red-500 bg-dark-elevated',
+      success: 'border-green-500 bg-dark-elevated',
     },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
+    size: {
+      default: 'h-12 text-base',
+      sm: 'h-10 text-sm',
+      lg: 'h-14 text-lg',
     },
   },
-);
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+});
 
 export interface InputProps
-  extends Omit<TextInputProps, 'style'>,
-    VariantProps<typeof inputVariants> {
+  extends Omit<TextInputProps, 'style'>, VariantProps<typeof inputVariants> {
   label?: string;
   error?: string;
   hint?: string;
@@ -69,14 +59,10 @@ export const Input = React.forwardRef<TextInput, InputProps>(
 
     return (
       <View className={cn('w-full', containerClassName)}>
-        {label && (
-          <Text className="mb-1.5 text-sm font-medium text-white">{label}</Text>
-        )}
+        {label && <Text className="mb-1.5 text-sm font-medium text-white">{label}</Text>}
         <View className="relative">
           {leftIcon && (
-            <View className="absolute left-4 top-0 bottom-0 justify-center z-10">
-              {leftIcon}
-            </View>
+            <View className="absolute left-4 top-0 bottom-0 justify-center z-10">{leftIcon}</View>
           )}
           <TextInput
             ref={ref}
@@ -112,15 +98,11 @@ export const Input = React.forwardRef<TextInput, InputProps>(
             </TouchableOpacity>
           )}
           {rightIcon && !showPasswordToggle && (
-            <View className="absolute right-4 top-0 bottom-0 justify-center">
-              {rightIcon}
-            </View>
+            <View className="absolute right-4 top-0 bottom-0 justify-center">{rightIcon}</View>
           )}
         </View>
         {error && <Text className="mt-1 text-sm text-red-500">{error}</Text>}
-        {hint && !error && (
-          <Text className="mt-1 text-sm text-dark-muted">{hint}</Text>
-        )}
+        {hint && !error && <Text className="mt-1 text-sm text-dark-muted">{hint}</Text>}
       </View>
     );
   },

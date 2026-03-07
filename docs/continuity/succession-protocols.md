@@ -5,6 +5,7 @@
 ## Overview
 
 Leadership transitions are high-risk moments for mission drift:
+
 - New leaders may not understand or value the constraints
 - Transition pressure creates temptation to "simplify" governance
 - Institutional knowledge can be lost
@@ -24,13 +25,13 @@ Leadership transitions are high-risk moments for mission drift:
 
 Each requires different protocols:
 
-| Transition Type | Risk Level | Protocol Intensity |
-|----------------|------------|-------------------|
-| Planned succession (retirement) | Medium | Standard protocol |
-| Departure (resignation, dismissal) | High | Enhanced review |
-| Sudden absence (illness, death) | Very High | Emergency protocol |
-| Acquisition/merger | Extreme | Maximum protection |
-| Founder exit | High | Special provisions |
+| Transition Type                    | Risk Level | Protocol Intensity |
+| ---------------------------------- | ---------- | ------------------ |
+| Planned succession (retirement)    | Medium     | Standard protocol  |
+| Departure (resignation, dismissal) | High       | Enhanced review    |
+| Sudden absence (illness, death)    | Very High  | Emergency protocol |
+| Acquisition/merger                 | Extreme    | Maximum protection |
+| Founder exit                       | High       | Special provisions |
 
 ## Standard Succession Protocol
 
@@ -39,6 +40,7 @@ Each requires different protocols:
 #### 1.1 Successor Identification
 
 **Selection Criteria** (ranked):
+
 1. **Mission alignment** - Demonstrated commitment to evidence discipline and constraints
 2. **Cultural fit** - Values institutional humility and principled refusal
 3. **Governance understanding** - Appreciates role of oversight and limitations
@@ -46,6 +48,7 @@ Each requires different protocols:
 5. **Leadership capability** - Can inspire while maintaining discipline
 
 **Anti-Criteria** (disqualifying):
+
 - ❌ "Move fast and break things" mentality
 - ❌ Views constraints as obstacles to innovation
 - ❌ Prioritizes growth over integrity
@@ -53,6 +56,7 @@ Each requires different protocols:
 - ❌ History of cutting corners under pressure
 
 **Selection Process**:
+
 ```
 1. Position defined with explicit mission requirements
 2. Search committee includes Oversight Board representation
@@ -66,6 +70,7 @@ Each requires different protocols:
 #### 1.2 Transition Documentation
 
 **Departing Leader Obligations**:
+
 - Document institutional knowledge (see institutional-memory.md)
 - Identify critical relationships and handoff protocols
 - Brief successor on governance constraints and why they exist
@@ -73,6 +78,7 @@ Each requires different protocols:
 - Introduce successor to oversight board and external stakeholders
 
 **Knowledge Transfer Requirements**:
+
 - ✅ Mission rationale and history ("why we're constrained")
 - ✅ Governance structure and reserved powers
 - ✅ Key invariants and their enforcement
@@ -85,6 +91,7 @@ Each requires different protocols:
 **Recommended**: 3-6 month overlap where both leaders are present
 
 **Structure**:
+
 - Departing leader transitions to advisory role
 - Successor shadow period (observe decisions and constraints)
 - Joint meetings with oversight board
@@ -92,6 +99,7 @@ Each requires different protocols:
 - Departing leader available for consultation
 
 **Benefits**:
+
 - Successor learns constraints in practice, not just theory
 - Institutional knowledge transfer is experiential
 - External stakeholders have continuity
@@ -104,12 +112,14 @@ Each requires different protocols:
 #### 2.1 Governance Reinforcement
 
 **Oversight Board Role**:
+
 - More frequent meetings during transition (monthly vs. quarterly)
 - Enhanced monitoring of decision patterns
 - Direct engagement with new leader on mission
 - Review of early decisions for drift indicators
 
 **Automatic Triggers**:
+
 - Independent audit within 90 days of succession
 - Review of any policy changes proposed by new leader
 - Stakeholder feedback collection
@@ -118,12 +128,14 @@ Each requires different protocols:
 #### 2.2 Public Continuity Signals
 
 **Communication Strategy**:
+
 - Public announcement emphasizing mission continuity
 - New leader's statement of commitment to invariants
 - Oversight board endorsement of transition
 - Confirmation that governance structure unchanged
 
 **Example Statement**:
+
 ```
 [Organization] announces [Name] as new [Role], effective [Date].
 
@@ -143,6 +155,7 @@ continue without modification.
 #### 2.3 Constraint Onboarding
 
 **Required Training** (non-negotiable):
+
 - Governance structure and reserved powers
 - Invariants and why they're non-negotiable
 - Evidence discipline requirements and enforcement
@@ -151,6 +164,7 @@ continue without modification.
 - Legal and regulatory constraints
 
 **Immersion**:
+
 - Review of decision logs showing constraint application
 - Case studies of "we refused despite pressure"
 - Meetings with oversight board on governance philosophy
@@ -163,12 +177,14 @@ continue without modification.
 #### 3.1 Drift Detection
 
 **Enhanced Monitoring**:
+
 - Weekly (not monthly) compliance reports to oversight board
 - Automated alerts on any policy proposals
 - Stakeholder feedback channels actively solicited
 - Independent review of decision quality
 
 **Red Flags** (trigger immediate oversight board engagement):
+
 - Proposals to "streamline" or "modernize" governance
 - Suggested "temporary" relaxation of constraints
 - Dismissal of oversight as "not understanding the business"
@@ -179,12 +195,14 @@ continue without modification.
 #### 3.2 Forced Check-ins
 
 **Required Reviews**:
+
 - 30-day: Oversight board assessment of early decisions
 - 90-day: Independent audit of mission adherence
 - 180-day: Stakeholder feedback review
 - 365-day: Comprehensive mission continuity assessment
 
 **Remediation Protocol** (if drift detected):
+
 1. Oversight board formally notifies new leader
 2. Specific examples of drift documented
 3. Remediation plan required within 14 days
@@ -205,18 +223,21 @@ continue without modification.
 ### Immediate Actions (First 24-48 Hours)
 
 **Interim Leadership**:
+
 - Pre-designated interim leader (COO, senior VP, or oversight board member)
 - Authority is **limited and temporary** (30-60 days max)
 - Cannot make governance or policy changes
 - Operates in "maintain status quo" mode
 
 **Oversight Board Activation**:
+
 - Emergency session within 24 hours
 - Confirm interim leader and scope of authority
 - Initiate expedited search for permanent successor
 - Enhanced monitoring and approval thresholds
 
 **External Communication**:
+
 - Prompt, transparent disclosure of transition
 - Confirmation of mission continuity
 - Oversight board statement of stability
@@ -225,12 +246,14 @@ continue without modification.
 ### Expedited Search (30-60 Days)
 
 **Accelerated Timeline**:
+
 - Compressed but not compromised selection process
 - Mission alignment still primary criterion
 - Oversight board heavily involved
 - Temporary overlap period waived (but institutional knowledge transfer required)
 
 **Safeguards**:
+
 - Major decisions deferred if possible
 - Emergency decisions require oversight board approval
 - Independent audit immediately after permanent succession
@@ -243,6 +266,7 @@ continue without modification.
 ### Special Challenges
 
 Founder transitions are uniquely risky:
+
 - Founder embodies the mission in stakeholder minds
 - Founder may have created informal processes successor doesn't know
 - Stakeholders may question mission continuity without founder
@@ -253,18 +277,21 @@ Founder transitions are uniquely risky:
 #### Pre-Exit Phase (12-24 months)
 
 **Mission Codification**:
+
 - Founder documents the "why" behind every constraint
 - Oral history captured (recorded interviews)
 - Implicit knowledge made explicit
 - External oversight board fully empowered (not founder-dependent)
 
 **Successor Development**:
+
 - Longer overlap period (6-12 months)
 - Public co-leadership phase
 - Successor publicly associated with mission
 - Stakeholder introductions and endorsements
 
 **Governance Transition**:
+
 - Founder may join oversight board (if independent)
 - Or retain advisory role without operational authority
 - Governance documents updated to remove founder-specific provisions
@@ -273,12 +300,14 @@ Founder transitions are uniquely risky:
 #### Post-Exit Phase
 
 **Enhanced External Validation**:
+
 - Independent audit comparing pre/post-founder operation
 - Stakeholder reassurance campaign
 - Transparency report specifically addressing continuity
 - Public commitment that founder's vision is structurally embedded
 
 **Founder's Continued Role** (options):
+
 - Advisory board member (no veto power)
 - Mission ambassador (external advocacy)
 - No role (clean break if appropriate)
@@ -297,6 +326,7 @@ Acquisition is the highest risk succession scenario.
 ### Pre-Acquisition Requirements
 
 **Deal Structure**:
+
 - Mission continuity covenant (legally binding)
 - Oversight board consent required for acquisition
 - Independent assessment of mission impact
@@ -304,6 +334,7 @@ Acquisition is the highest risk succession scenario.
 - Sunset provision if mission compromised
 
 **Example Covenant**:
+
 ```
 Acquisition Agreement: Mission Continuity Provision
 
@@ -331,6 +362,7 @@ Independent verification required [quarterly] for [X years].
 ### Post-Acquisition Monitoring
 
 **Mandatory Oversight**:
+
 - Independent audit within 90 days of close
 - Quarterly compliance verification for 2-3 years
 - Public transparency reports on mission continuity
@@ -338,12 +370,14 @@ Independent verification required [quarterly] for [X years].
 - Drift escalation to regulators if detected
 
 **Tripwires**:
+
 - Integration plans that compromise scope or invariants
 - Pressure to "harmonize" with acquirer's looser standards
 - Reduction in oversight board authority
 - Changes to governance without required approvals
 
 **Escape Clause**:
+
 - Key personnel retention tied to mission continuity
 - Termination rights if mission compromised
 - Asset/spinoff provisions if mission abandoned
@@ -355,12 +389,14 @@ Independent verification required [quarterly] for [X years].
 ### CEO/Executive Director
 
 **Selection Priorities**:
+
 1. Mission alignment (primary)
 2. Governance fluency
 3. Operational leadership
 4. Stakeholder relationships
 
 **Handoff Critical Items**:
+
 - Oversight board relationship and protocols
 - External accountability mechanisms
 - Evidence discipline enforcement
@@ -369,12 +405,14 @@ Independent verification required [quarterly] for [X years].
 ### CTO/Chief Architect
 
 **Selection Priorities**:
+
 1. Technical excellence within constraints
 2. Security and privacy alignment
 3. Evidence infrastructure understanding
 4. Resistance to "move fast, break things"
 
 **Handoff Critical Items**:
+
 - Technical enforcement of invariants
 - Audit trail architecture
 - External verification systems
@@ -383,12 +421,14 @@ Independent verification required [quarterly] for [X years].
 ### Chief Legal/Compliance Officer
 
 **Selection Priorities**:
+
 1. Mission alignment over risk minimization
 2. Governance expertise
 3. Regulatory relationship management
 4. Comfort with principled positions
 
 **Handoff Critical Items**:
+
 - Legal basis for mission commitments
 - Regulatory engagement strategy
 - Charter and governance documents
@@ -399,6 +439,7 @@ Independent verification required [quarterly] for [X years].
 ## Succession Planning Checklist
 
 ### Ongoing Preparation (Always Active)
+
 - [ ] Succession plan documented and regularly updated
 - [ ] Interim successors pre-designated for emergency scenarios
 - [ ] Critical institutional knowledge documented
@@ -406,6 +447,7 @@ Independent verification required [quarterly] for [X years].
 - [ ] Pipeline of mission-aligned candidates cultivated
 
 ### Pre-Transition (6-12 Months Before)
+
 - [ ] Successor selection process initiated
 - [ ] Oversight board engaged in selection
 - [ ] Transition documentation prepared
@@ -413,6 +455,7 @@ Independent verification required [quarterly] for [X years].
 - [ ] External stakeholders notified of timeline
 
 ### During Transition (First 90 Days)
+
 - [ ] Enhanced oversight board engagement
 - [ ] Knowledge transfer executed
 - [ ] Public continuity signals sent
@@ -420,6 +463,7 @@ Independent verification required [quarterly] for [X years].
 - [ ] Independent audit scheduled
 
 ### Post-Transition (90 Days - 1 Year)
+
 - [ ] Drift monitoring active
 - [ ] Forced check-ins completed
 - [ ] Stakeholder feedback collected

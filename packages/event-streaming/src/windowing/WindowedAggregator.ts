@@ -4,14 +4,14 @@
  * Tumbling, sliding, and session windows for stream aggregation
  */
 
-import { EventEmitter } from 'events';
-import pino from 'pino';
-import type { StreamEvent } from '../processing/StreamProcessor.js';
+import { EventEmitter } from "events";
+import pino from "pino";
+import type { StreamEvent } from "../processing/StreamProcessor.js";
 
 export enum WindowType {
-  TUMBLING = 'tumbling',
-  SLIDING = 'sliding',
-  SESSION = 'session'
+  TUMBLING = "tumbling",
+  SLIDING = "sliding",
+  SESSION = "session",
 }
 
 export interface WindowConfig {
@@ -29,9 +29,7 @@ export interface Window<T = any> {
   keys: Set<string>;
 }
 
-export type AggregateFunction<T = any, R = any> = (
-  events: StreamEvent<T>[]
-) => R;
+export type AggregateFunction<T = any, R = any> = (events: StreamEvent<T>[]) => R;
 
 export class WindowedAggregator<T = any, R = any> extends EventEmitter {
   private logger: pino.Logger;
@@ -40,14 +38,11 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
   private aggregateFunction: AggregateFunction<T, R>;
   private timer?: NodeJS.Timeout;
 
-  constructor(
-    config: WindowConfig,
-    aggregateFunction: AggregateFunction<T, R>
-  ) {
+  constructor(config: WindowConfig, aggregateFunction: AggregateFunction<T, R>) {
     super();
     this.config = config;
     this.aggregateFunction = aggregateFunction;
-    this.logger = pino({ name: 'WindowedAggregator' });
+    this.logger = pino({ name: "WindowedAggregator" });
   }
 
   /**
@@ -60,10 +55,7 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
       this.startSlidingWindows();
     }
 
-    this.logger.info(
-      { type: this.config.type, size: this.config.size },
-      'Windowing started'
-    );
+    this.logger.info({ type: this.config.type, size: this.config.size }, "Windowing started");
   }
 
   /**
@@ -75,7 +67,7 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
       this.timer = undefined;
     }
 
-    this.logger.info('Windowing stopped');
+    this.logger.info("Windowing stopped");
   }
 
   /**
@@ -127,7 +119,7 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
         startTime: windowStart,
         endTime: windowEnd,
         events: [],
-        keys: new Set()
+        keys: new Set(),
       };
       this.windows.set(windowId, window);
     }
@@ -146,9 +138,7 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
     // Find existing session window for this key
     for (const window of this.windows.values()) {
       if (window.keys.has(event.key)) {
-        const lastEventTime = Math.max(
-          ...window.events.map(e => e.timestamp.getTime())
-        );
+        const lastEventTime = Math.max(...window.events.map((e) => e.timestamp.getTime()));
 
         const timeSinceLastEvent = event.timestamp.getTime() - lastEventTime;
 
@@ -167,16 +157,14 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
         startTime: event.timestamp,
         endTime: new Date(event.timestamp.getTime() + sessionGap),
         events: [],
-        keys: new Set()
+        keys: new Set(),
       };
       this.windows.set(windowId, targetWindow);
     }
 
     targetWindow.events.push(event);
     targetWindow.keys.add(event.key);
-    targetWindow.endTime = new Date(
-      event.timestamp.getTime() + sessionGap
-    );
+    targetWindow.endTime = new Date(event.timestamp.getTime() + sessionGap);
   }
 
   /**
@@ -229,30 +217,27 @@ export class WindowedAggregator<T = any, R = any> extends EventEmitter {
     try {
       const result = this.aggregateFunction(window.events);
 
-      this.emit('window:closed', {
+      this.emit("window:closed", {
         windowId: window.windowId,
         startTime: window.startTime,
         endTime: window.endTime,
         eventCount: window.events.length,
-        result
+        result,
       });
 
       this.logger.debug(
         {
           windowId: window.windowId,
-          events: window.events.length
+          events: window.events.length,
         },
-        'Window closed'
+        "Window closed"
       );
     } catch (err) {
-      this.logger.error(
-        { err, windowId: window.windowId },
-        'Aggregation error'
-      );
+      this.logger.error({ err, windowId: window.windowId }, "Aggregation error");
 
-      this.emit('window:error', {
+      this.emit("window:error", {
         windowId: window.windowId,
-        error: err
+        error: err,
       });
     }
   }
@@ -282,7 +267,9 @@ export class Aggregators {
   static avg<T>(selector: (value: T) => number): AggregateFunction<T, number> {
     return (events) => {
       if (events.length === 0) return 0;
-      if (events.length === 0) {return 0;}
+      if (events.length === 0) {
+        return 0;
+      }
       const sum = events.reduce((s, event) => s + selector(event.value), 0);
       return sum / events.length;
     };
@@ -291,21 +278,25 @@ export class Aggregators {
   static min<T>(selector: (value: T) => number): AggregateFunction<T, number> {
     return (events) => {
       if (events.length === 0) return 0;
-      if (events.length === 0) {return 0;}
-      return Math.min(...events.map(e => selector(e.value)));
+      if (events.length === 0) {
+        return 0;
+      }
+      return Math.min(...events.map((e) => selector(e.value)));
     };
   }
 
   static max<T>(selector: (value: T) => number): AggregateFunction<T, number> {
     return (events) => {
       if (events.length === 0) return 0;
-      if (events.length === 0) {return 0;}
-      return Math.max(...events.map(e => selector(e.value)));
+      if (events.length === 0) {
+        return 0;
+      }
+      return Math.max(...events.map((e) => selector(e.value)));
     };
   }
 
   static collect<T>(): AggregateFunction<T, T[]> {
-    return (events) => events.map(e => e.value);
+    return (events) => events.map((e) => e.value);
   }
 
   static distinct<T>(selector: (value: T) => any): AggregateFunction<T, T[]> {

@@ -25,14 +25,14 @@ paths:
             type: integer
             default: 20
       responses:
-        '200':
+        "200":
           description: List of receipts
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Receipt'
+                  $ref: "#/components/schemas/Receipt"
 
   /provenance/receipts/{id}:
     get:
@@ -46,12 +46,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Receipt details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Receipt'
+                $ref: "#/components/schemas/Receipt"
 
   /provenance/receipts/export:
     post:
@@ -73,12 +73,12 @@ paths:
                   type: object
                   description: Fields to redact
       responses:
-        '200':
+        "200":
           description: Signed export bundle
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReceiptBundle'
+                $ref: "#/components/schemas/ReceiptBundle"
 
   /approvals:
     get:
@@ -92,14 +92,14 @@ paths:
             type: string
             enum: [pending, approved, rejected]
       responses:
-        '200':
+        "200":
           description: List of approval requests
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApprovalRequest'
+                  $ref: "#/components/schemas/ApprovalRequest"
 
   /approvals/{id}/action:
     post:
@@ -127,12 +127,12 @@ paths:
                   type: string
                   minLength: 10
       responses:
-        '200':
+        "200":
           description: Action recorded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApprovalRequest'
+                $ref: "#/components/schemas/ApprovalRequest"
 
   /policies/simulate:
     post:
@@ -153,12 +153,12 @@ paths:
                 input:
                   type: object
       responses:
-        '200':
+        "200":
           description: Policy decision
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyResult'
+                $ref: "#/components/schemas/PolicyResult"
 
   /usage/tenant/{id}:
     get:
@@ -182,18 +182,30 @@ paths:
             type: string
             format: date-time
       responses:
-        '200':
+        "200":
           description: Usage metrics
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TenantUsage'
+                $ref: "#/components/schemas/TenantUsage"
 
 components:
   schemas:
     Receipt:
       type: object
-      required: [spec_version, id, timestamp, correlation_id, tenant_id, actor, action, resource, policy, result]
+      required:
+        [
+          spec_version,
+          id,
+          timestamp,
+          correlation_id,
+          tenant_id,
+          actor,
+          action,
+          resource,
+          policy,
+          result,
+        ]
       properties:
         spec_version:
           type: string
@@ -212,87 +224,87 @@ components:
         actor:
           type: object
           properties:
-            id: {type: string}
-            email: {type: string}
-            principal_type: {type: string, enum: [user, service_account, system]}
-            roles: {type: array, items: {type: string}}
-            ip_address: {type: string}
+            id: { type: string }
+            email: { type: string }
+            principal_type: { type: string, enum: [user, service_account, system] }
+            roles: { type: array, items: { type: string } }
+            ip_address: { type: string }
         action:
           type: string
         resource:
           type: object
           properties:
-            id: {type: string}
-            type: {type: string}
-            attributes: {type: object}
+            id: { type: string }
+            type: { type: string }
+            attributes: { type: object }
         policy:
           type: object
           properties:
-            decision_id: {type: string}
-            policy_set: {type: string}
-            evaluation_timestamp: {type: string, format: date-time}
+            decision_id: { type: string }
+            policy_set: { type: string }
+            evaluation_timestamp: { type: string, format: date-time }
         result:
           type: object
           properties:
-            status: {type: string, enum: [success, failure, denied]}
-            details: {type: string}
-            rationale_hash: {type: string}
+            status: { type: string, enum: [success, failure, denied] }
+            details: { type: string }
+            rationale_hash: { type: string }
         signature:
           type: object
           properties:
-            key_id: {type: string}
-            algorithm: {type: string}
-            value: {type: string}
+            key_id: { type: string }
+            algorithm: { type: string }
+            value: { type: string }
 
     ReceiptBundle:
       type: object
       properties:
-        bundle_id: {type: string}
+        bundle_id: { type: string }
         receipts:
           type: array
-          items: { $ref: '#/components/schemas/Receipt' }
-        manifest: {type: object}
-        signature: {type: string}
+          items: { $ref: "#/components/schemas/Receipt" }
+        manifest: { type: object }
+        signature: { type: string }
 
     ApprovalRequest:
       type: object
       properties:
-        id: {type: string}
-        workflow_id: {type: string}
-        status: {type: string, enum: [pending, approved, rejected]}
-        requested_by: {type: string}
-        risk_level: {type: string}
-        payload: {type: object}
+        id: { type: string }
+        workflow_id: { type: string }
+        status: { type: string, enum: [pending, approved, rejected] }
+        requested_by: { type: string }
+        risk_level: { type: string }
+        payload: { type: object }
         actions:
           type: array
           items:
             type: object
             properties:
-              actor: {type: string}
-              action: {type: string}
-              timestamp: {type: string}
-              rationale: {type: string}
+              actor: { type: string }
+              action: { type: string }
+              timestamp: { type: string }
+              rationale: { type: string }
 
     PolicyResult:
       type: object
       properties:
-        allow: {type: boolean}
+        allow: { type: boolean }
         reasons:
           type: array
-          items: {type: string}
+          items: { type: string }
         obligations:
           type: array
-          items: {type: string}
+          items: { type: string }
 
     TenantUsage:
       type: object
       properties:
-        tenant_id: {type: string}
+        tenant_id: { type: string }
         period:
           type: object
           properties:
-            from: {type: string}
-            to: {type: string}
+            from: { type: string }
+            to: { type: string }
         metrics:
           type: object
           additionalProperties:

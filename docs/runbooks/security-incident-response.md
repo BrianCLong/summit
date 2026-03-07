@@ -7,6 +7,7 @@ This runbook provides procedures for responding to security incidents including 
 ## Incident Classification
 
 ### Severity Levels
+
 - **P0 (Critical)**: Active breach, data exfiltration, complete system compromise
 - **P1 (High)**: Unauthorized access, vulnerability being exploited, authentication bypass
 - **P2 (Medium)**: Attempted breach, vulnerability discovered, suspicious activity
@@ -15,6 +16,7 @@ This runbook provides procedures for responding to security incidents including 
 ## Initial Response (First 15 Minutes)
 
 ### 1. Confirm the Incident
+
 ```bash
 # Check security logs
 kubectl logs -l app=intelgraph-api -n intelgraph | grep -i "unauthorized\|forbidden\|security"
@@ -50,18 +52,21 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 ### 2. Activate Incident Response Team
+
 - Security Lead
 - Engineering Manager
 - Legal/Compliance (if data breach suspected)
 - Communications (if customer impact)
 
 ### 3. Create Incident Channel
+
 ```bash
 # Create dedicated Slack channel
 # #incident-security-<timestamp>
 ```
 
 ### 4. Preserve Evidence
+
 ```bash
 # Capture current state
 kubectl get pods -n intelgraph -o yaml > incident_pods_state.yaml
@@ -88,6 +93,7 @@ aws s3 cp incident_*.* s3://intelgraph-security-incidents/$(date +%Y%m%d)/
 ### Scenario 1: Unauthorized Access Detected
 
 #### Indicators
+
 - Failed login attempts spike
 - Successful login from unusual location
 - Access to unauthorized resources
@@ -96,6 +102,7 @@ aws s3 cp incident_*.* s3://intelgraph-security-incidents/$(date +%Y%m%d)/
 #### Immediate Actions
 
 **1. Identify Compromised Account:**
+
 ```bash
 # Check recent successful logins
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -126,6 +133,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **2. Immediately Revoke Access:**
+
 ```bash
 # Terminate all sessions for compromised user
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -149,6 +157,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **3. Check for Unauthorized Actions:**
+
 ```bash
 # Review actions taken by compromised account
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -180,6 +189,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **4. Assess Impact:**
+
 ```bash
 # Check accessed sensitive data
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -201,6 +211,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ### Scenario 2: Data Breach / Exfiltration
 
 #### Indicators
+
 - Large data exports
 - Unusual API access patterns
 - Database queries for sensitive data
@@ -209,6 +220,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 #### Immediate Actions
 
 **1. Stop the Bleeding:**
+
 ```bash
 # Identify data exfiltration
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -238,6 +250,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ```
 
 **2. Assess Scope of Breach:**
+
 ```bash
 # Identify compromised data
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -271,6 +284,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **3. Notify Stakeholders:**
+
 ```bash
 # Determine breach notification requirements
 # - GDPR: 72 hours
@@ -301,6 +315,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ### Scenario 3: Vulnerability Exploitation
 
 #### Indicators
+
 - Security scanner alerts
 - Unusual error patterns
 - Injection attempts in logs
@@ -309,6 +324,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 #### Immediate Actions
 
 **1. Confirm Vulnerability:**
+
 ```bash
 # Check for exploitation attempts
 kubectl logs -l app=intelgraph-api -n intelgraph | \
@@ -340,6 +356,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **2. Deploy Emergency Patch:**
+
 ```bash
 # If patch available, deploy immediately
 git checkout security-patch-branch
@@ -359,6 +376,7 @@ curl -X POST https://api.intelgraph.com/test-endpoint \
 ```
 
 **3. Enable WAF Rules:**
+
 ```bash
 # Enable stricter WAF rules
 aws wafv2 update-web-acl \
@@ -379,6 +397,7 @@ curl -X PATCH "https://api.cloudflare.com/client/v4/zones/<zone-id>/firewall/waf
 ### Scenario 4: Insider Threat
 
 #### Indicators
+
 - Access to unauthorized tenants/data
 - Bulk data downloads
 - Suspicious database queries
@@ -387,6 +406,7 @@ curl -X PATCH "https://api.cloudflare.com/client/v4/zones/<zone-id>/firewall/waf
 #### Immediate Actions
 
 **1. Document Evidence:**
+
 ```bash
 # Full audit trail for suspect user
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -413,6 +433,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **2. Restrict Access Without Alerting:**
+
 ```bash
 # Reduce permissions quietly
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -430,6 +451,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **3. Coordinate with HR/Legal:**
+
 - Document all findings
 - Do not confront directly
 - Coordinate timing of access revocation with HR
@@ -492,6 +514,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ## Communication Templates
 
 ### Internal - Initial Alert
+
 ```
 🚨 SECURITY INCIDENT - P0
 
@@ -510,6 +533,7 @@ Next Update: <timestamp>
 ```
 
 ### Customer Notification - Data Breach
+
 ```
 Subject: Important Security Notice
 

@@ -1,6 +1,6 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
-export type TaskLanguage = 'javascript' | 'typescript' | 'python';
+export type TaskLanguage = "javascript" | "typescript" | "python";
 
 export interface TaskGraphTask {
   id: string;
@@ -19,7 +19,7 @@ export interface TaskGraphDependency {
 }
 
 export interface TaskGraphArtifact {
-  schemaVersion: 'v1';
+  schemaVersion: "v1";
   createdAt: string;
   nodes: TaskGraphTask[];
   edges: TaskGraphDependency[];
@@ -39,7 +39,7 @@ export class TaskGraph {
 
   addDependency(from: string, to: string): void {
     if (!this.tasks.has(from) || !this.tasks.has(to)) {
-      throw new Error('Dependencies must reference existing tasks');
+      throw new Error("Dependencies must reference existing tasks");
     }
     this.dependencies.push({ from, to });
   }
@@ -87,7 +87,7 @@ export class TaskGraph {
     }
 
     if (ordered.length !== this.tasks.size) {
-      throw new Error('Task graph contains a cycle');
+      throw new Error("Task graph contains a cycle");
     }
 
     return ordered;
@@ -102,10 +102,10 @@ export class TaskGraph {
       return a.from.localeCompare(b.from);
     });
     const payload = JSON.stringify({ nodes, edges });
-    const hash = createHash('sha256').update(payload).digest('hex');
+    const hash = createHash("sha256").update(payload).digest("hex");
 
     return {
-      schemaVersion: 'v1',
+      schemaVersion: "v1",
       createdAt: new Date().toISOString(),
       nodes,
       edges,

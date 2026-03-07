@@ -12,10 +12,10 @@ export const CONFIDENCE_THRESHOLDS = {
 
 // Alert severity mappings
 export const ALERT_SEVERITY_BY_CONFIDENCE = [
-  { minConfidence: 0.9, severity: 'CRITICAL' },
-  { minConfidence: 0.7, severity: 'HIGH' },
-  { minConfidence: 0.5, severity: 'MEDIUM' },
-  { minConfidence: 0.3, severity: 'LOW' },
+  { minConfidence: 0.9, severity: "CRITICAL" },
+  { minConfidence: 0.7, severity: "HIGH" },
+  { minConfidence: 0.5, severity: "MEDIUM" },
+  { minConfidence: 0.3, severity: "LOW" },
 ] as const;
 
 // Processing timeouts (milliseconds)
@@ -36,43 +36,43 @@ export const FILE_SIZE_LIMITS = {
 // Supported MIME types
 export const SUPPORTED_MIME_TYPES = {
   VIDEO: [
-    'video/mp4',
-    'video/mpeg',
-    'video/quicktime',
-    'video/x-msvideo',
-    'video/x-matroska',
-    'video/webm',
+    "video/mp4",
+    "video/mpeg",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-matroska",
+    "video/webm",
   ],
   AUDIO: [
-    'audio/mpeg',
-    'audio/mp3',
-    'audio/wav',
-    'audio/wave',
-    'audio/x-wav',
-    'audio/flac',
-    'audio/ogg',
-    'audio/webm',
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wav",
+    "audio/wave",
+    "audio/x-wav",
+    "audio/flac",
+    "audio/ogg",
+    "audio/webm",
   ],
   IMAGE: [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-    'image/bmp',
-    'image/tiff',
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/bmp",
+    "image/tiff",
   ],
 } as const;
 
 // Model versions (current production versions)
 export const MODEL_VERSIONS = {
-  VIDEO_FACE: 'v1.2.0',
-  VIDEO_GENERIC: 'v1.0.0',
-  AUDIO_SPECTROGRAM: 'v1.1.0',
-  AUDIO_WAVEFORM: 'v1.0.0',
-  IMAGE_MANIPULATION: 'v1.0.1',
-  IMAGE_GAN: 'v1.0.0',
-  ENSEMBLE: 'v1.0.0',
+  VIDEO_FACE: "v1.2.0",
+  VIDEO_GENERIC: "v1.0.0",
+  AUDIO_SPECTROGRAM: "v1.1.0",
+  AUDIO_WAVEFORM: "v1.0.0",
+  IMAGE_MANIPULATION: "v1.0.1",
+  IMAGE_GAN: "v1.0.0",
+  ENSEMBLE: "v1.0.0",
 } as const;
 
 // Ensemble weights (for weighted voting)
@@ -91,14 +91,14 @@ export const FEATURE_EXTRACTION = {
   VIDEO_SAMPLE_FPS: 1, // Sample 1 frame per second
   VIDEO_MAX_FRAMES: 300, // Max 300 frames (5 min @ 1 fps)
   VIDEO_FACE_SIZE: 256, // Resize detected faces to 256x256
-  
+
   // Audio
   AUDIO_SAMPLE_RATE: 16000, // Resample to 16 kHz
   AUDIO_SEGMENT_DURATION: 5, // 5-second segments
   AUDIO_MEL_BINS: 128, // Number of mel filterbank bins
   AUDIO_N_FFT: 2048, // FFT window size
   AUDIO_HOP_LENGTH: 512, // Hop length for STFT
-  
+
   // Image
   IMAGE_TARGET_SIZE: 299, // Resize to 299x299 for XceptionNet
 } as const;
@@ -146,75 +146,75 @@ export const RATE_LIMITS = {
 // Notification templates
 export const NOTIFICATION_TEMPLATES = {
   HIGH_CONFIDENCE_DETECTION: {
-    subject: 'High Confidence Deepfake Detected',
-    body: 'A deepfake with {confidence}% confidence was detected in media {mediaId}. Review required.',
+    subject: "High Confidence Deepfake Detected",
+    body: "A deepfake with {confidence}% confidence was detected in media {mediaId}. Review required.",
   },
   CRITICAL_ALERT: {
-    subject: 'CRITICAL: Deepfake Alert',
-    body: 'Critical deepfake alert for investigation {investigationId}. Immediate action required.',
+    subject: "CRITICAL: Deepfake Alert",
+    body: "Critical deepfake alert for investigation {investigationId}. Immediate action required.",
   },
   MODEL_DRIFT_DETECTED: {
-    subject: 'Model Drift Detected',
-    body: 'Model {modelId} is showing signs of drift. Drift score: {driftScore}. Retraining recommended.',
+    subject: "Model Drift Detected",
+    body: "Model {modelId} is showing signs of drift. Drift score: {driftScore}. Retraining recommended.",
   },
 } as const;
 
 // Storage paths
 export const STORAGE_PATHS = {
-  MEDIA: 'media',
-  MODELS: 'models',
-  VISUALIZATIONS: 'visualizations',
-  EXPORTS: 'exports',
-  TEMP: 'temp',
+  MEDIA: "media",
+  MODELS: "models",
+  VISUALIZATIONS: "visualizations",
+  EXPORTS: "exports",
+  TEMP: "temp",
 } as const;
 
 // Metrics
 export const METRIC_NAMES = {
-  DETECTION_REQUESTS: 'deepfake_detection_requests_total',
-  DETECTION_DURATION: 'deepfake_detection_duration_seconds',
-  CONFIDENCE_SCORE: 'deepfake_confidence_score',
-  MODEL_LOAD_TIME: 'deepfake_model_load_time_seconds',
-  GPU_UTILIZATION: 'deepfake_gpu_utilization_percent',
-  JOBS_QUEUED: 'deepfake_jobs_queued',
-  JOBS_COMPLETED: 'deepfake_jobs_completed_total',
-  JOBS_PROCESSING_DURATION: 'deepfake_jobs_processing_duration_seconds',
-  ALERTS_CREATED: 'deepfake_alerts_created_total',
-  ALERTS_RESOLVED: 'deepfake_alerts_resolved_total',
-  ALERT_TIME_TO_RESOLUTION: 'deepfake_alert_time_to_resolution_seconds',
-  MODEL_ACCURACY: 'deepfake_model_accuracy',
-  MODEL_DRIFT_SCORE: 'deepfake_model_drift_score',
+  DETECTION_REQUESTS: "deepfake_detection_requests_total",
+  DETECTION_DURATION: "deepfake_detection_duration_seconds",
+  CONFIDENCE_SCORE: "deepfake_confidence_score",
+  MODEL_LOAD_TIME: "deepfake_model_load_time_seconds",
+  GPU_UTILIZATION: "deepfake_gpu_utilization_percent",
+  JOBS_QUEUED: "deepfake_jobs_queued",
+  JOBS_COMPLETED: "deepfake_jobs_completed_total",
+  JOBS_PROCESSING_DURATION: "deepfake_jobs_processing_duration_seconds",
+  ALERTS_CREATED: "deepfake_alerts_created_total",
+  ALERTS_RESOLVED: "deepfake_alerts_resolved_total",
+  ALERT_TIME_TO_RESOLUTION: "deepfake_alert_time_to_resolution_seconds",
+  MODEL_ACCURACY: "deepfake_model_accuracy",
+  MODEL_DRIFT_SCORE: "deepfake_model_drift_score",
 } as const;
 
 // Error codes
 export const ERROR_CODES = {
   // Media errors
-  MEDIA_NOT_FOUND: 'MEDIA_NOT_FOUND',
-  MEDIA_TOO_LARGE: 'MEDIA_TOO_LARGE',
-  UNSUPPORTED_FORMAT: 'UNSUPPORTED_FORMAT',
-  CORRUPT_FILE: 'CORRUPT_FILE',
-  
+  MEDIA_NOT_FOUND: "MEDIA_NOT_FOUND",
+  MEDIA_TOO_LARGE: "MEDIA_TOO_LARGE",
+  UNSUPPORTED_FORMAT: "UNSUPPORTED_FORMAT",
+  CORRUPT_FILE: "CORRUPT_FILE",
+
   // Detection errors
-  DETECTION_FAILED: 'DETECTION_FAILED',
-  DETECTION_TIMEOUT: 'DETECTION_TIMEOUT',
-  MODEL_NOT_LOADED: 'MODEL_NOT_LOADED',
-  INSUFFICIENT_QUALITY: 'INSUFFICIENT_QUALITY',
-  
+  DETECTION_FAILED: "DETECTION_FAILED",
+  DETECTION_TIMEOUT: "DETECTION_TIMEOUT",
+  MODEL_NOT_LOADED: "MODEL_NOT_LOADED",
+  INSUFFICIENT_QUALITY: "INSUFFICIENT_QUALITY",
+
   // Model errors
-  MODEL_NOT_FOUND: 'MODEL_NOT_FOUND',
-  MODEL_LOAD_FAILED: 'MODEL_LOAD_FAILED',
-  INFERENCE_ERROR: 'INFERENCE_ERROR',
-  
+  MODEL_NOT_FOUND: "MODEL_NOT_FOUND",
+  MODEL_LOAD_FAILED: "MODEL_LOAD_FAILED",
+  INFERENCE_ERROR: "INFERENCE_ERROR",
+
   // System errors
-  OUT_OF_MEMORY: 'OUT_OF_MEMORY',
-  GPU_NOT_AVAILABLE: 'GPU_NOT_AVAILABLE',
-  STORAGE_ERROR: 'STORAGE_ERROR',
-  DATABASE_ERROR: 'DATABASE_ERROR',
-  QUEUE_ERROR: 'QUEUE_ERROR',
-  
+  OUT_OF_MEMORY: "OUT_OF_MEMORY",
+  GPU_NOT_AVAILABLE: "GPU_NOT_AVAILABLE",
+  STORAGE_ERROR: "STORAGE_ERROR",
+  DATABASE_ERROR: "DATABASE_ERROR",
+  QUEUE_ERROR: "QUEUE_ERROR",
+
   // Auth errors
-  UNAUTHORIZED: 'UNAUTHORIZED',
-  FORBIDDEN: 'FORBIDDEN',
-  RATE_LIMITED: 'RATE_LIMITED',
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  RATE_LIMITED: "RATE_LIMITED",
 } as const;
 
 // Feature flags

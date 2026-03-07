@@ -12,6 +12,6 @@ export interface RunState {
   iteration: number;
   lastGitSha?: string;
   completed: boolean;
-  status: 'running' | 'completed' | 'failed' | 'stopped';
+  status: "running" | "completed" | "failed" | "stopped";
   logs: string[];
 }

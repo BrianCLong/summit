@@ -2,7 +2,7 @@
  * CQRS Projection Types
  */
 
-import type { DomainEvent } from '@intelgraph/event-sourcing';
+import type { DomainEvent } from "@intelgraph/event-sourcing";
 
 export interface Projection {
   name: string;
@@ -12,9 +12,7 @@ export interface Projection {
   rebuild?: () => Promise<void>;
 }
 
-export type ProjectionEventHandler = (
-  event: DomainEvent
-) => Promise<void> | void;
+export type ProjectionEventHandler = (event: DomainEvent) => Promise<void> | void;
 
 export interface ProjectionState {
   projectionName: string;
@@ -27,10 +25,10 @@ export interface ProjectionState {
 }
 
 export enum ProjectionStatus {
-  RUNNING = 'running',
-  STOPPED = 'stopped',
-  REBUILDING = 'rebuilding',
-  ERROR = 'error'
+  RUNNING = "running",
+  STOPPED = "stopped",
+  REBUILDING = "rebuilding",
+  ERROR = "error",
 }
 
 export interface ProjectionOptions {

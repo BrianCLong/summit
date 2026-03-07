@@ -20,9 +20,7 @@
       "title": "Last successful refresh",
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 7 },
-      "targets": [
-        { "expr": "max(pao_pricing_last_success_timestamp_seconds)" }
-      ],
+      "targets": [{ "expr": "max(pao_pricing_last_success_timestamp_seconds)" }],
       "fieldConfig": {
         "defaults": { "unit": "dateTimeAsIso" },
         "overrides": []
@@ -36,9 +34,7 @@
       "title": "Unknown poolId selections (5m)",
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 7 },
-      "targets": [
-        { "expr": "sum(rate(pao_unknown_pool_selections_total[5m]))" }
-      ],
+      "targets": [{ "expr": "sum(rate(pao_unknown_pool_selections_total[5m]))" }],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
@@ -55,7 +51,10 @@
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 0, "y": 7, "w": 12, "h": 7 },
       "targets": [
-        { "expr": "sum by (pool_id) (rate(pao_pool_selection_total[5m]))", "legendFormat": "{{pool_id}}" }
+        {
+          "expr": "sum by (pool_id) (rate(pao_pool_selection_total[5m]))",
+          "legendFormat": "{{pool_id}}"
+        }
       ],
       "options": { "legend": { "showLegend": true } },
       "fieldConfig": { "defaults": { "unit": "ops" } }
@@ -66,8 +65,14 @@
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 12, "y": 7, "w": 12, "h": 7 },
       "targets": [
-        { "expr": "sum by (action) (rate(pao_reservation_actions_total{status=\"success\"}[5m]))", "legendFormat": "{{action}} success" },
-        { "expr": "sum by (action) (rate(pao_reservation_actions_total{status=\"error\"}[5m]))", "legendFormat": "{{action}} error" }
+        {
+          "expr": "sum by (action) (rate(pao_reservation_actions_total{status=\"success\"}[5m]))",
+          "legendFormat": "{{action}} success"
+        },
+        {
+          "expr": "sum by (action) (rate(pao_reservation_actions_total{status=\"error\"}[5m]))",
+          "legendFormat": "{{action}} error"
+        }
       ],
       "options": { "legend": { "showLegend": true } }
     },
@@ -76,9 +81,7 @@
       "title": "Active reservations",
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 0, "y": 14, "w": 6, "h": 7 },
-      "targets": [
-        { "expr": "max(pao_active_reservations)" }
-      ],
+      "targets": [{ "expr": "max(pao_active_reservations)" }],
       "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
     },
@@ -99,7 +102,10 @@
       "gridPos": { "x": 15, "y": 14, "w": 9, "h": 7 },
       "targets": [
         { "expr": "sum(rate(pao_selector_no_eligible_total[5m]))", "legendFormat": "no eligible" },
-        { "expr": "sum(rate(pao_unknown_pool_selections_total[5m]))", "legendFormat": "unknown pool" }
+        {
+          "expr": "sum(rate(pao_unknown_pool_selections_total[5m]))",
+          "legendFormat": "unknown pool"
+        }
       ],
       "options": { "legend": { "showLegend": true } }
     }

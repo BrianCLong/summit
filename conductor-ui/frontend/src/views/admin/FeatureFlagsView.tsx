@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/views/admin/FeatureFlagsView.tsx
-import React from 'react';
+import React from "react";
 
 export const FeatureFlagsView = () => {
   // Placeholder for listing, searching, and toggling feature flags.

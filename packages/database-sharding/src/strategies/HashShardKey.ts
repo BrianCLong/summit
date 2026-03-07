@@ -1,6 +1,6 @@
-import murmurhash from 'murmurhash';
-import { ShardKeyStrategy } from './ShardKeyStrategy';
-import { ShardConfig } from '../types';
+import murmurhash from "murmurhash";
+import { ShardKeyStrategy } from "./ShardKeyStrategy";
+import { ShardConfig } from "../types";
 
 /**
  * Hash-based sharding using consistent hashing with virtual nodes
@@ -37,7 +37,7 @@ export class HashShardKey implements ShardKeyStrategy {
   }
 
   getName(): string {
-    return 'hash';
+    return "hash";
   }
 
   getShard(key: any, shards: ShardConfig[]): ShardConfig {
@@ -66,24 +66,20 @@ export class HashShardKey implements ShardKeyStrategy {
     return shard;
   }
 
-  getShardsForRange(
-    startKey: any,
-    endKey: any,
-    shards: ShardConfig[]
-  ): ShardConfig[] {
+  getShardsForRange(startKey: any, endKey: any, shards: ShardConfig[]): ShardConfig[] {
     // For hash-based sharding, range queries require all shards
     // because data is distributed randomly
     return shards;
   }
 
   private normalizeKey(key: any): string {
-    if (typeof key === 'string') {
+    if (typeof key === "string") {
       return key;
     }
-    if (typeof key === 'number') {
+    if (typeof key === "number") {
       return key.toString();
     }
-    if (typeof key === 'object' && key !== null) {
+    if (typeof key === "object" && key !== null) {
       return JSON.stringify(key);
     }
     return String(key);

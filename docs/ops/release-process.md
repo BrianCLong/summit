@@ -40,16 +40,16 @@ Examples:
 
 ### Version Increment Rules
 
-| Commit Type | Example | Version Bump |
-|-------------|---------|--------------|
-| `feat:` | `feat(api): add new search endpoint` | **MINOR** |
-| `fix:` | `fix(web): resolve login timeout` | **PATCH** |
-| `perf:` | `perf(db): optimize query cache` | **PATCH** |
-| `refactor:` | `refactor(core): simplify auth flow` | **PATCH** |
-| `revert:` | `revert: undo feature X` | **PATCH** |
-| `docs:` (README only) | `docs(README): update install steps` | **PATCH** |
-| `BREAKING CHANGE:` | Footer or `!` suffix | **MAJOR** |
-| `chore:`, `test:`, `style:`, `ci:` | Maintenance commits | **No release** |
+| Commit Type                        | Example                              | Version Bump   |
+| ---------------------------------- | ------------------------------------ | -------------- |
+| `feat:`                            | `feat(api): add new search endpoint` | **MINOR**      |
+| `fix:`                             | `fix(web): resolve login timeout`    | **PATCH**      |
+| `perf:`                            | `perf(db): optimize query cache`     | **PATCH**      |
+| `refactor:`                        | `refactor(core): simplify auth flow` | **PATCH**      |
+| `revert:`                          | `revert: undo feature X`             | **PATCH**      |
+| `docs:` (README only)              | `docs(README): update install steps` | **PATCH**      |
+| `BREAKING CHANGE:`                 | Footer or `!` suffix                 | **MAJOR**      |
+| `chore:`, `test:`, `style:`, `ci:` | Maintenance commits                  | **No release** |
 
 ### Breaking Changes
 
@@ -71,11 +71,11 @@ git commit -m "feat(api)!: redesign auth flow"
 
 Tags follow the pattern: `vMAJOR.MINOR.PATCH[-PRERELEASE]`
 
-| Channel | Tag Format | Example |
-|---------|-----------|---------|
-| Production | `vX.Y.Z` | `v1.2.3` |
-| Beta | `vX.Y.Z-beta.N` | `v1.3.0-beta.1` |
-| Alpha | `vX.Y.Z-alpha.N` | `v2.0.0-alpha.5` |
+| Channel    | Tag Format       | Example          |
+| ---------- | ---------------- | ---------------- |
+| Production | `vX.Y.Z`         | `v1.2.3`         |
+| Beta       | `vX.Y.Z-beta.N`  | `v1.3.0-beta.1`  |
+| Alpha      | `vX.Y.Z-alpha.N` | `v2.0.0-alpha.5` |
 
 ---
 
@@ -217,6 +217,7 @@ gh pr merge --squash
 ### 4. Verify Hotfix Release
 
 The merge will trigger an immediate patch release:
+
 - Monitor: [Actions → Semantic Release](https://github.com/BrianCLong/summit/actions)
 - Expected: `vX.Y.Z+1` (patch increment)
 
@@ -278,14 +279,14 @@ This creates a production release with the same features.
 
 Each release produces:
 
-| Artifact | Location | Description |
-|----------|----------|-------------|
-| Git Tag | `vX.Y.Z` | Immutable version marker |
-| GitHub Release | Releases page | Notes, changelog, assets |
-| CHANGELOG.md | Repository root | Cumulative changelog |
-| Release Notes | `RELEASE_NOTES.md` | Current release summary |
-| Release Manifest | `releases/X.Y.Z.json` | Machine-readable metadata |
-| Deployment YAML | `releases/vX.Y.Z.yaml` | Kubernetes-style manifest |
+| Artifact         | Location               | Description               |
+| ---------------- | ---------------------- | ------------------------- |
+| Git Tag          | `vX.Y.Z`               | Immutable version marker  |
+| GitHub Release   | Releases page          | Notes, changelog, assets  |
+| CHANGELOG.md     | Repository root        | Cumulative changelog      |
+| Release Notes    | `RELEASE_NOTES.md`     | Current release summary   |
+| Release Manifest | `releases/X.Y.Z.json`  | Machine-readable metadata |
+| Deployment YAML  | `releases/vX.Y.Z.yaml` | Kubernetes-style manifest |
 
 ### Accessing Release Info
 
@@ -355,11 +356,13 @@ helm rollback intelgraph -n intelgraph-production
 **Symptoms**: Merged PR but no new release
 
 **Check**:
+
 1. Commit messages follow convention (`feat:`, `fix:`, etc.)
 2. No `[skip ci]` in commit messages
 3. Workflow ran successfully: [Actions page](https://github.com/BrianCLong/summit/actions)
 
 **Fix**:
+
 ```bash
 # Manually trigger release
 gh workflow run semantic-release.yml --ref main
@@ -370,6 +373,7 @@ gh workflow run semantic-release.yml --ref main
 **Symptoms**: Expected major but got minor
 
 **Check**:
+
 - Breaking change format: Must use `BREAKING CHANGE:` footer or `!` suffix
 
 **Fix**:
@@ -378,10 +382,12 @@ Can't change released version. Cut a new release with correct commits.
 ### CHANGELOG Not Updated
 
 **Check**:
+
 1. `.releaserc.json` has `@semantic-release/changelog` plugin
 2. `CHANGELOG.md` exists and is committed
 
 **Fix**:
+
 ```bash
 # Regenerate changelog manually
 npx semantic-release --dry-run
@@ -392,6 +398,7 @@ npx semantic-release --dry-run
 **Symptoms**: `GITHUB_TOKEN` or permission errors
 
 **Check**:
+
 - Repository secrets configured
 - Workflow has correct permissions
 
@@ -408,7 +415,11 @@ Primary configuration: `.releaserc.json`
 
 ```json
 {
-  "branches": ["main", {"name": "beta", "prerelease": true}, {"name": "alpha", "prerelease": true}],
+  "branches": [
+    "main",
+    { "name": "beta", "prerelease": true },
+    { "name": "alpha", "prerelease": true }
+  ],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -423,14 +434,14 @@ Primary configuration: `.releaserc.json`
 
 ### Related Files
 
-| File | Purpose |
-|------|---------|
-| `.releaserc.json` | semantic-release configuration |
-| `.github/workflows/semantic-release.yml` | Release workflow |
-| `scripts/prepare-release.sh` | Pre-release preparation |
-| `scripts/publish-release.sh` | Post-release actions |
-| `scripts/gen-release-notes.sh` | Manual release notes |
-| `CHANGELOG.md` | Cumulative changelog |
+| File                                     | Purpose                        |
+| ---------------------------------------- | ------------------------------ |
+| `.releaserc.json`                        | semantic-release configuration |
+| `.github/workflows/semantic-release.yml` | Release workflow               |
+| `scripts/prepare-release.sh`             | Pre-release preparation        |
+| `scripts/publish-release.sh`             | Post-release actions           |
+| `scripts/gen-release-notes.sh`           | Manual release notes           |
+| `CHANGELOG.md`                           | Cumulative changelog           |
 
 ---
 

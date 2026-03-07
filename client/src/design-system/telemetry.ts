@@ -1,4 +1,4 @@
-import { allowedColors, allowedSpacing } from './tokens';
+import { allowedColors, allowedSpacing } from "./tokens";
 
 export type TelemetryEvent = {
   component: string;
@@ -13,18 +13,18 @@ export interface TelemetryTransport {
 }
 
 export class BeaconTransport implements TelemetryTransport {
-  constructor(private endpoint: string = '/api/ux-telemetry') {}
+  constructor(private endpoint: string = "/api/ux-telemetry") {}
 
   async send(events: TelemetryEvent[]): Promise<void> {
     const payload = JSON.stringify({ events });
-    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
       navigator.sendBeacon(this.endpoint, payload);
       return;
     }
 
     await fetch(this.endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: payload,
       keepalive: true,
     });
@@ -39,7 +39,10 @@ export class DesignSystemTelemetry {
   private buffer: TelemetryEvent[] = [];
   private flushInterval?: ReturnType<typeof setInterval>;
 
-  constructor(private transport: TelemetryTransport = new BeaconTransport(), options: TelemetryOptions = {}) {
+  constructor(
+    private transport: TelemetryTransport = new BeaconTransport(),
+    options: TelemetryOptions = {}
+  ) {
     const interval = options.autoFlushMs ?? 5000;
     if (interval !== null) {
       this.flushInterval = setInterval(() => this.flush(), interval);
@@ -50,7 +53,13 @@ export class DesignSystemTelemetry {
     this.buffer.push({ component, version, context, timestamp: Date.now() });
   }
 
-  recordDrift(component: string, version: string, field: string, value: unknown, allowed: (string | number)[]) {
+  recordDrift(
+    component: string,
+    version: string,
+    field: string,
+    value: unknown,
+    allowed: (string | number)[]
+  ) {
     this.buffer.push({
       component,
       version,
@@ -61,10 +70,14 @@ export class DesignSystemTelemetry {
 
   validateStyle(component: string, version: string, styles: Record<string, unknown>) {
     Object.entries(styles).forEach(([key, value]) => {
-      if (typeof value === 'string' && value.startsWith('#') && !allowedColors.has(value)) {
+      if (typeof value === "string" && value.startsWith("#") && !allowedColors.has(value)) {
         this.recordDrift(component, version, key, value, Array.from(allowedColors));
       }
-      if (typeof value === 'number' && key.toLowerCase().includes('padding') && !allowedSpacing.has(value)) {
+      if (
+        typeof value === "number" &&
+        key.toLowerCase().includes("padding") &&
+        !allowedSpacing.has(value)
+      ) {
         this.recordDrift(component, version, key, value, Array.from(allowedSpacing));
       }
     });

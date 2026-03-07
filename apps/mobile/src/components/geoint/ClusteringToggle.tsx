@@ -31,9 +31,12 @@ export const ClusteringToggle: React.FC<ClusteringToggleProps> = ({
           enabled ? 'border-intel-400 bg-intel-600/20' : 'border-dark-border bg-dark-elevated',
         )}
       >
-        {enabled ? <ToggleRight size={24} color="#0ea5e9" /> : <ToggleLeft size={24} color="#94a3b8" />}
+        {enabled ? (
+          <ToggleRight size={24} color="#0ea5e9" />
+        ) : (
+          <ToggleLeft size={24} color="#94a3b8" />
+        )}
       </TouchableOpacity>
     </View>
   );
 };
-

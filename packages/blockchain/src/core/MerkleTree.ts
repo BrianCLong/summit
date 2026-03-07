@@ -2,7 +2,7 @@
  * Merkle Tree implementation for efficient transaction verification
  */
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export class MerkleTree {
   private leaves: string[];
@@ -18,7 +18,7 @@ export class MerkleTree {
    */
   private buildTree(): string[][] {
     if (this.leaves.length === 0) {
-      return [['']];
+      return [[""]];
     }
 
     const tree: string[][] = [this.leaves];
@@ -46,7 +46,7 @@ export class MerkleTree {
    */
   getRoot(): string {
     if (this.tree.length === 0 || this.tree[this.tree.length - 1].length === 0) {
-      return '';
+      return "";
     }
     return this.tree[this.tree.length - 1][0];
   }
@@ -56,7 +56,7 @@ export class MerkleTree {
    */
   getProof(leafIndex: number): string[] {
     if (leafIndex < 0 || leafIndex >= this.leaves.length) {
-      throw new Error('Invalid leaf index');
+      throw new Error("Invalid leaf index");
     }
 
     const proof: string[] = [];
@@ -107,7 +107,7 @@ export class MerkleTree {
    * Hash function
    */
   private hash(data: string): string {
-    return createHash('sha256').update(data).digest('hex');
+    return createHash("sha256").update(data).digest("hex");
   }
 
   /**

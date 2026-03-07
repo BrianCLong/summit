@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Symphony UI — Wired Single-File React + Tailwind Scaffold
@@ -17,7 +17,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
  */
 
 // --------------------------- Small Utilities ---------------------------
-const cn = (...xs) => xs.filter(Boolean).join(' ');
+const cn = (...xs) => xs.filter(Boolean).join(" ");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function getURLParam(name) {
@@ -28,21 +28,18 @@ function getURLParam(name) {
 function getENV() {
   const cfg = window.__SYMPHONY_CFG__ || {};
   const fromURL = {
-    LITELLM_BASE: getURLParam('litellm'),
-    OLLAMA_BASE: getURLParam('ollama'),
-    PROXY_BASE: getURLParam('proxy'),
+    LITELLM_BASE: getURLParam("litellm"),
+    OLLAMA_BASE: getURLParam("ollama"),
+    PROXY_BASE: getURLParam("proxy"),
   };
   const env = {
-    LITELLM_BASE:
-      fromURL.LITELLM_BASE || cfg.LITELLM_BASE || 'http://127.0.0.1:4000',
-    OLLAMA_BASE:
-      fromURL.OLLAMA_BASE || cfg.OLLAMA_BASE || 'http://127.0.0.1:11434',
-    PROXY_BASE: fromURL.PROXY_BASE || cfg.PROXY_BASE || '',
+    LITELLM_BASE: fromURL.LITELLM_BASE || cfg.LITELLM_BASE || "http://127.0.0.1:4000",
+    OLLAMA_BASE: fromURL.OLLAMA_BASE || cfg.OLLAMA_BASE || "http://127.0.0.1:11434",
+    PROXY_BASE: fromURL.PROXY_BASE || cfg.PROXY_BASE || "",
   };
   // Normalize trailing slashes
   for (const k of Object.keys(env)) {
-    if (env[k] && typeof env[k] === 'string')
-      env[k] = env[k].replace(/\/$/, '');
+    if (env[k] && typeof env[k] === "string") env[k] = env[k].replace(/\/$/, "");
   }
   return env;
 }
@@ -51,8 +48,8 @@ function useStableENV() {
   const [env, setEnv] = useState(getENV());
   useEffect(() => {
     const onPop = () => setEnv(getENV());
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
   return env;
 }
@@ -60,11 +57,11 @@ function useStableENV() {
 async function fetchJson(url, init) {
   const r = await fetch(url, init);
   if (!r.ok) {
-    const text = await r.text().catch(() => '');
+    const text = await r.text().catch(() => "");
     throw new Error(`HTTP ${r.status}: ${text || r.statusText}`);
   }
-  const ct = r.headers.get('content-type') || '';
-  if (ct.includes('application/json')) return r.json();
+  const ct = r.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return r.json();
   const t = await r.text();
   try {
     return JSON.parse(t);
@@ -75,8 +72,8 @@ async function fetchJson(url, init) {
 
 async function postJson(url, body, init = {}) {
   return fetchJson(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', ...(init.headers || {}) },
+    method: "POST",
+    headers: { "content-type": "application/json", ...(init.headers || {}) },
     body: JSON.stringify(body || {}),
     ...init,
   });
@@ -101,9 +98,9 @@ function useSSE(url, { onMessage, onError, onOpen }) {
     if (!url) return;
     const es = new EventSource(url);
     esRef.current = es;
-    if (onOpen) es.addEventListener('open', onOpen);
-    if (onMessage) es.addEventListener('message', (e) => onMessage(e.data));
-    if (onError) es.addEventListener('error', onError);
+    if (onOpen) es.addEventListener("open", onOpen);
+    if (onMessage) es.addEventListener("message", (e) => onMessage(e.data));
+    if (onError) es.addEventListener("error", onError);
     return () => {
       es.close();
       esRef.current = null;
@@ -113,15 +110,12 @@ function useSSE(url, { onMessage, onError, onOpen }) {
 }
 
 const fmt = {
-  num: (n, d = 0) =>
-    n == null ? '—' : Number(n).toFixed(d).replace(/\.0+$/, ''),
-  ms: (n) => (n == null ? '—' : `${Math.round(n)} ms`),
-  pct: (x) => (x == null ? '—' : `${Math.round(x * 100)}%`),
+  num: (n, d = 0) => (n == null ? "—" : Number(n).toFixed(d).replace(/\.0+$/, "")),
+  ms: (n) => (n == null ? "—" : `${Math.round(n)} ms`),
+  pct: (x) => (x == null ? "—" : `${Math.round(x * 100)}%`),
   money: (x) =>
-    x == null
-      ? '—'
-      : `$${Number(x).toFixed(6).replace(/0+$/, '').replace(/\.$/, '')}`,
-  time: (s) => (s ? new Date(s).toLocaleTimeString() : '—'),
+    x == null ? "—" : `$${Number(x).toFixed(6).replace(/0+$/, "").replace(/\.$/, "")}`,
+  time: (s) => (s ? new Date(s).toLocaleTimeString() : "—"),
 };
 
 // --------------------------- API Layer ---------------------------
@@ -141,7 +135,7 @@ function makeAPI(ENV) {
       }
       // Compose basic health by probing services
       const status = {
-        env: 'dev',
+        env: "dev",
         loa: 1,
         kill: 0,
         services: {
@@ -202,17 +196,15 @@ function makeAPI(ENV) {
         const arr = r.data || r.models || [];
         arr.forEach((m) =>
           items.push({
-            id: m.id || m.name || m.model || 'unknown',
-            provider: 'litellm',
-          }),
+            id: m.id || m.name || m.model || "unknown",
+            provider: "litellm",
+          })
         );
       } catch {}
       try {
         const o = await fetchJson(`${ENV.OLLAMA_BASE}/api/tags`);
         const arr = o.models || [];
-        arr.forEach((m) =>
-          items.push({ id: `ollama/${m.name}`, provider: 'ollama' }),
-        );
+        arr.forEach((m) => items.push({ id: `ollama/${m.name}`, provider: "ollama" }));
       } catch {}
       return { items };
     },
@@ -221,21 +213,21 @@ function makeAPI(ENV) {
       if (hasProxy) return postJson(`${ENV.PROXY_BASE}/route/plan`, payload);
       // Fallback: naive local plan — choose first litellm model if any, else first ollama
       const mods = await api.models();
-      const choice = mods.items[0]?.id || 'unknown';
+      const choice = mods.items[0]?.id || "unknown";
       return {
         decision: {
           model: choice,
           confidence: 0.5,
-          reason: 'proxy off: chose first discovered model',
+          reason: "proxy off: chose first discovered model",
         },
         candidates: mods.items.map((m) => ({ model: m.id, score: 0.5 })),
         prompt_preview: {
-          system: 'You are Symphony local route.',
-          user: payload?.input || '',
+          system: "You are Symphony local route.",
+          user: payload?.input || "",
         },
         policy: {
           allow: true,
-          reason: 'proxy off',
+          reason: "proxy off",
           max_loa: 3,
           hosted_allowed: true,
         },
@@ -252,7 +244,7 @@ function makeAPI(ENV) {
           meta,
         });
       // Fallback: call LiteLLM chat completions if available
-      let text = '(no output)';
+      let text = "(no output)";
       let usage = {};
       let latency_ms = null;
       const cost_usd = 0;
@@ -260,15 +252,14 @@ function makeAPI(ENV) {
       const t0 = performance.now();
       try {
         const r = await postJson(`${ENV.LITELLM_BASE}/v1/chat/completions`, {
-          model: 'gpt-4o-mini', // LiteLLM will map/route if configured; otherwise may error
+          model: "gpt-4o-mini", // LiteLLM will map/route if configured; otherwise may error
           messages: [
-            { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: input || '' },
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: input || "" },
           ],
         });
         latency_ms = performance.now() - t0;
-        text =
-          r.choices?.[0]?.message?.content || JSON.stringify(r).slice(0, 2000);
+        text = r.choices?.[0]?.message?.content || JSON.stringify(r).slice(0, 2000);
         usage = r.usage || {};
       } catch (e) {
         latency_ms = performance.now() - t0;
@@ -286,9 +277,9 @@ function makeAPI(ENV) {
       if (hasProxy) return postJson(`${ENV.PROXY_BASE}/rag/query`, { q, k });
       // Fallback: answer via LLM, flagging that RAG is off
       const r = await api.routeExecute({
-        task: 'qa',
+        task: "qa",
         input: q,
-        env: 'dev',
+        env: "dev",
         loa: 1,
       });
       return {
@@ -301,7 +292,7 @@ function makeAPI(ENV) {
     },
 
     async guardRun(keep_db) {
-      if (!hasProxy) throw new Error('Proxy not configured; cannot run guard');
+      if (!hasProxy) throw new Error("Proxy not configured; cannot run guard");
       return postJson(`${ENV.PROXY_BASE}/neo4j/guard`, { keep_db });
     },
     guardStreamURL(run_id) {
@@ -309,39 +300,37 @@ function makeAPI(ENV) {
       return `${ENV.PROXY_BASE}/neo4j/guard/stream?run_id=${encodeURIComponent(run_id)}`;
     },
     async guardReport(run_id) {
-      if (!hasProxy) throw new Error('Proxy not configured');
-      return fetchJson(
-        `${ENV.PROXY_BASE}/neo4j/guard/report?run_id=${encodeURIComponent(run_id)}`,
-      );
+      if (!hasProxy) throw new Error("Proxy not configured");
+      return fetchJson(`${ENV.PROXY_BASE}/neo4j/guard/report?run_id=${encodeURIComponent(run_id)}`);
     },
 
     async policyGet() {
       if (!hasProxy)
         return {
-          text: '# Policy (proxy off)\nmax_loa:\n  dev: 3\n  staging: 2\n  prod: 1\n',
-          version: 'local',
+          text: "# Policy (proxy off)\nmax_loa:\n  dev: 3\n  staging: 2\n  prod: 1\n",
+          version: "local",
           updated_at: new Date().toISOString(),
         };
       return fetchJson(`${ENV.PROXY_BASE}/policy`);
     },
     async policyPut(text) {
-      if (!hasProxy) throw new Error('Proxy not configured');
+      if (!hasProxy) throw new Error("Proxy not configured");
       const r = await fetch(`${ENV.PROXY_BASE}/policy`, {
-        method: 'PUT',
-        headers: { 'content-type': 'text/plain' },
+        method: "PUT",
+        headers: { "content-type": "text/plain" },
         body: text,
       });
       if (!r.ok) throw new Error(await r.text());
       return r.json();
     },
 
-    logsStreamURL(params = '') {
+    logsStreamURL(params = "") {
       if (!hasProxy) return null;
-      return `${ENV.PROXY_BASE}/logs/stream${params ? `?${params}` : ''}`;
+      return `${ENV.PROXY_BASE}/logs/stream${params ? `?${params}` : ""}`;
     },
 
     async runCmd(cmd) {
-      if (!hasProxy) throw new Error('Proxy not configured');
+      if (!hasProxy) throw new Error("Proxy not configured");
       return postJson(`${ENV.PROXY_BASE}/run`, { cmd });
     },
   };
@@ -353,7 +342,7 @@ function useStore() {
   const ENV = useStableENV();
   const api = useMemo(() => makeAPI(ENV), [ENV]);
 
-  const [env, setEnv] = useState('dev');
+  const [env, setEnv] = useState("dev");
   const [loa, setLoa] = useState(1);
   const [kill, setKill] = useState(0);
   const [services, setServices] = useState({
@@ -374,22 +363,20 @@ function useStore() {
         setHealth(h);
         if (h?.services)
           setServices({
-            ollama: h.services.ollama === true || h.services.ollama === 'UP',
-            litellm: h.services.litellm === true || h.services.litellm === 'UP',
-            neo4j: h.services.neo4j === true || h.services.neo4j === 'UP',
-            federation:
-              h.services.federation === true ||
-              h.services.federation === 'READY',
+            ollama: h.services.ollama === true || h.services.ollama === "UP",
+            litellm: h.services.litellm === true || h.services.litellm === "UP",
+            neo4j: h.services.neo4j === true || h.services.neo4j === "UP",
+            federation: h.services.federation === true || h.services.federation === "READY",
           });
         if (h.env) setEnv(h.env);
-        if (typeof h.loa === 'number') setLoa(h.loa);
-        if (typeof h.kill === 'number') setKill(h.kill);
+        if (typeof h.loa === "number") setLoa(h.loa);
+        if (typeof h.kill === "number") setKill(h.kill);
       } catch (e) {
         // keep previous
       }
     },
     2000,
-    [api],
+    [api]
   );
 
   // Poll burndown
@@ -400,7 +387,7 @@ function useStore() {
       } catch {}
     },
     5000,
-    [api],
+    [api]
   );
 
   // Refresh models occasionally
@@ -418,7 +405,7 @@ function useStore() {
       } catch {}
     },
     30000,
-    [api],
+    [api]
   );
 
   return {
@@ -442,11 +429,11 @@ function StatChip({ ok, label }) {
   return (
     <span
       className={cn(
-        'px-2 py-1 rounded text-xs font-semibold',
-        ok ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700',
+        "px-2 py-1 rounded text-xs font-semibold",
+        ok ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-700"
       )}
     >
-      {label} {ok ? 'UP' : 'DOWN'}
+      {label} {ok ? "UP" : "DOWN"}
     </span>
   );
 }
@@ -455,12 +442,12 @@ function EnvBadge({ env }) {
   return (
     <span
       className={cn(
-        'px-2 py-1 rounded text-xs font-medium',
-        env === 'prod'
-          ? 'bg-red-100 text-red-700'
-          : env === 'staging'
-            ? 'bg-amber-100 text-amber-800'
-            : 'bg-blue-100 text-blue-800',
+        "px-2 py-1 rounded text-xs font-medium",
+        env === "prod"
+          ? "bg-red-100 text-red-700"
+          : env === "staging"
+            ? "bg-amber-100 text-amber-800"
+            : "bg-blue-100 text-blue-800"
       )}
     >
       {env}
@@ -470,7 +457,7 @@ function EnvBadge({ env }) {
 
 function Card({ title, right, children, className }) {
   return (
-    <div className={cn('bg-white border rounded-2xl p-4 shadow-sm', className)}>
+    <div className={cn("bg-white border rounded-2xl p-4 shadow-sm", className)}>
       {(title || right) && (
         <div className="flex items-center mb-3">
           <div className="text-sm font-semibold">{title}</div>
@@ -496,7 +483,7 @@ function ProgressBar({ value, max, caption }) {
 }
 
 function Skeleton({ className }) {
-  return <div className={cn('animate-pulse bg-gray-200 rounded', className)} />;
+  return <div className={cn("animate-pulse bg-gray-200 rounded", className)} />;
 }
 
 // --------------------------- Panels ---------------------------
@@ -535,11 +522,11 @@ function Header({ store }) {
           <button
             onClick={() => store.setKill(store.kill ? 0 : 1)}
             className={cn(
-              'px-2 py-1 rounded',
-              store.kill ? 'bg-red-600 text-white' : 'bg-gray-200',
+              "px-2 py-1 rounded",
+              store.kill ? "bg-red-600 text-white" : "bg-gray-200"
             )}
           >
-            {store.kill ? 'ON' : 'OFF'}
+            {store.kill ? "ON" : "OFF"}
           </button>
         </div>
       </div>
@@ -550,7 +537,7 @@ function Header({ store }) {
         <StatChip ok={store.services.federation} label="Federation" />
       </div>
       <div className="text-[10px] text-gray-500 ml-3">
-        {ENV.PROXY_BASE ? `Proxy: ${ENV.PROXY_BASE}` : 'Proxy: (not set)'}
+        {ENV.PROXY_BASE ? `Proxy: ${ENV.PROXY_BASE}` : "Proxy: (not set)"}
       </div>
     </div>
   );
@@ -558,15 +545,15 @@ function Header({ store }) {
 
 function Sidebar({ active, setActive }) {
   const TABS = [
-    { id: 'dash', label: 'Dashboard' },
-    { id: 'route', label: 'Routing Studio' },
-    { id: 'rag', label: 'RAG Console' },
-    { id: 'guard', label: 'Neo4j Guard' },
-    { id: 'budgets', label: 'Budgets & Burndown' },
-    { id: 'policies', label: 'Policies & LOA' },
-    { id: 'logs', label: 'Logs' },
-    { id: 'ci', label: 'CI & Chaos' },
-    { id: 'docs', label: 'Docs & Runbooks' },
+    { id: "dash", label: "Dashboard" },
+    { id: "route", label: "Routing Studio" },
+    { id: "rag", label: "RAG Console" },
+    { id: "guard", label: "Neo4j Guard" },
+    { id: "budgets", label: "Budgets & Burndown" },
+    { id: "policies", label: "Policies & LOA" },
+    { id: "logs", label: "Logs" },
+    { id: "ci", label: "CI & Chaos" },
+    { id: "docs", label: "Docs & Runbooks" },
   ];
   return (
     <div className="w-full md:w-64 border-r bg-white">
@@ -577,10 +564,8 @@ function Sidebar({ active, setActive }) {
             key={t.id}
             onClick={() => setActive(t.id)}
             className={cn(
-              'text-left px-3 py-2 rounded-md text-sm',
-              active === t.id
-                ? 'bg-indigo-600 text-white'
-                : 'hover:bg-gray-100 text-gray-800',
+              "text-left px-3 py-2 rounded-md text-sm",
+              active === t.id ? "bg-indigo-600 text-white" : "hover:bg-gray-100 text-gray-800"
             )}
           >
             {t.label}
@@ -613,11 +598,10 @@ function Dashboard({ store }) {
               <span className="font-semibold">LOA:</span> {store.loa}
             </div>
             <div>
-              <span className="font-semibold">Kill:</span>{' '}
-              {store.kill ? 'ON' : 'OFF'}
+              <span className="font-semibold">Kill:</span> {store.kill ? "ON" : "OFF"}
             </div>
             <div>
-              <span className="font-semibold">Clock:</span>{' '}
+              <span className="font-semibold">Clock:</span>{" "}
               {fmt.time(h.clock_utc || new Date().toISOString())}
             </div>
           </div>
@@ -630,24 +614,13 @@ function Dashboard({ store }) {
         ) : (
           <div className="text-sm">
             <div>
-              RPS:{' '}
-              <span className="font-mono">
-                {fmt.num(b?.perf?.rps_last_60s, 3)}
-              </span>
+              RPS: <span className="font-mono">{fmt.num(b?.perf?.rps_last_60s, 3)}</span>
             </div>
             <div>
-              p50:{' '}
-              <span className="font-mono">
-                {fmt.ms(b?.perf?.p50_ms_last_60s)}
-              </span>{' '}
-              · p95:{' '}
-              <span className="font-mono">
-                {fmt.ms(b?.perf?.p95_ms_last_60s)}
-              </span>
+              p50: <span className="font-mono">{fmt.ms(b?.perf?.p50_ms_last_60s)}</span> · p95:{" "}
+              <span className="font-mono">{fmt.ms(b?.perf?.p95_ms_last_60s)}</span>
             </div>
-            <div className="text-xs text-gray-500">
-              Updated {fmt.time(b?.generated_at)}
-            </div>
+            <div className="text-xs text-gray-500">Updated {fmt.time(b?.generated_at)}</div>
           </div>
         )}
       </Card>
@@ -655,8 +628,7 @@ function Dashboard({ store }) {
       <Card title="RAG Freshness">
         {/* Minimal: show from burndown time as proxy if rag stats not wired */}
         <div className="text-sm text-gray-600">
-          Use Docs panel for onboarding; RAG stats will appear here when
-          /rag/stats is enabled.
+          Use Docs panel for onboarding; RAG stats will appear here when /rag/stats is enabled.
         </div>
       </Card>
 
@@ -674,9 +646,7 @@ function Dashboard({ store }) {
 
       <div className="xl:col-span-2">
         <Card title="Recent Routes (sample)">
-          <div className="text-xs text-gray-500">
-            Wire to /logs or /route history.
-          </div>
+          <div className="text-xs text-gray-500">Wire to /logs or /route history.</div>
         </Card>
       </div>
       <Card title="Recent Logs (tail)">
@@ -694,13 +664,9 @@ function ModelWindow({ win, burndown }) {
   const names = Object.keys(per).sort();
   return (
     <div>
-      <div className="text-xs text-gray-500 mb-2">
-        Resets at {fmt.time(W.reset_at)}
-      </div>
+      <div className="text-xs text-gray-500 mb-2">Resets at {fmt.time(W.reset_at)}</div>
       <div className="space-y-3">
-        {names.length === 0 && (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
+        {names.length === 0 && <div className="text-sm text-gray-500">No data.</div>}
         {names.map((m) => {
           const v = per[m];
           const cap = v?.caps?.minute_rpm_cap || 0;
@@ -709,15 +675,9 @@ function ModelWindow({ win, burndown }) {
             <div key={m}>
               <div className="flex items-center justify-between text-sm">
                 <div className="font-medium">{m}</div>
-                {cap ? (
-                  <div className="text-xs text-gray-500">cap {cap}</div>
-                ) : null}
+                {cap ? <div className="text-xs text-gray-500">cap {cap}</div> : null}
               </div>
-              <ProgressBar
-                value={v.req || 0}
-                max={cap || 100}
-                caption={caption}
-              />
+              <ProgressBar value={v.req || 0} max={cap || 100} caption={caption} />
             </div>
           );
         })}
@@ -727,14 +687,12 @@ function ModelWindow({ win, burndown }) {
 }
 
 function LogsTailMini({ store }) {
-  const [out, setOut] = useState('');
+  const [out, setOut] = useState("");
   const [enabled, setEnabled] = useState(false);
   const url = store.api.logsStreamURL();
   useSSE(enabled ? url : null, {
     onMessage: (data) =>
-      setOut((s) =>
-        (s + (s ? '\n' : '') + data).split('\n').slice(-200).join('\n'),
-      ),
+      setOut((s) => (s + (s ? "\n" : "") + data).split("\n").slice(-200).join("\n")),
   });
   return (
     <div>
@@ -743,28 +701,26 @@ function LogsTailMini({ store }) {
           <button
             onClick={() => setEnabled(!enabled)}
             className={cn(
-              'px-2 py-1 rounded text-xs border',
-              enabled ? 'bg-gray-900 text-white' : 'bg-white',
+              "px-2 py-1 rounded text-xs border",
+              enabled ? "bg-gray-900 text-white" : "bg-white"
             )}
           >
-            {enabled ? 'Stop' : 'Start'} streaming
+            {enabled ? "Stop" : "Start"} streaming
           </button>
         </div>
       ) : (
-        <div className="text-xs text-amber-600 mb-2">
-          Proxy not configured; streaming disabled.
-        </div>
+        <div className="text-xs text-amber-600 mb-2">Proxy not configured; streaming disabled.</div>
       )}
       <pre className="text-xs whitespace-pre-wrap min-h-[140px] max-h-[220px] overflow-auto">
-        {out || '(no output)'}
+        {out || "(no output)"}
       </pre>
     </div>
   );
 }
 
 function RoutingStudio({ store }) {
-  const [task, setTask] = useState('nl2cypher');
-  const [input, setInput] = useState('');
+  const [task, setTask] = useState("nl2cypher");
+  const [input, setInput] = useState("");
   const [plan, setPlan] = useState(null);
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState(null);
@@ -821,7 +777,7 @@ function RoutingStudio({ store }) {
               className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white disabled:opacity-50"
               disabled={busy || disabled}
             >
-              {disabled ? 'Blocked (Kill)' : 'Execute Now'}
+              {disabled ? "Blocked (Kill)" : "Execute Now"}
             </button>
           </div>
         }
@@ -842,9 +798,7 @@ function RoutingStudio({ store }) {
           <div>
             <label className="text-xs text-gray-600">Model Candidates</label>
             <div className="text-xs text-gray-800 border rounded-xl p-2 h-[40px] overflow-auto">
-              {store.models.length
-                ? store.models.map((m) => m.id).join(', ')
-                : '(discovering…)'}
+              {store.models.length ? store.models.map((m) => m.id).join(", ") : "(discovering…)"}
             </div>
           </div>
           <div className="md:col-span-2">
@@ -862,24 +816,20 @@ function RoutingStudio({ store }) {
 
       <Card title="Plan & Policy">
         {!plan ? (
-          <div className="text-sm text-gray-500">
-            Run a Dry-Run to preview routing and policy.
-          </div>
+          <div className="text-sm text-gray-500">Run a Dry-Run to preview routing and policy.</div>
         ) : plan.error ? (
           <div className="text-sm text-red-600">{String(plan.error)}</div>
         ) : (
           <div className="text-sm space-y-2">
             <div>
-              <span className="font-medium">Decision:</span>{' '}
-              {plan.decision?.model} · Conf{' '}
+              <span className="font-medium">Decision:</span> {plan.decision?.model} · Conf{" "}
               {fmt.num(plan.decision?.confidence, 2)}
             </div>
             <div className="text-xs text-gray-600">
-              Reason: {plan.decision?.reason || '(none)'}
+              Reason: {plan.decision?.reason || "(none)"}
               <div className="mt-1">
-                Policy: {plan.policy?.allow ? 'allow' : 'deny'} · max_loa{' '}
-                {plan.policy?.max_loa} · hosted{' '}
-                {String(plan.policy?.hosted_allowed)}
+                Policy: {plan.policy?.allow ? "allow" : "deny"} · max_loa {plan.policy?.max_loa} ·
+                hosted {String(plan.policy?.hosted_allowed)}
               </div>
             </div>
             <div>
@@ -888,14 +838,14 @@ function RoutingStudio({ store }) {
                 {(plan.candidates || [])
                   .map(
                     (c) =>
-                      `${c.model} (score ${fmt.num(c.score, 2)}${c.p50_ms ? `, p50 ${fmt.ms(c.p50_ms)}` : ''})`,
+                      `${c.model} (score ${fmt.num(c.score, 2)}${c.p50_ms ? `, p50 ${fmt.ms(c.p50_ms)}` : ""})`
                   )
-                  .join('\n') || '(none)'}
+                  .join("\n") || "(none)"}
               </div>
             </div>
             <div>
               <div className="font-medium text-sm mt-2">Prompt Preview</div>
-              <pre className="text-xs bg-gray-50 border rounded-xl p-2 whitespace-pre-wrap">{`[system]\n${plan.prompt_preview?.system || ''}\n\n[user]\n${plan.prompt_preview?.user || ''}`}</pre>
+              <pre className="text-xs bg-gray-50 border rounded-xl p-2 whitespace-pre-wrap">{`[system]\n${plan.prompt_preview?.system || ""}\n\n[user]\n${plan.prompt_preview?.user || ""}`}</pre>
             </div>
           </div>
         )}
@@ -910,21 +860,18 @@ function RoutingStudio({ store }) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
               <div>
-                <span className="font-medium">Audit:</span>{' '}
-                {res.audit_id || '—'}
+                <span className="font-medium">Audit:</span> {res.audit_id || "—"}
               </div>
               <div>
-                <span className="font-medium">Latency:</span>{' '}
-                {fmt.ms(res.latency_ms)}
+                <span className="font-medium">Latency:</span> {fmt.ms(res.latency_ms)}
               </div>
               <div>
-                <span className="font-medium">Cost:</span>{' '}
-                {fmt.money(res.cost_usd)}
+                <span className="font-medium">Cost:</span> {fmt.money(res.cost_usd)}
               </div>
               <div className="md:col-span-3">
                 <div className="text-xs text-gray-600">Output</div>
                 <pre className="text-xs bg-gray-50 border rounded-xl p-3 whitespace-pre-wrap">
-                  {res.text || '(no text)'}
+                  {res.text || "(no text)"}
                 </pre>
               </div>
             </div>
@@ -936,7 +883,7 @@ function RoutingStudio({ store }) {
 }
 
 function RagConsole({ store }) {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
   const [ans, setAns] = useState(null);
   const [busy, setBusy] = useState(false);
   const [stats, setStats] = useState(null);
@@ -983,7 +930,7 @@ function RagConsole({ store }) {
           </button>
         </div>
         <div className="text-xs text-gray-500">
-          Index: {stats ? `${stats.files} files` : '—'} · Updated:{' '}
+          Index: {stats ? `${stats.files} files` : "—"} · Updated:{" "}
           {fmt.time(stats?.last_indexed_at)}
         </div>
       </Card>
@@ -996,8 +943,7 @@ function RagConsole({ store }) {
           <div>
             {ans._no_rag && (
               <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 mb-2">
-                RAG proxy is not configured. Answering via model only (no
-                citations).
+                RAG proxy is not configured. Answering via model only (no citations).
               </div>
             )}
             <div className="text-sm whitespace-pre-wrap">{ans.answer}</div>
@@ -1015,10 +961,7 @@ function RagConsole({ store }) {
                       >
                         {c.title || c.id}
                       </a>
-                      <span className="text-gray-500">
-                        {' '}
-                        — {c.snippet || ''}
-                      </span>
+                      <span className="text-gray-500"> — {c.snippet || ""}</span>
                     </li>
                   ))}
                 </ol>
@@ -1036,40 +979,35 @@ function RagConsole({ store }) {
 function Neo4jGuard({ store }) {
   const [keep, setKeep] = useState(false);
   const [run, setRun] = useState(null);
-  const [log, setLog] = useState('');
-  const [status, setStatus] = useState('idle');
+  const [log, setLog] = useState("");
+  const [status, setStatus] = useState("idle");
 
   async function start() {
     try {
-      setStatus('starting');
+      setStatus("starting");
       const r = await store.api.guardRun(keep);
       setRun(r);
-      setStatus('running');
+      setStatus("running");
     } catch (e) {
-      setStatus('error');
+      setStatus("error");
       setLog(String(e.message));
     }
   }
 
   const streamURL = run ? store.api.guardStreamURL(run.run_id) : null;
   useSSE(streamURL, {
-    onMessage: (d) =>
-      setLog((s) =>
-        (s + (s ? '\n' : '') + d).split('\n').slice(-400).join('\n'),
-      ),
+    onMessage: (d) => setLog((s) => (s + (s ? "\n" : "") + d).split("\n").slice(-400).join("\n")),
   });
 
   async function finalize() {
     if (!run) return;
     try {
       const rep = await store.api.guardReport(run.run_id);
-      setStatus(rep.status || 'done');
-      setLog(
-        (s) => s + '\n\n---' + '-' + 'report ---' + '\n' + (rep.log_tail || ''),
-      );
+      setStatus(rep.status || "done");
+      setLog((s) => s + "\n\n---" + "-" + "report ---" + "\n" + (rep.log_tail || ""));
     } catch (e) {
-      setStatus('error');
-      setLog((s) => s + '\n' + String(e.message));
+      setStatus("error");
+      setLog((s) => s + "\n" + String(e.message));
     }
   }
 
@@ -1080,11 +1018,7 @@ function Neo4jGuard({ store }) {
         right={
           <div className="flex gap-2">
             <label className="text-xs text-gray-600 flex items-center gap-1">
-              <input
-                type="checkbox"
-                checked={keep}
-                onChange={(e) => setKeep(e.target.checked)}
-              />{' '}
+              <input type="checkbox" checked={keep} onChange={(e) => setKeep(e.target.checked)} />{" "}
               KEEP_DB
             </label>
             <button
@@ -1106,8 +1040,8 @@ function Neo4jGuard({ store }) {
       >
         {!store.ENV.PROXY_BASE && (
           <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
-            Proxy not configured. To enable Guard runs, set{' '}
-            <code>PROXY_BASE</code> and start the proxy.
+            Proxy not configured. To enable Guard runs, set <code>PROXY_BASE</code> and start the
+            proxy.
           </div>
         )}
         {store.kill === 1 && (
@@ -1116,13 +1050,11 @@ function Neo4jGuard({ store }) {
           </div>
         )}
         <div className="text-xs text-gray-500 mt-2">Status: {status}</div>
-        {run && (
-          <div className="text-xs text-gray-500">Run ID: {run.run_id}</div>
-        )}
+        {run && <div className="text-xs text-gray-500">Run ID: {run.run_id}</div>}
       </Card>
       <Card title="Console">
         <pre className="text-xs whitespace-pre-wrap min-h-[260px] max-h-[380px] overflow-auto">
-          {log || '(no output)'}
+          {log || "(no output)"}
         </pre>
       </Card>
     </div>
@@ -1158,9 +1090,7 @@ function Budgets({ store }) {
                   <div key={p}>
                     <div className="flex items-center justify-between text-sm">
                       <div className="font-medium">{p}</div>
-                      <div className="text-xs text-gray-500">
-                        resets {fmt.time(x.resets_at)}
-                      </div>
+                      <div className="text-xs text-gray-500">resets {fmt.time(x.resets_at)}</div>
                     </div>
                     <ProgressBar
                       value={x.spent_usd || 0}
@@ -1179,17 +1109,17 @@ function Budgets({ store }) {
 }
 
 function Policies({ store }) {
-  const [text, setText] = useState('');
-  const [details, setDetails] = useState('');
+  const [text, setText] = useState("");
+  const [details, setDetails] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const r = await store.api.policyGet();
-        setText(r.text || '');
+        setText(r.text || "");
         setDetails(
-          `v${r.version || '—'} · ${r.updated_at ? new Date(r.updated_at).toLocaleString() : ''}`,
+          `v${r.version || "—"} · ${r.updated_at ? new Date(r.updated_at).toLocaleString() : ""}`
         );
       } catch (e) {
         setText(`# Unable to load policy\n${e.message}`);
@@ -1201,7 +1131,7 @@ function Policies({ store }) {
     setBusy(true);
     try {
       const r = await store.api.policyPut(text);
-      setDetails(`v${r.version || '—'}`);
+      setDetails(`v${r.version || "—"}`);
     } catch (e) {
       alert(`Save failed: ${e.message}`);
     } finally {
@@ -1237,33 +1167,28 @@ function Policies({ store }) {
           rows={18}
           className="w-full border rounded-xl p-3 font-mono text-xs"
         />
-        <div className="text-xs mt-2 text-slate-500">
-          {busy ? 'Working…' : ''}
-        </div>
+        <div className="text-xs mt-2 text-slate-500">{busy ? "Working…" : ""}</div>
       </Card>
     </div>
   );
 }
 
 function Logs({ store }) {
-  const [out, setOut] = useState('');
+  const [out, setOut] = useState("");
   const [busy, setBusy] = useState(false);
   const [streamOn, setStreamOn] = useState(false);
 
   const url = store.api.logsStreamURL();
   useSSE(streamOn ? url : null, {
-    onMessage: (d) =>
-      setOut((s) =>
-        (s + (s ? '\n' : '') + d).split('\n').slice(-1000).join('\n'),
-      ),
+    onMessage: (d) => setOut((s) => (s + (s ? "\n" : "") + d).split("\n").slice(-1000).join("\n")),
   });
 
   const pull = async () => {
     setBusy(true);
-    setOut('');
+    setOut("");
     try {
-      const r = await store.api.runCmd('tail -n 200 /tmp/litellm.log');
-      setOut(r.stdout || r.stderr || '');
+      const r = await store.api.runCmd("tail -n 200 /tmp/litellm.log");
+      setOut(r.stdout || r.stderr || "");
     } catch (e) {
       setOut(String(e));
     } finally {
@@ -1280,7 +1205,7 @@ function Logs({ store }) {
             disabled={!store.ENV.PROXY_BASE}
             className="px-3 py-1.5 rounded-xl border disabled:opacity-50"
           >
-            {streamOn ? 'Stop' : 'Start'} Stream
+            {streamOn ? "Stop" : "Start"} Stream
           </button>
           <button
             onClick={pull}
@@ -1294,12 +1219,11 @@ function Logs({ store }) {
     >
       {store.ENV.PROXY_BASE ? (
         <pre className="text-xs whitespace-pre-wrap min-h-[240px]">
-          {out || (busy ? 'Loading…' : '(no output)')}
+          {out || (busy ? "Loading…" : "(no output)")}
         </pre>
       ) : (
         <div className="text-sm text-slate-600">
-          Proxy not configured. Logs available on host at{' '}
-          <code>/tmp/litellm.log</code>.
+          Proxy not configured. Logs available on host at <code>/tmp/litellm.log</code>.
         </div>
       )}
     </Card>
@@ -1309,12 +1233,12 @@ function Logs({ store }) {
 function CIChaos({ store }) {
   const [busy, setBusy] = useState(false);
   async function run(cmd) {
-    if (!store.ENV.PROXY_BASE) return alert('Proxy not configured');
-    if (store.kill === 1) return alert('Kill switch is ON');
+    if (!store.ENV.PROXY_BASE) return alert("Proxy not configured");
+    if (store.kill === 1) return alert("Kill switch is ON");
     setBusy(true);
     try {
       const r = await store.api.runCmd(cmd);
-      alert(`Started: pid ${r.pid || '?'}\n${r.stdout || ''}${r.stderr || ''}`);
+      alert(`Started: pid ${r.pid || "?"}\n${r.stdout || ""}${r.stderr || ""}`);
     } catch (e) {
       alert(`Error: ${e.message}`);
     } finally {
@@ -1325,7 +1249,7 @@ function CIChaos({ store }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Card title="Config Validate">
         <button
-          onClick={() => run('just validate-config')}
+          onClick={() => run("just validate-config")}
           disabled={busy || !store.ENV.PROXY_BASE || store.kill === 1}
           className="px-3 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50"
         >
@@ -1334,7 +1258,7 @@ function CIChaos({ store }) {
       </Card>
       <Card title="Smoke Test">
         <button
-          onClick={() => run('just smoke-test')}
+          onClick={() => run("just smoke-test")}
           disabled={busy || !store.ENV.PROXY_BASE || store.kill === 1}
           className="px-3 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50"
         >
@@ -1343,7 +1267,7 @@ function CIChaos({ store }) {
       </Card>
       <Card title="Chaos Drill">
         <button
-          onClick={() => run('just chaos-drill')}
+          onClick={() => run("just chaos-drill")}
           disabled={busy || !store.ENV.PROXY_BASE || store.kill === 1}
           className="px-3 py-2 rounded-xl bg-red-600 text-white disabled:opacity-50"
         >
@@ -1365,17 +1289,10 @@ function Docs() {
       <h2>Docs & Runbooks</h2>
       <ul className="list-disc pl-6">
         <li>Onboarding: how to configure LiteLLM, Ollama, and the Proxy.</li>
-        <li>
-          Incident Playbooks: rate-limit storms, provider outages, policy
-          regressions.
-        </li>
-        <li>
-          Release Checklist: smoke tests, policy diff, LOA audit, rollback plan.
-        </li>
+        <li>Incident Playbooks: rate-limit storms, provider outages, policy regressions.</li>
+        <li>Release Checklist: smoke tests, policy diff, LOA audit, rollback plan.</li>
       </ul>
-      <p className="text-sm text-gray-600">
-        Wire these to your internal docs when ready.
-      </p>
+      <p className="text-sm text-gray-600">Wire these to your internal docs when ready.</p>
     </div>
   );
 }
@@ -1383,7 +1300,7 @@ function Docs() {
 // --------------------------- App ---------------------------
 export default function App() {
   const store = useStore();
-  const [active, setActive] = useState('dash');
+  const [active, setActive] = useState("dash");
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -1391,15 +1308,15 @@ export default function App() {
       <div className="flex">
         <Sidebar active={active} setActive={setActive} />
         <main className="flex-1 p-4">
-          {active === 'dash' && <Dashboard store={store} />}
-          {active === 'route' && <RoutingStudio store={store} />}
-          {active === 'rag' && <RagConsole store={store} />}
-          {active === 'guard' && <Neo4jGuard store={store} />}
-          {active === 'budgets' && <Budgets store={store} />}
-          {active === 'policies' && <Policies store={store} />}
-          {active === 'logs' && <Logs store={store} />}
-          {active === 'ci' && <CIChaos store={store} />}
-          {active === 'docs' && <Docs />}
+          {active === "dash" && <Dashboard store={store} />}
+          {active === "route" && <RoutingStudio store={store} />}
+          {active === "rag" && <RagConsole store={store} />}
+          {active === "guard" && <Neo4jGuard store={store} />}
+          {active === "budgets" && <Budgets store={store} />}
+          {active === "policies" && <Policies store={store} />}
+          {active === "logs" && <Logs store={store} />}
+          {active === "ci" && <CIChaos store={store} />}
+          {active === "docs" && <Docs />}
         </main>
       </div>
     </div>

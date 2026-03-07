@@ -33,26 +33,26 @@ version: latest
 // docusaurus.config.js – add Redoc + redirects
 plugins: [
   [
-    'redocusaurus',
+    "redocusaurus",
     {
       specs: [
         {
-          id: 'maestro',
-          spec: '../api/maestro-orchestration-api.yaml',
-          route: '/intelgraph/api/maestro/1.0.0',
+          id: "maestro",
+          spec: "../api/maestro-orchestration-api.yaml",
+          route: "/intelgraph/api/maestro/1.0.0",
         },
         {
-          id: 'core',
-          spec: '../api/intelgraph-core-api.yaml',
-          route: '/intelgraph/api/core/1.0.0',
+          id: "core",
+          spec: "../api/intelgraph-core-api.yaml",
+          route: "/intelgraph/api/core/1.0.0",
         },
       ],
-      theme: { primaryColor: '#0f766e' },
+      theme: { primaryColor: "#0f766e" },
     },
   ],
   [
-    '@docusaurus/plugin-client-redirects',
-    { redirects: [{ from: '/api', to: '/intelgraph/api/core/1.0.0' }] },
+    "@docusaurus/plugin-client-redirects",
+    { redirects: [{ from: "/api", to: "/intelgraph/api/core/1.0.0" }] },
   ],
 ];
 ```
@@ -127,8 +127,8 @@ const spec = fs.readFileSync(specPath, 'utf8')
 
 ```jsx
 // Minimal footer swizzle to surface tags + related links
-import React from 'react';
-import { useDoc } from '@docusaurus/theme-common/internal';
+import React from "react";
+import { useDoc } from "@docusaurus/theme-common/internal";
 
 export default function DocItemFooter() {
   const { metadata } = useDoc();
@@ -137,7 +137,7 @@ export default function DocItemFooter() {
     <div className="mt-12 border-t pt-6">
       {tags && tags.length > 0 && (
         <p>
-          <strong>Tags:</strong> {tags.map((t) => t.label).join(', ')}
+          <strong>Tags:</strong> {tags.map((t) => t.label).join(", ")}
         </p>
       )}
       <div className="grid gap-2">
@@ -180,10 +180,10 @@ export default function DocItemFooter() {
 
 ```js
 // scripts/docs/validate-frontmatter.js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const owners = new Set(require('../../docs/.owners.json').owners);
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const owners = new Set(require("../../docs/.owners.json").owners);
 
 let fail = false;
 function walk(dir) {
@@ -192,7 +192,7 @@ function walk(dir) {
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      const src = fs.readFileSync(p, 'utf8');
+      const src = fs.readFileSync(p, "utf8");
       const fm = matter(src).data || {};
       if (!fm.owner || !owners.has(fm.owner)) {
         console.error(`Missing/invalid owner in ${p}`);
@@ -209,7 +209,7 @@ function walk(dir) {
     }
   }
 }
-walk(path.resolve(__dirname, '../../docs'));
+walk(path.resolve(__dirname, "../../docs"));
 process.exit(fail ? 1 : 0);
 ```
 
@@ -239,7 +239,7 @@ process.exit(fail ? 1 : 0);
 name: Docs Versioning
 on:
   push:
-    tags: ['v*.*.*']
+    tags: ["v*.*.*"]
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -413,9 +413,9 @@ jobs:
 
 ```js
 // scripts/docs/stale-report.js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const cutoff = Date.now() - 1000 * 60 * 60 * 24 * 120; // 120 days
 const out = [];
 function walk(dir) {
@@ -429,14 +429,14 @@ function walk(dir) {
       if (!d || d < cutoff)
         out.push({
           file: p,
-          owner: data.owner || 'unknown',
-          lastUpdated: data.lastUpdated || 'n/a',
+          owner: data.owner || "unknown",
+          lastUpdated: data.lastUpdated || "n/a",
         });
     }
   }
 }
-walk('docs');
-fs.writeFileSync('docs-stale-report.json', JSON.stringify(out, null, 2));
+walk("docs");
+fs.writeFileSync("docs-stale-report.json", JSON.stringify(out, null, 2));
 console.log(`Found ${out.length} potentially stale docs`);
 ```
 
@@ -444,7 +444,7 @@ console.log(`Found ${out.length} potentially stale docs`);
 # .github/workflows/docs-stale-report.yml
 name: Docs Stale Report
 on:
-  schedule: [{ cron: '0 12 * * 1' }] # Mondays
+  schedule: [{ cron: "0 12 * * 1" }] # Mondays
   workflow_dispatch:
 jobs:
   stale:

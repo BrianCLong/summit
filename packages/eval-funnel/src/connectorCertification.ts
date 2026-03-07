@@ -1,4 +1,4 @@
-import { ConnectorCertificationResult, ConnectorContract } from './types';
+import { ConnectorCertificationResult, ConnectorContract } from "./types";
 
 export class ConnectorCertificationHarness {
   constructor(private readonly schemaVersion: string) {}
@@ -21,7 +21,7 @@ export class ConnectorCertificationHarness {
   private assertCompatibility(results: ConnectorCertificationResult[]): void {
     const mismatches = results.filter((result) => result.schemaVersion !== this.schemaVersion);
     if (mismatches.length) {
-      const names = mismatches.map((m) => `${m.name}@${m.schemaVersion}`).join(', ');
+      const names = mismatches.map((m) => `${m.name}@${m.schemaVersion}`).join(", ");
       throw new Error(`Connector schema mismatch: expected ${this.schemaVersion}, found ${names}`);
     }
   }

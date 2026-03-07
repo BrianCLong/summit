@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Agent Mandates
 
 **Authority:** Derived from Article II of the [Constitution](CONSTITUTION.md).

@@ -1,14 +1,8 @@
 {
   "item_slug": "mcp-apps",
-  "evidence_ids": [
-    "EVD-MCPAPPS-SEC-001",
-    "EVD-MCPAPPS-SEC-002",
-    "EVD-MCPAPPS-SEC-003"
-  ],
+  "evidence_ids": ["EVD-MCPAPPS-SEC-001", "EVD-MCPAPPS-SEC-002", "EVD-MCPAPPS-SEC-003"],
   "claims": [],
-  "decisions": [
-    "verify_subsumption_bundle executed"
-  ],
+  "decisions": ["verify_subsumption_bundle executed"],
   "artifacts": [
     {
       "path": "subsumption/mcp-apps/manifest.yaml",

@@ -21,15 +21,15 @@ Automatically discover and extract metadata from various data sources:
 #### Setting Up Discovery Jobs
 
 ```typescript
-import { DiscoveryJobRunner } from '@intelgraph/metadata-discovery';
+import { DiscoveryJobRunner } from "@intelgraph/metadata-discovery";
 
 const jobRunner = new DiscoveryJobRunner(store);
 
 const jobConfig = {
-  id: 'postgres-discovery',
-  name: 'PostgreSQL Database Discovery',
-  sourceId: 'postgres-prod',
-  schedule: '0 2 * * *', // Daily at 2 AM
+  id: "postgres-discovery",
+  name: "PostgreSQL Database Discovery",
+  sourceId: "postgres-prod",
+  schedule: "0 2 * * *", // Daily at 2 AM
   enabled: true,
   options: {
     extractSchema: true,
@@ -38,8 +38,8 @@ const jobConfig = {
     inferRelationships: true,
     analyzeUsage: true,
     maxSampleRows: 100,
-    excludePatterns: ['tmp_*', 'test_*'],
-    includePatterns: ['*'],
+    excludePatterns: ["tmp_*", "test_*"],
+    includePatterns: ["*"],
   },
 };
 
@@ -61,32 +61,32 @@ Manage business terminology with approval workflows:
 #### Creating Glossary Terms
 
 ```typescript
-import { GlossaryService } from '@intelgraph/business-glossary';
+import { GlossaryService } from "@intelgraph/business-glossary";
 
 const glossaryService = new GlossaryService(store);
 
 const term = await glossaryService.createTerm({
-  name: 'customer_lifetime_value',
-  displayName: 'Customer Lifetime Value',
-  definition: 'Total revenue expected from a customer over their entire relationship',
-  longDescription: 'CLV is calculated by...',
-  categoryId: 'metrics',
-  owner: 'data-governance@company.com',
-  stewards: ['analytics-team@company.com'],
-  domain: 'sales',
-  tags: ['metric', 'revenue', 'customer'],
-  synonyms: ['CLV', 'LTV'],
-  relatedTerms: ['customer_acquisition_cost', 'churn_rate'],
+  name: "customer_lifetime_value",
+  displayName: "Customer Lifetime Value",
+  definition: "Total revenue expected from a customer over their entire relationship",
+  longDescription: "CLV is calculated by...",
+  categoryId: "metrics",
+  owner: "data-governance@company.com",
+  stewards: ["analytics-team@company.com"],
+  domain: "sales",
+  tags: ["metric", "revenue", "customer"],
+  synonyms: ["CLV", "LTV"],
+  relatedTerms: ["customer_acquisition_cost", "churn_rate"],
   businessRules: [
     {
-      id: 'clv-calculation',
-      name: 'CLV Calculation',
-      description: 'Average order value × Purchase frequency × Customer lifespan',
-      type: 'CALCULATION',
-      severity: 'CRITICAL',
+      id: "clv-calculation",
+      name: "CLV Calculation",
+      description: "Average order value × Purchase frequency × Customer lifespan",
+      type: "CALCULATION",
+      severity: "CRITICAL",
     },
   ],
-  examples: ['CLV = $100 × 10 × 3 = $3,000'],
+  examples: ["CLV = $100 × 10 × 3 = $3,000"],
 });
 ```
 
@@ -105,40 +105,43 @@ Powerful search capabilities with faceted filtering:
 #### Using the Search API
 
 ```typescript
-import { SearchService } from '@intelgraph/semantic-search';
+import { SearchService } from "@intelgraph/semantic-search";
 
 const searchService = new SearchService(searchIndex, analytics);
 
 // Basic search
-const results = await searchService.search({
-  query: 'customer transactions',
-  filters: [],
-  facets: ['type', 'status', 'domain'],
-  sort: [{ field: '_score', direction: 'DESC' }],
-  offset: 0,
-  limit: 20,
-}, userId);
+const results = await searchService.search(
+  {
+    query: "customer transactions",
+    filters: [],
+    facets: ["type", "status", "domain"],
+    sort: [{ field: "_score", direction: "DESC" }],
+    offset: 0,
+    limit: 20,
+  },
+  userId
+);
 
 // Faceted search
 const facetedResults = await searchService.facetedSearch(
-  'sales data',
+  "sales data",
   {
-    type: ['TABLE', 'VIEW'],
-    domain: ['sales', 'marketing'],
-    status: ['ACTIVE'],
+    type: ["TABLE", "VIEW"],
+    domain: ["sales", "marketing"],
+    status: ["ACTIVE"],
   },
   userId
 );
 
 // Advanced search
 const advancedResults = await searchService.advancedSearch(
-  'revenue',
+  "revenue",
   {
-    classification: { operator: 'IN', value: ['PUBLIC', 'INTERNAL'] },
-    'trustIndicators.certificationLevel': 'GOLD',
-    updatedAt: { operator: 'GREATER_THAN', value: '2024-01-01' },
+    classification: { operator: "IN", value: ["PUBLIC", "INTERNAL"] },
+    "trustIndicators.certificationLevel": "GOLD",
+    updatedAt: { operator: "GREATER_THAN", value: "2024-01-01" },
   },
-  [{ field: 'updatedAt', direction: 'DESC' }],
+  [{ field: "updatedAt", direction: "DESC" }],
   0,
   50,
   userId
@@ -160,30 +163,27 @@ Comprehensive lineage tracking and impact analysis:
 #### Working with Lineage
 
 ```typescript
-import { LineageService } from '@intelgraph/data-catalog';
+import { LineageService } from "@intelgraph/data-catalog";
 
 const lineageService = new LineageService(lineageStore);
 
 // Get upstream lineage
 const upstream = await lineageService.getUpstreamLineage(
-  'table-sales-transactions',
+  "table-sales-transactions",
   5, // depth
   LineageLevel.TABLE
 );
 
 // Analyze impact of changes
-const impact = await lineageService.analyzeImpact('table-customer-master', 10);
+const impact = await lineageService.analyzeImpact("table-customer-master", 10);
 
 console.log(`Total impacted assets: ${impact.totalImpacted}`);
 console.log(`Critical impacts: ${impact.criticalImpacts}`);
 
 // Get column-level lineage
-const columnLineage = await lineageService.getColumnLineage(
-  'table-sales-summary',
-  'total_revenue'
-);
+const columnLineage = await lineageService.getColumnLineage("table-sales-summary", "total_revenue");
 
-console.log('Source columns:', columnLineage?.sourceColumns);
+console.log("Source columns:", columnLineage?.sourceColumns);
 ```
 
 ### 5. Data Quality & Trust Indicators
@@ -201,23 +201,23 @@ Track and display quality metrics:
 #### Managing Quality Metrics
 
 ```typescript
-import { CatalogService } from '@intelgraph/data-catalog';
+import { CatalogService } from "@intelgraph/data-catalog";
 
 const catalogService = new CatalogService(catalogStore);
 
 // Update quality scores
-await catalogService.updateAsset('asset-id', {
+await catalogService.updateAsset("asset-id", {
   trustIndicators: {
-    certificationLevel: 'GOLD',
+    certificationLevel: "GOLD",
     endorsementCount: 15,
     userRating: 4.5,
     usageCount: 1250,
     lastVerified: new Date(),
-    verifiedBy: 'data-quality-team',
+    verifiedBy: "data-quality-team",
     qualityScore: {
       overall: 0.92,
       completeness: 0.95,
-      accuracy: 0.90,
+      accuracy: 0.9,
       consistency: 0.88,
       timeliness: 0.95,
       validity: 0.93,
@@ -254,7 +254,7 @@ Comprehensive usage analytics:
 #### Generating Reports
 
 ```typescript
-import { AnalyticsReporter } from '@intelgraph/catalog-analytics';
+import { AnalyticsReporter } from "@intelgraph/catalog-analytics";
 
 const reporter = new AnalyticsReporter(analyticsStore, insightGenerator);
 
@@ -268,7 +268,7 @@ console.log(`Documented assets: ${coverage.documentedAssets}/${coverage.totalAss
 
 // Quality report
 const quality = await reporter.generateQualityReport();
-console.log('Recommendations:', quality.recommendations);
+console.log("Recommendations:", quality.recommendations);
 
 // Health score
 const healthScore = await reporter.calculateHealthScore();
@@ -309,6 +309,7 @@ The catalog uses PostgreSQL with the following main tables:
 ### REST API Endpoints
 
 **Catalog Management**
+
 - `GET /api/v1/catalog/assets` - List assets
 - `GET /api/v1/catalog/assets/:id` - Get asset details
 - `POST /api/v1/catalog/assets` - Create asset
@@ -316,17 +317,20 @@ The catalog uses PostgreSQL with the following main tables:
 - `DELETE /api/v1/catalog/assets/:id` - Delete asset
 
 **Search**
+
 - `GET /api/v1/search?q=query` - Search assets
 - `POST /api/v1/search` - Advanced search
 - `GET /api/v1/search/suggestions` - Get suggestions
 
 **Lineage**
+
 - `GET /api/v1/lineage/:assetId` - Get lineage graph
 - `GET /api/v1/lineage/:assetId/upstream` - Upstream lineage
 - `GET /api/v1/lineage/:assetId/downstream` - Downstream lineage
 - `GET /api/v1/lineage/:assetId/impact` - Impact analysis
 
 **Analytics**
+
 - `GET /api/v1/analytics/summary` - Executive summary
 - `GET /api/v1/analytics/coverage` - Coverage metrics
 - `GET /api/v1/analytics/trending` - Trending assets

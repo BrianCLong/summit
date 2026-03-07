@@ -3,7 +3,7 @@
  * Core deep learning infrastructure and utilities for Summit intelligence platform
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Core Types and Schemas
@@ -17,7 +17,7 @@ export const ModelMetadataSchema = z.object({
   name: z.string(),
   version: z.string(),
   architecture: z.string(),
-  framework: z.enum(['tensorflow', 'pytorch', 'onnx', 'custom']),
+  framework: z.enum(["tensorflow", "pytorch", "onnx", "custom"]),
   description: z.string().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -39,7 +39,7 @@ export const TrainingConfigSchema = z.object({
   batchSize: z.number().positive(),
   epochs: z.number().positive(),
   learningRate: z.number().positive(),
-  optimizer: z.enum(['adam', 'sgd', 'rmsprop', 'adamw', 'adagrad']),
+  optimizer: z.enum(["adam", "sgd", "rmsprop", "adamw", "adagrad"]),
   lossFunction: z.string(),
   metrics: z.array(z.string()),
   validationSplit: z.number().min(0).max(1).optional(),
@@ -58,7 +58,7 @@ export const TrainingConfigSchema = z.object({
     .optional(),
   distributed: z
     .object({
-      strategy: z.enum(['data_parallel', 'model_parallel', 'pipeline']),
+      strategy: z.enum(["data_parallel", "model_parallel", "pipeline"]),
       numWorkers: z.number().positive(),
     })
     .optional(),
@@ -72,7 +72,7 @@ export type TrainingConfig = z.infer<typeof TrainingConfigSchema>;
 export const TrainingStatusSchema = z.object({
   jobId: z.string(),
   modelId: z.string(),
-  status: z.enum(['pending', 'running', 'completed', 'failed', 'stopped']),
+  status: z.enum(["pending", "running", "completed", "failed", "stopped"]),
   currentEpoch: z.number(),
   totalEpochs: z.number(),
   currentBatch: z.number().optional(),
@@ -122,7 +122,7 @@ export type InferenceResponse = z.infer<typeof InferenceResponseSchema>;
 export const DeploymentConfigSchema = z.object({
   modelId: z.string(),
   version: z.string(),
-  environment: z.enum(['dev', 'staging', 'production']),
+  environment: z.enum(["dev", "staging", "production"]),
   replicas: z.number().positive().optional(),
   resources: z
     .object({
@@ -178,7 +178,7 @@ export interface ConvolutionalLayerConfig {
   filters: number;
   kernelSize: number | [number, number];
   strides?: number | [number, number];
-  padding?: 'valid' | 'same';
+  padding?: "valid" | "same";
   activation?: string;
   useBias?: boolean;
 }
@@ -215,53 +215,54 @@ export interface ModelZooEntry {
   name: string;
   architecture: string;
   pretrainedWeights?: string;
-  taskType: 'classification' | 'regression' | 'detection' | 'segmentation' | 'generation';
-  domain: 'vision' | 'nlp' | 'audio' | 'multimodal' | 'general';
+  taskType: "classification" | "regression" | "detection" | "segmentation" | "generation";
+  domain: "vision" | "nlp" | "audio" | "multimodal" | "general";
   description: string;
   paperUrl?: string;
   citationBibtex?: string;
 }
 
 export const MODEL_ZOO: Record<string, ModelZooEntry> = {
-  'resnet50-imagenet': {
-    id: 'resnet50-imagenet',
-    name: 'ResNet-50',
-    architecture: 'ResNet',
-    pretrainedWeights: 'imagenet',
-    taskType: 'classification',
-    domain: 'vision',
-    description: 'Deep residual network with 50 layers trained on ImageNet',
-    paperUrl: 'https://arxiv.org/abs/1512.03385',
+  "resnet50-imagenet": {
+    id: "resnet50-imagenet",
+    name: "ResNet-50",
+    architecture: "ResNet",
+    pretrainedWeights: "imagenet",
+    taskType: "classification",
+    domain: "vision",
+    description: "Deep residual network with 50 layers trained on ImageNet",
+    paperUrl: "https://arxiv.org/abs/1512.03385",
   },
-  'bert-base-uncased': {
-    id: 'bert-base-uncased',
-    name: 'BERT Base Uncased',
-    architecture: 'BERT',
-    pretrainedWeights: 'google',
-    taskType: 'classification',
-    domain: 'nlp',
-    description: 'Bidirectional Encoder Representations from Transformers',
-    paperUrl: 'https://arxiv.org/abs/1810.04805',
+  "bert-base-uncased": {
+    id: "bert-base-uncased",
+    name: "BERT Base Uncased",
+    architecture: "BERT",
+    pretrainedWeights: "google",
+    taskType: "classification",
+    domain: "nlp",
+    description: "Bidirectional Encoder Representations from Transformers",
+    paperUrl: "https://arxiv.org/abs/1810.04805",
   },
-  'gpt2-medium': {
-    id: 'gpt2-medium',
-    name: 'GPT-2 Medium',
-    architecture: 'GPT',
-    pretrainedWeights: 'openai',
-    taskType: 'generation',
-    domain: 'nlp',
-    description: 'Generative Pre-trained Transformer 2',
-    paperUrl: 'https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf',
+  "gpt2-medium": {
+    id: "gpt2-medium",
+    name: "GPT-2 Medium",
+    architecture: "GPT",
+    pretrainedWeights: "openai",
+    taskType: "generation",
+    domain: "nlp",
+    description: "Generative Pre-trained Transformer 2",
+    paperUrl:
+      "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf",
   },
-  't5-base': {
-    id: 't5-base',
-    name: 'T5 Base',
-    architecture: 'T5',
-    pretrainedWeights: 'google',
-    taskType: 'generation',
-    domain: 'nlp',
-    description: 'Text-to-Text Transfer Transformer',
-    paperUrl: 'https://arxiv.org/abs/1910.10683',
+  "t5-base": {
+    id: "t5-base",
+    name: "T5 Base",
+    architecture: "T5",
+    pretrainedWeights: "google",
+    taskType: "generation",
+    domain: "nlp",
+    description: "Text-to-Text Transfer Transformer",
+    paperUrl: "https://arxiv.org/abs/1910.10683",
   },
 };
 
@@ -270,30 +271,30 @@ export const MODEL_ZOO: Record<string, ModelZooEntry> = {
 // ============================================================================
 
 export interface OptimizationConfig {
-  technique: 'quantization' | 'pruning' | 'distillation' | 'onnx_export';
+  technique: "quantization" | "pruning" | "distillation" | "onnx_export";
   parameters: Record<string, any>;
 }
 
 export interface QuantizationConfig extends OptimizationConfig {
-  technique: 'quantization';
+  technique: "quantization";
   parameters: {
     bitWidth: 8 | 4 | 2;
-    method: 'dynamic' | 'static' | 'qat';
+    method: "dynamic" | "static" | "qat";
     calibrationDataset?: string;
   };
 }
 
 export interface PruningConfig extends OptimizationConfig {
-  technique: 'pruning';
+  technique: "pruning";
   parameters: {
     pruningRate: number;
-    method: 'magnitude' | 'structured' | 'unstructured';
+    method: "magnitude" | "structured" | "unstructured";
     fineTuneEpochs?: number;
   };
 }
 
 export interface DistillationConfig extends OptimizationConfig {
-  technique: 'distillation';
+  technique: "distillation";
   parameters: {
     teacherModelId: string;
     studentModelId: string;
@@ -310,7 +311,7 @@ export interface ExplainabilityRequest {
   modelId: string;
   version: string;
   input: Record<string, any>;
-  method: 'saliency' | 'grad_cam' | 'integrated_gradients' | 'shap' | 'lime';
+  method: "saliency" | "grad_cam" | "integrated_gradients" | "shap" | "lime";
   outputIndex?: number;
 }
 
@@ -328,7 +329,7 @@ export interface ExplainabilityResponse {
 /**
  * Generate a unique model ID
  */
-export function generateModelId(prefix = 'model'): string {
+export function generateModelId(prefix = "model"): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 10);
   return `${prefix}-${timestamp}-${random}`;
@@ -337,8 +338,8 @@ export function generateModelId(prefix = 'model'): string {
 /**
  * Calculate model size from parameters
  */
-export function estimateModelSize(parameters: number, dtype = 'float32'): number {
-  const bytesPerParam = dtype === 'float32' ? 4 : dtype === 'float16' ? 2 : 1;
+export function estimateModelSize(parameters: number, dtype = "float32"): number {
+  const bytesPerParam = dtype === "float32" ? 4 : dtype === "float16" ? 2 : 1;
   return parameters * bytesPerParam;
 }
 
@@ -346,7 +347,7 @@ export function estimateModelSize(parameters: number, dtype = 'float32'): number
  * Format bytes to human-readable size
  */
 export function formatBytes(bytes: number): string {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const units = ["B", "KB", "MB", "GB", "TB"];
   let unitIndex = 0;
   let size = bytes;
 
@@ -363,7 +364,7 @@ export function formatBytes(bytes: number): string {
  */
 export function validateInputShape(
   input: number[],
-  expectedShape: number[],
+  expectedShape: number[]
 ): { valid: boolean; error?: string } {
   if (input.length !== expectedShape.length) {
     return {
@@ -388,17 +389,17 @@ export function validateInputShape(
 // Constants
 // ============================================================================
 
-export const SUPPORTED_FRAMEWORKS = ['tensorflow', 'pytorch', 'onnx', 'custom'] as const;
-export const SUPPORTED_OPTIMIZERS = ['adam', 'sgd', 'rmsprop', 'adamw', 'adagrad'] as const;
+export const SUPPORTED_FRAMEWORKS = ["tensorflow", "pytorch", "onnx", "custom"] as const;
+export const SUPPORTED_OPTIMIZERS = ["adam", "sgd", "rmsprop", "adamw", "adagrad"] as const;
 export const SUPPORTED_ACTIVATIONS = [
-  'relu',
-  'sigmoid',
-  'tanh',
-  'softmax',
-  'leaky_relu',
-  'elu',
-  'selu',
-  'gelu',
+  "relu",
+  "sigmoid",
+  "tanh",
+  "softmax",
+  "leaky_relu",
+  "elu",
+  "selu",
+  "gelu",
 ] as const;
 
 export type Framework = (typeof SUPPORTED_FRAMEWORKS)[number];

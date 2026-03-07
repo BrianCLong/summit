@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import type {
   PolicyEvaluationRequest,
   PolicyEvaluationResult,
@@ -7,10 +7,10 @@ import type {
   WorkflowDefinition,
   WorkflowValidationIssue,
   WorkflowValidationResult,
-} from 'common-types';
+} from "common-types";
 
-export type GovernanceVerdictStatus = 'APPROVED' | 'REJECTED' | 'REQUIRES_REVIEW';
-export type GovernanceSurface = 'microservice' | 'workflow' | 'ui';
+export type GovernanceVerdictStatus = "APPROVED" | "REJECTED" | "REQUIRES_REVIEW";
+export type GovernanceSurface = "microservice" | "workflow" | "ui";
 
 export interface GovernanceVerdict {
   id: string;
@@ -55,10 +55,10 @@ export interface PolicyEvaluator {
 }
 
 function mapEffectToStatus(effect: PolicyEffect): GovernanceVerdictStatus {
-  if (effect === 'deny') {
-    return 'REJECTED';
+  if (effect === "deny") {
+    return "REJECTED";
   }
-  return effect === 'allow' ? 'APPROVED' : 'REQUIRES_REVIEW';
+  return effect === "allow" ? "APPROVED" : "REQUIRES_REVIEW";
 }
 
 export function buildGovernanceVerdict(
@@ -69,9 +69,9 @@ export function buildGovernanceVerdict(
     surface: GovernanceSurface;
     recommendations?: string[];
     evidence?: Record<string, unknown>;
-    runtime?: GovernanceVerdict['runtime'];
+    runtime?: GovernanceVerdict["runtime"];
     now?: () => Date;
-  },
+  }
 ): GovernanceVerdict {
   return {
     id: randomUUID(),
@@ -101,19 +101,19 @@ export class GovernanceOrchestrator {
   private readonly defaultSurface: GovernanceSurface;
   private readonly now: () => Date;
   private readonly engine: PolicyEvaluator;
-  private readonly engineFactory?: GovernanceOrchestratorOptions['engineFactory'];
+  private readonly engineFactory?: GovernanceOrchestratorOptions["engineFactory"];
 
   constructor(engine: PolicyEvaluator, options: GovernanceOrchestratorOptions) {
     this.engine = engine;
     this.evaluatedBy = options.evaluatedBy;
-    this.defaultSurface = options.defaultSurface ?? 'microservice';
+    this.defaultSurface = options.defaultSurface ?? "microservice";
     this.now = options.now ?? (() => new Date());
     this.engineFactory = options.engineFactory;
   }
 
   evaluateUserAction(
     request: PolicyEvaluationRequest,
-    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {},
+    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {}
   ): GovernedEnvelope<PolicyEvaluationResult> {
     return this.evaluate(request, {
       surface: opts.surface ?? this.defaultSurface,
@@ -124,10 +124,10 @@ export class GovernanceOrchestrator {
   evaluateRecommendation(
     recommendation: { id: string; kind: string; content: string },
     request: PolicyEvaluationRequest,
-    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {},
+    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {}
   ): GovernedEnvelope<{ recommendation: typeof recommendation; policy: PolicyEvaluationResult }> {
     const governed = this.evaluate(request, {
-      surface: opts.surface ?? 'ui',
+      surface: opts.surface ?? "ui",
       dynamicRules: opts.dynamicRules,
     });
 
@@ -143,10 +143,10 @@ export class GovernanceOrchestrator {
   evaluateOutput<TPayload>(
     payload: TPayload,
     request: PolicyEvaluationRequest,
-    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {},
+    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {}
   ): GovernedEnvelope<TPayload> {
     const governed = this.evaluate(request, {
-      surface: opts.surface ?? 'workflow',
+      surface: opts.surface ?? "workflow",
       dynamicRules: opts.dynamicRules,
     });
 
@@ -159,39 +159,39 @@ export class GovernanceOrchestrator {
   validateWorkflow(
     workflow: WorkflowDefinition,
     validation: WorkflowValidationResult,
-    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {},
+    opts: { surface?: GovernanceSurface; dynamicRules?: PolicyRule[] } = {}
   ): GovernedEnvelope<WorkflowValidationResult> {
     const request: PolicyEvaluationRequest = {
-      action: 'workflow:validate',
-      resource: workflow.id ?? 'workflow',
+      action: "workflow:validate",
+      resource: workflow.id ?? "workflow",
       context: {
-        tenantId: workflow.tenantId ?? 'unknown',
-        userId: workflow.owner ?? 'system',
-        roles: workflow.roles ?? ['system'],
+        tenantId: workflow.tenantId ?? "unknown",
+        userId: workflow.owner ?? "system",
+        roles: workflow.roles ?? ["system"],
         region: workflow.region,
       },
     };
 
     const issues = validation.issues ?? [];
-    const effect: PolicyEffect = issues.some((issue) => issue.severity === 'error')
-      ? 'deny'
-      : 'allow';
+    const effect: PolicyEffect = issues.some((issue) => issue.severity === "error")
+      ? "deny"
+      : "allow";
 
     const evaluation: PolicyEvaluationResult = {
-      allowed: effect === 'allow',
+      allowed: effect === "allow",
       effect,
-      matchedRules: issues.map((issue) => issue.ruleId ?? 'validation'),
+      matchedRules: issues.map((issue) => issue.ruleId ?? "validation"),
       reasons: issues.map((issue) => issue.message),
       obligations: [],
       trace: issues.map((issue) => ({
-        ruleId: issue.ruleId ?? 'validation',
+        ruleId: issue.ruleId ?? "validation",
         matched: true,
         reasons: [issue.message],
       })),
     };
 
     const governed = this.evaluate(request, {
-      surface: opts.surface ?? 'workflow',
+      surface: opts.surface ?? "workflow",
       dynamicRules: opts.dynamicRules,
       evaluation,
     });
@@ -208,12 +208,11 @@ export class GovernanceOrchestrator {
       surface: GovernanceSurface;
       dynamicRules?: PolicyRule[];
       evaluation?: PolicyEvaluationResult;
-    },
+    }
   ): GovernedEnvelope<PolicyEvaluationResult> {
     const start = performance.now();
-    const engine = opts.dynamicRules && this.engineFactory
-      ? this.engineFactory(opts.dynamicRules)
-      : this.engine;
+    const engine =
+      opts.dynamicRules && this.engineFactory ? this.engineFactory(opts.dynamicRules) : this.engine;
     const evaluation = opts.evaluation ?? engine.evaluate(request);
     const governance = buildGovernanceVerdict(request, evaluation, {
       evaluatedBy: this.evaluatedBy,
@@ -233,11 +232,11 @@ export class GovernanceOrchestrator {
 
 export function assertGovernanceIntegrity<T>(envelope: GovernedEnvelope<T>): void {
   if (!envelope || !envelope.governance) {
-    throw new Error('Governance verdict missing from envelope');
+    throw new Error("Governance verdict missing from envelope");
   }
   const { governance } = envelope;
   if (!governance.id || !governance.timestamp) {
-    throw new Error('Governance verdict is incomplete');
+    throw new Error("Governance verdict is incomplete");
   }
 }
 
@@ -257,7 +256,7 @@ export interface AdversarialProbeResult {
 
 export function runAdversarialProbes(
   orchestrator: GovernanceOrchestrator,
-  probes: AdversarialProbe[],
+  probes: AdversarialProbe[]
 ): AdversarialProbeResult[] {
   return probes.map((probe) => {
     const outcome = orchestrator.evaluateUserAction(probe.request, {
@@ -266,7 +265,8 @@ export function runAdversarialProbes(
 
     const bypassDetected =
       (probe.expectedStatus && outcome.governance.status !== probe.expectedStatus) ||
-      (probe.expectedReasons && !probe.expectedReasons.every((reason) => outcome.governance.reasons.includes(reason)));
+      (probe.expectedReasons &&
+        !probe.expectedReasons.every((reason) => outcome.governance.reasons.includes(reason)));
 
     return {
       name: probe.name,
@@ -277,5 +277,7 @@ export function runAdversarialProbes(
 }
 
 export function summarizeWorkflowIssues(issues: WorkflowValidationIssue[]): string[] {
-  return issues.map((issue) => `${issue.severity}:${issue.ruleId ?? 'validation'}:${issue.message}`);
+  return issues.map(
+    (issue) => `${issue.severity}:${issue.ruleId ?? "validation"}:${issue.message}`
+  );
 }

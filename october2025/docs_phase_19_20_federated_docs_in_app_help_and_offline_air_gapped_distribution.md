@@ -48,13 +48,13 @@ jobs:
 ```js
 plugins: [
   [
-    '@docusaurus/plugin-content-docs',
+    "@docusaurus/plugin-content-docs",
     {
-      id: 'agents',
-      path: '../external/agents/docs',
-      routeBasePath: '/agents',
-      sidebarPath: require.resolve('./sidebars.js'),
-      editUrl: 'https://github.com/intelgraph/agents/edit/main/docs/',
+      id: "agents",
+      path: "../external/agents/docs",
+      routeBasePath: "/agents",
+      sidebarPath: require.resolve("./sidebars.js"),
+      editUrl: "https://github.com/intelgraph/agents/edit/main/docs/",
     },
   ],
 ];
@@ -65,26 +65,23 @@ plugins: [
 **`scripts/docs/build-federation-map.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 function list(dir) {
   const out = [];
   const walk = (d) =>
     fs.readdirSync(d).forEach((f) => {
-      const p = d + '/' + f;
+      const p = d + "/" + f;
       const s = fs.statSync(p);
       if (s.isDirectory()) walk(p);
-      else if (/\.mdx?$/.test(f)) out.push(p.replace(/^external\//, ''));
+      else if (/\.mdx?$/.test(f)) out.push(p.replace(/^external\//, ""));
     });
-  walk('external');
+  walk("external");
   return out;
 }
-const files = fs.existsSync('external') ? list('external') : [];
-fs.mkdirSync('docs/ops', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/federation-map.json',
-  JSON.stringify({ files }, null, 2),
-);
-console.log('Federated files:', files.length);
+const files = fs.existsSync("external") ? list("external") : [];
+fs.mkdirSync("docs/ops", { recursive: true });
+fs.writeFileSync("docs/ops/federation-map.json", JSON.stringify({ files }, null, 2));
+console.log("Federated files:", files.length);
 ```
 
 **Acceptance**
@@ -100,9 +97,9 @@ console.log('Federated files:', files.length);
 **`scripts/docs/export-help-index.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const rows = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -110,19 +107,19 @@ const rows = [];
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      const src = fs.readFileSync(p, 'utf8');
+      const src = fs.readFileSync(p, "utf8");
       const fm = matter(src).data || {};
       rows.push({
-        slug: p.replace(/^docs\//, '').replace(/\.mdx?$/, ''),
+        slug: p.replace(/^docs\//, "").replace(/\.mdx?$/, ""),
         title: fm.title || path.basename(p),
         tags: fm.tags || [],
-        summary: fm.summary || '',
+        summary: fm.summary || "",
       });
     }
   }
-})('docs');
-fs.mkdirSync('docs/ops/help', { recursive: true });
-fs.writeFileSync('docs/ops/help/index.json', JSON.stringify(rows, null, 2));
+})("docs");
+fs.mkdirSync("docs/ops/help", { recursive: true });
+fs.writeFileSync("docs/ops/help/index.json", JSON.stringify(rows, null, 2));
 ```
 
 ## B2) Embeddable Help overlay for product UI
@@ -135,35 +132,33 @@ fs.writeFileSync('docs/ops/help/index.json', JSON.stringify(rows, null, 2));
     return document.querySelector(q);
   }
   async function load() {
-    const res = await fetch('/docs/ops/help/index.json');
+    const res = await fetch("/docs/ops/help/index.json");
     const data = await res.json();
-    const el = document.createElement('div');
-    el.id = 'helpkit';
-    el.style.position = 'fixed';
-    el.style.bottom = '20px';
-    el.style.right = '20px';
+    const el = document.createElement("div");
+    el.id = "helpkit";
+    el.style.position = "fixed";
+    el.style.bottom = "20px";
+    el.style.right = "20px";
     el.innerHTML =
       '<button id="hk-btn">? Help</button><div id="hk-panel" hidden><input id="hk-q" placeholder="Search..."/><ul id="hk-results"></ul></div>';
     document.body.appendChild(el);
-    qs('#hk-btn').onclick = () => {
-      qs('#hk-panel').hidden = !qs('#hk-panel').hidden;
+    qs("#hk-btn").onclick = () => {
+      qs("#hk-panel").hidden = !qs("#hk-panel").hidden;
     };
-    qs('#hk-q').oninput = (e) => {
-      const q = (e.target.value || '').toLowerCase();
+    qs("#hk-q").oninput = (e) => {
+      const q = (e.target.value || "").toLowerCase();
       const out = data
         .filter(
-          (x) =>
-            x.title.toLowerCase().includes(q) ||
-            x.tags.join(' ').toLowerCase().includes(q),
+          (x) => x.title.toLowerCase().includes(q) || x.tags.join(" ").toLowerCase().includes(q)
         )
         .slice(0, 8);
-      qs('#hk-results').innerHTML = out
+      qs("#hk-results").innerHTML = out
         .map((x) => `<li><a href='/${x.slug}'>${x.title}</a></li>`)
-        .join('');
+        .join("");
     };
   }
-  if (document.readyState === 'complete') load();
-  else window.addEventListener('load', load);
+  if (document.readyState === "complete") load();
+  else window.addEventListener("load", load);
 })();
 ```
 
@@ -182,19 +177,16 @@ fs.writeFileSync('docs/ops/help/index.json', JSON.stringify(rows, null, 2));
 **`scripts/docs/build-offline-bundle.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const { execSync } = require("child_process");
 
-execSync('cd docs-site && npm i && npm run build', { stdio: 'inherit' });
-const root = 'docs-site/build';
+execSync("cd docs-site && npm i && npm run build", { stdio: "inherit" });
+const root = "docs-site/build";
 const manifest = [];
 function hash(file) {
-  return crypto
-    .createHash('sha256')
-    .update(fs.readFileSync(file))
-    .digest('hex');
+  return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -203,7 +195,7 @@ function hash(file) {
     if (s.isDirectory()) walk(p);
     else {
       manifest.push({
-        path: p.replace(/^docs-site\/build\//, ''),
+        path: p.replace(/^docs-site\/build\//, ""),
         sha256: hash(p),
         bytes: s.size,
       });
@@ -211,17 +203,13 @@ function hash(file) {
   }
 })(root);
 fs.writeFileSync(
-  'offline-manifest.json',
-  JSON.stringify(
-    { created: new Date().toISOString(), files: manifest },
-    null,
-    2,
-  ),
+  "offline-manifest.json",
+  JSON.stringify({ created: new Date().toISOString(), files: manifest }, null, 2)
 );
-execSync('zip -r offline-docs.zip docs-site/build offline-manifest.json', {
-  stdio: 'inherit',
+execSync("zip -r offline-docs.zip docs-site/build offline-manifest.json", {
+  stdio: "inherit",
 });
-console.log('Wrote offline-docs.zip');
+console.log("Wrote offline-docs.zip");
 ```
 
 ## C2) Tiny server for air‑gap
@@ -229,19 +217,17 @@ console.log('Wrote offline-docs.zip');
 **`scripts/docs/offline-server.js`**
 
 ```js
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const root = path.resolve(__dirname, '../../docs-site/build');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const root = path.resolve(__dirname, "../../docs-site/build");
 http
   .createServer((req, res) => {
-    const fp = path.join(root, req.url === '/' ? 'index.html' : req.url);
-    if (!fp.startsWith(root)) return res.writeHead(403).end('Forbidden');
-    fs.readFile(fp, (e, b) =>
-      e ? res.writeHead(404).end('Not found') : res.end(b),
-    );
+    const fp = path.join(root, req.url === "/" ? "index.html" : req.url);
+    if (!fp.startsWith(root)) return res.writeHead(403).end("Forbidden");
+    fs.readFile(fp, (e, b) => (e ? res.writeHead(404).end("Not found") : res.end(b)));
   })
-  .listen(8080, () => console.log('Offline docs at http://localhost:8080'));
+  .listen(8080, () => console.log("Offline docs at http://localhost:8080"));
 ```
 
 ## C3) Sign & verify (optional)
@@ -261,30 +247,29 @@ http
 **`scripts/docs/check-ts-snippets.js`**
 
 ````js
-const fs = require('fs');
-const child = require('child_process');
+const fs = require("fs");
+const child = require("child_process");
 const files = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
-    const p = d + '/' + f;
+    const p = d + "/" + f;
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && files.push(p);
   }
-})('docs');
+})("docs");
 const rx = /```ts\s+test\s+compile[\r\n]+([\s\S]*?)```/g;
-let tmp = '';
+let tmp = "";
 for (const f of files) {
-  const src = fs.readFileSync(f, 'utf8');
+  const src = fs.readFileSync(f, "utf8");
   for (const m of src.matchAll(rx)) {
-    tmp += m[1] + '\n';
+    tmp += m[1] + "\n";
   }
 }
-fs.writeFileSync('tmp-snippets.ts', tmp);
+fs.writeFileSync("tmp-snippets.ts", tmp);
 try {
-  child.execSync(
-    'npx -y typescript@5 tsc --pretty false --noEmit tmp-snippets.ts',
-    { stdio: 'inherit' },
-  );
+  child.execSync("npx -y typescript@5 tsc --pretty false --noEmit tmp-snippets.ts", {
+    stdio: "inherit",
+  });
 } catch (e) {
   process.exit(1);
 }

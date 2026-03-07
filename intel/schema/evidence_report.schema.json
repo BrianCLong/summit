@@ -24,9 +24,9 @@
         "type": "object",
         "required": ["name", "status"],
         "properties": {
-          "name": {"type": "string"},
-          "status": {"type": "string"},
-          "details": {"type": "object"}
+          "name": { "type": "string" },
+          "status": { "type": "string" },
+          "details": { "type": "object" }
         }
       }
     }

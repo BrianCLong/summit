@@ -61,8 +61,5 @@
     "Deny-by-default and feature flag behaviors are tested.",
     "Decision ledger updated with rollback guidance."
   ],
-  "stop_conditions": [
-    "Evidence index fails to parse.",
-    "Prompt hash mismatch in registry."
-  ]
+  "stop_conditions": ["Evidence index fails to parse.", "Prompt hash mismatch in registry."]
 }

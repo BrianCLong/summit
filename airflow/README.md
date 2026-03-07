@@ -4,18 +4,19 @@ This directory contains the Airflow Data Pipelines for IntelGraph.
 
 ## Structure
 
-*   `dags/`: Contains the Airflow DAG definitions.
-    *   `intelgraph_pipeline.py`: Main ETL pipeline for ingesting intelligence data.
-    *   `coord_batch.py`: (Legacy/Deprecated) Coordination detection batch job.
-*   `etl/`: Python package containing the core logic.
-    *   `connectors/`: Data ingestion connectors (Mock, etc.).
-    *   `transformers/`: Data validation and transformation logic (Pydantic models).
-    *   `loaders/`: Database loaders (Neo4j).
-*   `tests/`: Unit tests for the ETL components.
+- `dags/`: Contains the Airflow DAG definitions.
+  - `intelgraph_pipeline.py`: Main ETL pipeline for ingesting intelligence data.
+  - `coord_batch.py`: (Legacy/Deprecated) Coordination detection batch job.
+- `etl/`: Python package containing the core logic.
+  - `connectors/`: Data ingestion connectors (Mock, etc.).
+  - `transformers/`: Data validation and transformation logic (Pydantic models).
+  - `loaders/`: Database loaders (Neo4j).
+- `tests/`: Unit tests for the ETL components.
 
 ## Setup
 
 1.  Ensure Python dependencies are installed:
+
     ```bash
     pip install apache-airflow neo4j pandas pydantic
     ```
@@ -46,6 +47,7 @@ The `intelgraph_pipeline` DAG follows a standard ETL pattern:
 4.  **Quality Check:** Simple post-load verification.
 
 The pipeline is designed to be:
-*   **Robust:** Uses Pydantic for strict schema validation.
-*   **Scalable:** Loaders support batching; Airflow allows parallel task execution.
-*   **Maintainable:** Core logic is separated from DAG definitions in the `etl/` package.
+
+- **Robust:** Uses Pydantic for strict schema validation.
+- **Scalable:** Loaders support batching; Airflow allows parallel task execution.
+- **Maintainable:** Core logic is separated from DAG definitions in the `etl/` package.

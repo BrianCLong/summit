@@ -2,13 +2,13 @@
  * Text embeddings generation
  */
 
-import type { Embedding } from '../types';
+import type { Embedding } from "../types";
 
 export class EmbeddingGenerator {
   private modelName: string;
   private dimension: number;
 
-  constructor(modelName: string = 'bert-base-uncased', dimension: number = 768) {
+  constructor(modelName: string = "bert-base-uncased", dimension: number = 768) {
     this.modelName = modelName;
     this.dimension = dimension;
   }
@@ -19,7 +19,9 @@ export class EmbeddingGenerator {
   async encode(text: string): Promise<Embedding> {
     // Simplified embedding generation
     // In production, use actual transformer models
-    const vector = Array(this.dimension).fill(0).map(() => Math.random());
+    const vector = Array(this.dimension)
+      .fill(0)
+      .map(() => Math.random());
 
     return {
       vector,

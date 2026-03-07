@@ -5,23 +5,23 @@ on:
   workflow_dispatch:
     inputs:
       target_url:
-        description: 'Target URL to scan (default: http://localhost:3000)'
+        description: "Target URL to scan (default: http://localhost:3000)"
         required: false
-        default: 'http://localhost:3000'
+        default: "http://localhost:3000"
       scan_type:
-        description: 'Scan type (baseline, full, api)'
+        description: "Scan type (baseline, full, api)"
         required: false
-        default: 'baseline'
+        default: "baseline"
   pull_request:
     branches: [main]
     paths:
-      - 'client/**'
-      - 'apps/**'
-      - 'gateway/**'
-      - 'server/**'
+      - "client/**"
+      - "apps/**"
+      - "gateway/**"
+      - "server/**"
   schedule:
     # Run full scan weekly on Sundays at 2 AM
-    - cron: '0 2 * * 0'
+    - cron: "0 2 * * 0"
 
 permissions:
   contents: read
@@ -47,8 +47,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
 
       - name: Build application
         run: |
@@ -107,9 +107,9 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          issue_title: 'ZAP Baseline Scan Report'
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a -j -l WARN"
+          issue_title: "ZAP Baseline Scan Report"
           token: ${{ secrets.GITHUB_TOKEN }}
           allow_issue_writing: true
 
@@ -118,9 +118,9 @@ jobs:
         uses: zaproxy/action-full-scan@v0.10.0
         with:
           target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-j -l WARN'
-          issue_title: 'ZAP Full Scan Report'
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-j -l WARN"
+          issue_title: "ZAP Full Scan Report"
           token: ${{ secrets.GITHUB_TOKEN }}
           allow_issue_writing: true
 
@@ -130,9 +130,9 @@ jobs:
         with:
           target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
           format: openapi
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-j -l WARN'
-          issue_title: 'ZAP API Scan Report'
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-j -l WARN"
+          issue_title: "ZAP API Scan Report"
           token: ${{ secrets.GITHUB_TOKEN }}
           allow_issue_writing: true
 

@@ -1,4 +1,4 @@
-import type { EventEnvelope, EventHandler } from './types.js';
+import type { EventEnvelope, EventHandler } from "./types.js";
 
 export class EventBus {
   private readonly handlers = new Map<string, Set<EventHandler>>();

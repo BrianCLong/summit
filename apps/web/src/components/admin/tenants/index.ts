@@ -1,1 +1,1 @@
-export { default as TenantManagement } from './TenantManagement';
+export { default as TenantManagement } from './TenantManagement'

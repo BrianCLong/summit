@@ -5,7 +5,7 @@
     <style>
       body {
         margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background: #0a0e27;
         color: white;
       }
@@ -255,9 +255,7 @@
 
         <div class="controls">
           <button class="btn" onclick="runLiveQuery()">🔍 Run Query</button>
-          <button class="btn" onclick="createInvestigation()">
-            📋 New Investigation
-          </button>
+          <button class="btn" onclick="createInvestigation()">📋 New Investigation</button>
           <button class="btn" onclick="runAIAnalysis()">🧠 AI Analysis</button>
           <button class="btn" onclick="subscribeToUpdates()" id="subscribe-btn">
             📡 Subscribe
@@ -268,11 +266,7 @@
       <!-- GraphQL Playground -->
       <div class="panel grid-full">
         <h3>🎮 Live GraphQL Playground</h3>
-        <textarea
-          class="query-input"
-          id="graphql-query"
-          placeholder="Enter GraphQL query..."
-        >
+        <textarea class="query-input" id="graphql-query" placeholder="Enter GraphQL query...">
 query LiveDemo {
   health
   systemStatus {
@@ -284,9 +278,7 @@ query LiveDemo {
             </textarea
         >
         <button class="btn" onclick="executeQuery()">▶️ Execute Query</button>
-        <div class="result-output" id="query-result">
-          Ready to execute queries...
-        </div>
+        <div class="result-output" id="query-result">Ready to execute queries...</div>
       </div>
 
       <!-- AI Analysis Panel -->
@@ -303,9 +295,7 @@ were recorded from the same IP address. This access pattern deviates from normal
 business hours and established user behavior profiles.
             </textarea
         >
-        <button class="btn" onclick="runAIAnalysis()">
-          🔍 Analyze Intelligence
-        </button>
+        <button class="btn" onclick="runAIAnalysis()">🔍 Analyze Intelligence</button>
         <div class="result-output" id="ai-result">Ready for AI analysis...</div>
       </div>
 
@@ -314,28 +304,25 @@ business hours and established user behavior profiles.
         <h3>📋 Live Activity Monitor</h3>
         <div class="log-container" id="activity-log">
           <div class="log-entry log-success">
-            <span class="log-timestamp">[16:14:50]</span> IntelGraph Live Server
-            started successfully
+            <span class="log-timestamp">[16:14:50]</span> IntelGraph Live Server started
+            successfully
           </div>
           <div class="log-entry">
-            <span class="log-timestamp">[16:14:52]</span> GraphQL endpoint
-            operational on port 4001
+            <span class="log-timestamp">[16:14:52]</span> GraphQL endpoint operational on port 4001
           </div>
           <div class="log-entry">
-            <span class="log-timestamp">[16:14:53]</span> WebSocket
-            subscriptions enabled
+            <span class="log-timestamp">[16:14:53]</span> WebSocket subscriptions enabled
           </div>
           <div class="log-entry">
-            <span class="log-timestamp">[16:14:54]</span> AI pipeline
-            initialized and ready
+            <span class="log-timestamp">[16:14:54]</span> AI pipeline initialized and ready
           </div>
         </div>
       </div>
     </div>
 
     <script>
-      const SERVER_URL = 'http://localhost:4001';
-      const WS_URL = 'ws://localhost:4001/graphql';
+      const SERVER_URL = "http://localhost:4001";
+      const WS_URL = "ws://localhost:4001/graphql";
       let websocket = null;
       let isSubscribed = false;
 
@@ -352,21 +339,21 @@ business hours and established user behavior profiles.
           const response = await fetch(`${SERVER_URL}/health`);
           const data = await response.json();
 
-          updateStatus('server-status', 'server-text', 'green', 'Operational');
-          updateStatus('graphql-status', 'graphql-text', 'green', 'Connected');
+          updateStatus("server-status", "server-text", "green", "Operational");
+          updateStatus("graphql-status", "graphql-text", "green", "Connected");
 
-          logActivity('SUCCESS', 'Server health check passed');
+          logActivity("SUCCESS", "Server health check passed");
         } catch (error) {
-          updateStatus('server-status', 'server-text', 'red', 'Disconnected');
-          logActivity('ERROR', `Server connection failed: ${error.message}`);
+          updateStatus("server-status", "server-text", "red", "Disconnected");
+          logActivity("ERROR", `Server connection failed: ${error.message}`);
         }
       }
 
       async function loadInitialData() {
         try {
           const response = await fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: `query {
                             investigations { id title status }
@@ -377,38 +364,37 @@ business hours and established user behavior profiles.
 
           const data = await response.json();
 
-          document.getElementById('investigations-count').textContent =
+          document.getElementById("investigations-count").textContent =
             data.data.investigations.length;
-          document.getElementById('entities-count').textContent =
-            data.data.entities.length;
-          document.getElementById('relationships-count').textContent = '1';
+          document.getElementById("entities-count").textContent = data.data.entities.length;
+          document.getElementById("relationships-count").textContent = "1";
 
           logActivity(
-            'INFO',
-            `Loaded ${data.data.investigations.length} investigations, ${data.data.entities.length} entities`,
+            "INFO",
+            `Loaded ${data.data.investigations.length} investigations, ${data.data.entities.length} entities`
           );
         } catch (error) {
-          logActivity('ERROR', `Failed to load initial data: ${error.message}`);
+          logActivity("ERROR", `Failed to load initial data: ${error.message}`);
         }
       }
 
       function connectWebSocket() {
         // Note: WebSocket subscriptions would need additional implementation
-        updateStatus('websocket-status', 'websocket-text', 'green', 'Ready');
-        logActivity('INFO', 'WebSocket connection ready for subscriptions');
+        updateStatus("websocket-status", "websocket-text", "green", "Ready");
+        logActivity("INFO", "WebSocket connection ready for subscriptions");
       }
 
       async function executeQuery() {
-        const query = document.getElementById('graphql-query').value;
-        const resultDiv = document.getElementById('query-result');
+        const query = document.getElementById("graphql-query").value;
+        const resultDiv = document.getElementById("query-result");
 
         try {
-          resultDiv.textContent = 'Executing query...';
+          resultDiv.textContent = "Executing query...";
 
           const startTime = Date.now();
           const response = await fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query }),
           });
 
@@ -416,26 +402,25 @@ business hours and established user behavior profiles.
           const duration = Date.now() - startTime;
 
           resultDiv.textContent = JSON.stringify(data, null, 2);
-          document.getElementById('response-time').textContent =
-            `${duration}ms`;
+          document.getElementById("response-time").textContent = `${duration}ms`;
 
-          logActivity('SUCCESS', `GraphQL query executed in ${duration}ms`);
+          logActivity("SUCCESS", `GraphQL query executed in ${duration}ms`);
         } catch (error) {
           resultDiv.textContent = `Error: ${error.message}`;
-          logActivity('ERROR', `Query execution failed: ${error.message}`);
+          logActivity("ERROR", `Query execution failed: ${error.message}`);
         }
       }
 
       async function runAIAnalysis() {
-        const text = document.getElementById('ai-input').value;
-        const resultDiv = document.getElementById('ai-result');
+        const text = document.getElementById("ai-input").value;
+        const resultDiv = document.getElementById("ai-result");
 
         try {
-          resultDiv.textContent = 'Running AI analysis...';
+          resultDiv.textContent = "Running AI analysis...";
 
           const response = await fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: `query { aiAnalysis(text: "${text.replace(/"/g, '\\"')}") { 
                             status confidence 
@@ -453,25 +438,25 @@ business hours and established user behavior profiles.
 
           // Update threat level
           const threatLevel = analysis.threatAssessment.riskLevel;
-          const threatElement = document.getElementById('threat-level');
+          const threatElement = document.getElementById("threat-level");
           threatElement.textContent = threatLevel;
           threatElement.className = `metric-value threat-${threatLevel.toLowerCase()}`;
 
           logActivity(
-            'AI',
-            `Analysis completed - Risk: ${threatLevel} (${Math.round(analysis.confidence * 100)}% confidence)`,
+            "AI",
+            `Analysis completed - Risk: ${threatLevel} (${Math.round(analysis.confidence * 100)}% confidence)`
           );
         } catch (error) {
           resultDiv.textContent = `Error: ${error.message}`;
-          logActivity('ERROR', `AI analysis failed: ${error.message}`);
+          logActivity("ERROR", `AI analysis failed: ${error.message}`);
         }
       }
 
       async function createInvestigation() {
         try {
           const response = await fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: `mutation {
                             createInvestigation(input: {
@@ -488,27 +473,21 @@ business hours and established user behavior profiles.
           const investigation = data.data.createInvestigation;
 
           logActivity(
-            'SUCCESS',
-            `Created investigation: ${investigation.title} (${investigation.id})`,
+            "SUCCESS",
+            `Created investigation: ${investigation.title} (${investigation.id})`
           );
 
           // Update counter
           const current =
-            parseInt(
-              document.getElementById('investigations-count').textContent,
-            ) || 0;
-          document.getElementById('investigations-count').textContent =
-            current + 1;
+            parseInt(document.getElementById("investigations-count").textContent) || 0;
+          document.getElementById("investigations-count").textContent = current + 1;
         } catch (error) {
-          logActivity(
-            'ERROR',
-            `Failed to create investigation: ${error.message}`,
-          );
+          logActivity("ERROR", `Failed to create investigation: ${error.message}`);
         }
       }
 
       function runLiveQuery() {
-        document.getElementById('graphql-query').value = `query LiveData {
+        document.getElementById("graphql-query").value = `query LiveData {
   systemStatus {
     databases { postgres neo4j redis }
     performance { responseTime requestsPerSecond memoryUsage cpuUsage }
@@ -521,19 +500,16 @@ business hours and established user behavior profiles.
       }
 
       function subscribeToUpdates() {
-        const btn = document.getElementById('subscribe-btn');
+        const btn = document.getElementById("subscribe-btn");
         if (!isSubscribed) {
-          btn.textContent = '📡 Subscribed';
+          btn.textContent = "📡 Subscribed";
           btn.disabled = true;
           isSubscribed = true;
-          logActivity('INFO', 'Subscribed to real-time updates');
+          logActivity("INFO", "Subscribed to real-time updates");
 
           // Simulate subscription updates
           setInterval(() => {
-            logActivity(
-              'STREAM',
-              `Real-time update: Entity relationships updated`,
-            );
+            logActivity("STREAM", `Real-time update: Entity relationships updated`);
           }, 10000);
         }
       }
@@ -547,10 +523,10 @@ business hours and established user behavior profiles.
       }
 
       function logActivity(level, message) {
-        const logContainer = document.getElementById('activity-log');
+        const logContainer = document.getElementById("activity-log");
         const timestamp = new Date().toLocaleTimeString();
 
-        const logEntry = document.createElement('div');
+        const logEntry = document.createElement("div");
         logEntry.className = `log-entry log-${level.toLowerCase()}`;
         logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${message}`;
 
@@ -569,12 +545,12 @@ business hours and established user behavior profiles.
             const response = await fetch(`${SERVER_URL}/metrics`);
             const data = await response.json();
 
-            document.getElementById('response-time').textContent =
+            document.getElementById("response-time").textContent =
               `${Math.round(data.performance.responseTime)}ms`;
-            document.getElementById('connections').textContent =
+            document.getElementById("connections").textContent =
               Math.floor(Math.random() * 50) + 10;
-            document.getElementById('qps').textContent = Math.round(
-              data.performance.requestsPerSecond,
+            document.getElementById("qps").textContent = Math.round(
+              data.performance.requestsPerSecond
             );
           } catch (error) {
             // Silently handle metrics update failures
@@ -583,7 +559,7 @@ business hours and established user behavior profiles.
       }
 
       // Initialize when page loads
-      window.addEventListener('load', initDemo);
+      window.addEventListener("load", initDemo);
 
       console.log(`
 🚀 IntelGraph Live Demo Interface

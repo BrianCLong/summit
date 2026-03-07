@@ -12,7 +12,7 @@ export interface MatchScorecard {
   entityB: string;
   overallScore: number;
   featureScores: Record<string, number>;
-  decision: 'MATCH' | 'NO_MATCH' | 'MANUAL_REVIEW';
+  decision: "MATCH" | "NO_MATCH" | "MANUAL_REVIEW";
   explanation: string[];
   threshold: number;
 }
@@ -39,7 +39,7 @@ export class EntityResolver {
     if (entityA.email && entityB.email) {
       const emailScore = entityA.email.toLowerCase() === entityB.email.toLowerCase() ? 1.0 : 0.0;
       featureScores.email = emailScore;
-      explanation.push(`Email match: ${emailScore === 1 ? 'exact' : 'no match'}`);
+      explanation.push(`Email match: ${emailScore === 1 ? "exact" : "no match"}`);
     }
 
     // Phone similarity (normalize and compare)
@@ -48,7 +48,7 @@ export class EntityResolver {
       const phoneB = this.normalizePhone(entityB.phone);
       const phoneScore = phoneA === phoneB ? 1.0 : 0.0;
       featureScores.phone = phoneScore;
-      explanation.push(`Phone match: ${phoneScore === 1 ? 'exact' : 'no match'}`);
+      explanation.push(`Phone match: ${phoneScore === 1 ? "exact" : "no match"}`);
     }
 
     // Weighted average
@@ -56,7 +56,7 @@ export class EntityResolver {
     let overallScore = 0;
     let totalWeight = 0;
 
-    Object.keys(featureScores).forEach(key => {
+    Object.keys(featureScores).forEach((key) => {
       const weight = weights[key as keyof typeof weights] || 0.33;
       overallScore += featureScores[key] * weight;
       totalWeight += weight;
@@ -64,11 +64,11 @@ export class EntityResolver {
 
     overallScore = totalWeight > 0 ? overallScore / totalWeight : 0;
 
-    let decision: 'MATCH' | 'NO_MATCH' | 'MANUAL_REVIEW' = 'NO_MATCH';
+    let decision: "MATCH" | "NO_MATCH" | "MANUAL_REVIEW" = "NO_MATCH";
     if (overallScore >= this.threshold) {
-      decision = 'MATCH';
+      decision = "MATCH";
     } else if (overallScore >= this.threshold * 0.7) {
-      decision = 'MANUAL_REVIEW';
+      decision = "MANUAL_REVIEW";
     }
 
     return {
@@ -108,7 +108,7 @@ export class EntityResolver {
           matrix[i][j] = Math.min(
             matrix[i - 1][j - 1] + 1,
             matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1,
+            matrix[i - 1][j] + 1
           );
         }
       }
@@ -117,7 +117,7 @@ export class EntityResolver {
   }
 
   private normalizePhone(phone: string): string {
-    return phone.replace(/\D/g, '');
+    return phone.replace(/\D/g, "");
   }
 
   evaluateDataset(entities: Entity[]): { tp: number; fp: number; tn: number; fn: number } {

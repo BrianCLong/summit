@@ -31,8 +31,8 @@ spec:
     - type: redis
       metadata:
         address: redis-conductor.conductor-system.svc.cluster.local:6379
-        listName: 'queue:routing_requests'
-        listLength: '10' # Scale when queue > 10 items
+        listName: "queue:routing_requests"
+        listLength: "10" # Scale when queue > 10 items
       authenticationRef:
         name: redis-auth
 
@@ -42,7 +42,7 @@ spec:
         serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
         metricName: conductor_request_rate
         query: rate(conductor_requests_total[1m])
-        threshold: '5' # Scale when > 5 requests per second
+        threshold: "5" # Scale when > 5 requests per second
 
     # Custom HTTP requests trigger
     - type: prometheus
@@ -50,7 +50,7 @@ spec:
         serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
         metricName: conductor_pending_requests
         query: conductor_router_queue_depth
-        threshold: '20' # Scale when > 20 pending requests
+        threshold: "20" # Scale when > 20 pending requests
 
 ---
 apiVersion: keda.sh/v1alpha1
@@ -73,8 +73,8 @@ spec:
     - type: redis
       metadata:
         address: redis-conductor.conductor-system.svc.cluster.local:6379
-        listName: 'queue:expert_tasks'
-        listLength: '5' # Scale when > 5 expert tasks queued
+        listName: "queue:expert_tasks"
+        listLength: "5" # Scale when > 5 expert tasks queued
       authenticationRef:
         name: redis-auth
 
@@ -82,13 +82,13 @@ spec:
     - type: cpu
       metadata:
         type: Utilization
-        value: '70' # Scale when CPU > 70%
+        value: "70" # Scale when CPU > 70%
 
     # Memory-based scaling
     - type: memory
       metadata:
         type: Utilization
-        value: '80' # Scale when memory > 80%
+        value: "80" # Scale when memory > 80%
 
 ---
 apiVersion: keda.sh/v1alpha1
@@ -111,8 +111,8 @@ spec:
     - type: redis
       metadata:
         address: redis-conductor.conductor-system.svc.cluster.local:6379
-        listName: 'queue:web_tasks'
-        listLength: '3' # Conservative scaling for web tasks
+        listName: "queue:web_tasks"
+        listLength: "3" # Conservative scaling for web tasks
       authenticationRef:
         name: redis-auth
 
@@ -122,7 +122,7 @@ spec:
         serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
         metricName: conductor_web_rate_limit_headroom
         query: conductor_web_scraping_rate_limit_remaining
-        threshold: '50' # Scale down when rate limit headroom < 50%
+        threshold: "50" # Scale down when rate limit headroom < 50%
 
 ---
 apiVersion: keda.sh/v1alpha1
@@ -145,8 +145,8 @@ spec:
     - type: redis
       metadata:
         address: redis-conductor.conductor-system.svc.cluster.local:6379
-        listName: 'queue:compliance_scans'
-        listLength: '2'
+        listName: "queue:compliance_scans"
+        listLength: "2"
       authenticationRef:
         name: redis-auth
 
@@ -171,8 +171,8 @@ spec:
     - type: redis
       metadata:
         address: redis-conductor.conductor-system.svc.cluster.local:6379
-        listName: 'queue:crdt_conflicts'
-        listLength: '5'
+        listName: "queue:crdt_conflicts"
+        listLength: "5"
       authenticationRef:
         name: redis-auth
 
@@ -182,7 +182,7 @@ spec:
         serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
         metricName: conductor_critical_conflicts
         query: conductor_crdt_conflicts{severity="critical"}
-        threshold: '1' # Scale immediately on critical conflicts
+        threshold: "1" # Scale immediately on critical conflicts
 
 ---
 # Redis authentication secret reference
@@ -247,7 +247,7 @@ spec:
           name: conductor_requests_per_second
         target:
           type: AverageValue
-          averageValue: '10'
+          averageValue: "10"
 
 ---
 # Vertical Pod Autoscaler for resource optimization
@@ -265,7 +265,7 @@ spec:
     kind: Deployment
     name: conductor-router
   updatePolicy:
-    updateMode: 'Auto' # Automatically apply recommendations
+    updateMode: "Auto" # Automatically apply recommendations
   resourcePolicy:
     containerPolicies:
       - containerName: conductor-router
@@ -275,7 +275,7 @@ spec:
         maxAllowed:
           cpu: 4
           memory: 8Gi
-        controlledResources: ['cpu', 'memory']
+        controlledResources: ["cpu", "memory"]
         controlledValues: RequestsAndLimits
 
 ---
@@ -301,9 +301,9 @@ spec:
             image: conductor/batch-processor:latest
             env:
               - name: BATCH_SIZE
-                value: '100'
+                value: "100"
               - name: REDIS_URL
-                value: 'redis://redis-conductor.conductor-system.svc.cluster.local:6379'
+                value: "redis://redis-conductor.conductor-system.svc.cluster.local:6379"
             resources:
               requests:
                 cpu: 500m
@@ -320,8 +320,8 @@ spec:
     - type: redis
       metadata:
         address: redis-conductor.conductor-system.svc.cluster.local:6379
-        listName: 'queue:batch_jobs'
-        listLength: '20' # Process batches when > 20 items queued
+        listName: "queue:batch_jobs"
+        listLength: "20" # Process batches when > 20 items queued
       authenticationRef:
         name: redis-auth
 

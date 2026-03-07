@@ -2,13 +2,7 @@
  * HorizonScanner - Horizon Scanning and Weak Signal Detection
  */
 
-import {
-  HorizonScan,
-  ScanFinding,
-  EmergingIssue,
-  TimeHorizon,
-  TrendAnalysis,
-} from './types.js';
+import { HorizonScan, ScanFinding, EmergingIssue, TimeHorizon, TrendAnalysis } from "./types.js";
 
 export interface HorizonScannerConfig {
   scanFrequency: number;
@@ -44,7 +38,7 @@ export class HorizonScanner {
     // Identify emerging issues
     const issues = await this.identifyEmergingIssues(findings);
     emergingIssues.push(...issues);
-    issues.forEach(issue => this.emergingIssues.set(issue.id, issue));
+    issues.forEach((issue) => this.emergingIssues.set(issue.id, issue));
 
     // Detect weak signals
     const signals = await this.detectWeakSignals(findings);
@@ -88,12 +82,12 @@ export class HorizonScanner {
   /**
    * Assess issue momentum
    */
-  assessMomentum(issueId: string): EmergingIssue['momentum'] {
+  assessMomentum(issueId: string): EmergingIssue["momentum"] {
     const issue = this.emergingIssues.get(issueId);
-    if (!issue) return 'stable';
+    if (!issue) return "stable";
 
     // TODO: Analyze trajectory of mentions, attention, development
-    return 'growing';
+    return "growing";
   }
 
   /**
@@ -119,7 +113,7 @@ export class HorizonScanner {
     findings.push(...socialFindings);
 
     // Filter by novelty threshold
-    return findings.filter(f => this.meetsNoveltyThreshold(f));
+    return findings.filter((f) => this.meetsNoveltyThreshold(f));
   }
 
   /**
@@ -129,7 +123,7 @@ export class HorizonScanner {
     let scans = Array.from(this.scans.values());
 
     if (since) {
-      scans = scans.filter(scan => scan.scanDate >= since);
+      scans = scans.filter((scan) => scan.scanDate >= since);
     }
 
     return scans.sort((a, b) => b.scanDate.getTime() - a.scanDate.getTime());
@@ -139,24 +133,24 @@ export class HorizonScanner {
    * Get emerging issues
    */
   getEmergingIssues(filter?: {
-    momentum?: EmergingIssue['momentum'];
+    momentum?: EmergingIssue["momentum"];
     domain?: string;
   }): EmergingIssue[] {
     let issues = Array.from(this.emergingIssues.values());
 
     if (filter) {
       if (filter.momentum) {
-        issues = issues.filter(issue => issue.momentum === filter.momentum);
+        issues = issues.filter((issue) => issue.momentum === filter.momentum);
       }
       // Additional filters can be added
     }
 
     return issues.sort((a, b) => {
       const momentumOrder = {
-        'accelerating': 4,
-        'growing': 3,
-        'stable': 2,
-        'stalling': 1,
+        accelerating: 4,
+        growing: 3,
+        stable: 2,
+        stalling: 1,
       };
       return momentumOrder[b.momentum] - momentumOrder[a.momentum];
     });
@@ -220,10 +214,10 @@ export class HorizonScanner {
 
   private meetsNoveltyThreshold(finding: ScanFinding): boolean {
     const noveltyScore = {
-      'incremental': 1,
-      'significant': 2,
-      'breakthrough': 3,
-      'paradigm-shift': 4,
+      incremental: 1,
+      significant: 2,
+      breakthrough: 3,
+      "paradigm-shift": 4,
     }[finding.novelty];
 
     return noveltyScore >= this.config.noveltyThreshold;

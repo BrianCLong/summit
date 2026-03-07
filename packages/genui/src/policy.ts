@@ -1,4 +1,4 @@
-import { UiPlan } from './schema.js';
+import { UiPlan } from "./schema.js";
 
 export type PolicyFilter = {
   allowComponents?: string[];

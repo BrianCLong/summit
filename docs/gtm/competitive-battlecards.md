@@ -1,4 +1,5 @@
 <!-- markdownlint-disable -->
+
 # Summit Competitive Battlecards
 
 **Purpose:** Positioning guidance against key competitors. Use for sales prep, objection handling, and RFP responses.

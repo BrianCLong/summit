@@ -153,23 +153,19 @@ steps:
   - id: ingest
     action: ingest
     input:
-      {
-        mappingId: 'map:persons',
-        sourceUrl: '${params.sourceUrl}',
-        license: '${params.license}',
-      }
+      { mappingId: "map:persons", sourceUrl: "${params.sourceUrl}", license: "${params.license}" }
     approve: true
   - id: er
     action: er
     approve: false
   - id: analytics
     action: gds
-    input: { kind: 'community', params: { algorithm: 'leiden' } }
+    input: { kind: "community", params: { algorithm: "leiden" } }
   - id: report
     action: snapshot
   - id: export
     action: export
-    input: { caseId: '${ctx.caseId}', withProvenance: true }
+    input: { caseId: "${ctx.caseId}", withProvenance: true }
     approve: true
 ```
 
@@ -177,45 +173,45 @@ steps:
 
 ```ts
 // server/src/playbooks/runner.ts
-import { Queue, JobsOptions } from 'bullmq';
-import { z } from 'zod';
-import { signExport } from '../provenance/sign';
+import { Queue, JobsOptions } from "bullmq";
+import { z } from "zod";
+import { signExport } from "../provenance/sign";
 
 const Step = z.object({
   id: z.string(),
-  action: z.enum(['ingest', 'er', 'gds', 'snapshot', 'export']),
+  action: z.enum(["ingest", "er", "gds", "snapshot", "export"]),
   input: z.record(z.any()).optional(),
   approve: z.boolean().optional(),
 });
 export async function runPlaybook(ctx, pb) {
   const steps = pb.steps.map((s: any) => Step.parse(s));
   for (const step of steps) {
-    await log(ctx, 'step.start', step);
+    await log(ctx, "step.start", step);
     if (step.approve) {
       await requireApproval(ctx, step);
     }
     try {
       switch (step.action) {
-        case 'ingest':
+        case "ingest":
           await doIngest(ctx, step.input);
           break;
-        case 'er':
+        case "er":
           await doER(ctx);
           break;
-        case 'gds':
+        case "gds":
           await doGDS(ctx, step.input);
           break;
-        case 'snapshot':
+        case "snapshot":
           await doSnapshot(ctx);
           break;
-        case 'export':
+        case "export":
           const bundle = await doExport(ctx, step.input);
           await signExport(bundle);
           break;
       }
-      await log(ctx, 'step.done', step);
+      await log(ctx, "step.done", step);
     } catch (e) {
-      await log(ctx, 'step.error', { step, error: String(e) });
+      await log(ctx, "step.error", { step, error: String(e) });
       await rollback(ctx, step);
       throw e;
     }
@@ -228,22 +224,22 @@ export async function runPlaybook(ctx, pb) {
 ```js
 // apps/web/src/features/playbooks/jquery-hooks.js
 $(function () {
-  $(document).on('click', '.pbk-run', function () {
-    const id = $(this).data('id');
+  $(document).on("click", ".pbk-run", function () {
+    const id = $(this).data("id");
     $.ajax({
-      url: '/api/playbooks/run',
-      method: 'POST',
+      url: "/api/playbooks/run",
+      method: "POST",
       data: JSON.stringify({ id }),
-      contentType: 'application/json',
+      contentType: "application/json",
     });
   });
-  $(document).on('click', '.pbk-approve', function () {
-    const step = $(this).data('step');
+  $(document).on("click", ".pbk-approve", function () {
+    const step = $(this).data("step");
     $.ajax({
-      url: '/api/playbooks/approve',
-      method: 'POST',
+      url: "/api/playbooks/approve",
+      method: "POST",
       data: JSON.stringify({ step }),
-      contentType: 'application/json',
+      contentType: "application/json",
     });
   });
 });
@@ -253,31 +249,24 @@ $(function () {
 
 ```ts
 // server/src/provenance/sign.ts
-import { randomBytes } from 'crypto';
-import nacl from 'tweetnacl';
+import { randomBytes } from "crypto";
+import nacl from "tweetnacl";
 
 export function genKeypair() {
   const kp = nacl.sign.keyPair();
   return {
-    publicKey: Buffer.from(kp.publicKey).toString('base64'),
-    secretKey: Buffer.from(kp.secretKey).toString('base64'),
+    publicKey: Buffer.from(kp.publicKey).toString("base64"),
+    secretKey: Buffer.from(kp.secretKey).toString("base64"),
   };
 }
 export function signExport(bundle: Buffer, secretKeyB64?: string) {
-  const sk = Buffer.from(
-    secretKeyB64 || process.env.EXPORT_SIGNING_SK!,
-    'base64',
-  );
+  const sk = Buffer.from(secretKeyB64 || process.env.EXPORT_SIGNING_SK!, "base64");
   const sig = nacl.sign.detached(bundle, sk);
-  return Buffer.from(sig).toString('base64');
+  return Buffer.from(sig).toString("base64");
 }
-export function verifyExport(
-  bundle: Buffer,
-  sigB64: string,
-  publicKeyB64: string,
-) {
-  const pk = Buffer.from(publicKeyB64, 'base64');
-  const sig = Buffer.from(sigB64, 'base64');
+export function verifyExport(bundle: Buffer, sigB64: string, publicKeyB64: string) {
+  const pk = Buffer.from(publicKeyB64, "base64");
+  const sig = Buffer.from(sigB64, "base64");
   return nacl.sign.detached.verify(bundle, sig, pk);
 }
 ```
@@ -301,45 +290,38 @@ process.exit(ok?0:1)
 
 ```ts
 // server/src/api/index.ts
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import { requireScope, authToken } from './tokens';
+import express from "express";
+import rateLimit from "express-rate-limit";
+import { requireScope, authToken } from "./tokens";
 
 export const api = express.Router();
 api.use(express.json());
 api.use(authToken);
 api.use(rateLimit({ windowMs: 60_000, max: 600 }));
 
-api.get('/cases', requireScope('cases:read'), async (req, res) => {
+api.get("/cases", requireScope("cases:read"), async (req, res) => {
   /* list cases with ABAC filter */
 });
-api.post('/webhooks', requireScope('admin:webhooks'), async (req, res) => {
+api.post("/webhooks", requireScope("admin:webhooks"), async (req, res) => {
   /* register */
 });
-api.post(
-  '/exports/:id/retry',
-  requireScope('exports:write'),
-  async (req, res) => {
-    /* retry */
-  },
-);
+api.post("/exports/:id/retry", requireScope("exports:write"), async (req, res) => {
+  /* retry */
+});
 ```
 
 ### 4.7 Webhook Dispatcher
 
 ```ts
 // server/src/webhooks/dispatcher.ts
-import crypto from 'crypto';
-import axios from 'axios';
+import crypto from "crypto";
+import axios from "axios";
 
 export async function dispatch(url, secret, body, id) {
-  const sig = crypto
-    .createHmac('sha256', secret)
-    .update(JSON.stringify(body))
-    .digest('hex');
+  const sig = crypto.createHmac("sha256", secret).update(JSON.stringify(body)).digest("hex");
   try {
     await axios.post(url, body, {
-      headers: { 'X-IntelGraph-Signature': sig, 'X-Idempotency-Key': id },
+      headers: { "X-IntelGraph-Signature": sig, "X-Idempotency-Key": id },
       timeout: 3000,
     });
     return { ok: true };
@@ -374,7 +356,7 @@ paths:
     get:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: q, in: query, schema: { type: string } }]
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
   /webhooks:
     post:
       security: [{ bearerAuth: [] }]
@@ -384,17 +366,15 @@ paths:
 ### 4.10 k6 — API + Webhook Chaos
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 40, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 40, duration: "3m" };
 export default function () {
-  http.get('http://localhost:4000/api/cases', {
+  http.get("http://localhost:4000/api/cases", {
     headers: { Authorization: `Bearer ${__ENV.TOKEN}` },
   });
-  http.post(
-    'http://localhost:4000/api/webhooks/test',
-    JSON.stringify({ event: 'case.updated' }),
-    { headers: { 'Content-Type': 'application/json' } },
-  );
+  http.post("http://localhost:4000/api/webhooks/test", JSON.stringify({ event: "case.updated" }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 

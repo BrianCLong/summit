@@ -1,10 +1,10 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { parse } from 'yaml';
-import { z } from 'zod';
+import fs from "fs/promises";
+import path from "path";
+import { parse } from "yaml";
+import { z } from "zod";
 
-export type ControlCategory = 'security' | 'availability' | 'confidentiality' | 'privacy';
-export type ControlCheckType = 'automated' | 'manual-with-expiry' | 'hybrid';
+export type ControlCategory = "security" | "availability" | "confidentiality" | "privacy";
+export type ControlCheckType = "automated" | "manual-with-expiry" | "hybrid";
 
 export interface ControlOwner {
   primary: string;
@@ -63,7 +63,7 @@ const EvidenceConfigSchema = z.object({
 });
 
 const ControlCheckSchema = z.object({
-  type: z.enum(['automated', 'manual-with-expiry', 'hybrid']),
+  type: z.enum(["automated", "manual-with-expiry", "hybrid"]),
   script: z.string().optional(),
   query: z.string().optional(),
   manualEvidence: z.string().optional(),
@@ -78,7 +78,7 @@ const ControlScheduleSchema = z.object({
 const ControlDefinitionSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(3),
-  category: z.enum(['security', 'availability', 'confidentiality', 'privacy']),
+  category: z.enum(["security", "availability", "confidentiality", "privacy"]),
   objective: z.string().min(5),
   owner: ControlOwnerSchema,
   check: ControlCheckSchema,
@@ -97,15 +97,15 @@ export class ControlRegistry {
   private readonly loadedFrom?: string;
 
   private constructor(controls: ControlDefinition[], loadedFrom?: string) {
-    this.controls = new Map(controls.map(control => [control.id, control]));
+    this.controls = new Map(controls.map((control) => [control.id, control]));
     this.loadedFrom = loadedFrom;
   }
 
   static async fromYaml(filePath: string): Promise<ControlRegistry> {
-    const raw = await fs.readFile(filePath, 'utf-8');
+    const raw = await fs.readFile(filePath, "utf-8");
     const parsed = parse(raw);
     const controls = ControlRegistrySchema.parse(parsed);
-    const normalized = controls.map(control => ({
+    const normalized = controls.map((control) => ({
       ...control,
       evidence: {
         ...control.evidence,

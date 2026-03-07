@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Exception Register
 
 **Last Updated:** 2026-01-01

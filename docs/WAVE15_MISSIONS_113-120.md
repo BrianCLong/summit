@@ -3,6 +3,7 @@
 This pack captures the backend-first delivery plans for wave fifteen. Each mission is scoped to be parallel, merge-safe, and additive to the existing platform while avoiding upstream schema changes.
 
 ## 113. Numeric & Visual XAI Alignment Engine (`xai-visual/`)
+
 - **Goal:** Keep charts/tables and LLM explanations numerically aligned using canonical payloads.
 - **Scope & Design:**
   - Define a canonical `ExplanationPayload` (numbers, series, labels, units, filters, time ranges, tolerances, and provenance).
@@ -15,6 +16,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** synthetic trend/number fixtures, boundary tolerances around ±0.1%, and failure-mode tests asserting structured inconsistencies.
 
 ## 114. Customer Simulation Lab (`customer-lab/`)
+
 - **Goal:** Safe digital twins of tenants for experimentation without touching production.
 - **Scope & Design:**
   - Twin model mirrors configs/policies/shape of data; records provenance of source tenant and snapshot time; swaps data with dev-sandbox-data.
@@ -27,6 +29,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** isolation guards, config-parity snapshots vs source, deterministic experiment replays on identical inputs.
 
 ## 115. Reputation & Narrative Risk Engine (`reputation/`)
+
 - **Goal:** Score entities and narratives for reputation risk with explainable trends.
 - **Scope & Design:**
   - Read-only scoring over incident history, case outcomes, alerts, legal-hold activity, and allowed external intel via interop-standards; ontology tags group narratives.
@@ -37,6 +40,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** synthetic graph fixtures for sanity/drift, fairness checks via fairness-lab, and threshold alerting on new events.
 
 ## 116. Deep Archive Explorer (`cold-archive/`)
+
 - **Goal:** Queryable but controlled access to cold storage for compliance/forensics.
 - **Scope & Design:**
   - Indexes lifecycle/offboarding/legal-hold archives in metadata-heavy, content-light form; restricts query predicates (case/entity ID, time range, tenant, policy tag).
@@ -47,6 +51,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** correctness on synthetic archives, cost/latency ceilings with graceful failures for oversized queries, governance enforcement tests.
 
 ## 117. Contract/SLA Enforcement & Breach Detector (`sla-guard/`)
+
 - **Goal:** Encode SLAs/SLOs as executable monitors with breach detection per tenant/feature.
 - **Scope & Design:**
   - SLO schema for latency/availability/data freshness/response timelines; configs are versioned data in config-center.
@@ -57,6 +62,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** synthetic time-series for pass/fail, monthly/quarterly windowing, edge cases (partial outages, missing metrics, new tenants).
 
 ## 118. Internal AI Coding Assistant (`dev-copilot/`)
+
 - **Goal:** Repo-specific coding assistant that enforces architecture and safety constraints.
 - **Scope & Design:**
   - Indexes codebase, docs, schema-viz, arch-bot rules, program-graph; retrieval layer feeds constrained LLM backend.
@@ -67,6 +73,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** golden task fixtures, arch-bot rule compliance checks, safety tests for secrets/network calls/dependency bloat.
 
 ## 119. Adversarial Data Generator (`adv-data-lab/`)
+
 - **Goal:** Generate adversarial/edge-case datasets to harden non-LLM models.
 - **Scope & Design:**
   - Uses serving-gateway + training datasets to craft perturbations near decision boundaries and label fragile patterns; outputs versioned adversarial corpora in data-catalog.
@@ -76,6 +83,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** baseline vs adversarial difficulty checks, robustness gains after adversarial training, privacy/governance safeguards on generated data.
 
 ## 120. Cross-Domain Mission Template Composer (`mission-templates/`)
+
 - **Goal:** Business-facing mission blueprints that stitch capabilities into end-to-end scenarios.
 - **Scope & Design:**
   - Mission template schema defines capability graphs (ingest, ER, graph-analytics, triage, copilot, report, compliance), inputs/outputs, and required QA/safety/compliance gates; templates are versioned configs atop program-graph.
@@ -85,6 +93,7 @@ This pack captures the backend-first delivery plans for wave fifteen. Each missi
 - **Testing:** integrity of instantiated mission references, coverage of required capabilities, status aggregation against program-graph/CI signals.
 
 ## Implementation Notes
+
 - All services are overlays/read-only against source systems; no upstream schema mutations.
 - Configs and thresholds are data-versioned for safe iteration and rollback.
 - Failure modes prioritize structured warnings and observability over silent degradation.

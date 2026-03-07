@@ -2,21 +2,18 @@ import type {
   PolicyActorContext,
   PolicyEvaluationRequest,
   PolicyEvaluationResult,
-} from '@ga-graphai/common-types';
-import {
-  OrchestrationKnowledgeGraph,
-  type ServiceRiskProfile,
-} from '@ga-graphai/knowledge-graph';
-import type { AuditSink } from '../index.js';
+} from "@ga-graphai/common-types";
+import { OrchestrationKnowledgeGraph, type ServiceRiskProfile } from "@ga-graphai/knowledge-graph";
+import type { AuditSink } from "../index.js";
 
-export type OrchestrationIntentType = 'deploy' | 'scale' | 'rollback';
+export type OrchestrationIntentType = "deploy" | "scale" | "rollback";
 
 export interface OrchestrationIntent {
   type: OrchestrationIntentType;
   targetServiceId: string;
   environmentId?: string;
   requestedBy: PolicyActorContext;
-  riskTolerance?: 'low' | 'medium' | 'high';
+  riskTolerance?: "low" | "medium" | "high";
   desiredCapacity?: number;
   metadata?: Record<string, unknown>;
   reason?: string;
@@ -63,7 +60,7 @@ function makeAuditId(serviceId: string, intentType: OrchestrationIntentType) {
 
 export class GenerativeActionTranslator {
   private readonly knowledgeGraph: OrchestrationKnowledgeGraph;
-  private readonly policyEvaluator: GenerativeActionTranslatorOptions['policyEvaluator'];
+  private readonly policyEvaluator: GenerativeActionTranslatorOptions["policyEvaluator"];
   private readonly auditSink?: AuditSink;
   private readonly approvalQueue?: ApprovalQueue;
   private readonly defaultRollbackWindowMinutes: number;
@@ -97,7 +94,9 @@ export class GenerativeActionTranslator {
     };
     const policyEvaluation = this.policyEvaluator(policyRequest);
     if (!policyEvaluation.allowed) {
-      throw new Error(`policy denied action ${policyRequest.action}: ${policyEvaluation.reasons.join(', ')}`);
+      throw new Error(
+        `policy denied action ${policyRequest.action}: ${policyEvaluation.reasons.join(", ")}`
+      );
     }
 
     const riskProfile = context.risk;
@@ -107,7 +106,7 @@ export class GenerativeActionTranslator {
       policyEvaluation,
       requiresApproval,
       approvalReason: requiresApproval
-        ? 'Risk score or policy risk exceeded threshold; human approval required.'
+        ? "Risk score or policy risk exceeded threshold; human approval required."
         : undefined,
     };
 
@@ -126,7 +125,7 @@ export class GenerativeActionTranslator {
     void this.auditSink?.record({
       id: auditRef,
       timestamp: new Date().toISOString(),
-      category: 'plan',
+      category: "plan",
       summary: `Generated action plan for ${intent.type} ${intent.targetServiceId}`,
       data: plan,
     });
@@ -136,37 +135,38 @@ export class GenerativeActionTranslator {
 
   private resolvePolicyAction(intent: OrchestrationIntent): string {
     switch (intent.type) {
-      case 'deploy':
-        return 'orchestration.deploy';
-      case 'scale':
-        return 'orchestration.scale';
-      case 'rollback':
-        return 'orchestration.rollback';
+      case "deploy":
+        return "orchestration.deploy";
+      case "scale":
+        return "orchestration.scale";
+      case "rollback":
+        return "orchestration.rollback";
       default:
-        return 'orchestration.unknown';
+        return "orchestration.unknown";
     }
   }
 
   private requiresApproval(
     intent: OrchestrationIntent,
     risk: ServiceRiskProfile | undefined,
-    context: NonNullable<ReturnType<OrchestrationKnowledgeGraph['queryService']>>,
+    context: NonNullable<ReturnType<OrchestrationKnowledgeGraph["queryService"]>>
   ): boolean {
     const riskScore = risk?.score ?? 0;
-    const tolerance = intent.riskTolerance ?? 'medium';
-    const hasHighRiskPolicy = context.policies?.some((policy) => policy.tags?.includes('high-risk')) ?? false;
+    const tolerance = intent.riskTolerance ?? "medium";
+    const hasHighRiskPolicy =
+      context.policies?.some((policy) => policy.tags?.includes("high-risk")) ?? false;
     const openCriticalIncident = context.incidents?.some(
-      (incident) => incident.status === 'open' && incident.severity === 'critical',
+      (incident) => incident.status === "open" && incident.severity === "critical"
     );
 
-    const toleranceThreshold = tolerance === 'high' ? 0.75 : tolerance === 'medium' ? 0.5 : 0.3;
+    const toleranceThreshold = tolerance === "high" ? 0.75 : tolerance === "medium" ? 0.5 : 0.3;
     if (hasHighRiskPolicy || openCriticalIncident) {
       return true;
     }
     if (riskScore >= toleranceThreshold) {
       return true;
     }
-    if (intent.type === 'rollback' && context.incidents?.length) {
+    if (intent.type === "rollback" && context.incidents?.length) {
       return false;
     }
     return false;
@@ -174,19 +174,19 @@ export class GenerativeActionTranslator {
 
   private buildSteps(intent: OrchestrationIntent, stageId?: string): ActionStep[] {
     const baseGuardrails = [`rollback-window=${this.defaultRollbackWindowMinutes}m`];
-    const target = intent.environmentId ?? 'unknown';
+    const target = intent.environmentId ?? "unknown";
 
-    if (intent.type === 'deploy') {
+    if (intent.type === "deploy") {
       return [
         {
-          id: 'validate-plan',
+          id: "validate-plan",
           description: `Validate deployment plan for ${intent.targetServiceId} in ${target}`,
           command: `orchestrator validate --service ${intent.targetServiceId} --env ${target}`,
           rollbackCommand: `orchestrator rollback-plan --service ${intent.targetServiceId} --env ${target}`,
-          guardrails: [...baseGuardrails, 'policy=pass'],
+          guardrails: [...baseGuardrails, "policy=pass"],
         },
         {
-          id: 'execute-stage',
+          id: "execute-stage",
           description: stageId
             ? `Execute stage ${stageId} via meta orchestrator`
             : `Execute deployment for ${intent.targetServiceId}`,
@@ -194,28 +194,28 @@ export class GenerativeActionTranslator {
             ? `orchestrator run-stage --stage ${stageId}`
             : `orchestrator deploy --service ${intent.targetServiceId} --env ${target}`,
           rollbackCommand: `orchestrator rollback --service ${intent.targetServiceId} --env ${target}`,
-          guardrails: [...baseGuardrails, 'self-heal=monitor'],
+          guardrails: [...baseGuardrails, "self-heal=monitor"],
           metadata: intent.metadata,
         },
       ];
     }
 
-    if (intent.type === 'scale') {
+    if (intent.type === "scale") {
       const desired = intent.desiredCapacity ?? 1;
       return [
         {
-          id: 'plan-scale',
+          id: "plan-scale",
           description: `Plan scaling ${intent.targetServiceId} to ${desired} units in ${target}`,
           command: `orchestrator scale-plan --service ${intent.targetServiceId} --env ${target} --capacity ${desired}`,
           rollbackCommand: `orchestrator scale-plan --service ${intent.targetServiceId} --env ${target} --capacity revert`,
-          guardrails: [...baseGuardrails, 'capacity-check', 'cost-guard-integration'],
+          guardrails: [...baseGuardrails, "capacity-check", "cost-guard-integration"],
         },
         {
-          id: 'apply-scale',
+          id: "apply-scale",
           description: `Apply scaling action`,
           command: `orchestrator scale-apply --service ${intent.targetServiceId} --env ${target}`,
           rollbackCommand: `orchestrator scale-apply --service ${intent.targetServiceId} --env ${target} --rollback`,
-          guardrails: [...baseGuardrails, 'observe-15m'],
+          guardrails: [...baseGuardrails, "observe-15m"],
           metadata: { desiredCapacity: desired },
         },
       ];
@@ -223,11 +223,11 @@ export class GenerativeActionTranslator {
 
     return [
       {
-        id: 'execute-rollback',
+        id: "execute-rollback",
         description: `Rollback ${intent.targetServiceId} in ${target}`,
         command: `orchestrator rollback --service ${intent.targetServiceId} --env ${target}`,
-        rollbackCommand: 'noop',
-        guardrails: [...baseGuardrails, 'post-incident-review'],
+        rollbackCommand: "noop",
+        guardrails: [...baseGuardrails, "post-incident-review"],
       },
     ];
   }

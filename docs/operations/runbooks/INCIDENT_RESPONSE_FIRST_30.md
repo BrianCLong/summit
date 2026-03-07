@@ -18,10 +18,10 @@ This runbook is the primary reference for on-call engineers when a production al
 ## T+5 to T+15: Impact Assessment
 
 1. **User Impact**: Is this affecting all tenants or a single tenant?
-   * Check `summit_graphql_error_rate` grouped by `tenant_id` in Grafana.
+   - Check `summit_graphql_error_rate` grouped by `tenant_id` in Grafana.
 2. **System Health**: Check for resource exhaustion.
-   * CPU/Memory spikes in Kubernetes/ECS dashboard.
-   * PostgreSQL connection pool utilization (`pg_stat_activity`).
+   - CPU/Memory spikes in Kubernetes/ECS dashboard.
+   - PostgreSQL connection pool utilization (`pg_stat_activity`).
 
 ## T+15 to T+30: Containment and Mitigation
 

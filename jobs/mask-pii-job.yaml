@@ -12,7 +12,7 @@ spec:
           image: ghcr.io/BrianCLong/db-tools:latest
           envFrom:
             - secretRef: { name: app-creds }
-          command: ["sh","-c"]
+          command: ["sh", "-c"]
           args:
             - |
               psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'

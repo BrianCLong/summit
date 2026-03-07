@@ -222,11 +222,7 @@ type Query {
 **Statement Estimator (TS)**
 
 ```ts
-export function estimateCost(u: {
-  calls: number;
-  events: number;
-  storageGB: number;
-}) {
+export function estimateCost(u: { calls: number; events: number; storageGB: number }) {
   return u.calls * 0.000002 + u.events * 0.0001 + u.storageGB * 0.02;
 }
 ```
@@ -327,12 +323,12 @@ repo/
 **Federation Router (TS excerpt)**
 
 ```ts
-import { createGateway } from '@apollo/gateway';
+import { createGateway } from "@apollo/gateway";
 const gateway = createGateway({
   serviceList: [
-    { name: 'core', url: process.env.CORE_URL },
-    { name: 'analytics', url: process.env.ANALYTICS_URL },
-    { name: 'admin', url: process.env.ADMIN_URL },
+    { name: "core", url: process.env.CORE_URL },
+    { name: "analytics", url: process.env.ANALYTICS_URL },
+    { name: "admin", url: process.env.ADMIN_URL },
   ],
 });
 ```

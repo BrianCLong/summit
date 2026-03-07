@@ -56,19 +56,19 @@ The primary interface for provenance exploration is the **Mesh Timeline View** -
 
 ### Node Types & Colors
 
-| Node Type | Color | Icon | Description |
-|-----------|-------|------|-------------|
-| Task Created | Blue | 📋 | Task submission event |
-| Routing Decision | Purple | 🔀 | Agent/model selection |
-| Policy Check | Orange | 🛡️ | Policy evaluation |
-| Agent Invocation | Green | 🤖 | Agent task execution |
-| Model Call | Cyan | 🧠 | LLM invocation |
-| Tool Call | Yellow | 🔧 | Tool invocation |
-| Subtask | Gray | 📎 | Spawned subtask |
-| Critic Review | Red | 👁️ | Quality review |
-| Human Review | Pink | 👤 | Human approval |
-| Completed | Green | ✅ | Successful completion |
-| Failed | Red | ❌ | Failure |
+| Node Type        | Color  | Icon | Description           |
+| ---------------- | ------ | ---- | --------------------- |
+| Task Created     | Blue   | 📋   | Task submission event |
+| Routing Decision | Purple | 🔀   | Agent/model selection |
+| Policy Check     | Orange | 🛡️   | Policy evaluation     |
+| Agent Invocation | Green  | 🤖   | Agent task execution  |
+| Model Call       | Cyan   | 🧠   | LLM invocation        |
+| Tool Call        | Yellow | 🔧   | Tool invocation       |
+| Subtask          | Gray   | 📎   | Spawned subtask       |
+| Critic Review    | Red    | 👁️   | Quality review        |
+| Human Review     | Pink   | 👤   | Human approval        |
+| Completed        | Green  | ✅   | Successful completion |
+| Failed           | Red    | ❌   | Failure               |
 
 ## Drill-Down Views
 
@@ -315,12 +315,12 @@ POST /api/v1/provenance/audit
 
 Provenance data access is controlled by policies:
 
-| Role | Access Level |
-|------|--------------|
-| Admin | Full access to all provenance data |
-| Auditor | Read access to all provenance data |
+| Role      | Access Level                       |
+| --------- | ---------------------------------- |
+| Admin     | Full access to all provenance data |
+| Auditor   | Read access to all provenance data |
 | Developer | Access to own tasks and team tasks |
-| User | Access to own tasks only |
+| User      | Access to own tasks only           |
 
 ## Best Practices
 

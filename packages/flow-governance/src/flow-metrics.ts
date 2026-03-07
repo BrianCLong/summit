@@ -1,4 +1,4 @@
-import { FlowMetrics, WorkItem } from './types.js';
+import { FlowMetrics, WorkItem } from "./types.js";
 
 const MS_IN_DAY = 1000 * 60 * 60 * 24;
 const MS_IN_HOUR = 1000 * 60 * 60;
@@ -24,11 +24,10 @@ export function computeFlowMetrics(workItems: WorkItem[], now = new Date()): Flo
     const leadTimeDays =
       completed.length === 0
         ? 0
-        :
-            completed.reduce(
-              (acc, item) => acc + daysBetween(item.createdAt, item.completedAt ?? now),
-              0,
-            ) / completed.length;
+        : completed.reduce(
+            (acc, item) => acc + daysBetween(item.createdAt, item.completedAt ?? now),
+            0
+          ) / completed.length;
 
     const cycleTimeDays =
       completed.length === 0
@@ -38,7 +37,7 @@ export function computeFlowMetrics(workItems: WorkItem[], now = new Date()): Flo
             return acc + daysBetween(item.startedAt, item.completedAt ?? now);
           }, 0) / completed.filter((item) => item.startedAt).length;
 
-    const wipCount = items.filter((item) => item.status !== 'done').length;
+    const wipCount = items.filter((item) => item.status !== "done").length;
 
     const blockedTimeHours = completed.reduce((acc, item) => {
       if (!item.blockedWindows || item.blockedWindows.length === 0) return acc;
@@ -52,9 +51,10 @@ export function computeFlowMetrics(workItems: WorkItem[], now = new Date()): Flo
 
     const totalBlockedEvents = items.reduce(
       (acc, item) => acc + (item.blockedWindows ? item.blockedWindows.length : 0),
-      0,
+      0
     );
-    const averageBlockedHours = totalBlockedEvents === 0 ? 0 : blockedTimeHours / totalBlockedEvents;
+    const averageBlockedHours =
+      totalBlockedEvents === 0 ? 0 : blockedTimeHours / totalBlockedEvents;
 
     const totalRework = completed.reduce((acc, item) => acc + (item.reworkCount ?? 0), 0);
     const reworkPercentage = completed.length === 0 ? 0 : (totalRework / completed.length) * 100;

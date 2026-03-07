@@ -9,10 +9,10 @@ injection. The proxy is deny-by-default and requires explicit host allowlisting.
 
 ## Import / Export Matrix
 
-| Interface | Direction | Description |
-| --- | --- | --- |
-| OpenAI-compatible chat completions | Import | vLLM/OpenAI-compatible upstream endpoint (`/v1/chat/completions`). |
-| Summit SERA proxy | Export | Local proxy endpoint for Summit tooling or Claude Code. |
+| Interface                          | Direction | Description                                                        |
+| ---------------------------------- | --------- | ------------------------------------------------------------------ |
+| OpenAI-compatible chat completions | Import    | vLLM/OpenAI-compatible upstream endpoint (`/v1/chat/completions`). |
+| Summit SERA proxy                  | Export    | Local proxy endpoint for Summit tooling or Claude Code.            |
 
 ## Non-Goals
 

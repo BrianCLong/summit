@@ -11,7 +11,7 @@
           "expr": "sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (destination_service_name)"
         }
       ],
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0}
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 }
     },
     {
       "type": "timeseries",
@@ -21,7 +21,7 @@
           "expr": "(sum(rate(istio_requests_total{response_code!~\"5..\",reporter=\"destination\"}[5m])) by (destination_service_name)) / (sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (destination_service_name))"
         }
       ],
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
     },
     {
       "type": "timeseries",
@@ -31,7 +31,7 @@
           "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{reporter=\"destination\"}[5m])) by (le, destination_service_name))"
         }
       ],
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
     }
   ]
 }

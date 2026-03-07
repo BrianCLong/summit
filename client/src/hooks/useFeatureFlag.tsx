@@ -1,5 +1,5 @@
 // client/src/hooks/useFeatureFlag.ts
-import { useState, useEffect, useContext, createContext, useCallback } from 'react';
+import { useState, useEffect, useContext, createContext, useCallback } from "react";
 
 // Define types for feature flags
 export interface FeatureFlag {
@@ -31,7 +31,7 @@ interface FeatureFlagProviderProps {
   refreshInterval?: number; // in milliseconds
 }
 
-const DEFAULT_API_URL = '/api/feature-flags';
+const DEFAULT_API_URL = "/api/feature-flags";
 const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 export function FeatureFlagProvider({
@@ -39,7 +39,7 @@ export function FeatureFlagProvider({
   apiUrl = DEFAULT_API_URL,
   userId,
   autoRefresh = true,
-  refreshInterval = DEFAULT_REFRESH_INTERVAL
+  refreshInterval = DEFAULT_REFRESH_INTERVAL,
 }: FeatureFlagProviderProps): JSX.Element {
   const [flags, setFlags] = useState<Record<string, FeatureFlag>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -53,15 +53,15 @@ export function FeatureFlagProvider({
 
       const queryParams = new URLSearchParams();
       if (userId) {
-        queryParams.append('userId', userId);
+        queryParams.append("userId", userId);
       }
 
       const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           // Add any auth headers if needed
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+          "X-Requested-With": "XMLHttpRequest",
+        },
       });
 
       if (!response.ok) {
@@ -72,18 +72,18 @@ export function FeatureFlagProvider({
 
       // Transform array to record for easier access
       const flagsRecord: Record<string, FeatureFlag> = {};
-      data.forEach(flag => {
+      data.forEach((flag) => {
         flagsRecord[flag.key] = {
           ...flag,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         };
       });
 
       setFlags(flagsRecord);
     } catch (err) {
-      const fetchError = err instanceof Error ? err : new Error('Unknown error');
+      const fetchError = err instanceof Error ? err : new Error("Unknown error");
       setError(fetchError);
-      console.error('Error fetching feature flags:', fetchError);
+      console.error("Error fetching feature flags:", fetchError);
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +116,7 @@ export function FeatureFlagProvider({
   };
 
   // Function to get a specific flag's value with type safety
-  const getFlagValue = <T = unknown>(key: string, defaultValue?: T): T | boolean | undefined => {
+  const getFlagValue = <T = unknown,>(key: string, defaultValue?: T): T | boolean | undefined => {
     const flag = getFlag(key);
     if (!flag) {
       return defaultValue;
@@ -138,19 +138,17 @@ export function FeatureFlagProvider({
     error,
     refreshFlags,
     getFlag,
-    getFlagValue
+    getFlagValue,
   };
 
-  return (
-    <FeatureFlagContext.Provider value={contextValue}>
-      {children}
-    </FeatureFlagContext.Provider>
-  );
+  return <FeatureFlagContext.Provider value={contextValue}>{children}</FeatureFlagContext.Provider>;
 }
 
 // Hook to use the feature flag context
 // eslint-disable-next-line react-refresh/only-export-components
-export const useFeatureFlag = (flagKey: string): {
+export const useFeatureFlag = (
+  flagKey: string
+): {
   enabled: boolean;
   value?: unknown;
   isLoading: boolean;
@@ -160,7 +158,7 @@ export const useFeatureFlag = (flagKey: string): {
   const context = useContext(FeatureFlagContext);
 
   if (!context) {
-    throw new Error('useFeatureFlag must be used within a FeatureFlagProvider');
+    throw new Error("useFeatureFlag must be used within a FeatureFlagProvider");
   }
 
   const flag = context.getFlag(flagKey);
@@ -170,13 +168,15 @@ export const useFeatureFlag = (flagKey: string): {
     value: flag ? (flag.value !== undefined ? flag.value : flag.enabled) : undefined,
     isLoading: context.isLoading,
     error: context.error,
-    refresh: context.refreshFlags
+    refresh: context.refreshFlags,
   };
 };
 
 // Hook to get multiple flags
 // eslint-disable-next-line react-refresh/only-export-components
-export const useMultipleFeatureFlags = (flagKeys: string[]): {
+export const useMultipleFeatureFlags = (
+  flagKeys: string[]
+): {
   flags: Record<string, boolean>;
   values: Record<string, unknown>;
   isLoading: boolean;
@@ -185,13 +185,13 @@ export const useMultipleFeatureFlags = (flagKeys: string[]): {
   const context = useContext(FeatureFlagContext);
 
   if (!context) {
-    throw new Error('useMultipleFeatureFlags must be used within a FeatureFlagProvider');
+    throw new Error("useMultipleFeatureFlags must be used within a FeatureFlagProvider");
   }
 
   const flags: Record<string, boolean> = {};
   const values: Record<string, unknown> = {};
 
-  flagKeys.forEach(key => {
+  flagKeys.forEach((key) => {
     const flag = context.getFlag(key);
     flags[key] = flag ? (flag.value !== undefined ? !!flag.value : flag.enabled) : false;
     values[key] = flag ? (flag.value !== undefined ? flag.value : flag.enabled) : undefined;
@@ -201,13 +201,15 @@ export const useMultipleFeatureFlags = (flagKeys: string[]): {
     flags,
     values,
     isLoading: context.isLoading,
-    error: context.error
+    error: context.error,
   };
 };
 
 // Hook to check if all flags are enabled
 // eslint-disable-next-line react-refresh/only-export-components
-export const useFeatureFlagAll = (flagKeys: string[]): {
+export const useFeatureFlagAll = (
+  flagKeys: string[]
+): {
   allEnabled: boolean;
   isLoading: boolean;
   error: Error | null;
@@ -215,18 +217,20 @@ export const useFeatureFlagAll = (flagKeys: string[]): {
   const { flags, isLoading, error } = useMultipleFeatureFlags(flagKeys);
 
   // Check if all flags are enabled
-  const allEnabled = flagKeys.every(key => flags[key]);
+  const allEnabled = flagKeys.every((key) => flags[key]);
 
   return {
     allEnabled,
     isLoading,
-    error
+    error,
   };
 };
 
 // Hook to check if any flag is enabled
 // eslint-disable-next-line react-refresh/only-export-components
-export const useFeatureFlagAny = (flagKeys: string[]): {
+export const useFeatureFlagAny = (
+  flagKeys: string[]
+): {
   anyEnabled: boolean;
   isLoading: boolean;
   error: Error | null;
@@ -234,12 +238,12 @@ export const useFeatureFlagAny = (flagKeys: string[]): {
   const { flags, isLoading, error } = useMultipleFeatureFlags(flagKeys);
 
   // Check if any flag is enabled
-  const anyEnabled = flagKeys.some(key => flags[key]);
+  const anyEnabled = flagKeys.some((key) => flags[key]);
 
   return {
     anyEnabled,
     isLoading,
-    error
+    error,
   };
 };
 

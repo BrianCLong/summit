@@ -1,9 +1,11 @@
 # Containment Runbook: ShinyHunters-Branded SaaS Data Theft
 
 ## Overview
+
 This runbook provides steps to contain an incident involving SaaS data theft initiated via vishing and credential harvesting.
 
 ## Immediate Actions
+
 1. **Revoke Active Sessions**:
    - Terminate all active sessions for the compromised user in the IdP (Okta, Entra ID).
    - Force re-authentication across all integrated SaaS applications.
@@ -18,6 +20,7 @@ This runbook provides steps to contain an incident involving SaaS data theft ini
    - Limit self-service password resets, especially for administrative accounts.
 
 ## Evidence Collection
+
 - Preserve IdP logs (sign-in, MFA changes).
 - Preserve SaaS audit logs (SharePoint, Salesforce, Workspace).
 - Document any identified look-alike domains.

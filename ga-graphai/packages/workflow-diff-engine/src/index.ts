@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 import {
   type ComplianceDomain,
   type DiffEdgeReweight,
@@ -20,8 +20,8 @@ import {
   type WorkflowPolicyBinding,
   type WorkflowRuntimeProfile,
   type WorkflowSnapshot,
-} from 'common-types';
-import { canonicalize, canonicalStringify } from '@ga-graphai/data-integrity';
+} from "common-types";
+import { canonicalize, canonicalStringify } from "@ga-graphai/data-integrity";
 
 interface LayeredGraphNode {
   id: string;
@@ -42,25 +42,22 @@ interface LayeredGraph {
   fingerprint: string;
 }
 
-const LAYER_PREFIX_SEPARATOR = ':';
+const LAYER_PREFIX_SEPARATOR = ":";
 
 function hashParts(parts: string[]): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   for (const part of parts) {
     hash.update(part);
-    hash.update('|');
+    hash.update("|");
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function addNode(
   graph: LayeredGraph,
-  node: Omit<LayeredGraphNode, 'baseSignature' | 'signature' | 'neighbors'>,
+  node: Omit<LayeredGraphNode, "baseSignature" | "signature" | "neighbors">
 ): void {
-  const canonicalAttributes = canonicalize(node.attributes) as Record<
-    string,
-    unknown
-  >;
+  const canonicalAttributes = canonicalize(node.attributes) as Record<string, unknown>;
   const baseSignature = hashParts([
     node.id,
     node.layer,
@@ -80,7 +77,7 @@ function addNode(
 }
 
 function edgeKey(edge: DiffGraphEdge): string {
-  return [edge.from, edge.to, edge.relation, edge.layer].join('>');
+  return [edge.from, edge.to, edge.relation, edge.layer].join(">");
 }
 
 function addEdge(graph: LayeredGraph, edge: LayeredGraphEdge): void {
@@ -107,7 +104,7 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
     nodes: new Map<string, LayeredGraphNode>(),
     edges: new Map<string, LayeredGraphEdge>(),
     adjacency: new Map<string, Set<string>>(),
-    fingerprint: '',
+    fingerprint: "",
   };
 
   const workflow = snapshot.definition;
@@ -117,7 +114,7 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
     addNode(graph, {
       id: nodeId,
       label: node.name ?? node.id,
-      layer: 'functional',
+      layer: "functional",
       attributes: {
         type: node.type,
         params: node.params,
@@ -134,7 +131,7 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
   addNode(graph, {
     id: policyNodeId,
     label: `${workflow.workflowId}-policy`,
-    layer: 'policy',
+    layer: "policy",
     attributes: workflow.policy,
   });
 
@@ -142,7 +139,7 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
   addNode(graph, {
     id: constraintNodeId,
     label: `${workflow.workflowId}-constraints`,
-    layer: 'policy',
+    layer: "policy",
     attributes: workflow.constraints,
   });
 
@@ -151,15 +148,15 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
     addEdge(graph, {
       from: nodeId,
       to: policyNodeId,
-      relation: 'governed-by',
-      layer: 'policy',
+      relation: "governed-by",
+      layer: "policy",
       weight: node.policy?.handlesPii ? 0.9 : 0.6,
     });
     addEdge(graph, {
       from: nodeId,
       to: constraintNodeId,
-      relation: 'bounded-by',
-      layer: 'policy',
+      relation: "bounded-by",
+      layer: "policy",
       weight: 0.5,
     });
   }
@@ -171,7 +168,7 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
       from,
       to,
       relation: `flow:${edge.on}`,
-      layer: 'functional',
+      layer: "functional",
       weight: edge.condition ? 0.8 : 0.6,
     });
   }
@@ -190,14 +187,14 @@ function buildLayeredGraph(snapshot: WorkflowSnapshot): LayeredGraph {
 function attachDependencies(
   graph: LayeredGraph,
   dependencies: WorkflowDependencySnapshot[],
-  workflowId: string,
+  workflowId: string
 ): void {
   for (const dependency of dependencies) {
     const depId = `dependency${LAYER_PREFIX_SEPARATOR}${dependency.id}`;
     addNode(graph, {
       id: depId,
       label: dependency.name,
-      layer: 'dependency',
+      layer: "dependency",
       attributes: {
         type: dependency.type,
         version: dependency.version,
@@ -215,8 +212,8 @@ function attachDependencies(
       addEdge(graph, {
         from: depId,
         to: `policy${LAYER_PREFIX_SEPARATOR}${workflowId}-constraints`,
-        relation: 'supports',
-        layer: 'dependency',
+        relation: "supports",
+        layer: "dependency",
         weight,
       });
     }
@@ -228,28 +225,25 @@ function attachDependencies(
       addEdge(graph, {
         from: depId,
         to: functionalNode,
-        relation: 'feeds',
-        layer: 'dependency',
+        relation: "feeds",
+        layer: "dependency",
         weight,
       });
     }
   }
 }
 
-function attachPolicyBindings(
-  graph: LayeredGraph,
-  bindings: WorkflowPolicyBinding[],
-): void {
+function attachPolicyBindings(graph: LayeredGraph, bindings: WorkflowPolicyBinding[]): void {
   for (const binding of bindings) {
     const bindingId = `policy${LAYER_PREFIX_SEPARATOR}binding-${binding.controlId}`;
     addNode(graph, {
       id: bindingId,
       label: binding.controlId,
-      layer: 'policy',
+      layer: "policy",
       attributes: {
         domain: binding.domain,
         coverage: binding.coverage,
-        description: binding.description ?? '',
+        description: binding.description ?? "",
         annotations: binding.annotations ?? {},
       },
     });
@@ -260,8 +254,8 @@ function attachPolicyBindings(
       addEdge(graph, {
         from: bindingId,
         to: `policy${LAYER_PREFIX_SEPARATOR}workflow`,
-        relation: 'guards',
-        layer: 'policy',
+        relation: "guards",
+        layer: "policy",
         weight: coverageWeight,
       });
     }
@@ -273,25 +267,22 @@ function attachPolicyBindings(
       addEdge(graph, {
         from: bindingId,
         to: functionalNode,
-        relation: 'guards',
-        layer: 'policy',
+        relation: "guards",
+        layer: "policy",
         weight: coverageWeight,
       });
     }
   }
 }
 
-function attachRuntime(
-  graph: LayeredGraph,
-  runtime: WorkflowRuntimeProfile,
-): void {
+function attachRuntime(graph: LayeredGraph, runtime: WorkflowRuntimeProfile): void {
   if (runtime.resourceProfiles) {
     for (const profile of runtime.resourceProfiles) {
       const runtimeId = `runtime${LAYER_PREFIX_SEPARATOR}${profile.nodeId}`;
       addNode(graph, {
         id: runtimeId,
         label: `runtime-${profile.nodeId}`,
-        layer: 'runtime',
+        layer: "runtime",
         attributes: {
           latencyMs: profile.latencyMs ?? 0,
           costUSD: profile.costUSD ?? 0,
@@ -305,8 +296,8 @@ function attachRuntime(
         addEdge(graph, {
           from: runtimeId,
           to: functionalNode,
-          relation: 'profiles',
-          layer: 'runtime',
+          relation: "profiles",
+          layer: "runtime",
           weight: runtimeWeight(profile),
         });
       }
@@ -319,7 +310,7 @@ function attachRuntime(
       addNode(graph, {
         id: incidentId,
         label: incident.summary,
-        layer: 'runtime',
+        layer: "runtime",
         attributes: {
           severity: incident.severity,
           nodes: incident.nodes ?? [],
@@ -333,8 +324,8 @@ function attachRuntime(
           addEdge(graph, {
             from: incidentId,
             to: functionalNode,
-            relation: 'impacts',
-            layer: 'runtime',
+            relation: "impacts",
+            layer: "runtime",
             weight: incidentWeight(incident.severity),
           });
         }
@@ -345,17 +336,17 @@ function attachRuntime(
   const statsId = `runtime${LAYER_PREFIX_SEPARATOR}summary`;
   addNode(graph, {
     id: statsId,
-    label: 'runtime-stats',
-    layer: 'runtime',
+    label: "runtime-stats",
+    layer: "runtime",
     attributes: runtime.stats,
   });
   for (const node of graph.nodes.values()) {
-    if (node.layer === 'functional') {
+    if (node.layer === "functional") {
       addEdge(graph, {
         from: statsId,
         to: node.id,
-        relation: 'influences',
-        layer: 'runtime',
+        relation: "influences",
+        layer: "runtime",
         weight: 0.4,
       });
     }
@@ -364,54 +355,49 @@ function attachRuntime(
 
 function dependencyWeight(dependency: WorkflowDependencySnapshot): number {
   switch (dependency.criticality) {
-    case 'mission-critical':
+    case "mission-critical":
       return 1;
-    case 'high':
+    case "high":
       return 0.85;
-    case 'medium':
+    case "medium":
       return 0.6;
-    case 'low':
+    case "low":
       return 0.3;
     default:
       return 0.5;
   }
 }
 
-function coverageToWeight(coverage: WorkflowPolicyBinding['coverage']): number {
+function coverageToWeight(coverage: WorkflowPolicyBinding["coverage"]): number {
   switch (coverage) {
-    case 'full':
+    case "full":
       return 0.95;
-    case 'partial':
+    case "partial":
       return 0.6;
-    case 'none':
+    case "none":
       return 0.2;
     default:
       return 0.5;
   }
 }
 
-function runtimeWeight(
-  profile: WorkflowRuntimeProfile['resourceProfiles'][number],
-): number {
+function runtimeWeight(profile: WorkflowRuntimeProfile["resourceProfiles"][number]): number {
   const latency = profile.latencyMs ?? 0;
   const cost = profile.costUSD ?? 0;
   const throughput = profile.throughputPerMin ?? 0;
-  const score = Math.min(
-    1,
-    (latency / 1000 + cost / 100 + throughput / 100) / 3,
-  );
+  const score = Math.min(1, (latency / 1000 + cost / 100 + throughput / 100) / 3);
   return 0.3 + score * 0.7;
 }
 
 function incidentWeight(severity: RiskSeverity): number {
   switch (severity) {
-    case 'critical':
+    case "critical":
       return 1;
-    case 'high':
+    case "high":
       return 0.85;
-    case 'medium':
+    case "medium":
       return 0.6;
-    case 'low':
+    case "low":
       return 0.4;
     default:
       return 0.3;
@@ -428,7 +414,7 @@ function computeSignatures(graph: LayeredGraph): void {
     const next = new Map<string, string>();
     for (const [id, node] of graph.nodes.entries()) {
       const neighborSignatures = [...(graph.adjacency.get(id) ?? [])]
-        .map((neighborId) => current.get(neighborId) ?? '')
+        .map((neighborId) => current.get(neighborId) ?? "")
         .sort();
       const aggregated = hashParts([node.baseSignature, ...neighborSignatures]);
       next.set(id, aggregated);
@@ -442,14 +428,9 @@ function computeSignatures(graph: LayeredGraph): void {
 }
 
 function fingerprintGraph(graph: LayeredGraph): string {
-  const nodeParts = [...graph.nodes.values()]
-    .map((node) => `${node.id}:${node.signature}`)
-    .sort();
+  const nodeParts = [...graph.nodes.values()].map((node) => `${node.id}:${node.signature}`).sort();
   const edgeParts = [...graph.edges.values()]
-    .map(
-      (edge) =>
-        `${edge.from}->${edge.to}:${edge.relation}:${edge.layer}:${edge.weight ?? 'na'}`,
-    )
+    .map((edge) => `${edge.from}->${edge.to}:${edge.relation}:${edge.layer}:${edge.weight ?? "na"}`)
     .sort();
   return hashParts([...nodeParts, ...edgeParts]);
 }
@@ -466,7 +447,7 @@ function toDiffNode(node: LayeredGraphNode): DiffGraphNode {
 
 function computeAttributeDelta(
   before: Record<string, unknown>,
-  after: Record<string, unknown>,
+  after: Record<string, unknown>
 ): DiffFieldDelta[] {
   const keys = new Set<string>([...Object.keys(before), ...Object.keys(after)]);
   const deltas: DiffFieldDelta[] = [];
@@ -487,14 +468,14 @@ function computeAttributeDelta(
 }
 
 function deltaWeight(before: unknown, after: unknown): number {
-  if (typeof before === 'number' && typeof after === 'number') {
+  if (typeof before === "number" && typeof after === "number") {
     const baseline = Math.abs(before) < 1 ? 1 : Math.abs(before);
     return Math.min(1, Math.abs(after - before) / baseline);
   }
-  if (typeof before === 'boolean' || typeof after === 'boolean') {
+  if (typeof before === "boolean" || typeof after === "boolean") {
     return 0.75;
   }
-  if (typeof before === 'string' && typeof after === 'string') {
+  if (typeof before === "string" && typeof after === "string") {
     return before === after ? 0 : 0.5;
   }
   if (Array.isArray(before) || Array.isArray(after)) {
@@ -535,10 +516,7 @@ function diffGraphs(baseline: LayeredGraph, target: LayeredGraph): GraphDelta {
       layer: beforeNode.layer,
       beforeSignature: beforeNode.signature,
       afterSignature: afterNode.signature,
-      deltas: computeAttributeDelta(
-        beforeNode.attributes,
-        afterNode.attributes,
-      ),
+      deltas: computeAttributeDelta(beforeNode.attributes, afterNode.attributes),
       beforeAttributes: beforeNode.attributes,
       afterAttributes: afterNode.attributes,
     });
@@ -586,121 +564,96 @@ function diffGraphs(baseline: LayeredGraph, target: LayeredGraph): GraphDelta {
   };
 }
 
-function inferFunctionalDomain(
-  attributes: Record<string, unknown>,
-): ComplianceDomain {
+function inferFunctionalDomain(attributes: Record<string, unknown>): ComplianceDomain {
   const policy = attributes.policy as { handlesPii?: boolean } | undefined;
   if (policy?.handlesPii) {
-    return 'privacy';
+    return "privacy";
   }
   const type = attributes.type as string | undefined;
-  if (type?.includes('security')) {
-    return 'security';
+  if (type?.includes("security")) {
+    return "security";
   }
-  if (type?.includes('finance') || type?.includes('billing')) {
-    return 'financial';
+  if (type?.includes("finance") || type?.includes("billing")) {
+    return "financial";
   }
-  if (type?.includes('data') || type?.includes('ingest')) {
-    return 'data';
+  if (type?.includes("data") || type?.includes("ingest")) {
+    return "data";
   }
-  return 'operational';
+  return "operational";
 }
 
-function inferDependencyDomain(
-  attributes: Record<string, unknown>,
-): ComplianceDomain {
+function inferDependencyDomain(attributes: Record<string, unknown>): ComplianceDomain {
   const domain = attributes.domain as ComplianceDomain | undefined;
-  return domain ?? 'data';
+  return domain ?? "data";
 }
 
-function inferPolicyDomain(
-  attributes: Record<string, unknown>,
-): ComplianceDomain {
+function inferPolicyDomain(attributes: Record<string, unknown>): ComplianceDomain {
   const domain = attributes.domain as ComplianceDomain | undefined;
-  return domain ?? 'regulatory';
+  return domain ?? "regulatory";
 }
 
 function inferRuntimeDomain(): ComplianceDomain {
-  return 'operational';
+  return "operational";
 }
 
 function functionalSeverity(
-  changeType: 'added' | 'removed' | 'modified',
+  changeType: "added" | "removed" | "modified",
   attributes: Record<string, unknown>,
-  deltas: DiffFieldDelta[],
+  deltas: DiffFieldDelta[]
 ): RiskSeverity {
   if ((attributes.policy as { handlesPii?: boolean } | undefined)?.handlesPii) {
-    return changeType === 'removed' ? 'high' : 'critical';
+    return changeType === "removed" ? "high" : "critical";
   }
-  const estimates = attributes.estimates as
-    | { costUSD?: number; latencyP95Ms?: number }
-    | undefined;
+  const estimates = attributes.estimates as { costUSD?: number; latencyP95Ms?: number } | undefined;
   if (estimates) {
-    const latencyDelta = deltas.find((delta) => delta.field === 'estimates');
+    const latencyDelta = deltas.find((delta) => delta.field === "estimates");
     if (latencyDelta && latencyDelta.weight > 0.4) {
-      return 'high';
+      return "high";
     }
   }
-  if (
-    changeType === 'modified' &&
-    deltas.some((delta) => delta.field === 'params')
-  ) {
-    return 'medium';
+  if (changeType === "modified" && deltas.some((delta) => delta.field === "params")) {
+    return "medium";
   }
-  return changeType === 'removed' ? 'high' : 'medium';
+  return changeType === "removed" ? "high" : "medium";
 }
 
 function dependencySeverity(
   attributes: Record<string, unknown>,
-  deltas: DiffFieldDelta[],
+  deltas: DiffFieldDelta[]
 ): RiskSeverity {
   const criticality = attributes.criticality as string | undefined;
-  if (criticality === 'mission-critical') {
-    return 'critical';
+  if (criticality === "mission-critical") {
+    return "critical";
   }
-  const versionDelta = deltas.find((delta) => delta.field === 'version');
+  const versionDelta = deltas.find((delta) => delta.field === "version");
   if (versionDelta && versionDelta.weight > 0.5) {
-    return 'high';
+    return "high";
   }
-  return criticality === 'high' ? 'high' : 'medium';
+  return criticality === "high" ? "high" : "medium";
 }
 
 function policySeverity(
   attributes: Record<string, unknown>,
-  deltas: DiffFieldDelta[],
+  deltas: DiffFieldDelta[]
 ): RiskSeverity {
-  const coverageDelta = deltas.find((delta) => delta.field === 'coverage');
-  if (
-    coverageDelta &&
-    coverageDelta.before === 'full' &&
-    coverageDelta.after !== 'full'
-  ) {
-    return 'high';
+  const coverageDelta = deltas.find((delta) => delta.field === "coverage");
+  if (coverageDelta && coverageDelta.before === "full" && coverageDelta.after !== "full") {
+    return "high";
   }
-  if (
-    coverageDelta &&
-    coverageDelta.before === 'partial' &&
-    coverageDelta.after === 'none'
-  ) {
-    return 'critical';
+  if (coverageDelta && coverageDelta.before === "partial" && coverageDelta.after === "none") {
+    return "critical";
   }
-  return 'medium';
+  return "medium";
 }
 
 function runtimeSeverity(deltas: DiffFieldDelta[]): RiskSeverity {
-  if (
-    deltas.some(
-      (delta) => delta.field === 'severity' && delta.after === 'critical',
-    )
-  ) {
-    return 'critical';
+  if (deltas.some((delta) => delta.field === "severity" && delta.after === "critical")) {
+    return "critical";
   }
-  if (
-    deltas.some((delta) => delta.field === 'latencyMs' && delta.weight > 0.5)
-  ) {
-    return 'high';
+  if (deltas.some((delta) => delta.field === "latencyMs" && delta.weight > 0.5)) {
+    return "high";
   }
-  return 'medium';
+  return "medium";
 }
 
 function stripLayerPrefix(id: string): string {
@@ -711,44 +664,34 @@ function stripLayerPrefix(id: string): string {
 function summarizeFunctionalChanges(
   delta: GraphDelta,
   targetGraph: LayeredGraph,
-  baselineGraph: LayeredGraph,
+  baselineGraph: LayeredGraph
 ): WorkflowChangeSummary[] {
   const summaries: WorkflowChangeSummary[] = [];
-  for (const node of delta.addedNodes.filter(
-    (candidate) => candidate.layer === 'functional',
-  )) {
+  for (const node of delta.addedNodes.filter((candidate) => candidate.layer === "functional")) {
     const attributes = targetGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
       description: `Functional node ${node.label} added`,
       impactedNodes: [stripLayerPrefix(node.id)],
-      severity: functionalSeverity('added', attributes, []),
+      severity: functionalSeverity("added", attributes, []),
       domain: inferFunctionalDomain(attributes),
       businessImpact: `Introduces capability ${attributes.type as string}`,
     });
   }
-  for (const node of delta.removedNodes.filter(
-    (candidate) => candidate.layer === 'functional',
-  )) {
+  for (const node of delta.removedNodes.filter((candidate) => candidate.layer === "functional")) {
     const attributes = baselineGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
       description: `Functional node ${node.label} removed`,
       impactedNodes: [stripLayerPrefix(node.id)],
-      severity: functionalSeverity('removed', attributes, []),
+      severity: functionalSeverity("removed", attributes, []),
       domain: inferFunctionalDomain(attributes),
-      businessImpact: 'Potential loss of workflow coverage',
+      businessImpact: "Potential loss of workflow coverage",
     });
   }
-  for (const change of delta.changedNodes.filter(
-    (candidate) => candidate.layer === 'functional',
-  )) {
+  for (const change of delta.changedNodes.filter((candidate) => candidate.layer === "functional")) {
     summaries.push({
       description: `Functional node ${stripLayerPrefix(change.id)} modified`,
       impactedNodes: [stripLayerPrefix(change.id)],
-      severity: functionalSeverity(
-        'modified',
-        change.afterAttributes,
-        change.deltas,
-      ),
+      severity: functionalSeverity("modified", change.afterAttributes, change.deltas),
       domain: inferFunctionalDomain(change.afterAttributes),
       businessImpact: summarizeFunctionalImpact(change),
     });
@@ -758,52 +701,45 @@ function summarizeFunctionalChanges(
 
 function summarizeFunctionalImpact(change: DiffGraphNodeChange): string {
   const deltas = change.deltas.map((delta) => delta.field);
-  if (deltas.includes('params')) {
-    return 'Parameter update requires regression of downstream analytics';
+  if (deltas.includes("params")) {
+    return "Parameter update requires regression of downstream analytics";
   }
-  if (deltas.includes('policy')) {
-    return 'Policy mutation alters approval paths for MC/Summit workloads';
+  if (deltas.includes("policy")) {
+    return "Policy mutation alters approval paths for MC/Summit workloads";
   }
-  if (deltas.includes('estimates')) {
-    return 'Resource profile shift may affect cost and latency commitments';
+  if (deltas.includes("estimates")) {
+    return "Resource profile shift may affect cost and latency commitments";
   }
-  return 'Topology adjustment detected';
+  return "Topology adjustment detected";
 }
 
 function summarizeDependencyChanges(
   delta: GraphDelta,
   targetGraph: LayeredGraph,
-  baselineGraph: LayeredGraph,
+  baselineGraph: LayeredGraph
 ): WorkflowChangeSummary[] {
   const summaries: WorkflowChangeSummary[] = [];
-  for (const node of delta.addedNodes.filter(
-    (candidate) => candidate.layer === 'dependency',
-  )) {
+  for (const node of delta.addedNodes.filter((candidate) => candidate.layer === "dependency")) {
     const attributes = targetGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
       description: `Dependency ${node.label} introduced`,
       impactedNodes: impactedFunctionalFromDependency(targetGraph, node.id),
       severity: dependencySeverity(attributes, []),
       domain: inferDependencyDomain(attributes),
-      businessImpact: 'New upstream integration path requires validation',
+      businessImpact: "New upstream integration path requires validation",
     });
   }
-  for (const node of delta.removedNodes.filter(
-    (candidate) => candidate.layer === 'dependency',
-  )) {
+  for (const node of delta.removedNodes.filter((candidate) => candidate.layer === "dependency")) {
     const attributes = baselineGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
       description: `Dependency ${node.label} removed`,
       impactedNodes: impactedFunctionalFromDependency(baselineGraph, node.id),
       severity: dependencySeverity(attributes, []),
       domain: inferDependencyDomain(attributes),
-      businessImpact:
-        'Ensure replacement coverage and archival of shared data contracts',
+      businessImpact: "Ensure replacement coverage and archival of shared data contracts",
     });
   }
-  for (const change of delta.changedNodes.filter(
-    (candidate) => candidate.layer === 'dependency',
-  )) {
+  for (const change of delta.changedNodes.filter((candidate) => candidate.layer === "dependency")) {
     const attributes = change.afterAttributes;
     summaries.push({
       description: `Dependency ${stripLayerPrefix(change.id)} version/policy drift`,
@@ -817,40 +753,33 @@ function summarizeDependencyChanges(
 }
 
 function summarizeDependencyImpact(change: DiffGraphNodeChange): string {
-  const versionDelta = change.deltas.find((delta) => delta.field === 'version');
+  const versionDelta = change.deltas.find((delta) => delta.field === "version");
   if (versionDelta) {
     return `Upgrade from ${versionDelta.before as string} to ${versionDelta.after as string} impacts shared data contracts`;
   }
-  if (change.deltas.some((delta) => delta.field === 'criticality')) {
-    return 'Criticality shift demands reassessment of SLO alignment';
+  if (change.deltas.some((delta) => delta.field === "criticality")) {
+    return "Criticality shift demands reassessment of SLO alignment";
   }
-  return 'Dependency metadata drift detected';
+  return "Dependency metadata drift detected";
 }
 
-function impactedFunctionalFromDependency(
-  graph: LayeredGraph,
-  dependencyId: string,
-): string[] {
+function impactedFunctionalFromDependency(graph: LayeredGraph, dependencyId: string): string[] {
   const edgeSources = [...graph.edges.values()].filter(
-    (edge) => edge.layer === 'dependency' && edge.from === dependencyId,
+    (edge) => edge.layer === "dependency" && edge.from === dependencyId
   );
   const impacted = edgeSources
     .map((edge) => stripLayerPrefix(edge.to))
-    .filter((id) =>
-      graph.nodes.has(`functional${LAYER_PREFIX_SEPARATOR}${id}`),
-    );
+    .filter((id) => graph.nodes.has(`functional${LAYER_PREFIX_SEPARATOR}${id}`));
   return [...new Set(impacted)];
 }
 
 function summarizePolicyChanges(
   delta: GraphDelta,
   targetGraph: LayeredGraph,
-  baselineGraph: LayeredGraph,
+  baselineGraph: LayeredGraph
 ): WorkflowChangeSummary[] {
   const summaries: WorkflowChangeSummary[] = [];
-  const addedPolicyNodes = delta.addedNodes.filter(
-    (node) => node.layer === 'policy',
-  );
+  const addedPolicyNodes = delta.addedNodes.filter((node) => node.layer === "policy");
   for (const node of addedPolicyNodes) {
     const attributes = targetGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
@@ -858,12 +787,10 @@ function summarizePolicyChanges(
       impactedNodes: impactedFunctionalFromPolicy(targetGraph, node.id),
       severity: policySeverity(attributes, []),
       domain: inferPolicyDomain(attributes),
-      businessImpact: 'New control mapping introduced for Summit/MC governance',
+      businessImpact: "New control mapping introduced for Summit/MC governance",
     });
   }
-  const removedPolicyNodes = delta.removedNodes.filter(
-    (node) => node.layer === 'policy',
-  );
+  const removedPolicyNodes = delta.removedNodes.filter((node) => node.layer === "policy");
   for (const node of removedPolicyNodes) {
     const attributes = baselineGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
@@ -871,12 +798,10 @@ function summarizePolicyChanges(
       impactedNodes: impactedFunctionalFromPolicy(baselineGraph, node.id),
       severity: policySeverity(attributes, []),
       domain: inferPolicyDomain(attributes),
-      businessImpact: 'Control gap detected; review compensating safeguards',
+      businessImpact: "Control gap detected; review compensating safeguards",
     });
   }
-  for (const change of delta.changedNodes.filter(
-    (candidate) => candidate.layer === 'policy',
-  )) {
+  for (const change of delta.changedNodes.filter((candidate) => candidate.layer === "policy")) {
     summaries.push({
       description: `Policy binding ${stripLayerPrefix(change.id)} coverage changed`,
       impactedNodes: impactedFunctionalFromPolicy(targetGraph, change.id),
@@ -889,24 +814,16 @@ function summarizePolicyChanges(
 }
 
 function summarizePolicyImpact(change: DiffGraphNodeChange): string {
-  const coverageDelta = change.deltas.find(
-    (delta) => delta.field === 'coverage',
-  );
+  const coverageDelta = change.deltas.find((delta) => delta.field === "coverage");
   if (coverageDelta) {
     return `Coverage shifted from ${coverageDelta.before as string} to ${coverageDelta.after as string}`;
   }
-  return 'Policy annotation updates detected';
+  return "Policy annotation updates detected";
 }
 
-function impactedFunctionalFromPolicy(
-  graph: LayeredGraph,
-  policyId: string,
-): string[] {
+function impactedFunctionalFromPolicy(graph: LayeredGraph, policyId: string): string[] {
   const edges = [...graph.edges.values()].filter(
-    (edge) =>
-      edge.layer === 'policy' &&
-      edge.from === policyId &&
-      edge.to.startsWith('functional:'),
+    (edge) => edge.layer === "policy" && edge.from === policyId && edge.to.startsWith("functional:")
   );
   return [...new Set(edges.map((edge) => stripLayerPrefix(edge.to)))];
 }
@@ -914,37 +831,30 @@ function impactedFunctionalFromPolicy(
 function summarizeRuntimeChanges(
   delta: GraphDelta,
   targetGraph: LayeredGraph,
-  baselineGraph: LayeredGraph,
+  baselineGraph: LayeredGraph
 ): WorkflowChangeSummary[] {
   const summaries: WorkflowChangeSummary[] = [];
-  for (const node of delta.addedNodes.filter(
-    (candidate) => candidate.layer === 'runtime',
-  )) {
+  for (const node of delta.addedNodes.filter((candidate) => candidate.layer === "runtime")) {
     const attributes = targetGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
       description: `Runtime signal ${node.label} detected`,
       impactedNodes: impactedFunctionalFromRuntime(targetGraph, node.id),
       severity: runtimeSeverity([]),
       domain: inferRuntimeDomain(),
-      businessImpact: 'New runtime telemetry requires baseline alignment',
+      businessImpact: "New runtime telemetry requires baseline alignment",
     });
   }
-  for (const node of delta.removedNodes.filter(
-    (candidate) => candidate.layer === 'runtime',
-  )) {
+  for (const node of delta.removedNodes.filter((candidate) => candidate.layer === "runtime")) {
     const attributes = baselineGraph.nodes.get(node.id)?.attributes ?? {};
     summaries.push({
       description: `Runtime signal ${node.label} removed`,
       impactedNodes: impactedFunctionalFromRuntime(baselineGraph, node.id),
       severity: runtimeSeverity([]),
       domain: inferRuntimeDomain(),
-      businessImpact:
-        'Runtime guardrail removed; verify observability coverage',
+      businessImpact: "Runtime guardrail removed; verify observability coverage",
     });
   }
-  for (const change of delta.changedNodes.filter(
-    (candidate) => candidate.layer === 'runtime',
-  )) {
+  for (const change of delta.changedNodes.filter((candidate) => candidate.layer === "runtime")) {
     summaries.push({
       description: `Runtime signal ${stripLayerPrefix(change.id)} drift`,
       impactedNodes: impactedFunctionalFromRuntime(targetGraph, change.id),
@@ -956,34 +866,25 @@ function summarizeRuntimeChanges(
   return summaries;
 }
 
-function impactedFunctionalFromRuntime(
-  graph: LayeredGraph,
-  runtimeId: string,
-): string[] {
+function impactedFunctionalFromRuntime(graph: LayeredGraph, runtimeId: string): string[] {
   const edges = [...graph.edges.values()].filter(
     (edge) =>
-      edge.layer === 'runtime' &&
-      edge.from === runtimeId &&
-      edge.to.startsWith('functional:'),
+      edge.layer === "runtime" && edge.from === runtimeId && edge.to.startsWith("functional:")
   );
   return [...new Set(edges.map((edge) => stripLayerPrefix(edge.to)))];
 }
 
 function summarizeRuntimeImpact(change: DiffGraphNodeChange): string {
-  if (change.deltas.some((delta) => delta.field === 'latencyMs')) {
-    return 'Latency distribution shifted; verify SLO regression tests';
+  if (change.deltas.some((delta) => delta.field === "latencyMs")) {
+    return "Latency distribution shifted; verify SLO regression tests";
   }
-  if (change.deltas.some((delta) => delta.field === 'costUSD')) {
-    return 'Cost profile changed; rerun budgeting scenarios';
+  if (change.deltas.some((delta) => delta.field === "costUSD")) {
+    return "Cost profile changed; rerun budgeting scenarios";
   }
-  if (
-    change.deltas.some(
-      (delta) => delta.field === 'severity' && delta.after === 'critical',
-    )
-  ) {
-    return 'Critical incident recorded; execute incident postmortem';
+  if (change.deltas.some((delta) => delta.field === "severity" && delta.after === "critical")) {
+    return "Critical incident recorded; execute incident postmortem";
   }
-  return 'Runtime telemetry adjusted';
+  return "Runtime telemetry adjusted";
 }
 
 function collectRiskAnnotations(
@@ -991,7 +892,7 @@ function collectRiskAnnotations(
   dependencyChanges: WorkflowChangeSummary[],
   policyChanges: WorkflowChangeSummary[],
   runtimeChanges: WorkflowChangeSummary[],
-  target: WorkflowSnapshot,
+  target: WorkflowSnapshot
 ): WorkflowDiffRiskAnnotation[] {
   const annotations: WorkflowDiffRiskAnnotation[] = [];
   const allChanges = [
@@ -1001,7 +902,7 @@ function collectRiskAnnotations(
     ...runtimeChanges,
   ];
   for (const change of allChanges) {
-    if (change.severity === 'info' || change.severity === 'low') {
+    if (change.severity === "info" || change.severity === "low") {
       continue;
     }
     annotations.push({
@@ -1017,19 +918,16 @@ function collectRiskAnnotations(
   const runtime = target.runtime;
   if (runtime?.incidents) {
     for (const incident of runtime.incidents) {
-      if (incident.severity === 'low' || incident.severity === 'info') {
+      if (incident.severity === "low" || incident.severity === "info") {
         continue;
       }
       annotations.push({
-        domain: 'operational',
+        domain: "operational",
         severity: incident.severity,
         rationale: `Runtime incident ${incident.summary}`,
         impactedNodes: incident.nodes ?? [],
-        recommendedControls: [
-          'Expand synthetic canaries',
-          'Increase anomaly detector sensitivity',
-        ],
-        businessImpact: 'Potential service disruption during merge window',
+        recommendedControls: ["Expand synthetic canaries", "Increase anomaly detector sensitivity"],
+        businessImpact: "Potential service disruption during merge window",
       });
     }
   }
@@ -1038,7 +936,7 @@ function collectRiskAnnotations(
 }
 
 function dedupeAnnotations(
-  annotations: WorkflowDiffRiskAnnotation[],
+  annotations: WorkflowDiffRiskAnnotation[]
 ): WorkflowDiffRiskAnnotation[] {
   const map = new Map<string, WorkflowDiffRiskAnnotation>();
   for (const annotation of annotations) {
@@ -1047,14 +945,9 @@ function dedupeAnnotations(
       map.set(key, annotation);
     } else {
       const existing = map.get(key)!;
-      const mergedNodes = [
-        ...new Set([...existing.impactedNodes, ...annotation.impactedNodes]),
-      ];
+      const mergedNodes = [...new Set([...existing.impactedNodes, ...annotation.impactedNodes])];
       const mergedControls = [
-        ...new Set([
-          ...existing.recommendedControls,
-          ...annotation.recommendedControls,
-        ]),
+        ...new Set([...existing.recommendedControls, ...annotation.recommendedControls]),
       ];
       map.set(key, {
         ...existing,
@@ -1066,29 +959,26 @@ function dedupeAnnotations(
   return [...map.values()];
 }
 
-function recommendControls(
-  domain: ComplianceDomain,
-  severity: RiskSeverity,
-): string[] {
+function recommendControls(domain: ComplianceDomain, severity: RiskSeverity): string[] {
   const controls: string[] = [];
-  if (domain === 'privacy') {
-    controls.push('Execute differential privacy validation');
+  if (domain === "privacy") {
+    controls.push("Execute differential privacy validation");
   }
-  if (domain === 'data') {
-    controls.push('Rebuild lineage graph and validate schema contracts');
+  if (domain === "data") {
+    controls.push("Rebuild lineage graph and validate schema contracts");
   }
-  if (domain === 'regulatory') {
-    controls.push('Run automated policy attestation suite');
+  if (domain === "regulatory") {
+    controls.push("Run automated policy attestation suite");
   }
-  if (domain === 'security') {
-    controls.push('Trigger threat modeling delta review');
+  if (domain === "security") {
+    controls.push("Trigger threat modeling delta review");
   }
-  if (severity === 'critical') {
-    controls.push('Require executive sign-off prior to merge');
+  if (severity === "critical") {
+    controls.push("Require executive sign-off prior to merge");
   }
   return controls.length > 0
     ? controls
-    : ['Document change rationale in Summit compliance console'];
+    : ["Document change rationale in Summit compliance console"];
 }
 
 function buildMigrationPlan(
@@ -1096,92 +986,79 @@ function buildMigrationPlan(
   dependency: WorkflowChangeSummary[],
   policy: WorkflowChangeSummary[],
   runtime: WorkflowChangeSummary[],
-  target: WorkflowSnapshot,
+  target: WorkflowSnapshot
 ): WorkflowMigrationPlan {
   const steps: WorkflowMigrationStep[] = [];
   if (functional.length > 0) {
     steps.push({
-      title: 'Apply workflow topology updates',
-      description: 'Synchronize node graph with Summit/MC orchestrators',
+      title: "Apply workflow topology updates",
+      description: "Synchronize node graph with Summit/MC orchestrators",
       commands: [
         `ga graph apply --workflow ${target.definition.workflowId} --version ${target.definition.version}`,
-        'ga graph validate --scope functional',
+        "ga graph validate --scope functional",
       ],
     });
   }
   if (dependency.length > 0) {
     steps.push({
-      title: 'Reconcile dependency contracts',
-      description: 'Update service/package versions and regenerate SBOM',
-      commands: [
-        'npm run sbom:refresh',
-        'ga contracts verify --mode connected',
-      ],
+      title: "Reconcile dependency contracts",
+      description: "Update service/package versions and regenerate SBOM",
+      commands: ["npm run sbom:refresh", "ga contracts verify --mode connected"],
     });
   }
   if (policy.length > 0) {
     steps.push({
-      title: 'Re-baseline compliance controls',
-      description: 'Ensure coverage parity across MC privacy/security domains',
-      commands: [
-        'ga compliance attestation --autofix',
-        'ga policy diff --enforce gapless',
-      ],
+      title: "Re-baseline compliance controls",
+      description: "Ensure coverage parity across MC privacy/security domains",
+      commands: ["ga compliance attestation --autofix", "ga policy diff --enforce gapless"],
     });
   }
   if (runtime.length > 0) {
     steps.push({
-      title: 'Execute runtime regression suite',
-      description: 'Validate latency, cost, and incident recovery scripts',
+      title: "Execute runtime regression suite",
+      description: "Validate latency, cost, and incident recovery scripts",
       commands: [
-        'ga runtime simulate --scenarios peak,steady',
-        'ga runtime assert --checks slo,spend',
+        "ga runtime simulate --scenarios peak,steady",
+        "ga runtime assert --checks slo,spend",
       ],
     });
   }
 
   const tests: WorkflowMigrationTestCase[] = [];
-  if (
-    functional.some((change) =>
-      change.businessImpact?.includes('Parameter update'),
-    )
-  ) {
+  if (functional.some((change) => change.businessImpact?.includes("Parameter update"))) {
     tests.push({
-      name: 'functional-regression',
-      description: 'Ensure new parameters maintain deterministic outputs',
-      assertions: [
-        'Compare baseline vs target golden dataset',
-        'Verify checksum parity',
-      ],
+      name: "functional-regression",
+      description: "Ensure new parameters maintain deterministic outputs",
+      assertions: ["Compare baseline vs target golden dataset", "Verify checksum parity"],
     });
   }
   if (dependency.length > 0) {
     tests.push({
-      name: 'supply-chain-scan',
-      description: 'Validate dependency SBOM and provenance chain',
-      assertions: ['All dependencies signed', 'License compatibility verified'],
+      name: "supply-chain-scan",
+      description: "Validate dependency SBOM and provenance chain",
+      assertions: ["All dependencies signed", "License compatibility verified"],
     });
   }
   if (policy.length > 0) {
     tests.push({
-      name: 'policy-regression',
-      description: 'Confirm policy coverage has no gaps',
-      assertions: ['Coverage >= baseline', 'All privacy controls attested'],
+      name: "policy-regression",
+      description: "Confirm policy coverage has no gaps",
+      assertions: ["Coverage >= baseline", "All privacy controls attested"],
     });
   }
   if (runtime.length > 0) {
     tests.push({
-      name: 'runtime-drift',
-      description: 'Ensure runtime drift is within guardrails',
-      assertions: ['Latency delta < 15%', 'Cost delta < 10%'],
+      name: "runtime-drift",
+      description: "Ensure runtime drift is within guardrails",
+      assertions: ["Latency delta < 15%", "Cost delta < 10%"],
     });
   }
 
   if (tests.length === 0) {
     tests.push({
-      name: 'baseline-verification',
-      description: 'Validate that no unintended regressions exist',
-      assertions: ['Run ga graph audit --full'],
+      name: "baseline-verification",
+      description: "Validate that no unintended regressions exist",
+      assertions: ["Run ga graph audit --full"],
     });
   }
 
@@ -1189,43 +1066,40 @@ function buildMigrationPlan(
 }
 
 function buildContinuousChecks(
-  riskAnnotations: WorkflowDiffRiskAnnotation[],
+  riskAnnotations: WorkflowDiffRiskAnnotation[]
 ): WorkflowContinuousCheck[] {
   const checks: WorkflowContinuousCheck[] = [
     {
-      name: 'stratified-graph-integrity',
-      description: 'Compare layered graph fingerprints for every merge request',
-      trigger: 'pre-merge',
+      name: "stratified-graph-integrity",
+      description: "Compare layered graph fingerprints for every merge request",
+      trigger: "pre-merge",
     },
     {
-      name: 'gapless-merge-simulator',
-      description: 'Execute simulated merges ensuring no control gaps remain',
-      trigger: 'pre-merge',
+      name: "gapless-merge-simulator",
+      description: "Execute simulated merges ensuring no control gaps remain",
+      trigger: "pre-merge",
     },
   ];
 
-  if (riskAnnotations.some((annotation) => annotation.domain === 'privacy')) {
+  if (riskAnnotations.some((annotation) => annotation.domain === "privacy")) {
     checks.push({
-      name: 'privacy-regression-circuit',
-      description:
-        'Continuously assert privacy controls with synthetic payloads',
-      trigger: 'scheduled',
+      name: "privacy-regression-circuit",
+      description: "Continuously assert privacy controls with synthetic payloads",
+      trigger: "scheduled",
     });
   }
-  if (
-    riskAnnotations.some((annotation) => annotation.domain === 'operational')
-  ) {
+  if (riskAnnotations.some((annotation) => annotation.domain === "operational")) {
     checks.push({
-      name: 'runtime-drift-watch',
-      description: 'Monitor latency and cost drift after deployment',
-      trigger: 'post-merge',
+      name: "runtime-drift-watch",
+      description: "Monitor latency and cost drift after deployment",
+      trigger: "post-merge",
     });
   }
-  if (riskAnnotations.some((annotation) => annotation.domain === 'data')) {
+  if (riskAnnotations.some((annotation) => annotation.domain === "data")) {
     checks.push({
-      name: 'lineage-continuity-check',
-      description: 'Ensure data lineage graph remains gapless after merges',
-      trigger: 'pre-merge',
+      name: "lineage-continuity-check",
+      description: "Ensure data lineage graph remains gapless after merges",
+      trigger: "pre-merge",
     });
   }
 
@@ -1234,39 +1108,23 @@ function buildContinuousChecks(
 
 export function diffWorkflowSnapshots(
   baseline: WorkflowSnapshot,
-  target: WorkflowSnapshot,
+  target: WorkflowSnapshot
 ): WorkflowDiffResult {
   const baselineGraph = buildLayeredGraph(baseline);
   const targetGraph = buildLayeredGraph(target);
   const graphDelta = diffGraphs(baselineGraph, targetGraph);
 
-  const functionalChanges = summarizeFunctionalChanges(
-    graphDelta,
-    targetGraph,
-    baselineGraph,
-  );
-  const dependencyChanges = summarizeDependencyChanges(
-    graphDelta,
-    targetGraph,
-    baselineGraph,
-  );
-  const policyChanges = summarizePolicyChanges(
-    graphDelta,
-    targetGraph,
-    baselineGraph,
-  );
-  const runtimeChanges = summarizeRuntimeChanges(
-    graphDelta,
-    targetGraph,
-    baselineGraph,
-  );
+  const functionalChanges = summarizeFunctionalChanges(graphDelta, targetGraph, baselineGraph);
+  const dependencyChanges = summarizeDependencyChanges(graphDelta, targetGraph, baselineGraph);
+  const policyChanges = summarizePolicyChanges(graphDelta, targetGraph, baselineGraph);
+  const runtimeChanges = summarizeRuntimeChanges(graphDelta, targetGraph, baselineGraph);
 
   const riskAnnotations = collectRiskAnnotations(
     functionalChanges,
     dependencyChanges,
     policyChanges,
     runtimeChanges,
-    target,
+    target
   );
 
   const migrationPlan = buildMigrationPlan(
@@ -1274,7 +1132,7 @@ export function diffWorkflowSnapshots(
     dependencyChanges,
     policyChanges,
     runtimeChanges,
-    target,
+    target
   );
 
   const continuousChecks = buildContinuousChecks(riskAnnotations);

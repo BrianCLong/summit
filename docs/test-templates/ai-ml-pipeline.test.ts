@@ -19,13 +19,13 @@
  * 4. Add model-specific test cases
  */
 
-import { jest } from '@jest/globals';
-import type { ModelConfig, InferenceResult, PipelineContext } from '../types';
-import { MLPipeline } from '../services/MLPipeline';
-import { ModelRegistry } from '../services/ModelRegistry';
-import { DataPreprocessor } from '../services/DataPreprocessor';
+import { jest } from "@jest/globals";
+import type { ModelConfig, InferenceResult, PipelineContext } from "../types";
+import { MLPipeline } from "../services/MLPipeline";
+import { ModelRegistry } from "../services/ModelRegistry";
+import { DataPreprocessor } from "../services/DataPreprocessor";
 
-describe('MLPipeline - AI/ML Operations', () => {
+describe("MLPipeline - AI/ML Operations", () => {
   let pipeline: MLPipeline;
   let mockModelRegistry: jest.Mocked<ModelRegistry>;
   let mockPreprocessor: jest.Mocked<DataPreprocessor>;
@@ -37,8 +37,8 @@ describe('MLPipeline - AI/ML Operations', () => {
       predict: jest.fn(),
       batchPredict: jest.fn(),
       getMetadata: jest.fn(() => ({
-        name: 'test-model',
-        version: '1.0.0',
+        name: "test-model",
+        version: "1.0.0",
         inputShape: [1, 768],
         outputShape: [1, 10],
       })),
@@ -48,9 +48,9 @@ describe('MLPipeline - AI/ML Operations', () => {
     mockModelRegistry = {
       loadModel: jest.fn().mockResolvedValue(mockModel),
       unloadModel: jest.fn().mockResolvedValue(undefined),
-      listModels: jest.fn().mockReturnValue([
-        { name: 'test-model', version: '1.0.0', status: 'loaded' },
-      ]),
+      listModels: jest
+        .fn()
+        .mockReturnValue([{ name: "test-model", version: "1.0.0", status: "loaded" }]),
       getModel: jest.fn().mockReturnValue(mockModel),
     } as any;
 
@@ -73,14 +73,14 @@ describe('MLPipeline - AI/ML Operations', () => {
   // MODEL LOADING TESTS
   // ===========================================
 
-  describe('model loading', () => {
-    it('should load model successfully', async () => {
+  describe("model loading", () => {
+    it("should load model successfully", async () => {
       // Arrange
       const modelConfig: ModelConfig = {
-        name: 'entity-classifier',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "entity-classifier",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       };
 
       // Act
@@ -91,32 +91,28 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(mockModelRegistry.loadModel).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle model loading errors gracefully', async () => {
+    it("should handle model loading errors gracefully", async () => {
       // Arrange
-      mockModelRegistry.loadModel.mockRejectedValue(
-        new Error('Model file not found'),
-      );
+      mockModelRegistry.loadModel.mockRejectedValue(new Error("Model file not found"));
 
       const modelConfig: ModelConfig = {
-        name: 'nonexistent-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "nonexistent-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       };
 
       // Act & Assert
-      await expect(pipeline.loadModel(modelConfig)).rejects.toThrow(
-        'Failed to load model',
-      );
+      await expect(pipeline.loadModel(modelConfig)).rejects.toThrow("Failed to load model");
     });
 
-    it('should cache loaded models', async () => {
+    it("should cache loaded models", async () => {
       // Arrange
       const modelConfig: ModelConfig = {
-        name: 'entity-classifier',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "entity-classifier",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       };
 
       // Act
@@ -128,20 +124,20 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(mockModelRegistry.loadModel).toHaveBeenCalledTimes(1);
     });
 
-    it('should support multiple model versions', async () => {
+    it("should support multiple model versions", async () => {
       // Arrange
       const v1Config: ModelConfig = {
-        name: 'entity-classifier',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "entity-classifier",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       };
 
       const v2Config: ModelConfig = {
-        name: 'entity-classifier',
-        version: '2.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "entity-classifier",
+        version: "2.0.0",
+        type: "classification",
+        framework: "tensorflow",
       };
 
       // Act
@@ -159,25 +155,25 @@ describe('MLPipeline - AI/ML Operations', () => {
   // INFERENCE TESTS
   // ===========================================
 
-  describe('inference', () => {
+  describe("inference", () => {
     beforeEach(async () => {
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
     });
 
-    it('should perform single prediction', async () => {
+    it("should perform single prediction", async () => {
       // Arrange
       const input = {
-        text: 'John Doe works at Acme Corporation',
-        metadata: { investigationId: 'inv-123' },
+        text: "John Doe works at Acme Corporation",
+        metadata: { investigationId: "inv-123" },
       };
 
       const mockPrediction = {
-        labels: ['Person', 'Organization'],
+        labels: ["Person", "Organization"],
         scores: [0.95, 0.87],
         confidence: 0.95,
       };
@@ -185,7 +181,7 @@ describe('MLPipeline - AI/ML Operations', () => {
       mockModel.predict.mockResolvedValue(mockPrediction);
 
       // Act
-      const result = await pipeline.predict('test-model', input);
+      const result = await pipeline.predict("test-model", input);
 
       // Assert
       expect(result).toEqual(mockPrediction);
@@ -193,15 +189,15 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(mockModel.predict).toHaveBeenCalled();
     });
 
-    it('should perform batch predictions efficiently', async () => {
+    it("should perform batch predictions efficiently", async () => {
       // Arrange
       const inputs = Array.from({ length: 100 }, (_, i) => ({
         text: `Sample text ${i}`,
-        metadata: { investigationId: 'inv-123' },
+        metadata: { investigationId: "inv-123" },
       }));
 
       const mockBatchPredictions = inputs.map((_, i) => ({
-        labels: ['Entity'],
+        labels: ["Entity"],
         scores: [0.9],
         confidence: 0.9,
       }));
@@ -210,7 +206,7 @@ describe('MLPipeline - AI/ML Operations', () => {
 
       // Act
       const start = Date.now();
-      const results = await pipeline.batchPredict('test-model', inputs);
+      const results = await pipeline.batchPredict("test-model", inputs);
       const duration = Date.now() - start;
 
       // Assert
@@ -219,30 +215,30 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(mockModel.batchPredict).toHaveBeenCalledTimes(1); // Single batch call
     });
 
-    it('should validate input data', async () => {
+    it("should validate input data", async () => {
       // Arrange
       const invalidInput = {
-        text: '', // Empty text
+        text: "", // Empty text
         metadata: {},
       };
 
       // Act & Assert
-      await expect(
-        pipeline.predict('test-model', invalidInput),
-      ).rejects.toThrow('Input text cannot be empty');
+      await expect(pipeline.predict("test-model", invalidInput)).rejects.toThrow(
+        "Input text cannot be empty"
+      );
     });
 
-    it('should handle inference errors with fallback', async () => {
+    it("should handle inference errors with fallback", async () => {
       // Arrange
       const input = {
-        text: 'Sample text',
+        text: "Sample text",
         metadata: {},
       };
 
-      mockModel.predict.mockRejectedValue(new Error('Model inference failed'));
+      mockModel.predict.mockRejectedValue(new Error("Model inference failed"));
 
       // Act
-      const result = await pipeline.predict('test-model', input, {
+      const result = await pipeline.predict("test-model", input, {
         fallback: true,
       });
 
@@ -252,31 +248,31 @@ describe('MLPipeline - AI/ML Operations', () => {
         scores: [],
         confidence: 0,
         fallback: true,
-        error: 'Model inference failed',
+        error: "Model inference failed",
       });
     });
 
-    it('should apply confidence thresholds', async () => {
+    it("should apply confidence thresholds", async () => {
       // Arrange
       const input = {
-        text: 'Sample text',
+        text: "Sample text",
         metadata: {},
       };
 
       mockModel.predict.mockResolvedValue({
-        labels: ['Label1', 'Label2', 'Label3'],
+        labels: ["Label1", "Label2", "Label3"],
         scores: [0.95, 0.65, 0.45],
         confidence: 0.95,
       });
 
       // Act
-      const result = await pipeline.predict('test-model', input, {
+      const result = await pipeline.predict("test-model", input, {
         confidenceThreshold: 0.7,
       });
 
       // Assert
       // Should only return predictions above threshold
-      expect(result.labels).toEqual(['Label1']);
+      expect(result.labels).toEqual(["Label1"]);
       expect(result.scores).toEqual([0.95]);
     });
   });
@@ -285,10 +281,10 @@ describe('MLPipeline - AI/ML Operations', () => {
   // PREPROCESSING TESTS
   // ===========================================
 
-  describe('data preprocessing', () => {
-    it('should tokenize text correctly', () => {
+  describe("data preprocessing", () => {
+    it("should tokenize text correctly", () => {
       // Arrange
-      const text = 'John Doe is a person of interest';
+      const text = "John Doe is a person of interest";
 
       // Act
       const tokens = mockPreprocessor.tokenize(text);
@@ -299,7 +295,7 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(tokens.length).toBe(768); // Standard embedding size
     });
 
-    it('should normalize numerical data', () => {
+    it("should normalize numerical data", () => {
       // Arrange
       const data = [1, 2, 3, 4, 5, 100];
 
@@ -311,9 +307,9 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(normalized.length).toBe(data.length);
     });
 
-    it('should handle special characters in text', () => {
+    it("should handle special characters in text", () => {
       // Arrange
-      const text = 'Test @#$% special chars 123!';
+      const text = "Test @#$% special chars 123!";
 
       // Act
       const tokens = mockPreprocessor.tokenize(text);
@@ -323,11 +319,11 @@ describe('MLPipeline - AI/ML Operations', () => {
       // Should not throw errors
     });
 
-    it('should truncate long sequences', () => {
+    it("should truncate long sequences", () => {
       // Arrange
-      const longText = 'word '.repeat(1000); // Very long text
+      const longText = "word ".repeat(1000); // Very long text
       mockPreprocessor.tokenize.mockImplementation((text) =>
-        Array.from({ length: Math.min(512, text.length) }, () => Math.random()),
+        Array.from({ length: Math.min(512, text.length) }, () => Math.random())
       );
 
       // Act
@@ -337,9 +333,9 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(tokens.length).toBeLessThanOrEqual(512); // Max sequence length
     });
 
-    it('should pad short sequences', () => {
+    it("should pad short sequences", () => {
       // Arrange
-      const shortText = 'short';
+      const shortText = "short";
       mockPreprocessor.tokenize.mockImplementation((text) => {
         const tokens = Array.from({ length: text.length }, () => Math.random());
         // Pad to min length
@@ -359,19 +355,19 @@ describe('MLPipeline - AI/ML Operations', () => {
   // PIPELINE ORCHESTRATION TESTS
   // ===========================================
 
-  describe('pipeline orchestration', () => {
-    it('should execute multi-stage pipeline', async () => {
+  describe("pipeline orchestration", () => {
+    it("should execute multi-stage pipeline", async () => {
       // Arrange
       const pipelineConfig = {
         stages: [
-          { name: 'entity-extraction', model: 'entity-model' },
-          { name: 'relationship-extraction', model: 'relation-model' },
-          { name: 'classification', model: 'classifier-model' },
+          { name: "entity-extraction", model: "entity-model" },
+          { name: "relationship-extraction", model: "relation-model" },
+          { name: "classification", model: "classifier-model" },
         ],
       };
 
       const input = {
-        text: 'John Doe works at Acme Corporation in New York',
+        text: "John Doe works at Acme Corporation in New York",
         metadata: {},
       };
 
@@ -380,21 +376,21 @@ describe('MLPipeline - AI/ML Operations', () => {
         .mockResolvedValueOnce({
           // Stage 1: Entity extraction
           entities: [
-            { text: 'John Doe', type: 'Person' },
-            { text: 'Acme Corporation', type: 'Organization' },
-            { text: 'New York', type: 'Location' },
+            { text: "John Doe", type: "Person" },
+            { text: "Acme Corporation", type: "Organization" },
+            { text: "New York", type: "Location" },
           ],
         })
         .mockResolvedValueOnce({
           // Stage 2: Relationship extraction
           relationships: [
-            { from: 'John Doe', to: 'Acme Corporation', type: 'WORKS_FOR' },
-            { from: 'Acme Corporation', to: 'New York', type: 'LOCATED_IN' },
+            { from: "John Doe", to: "Acme Corporation", type: "WORKS_FOR" },
+            { from: "Acme Corporation", to: "New York", type: "LOCATED_IN" },
           ],
         })
         .mockResolvedValueOnce({
           // Stage 3: Classification
-          category: 'employment',
+          category: "employment",
           confidence: 0.92,
         });
 
@@ -404,49 +400,49 @@ describe('MLPipeline - AI/ML Operations', () => {
       // Assert
       expect(result.entities).toHaveLength(3);
       expect(result.relationships).toHaveLength(2);
-      expect(result.category).toBe('employment');
+      expect(result.category).toBe("employment");
       expect(mockModel.predict).toHaveBeenCalledTimes(3);
     });
 
-    it('should handle stage failures gracefully', async () => {
+    it("should handle stage failures gracefully", async () => {
       // Arrange
       const pipelineConfig = {
         stages: [
-          { name: 'stage1', model: 'model1' },
-          { name: 'stage2', model: 'model2' },
+          { name: "stage1", model: "model1" },
+          { name: "stage2", model: "model2" },
         ],
       };
 
-      const input = { text: 'Sample text', metadata: {} };
+      const input = { text: "Sample text", metadata: {} };
 
       mockModel.predict
-        .mockResolvedValueOnce({ data: 'stage1-output' })
-        .mockRejectedValueOnce(new Error('Stage 2 failed'));
+        .mockResolvedValueOnce({ data: "stage1-output" })
+        .mockRejectedValueOnce(new Error("Stage 2 failed"));
 
       // Act & Assert
-      await expect(
-        pipeline.executePipeline(pipelineConfig, input),
-      ).rejects.toThrow('Pipeline execution failed at stage: stage2');
+      await expect(pipeline.executePipeline(pipelineConfig, input)).rejects.toThrow(
+        "Pipeline execution failed at stage: stage2"
+      );
     });
 
-    it('should support conditional pipeline execution', async () => {
+    it("should support conditional pipeline execution", async () => {
       // Arrange
       const pipelineConfig = {
         stages: [
-          { name: 'detection', model: 'detector' },
+          { name: "detection", model: "detector" },
           {
-            name: 'classification',
-            model: 'classifier',
+            name: "classification",
+            model: "classifier",
             condition: (prev: any) => prev.detected === true,
           },
         ],
       };
 
-      const input = { text: 'Sample text', metadata: {} };
+      const input = { text: "Sample text", metadata: {} };
 
       mockModel.predict
         .mockResolvedValueOnce({ detected: false })
-        .mockResolvedValueOnce({ category: 'should-not-run' });
+        .mockResolvedValueOnce({ category: "should-not-run" });
 
       // Act
       const result = await pipeline.executePipeline(pipelineConfig, input);
@@ -456,18 +452,18 @@ describe('MLPipeline - AI/ML Operations', () => {
       expect(result.category).toBeUndefined();
     });
 
-    it('should cache intermediate results', async () => {
+    it("should cache intermediate results", async () => {
       // Arrange
       const pipelineConfig = {
         stages: [
-          { name: 'expensive-stage', model: 'slow-model', cache: true },
-          { name: 'fast-stage', model: 'fast-model' },
+          { name: "expensive-stage", model: "slow-model", cache: true },
+          { name: "fast-stage", model: "fast-model" },
         ],
       };
 
-      const input = { text: 'Sample text', metadata: {} };
+      const input = { text: "Sample text", metadata: {} };
 
-      mockModel.predict.mockResolvedValue({ data: 'result' });
+      mockModel.predict.mockResolvedValue({ data: "result" });
 
       // Act
       await pipeline.executePipeline(pipelineConfig, input);
@@ -483,17 +479,17 @@ describe('MLPipeline - AI/ML Operations', () => {
   // MODEL VALIDATION TESTS
   // ===========================================
 
-  describe('model validation', () => {
-    it('should validate model output format', async () => {
+  describe("model validation", () => {
+    it("should validate model output format", async () => {
       // Arrange
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
 
-      const input = { text: 'Sample', metadata: {} };
+      const input = { text: "Sample", metadata: {} };
 
       // Invalid output format
       mockModel.predict.mockResolvedValue({
@@ -502,56 +498,54 @@ describe('MLPipeline - AI/ML Operations', () => {
       });
 
       // Act & Assert
-      await expect(pipeline.predict('test-model', input)).rejects.toThrow(
-        'Invalid model output format',
+      await expect(pipeline.predict("test-model", input)).rejects.toThrow(
+        "Invalid model output format"
       );
     });
 
-    it('should validate output shapes', async () => {
+    it("should validate output shapes", async () => {
       // Arrange
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
 
-      const input = { text: 'Sample', metadata: {} };
+      const input = { text: "Sample", metadata: {} };
 
       // Output shape mismatch
       mockModel.predict.mockResolvedValue({
-        labels: ['A', 'B'],
+        labels: ["A", "B"],
         scores: [0.9], // Mismatch: 2 labels, 1 score
         confidence: 0.9,
       });
 
       // Act & Assert
-      await expect(pipeline.predict('test-model', input)).rejects.toThrow(
-        'Output shape mismatch',
-      );
+      await expect(pipeline.predict("test-model", input)).rejects.toThrow("Output shape mismatch");
     });
 
-    it('should validate score ranges', async () => {
+    it("should validate score ranges", async () => {
       // Arrange
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
 
-      const input = { text: 'Sample', metadata: {} };
+      const input = { text: "Sample", metadata: {} };
 
       // Invalid scores (outside 0-1 range)
       mockModel.predict.mockResolvedValue({
-        labels: ['A'],
+        labels: ["A"],
         scores: [1.5], // Invalid: > 1
         confidence: 0.9,
       });
 
       // Act & Assert
-      await expect(pipeline.predict('test-model', input)).rejects.toThrow(
-        'Scores must be between 0 and 1',
+      await expect(pipeline.predict("test-model", input)).rejects.toThrow(
+        "Scores must be between 0 and 1"
       );
     });
   });
@@ -560,19 +554,19 @@ describe('MLPipeline - AI/ML Operations', () => {
   // PERFORMANCE TESTS
   // ===========================================
 
-  describe('performance', () => {
+  describe("performance", () => {
     beforeEach(async () => {
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
     });
 
-    it('should meet inference latency SLA', async () => {
+    it("should meet inference latency SLA", async () => {
       // Arrange
-      const input = { text: 'Sample text', metadata: {} };
+      const input = { text: "Sample text", metadata: {} };
 
       mockModel.predict.mockImplementation(
         async () =>
@@ -580,25 +574,25 @@ describe('MLPipeline - AI/ML Operations', () => {
             setTimeout(
               () =>
                 resolve({
-                  labels: ['Label'],
+                  labels: ["Label"],
                   scores: [0.9],
                   confidence: 0.9,
                 }),
-              50,
-            ),
-          ),
+              50
+            )
+          )
       );
 
       // Act
       const start = Date.now();
-      await pipeline.predict('test-model', input);
+      await pipeline.predict("test-model", input);
       const latency = Date.now() - start;
 
       // Assert
       expect(latency).toBeLessThan(100); // SLA: < 100ms per prediction
     });
 
-    it('should handle concurrent requests efficiently', async () => {
+    it("should handle concurrent requests efficiently", async () => {
       // Arrange
       const inputs = Array.from({ length: 50 }, (_, i) => ({
         text: `Sample text ${i}`,
@@ -606,23 +600,21 @@ describe('MLPipeline - AI/ML Operations', () => {
       }));
 
       mockModel.predict.mockResolvedValue({
-        labels: ['Label'],
+        labels: ["Label"],
         scores: [0.9],
         confidence: 0.9,
       });
 
       // Act
       const start = Date.now();
-      await Promise.all(
-        inputs.map((input) => pipeline.predict('test-model', input)),
-      );
+      await Promise.all(inputs.map((input) => pipeline.predict("test-model", input)));
       const duration = Date.now() - start;
 
       // Assert
       expect(duration).toBeLessThan(5000); // Should handle 50 concurrent in < 5s
     });
 
-    it('should optimize batch size automatically', async () => {
+    it("should optimize batch size automatically", async () => {
       // Arrange
       const inputs = Array.from({ length: 1000 }, (_, i) => ({
         text: `Sample ${i}`,
@@ -634,14 +626,14 @@ describe('MLPipeline - AI/ML Operations', () => {
       mockModel.batchPredict.mockImplementation(async (batch: any[]) => {
         batchSizes.push(batch.length);
         return batch.map(() => ({
-          labels: ['Label'],
+          labels: ["Label"],
           scores: [0.9],
           confidence: 0.9,
         }));
       });
 
       // Act
-      await pipeline.batchPredict('test-model', inputs, {
+      await pipeline.batchPredict("test-model", inputs, {
         autoBatch: true,
       });
 
@@ -656,52 +648,52 @@ describe('MLPipeline - AI/ML Operations', () => {
   // MONITORING AND OBSERVABILITY TESTS
   // ===========================================
 
-  describe('monitoring', () => {
-    it('should emit metrics for predictions', async () => {
+  describe("monitoring", () => {
+    it("should emit metrics for predictions", async () => {
       // Arrange
       const metricsSpy = jest.fn();
-      pipeline.on('metrics', metricsSpy);
+      pipeline.on("metrics", metricsSpy);
 
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
 
-      const input = { text: 'Sample', metadata: {} };
+      const input = { text: "Sample", metadata: {} };
 
       mockModel.predict.mockResolvedValue({
-        labels: ['Label'],
+        labels: ["Label"],
         scores: [0.9],
         confidence: 0.9,
       });
 
       // Act
-      await pipeline.predict('test-model', input);
+      await pipeline.predict("test-model", input);
 
       // Assert
       expect(metricsSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          modelName: 'test-model',
-          operation: 'predict',
+          modelName: "test-model",
+          operation: "predict",
           latency: expect.any(Number),
           success: true,
-        }),
+        })
       );
     });
 
-    it('should track model performance metrics', async () => {
+    it("should track model performance metrics", async () => {
       // Arrange
       await pipeline.loadModel({
-        name: 'test-model',
-        version: '1.0.0',
-        type: 'classification',
-        framework: 'tensorflow',
+        name: "test-model",
+        version: "1.0.0",
+        type: "classification",
+        framework: "tensorflow",
       });
 
       mockModel.predict.mockResolvedValue({
-        labels: ['Label'],
+        labels: ["Label"],
         scores: [0.9],
         confidence: 0.9,
       });
@@ -709,14 +701,14 @@ describe('MLPipeline - AI/ML Operations', () => {
       // Act
       await Promise.all(
         Array.from({ length: 10 }, () =>
-          pipeline.predict('test-model', {
-            text: 'Sample',
+          pipeline.predict("test-model", {
+            text: "Sample",
             metadata: {},
-          }),
-        ),
+          })
+        )
       );
 
-      const metrics = pipeline.getModelMetrics('test-model');
+      const metrics = pipeline.getModelMetrics("test-model");
 
       // Assert
       expect(metrics).toEqual(
@@ -725,7 +717,7 @@ describe('MLPipeline - AI/ML Operations', () => {
           averageLatency: expect.any(Number),
           averageConfidence: expect.any(Number),
           errorRate: 0,
-        }),
+        })
       );
     });
   });

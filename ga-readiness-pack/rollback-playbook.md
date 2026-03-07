@@ -6,9 +6,11 @@
 ## Scenarios
 
 ### Scenario A: Application Failure (Code Bug)
-*Trigger:* Error rate spikes > 1% or functional regression found.
+
+_Trigger:_ Error rate spikes > 1% or functional regression found.
 
 **Action:**
+
 1.  **Revert Helm Release:**
     ```bash
     helm rollback intelgraph <PREVIOUS_REVISION> -n production
@@ -20,28 +22,32 @@
 3.  **Notify:** Update status page and Slack `#incident-room`.
 
 ### Scenario B: Database Migration Failure (Data Corruption)
-*Trigger:* Data integrity check fails or schema mismatch errors.
+
+_Trigger:_ Data integrity check fails or schema mismatch errors.
 
 **Action:**
+
 1.  **Stop Traffic:**
     ```bash
     kubectl scale deployment/server --replicas=0 -n production
     ```
 2.  **Restore Database (Postgres):**
-    *   Identify last good PITR snapshot.
-    *   Restore to new instance.
-    *   Switch connection string in Sealed Secret.
+    - Identify last good PITR snapshot.
+    - Restore to new instance.
+    - Switch connection string in Sealed Secret.
 3.  **Restore Database (Neo4j):**
-    *   Run `scripts/restore-neo4j.sh <BACKUP_ID>`.
+    - Run `scripts/restore-neo4j.sh <BACKUP_ID>`.
 4.  **Restart Traffic:**
     ```bash
     kubectl scale deployment/server --replicas=<ORIGINAL> -n production
     ```
 
 ### Scenario C: Feature Flag Performance Issue
-*Trigger:* Specific feature causing latency spike.
+
+_Trigger:_ Specific feature causing latency spike.
 
 **Action:**
+
 1.  **Kill Switch:**
     ```bash
     # If using Flagsmith or similar config
@@ -49,7 +55,7 @@
       -H "Authorization: Bearer $FLAG_TOKEN" \
       -d '{"enabled": false}'
     ```
-    *Alternatively, update ConfigMap:*
+    _Alternatively, update ConfigMap:_
     ```bash
     kubectl edit configmap feature-flags -n production
     # Set <FLAG_KEY>: "false"
@@ -57,5 +63,6 @@
     ```
 
 ## Post-Rollback
+
 1.  **Capture State:** Save logs, metrics snapshots.
 2.  **Root Cause Analysis:** Start incident review process.

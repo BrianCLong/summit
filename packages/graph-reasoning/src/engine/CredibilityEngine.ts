@@ -23,7 +23,7 @@ export class CredibilityEngine {
     const challengeRate = challenges / totalClaims;
 
     // Stability penalty increases with higher error rate and challenge rate
-    const stabilityPenalty = (errorRate * 0.6) + (challengeRate * 0.4);
+    const stabilityPenalty = errorRate * 0.6 + challengeRate * 0.4;
     const weight = Math.max(0.1, 1 - stabilityPenalty);
 
     return baseScore * weight;

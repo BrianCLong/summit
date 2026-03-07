@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 type Explain = {
   allow: boolean;
@@ -28,12 +28,8 @@ export default function PolicyExplainDialog({
         <h2 id="policy-explain-title" className="text-lg font-semibold">
           Policy Explain
         </h2>
-        <div
-          className={
-            'mt-2 text-sm ' + (data?.allow ? 'text-green-700' : 'text-red-700')
-          }
-        >
-          Decision: <b>{data?.allow ? 'ALLOW' : 'DENY'}</b>
+        <div className={"mt-2 text-sm " + (data?.allow ? "text-green-700" : "text-red-700")}>
+          Decision: <b>{data?.allow ? "ALLOW" : "DENY"}</b>
         </div>
         {data?.reasons && data.reasons.length > 0 && (
           <ul className="mt-2 text-sm list-disc pl-5">
@@ -44,20 +40,14 @@ export default function PolicyExplainDialog({
         )}
         {data?.rules && (
           <details className="mt-3">
-            <summary className="cursor-pointer text-sm underline">
-              Show full rule trace
-            </summary>
+            <summary className="cursor-pointer text-sm underline">Show full rule trace</summary>
             <pre className="bg-gray-50 border rounded p-2 text-xs overflow-auto mt-2">
               {JSON.stringify(data.rules, null, 2)}
             </pre>
           </details>
         )}
         <div className="mt-4 flex justify-end">
-          <button
-            className="border rounded px-3 py-1"
-            onClick={onClose}
-            autoFocus
-          >
+          <button className="border rounded px-3 py-1" onClick={onClose} autoFocus>
             Close
           </button>
         </div>

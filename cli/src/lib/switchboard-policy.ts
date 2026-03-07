@@ -2,14 +2,14 @@
  * Switchboard Capsule Policy Gate
  */
 
-import { CapsuleManifest, CapsuleWaiver, normalizeRelativePath } from './switchboard-capsule.js';
+import { CapsuleManifest, CapsuleWaiver, normalizeRelativePath } from "./switchboard-capsule.js";
 
 export type CapsulePolicyAction =
-  | { type: 'exec'; command: string }
-  | { type: 'read'; path: string }
-  | { type: 'write'; path: string }
-  | { type: 'network'; allow_network: boolean }
-  | { type: 'secret'; secret_handle: string };
+  | { type: "exec"; command: string }
+  | { type: "read"; path: string }
+  | { type: "write"; path: string }
+  | { type: "network"; allow_network: boolean }
+  | { type: "secret"; secret_handle: string };
 
 export interface CapsulePolicyDecision {
   allow: boolean;
@@ -31,7 +31,7 @@ function isExpired(waiver: CapsuleWaiver): boolean {
 
 function matchesCommand(allowed: string[], command: string): boolean {
   return allowed.some((pattern) => {
-    if (pattern.endsWith('*')) {
+    if (pattern.endsWith("*")) {
       return command.startsWith(pattern.slice(0, -1));
     }
     return pattern === command;
@@ -70,7 +70,7 @@ export class CapsulePolicyGate {
     if (waiver) {
       return {
         allow: true,
-        reason: 'waiver-approved',
+        reason: "waiver-approved",
         waiver_token: waiver.token,
         waiver_reason: waiver.reason,
       };
@@ -80,36 +80,36 @@ export class CapsulePolicyGate {
 
   private evaluateBase(action: CapsulePolicyAction): CapsulePolicyDecision {
     switch (action.type) {
-      case 'exec':
+      case "exec":
         if (matchesCommand(this.manifest.allowed_commands, action.command)) {
-          return { allow: true, reason: 'command-allowlist' };
+          return { allow: true, reason: "command-allowlist" };
         }
-        return { allow: false, reason: 'command-not-allowed' };
-      case 'read':
+        return { allow: false, reason: "command-not-allowed" };
+      case "read":
         if (isPathAllowed(this.manifest.allowed_paths.read, action.path)) {
-          return { allow: true, reason: 'read-path-allowlist' };
+          return { allow: true, reason: "read-path-allowlist" };
         }
-        return { allow: false, reason: 'read-path-denied' };
-      case 'write':
+        return { allow: false, reason: "read-path-denied" };
+      case "write":
         if (isPathAllowed(this.manifest.allowed_paths.write, action.path)) {
-          return { allow: true, reason: 'write-path-allowlist' };
+          return { allow: true, reason: "write-path-allowlist" };
         }
-        return { allow: false, reason: 'write-path-denied' };
-      case 'network':
+        return { allow: false, reason: "write-path-denied" };
+      case "network":
         if (!action.allow_network) {
-          return { allow: true, reason: 'network-unused' };
+          return { allow: true, reason: "network-unused" };
         }
-        if (this.manifest.network_mode === 'on') {
-          return { allow: true, reason: 'network-allowed' };
+        if (this.manifest.network_mode === "on") {
+          return { allow: true, reason: "network-allowed" };
         }
-        return { allow: false, reason: 'network-disabled' };
-      case 'secret':
+        return { allow: false, reason: "network-disabled" };
+      case "secret":
         if (this.manifest.secret_handles.includes(action.secret_handle)) {
-          return { allow: true, reason: 'secret-handle-allowlist' };
+          return { allow: true, reason: "secret-handle-allowlist" };
         }
-        return { allow: false, reason: 'secret-handle-denied' };
+        return { allow: false, reason: "secret-handle-denied" };
       default:
-        return { allow: false, reason: 'unknown-action' };
+        return { allow: false, reason: "unknown-action" };
     }
   }
 

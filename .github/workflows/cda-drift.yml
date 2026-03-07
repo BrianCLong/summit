@@ -1,7 +1,7 @@
 name: CDA Drift Monitor
 on:
   schedule:
-    - cron: '0 0 * * 0' # Run weekly on Sunday
+    - cron: "0 0 * * 0" # Run weekly on Sunday
 
 jobs:
   check-drift:

@@ -9,12 +9,12 @@ This standard defines the appropriate use of AI modalities based on task require
 
 ## Selection Matrix
 
-| Task Requirement | Regulatory Exposure | Recommended Modality | Prohibited |
-| :--- | :--- | :--- | :--- |
-| Creative / Drafting | Low | GenAI | - |
-| Classification | Low/Medium | Predictive / GenAI | - |
-| Financial Calculation | High | Symbolic / Deterministic | GenAI (Unchecked) |
-| Clinical Diagnosis | High | Predictive (Explainable) | GenAI (Blackbox) |
+| Task Requirement      | Regulatory Exposure | Recommended Modality     | Prohibited        |
+| :-------------------- | :------------------ | :----------------------- | :---------------- |
+| Creative / Drafting   | Low                 | GenAI                    | -                 |
+| Classification        | Low/Medium          | Predictive / GenAI       | -                 |
+| Financial Calculation | High                | Symbolic / Deterministic | GenAI (Unchecked) |
+| Clinical Diagnosis    | High                | Predictive (Explainable) | GenAI (Blackbox)  |
 
 ## Enforcement
 

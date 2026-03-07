@@ -7,27 +7,24 @@
  * and enforce deployment safety windows.
  */
 
-const fs = require('fs');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const { execSync } = require("child_process");
 
 class SafetyCircuit {
   constructor() {
-    this.stateFile = '/tmp/safety-circuit-state.json';
+    this.stateFile = "/tmp/safety-circuit-state.json";
     this.loadState();
   }
 
   loadState() {
     try {
       if (fs.existsSync(this.stateFile)) {
-        this.state = JSON.parse(fs.readFileSync(this.stateFile, 'utf8'));
+        this.state = JSON.parse(fs.readFileSync(this.stateFile, "utf8"));
       } else {
         this.state = this.getDefaultState();
       }
     } catch (error) {
-      console.warn(
-        'Failed to load circuit state, using defaults:',
-        error.message,
-      );
+      console.warn("Failed to load circuit state, using defaults:", error.message);
       this.state = this.getDefaultState();
     }
   }
@@ -36,21 +33,21 @@ class SafetyCircuit {
     try {
       fs.writeFileSync(this.stateFile, JSON.stringify(this.state, null, 2));
     } catch (error) {
-      console.error('Failed to save circuit state:', error.message);
+      console.error("Failed to save circuit state:", error.message);
     }
   }
 
   getDefaultState() {
     return {
-      circuit: 'CLOSED', // CLOSED = normal, OPEN = blocked, HALF_OPEN = testing
+      circuit: "CLOSED", // CLOSED = normal, OPEN = blocked, HALF_OPEN = testing
       failureCount: 0,
       lastFailure: null,
       lastSuccess: null,
       blockedUntil: null,
       deploymentWindow: {
-        start: '09:00', // 9 AM UTC - Conservative business hours
-        end: '17:00', // 5 PM UTC - Conservative business hours
-        timezone: 'UTC',
+        start: "09:00", // 9 AM UTC - Conservative business hours
+        end: "17:00", // 5 PM UTC - Conservative business hours
+        timezone: "UTC",
         allowedDays: [1, 2, 3, 4, 5], // Monday-Friday only
       },
       rateLimit: {
@@ -70,7 +67,7 @@ class SafetyCircuit {
   }
 
   isDeploymentAllowed(options = {}) {
-    console.log('🔍 Checking deployment safety circuit...');
+    console.log("🔍 Checking deployment safety circuit...");
 
     const checks = [
       this.checkCircuitState(),
@@ -84,11 +81,9 @@ class SafetyCircuit {
     const blocked = results.some((result) => !result.allowed);
 
     if (blocked) {
-      const reasons = results
-        .filter((result) => !result.allowed)
-        .map((result) => result.reason);
+      const reasons = results.filter((result) => !result.allowed).map((result) => result.reason);
 
-      console.log('🚫 Deployment blocked:', reasons.join(', '));
+      console.log("🚫 Deployment blocked:", reasons.join(", "));
       return {
         allowed: false,
         reasons: reasons,
@@ -96,7 +91,7 @@ class SafetyCircuit {
       };
     }
 
-    console.log('✅ Deployment allowed');
+    console.log("✅ Deployment allowed");
     return {
       allowed: true,
       circuit: this.state.circuit,
@@ -107,35 +102,32 @@ class SafetyCircuit {
     const now = new Date();
 
     switch (this.state.circuit) {
-      case 'OPEN':
+      case "OPEN":
         // Check if circuit should move to HALF_OPEN
-        if (
-          this.state.blockedUntil &&
-          now > new Date(this.state.blockedUntil)
-        ) {
-          this.state.circuit = 'HALF_OPEN';
+        if (this.state.blockedUntil && now > new Date(this.state.blockedUntil)) {
+          this.state.circuit = "HALF_OPEN";
           this.saveState();
-          console.log('🟡 Circuit moved to HALF_OPEN - testing mode');
-          return { allowed: true, reason: 'Circuit testing' };
+          console.log("🟡 Circuit moved to HALF_OPEN - testing mode");
+          return { allowed: true, reason: "Circuit testing" };
         }
         return {
           allowed: false,
           reason: `Circuit OPEN until ${this.state.blockedUntil}`,
         };
 
-      case 'HALF_OPEN':
+      case "HALF_OPEN":
         // Allow one deployment to test the circuit
-        return { allowed: true, reason: 'Circuit testing deployment' };
+        return { allowed: true, reason: "Circuit testing deployment" };
 
-      case 'CLOSED':
+      case "CLOSED":
       default:
-        return { allowed: true, reason: 'Circuit healthy' };
+        return { allowed: true, reason: "Circuit healthy" };
     }
   }
 
   checkDeploymentWindow() {
     if (this.state.emergencyMode) {
-      return { allowed: true, reason: 'Emergency mode active' };
+      return { allowed: true, reason: "Emergency mode active" };
     }
 
     const now = new Date();
@@ -146,7 +138,7 @@ class SafetyCircuit {
     if (!this.state.deploymentWindow.allowedDays.includes(currentDay)) {
       return {
         allowed: false,
-        reason: 'Deployment not allowed on weekends',
+        reason: "Deployment not allowed on weekends",
       };
     }
 
@@ -159,7 +151,7 @@ class SafetyCircuit {
       };
     }
 
-    return { allowed: true, reason: 'Within deployment window' };
+    return { allowed: true, reason: "Within deployment window" };
   }
 
   checkRateLimit() {
@@ -168,14 +160,13 @@ class SafetyCircuit {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     // Clean old deployments
-    this.state.rateLimit.recentDeployments =
-      this.state.rateLimit.recentDeployments.filter(
-        (deployment) => new Date(deployment.timestamp) > oneDayAgo,
-      );
+    this.state.rateLimit.recentDeployments = this.state.rateLimit.recentDeployments.filter(
+      (deployment) => new Date(deployment.timestamp) > oneDayAgo
+    );
 
     const recentDeployments = this.state.rateLimit.recentDeployments;
     const deploymentsLastHour = recentDeployments.filter(
-      (deployment) => new Date(deployment.timestamp) > oneHourAgo,
+      (deployment) => new Date(deployment.timestamp) > oneHourAgo
     ).length;
     const deploymentsLastDay = recentDeployments.length;
 
@@ -195,21 +186,18 @@ class SafetyCircuit {
       };
     }
 
-    return { allowed: true, reason: 'Rate limit OK' };
+    return { allowed: true, reason: "Rate limit OK" };
   }
 
   checkSystemHealth() {
     try {
       // Quick health check of critical services
-      const healthEndpoints = [
-        'https://api.summit.dev/health',
-        'https://graph.summit.dev/health',
-      ];
+      const healthEndpoints = ["https://api.summit.dev/health", "https://graph.summit.dev/health"];
 
       let healthyCount = 0;
       for (const endpoint of healthEndpoints) {
         try {
-          execSync(`curl -f -s --max-time 10 "${endpoint}"`, { stdio: 'pipe' });
+          execSync(`curl -f -s --max-time 10 "${endpoint}"`, { stdio: "pipe" });
           healthyCount++;
         } catch (error) {
           console.warn(`Health check failed for ${endpoint}`);
@@ -229,29 +217,29 @@ class SafetyCircuit {
         reason: `System health good: ${healthPercentage.toFixed(0)}%`,
       };
     } catch (error) {
-      console.warn('Health check failed:', error.message);
-      return { allowed: true, reason: 'Health check inconclusive' };
+      console.warn("Health check failed:", error.message);
+      return { allowed: true, reason: "Health check inconclusive" };
     }
   }
 
   checkChangeFreeze() {
     try {
       // Check if there's an active change freeze
-      if (fs.existsSync('ops/freeze-windows.yaml')) {
-        const freezeConfig = fs.readFileSync('ops/freeze-windows.yaml', 'utf8');
+      if (fs.existsSync("ops/freeze-windows.yaml")) {
+        const freezeConfig = fs.readFileSync("ops/freeze-windows.yaml", "utf8");
 
         // Simple check for active freeze (would be more sophisticated in practice)
-        if (freezeConfig.includes('active: true')) {
+        if (freezeConfig.includes("active: true")) {
           return {
             allowed: false,
-            reason: 'Change freeze active',
+            reason: "Change freeze active",
           };
         }
       }
 
-      return { allowed: true, reason: 'No change freeze' };
+      return { allowed: true, reason: "No change freeze" };
     } catch (error) {
-      return { allowed: true, reason: 'Change freeze check failed' };
+      return { allowed: true, reason: "Change freeze check failed" };
     }
   }
 
@@ -279,9 +267,9 @@ class SafetyCircuit {
     this.state.failureCount = 0;
 
     // If circuit was HALF_OPEN and deployment succeeded, close it
-    if (this.state.circuit === 'HALF_OPEN') {
-      this.state.circuit = 'CLOSED';
-      console.log('✅ Circuit CLOSED - system recovered');
+    if (this.state.circuit === "HALF_OPEN") {
+      this.state.circuit = "CLOSED";
+      console.log("✅ Circuit CLOSED - system recovered");
     }
   }
 
@@ -293,21 +281,19 @@ class SafetyCircuit {
     const blockDurationMinutes = 30;
 
     if (this.state.failureCount >= maxFailures) {
-      this.state.circuit = 'OPEN';
+      this.state.circuit = "OPEN";
       this.state.blockedUntil = new Date(
-        Date.now() + blockDurationMinutes * 60 * 1000,
+        Date.now() + blockDurationMinutes * 60 * 1000
       ).toISOString();
 
-      console.log(
-        `🚨 Circuit OPEN - too many failures (${this.state.failureCount})`,
-      );
+      console.log(`🚨 Circuit OPEN - too many failures (${this.state.failureCount})`);
       console.log(`⏰ Blocked until: ${this.state.blockedUntil}`);
     }
   }
 
-  enableEmergencyMode(reason = 'Manual override', user = 'unknown') {
+  enableEmergencyMode(reason = "Manual override", user = "unknown") {
     const timestamp = new Date().toISOString();
-    console.log('🚨 Emergency mode ENABLED:', reason);
+    console.log("🚨 Emergency mode ENABLED:", reason);
 
     this.state.emergencyMode = true;
     this.state.emergencyReason = reason;
@@ -316,11 +302,11 @@ class SafetyCircuit {
     // Audit log entry
     const auditEntry = {
       timestamp,
-      action: 'EMERGENCY_ENABLED',
-      user: user || process.env.GITHUB_ACTOR || 'unknown',
+      action: "EMERGENCY_ENABLED",
+      user: user || process.env.GITHUB_ACTOR || "unknown",
       reason,
       sessionId: `emergency-${Date.now()}`,
-      ipAddress: process.env.GITHUB_SERVER_URL || 'github-actions',
+      ipAddress: process.env.GITHUB_SERVER_URL || "github-actions",
     };
 
     this.state.auditLog = this.state.auditLog || [];
@@ -337,24 +323,21 @@ class SafetyCircuit {
     this.createEmergencyAuditIssue(auditEntry);
   }
 
-  disableEmergencyMode(user = 'unknown') {
+  disableEmergencyMode(user = "unknown") {
     const timestamp = new Date().toISOString();
-    console.log('✅ Emergency mode DISABLED');
+    console.log("✅ Emergency mode DISABLED");
 
     // Audit log entry for disabling
     const auditEntry = {
       timestamp,
-      action: 'EMERGENCY_DISABLED',
-      user: user || process.env.GITHUB_ACTOR || 'unknown',
-      reason: 'Emergency mode deactivated',
+      action: "EMERGENCY_DISABLED",
+      user: user || process.env.GITHUB_ACTOR || "unknown",
+      reason: "Emergency mode deactivated",
       sessionId: `emergency-${Date.now()}`,
       duration: this.state.emergencyActivated
-        ? (
-            (new Date() - new Date(this.state.emergencyActivated)) /
-            1000 /
-            60
-          ).toFixed(2) + ' minutes'
-        : 'unknown',
+        ? ((new Date() - new Date(this.state.emergencyActivated)) / 1000 / 60).toFixed(2) +
+          " minutes"
+        : "unknown",
     };
 
     this.state.auditLog = this.state.auditLog || [];
@@ -381,9 +364,9 @@ This emergency override was triggered to bypass Release Captain safety controls.
 
 ### Security Information
 - **IP Address**: ${auditEntry.ipAddress}
-- **GitHub Actor**: ${process.env.GITHUB_ACTOR || 'unknown'}
-- **Workflow**: ${process.env.GITHUB_WORKFLOW || 'unknown'}
-- **Repository**: ${process.env.GITHUB_REPOSITORY || 'unknown'}
+- **GitHub Actor**: ${process.env.GITHUB_ACTOR || "unknown"}
+- **Workflow**: ${process.env.GITHUB_WORKFLOW || "unknown"}
+- **Repository**: ${process.env.GITHUB_REPOSITORY || "unknown"}
 
 ### Required Actions
 - [ ] Review the emergency reason and validate it was appropriate
@@ -397,10 +380,10 @@ This emergency override was triggered to bypass Release Captain safety controls.
 
       // Create issue using GitHub CLI (if available)
       if (process.env.GITHUB_TOKEN) {
-        const { execSync } = require('child_process');
-        const fs = require('fs');
+        const { execSync } = require("child_process");
+        const fs = require("fs");
 
-        fs.writeFileSync('/tmp/emergency-audit.md', issueBody);
+        fs.writeFileSync("/tmp/emergency-audit.md", issueBody);
 
         execSync(
           `gh issue create \
@@ -410,15 +393,13 @@ This emergency override was triggered to bypass Release Captain safety controls.
           --assignee "${auditEntry.user}"`,
           {
             env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
-          },
+          }
         );
 
-        console.log(
-          `📝 Emergency audit issue created for session ${auditEntry.sessionId}`,
-        );
+        console.log(`📝 Emergency audit issue created for session ${auditEntry.sessionId}`);
       }
     } catch (error) {
-      console.warn('Failed to create emergency audit issue:', error.message);
+      console.warn("Failed to create emergency audit issue:", error.message);
     }
   }
 
@@ -436,7 +417,7 @@ This emergency override was triggered to bypass Release Captain safety controls.
   }
 
   reset() {
-    console.log('🔄 Resetting safety circuit');
+    console.log("🔄 Resetting safety circuit");
     this.state = this.getDefaultState();
     this.saveState();
   }
@@ -448,56 +429,56 @@ async function main() {
   const circuit = new SafetyCircuit();
 
   switch (command) {
-    case 'check':
+    case "check":
       const result = circuit.isDeploymentAllowed();
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.allowed ? 0 : 1);
       break;
 
-    case 'record-success':
-      circuit.recordDeployment(true, { source: 'cli' });
-      console.log('✅ Success recorded');
+    case "record-success":
+      circuit.recordDeployment(true, { source: "cli" });
+      console.log("✅ Success recorded");
       break;
 
-    case 'record-failure':
-      circuit.recordDeployment(false, { source: 'cli' });
-      console.log('❌ Failure recorded');
+    case "record-failure":
+      circuit.recordDeployment(false, { source: "cli" });
+      console.log("❌ Failure recorded");
       break;
 
-    case 'emergency-on':
-      const reason = process.argv[3] || 'CLI activation';
+    case "emergency-on":
+      const reason = process.argv[3] || "CLI activation";
       circuit.enableEmergencyMode(reason);
       break;
 
-    case 'emergency-off':
+    case "emergency-off":
       circuit.disableEmergencyMode();
       break;
 
-    case 'status':
+    case "status":
       console.log(JSON.stringify(circuit.getStatus(), null, 2));
       break;
 
-    case 'reset':
+    case "reset":
       circuit.reset();
       break;
 
     default:
-      console.log('Usage: safety-circuit.js <command>');
-      console.log('Commands:');
-      console.log('  check            - Check if deployment is allowed');
-      console.log('  record-success   - Record successful deployment');
-      console.log('  record-failure   - Record failed deployment');
-      console.log('  emergency-on     - Enable emergency mode');
-      console.log('  emergency-off    - Disable emergency mode');
-      console.log('  status           - Show circuit status');
-      console.log('  reset            - Reset circuit to default state');
+      console.log("Usage: safety-circuit.js <command>");
+      console.log("Commands:");
+      console.log("  check            - Check if deployment is allowed");
+      console.log("  record-success   - Record successful deployment");
+      console.log("  record-failure   - Record failed deployment");
+      console.log("  emergency-on     - Enable emergency mode");
+      console.log("  emergency-off    - Disable emergency mode");
+      console.log("  status           - Show circuit status");
+      console.log("  reset            - Reset circuit to default state");
       process.exit(1);
   }
 }
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error('Safety circuit error:', error.message);
+    console.error("Safety circuit error:", error.message);
     process.exit(1);
   });
 }

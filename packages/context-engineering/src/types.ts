@@ -1,16 +1,16 @@
 export type ContextStream =
-  | 'system'
-  | 'user'
-  | 'history'
-  | 'tools'
-  | 'toolOutputs'
-  | 'retrieval'
-  | 'state'
-  | 'workingMemory';
+  | "system"
+  | "user"
+  | "history"
+  | "tools"
+  | "toolOutputs"
+  | "retrieval"
+  | "state"
+  | "workingMemory";
 
-export type CompressionState = 'none' | 'extractive' | 'structured';
+export type CompressionState = "none" | "extractive" | "structured";
 
-export type ContextPriority = 'critical' | 'high' | 'medium' | 'low';
+export type ContextPriority = "critical" | "high" | "medium" | "low";
 
 export interface ContextItemInput {
   id?: string;
@@ -103,7 +103,7 @@ export interface ContextManifest {
 }
 
 export interface BuildContextResult {
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+  messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
   manifest: ContextManifest;
   metrics: ContextMetrics;
 }

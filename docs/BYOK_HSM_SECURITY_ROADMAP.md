@@ -102,7 +102,7 @@ graph TD
 // Customer-managed key configuration
 interface CustomerKeyConfig {
   tenantId: string;
-  kmsProvider: 'aws' | 'azure' | 'gcp' | 'hsm';
+  kmsProvider: "aws" | "azure" | "gcp" | "hsm";
   keyIdentifier: string; // ARN, resource ID, etc.
   crossAccountRole: string; // For AWS assumed role access
   permissions: KeyPermission[];
@@ -260,10 +260,7 @@ interface KeyProvider {
 
 // Tenant-aware key routing
 class TenantKeyManager {
-  async routeKeyOperation(
-    tenantId: string,
-    operation: CryptoOperation,
-  ): Promise<CryptoResult> {
+  async routeKeyOperation(tenantId: string, operation: CryptoOperation): Promise<CryptoResult> {
     const keyConfig = await this.getKeyConfig(tenantId);
     const provider = this.getProvider(keyConfig.provider);
 

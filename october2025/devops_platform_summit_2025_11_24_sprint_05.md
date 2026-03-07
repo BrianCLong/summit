@@ -64,14 +64,7 @@ metadata: { name: spire-server, namespace: spire }
 spec:
   server:
     trustDomain: example.internal
-    dataStore:
-      {
-        sql:
-          {
-            driverName: sqlite3,
-            fileName: '/run/spire/data/datastore.sqlite3',
-          },
-      }
+    dataStore: { sql: { driverName: sqlite3, fileName: "/run/spire/data/datastore.sqlite3" } }
   telemetry: { enablePrometheus: true }
 ```
 
@@ -108,21 +101,12 @@ spec:
           image: ghcr.io/org/pii-svc:${VERSION}
           env:
             - { name: VAULT_ADDR, value: https://vault.svc.cluster.local }
-            - {
-                name: SPIFFE_ENDPOINT_SOCKET,
-                value: unix:///run/spiffe/api.sock,
-              }
+            - { name: SPIFFE_ENDPOINT_SOCKET, value: unix:///run/spiffe/api.sock }
           volumeMounts:
             - { name: spiffe, mountPath: /run/spiffe }
         - name: attestor
           image: ghcr.io/org/enclave-attestor:latest
-          args:
-            [
-              '--verify-nitro',
-              '--require-claims',
-              'pcrs:sha384',
-              'image:${VERSION}',
-            ]
+          args: ["--verify-nitro", "--require-claims", "pcrs:sha384", "image:${VERSION}"]
       volumes:
         - name: spiffe
           csi: { driver: spiffe.csi.spiffe.io }
@@ -240,7 +224,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: waf-sync, namespace: edge }
 spec:
-  schedule: '*/5 * * * *'
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:
@@ -248,7 +232,7 @@ spec:
           containers:
             - name: sync
               image: ghcr.io/org/waf-sync:latest
-              args: ['--from-topic', 'fraud-signals', '--apply']
+              args: ["--from-topic", "fraud-signals", "--apply"]
           restartPolicy: OnFailure
 ```
 
@@ -292,9 +276,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata: { name: loadshed-config, namespace: gateway }
 data:
-  mode: 'adaptive'
-  shed_threshold_ms: '1500'
-  max_drop_percent: '30'
+  mode: "adaptive"
+  shed_threshold_ms: "1500"
+  max_drop_percent: "30"
 ```
 
 ### 3.6 eBPF Observability Hooks (optional but valuable)
@@ -309,9 +293,9 @@ spec:
   ingress:
     - fromEntities: [all]
       toPorts:
-        - ports: [{ port: '443', protocol: TCP }]
+        - ports: [{ port: "443", protocol: TCP }]
           rules:
-            http: [{ method: GET, path: '/' }]
+            http: [{ method: GET, path: "/" }]
 ```
 
 ---

@@ -2,7 +2,7 @@
  * Graph Embeddings (Node2Vec, DeepWalk, GNN)
  */
 
-import { Driver } from 'neo4j-driver';
+import { Driver } from "neo4j-driver";
 
 export interface EmbeddingConfig {
   dimensions: number;
@@ -16,7 +16,7 @@ export interface EmbeddingConfig {
 export interface NodeEmbedding {
   nodeId: string;
   embedding: number[];
-  algorithm: 'node2vec' | 'deepwalk' | 'gnn';
+  algorithm: "node2vec" | "deepwalk" | "gnn";
   metadata?: Record<string, any>;
 }
 
@@ -35,7 +35,7 @@ export class GraphEmbeddings {
       windowSize: 10,
       p: 1.0,
       q: 1.0,
-    },
+    }
   ): Promise<NodeEmbedding[]> {
     const session = this.driver.session();
     try {
@@ -74,13 +74,13 @@ export class GraphEmbeddings {
           windowSize: config.windowSize,
           p: config.p || 1.0,
           q: config.q || 1.0,
-        },
+        }
       );
 
       const embeddings: NodeEmbedding[] = result.records.map((record) => ({
-        nodeId: record.get('nodeId'),
-        embedding: record.get('embedding'),
-        algorithm: 'node2vec',
+        nodeId: record.get("nodeId"),
+        embedding: record.get("embedding"),
+        algorithm: "node2vec",
       }));
 
       // Drop the in-memory graph
@@ -88,7 +88,7 @@ export class GraphEmbeddings {
 
       return embeddings;
     } catch (error) {
-      console.error('Node2Vec generation error:', error);
+      console.error("Node2Vec generation error:", error);
       // Return empty array if GDS is not available
       return [];
     } finally {
@@ -105,7 +105,7 @@ export class GraphEmbeddings {
       walkLength: 80,
       numWalks: 10,
       windowSize: 10,
-    },
+    }
   ): Promise<NodeEmbedding[]> {
     // DeepWalk is similar to Node2Vec with p=1, q=1
     return this.generateNode2Vec({
@@ -134,7 +134,7 @@ export class GraphEmbeddings {
             embedding: embedding.embedding,
             algorithm: embedding.algorithm,
             dimensions: embedding.embedding.length,
-          },
+          }
         );
       }
     } finally {
@@ -147,7 +147,7 @@ export class GraphEmbeddings {
    */
   cosineSimilarity(embedding1: number[], embedding2: number[]): number {
     if (embedding1.length !== embedding2.length) {
-      throw new Error('Embeddings must have same dimensions');
+      throw new Error("Embeddings must have same dimensions");
     }
 
     let dotProduct = 0;
@@ -169,7 +169,7 @@ export class GraphEmbeddings {
   async findSimilarNodes(
     nodeId: string,
     topK = 10,
-    minSimilarity = 0.7,
+    minSimilarity = 0.7
   ): Promise<Array<{ nodeId: string; similarity: number }>> {
     const session = this.driver.session();
     try {
@@ -179,14 +179,14 @@ export class GraphEmbeddings {
         MATCH (n {id: $nodeId})
         RETURN n.embedding as embedding
         `,
-        { nodeId },
+        { nodeId }
       );
 
       if (targetResult.records.length === 0) {
         return [];
       }
 
-      const targetEmbedding = targetResult.records[0].get('embedding');
+      const targetEmbedding = targetResult.records[0].get("embedding");
 
       // Find similar nodes
       // Note: This is a simplified version. In production, use vector indexes
@@ -197,13 +197,13 @@ export class GraphEmbeddings {
         RETURN n.id as nodeId, n.embedding as embedding
         LIMIT 1000
         `,
-        { nodeId },
+        { nodeId }
       );
 
       const similarities = result.records
         .map((record) => ({
-          nodeId: record.get('nodeId'),
-          similarity: this.cosineSimilarity(targetEmbedding, record.get('embedding')),
+          nodeId: record.get("nodeId"),
+          similarity: this.cosineSimilarity(targetEmbedding, record.get("embedding")),
         }))
         .filter((item) => item.similarity >= minSimilarity)
         .sort((a, b) => b.similarity - a.similarity)
@@ -218,9 +218,7 @@ export class GraphEmbeddings {
   /**
    * Transfer learning: Use pre-trained embeddings
    */
-  async transferEmbeddings(
-    pretrainedEmbeddings: Map<string, number[]>,
-  ): Promise<void> {
+  async transferEmbeddings(pretrainedEmbeddings: Map<string, number[]>): Promise<void> {
     const session = this.driver.session();
     try {
       for (const [nodeId, embedding] of pretrainedEmbeddings.entries()) {
@@ -230,7 +228,7 @@ export class GraphEmbeddings {
           SET n.embedding = $embedding,
               n.embeddingAlgorithm = 'transfer_learning'
           `,
-          { nodeId, embedding },
+          { nodeId, embedding }
         );
       }
     } finally {

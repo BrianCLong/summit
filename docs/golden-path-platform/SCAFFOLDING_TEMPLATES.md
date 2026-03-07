@@ -40,14 +40,14 @@ companyos create pipeline --name etl-customers
 
 ### 1.3 Common Options
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--name` | Service/package name | Required |
-| `--description` | Package description | Empty |
-| `--team` | Owning team (for alerts) | Prompted |
-| `--tier` | Criticality tier (1-3) | 2 |
-| `--port` | HTTP port (API services) | 8080 |
-| `--dry-run` | Preview without creating | false |
+| Flag            | Description              | Default  |
+| --------------- | ------------------------ | -------- |
+| `--name`        | Service/package name     | Required |
+| `--description` | Package description      | Empty    |
+| `--team`        | Owning team (for alerts) | Prompted |
+| `--tier`        | Criticality tier (1-3)   | 2        |
+| `--port`        | HTTP port (API services) | 8080     |
+| `--dry-run`     | Preview without creating | false    |
 
 ---
 
@@ -58,6 +58,7 @@ companyos create pipeline --name etl-customers
 **Command**: `companyos create api-service --name <name>`
 
 **Generated Structure**:
+
 ```
 services/<name>/
 ├── .github/
@@ -101,13 +102,13 @@ services/<name>/
 
 ```typescript
 // src/config.ts
-import { z } from 'zod';
+import { z } from "zod";
 
 export const configSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(8080),
-  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
-  OTEL_SERVICE_NAME: z.string().default('{{SERVICE_NAME}}'),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  OTEL_SERVICE_NAME: z.string().default("{{SERVICE_NAME}}"),
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().optional(),
 });
 
@@ -117,22 +118,22 @@ export const config = configSchema.parse(process.env);
 
 ```typescript
 // src/metrics.ts
-import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
+import { Registry, Counter, Histogram, collectDefaultMetrics } from "prom-client";
 
 export const registry = new Registry();
 collectDefaultMetrics({ register: registry });
 
 export const httpRequestTotal = new Counter({
-  name: 'http_requests_total',
-  help: 'Total HTTP requests',
-  labelNames: ['method', 'path', 'status'],
+  name: "http_requests_total",
+  help: "Total HTTP requests",
+  labelNames: ["method", "path", "status"],
   registers: [registry],
 });
 
 export const httpRequestDuration = new Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'HTTP request duration in seconds',
-  labelNames: ['method', 'path', 'status'],
+  name: "http_request_duration_seconds",
+  help: "HTTP request duration in seconds",
+  labelNames: ["method", "path", "status"],
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
   registers: [registry],
 });
@@ -176,6 +177,7 @@ spec:
 **Command**: `companyos create worker --name <name> --queue <queue-name>`
 
 **Generated Structure**:
+
 ```
 services/<name>/
 ├── src/
@@ -197,27 +199,28 @@ services/<name>/
 ```
 
 **Worker-Specific Metrics**:
+
 ```typescript
 // src/metrics.ts
 export const messagesProcessedTotal = new Counter({
-  name: 'messages_processed_total',
-  help: 'Total messages processed',
-  labelNames: ['handler', 'status'],
+  name: "messages_processed_total",
+  help: "Total messages processed",
+  labelNames: ["handler", "status"],
   registers: [registry],
 });
 
 export const messageProcessingDuration = new Histogram({
-  name: 'message_processing_duration_seconds',
-  help: 'Message processing duration',
-  labelNames: ['handler'],
+  name: "message_processing_duration_seconds",
+  help: "Message processing duration",
+  labelNames: ["handler"],
   buckets: [0.1, 0.5, 1, 5, 10, 30, 60],
   registers: [registry],
 });
 
 export const consumerLag = new Gauge({
-  name: 'consumer_lag_messages',
-  help: 'Consumer lag in messages',
-  labelNames: ['partition'],
+  name: "consumer_lag_messages",
+  help: "Consumer lag in messages",
+  labelNames: ["partition"],
   registers: [registry],
 });
 ```
@@ -229,6 +232,7 @@ export const consumerLag = new Gauge({
 **Command**: `companyos create batch-job --name <name> --schedule "<cron>"`
 
 **Generated Structure**:
+
 ```
 pipelines/<name>/
 ├── src/
@@ -251,6 +255,7 @@ pipelines/<name>/
 ```
 
 **CronJob Template**:
+
 ```yaml
 # k8s/cronjob.yaml
 apiVersion: batch/v1
@@ -292,6 +297,7 @@ spec:
 **Command**: `companyos create data-service --name <name> --database <pg|neo4j|redis>`
 
 **Generated Structure**:
+
 ```
 services/<name>/
 ├── src/
@@ -318,14 +324,15 @@ services/<name>/
 ```
 
 **Database Health Check**:
+
 ```typescript
 // src/routes/health.ts
-router.get('/health/ready', async (req, res) => {
+router.get("/health/ready", async (req, res) => {
   try {
-    await db.query('SELECT 1');
-    res.json({ status: 'ok', database: 'connected' });
+    await db.query("SELECT 1");
+    res.json({ status: "ok", database: "connected" });
   } catch (error) {
-    res.status(503).json({ status: 'error', database: 'disconnected' });
+    res.status(503).json({ status: "error", database: "disconnected" });
   }
 });
 ```
@@ -337,6 +344,7 @@ router.get('/health/ready', async (req, res) => {
 **Command**: `companyos create frontend --name <name> --framework <next|vite>`
 
 **Generated Structure (Next.js)**:
+
 ```
 apps/<name>/
 ├── src/
@@ -370,11 +378,12 @@ apps/<name>/
 ```
 
 **Frontend SLOs**:
+
 ```yaml
 # slos/slos.yaml
 slos:
   - name: "core-web-vitals-lcp"
-    objective: 75.0  # 75% of users < 2.5s
+    objective: 75.0 # 75% of users < 2.5s
     description: "Largest Contentful Paint"
     sli:
       type: distribution
@@ -396,6 +405,7 @@ slos:
 **Command**: `companyos create library --name <name>`
 
 **Generated Structure**:
+
 ```
 packages/<name>/
 ├── src/
@@ -412,6 +422,7 @@ packages/<name>/
 ```
 
 **Package.json Template**:
+
 ```json
 {
   "name": "@intelgraph/{{LIBRARY_NAME}}",
@@ -448,6 +459,7 @@ packages/<name>/
 **Command**: `companyos create pipeline --name <name>`
 
 **Generated Structure**:
+
 ```
 pipelines/<name>/
 ├── src/
@@ -482,13 +494,14 @@ Every scaffold automatically includes the following without opt-in:
 
 ### 3.1 Testing Infrastructure
 
-| Component | Implementation |
-|-----------|----------------|
-| Unit Tests | Jest (TS) / pytest (Python) with coverage thresholds |
-| Test Fixtures | Sample data in `tests/fixtures/` |
-| CI Integration | Tests run on every PR |
+| Component      | Implementation                                       |
+| -------------- | ---------------------------------------------------- |
+| Unit Tests     | Jest (TS) / pytest (Python) with coverage thresholds |
+| Test Fixtures  | Sample data in `tests/fixtures/`                     |
+| CI Integration | Tests run on every PR                                |
 
 **Coverage Thresholds** (enforced in CI):
+
 ```javascript
 // jest.config.js
 module.exports = {
@@ -505,12 +518,12 @@ module.exports = {
 
 ### 3.2 Linting & Formatting
 
-| Tool | Purpose | Config |
-|------|---------|--------|
-| ESLint | TS/JS linting | `.eslintrc.json` with platform rules |
-| Prettier | Code formatting | Shared `.prettierrc` |
-| Ruff | Python linting | `pyproject.toml` |
-| Black | Python formatting | `pyproject.toml` |
+| Tool     | Purpose           | Config                               |
+| -------- | ----------------- | ------------------------------------ |
+| ESLint   | TS/JS linting     | `.eslintrc.json` with platform rules |
+| Prettier | Code formatting   | Shared `.prettierrc`                 |
+| Ruff     | Python linting    | `pyproject.toml`                     |
+| Black    | Python formatting | `pyproject.toml`                     |
 
 ### 3.3 OPA/Policy Hooks
 
@@ -576,14 +589,15 @@ Every service includes `slos/slos.yaml` with:
 
 ### 3.6 Observability Defaults
 
-| Component | Default |
-|-----------|---------|
-| Metrics | Prometheus client with RED metrics |
-| Logging | Pino (TS) / structlog (Python) JSON format |
-| Tracing | OpenTelemetry SDK auto-instrumentation |
-| Dashboard | Pre-built Grafana JSON in `dashboards/` |
+| Component | Default                                    |
+| --------- | ------------------------------------------ |
+| Metrics   | Prometheus client with RED metrics         |
+| Logging   | Pino (TS) / structlog (Python) JSON format |
+| Tracing   | OpenTelemetry SDK auto-instrumentation     |
+| Dashboard | Pre-built Grafana JSON in `dashboards/`    |
 
 **Standard Log Format**:
+
 ```json
 {
   "level": "info",
@@ -605,17 +619,17 @@ Every service includes `slos/slos.yaml` with:
 
 All templates support these variables:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `{{SERVICE_NAME}}` | Kebab-case service name | `users-api` |
-| `{{SERVICE_TITLE}}` | Title case for display | `Users API` |
-| `{{PACKAGE_NAME}}` | Full package name | `@intelgraph/users-api` |
-| `{{PORT}}` | HTTP port | `8080` |
-| `{{TEAM}}` | Owning team | `platform` |
-| `{{TIER}}` | Service tier (1-3) | `2` |
-| `{{DESCRIPTION}}` | Package description | `User management API` |
-| `{{AUTHOR}}` | Git author | `team@company.com` |
-| `{{YEAR}}` | Current year | `2024` |
+| Variable            | Description             | Example                 |
+| ------------------- | ----------------------- | ----------------------- |
+| `{{SERVICE_NAME}}`  | Kebab-case service name | `users-api`             |
+| `{{SERVICE_TITLE}}` | Title case for display  | `Users API`             |
+| `{{PACKAGE_NAME}}`  | Full package name       | `@intelgraph/users-api` |
+| `{{PORT}}`          | HTTP port               | `8080`                  |
+| `{{TEAM}}`          | Owning team             | `platform`              |
+| `{{TIER}}`          | Service tier (1-3)      | `2`                     |
+| `{{DESCRIPTION}}`   | Package description     | `User management API`   |
+| `{{AUTHOR}}`        | Git author              | `team@company.com`      |
+| `{{YEAR}}`          | Current year            | `2024`                  |
 
 ---
 

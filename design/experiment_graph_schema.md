@@ -12,26 +12,26 @@ The canonical representation of the graph will be a JSONL file, where each line 
 
 Nodes represent the fundamental entities in an experiment. Each node has a unique `id`, a `type`, a `timestamp`, and a `metadata` block containing type-specific attributes.
 
-| Type             | Description                                                                                             | Metadata Attributes (Examples)                                     |
-| ---------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `hypothesis`     | A testable statement or question that an experiment aims to investigate.                                | `statement`: "Using a larger learning rate will improve convergence." |
-| `dataset`        | A specific version of a dataset used in an experiment.                                                  | `name`: "IMDB", `version`: "v1.0", `source_uri`: "...", `checksum`: "..." |
-| `transform`      | A data preprocessing or feature engineering step.                                                       | `function`: "normalize_text", `parameters`: {"lowercase": true}     |
-| `model`          | A specific model architecture or configuration.                                                         | `architecture`: "BERT-base", `parameters`: {"layers": 12}          |
-| `training-run`   | The execution of a model training process.                                                              | `hyperparameters`: {"lr": 0.001}, `epochs`: 3, `batch_size`: 32      |
-| `eval`           | The result of evaluating a trained model on a dataset.                                                  | `metrics`: {"accuracy": 0.92, "f1": 0.91}, `dataset_id`: "..."      |
-| `analysis`       | An interpretation or summary of evaluation results, often linking back to a hypothesis.                 | `summary`: "The larger learning rate led to faster convergence..." |
+| Type           | Description                                                                             | Metadata Attributes (Examples)                                            |
+| -------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `hypothesis`   | A testable statement or question that an experiment aims to investigate.                | `statement`: "Using a larger learning rate will improve convergence."     |
+| `dataset`      | A specific version of a dataset used in an experiment.                                  | `name`: "IMDB", `version`: "v1.0", `source_uri`: "...", `checksum`: "..." |
+| `transform`    | A data preprocessing or feature engineering step.                                       | `function`: "normalize_text", `parameters`: {"lowercase": true}           |
+| `model`        | A specific model architecture or configuration.                                         | `architecture`: "BERT-base", `parameters`: {"layers": 12}                 |
+| `training-run` | The execution of a model training process.                                              | `hyperparameters`: {"lr": 0.001}, `epochs`: 3, `batch_size`: 32           |
+| `eval`         | The result of evaluating a trained model on a dataset.                                  | `metrics`: {"accuracy": 0.92, "f1": 0.91}, `dataset_id`: "..."            |
+| `analysis`     | An interpretation or summary of evaluation results, often linking back to a hypothesis. | `summary`: "The larger learning rate led to faster convergence..."        |
 
 ### Edges
 
 Edges define the relationships between nodes, forming the structure of the DAG. Each edge has a `source` and `target` node ID, a `type`, and a `timestamp`.
 
-| Type           | Description                                                                                         | Example Usage                                    |
-| -------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `depends_on`   | A general-purpose dependency relationship. The target node requires the source node as an input.     | `training-run` -> `depends_on` -> `model`        |
-| `refines`      | The target node is an improvement or iterative development upon the source node.                    | `model-v2` -> `refines` -> `model-v1`            |
-| `contradicts`  | The result in the target node contradicts or invalidates the source node (typically a hypothesis).    | `analysis` -> `contradicts` -> `hypothesis`      |
-| `supersedes`   | The target node makes the source node obsolete or irrelevant.                                       | `hypothesis-v2` -> `supersedes` -> `hypothesis-v1` |
+| Type          | Description                                                                                        | Example Usage                                      |
+| ------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `depends_on`  | A general-purpose dependency relationship. The target node requires the source node as an input.   | `training-run` -> `depends_on` -> `model`          |
+| `refines`     | The target node is an improvement or iterative development upon the source node.                   | `model-v2` -> `refines` -> `model-v1`              |
+| `contradicts` | The result in the target node contradicts or invalidates the source node (typically a hypothesis). | `analysis` -> `contradicts` -> `hypothesis`        |
+| `supersedes`  | The target node makes the source node obsolete or irrelevant.                                      | `hypothesis-v2` -> `supersedes` -> `hypothesis-v1` |
 
 ## Example JSONL Representation
 

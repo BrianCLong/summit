@@ -1,33 +1,33 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
-import { BrowserRouter } from 'react-router-dom';
-import { DataFetchErrorBoundary } from '@/components/error/DataFetchErrorBoundary';
-import { MutationErrorBoundary } from '@/components/error/MutationErrorBoundary';
-import { reportError } from '@/telemetry/metrics';
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { vi } from 'vitest'
+import { BrowserRouter } from 'react-router-dom'
+import { DataFetchErrorBoundary } from '@/components/error/DataFetchErrorBoundary'
+import { MutationErrorBoundary } from '@/components/error/MutationErrorBoundary'
+import { reportError } from '@/telemetry/metrics'
 
 // Mock telemetry
 vi.mock('@/telemetry/metrics', () => ({
   reportError: vi.fn(),
   generateErrorFingerprint: vi.fn(() => 'test-fingerprint'),
   categorizeError: vi.fn(() => 'data_fetch'),
-}));
+}))
 
 // Mock a dashboard component that can throw errors
 const MockDashboard = ({
   shouldThrow = false,
   errorType = 'data_fetch',
 }: {
-  shouldThrow?: boolean;
-  errorType?: 'data_fetch' | 'mutation' | 'network';
+  shouldThrow?: boolean
+  errorType?: 'data_fetch' | 'mutation' | 'network'
 }) => {
   if (shouldThrow) {
     if (errorType === 'network') {
-      throw new Error('Network request failed: timeout');
+      throw new Error('Network request failed: timeout')
     } else if (errorType === 'mutation') {
-      throw new Error('Failed to update user record');
+      throw new Error('Failed to update user record')
     } else {
-      throw new Error('Failed to fetch dashboard data');
+      throw new Error('Failed to fetch dashboard data')
     }
   }
 
@@ -37,13 +37,13 @@ const MockDashboard = ({
       <div>Dashboard loaded successfully</div>
       <button>Perform Action</button>
     </div>
-  );
-};
+  )
+}
 
 // Mock an admin component
 const MockAdminPanel = ({ shouldThrow = false }: { shouldThrow?: boolean }) => {
   if (shouldThrow) {
-    throw new Error('Failed to save feature flag configuration');
+    throw new Error('Failed to save feature flag configuration')
   }
 
   return (
@@ -51,18 +51,18 @@ const MockAdminPanel = ({ shouldThrow = false }: { shouldThrow?: boolean }) => {
       <h1>Admin Panel</h1>
       <button>Save Configuration</button>
     </div>
-  );
-};
+  )
+}
 
 describe('Error Boundary Integration Tests', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-  });
+    vi.clearAllMocks()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
 
   afterEach(() => {
-    vi.restoreAllMocks();
-  });
+    vi.restoreAllMocks()
+  })
 
   describe('DataFetchErrorBoundary with Dashboard', () => {
     it('renders dashboard successfully when no errors occur', () => {
@@ -72,11 +72,13 @@ describe('Error Boundary Integration Tests', () => {
             <MockDashboard />
           </DataFetchErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      expect(screen.getByText('Command Center Dashboard')).toBeInTheDocument();
-      expect(screen.getByText('Dashboard loaded successfully')).toBeInTheDocument();
-    });
+      expect(screen.getByText('Command Center Dashboard')).toBeInTheDocument()
+      expect(
+        screen.getByText('Dashboard loaded successfully')
+      ).toBeInTheDocument()
+    })
 
     it('catches data fetch errors and shows appropriate fallback', () => {
       render(
@@ -85,31 +87,31 @@ describe('Error Boundary Integration Tests', () => {
             <MockDashboard shouldThrow={true} errorType="data_fetch" />
           </DataFetchErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      expect(screen.getByText('Data Loading Failed')).toBeInTheDocument();
+      expect(screen.getByText('Data Loading Failed')).toBeInTheDocument()
       expect(
         screen.getByText(/We couldn't load data from Command Center/i)
-      ).toBeInTheDocument();
-    });
+      ).toBeInTheDocument()
+    })
 
     // TODO: Fake timers causing timeout - needs investigation
     it.skip('provides retry functionality for data fetch errors', async () => {
-      vi.useFakeTimers();
+      vi.useFakeTimers()
 
       const TestComponent = () => {
-        const [failCount, setFailCount] = React.useState(2);
+        const [failCount, setFailCount] = React.useState(2)
 
         // Fail twice, then succeed
         if (failCount > 0) {
           React.useEffect(() => {
-            setFailCount((c) => c - 1);
-          }, []);
-          throw new Error('Data fetch failed');
+            setFailCount(c => c - 1)
+          }, [])
+          throw new Error('Data fetch failed')
         }
 
-        return <MockDashboard />;
-      };
+        return <MockDashboard />
+      }
 
       render(
         <BrowserRouter>
@@ -117,33 +119,35 @@ describe('Error Boundary Integration Tests', () => {
             <TestComponent />
           </DataFetchErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
       // Error should be shown initially
-      expect(screen.getByText('Data Loading Failed')).toBeInTheDocument();
+      expect(screen.getByText('Data Loading Failed')).toBeInTheDocument()
 
       // Click retry
-      const retryButton = screen.getByRole('button', { name: /retry/i });
-      fireEvent.click(retryButton);
+      const retryButton = screen.getByRole('button', { name: /retry/i })
+      fireEvent.click(retryButton)
 
       // Should show retrying state
       await waitFor(() => {
-        expect(retryButton).toHaveTextContent(/retrying/i);
-      });
+        expect(retryButton).toHaveTextContent(/retrying/i)
+      })
 
       // Fast-forward through backoff delay
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000)
 
       // After retry, error should be cleared and content should show
       await waitFor(
         () => {
-          expect(screen.queryByText('Data Loading Failed')).not.toBeInTheDocument();
+          expect(
+            screen.queryByText('Data Loading Failed')
+          ).not.toBeInTheDocument()
         },
         { timeout: 2000 }
-      );
+      )
 
-      vi.useRealTimers();
-    });
+      vi.useRealTimers()
+    })
 
     it('shows user guidance for network errors', () => {
       render(
@@ -152,12 +156,14 @@ describe('Error Boundary Integration Tests', () => {
             <MockDashboard shouldThrow={true} errorType="network" />
           </DataFetchErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      expect(screen.getByText(/What you can do:/i)).toBeInTheDocument();
-      expect(screen.getByText(/Check your network connection/i)).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText(/What you can do:/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Check your network connection/i)
+      ).toBeInTheDocument()
+    })
+  })
 
   describe('MutationErrorBoundary with Admin Panel', () => {
     it('renders admin panel successfully when no errors occur', () => {
@@ -167,11 +173,13 @@ describe('Error Boundary Integration Tests', () => {
             <MockAdminPanel />
           </MutationErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      expect(screen.getByText('Admin Panel')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /save configuration/i })).toBeInTheDocument();
-    });
+      expect(screen.getByText('Admin Panel')).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /save configuration/i })
+      ).toBeInTheDocument()
+    })
 
     it('catches mutation errors and shows appropriate fallback', () => {
       render(
@@ -180,13 +188,13 @@ describe('Error Boundary Integration Tests', () => {
             <MockAdminPanel shouldThrow={true} />
           </MutationErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      expect(screen.getByText('Operation Failed')).toBeInTheDocument();
+      expect(screen.getByText('Operation Failed')).toBeInTheDocument()
       expect(
         screen.getByText(/The feature flag update could not be completed/i)
-      ).toBeInTheDocument();
-    });
+      ).toBeInTheDocument()
+    })
 
     it('shows data consistency warning for mutation errors', () => {
       render(
@@ -195,13 +203,15 @@ describe('Error Boundary Integration Tests', () => {
             <MockAdminPanel shouldThrow={true} />
           </MutationErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      expect(screen.getByText(/Important: Please verify your data/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Important: Please verify your data/i)
+      ).toBeInTheDocument()
       expect(
         screen.getByText(/check if your changes were partially saved/i)
-      ).toBeInTheDocument();
-    });
+      ).toBeInTheDocument()
+    })
 
     it('provides safe navigation back to workspace', () => {
       render(
@@ -210,11 +220,11 @@ describe('Error Boundary Integration Tests', () => {
             <MockAdminPanel shouldThrow={true} />
           </MutationErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
-      const backButton = screen.getByRole('button', { name: /back to safety/i });
-      expect(backButton).toBeInTheDocument();
-    });
+      const backButton = screen.getByRole('button', { name: /back to safety/i })
+      expect(backButton).toBeInTheDocument()
+    })
 
     it('does not enable automatic retry for mutations', () => {
       render(
@@ -223,24 +233,24 @@ describe('Error Boundary Integration Tests', () => {
             <MockAdminPanel shouldThrow={true} />
           </MutationErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
       // Should have a "Try Again" button but no retry counter
-      const tryAgainButton = screen.getByRole('button', { name: /try again/i });
-      expect(tryAgainButton).toBeInTheDocument();
-      expect(tryAgainButton).not.toHaveTextContent(/\d+\/\d+/);
-    });
-  });
+      const tryAgainButton = screen.getByRole('button', { name: /try again/i })
+      expect(tryAgainButton).toBeInTheDocument()
+      expect(tryAgainButton).not.toHaveTextContent(/\d+\/\d+/)
+    })
+  })
 
   describe('Nested Error Boundaries', () => {
     it('allows inner boundary to catch errors before outer boundary', () => {
       const OuterComponent = () => {
-        throw new Error('Outer error');
-      };
+        throw new Error('Outer error')
+      }
 
       const InnerComponent = () => {
-        throw new Error('Inner error');
-      };
+        throw new Error('Inner error')
+      }
 
       render(
         <BrowserRouter>
@@ -251,13 +261,15 @@ describe('Error Boundary Integration Tests', () => {
             </DataFetchErrorBoundary>
           </DataFetchErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
       // The outer boundary should catch the error from OuterComponent
-      expect(screen.getByText('Data Loading Failed')).toBeInTheDocument();
-      expect(screen.getByText(/We couldn't load data from Outer/i)).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('Data Loading Failed')).toBeInTheDocument()
+      expect(
+        screen.getByText(/We couldn't load data from Outer/i)
+      ).toBeInTheDocument()
+    })
+  })
 
   describe('Error Telemetry', () => {
     it('reports errors with correct categorization', () => {
@@ -267,7 +279,7 @@ describe('Error Boundary Integration Tests', () => {
             <MockDashboard shouldThrow={true} errorType="data_fetch" />
           </DataFetchErrorBoundary>
         </BrowserRouter>
-      );
+      )
 
       expect(reportError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -279,7 +291,7 @@ describe('Error Boundary Integration Tests', () => {
           dataSourceName: 'Test',
           boundaryType: 'data_fetch',
         })
-      );
-    });
-  });
-});
+      )
+    })
+  })
+})

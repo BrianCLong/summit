@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation, gql } from "@apollo/client";
 
 // GraphQL Queries
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -118,7 +118,7 @@ interface TimeRange {
 interface Alert {
   id: string;
   type: string;
-  severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   title: string;
   summary: string;
   createdAt: string;
@@ -187,19 +187,19 @@ interface ThreatSummary {
 
 // Severity colors
 const severityColors: Record<string, string> = {
-  CRITICAL: '#d32f2f',
-  HIGH: '#f57c00',
-  MEDIUM: '#fbc02d',
-  LOW: '#388e3c',
-  INFO: '#1976d2',
+  CRITICAL: "#d32f2f",
+  HIGH: "#f57c00",
+  MEDIUM: "#fbc02d",
+  LOW: "#388e3c",
+  INFO: "#1976d2",
 };
 
 const severityBgColors: Record<string, string> = {
-  CRITICAL: '#ffebee',
-  HIGH: '#fff3e0',
-  MEDIUM: '#fffde7',
-  LOW: '#e8f5e9',
-  INFO: '#e3f2fd',
+  CRITICAL: "#ffebee",
+  HIGH: "#fff3e0",
+  MEDIUM: "#fffde7",
+  LOW: "#e8f5e9",
+  INFO: "#e3f2fd",
 };
 
 // Format helpers
@@ -227,17 +227,24 @@ interface StatCardProps {
   title: string;
   value: number | string;
   icon: string;
-  trend?: 'up' | 'down' | 'stable';
+  trend?: "up" | "down" | "stable";
   color?: string;
   onClick?: () => void;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color = '#1976d2', onClick }) => (
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  icon,
+  trend,
+  color = "#1976d2",
+  onClick,
+}) => (
   <div
     className="stat-card"
     onClick={onClick}
-    style={{ cursor: onClick ? 'pointer' : 'default' }}
-    role={onClick ? 'button' : undefined}
+    style={{ cursor: onClick ? "pointer" : "default" }}
+    role={onClick ? "button" : undefined}
     tabIndex={onClick ? 0 : undefined}
   >
     <div className="stat-icon" style={{ backgroundColor: `${color}15`, color }}>
@@ -249,7 +256,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color = 
     </div>
     {trend && (
       <div className={`stat-trend ${trend}`}>
-        {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
+        {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}
       </div>
     )}
   </div>
@@ -261,10 +268,7 @@ interface AlertItemProps {
 }
 
 const AlertItem: React.FC<AlertItemProps> = ({ alert, onAcknowledge }) => (
-  <div
-    className="alert-item"
-    style={{ borderLeftColor: severityColors[alert.severity] }}
-  >
+  <div className="alert-item" style={{ borderLeftColor: severityColors[alert.severity] }}>
     <div className="alert-header">
       <span
         className="alert-severity"
@@ -275,17 +279,14 @@ const AlertItem: React.FC<AlertItemProps> = ({ alert, onAcknowledge }) => (
       >
         {alert.severity}
       </span>
-      <span className="alert-type">{alert.type.replace(/_/g, ' ')}</span>
+      <span className="alert-type">{alert.type.replace(/_/g, " ")}</span>
       <span className="alert-time">{formatRelativeTime(alert.createdAt)}</span>
     </div>
     <div className="alert-title">{alert.title}</div>
     <div className="alert-summary">{alert.summary}</div>
     <div className="alert-actions">
-      {alert.status === 'NEW' && (
-        <button
-          className="btn-acknowledge"
-          onClick={() => onAcknowledge(alert.id)}
-        >
+      {alert.status === "NEW" && (
+        <button className="btn-acknowledge" onClick={() => onAcknowledge(alert.id)}>
           Acknowledge
         </button>
       )}
@@ -306,24 +307,20 @@ const ThreatActorCard: React.FC<ThreatActorCardProps> = ({ actor, onClick }) => 
       <span className="actor-confidence">{Math.round(actor.confidence * 100)}%</span>
     </div>
     <div className="actor-attribution">
-      {actor.attribution.nationState || 'Unknown Attribution'}
-      <span className="attribution-confidence">
-        ({actor.attribution.confidence})
-      </span>
+      {actor.attribution.nationState || "Unknown Attribution"}
+      <span className="attribution-confidence">({actor.attribution.confidence})</span>
     </div>
     <div className="actor-capabilities">
       <span className="sophistication">{actor.capabilities.sophistication}</span>
       <div className="domains">
         {actor.capabilities.domains.slice(0, 3).map((domain, i) => (
           <span key={i} className="domain-tag">
-            {domain.replace(/_/g, ' ')}
+            {domain.replace(/_/g, " ")}
           </span>
         ))}
       </div>
     </div>
-    <div className="actor-updated">
-      Updated: {formatRelativeTime(actor.lastUpdated)}
-    </div>
+    <div className="actor-updated">Updated: {formatRelativeTime(actor.lastUpdated)}</div>
   </div>
 );
 
@@ -334,10 +331,10 @@ interface NarrativeCardProps {
 
 const NarrativeCard: React.FC<NarrativeCardProps> = ({ narrative, onClick }) => {
   const harmColors: Record<string, string> = {
-    SEVERE: '#d32f2f',
-    HIGH: '#f57c00',
-    MEDIUM: '#fbc02d',
-    LOW: '#388e3c',
+    SEVERE: "#d32f2f",
+    HIGH: "#f57c00",
+    MEDIUM: "#fbc02d",
+    LOW: "#388e3c",
   };
 
   return (
@@ -346,8 +343,8 @@ const NarrativeCard: React.FC<NarrativeCardProps> = ({ narrative, onClick }) => 
         <span
           className="narrative-status"
           style={{
-            backgroundColor: narrative.status === 'VIRAL' ? '#ffebee' : '#e3f2fd',
-            color: narrative.status === 'VIRAL' ? '#d32f2f' : '#1976d2',
+            backgroundColor: narrative.status === "VIRAL" ? "#ffebee" : "#e3f2fd",
+            color: narrative.status === "VIRAL" ? "#d32f2f" : "#1976d2",
           }}
         >
           {narrative.status}
@@ -362,16 +359,16 @@ const NarrativeCard: React.FC<NarrativeCardProps> = ({ narrative, onClick }) => 
       <div className="narrative-title">{narrative.title}</div>
       <div className="narrative-themes">
         {narrative.themes.slice(0, 3).map((theme, i) => (
-          <span key={i} className="theme-tag">{theme}</span>
+          <span key={i} className="theme-tag">
+            {theme}
+          </span>
         ))}
       </div>
       <div className="narrative-metrics">
         <span>Authenticity: {Math.round(narrative.authenticityScore * 100)}%</span>
         <span>Reach: {narrative.impactAssessment.reach.toLocaleString()}</span>
       </div>
-      <div className="narrative-dates">
-        First seen: {formatRelativeTime(narrative.firstSeen)}
-      </div>
+      <div className="narrative-dates">First seen: {formatRelativeTime(narrative.firstSeen)}</div>
     </div>
   );
 };
@@ -391,11 +388,8 @@ const AnomalyTimeline: React.FC<AnomalyTimelineProps> = ({ anomalies, onSelect }
         style={{ borderLeftColor: severityColors[anomaly.severity] }}
       >
         <div className="timeline-header">
-          <span className="anomaly-type">{anomaly.type.replace(/_/g, ' ')}</span>
-          <span
-            className="anomaly-severity"
-            style={{ color: severityColors[anomaly.severity] }}
-          >
+          <span className="anomaly-type">{anomaly.type.replace(/_/g, " ")}</span>
+          <span className="anomaly-severity" style={{ color: severityColors[anomaly.severity] }}>
             {anomaly.severity}
           </span>
         </div>
@@ -404,9 +398,7 @@ const AnomalyTimeline: React.FC<AnomalyTimelineProps> = ({ anomalies, onSelect }
           <span>{formatRelativeTime(anomaly.timestamp)}</span>
           {anomaly.entityId && <span>Entity: {anomaly.entityId.slice(0, 8)}...</span>}
           {anomaly.correlations.length > 0 && (
-            <span className="correlation-badge">
-              {anomaly.correlations.length} correlations
-            </span>
+            <span className="correlation-badge">{anomaly.correlations.length} correlations</span>
           )}
         </div>
       </div>
@@ -421,7 +413,9 @@ export function CounterIntelligenceDashboard() {
     start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     end: new Date(),
   });
-  const [activeTab, setActiveTab] = useState<'overview' | 'anomalies' | 'actors' | 'narratives'>('overview');
+  const [activeTab, setActiveTab] = useState<"overview" | "anomalies" | "actors" | "narratives">(
+    "overview"
+  );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAnomaly, setSelectedAnomaly] = useState<Anomaly | null>(null);
 
@@ -437,48 +431,54 @@ export function CounterIntelligenceDashboard() {
 
   const mockAlerts: Alert[] = [
     {
-      id: '1',
-      type: 'PATTERN_MATCH',
-      severity: 'CRITICAL',
-      title: 'Data Exfiltration Pattern Detected',
-      summary: 'Multiple indicators suggest unauthorized data transfer involving 3 entities',
+      id: "1",
+      type: "PATTERN_MATCH",
+      severity: "CRITICAL",
+      title: "Data Exfiltration Pattern Detected",
+      summary: "Multiple indicators suggest unauthorized data transfer involving 3 entities",
       createdAt: new Date(Date.now() - 30 * 60000).toISOString(),
-      status: 'NEW',
+      status: "NEW",
     },
     {
-      id: '2',
-      type: 'ANOMALY_CORRELATION',
-      severity: 'HIGH',
-      title: 'Unusual Access Pattern Cluster',
-      summary: 'Correlated access anomalies from finance department after hours',
+      id: "2",
+      type: "ANOMALY_CORRELATION",
+      severity: "HIGH",
+      title: "Unusual Access Pattern Cluster",
+      summary: "Correlated access anomalies from finance department after hours",
       createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
-      status: 'INVESTIGATING',
+      status: "INVESTIGATING",
     },
     {
-      id: '3',
-      type: 'BEHAVIOR_CHANGE',
-      severity: 'MEDIUM',
-      title: 'Communication Pattern Shift',
-      summary: 'Significant change in external communication volume detected',
+      id: "3",
+      type: "BEHAVIOR_CHANGE",
+      severity: "MEDIUM",
+      title: "Communication Pattern Shift",
+      summary: "Significant change in external communication volume detected",
       createdAt: new Date(Date.now() - 5 * 3600000).toISOString(),
-      status: 'NEW',
+      status: "NEW",
     },
   ];
 
   const mockThreatActors: ThreatActor[] = [
     {
-      id: 'ta1',
-      codename: 'PHANTOM_SERPENT',
-      attribution: { nationState: 'APT29', confidence: 'HIGH' },
-      capabilities: { sophistication: 'NATION_STATE', domains: ['NETWORK_EXPLOITATION', 'SUPPLY_CHAIN'] },
+      id: "ta1",
+      codename: "PHANTOM_SERPENT",
+      attribution: { nationState: "APT29", confidence: "HIGH" },
+      capabilities: {
+        sophistication: "NATION_STATE",
+        domains: ["NETWORK_EXPLOITATION", "SUPPLY_CHAIN"],
+      },
       confidence: 0.87,
       lastUpdated: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
     {
-      id: 'ta2',
-      codename: 'SHADOW_MANTIS',
-      attribution: { nationState: null, confidence: 'LOW' },
-      capabilities: { sophistication: 'ADVANCED', domains: ['SOCIAL_ENGINEERING', 'DISINFORMATION'] },
+      id: "ta2",
+      codename: "SHADOW_MANTIS",
+      attribution: { nationState: null, confidence: "LOW" },
+      capabilities: {
+        sophistication: "ADVANCED",
+        domains: ["SOCIAL_ENGINEERING", "DISINFORMATION"],
+      },
       confidence: 0.65,
       lastUpdated: new Date(Date.now() - 5 * 86400000).toISOString(),
     },
@@ -486,22 +486,22 @@ export function CounterIntelligenceDashboard() {
 
   const mockNarratives: Narrative[] = [
     {
-      id: 'n1',
-      title: 'Corporate Security Breach Claims',
-      themes: ['Data Breach', 'Corporate Espionage', 'Insider Threat'],
+      id: "n1",
+      title: "Corporate Security Breach Claims",
+      themes: ["Data Breach", "Corporate Espionage", "Insider Threat"],
       authenticityScore: 0.23,
-      status: 'ACTIVE',
-      impactAssessment: { potentialHarm: 'HIGH', reach: 45000 },
+      status: "ACTIVE",
+      impactAssessment: { potentialHarm: "HIGH", reach: 45000 },
       firstSeen: new Date(Date.now() - 3 * 86400000).toISOString(),
       lastSeen: new Date(Date.now() - 1 * 3600000).toISOString(),
     },
     {
-      id: 'n2',
-      title: 'Supply Chain Vulnerability Allegations',
-      themes: ['Supply Chain', 'Software Security'],
+      id: "n2",
+      title: "Supply Chain Vulnerability Allegations",
+      themes: ["Supply Chain", "Software Security"],
       authenticityScore: 0.78,
-      status: 'EMERGING',
-      impactAssessment: { potentialHarm: 'MEDIUM', reach: 12000 },
+      status: "EMERGING",
+      impactAssessment: { potentialHarm: "MEDIUM", reach: 12000 },
       firstSeen: new Date(Date.now() - 1 * 86400000).toISOString(),
       lastSeen: new Date(Date.now() - 30 * 60000).toISOString(),
     },
@@ -509,55 +509,55 @@ export function CounterIntelligenceDashboard() {
 
   const mockAnomalies: Anomaly[] = [
     {
-      id: 'a1',
-      type: 'DATA_EXFILTRATION',
-      severity: 'CRITICAL',
+      id: "a1",
+      type: "DATA_EXFILTRATION",
+      severity: "CRITICAL",
       confidence: 0.92,
-      description: 'Large data transfer to external endpoint detected outside business hours',
+      description: "Large data transfer to external endpoint detected outside business hours",
       timestamp: new Date(Date.now() - 1 * 3600000).toISOString(),
-      entityId: 'user-12345',
-      status: 'CORRELATED',
-      correlations: ['cluster-1'],
+      entityId: "user-12345",
+      status: "CORRELATED",
+      correlations: ["cluster-1"],
     },
     {
-      id: 'a2',
-      type: 'ACCESS_ANOMALY',
-      severity: 'HIGH',
+      id: "a2",
+      type: "ACCESS_ANOMALY",
+      severity: "HIGH",
       confidence: 0.85,
-      description: 'Unusual access to restricted financial documents',
+      description: "Unusual access to restricted financial documents",
       timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
-      entityId: 'user-12345',
-      status: 'CORRELATED',
-      correlations: ['cluster-1'],
+      entityId: "user-12345",
+      status: "CORRELATED",
+      correlations: ["cluster-1"],
     },
     {
-      id: 'a3',
-      type: 'BEHAVIORAL_DEVIATION',
-      severity: 'MEDIUM',
+      id: "a3",
+      type: "BEHAVIORAL_DEVIATION",
+      severity: "MEDIUM",
       confidence: 0.72,
-      description: 'Significant deviation from normal working hours pattern',
+      description: "Significant deviation from normal working hours pattern",
       timestamp: new Date(Date.now() - 12 * 3600000).toISOString(),
-      entityId: 'user-67890',
-      status: 'NEW',
+      entityId: "user-67890",
+      status: "NEW",
       correlations: [],
     },
   ];
 
   const handleAcknowledgeAlert = useCallback((alertId: string) => {
     // eslint-disable-next-line no-console
-    console.log('Acknowledging alert:', alertId);
+    console.log("Acknowledging alert:", alertId);
     // Would call mutation
   }, []);
 
   const handleSelectThreatActor = useCallback((actorId: string) => {
     // eslint-disable-next-line no-console
-    console.log('Selected threat actor:', actorId);
+    console.log("Selected threat actor:", actorId);
     // Would navigate to detail view
   }, []);
 
   const handleSelectNarrative = useCallback((narrativeId: string) => {
     // eslint-disable-next-line no-console
-    console.log('Selected narrative:', narrativeId);
+    console.log("Selected narrative:", narrativeId);
     // Would navigate to detail view
   }, []);
 
@@ -1050,26 +1050,26 @@ export function CounterIntelligenceDashboard() {
 
       <nav className="tab-nav">
         <button
-          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
+          className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
+          onClick={() => setActiveTab("overview")}
         >
           Overview
         </button>
         <button
-          className={`tab-btn ${activeTab === 'anomalies' ? 'active' : ''}`}
-          onClick={() => setActiveTab('anomalies')}
+          className={`tab-btn ${activeTab === "anomalies" ? "active" : ""}`}
+          onClick={() => setActiveTab("anomalies")}
         >
           Anomalies
         </button>
         <button
-          className={`tab-btn ${activeTab === 'actors' ? 'active' : ''}`}
-          onClick={() => setActiveTab('actors')}
+          className={`tab-btn ${activeTab === "actors" ? "active" : ""}`}
+          onClick={() => setActiveTab("actors")}
         >
           Threat Actors
         </button>
         <button
-          className={`tab-btn ${activeTab === 'narratives' ? 'active' : ''}`}
-          onClick={() => setActiveTab('narratives')}
+          className={`tab-btn ${activeTab === "narratives" ? "active" : ""}`}
+          onClick={() => setActiveTab("narratives")}
         >
           Narratives
         </button>
@@ -1077,36 +1077,22 @@ export function CounterIntelligenceDashboard() {
 
       <div className="main-content">
         <div className="alerts-section">
-          <h2 className="section-title">
-            🚨 Recent Alerts
-          </h2>
+          <h2 className="section-title">🚨 Recent Alerts</h2>
           {mockAlerts.map((alert) => (
-            <AlertItem
-              key={alert.id}
-              alert={alert}
-              onAcknowledge={handleAcknowledgeAlert}
-            />
+            <AlertItem key={alert.id} alert={alert} onAcknowledge={handleAcknowledgeAlert} />
           ))}
         </div>
 
         <div className="sidebar">
           <div className="actors-section">
-            <h2 className="section-title">
-              👤 Active Threat Actors
-            </h2>
+            <h2 className="section-title">👤 Active Threat Actors</h2>
             {mockThreatActors.map((actor) => (
-              <ThreatActorCard
-                key={actor.id}
-                actor={actor}
-                onClick={handleSelectThreatActor}
-              />
+              <ThreatActorCard key={actor.id} actor={actor} onClick={handleSelectThreatActor} />
             ))}
           </div>
 
           <div className="narratives-section">
-            <h2 className="section-title">
-              📰 Tracked Narratives
-            </h2>
+            <h2 className="section-title">📰 Tracked Narratives</h2>
             {mockNarratives.map((narrative) => (
               <NarrativeCard
                 key={narrative.id}
@@ -1118,13 +1104,10 @@ export function CounterIntelligenceDashboard() {
         </div>
       </div>
 
-      {activeTab === 'anomalies' && (
+      {activeTab === "anomalies" && (
         <div className="anomalies-section" style={{ marginTop: 24 }}>
           <h2 className="section-title">📊 Anomaly Timeline</h2>
-          <AnomalyTimeline
-            anomalies={mockAnomalies}
-            onSelect={handleSelectAnomaly}
-          />
+          <AnomalyTimeline anomalies={mockAnomalies} onSelect={handleSelectAnomaly} />
         </div>
       )}
     </div>

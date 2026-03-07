@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 type Preview = {
   depth: number;
@@ -9,9 +9,7 @@ type Preview = {
 };
 
 export default function CostPreviewPanel() {
-  const [operation, setOperation] = React.useState<string>(
-    'query { me { id name } }',
-  );
+  const [operation, setOperation] = React.useState<string>("query { me { id name } }");
   const [loading, setLoading] = React.useState(false);
   const [preview, setPreview] = React.useState<Preview | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -21,13 +19,13 @@ export default function CostPreviewPanel() {
     setError(null);
     setPreview(null);
     try {
-      const res = await fetch('/api/graphql/cost-preview', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/graphql/cost-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ operation }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'Request failed');
+      if (!res.ok) throw new Error(json?.error || "Request failed");
       setPreview(json.preview as Preview);
     } catch (e: any) {
       setError(e.message);
@@ -36,12 +34,12 @@ export default function CostPreviewPanel() {
     }
   };
 
-  if (import.meta?.env?.VITE_COST_PREVIEW !== '1') return null;
+  if (import.meta?.env?.VITE_COST_PREVIEW !== "1") return null;
 
   return (
     <div
       style={{
-        border: '1px solid #eee',
+        border: "1px solid #eee",
         borderRadius: 8,
         padding: 12,
         marginTop: 12,
@@ -53,18 +51,18 @@ export default function CostPreviewPanel() {
         onChange={(e) => setOperation(e.target.value)}
         rows={6}
         style={{
-          width: '100%',
-          fontFamily: 'monospace',
+          width: "100%",
+          fontFamily: "monospace",
           fontSize: 12,
           padding: 8,
         }}
         aria-label="GraphQL operation"
       />
-      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+      <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
         <button onClick={run} disabled={loading} aria-busy={loading}>
-          {loading ? 'Estimating…' : 'Estimate'}
+          {loading ? "Estimating…" : "Estimate"}
         </button>
-        {error && <span style={{ color: 'crimson' }}>{error}</span>}
+        {error && <span style={{ color: "crimson" }}>{error}</span>}
       </div>
       {preview && (
         <div style={{ marginTop: 8, fontSize: 12 }}>

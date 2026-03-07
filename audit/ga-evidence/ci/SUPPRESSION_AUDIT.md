@@ -11,12 +11,12 @@ This audit identified and categorized all code quality suppressions across the S
 
 ### Suppression Statistics
 
-| Suppression Type | Count | Files | Status |
-|-----------------|-------|-------|--------|
-| `eslint-disable` (TypeScript) | 571 | 353 | Reviewed |
-| `eslint-disable` (JavaScript) | 118 | 55 | Reviewed |
-| `@ts-ignore` | 105 | 65 | Requires Action |
-| `@ts-expect-error` | 17 | 9 | Acceptable |
+| Suppression Type              | Count | Files | Status          |
+| ----------------------------- | ----- | ----- | --------------- |
+| `eslint-disable` (TypeScript) | 571   | 353   | Reviewed        |
+| `eslint-disable` (JavaScript) | 118   | 55    | Reviewed        |
+| `@ts-ignore`                  | 105   | 65    | Requires Action |
+| `@ts-expect-error`            | 17    | 9     | Acceptable      |
 
 **Total Suppressions:** 811 across 482 unique files
 
@@ -27,6 +27,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Pattern:** `eslint-disable-next-line @typescript-eslint/no-explicit-any`
 
 **Locations:**
+
 - `/home/user/summit/server/src/validation/index.ts` (10 occurrences)
 - `/home/user/summit/server/src/validation/MutationValidators.ts` (29 occurrences)
 - Generic middleware and resolver wrappers requiring dynamic typing
@@ -42,6 +43,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Pattern:** `eslint-disable` in generated files
 
 **Locations:**
+
 - `/home/user/summit/packages/sdk/generated/**/*.ts` (100+ files)
 - `/home/user/summit/ga-graphai/packages/prov-ledger/src/proto/prov-ledger.ts`
 - `/home/user/summit/bindings/djce-pb/src/index.ts`
@@ -57,6 +59,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Pattern:** `eslint-disable` in test files and mocks
 
 **Locations:**
+
 - `/home/user/summit/apps/web/public/mockServiceWorker.js` (MSW generated)
 - Test setup files using `@ts-ignore` for mock imports
 - `/home/user/summit/tests/integration/setup-tests.ts` (3 `@ts-expect-error`)
@@ -72,6 +75,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Pattern:** `@ts-ignore` in older components
 
 **Locations:**
+
 - `/home/user/summit/client/src/components/*.tsx` (multiple legacy components)
 - `/home/user/summit/apps/mobile-interface/src/**/*.tsx`
 
@@ -80,6 +84,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Risk Level:** MEDIUM - May hide actual type errors
 
 **Recommendation:**
+
 - REMEDIATE - Create typed interfaces for these components
 - Track in technical debt backlog
 - Set 90-day deadline to remove or justify each instance
@@ -89,6 +94,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Pattern:** `@ts-ignore` in instrumentation code
 
 **Locations:**
+
 - `/home/user/summit/server/src/observability/neo4j-instrumentation.ts` (4 occurrences)
 - `/home/user/summit/server/src/observability/postgres-instrumentation.ts`
 - `/home/user/summit/server/src/observability/redis-instrumentation.ts`
@@ -98,6 +104,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Risk Level:** MEDIUM - Runtime monkey-patching can break with dependency updates
 
 **Recommendation:**
+
 - INVESTIGATE - Check if newer @opentelemetry packages have proper types
 - Add runtime error handling around instrumentation
 - Document expected errors with `@ts-expect-error <reason>`
@@ -107,6 +114,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Pattern:** `@ts-expect-error` with explanations
 
 **Locations:**
+
 - `/home/user/summit/server/src/billing/adapters/FileBillingAdapter.ts`
 - `/home/user/summit/ga-graphai/packages/common-types/tests/events.test.ts`
 
@@ -125,6 +133,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Risk:** HIGH - Security-critical real-time connection handling
 
 **Action Required:**
+
 1. Review authentication/authorization logic
 2. Ensure proper error handling exists
 3. Replace with typed interfaces or `@ts-expect-error` with documented reasons
@@ -136,6 +145,7 @@ This audit identified and categorized all code quality suppressions across the S
 **Risk:** MEDIUM - Input validation security boundary
 
 **Action Required:**
+
 1. Document each suppression with inline comments
 2. Ensure Zod validation occurs before any suppressed code
 3. Add integration tests for edge cases
@@ -145,6 +155,7 @@ This audit identified and categorized all code quality suppressions across the S
 ### Policy: Suppression Approval Gate
 
 All new suppressions must:
+
 1. Include inline comment explaining justification
 2. Reference issue/ticket for remediation plan (if temporary)
 3. Be approved in code review by 2+ reviewers
@@ -153,6 +164,7 @@ All new suppressions must:
 ### Policy: Prohibited Suppressions
 
 The following are NEVER acceptable:
+
 - `eslint-disable` without specific rule name
 - `@ts-ignore` in security-critical paths (auth, crypto, validation)
 - Suppressions in production configuration files
@@ -161,12 +173,14 @@ The following are NEVER acceptable:
 ### Policy: Preferred Patterns
 
 **DO:**
+
 ```typescript
 // @ts-expect-error - Express types incompatible with our typed middleware
 const handler: RequestHandler = (req, res, next) => { ... }
 ```
 
 **DON'T:**
+
 ```typescript
 // @ts-ignore
 const handler = (req, res, next) => { ... }
@@ -180,18 +194,18 @@ suppression_metrics:
   suppressions_per_file: 1.68
   high_risk_files: 2
   justified_percentage: 80%
-  requires_remediation: 163  # 20% of total
+  requires_remediation: 163 # 20% of total
 
   by_type:
     eslint_disable_typescript: 571
     eslint_disable_javascript: 118
-    ts_ignore: 105  # TARGET: Reduce to 50 within 90 days
-    ts_expect_error: 17  # PREFERRED - encourage migration
+    ts_ignore: 105 # TARGET: Reduce to 50 within 90 days
+    ts_expect_error: 17 # PREFERRED - encourage migration
 
   trend:
     baseline_date: "2025-12-27"
     baseline_count: 811
-    target_reduction: 20%  # By Q1 2026
+    target_reduction: 20% # By Q1 2026
     fail_ci_on_increase: true
 ```
 
@@ -206,6 +220,7 @@ suppression_metrics:
 ### Required CI Checks
 
 The following must pass before merge:
+
 1. ✅ Zero new `@ts-ignore` suppressions
 2. ✅ All `eslint-disable` have specific rule names
 3. ✅ Governance tests pass
@@ -214,11 +229,11 @@ The following must pass before merge:
 
 ## SOC 2 Control Mapping
 
-| Control | Requirement | Implementation |
-|---------|-------------|----------------|
-| CC7.1 | Detect system changes | CI fails on suppression increase |
-| CC7.2 | Manage system changes | Suppression approval policy |
-| CC8.1 | Authorize changes | 2+ reviewer approval required |
+| Control | Requirement           | Implementation                   |
+| ------- | --------------------- | -------------------------------- |
+| CC7.1   | Detect system changes | CI fails on suppression increase |
+| CC7.2   | Manage system changes | Suppression approval policy      |
+| CC8.1   | Authorize changes     | 2+ reviewer approval required    |
 
 ## Action Items
 

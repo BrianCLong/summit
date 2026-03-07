@@ -2,17 +2,17 @@
 
 ## Severity Levels
 
-| Level | Description | Response Time | Owner |
-|-------|-------------|---------------|-------|
-| **SEV-1** | Critical Outage (Data Loss, Security Breach, Global Down) | 15 mins | On-Call Engineer + Exec |
-| **SEV-2** | Major Degradation (Core feature broken, High Latency) | 1 hour | On-Call Engineer |
-| **SEV-3** | Minor Issue (Non-blocking bug, internal tool down) | 24 hours | Team Lead |
+| Level     | Description                                               | Response Time | Owner                   |
+| --------- | --------------------------------------------------------- | ------------- | ----------------------- |
+| **SEV-1** | Critical Outage (Data Loss, Security Breach, Global Down) | 15 mins       | On-Call Engineer + Exec |
+| **SEV-2** | Major Degradation (Core feature broken, High Latency)     | 1 hour        | On-Call Engineer        |
+| **SEV-3** | Minor Issue (Non-blocking bug, internal tool down)        | 24 hours      | Team Lead               |
 
 ## Roles
 
-*   **Incident Commander (IC)**: Coordinates response, communicates updates.
-*   **Tech Lead**: Investigates root cause.
-*   **Scribe**: Logs events and timeline.
+- **Incident Commander (IC)**: Coordinates response, communicates updates.
+- **Tech Lead**: Investigates root cause.
+- **Scribe**: Logs events and timeline.
 
 ## Workflow
 
@@ -25,5 +25,5 @@
 
 ## Communication
 
-*   **Public Status Page**: Update for SEV-1/SEV-2.
-*   **Internal Channel**: `#incidents` on Slack.
+- **Public Status Page**: Update for SEV-1/SEV-2.
+- **Internal Channel**: `#incidents` on Slack.

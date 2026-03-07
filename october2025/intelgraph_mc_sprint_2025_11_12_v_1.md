@@ -197,8 +197,7 @@ type SearchHit {
 }
 
 type Query {
-  search(q: String!, filters: JSON, after: String): SearchResult!
-    @auth(abac: "entity.search")
+  search(q: String!, filters: JSON, after: String): SearchResult! @auth(abac: "entity.search")
   apiVersion: String!
 }
 
@@ -290,8 +289,8 @@ jobs:
 
 ```yaml
 resources:
-  requests: { cpu: '250m', memory: '512Mi' }
-  limits: { cpu: '2', memory: '2Gi' }
+  requests: { cpu: "250m", memory: "512Mi" }
+  limits: { cpu: "2", memory: "2Gi" }
 autoscaling:
   enabled: true
   minReplicas: 3
@@ -340,15 +339,11 @@ LIMIT $limit OFFSET $offset;
 **Explorer React (excerpt)**
 
 ```tsx
-import CytoscapeComponent from 'react-cytoscapejs';
+import CytoscapeComponent from "react-cytoscapejs";
 export default function Explorer() {
   return (
     <div className="p-4">
-      <CytoscapeComponent
-        elements={[]}
-        stylesheet={[]}
-        style={{ height: 600 }}
-      />
+      <CytoscapeComponent elements={[]} stylesheet={[]} style={{ height: 600 }} />
     </div>
   );
 }

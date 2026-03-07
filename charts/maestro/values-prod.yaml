@@ -9,7 +9,7 @@ image:
   # Use digest for immutable deployments in prod
   # digest: sha256:...
 
-replicaCount: 3  # Higher count for production
+replicaCount: 3 # Higher count for production
 
 resources:
   requests:
@@ -27,7 +27,7 @@ opentelemetry:
   collector:
     endpoint: "otel-collector.observability.svc.cluster.local:4317"
   sampling:
-    ratio: 0.1  # 10% sampling in production to reduce overhead
+    ratio: 0.1 # 10% sampling in production to reduce overhead
     type: "parentbased_traceidratio"
 
 # ============================================================================
@@ -41,16 +41,16 @@ metrics:
 
 serviceMonitor:
   enabled: true
-  interval: 30s  # Less frequent in prod
+  interval: 30s # Less frequent in prod
 
 # ============================================================================
 # Feature Flags - Production Mode
 # ============================================================================
 featureFlags:
   enabled: true
-  provider: flagd  # or launchdarkly for production
+  provider: flagd # or launchdarkly for production
   defaults:
-    enableNewUI: false  # Conservative in prod
+    enableNewUI: false # Conservative in prod
     enableBetaFeatures: false
     enableAdvancedAnalytics: true
 
@@ -66,7 +66,7 @@ zeroTrust:
 # ============================================================================
 argoRollouts:
   enabled: true
-  autoPromotionEnabled: false  # Manual promotion in prod
+  autoPromotionEnabled: false # Manual promotion in prod
 
 # ============================================================================
 # Audit & Compliance
@@ -75,7 +75,7 @@ audit:
   worm:
     enabled: true
     bucket: maestro-audit-prod-worm
-    retentionDays: 2555  # 7 years for compliance
+    retentionDays: 2555 # 7 years for compliance
 
 # ============================================================================
 # Application Configuration
@@ -84,9 +84,9 @@ env:
   - name: NODE_ENV
     value: production
   - name: LOG_LEVEL
-    value: 'info'  # Less verbose in prod
+    value: "info" # Less verbose in prod
   - name: ALLOW_UNSIGNED_POLICY
-    value: 'false'
+    value: "false"
 
   # OTEL Configuration
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -98,7 +98,7 @@ env:
   - name: OTEL_TRACES_SAMPLER
     value: "parentbased_traceidratio"
   - name: OTEL_TRACES_SAMPLER_ARG
-    value: "0.1"  # 10% sampling
+    value: "0.1" # 10% sampling
 
   # Feature Flags
   - name: FEATURE_FLAGS_ENABLED
@@ -123,16 +123,16 @@ env:
         name: maestro-secrets
         key: redis_url
   - name: KAFKA_BROKERS
-    value: 'kafka.kafka.svc.cluster.local:9092'
+    value: "kafka.kafka.svc.cluster.local:9092"
   - name: S3_BUCKET
-    value: 'maestro-artifacts-prod'
+    value: "maestro-artifacts-prod"
 
 # ============================================================================
 # High Availability
 # ============================================================================
 podDisruptionBudget:
   enabled: true
-  minAvailable: 2  # Always keep 2 pods running
+  minAvailable: 2 # Always keep 2 pods running
 
 autoscaling:
   enabled: true

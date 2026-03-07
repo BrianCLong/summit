@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -24,7 +24,7 @@ import {
   ListItemIcon,
   ListItemText,
   ListItemButton,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore,
   Person,
@@ -36,7 +36,7 @@ import {
   FilterList,
   Clear,
   Lock,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface FacetPanelProps {
   onFiltersChange?: (filters: SearchFilters) => void;
@@ -58,72 +58,69 @@ interface SearchFilters {
 }
 
 const entityTypes = [
-  { value: 'PERSON', label: 'Person', icon: <Person />, count: 1247 },
+  { value: "PERSON", label: "Person", icon: <Person />, count: 1247 },
   {
-    value: 'ORGANIZATION',
-    label: 'Organization',
+    value: "ORGANIZATION",
+    label: "Organization",
     icon: <Business />,
     count: 892,
   },
-  { value: 'DOCUMENT', label: 'Document', icon: <Description />, count: 3421 },
-  { value: 'EVENT', label: 'Event', icon: <Event />, count: 567 },
-  { value: 'LOCATION', label: 'Location', icon: <Place />, count: 234 },
-  { value: 'IOC', label: 'IOC', icon: <Security />, count: 1089 },
+  { value: "DOCUMENT", label: "Document", icon: <Description />, count: 3421 },
+  { value: "EVENT", label: "Event", icon: <Event />, count: 567 },
+  { value: "LOCATION", label: "Location", icon: <Place />, count: 234 },
+  { value: "IOC", label: "IOC", icon: <Security />, count: 1089 },
 ];
 
 const classifications = [
-  { value: 'UNCLASSIFIED', label: 'Unclassified', count: 4521 },
-  { value: 'CONFIDENTIAL', label: 'Confidential', count: 1234 },
-  { value: 'SECRET', label: 'Secret', count: 567 },
-  { value: 'TOP_SECRET', label: 'Top Secret', count: 128 },
+  { value: "UNCLASSIFIED", label: "Unclassified", count: 4521 },
+  { value: "CONFIDENTIAL", label: "Confidential", count: 1234 },
+  { value: "SECRET", label: "Secret", count: 567 },
+  { value: "TOP_SECRET", label: "Top Secret", count: 128 },
 ];
 
 const sources = [
-  { value: 'OSINT', label: 'Open Source', count: 2341 },
-  { value: 'HUMINT', label: 'Human Intelligence', count: 892 },
-  { value: 'SIGINT', label: 'Signals Intelligence', count: 1456 },
-  { value: 'IMINT', label: 'Imagery Intelligence', count: 678 },
-  { value: 'FININT', label: 'Financial Intelligence', count: 543 },
-  { value: 'INTERNAL', label: 'Internal Analysis', count: 1234 },
+  { value: "OSINT", label: "Open Source", count: 2341 },
+  { value: "HUMINT", label: "Human Intelligence", count: 892 },
+  { value: "SIGINT", label: "Signals Intelligence", count: 1456 },
+  { value: "IMINT", label: "Imagery Intelligence", count: 678 },
+  { value: "FININT", label: "Financial Intelligence", count: 543 },
+  { value: "INTERNAL", label: "Internal Analysis", count: 1234 },
 ];
 
 const popularTags = [
-  'APT29',
-  'Financial Crime',
-  'Cybersecurity',
-  'Money Laundering',
-  'Threat Actor',
-  'Malware',
-  'Phishing',
-  'Data Breach',
-  'Insider Threat',
-  'Nation State',
-  'Cryptocurrency',
-  'Dark Web',
-  'C2 Infrastructure',
+  "APT29",
+  "Financial Crime",
+  "Cybersecurity",
+  "Money Laundering",
+  "Threat Actor",
+  "Malware",
+  "Phishing",
+  "Data Breach",
+  "Insider Threat",
+  "Nation State",
+  "Cryptocurrency",
+  "Dark Web",
+  "C2 Infrastructure",
 ];
 
 export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
   const [filters, setFilters] = useState<SearchFilters>({
     entityTypes: [],
-    dateRange: { start: '', end: '' },
+    dateRange: { start: "", end: "" },
     riskScore: [0, 100],
     classifications: [],
     tags: [],
     sources: [],
-    status: ['active'],
+    status: ["active"],
     hasAttachments: false,
     isBookmarked: false,
   });
 
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['entityTypes', 'dateRange']),
+    new Set(["entityTypes", "dateRange"])
   );
 
-  const updateFilters = (
-    key: keyof SearchFilters,
-    value: SearchFilters[keyof SearchFilters],
-  ) => {
+  const updateFilters = (key: keyof SearchFilters, value: SearchFilters[keyof SearchFilters]) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
@@ -143,34 +140,34 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
     const newTypes = filters.entityTypes.includes(entityType)
       ? filters.entityTypes.filter((t) => t !== entityType)
       : [...filters.entityTypes, entityType];
-    updateFilters('entityTypes', newTypes);
+    updateFilters("entityTypes", newTypes);
   };
 
   const handleClassificationChange = (classification: string) => {
     const newClassifications = filters.classifications.includes(classification)
       ? filters.classifications.filter((c) => c !== classification)
       : [...filters.classifications, classification];
-    updateFilters('classifications', newClassifications);
+    updateFilters("classifications", newClassifications);
   };
 
   const handleSourceChange = (source: string) => {
     const newSources = filters.sources.includes(source)
       ? filters.sources.filter((s) => s !== source)
       : [...filters.sources, source];
-    updateFilters('sources', newSources);
+    updateFilters("sources", newSources);
   };
 
   const handleTagToggle = (tag: string) => {
     const newTags = filters.tags.includes(tag)
       ? filters.tags.filter((t) => t !== tag)
       : [...filters.tags, tag];
-    updateFilters('tags', newTags);
+    updateFilters("tags", newTags);
   };
 
   const clearAllFilters = () => {
     const clearedFilters: SearchFilters = {
       entityTypes: [],
-      dateRange: { start: '', end: '' },
+      dateRange: { start: "", end: "" },
       riskScore: [0, 100],
       classifications: [],
       tags: [],
@@ -198,17 +195,12 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
   };
 
   return (
-    <Card sx={{ borderRadius: 3, height: 'fit-content' }}>
+    <Card sx={{ borderRadius: 3, height: "fit-content" }}>
       <CardContent>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 2 }}
-        >
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <FilterList color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Search Filters
             </Typography>
             {getActiveFilterCount() > 0 && (
@@ -233,9 +225,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
               control={
                 <Switch
                   checked={filters.isBookmarked}
-                  onChange={(e) =>
-                    updateFilters('isBookmarked', e.target.checked)
-                  }
+                  onChange={(e) => updateFilters("isBookmarked", e.target.checked)}
                 />
               }
               label="Bookmarked only"
@@ -244,9 +234,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
               control={
                 <Switch
                   checked={filters.hasAttachments}
-                  onChange={(e) =>
-                    updateFilters('hasAttachments', e.target.checked)
-                  }
+                  onChange={(e) => updateFilters("hasAttachments", e.target.checked)}
                 />
               }
               label="Has attachments"
@@ -258,18 +246,13 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Entity Types */}
         <Accordion
-          expanded={expandedSections.has('entityTypes')}
-          onChange={() => toggleSection('entityTypes')}
-          sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          expanded={expandedSections.has("entityTypes")}
+          onChange={() => toggleSection("entityTypes")}
+          sx={{ boxShadow: "none", "&:before": { display: "none" } }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            sx={{ px: 0, minHeight: 40 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-              Entity Types{' '}
-              {filters.entityTypes.length > 0 &&
-                `(${filters.entityTypes.length})`}
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0, minHeight: 40 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              Entity Types {filters.entityTypes.length > 0 && `(${filters.entityTypes.length})`}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0, pt: 0 }}>
@@ -281,9 +264,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                     sx={{ borderRadius: 1 }}
                   >
                     <ListItemIcon sx={{ minWidth: 32 }}>
-                      <Avatar
-                        sx={{ width: 24, height: 24, fontSize: '0.875rem' }}
-                      >
+                      <Avatar sx={{ width: 24, height: 24, fontSize: "0.875rem" }}>
                         {type.icon}
                       </Avatar>
                     </ListItemIcon>
@@ -305,15 +286,12 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Date Range */}
         <Accordion
-          expanded={expandedSections.has('dateRange')}
-          onChange={() => toggleSection('dateRange')}
-          sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          expanded={expandedSections.has("dateRange")}
+          onChange={() => toggleSection("dateRange")}
+          sx={{ boxShadow: "none", "&:before": { display: "none" } }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            sx={{ px: 0, minHeight: 40 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0, minHeight: 40 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
               Date Range
             </Typography>
           </AccordionSummary>
@@ -325,7 +303,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                 size="small"
                 value={filters.dateRange.start}
                 onChange={(e) =>
-                  updateFilters('dateRange', {
+                  updateFilters("dateRange", {
                     ...filters.dateRange,
                     start: e.target.value,
                   })
@@ -338,7 +316,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                 size="small"
                 value={filters.dateRange.end}
                 onChange={(e) =>
-                  updateFilters('dateRange', {
+                  updateFilters("dateRange", {
                     ...filters.dateRange,
                     end: e.target.value,
                   })
@@ -351,11 +329,11 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                   size="small"
                   variant="outlined"
                   onClick={() => {
-                    const end = new Date().toISOString().split('T')[0];
+                    const end = new Date().toISOString().split("T")[0];
                     const start = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
                       .toISOString()
-                      .split('T')[0];
-                    updateFilters('dateRange', { start, end });
+                      .split("T")[0];
+                    updateFilters("dateRange", { start, end });
                   }}
                 />
                 <Chip
@@ -363,13 +341,11 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                   size="small"
                   variant="outlined"
                   onClick={() => {
-                    const end = new Date().toISOString().split('T')[0];
-                    const start = new Date(
-                      Date.now() - 30 * 24 * 60 * 60 * 1000,
-                    )
+                    const end = new Date().toISOString().split("T")[0];
+                    const start = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
                       .toISOString()
-                      .split('T')[0];
-                    updateFilters('dateRange', { start, end });
+                      .split("T")[0];
+                    updateFilters("dateRange", { start, end });
                   }}
                 />
               </Stack>
@@ -379,15 +355,12 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Risk Score */}
         <Accordion
-          expanded={expandedSections.has('riskScore')}
-          onChange={() => toggleSection('riskScore')}
-          sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          expanded={expandedSections.has("riskScore")}
+          onChange={() => toggleSection("riskScore")}
+          sx={{ boxShadow: "none", "&:before": { display: "none" } }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            sx={{ px: 0, minHeight: 40 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0, minHeight: 40 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
               Risk Score ({filters.riskScore[0]}% - {filters.riskScore[1]}%)
             </Typography>
           </AccordionSummary>
@@ -395,20 +368,18 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
             <Box sx={{ px: 1 }}>
               <Slider
                 value={filters.riskScore}
-                onChange={(_, newValue) =>
-                  updateFilters('riskScore', newValue as [number, number])
-                }
+                onChange={(_, newValue) => updateFilters("riskScore", newValue as [number, number])}
                 valueLabelDisplay="auto"
                 valueLabelFormat={(value) => `${value}%`}
                 min={0}
                 max={100}
                 step={5}
                 marks={[
-                  { value: 0, label: '0%' },
-                  { value: 25, label: '25%' },
-                  { value: 50, label: '50%' },
-                  { value: 75, label: '75%' },
-                  { value: 100, label: '100%' },
+                  { value: 0, label: "0%" },
+                  { value: 25, label: "25%" },
+                  { value: 50, label: "50%" },
+                  { value: 75, label: "75%" },
+                  { value: 100, label: "100%" },
                 ]}
               />
             </Box>
@@ -417,18 +388,14 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Classification Level */}
         <Accordion
-          expanded={expandedSections.has('classifications')}
-          onChange={() => toggleSection('classifications')}
-          sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          expanded={expandedSections.has("classifications")}
+          onChange={() => toggleSection("classifications")}
+          sx={{ boxShadow: "none", "&:before": { display: "none" } }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            sx={{ px: 0, minHeight: 40 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-              Classification{' '}
-              {filters.classifications.length > 0 &&
-                `(${filters.classifications.length})`}
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0, minHeight: 40 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              Classification{" "}
+              {filters.classifications.length > 0 && `(${filters.classifications.length})`}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0, pt: 0 }}>
@@ -436,22 +403,20 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
               {classifications.map((classification) => (
                 <ListItem key={classification.value} disablePadding>
                   <ListItemButton
-                    onClick={() =>
-                      handleClassificationChange(classification.value)
-                    }
+                    onClick={() => handleClassificationChange(classification.value)}
                     sx={{ borderRadius: 1 }}
                   >
                     <ListItemIcon sx={{ minWidth: 32 }}>
                       <Lock
                         sx={{
                           color:
-                            classification.value === 'UNCLASSIFIED'
-                              ? 'success.main'
-                              : classification.value === 'CONFIDENTIAL'
-                                ? 'warning.main'
-                                : classification.value === 'SECRET'
-                                  ? 'error.main'
-                                  : 'error.dark',
+                            classification.value === "UNCLASSIFIED"
+                              ? "success.main"
+                              : classification.value === "CONFIDENTIAL"
+                                ? "warning.main"
+                                : classification.value === "SECRET"
+                                  ? "error.main"
+                                  : "error.dark",
                         }}
                       />
                     </ListItemIcon>
@@ -461,9 +426,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                     />
                     <Checkbox
                       edge="end"
-                      checked={filters.classifications.includes(
-                        classification.value,
-                      )}
+                      checked={filters.classifications.includes(classification.value)}
                       tabIndex={-1}
                     />
                   </ListItemButton>
@@ -475,17 +438,13 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Intelligence Sources */}
         <Accordion
-          expanded={expandedSections.has('sources')}
-          onChange={() => toggleSection('sources')}
-          sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          expanded={expandedSections.has("sources")}
+          onChange={() => toggleSection("sources")}
+          sx={{ boxShadow: "none", "&:before": { display: "none" } }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            sx={{ px: 0, minHeight: 40 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-              Intelligence Sources{' '}
-              {filters.sources.length > 0 && `(${filters.sources.length})`}
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0, minHeight: 40 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              Intelligence Sources {filters.sources.length > 0 && `(${filters.sources.length})`}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0, pt: 0 }}>
@@ -514,17 +473,13 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Popular Tags */}
         <Accordion
-          expanded={expandedSections.has('tags')}
-          onChange={() => toggleSection('tags')}
-          sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          expanded={expandedSections.has("tags")}
+          onChange={() => toggleSection("tags")}
+          sx={{ boxShadow: "none", "&:before": { display: "none" } }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            sx={{ px: 0, minHeight: 40 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-              Popular Tags{' '}
-              {filters.tags.length > 0 && `(${filters.tags.length})`}
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0, minHeight: 40 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              Popular Tags {filters.tags.length > 0 && `(${filters.tags.length})`}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0, pt: 0 }}>
@@ -534,8 +489,8 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                   key={tag}
                   label={tag}
                   size="small"
-                  variant={filters.tags.includes(tag) ? 'filled' : 'outlined'}
-                  color={filters.tags.includes(tag) ? 'primary' : 'default'}
+                  variant={filters.tags.includes(tag) ? "filled" : "outlined"}
+                  color={filters.tags.includes(tag) ? "primary" : "default"}
                   onClick={() => handleTagToggle(tag)}
                   sx={{ mb: 1 }}
                 />
@@ -547,11 +502,11 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
               fullWidth
               sx={{ mt: 2 }}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   const value = (e.target as HTMLInputElement).value.trim();
                   if (value && !filters.tags.includes(value)) {
                     handleTagToggle(value);
-                    (e.target as HTMLInputElement).value = '';
+                    (e.target as HTMLInputElement).value = "";
                   }
                 }
               }}
@@ -561,7 +516,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
         {/* Applied Filters Summary */}
         {getActiveFilterCount() > 0 && (
-          <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+          <Box sx={{ mt: 3, p: 2, bgcolor: "grey.50", borderRadius: 2 }}>
             <Typography variant="caption" color="text.secondary" gutterBottom>
               Active Filters:
             </Typography>
@@ -569,9 +524,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
               {filters.entityTypes.map((type) => (
                 <Chip
                   key={`entity-${type}`}
-                  label={
-                    entityTypes.find((e) => e.value === type)?.label || type
-                  }
+                  label={entityTypes.find((e) => e.value === type)?.label || type}
                   size="small"
                   onDelete={() => handleEntityTypeChange(type)}
                   color="primary"
@@ -581,8 +534,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
                 <Chip
                   key={`classification-${classification}`}
                   label={
-                    classifications.find((c) => c.value === classification)
-                      ?.label || classification
+                    classifications.find((c) => c.value === classification)?.label || classification
                   }
                   size="small"
                   onDelete={() => handleClassificationChange(classification)}
@@ -592,9 +544,7 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
               {filters.sources.map((source) => (
                 <Chip
                   key={`source-${source}`}
-                  label={
-                    sources.find((s) => s.value === source)?.label || source
-                  }
+                  label={sources.find((s) => s.value === source)?.label || source}
                   size="small"
                   onDelete={() => handleSourceChange(source)}
                   color="info"

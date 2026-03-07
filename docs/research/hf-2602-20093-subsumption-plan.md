@@ -36,13 +36,13 @@ Populate this section with verbatim excerpts before code PRs.
 
 ## 3) Claim Registry Mapping
 
-| Summit element | Purpose | Backing |
-| --- | --- | --- |
-| `summit/items/<item-slug>/spec.md` | Formal spec derived from paper claims | `ITEM:CLAIM-*` |
-| `summit/pipelines/<item-slug>.py` | Deterministic execution path | `ITEM:METHOD-*` |
-| `tests/items/test_<item-slug>.py` | Repro assertions with tolerances | `ITEM:RESULT-*` |
-| `docs/standards/<item-slug>.md` | Interop and standards mapping | Summit original |
-| Drift monitor workflow | Regression watch | Summit original |
+| Summit element                     | Purpose                               | Backing         |
+| ---------------------------------- | ------------------------------------- | --------------- |
+| `summit/items/<item-slug>/spec.md` | Formal spec derived from paper claims | `ITEM:CLAIM-*`  |
+| `summit/pipelines/<item-slug>.py`  | Deterministic execution path          | `ITEM:METHOD-*` |
+| `tests/items/test_<item-slug>.py`  | Repro assertions with tolerances      | `ITEM:RESULT-*` |
+| `docs/standards/<item-slug>.md`    | Interop and standards mapping         | Summit original |
+| Drift monitor workflow             | Regression watch                      | Summit original |
 
 Unmapped entries must be labeled **Summit original**.
 
@@ -83,11 +83,11 @@ Required artifacts:
 
 ## 7) Threat-Informed Requirements
 
-| Threat | Mitigation | Gate | Test |
-| --- | --- | --- | --- |
-| Metric gaming | Fixed seed + dataset hash | Repro gate | Hash assertion |
-| Data leakage | Explicit allowlist | Security lint | Leak fixture |
-| Policy drift | Scheduled regression | Drift workflow | Delta threshold assertion |
+| Threat        | Mitigation                | Gate           | Test                      |
+| ------------- | ------------------------- | -------------- | ------------------------- |
+| Metric gaming | Fixed seed + dataset hash | Repro gate     | Hash assertion            |
+| Data leakage  | Explicit allowlist        | Security lint  | Leak fixture              |
+| Policy drift  | Scheduled regression      | Drift workflow | Delta threshold assertion |
 
 Default-deny behavior is required for unsafe inputs and unapproved data classes.
 

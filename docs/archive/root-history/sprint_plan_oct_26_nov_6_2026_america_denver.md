@@ -96,4 +96,3 @@
 - **Mid-sprint Refinement:** Thu Oct 29, 14:00–14:45
 - **Sprint Review:** Fri Nov 6, 10:00–11:00
 - **Retro:** Fri Nov 6, 11:15–12:00
-

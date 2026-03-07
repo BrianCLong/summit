@@ -72,7 +72,7 @@ export class CoxProportionalHazards {
 
     // Calculate model statistics
     const { standardErrors, pValues } = this.computeStatistics(sortedData);
-    const hazardRatios = this.coefficients.map(b => Math.exp(b));
+    const hazardRatios = this.coefficients.map((b) => Math.exp(b));
     const logLikelihood = this.computeLogLikelihood(sortedData);
     const concordance = this.computeConcordance(sortedData);
 
@@ -93,7 +93,7 @@ export class CoxProportionalHazards {
    */
   predictSurvival(covariates: number[], times?: number[]): SurvivalPrediction[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
     const riskScore = this.computeRiskScore(covariates);
@@ -154,7 +154,7 @@ export class CoxProportionalHazards {
     data: SurvivalObservation[],
     numGroups: number = 3
   ): Map<string, SurvivalObservation[]> {
-    const riskScores = data.map(d => ({
+    const riskScores = data.map((d) => ({
       observation: d,
       score: this.computeRiskScore(d.covariates),
     }));
@@ -164,14 +164,17 @@ export class CoxProportionalHazards {
     const groupSize = Math.ceil(riskScores.length / numGroups);
     const groups = new Map<string, SurvivalObservation[]>();
 
-    const labels = ['Low Risk', 'Medium Risk', 'High Risk'];
+    const labels = ["Low Risk", "Medium Risk", "High Risk"];
 
     for (let g = 0; g < numGroups; g++) {
       const start = g * groupSize;
       const end = Math.min(start + groupSize, riskScores.length);
       const label = labels[g] || `Group ${g + 1}`;
 
-      groups.set(label, riskScores.slice(start, end).map(r => r.observation));
+      groups.set(
+        label,
+        riskScores.slice(start, end).map((r) => r.observation)
+      );
     }
 
     return groups;
@@ -188,11 +191,11 @@ export class CoxProportionalHazards {
     const gradient = new Array(p).fill(0);
     const hessian = Array.from({ length: p }, () => new Array(p).fill(0));
 
-    const eventTimes = [...new Set(data.filter(d => d.event).map(d => d.time))];
+    const eventTimes = [...new Set(data.filter((d) => d.event).map((d) => d.time))];
 
     for (const t of eventTimes) {
-      const atRisk = data.filter(d => d.time >= t);
-      const events = data.filter(d => d.time === t && d.event);
+      const atRisk = data.filter((d) => d.time >= t);
+      const events = data.filter((d) => d.time === t && d.event);
 
       // Calculate risk set sums
       let s0 = 0;
@@ -233,11 +236,13 @@ export class CoxProportionalHazards {
   private estimateBaselineHazard(data: SurvivalObservation[]): void {
     this.baselineHazard.clear();
 
-    const eventTimes = [...new Set(data.filter(d => d.event).map(d => d.time))].sort((a, b) => a - b);
+    const eventTimes = [...new Set(data.filter((d) => d.event).map((d) => d.time))].sort(
+      (a, b) => a - b
+    );
 
     for (const t of eventTimes) {
-      const events = data.filter(d => d.time === t && d.event).length;
-      const atRisk = data.filter(d => d.time >= t);
+      const events = data.filter((d) => d.time === t && d.event).length;
+      const atRisk = data.filter((d) => d.time >= t);
 
       let riskSum = 0;
       for (const obs of atRisk) {
@@ -268,11 +273,11 @@ export class CoxProportionalHazards {
   private computeLogLikelihood(data: SurvivalObservation[]): number {
     let logLik = 0;
 
-    const eventTimes = [...new Set(data.filter(d => d.event).map(d => d.time))];
+    const eventTimes = [...new Set(data.filter((d) => d.event).map((d) => d.time))];
 
     for (const t of eventTimes) {
-      const atRisk = data.filter(d => d.time >= t);
-      const events = data.filter(d => d.time === t && d.event);
+      const atRisk = data.filter((d) => d.time >= t);
+      const events = data.filter((d) => d.time === t && d.event);
 
       let riskSum = 0;
       for (const obs of atRisk) {
@@ -296,13 +301,16 @@ export class CoxProportionalHazards {
 
     for (let i = 0; i < data.length; i++) {
       for (let j = i + 1; j < data.length; j++) {
-        if (data[i].time === data[j].time) {continue;}
+        if (data[i].time === data[j].time) {
+          continue;
+        }
 
-        const [earlier, later] = data[i].time < data[j].time
-          ? [data[i], data[j]]
-          : [data[j], data[i]];
+        const [earlier, later] =
+          data[i].time < data[j].time ? [data[i], data[j]] : [data[j], data[i]];
 
-        if (!earlier.event) {continue;}
+        if (!earlier.event) {
+          continue;
+        }
 
         const riskEarlier = this.computeRiskScore(earlier.covariates);
         const riskLater = this.computeRiskScore(later.covariates);
@@ -328,11 +336,9 @@ export class CoxProportionalHazards {
     const { hessian } = this.computeGradientHessian(data);
 
     // Variance is inverse of information matrix (-Hessian)
-    const variance = this.invertMatrix(hessian.map(row => row.map(v => -v)));
+    const variance = this.invertMatrix(hessian.map((row) => row.map((v) => -v)));
 
-    const standardErrors = this.coefficients.map((_, i) =>
-      Math.sqrt(Math.abs(variance[i][i]))
-    );
+    const standardErrors = this.coefficients.map((_, i) => Math.sqrt(Math.abs(variance[i][i])));
 
     const pValues = this.coefficients.map((b, i) => {
       const z = b / standardErrors[i];
@@ -372,7 +378,7 @@ export class CoxProportionalHazards {
       for (let j = i + 1; j < n; j++) {
         x[i] -= augmented[i][j] * x[j];
       }
-      x[i] /= (augmented[i][i] + 1e-10);
+      x[i] /= augmented[i][i] + 1e-10;
     }
 
     return x;
@@ -413,7 +419,7 @@ export class CoxProportionalHazards {
       }
     }
 
-    return augmented.map(row => row.slice(n));
+    return augmented.map((row) => row.slice(n));
   }
 
   /**
@@ -431,7 +437,7 @@ export class CoxProportionalHazards {
     x = Math.abs(x) / Math.sqrt(2);
 
     const t = 1.0 / (1.0 + p * x);
-    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
 
     return 0.5 * (1.0 + sign * y);
   }

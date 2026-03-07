@@ -1,16 +1,14 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
-import {
-  ConformanceConnector,
-  ConnectorError,
-  PaginatedResponse,
-  RateLimitInfo,
-} from './types';
+import { ConformanceConnector, ConnectorError, PaginatedResponse, RateLimitInfo } from "./types";
 
 export class FakeConnector implements ConformanceConnector<{ id: string; value: number }> {
-  name = 'fake-connector';
+  name = "fake-connector";
 
-  private store = new Map<string, { id: string; checksum: string; data: { id: string; value: number } }>();
+  private store = new Map<
+    string,
+    { id: string; checksum: string; data: { id: string; value: number } }
+  >();
   private transientBudget = 2;
   private dataset: { id: string; value: number }[] = [];
   private rateLimitState: RateLimitInfo = { limit: 3, remaining: 3, resetSeconds: 30 };
@@ -19,7 +17,10 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
     await Promise.resolve();
     this.store.clear();
     this.transientBudget = 2;
-    this.dataset = Array.from({ length: 5 }, (_, index) => ({ id: `item-${index + 1}`, value: index + 1 }));
+    this.dataset = Array.from({ length: 5 }, (_, index) => ({
+      id: `item-${index + 1}`,
+      value: index + 1,
+    }));
     this.rateLimitState = { limit: 3, remaining: 3, resetSeconds: 30 };
   }
 
@@ -38,7 +39,7 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
     await Promise.resolve();
     const record = Array.from(this.store.values()).find((entry) => entry.id === id);
     if (!record) {
-      throw new Error('Record not found');
+      throw new Error("Record not found");
     }
     return record.data;
   }
@@ -48,13 +49,16 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
     if (attempt <= this.transientBudget) {
       return {
         success: false,
-        error: this.buildError('TRANSIENT', 503, true, `Transient failure on attempt ${attempt}`),
+        error: this.buildError("TRANSIENT", 503, true, `Transient failure on attempt ${attempt}`),
       };
     }
     return { success: true };
   }
 
-  async fetchPage(cursor: string | null = null, pageSize = 2): Promise<PaginatedResponse<{ id: string; value: number }>> {
+  async fetchPage(
+    cursor: string | null = null,
+    pageSize = 2
+  ): Promise<PaginatedResponse<{ id: string; value: number }>> {
     await Promise.resolve();
     const start = cursor ? Number.parseInt(cursor, 10) : 0;
     const items = this.dataset.slice(start, start + pageSize);
@@ -84,14 +88,14 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
   async mapError(code: string): Promise<ConnectorError> {
     await Promise.resolve();
     switch (code) {
-      case 'NOT_FOUND':
-        return this.buildError('NOT_FOUND', 404, false, 'Resource was not found');
-      case 'UNAUTHORIZED':
-        return this.buildError('UNAUTHORIZED', 401, false, 'Authentication failed');
-      case 'RATE_LIMIT':
-        return this.buildError('RATE_LIMIT', 429, true, 'Rate limit exceeded');
+      case "NOT_FOUND":
+        return this.buildError("NOT_FOUND", 404, false, "Resource was not found");
+      case "UNAUTHORIZED":
+        return this.buildError("UNAUTHORIZED", 401, false, "Authentication failed");
+      case "RATE_LIMIT":
+        return this.buildError("RATE_LIMIT", 429, true, "Rate limit exceeded");
       default:
-        return this.buildError('UNKNOWN', 500, false, 'Unknown error');
+        return this.buildError("UNKNOWN", 500, false, "Unknown error");
     }
   }
 
@@ -99,7 +103,7 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
     await Promise.resolve();
     return {
       timestamp: new Date().toISOString(),
-      operations: ['idempotentWrite', 'pagination', 'rateLimit', 'errorMapping', 'redaction'],
+      operations: ["idempotentWrite", "pagination", "rateLimit", "errorMapping", "redaction"],
       coverage: {
         idempotency: true,
         retries: true,
@@ -108,25 +112,28 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
         errors: true,
         redaction: true,
       },
-      notes: 'Synthetic connector used for harness validation.',
+      notes: "Synthetic connector used for harness validation.",
     };
   }
 
   async redactSecrets(record: Record<string, unknown>): Promise<Record<string, unknown>> {
     await Promise.resolve();
     const scrub = (value: unknown): unknown => {
-      if (value && typeof value === 'object') {
+      if (value && typeof value === "object") {
         if (Array.isArray(value)) {
           return value.map((entry) => scrub(entry));
         }
-        return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>((acc, [key, val]) => {
-          if (['token', 'password', 'apiKey', 'authorization', 'secret'].includes(key)) {
-            acc[key] = '[REDACTED]';
-          } else {
-            acc[key] = scrub(val);
-          }
-          return acc;
-        }, {});
+        return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>(
+          (acc, [key, val]) => {
+            if (["token", "password", "apiKey", "authorization", "secret"].includes(key)) {
+              acc[key] = "[REDACTED]";
+            } else {
+              acc[key] = scrub(val);
+            }
+            return acc;
+          },
+          {}
+        );
       }
       return value;
     };
@@ -134,7 +141,12 @@ export class FakeConnector implements ConformanceConnector<{ id: string; value: 
     return scrub(record) as Record<string, unknown>;
   }
 
-  private buildError(code: string, status: number, retryable: boolean, message: string): ConnectorError {
+  private buildError(
+    code: string,
+    status: number,
+    retryable: boolean,
+    message: string
+  ): ConnectorError {
     return { code, status, retryable, message };
   }
 }

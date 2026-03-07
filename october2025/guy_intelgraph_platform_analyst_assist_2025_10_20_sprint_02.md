@@ -148,9 +148,9 @@ Neo4j (algo jobs) · Postgres (ledger) · Redis (OPA cache) · OTEL/Prom/Grafana
 
 ```tsx
 // apps/web/src/features/ingest-wizard/ai-mapper.tsx
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
-import { Button } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
+import { Button } from "@mui/material";
 
 type Suggestion = {
   column: string;
@@ -159,18 +159,14 @@ type Suggestion = {
   pii?: boolean;
 };
 
-export default function AiMapper({
-  sample,
-}: {
-  sample: Record<string, any>[];
-}) {
+export default function AiMapper({ sample }: { sample: Record<string, any>[] }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   useEffect(() => {
     $.ajax({
-      url: '/api/ingest/mapping/suggest',
-      method: 'POST',
+      url: "/api/ingest/mapping/suggest",
+      method: "POST",
       data: JSON.stringify({ sample }),
-      contentType: 'application/json',
+      contentType: "application/json",
     }).done((resp) => setSuggestions(resp.suggestions || []));
   }, [sample]);
   return (
@@ -185,20 +181,17 @@ export default function AiMapper({
               {s.column} → {s.target}
             </div>
             <div className="text-sm">
-              conf {Math.round(s.confidence * 100)}% {s.pii ? '• PII' : ''}
+              conf {Math.round(s.confidence * 100)}% {s.pii ? "• PII" : ""}
             </div>
           </div>
           <div>
             <Button
               variant="contained"
-              onClick={() => $(document).trigger('ig:ingest:mapping:accept', s)}
+              onClick={() => $(document).trigger("ig:ingest:mapping:accept", s)}
             >
               Accept
             </Button>
-            <Button
-              variant="text"
-              onClick={() => $(document).trigger('ig:ingest:mapping:edit', s)}
-            >
+            <Button variant="text" onClick={() => $(document).trigger("ig:ingest:mapping:edit", s)}>
               Edit
             </Button>
           </div>
@@ -213,13 +206,13 @@ export default function AiMapper({
 
 ```ts
 // server/src/ingest/mapping/suggest.ts
-import type { Request, Response } from 'express';
-import { scoreMappings } from './suggester';
+import type { Request, Response } from "express";
+import { scoreMappings } from "./suggester";
 
 export async function suggest(req: Request, res: Response) {
   const { sample } = req.body || {};
   if (!Array.isArray(sample) || sample.length === 0)
-    return res.status(400).json({ error: 'sample required' });
+    return res.status(400).json({ error: "sample required" });
   const { suggestions } = await scoreMappings(sample);
   res.json({ suggestions });
 }
@@ -229,15 +222,10 @@ export async function suggest(req: Request, res: Response) {
 
 ```ts
 // server/src/ingest/mapping/suggester.ts
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 const KNOWN = {
-  person: [
-    /^first.?name$/i,
-    /^last.?name$/i,
-    /^email$/i,
-    /^dob|date.?of.?birth$/i,
-  ],
+  person: [/^first.?name$/i, /^last.?name$/i, /^email$/i, /^dob|date.?of.?birth$/i],
   org: [/^company|employer|organization$/i],
   geo: [/^lat|latitude$/i, /^lon|lng|longitude$/i, /^country$/i],
 };
@@ -246,22 +234,20 @@ export async function scoreMappings(sample: any[]) {
   const head = Object.keys(sample[0] || {});
   const suggestions = head.map((col) => {
     const lower = col.toLowerCase();
-    let target = 'meta:Unknown';
+    let target = "meta:Unknown";
     let conf = 0.5;
     let pii = /email|phone|dob|ssn|passport/i.test(lower);
     if (KNOWN.person.some((re) => re.test(lower))) {
-      target = 'node:Person';
+      target = "node:Person";
       conf = 0.88;
     }
     if (KNOWN.geo.some((re) => re.test(lower))) {
-      target = 'prop:Geo';
+      target = "prop:Geo";
       conf = 0.82;
     }
     return { column: col, target, confidence: conf, pii };
   });
-  const dpiaKey = createHash('sha256')
-    .update(JSON.stringify(head))
-    .digest('hex');
+  const dpiaKey = createHash("sha256").update(JSON.stringify(head)).digest("hex");
   return { suggestions, dpiaKey };
 }
 ```
@@ -270,17 +256,15 @@ export async function scoreMappings(sample: any[]) {
 
 ```tsx
 // apps/web/src/features/report-studio/redaction.tsx
-import React, { useState } from 'react';
-import $ from 'jquery';
+import React, { useState } from "react";
+import $ from "jquery";
 const PRESETS = {
-  Public: ['mask:email', 'drop:geo_precision', 'mask:phone_last4'],
-  Partner: ['mask:email', 'mask:phone_last4'],
+  Public: ["mask:email", "drop:geo_precision", "mask:phone_last4"],
+  Partner: ["mask:email", "mask:phone_last4"],
   Internal: [],
 };
 export default function Redaction() {
-  const [preset, setPreset] = useState<'Public' | 'Partner' | 'Internal'>(
-    'Public',
-  );
+  const [preset, setPreset] = useState<"Public" | "Partner" | "Internal">("Public");
   return (
     <div className="p-3">
       <select
@@ -294,9 +278,7 @@ export default function Redaction() {
       </select>
       <button
         className="ml-3 rounded-2xl p-2 shadow"
-        onClick={() =>
-          $(document).trigger('ig:report:redaction:set', PRESETS[preset])
-        }
+        onClick={() => $(document).trigger("ig:report:redaction:set", PRESETS[preset])}
       >
         Apply
       </button>
@@ -309,24 +291,15 @@ export default function Redaction() {
 
 ```ts
 // apps/web/src/features/tri-pane/overlays.ts
-import $ from 'jquery';
+import $ from "jquery";
 export function registerOverlayBus(cy: any) {
-  $(document).on('ig:overlay:toggle', (_e, overlay: string) => {
-    if (overlay === 'pagerank')
-      cy.style()
-        .selector('node')
-        .style('width', 'mapData(pagerank, 0, 1, 20, 60)')
-        .update();
-    if (overlay === 'community')
-      cy.style()
-        .selector('node')
-        .style('background-color', 'data(communityColor)')
-        .update();
-    if (overlay === 'anomaly')
-      cy.style()
-        .selector('node')
-        .style('border-width', 'mapData(anomaly, 0, 1, 0, 8)')
-        .update();
+  $(document).on("ig:overlay:toggle", (_e, overlay: string) => {
+    if (overlay === "pagerank")
+      cy.style().selector("node").style("width", "mapData(pagerank, 0, 1, 20, 60)").update();
+    if (overlay === "community")
+      cy.style().selector("node").style("background-color", "data(communityColor)").update();
+    if (overlay === "anomaly")
+      cy.style().selector("node").style("border-width", "mapData(anomaly, 0, 1, 0, 8)").update();
   });
 }
 ```
@@ -335,14 +308,11 @@ export function registerOverlayBus(cy: any) {
 
 ```ts
 // server/src/ai/nl2cypher/guard.ts
-import neo4j from 'neo4j-driver';
-const ALLOW = [
-  /^MATCH \(.*\)\-\[.*\]\-\>.* RETURN .*$/i,
-  /^MATCH \(.*\) RETURN .*$/i,
-];
+import neo4j from "neo4j-driver";
+const ALLOW = [/^MATCH \(.*\)\-\[.*\]\-\>.* RETURN .*$/i, /^MATCH \(.*\) RETURN .*$/i];
 export async function schemaIntrospect(driver: neo4j.Driver) {
   const s = await driver.session();
-  const res = await s.run('CALL db.schema.visualization()');
+  const res = await s.run("CALL db.schema.visualization()");
   await s.close();
   return res.records.map((r) => r.toObject());
 }
@@ -358,7 +328,7 @@ export function denyReason(cypher: string) {
 
 ```ts
 // server/src/policy/opa/cache.ts
-import LRU from 'lru-cache';
+import LRU from "lru-cache";
 const cache = new LRU<string, any>({
   max: 5000,
   ttl: process.env.OPA_CACHE_TTL_MS ? +process.env.OPA_CACHE_TTL_MS : 15000,
@@ -378,17 +348,17 @@ export function set(k: string, v: any) {
 
 ```ts
 // server/src/metrics/resolvers.ts
-import client from 'prom-client';
+import client from "prom-client";
 export const resolverLatency = new client.Histogram({
-  name: 'resolver_latency_ms',
-  help: 'Resolver latency',
+  name: "resolver_latency_ms",
+  help: "Resolver latency",
   buckets: [10, 25, 50, 100, 250, 500, 1000, 2000],
-  labelNames: ['name'],
+  labelNames: ["name"],
 });
 export const opaCacheOps = new client.Counter({
-  name: 'opa_cache_ops_total',
-  help: 'OPA cache ops',
-  labelNames: ['op'],
+  name: "opa_cache_ops_total",
+  help: "OPA cache ops",
+  labelNames: ["op"],
 });
 ```
 
@@ -447,7 +417,7 @@ policy:
 features:
   ingestAiMapper: true
   reportRedaction: true
-  overlays: ['pagerank', 'community', 'anomaly']
+  overlays: ["pagerank", "community", "anomaly"]
 observability:
   enableResolverPanels: true
 ```

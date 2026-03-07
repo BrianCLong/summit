@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,8 +7,8 @@ import {
   ListItem,
   ListItemText,
   Typography,
-} from '@mui/material';
-import { ActivityAPI } from '../../services/api';
+} from "@mui/material";
+import { ActivityAPI } from "../../services/api";
 
 export default function ActivityWidget() {
   const [rows, setRows] = useState([]);
@@ -39,10 +39,8 @@ export default function ActivityWidget() {
           {rows.map((r) => (
             <ListItem key={r.id} disableGutters>
               <ListItemText
-                primary={`${r.action} — ${r.resource_type || r.resourceType || ''}:${r.resource_id || r.resourceId || ''}`}
-                secondary={new Date(
-                  r.created_at || r.createdAt,
-                ).toLocaleString()}
+                primary={`${r.action} — ${r.resource_type || r.resourceType || ""}:${r.resource_id || r.resourceId || ""}`}
+                secondary={new Date(r.created_at || r.createdAt).toLocaleString()}
               />
             </ListItem>
           ))}

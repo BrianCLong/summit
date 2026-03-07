@@ -30,12 +30,7 @@
     },
     "risk_level": {
       "type": "string",
-      "enum": [
-        "low",
-        "moderate",
-        "high",
-        "critical"
-      ]
+      "enum": ["low", "moderate", "high", "critical"]
     },
     "blocked": {
       "type": "boolean"
@@ -45,23 +40,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "id",
-          "severity",
-          "message"
-        ],
+        "required": ["id", "severity", "message"],
         "properties": {
           "id": {
             "type": "string"
           },
           "severity": {
             "type": "string",
-            "enum": [
-              "low",
-              "moderate",
-              "high",
-              "critical"
-            ]
+            "enum": ["low", "moderate", "high", "critical"]
           },
           "message": {
             "type": "string"

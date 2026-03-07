@@ -30,7 +30,9 @@ type EvidenceExportStatus = {
 
 export default function AdminPage() {
   const [demoTenant, setDemoTenant] = useState<DemoTenantResponse | null>(null)
-  const [demoStatus, setDemoStatus] = useState<EvidenceExportStatus | null>(null)
+  const [demoStatus, setDemoStatus] = useState<EvidenceExportStatus | null>(
+    null
+  )
   const [demoLoading, setDemoLoading] = useState(false)
   const [statusLoading, setStatusLoading] = useState(false)
   const [demoError, setDemoError] = useState<string | null>(null)
@@ -46,7 +48,7 @@ export default function AdminPage() {
     setStatusLoading(true)
     try {
       const response = await fetch(
-        `/api/evidence/exports/status?tenantId=${tenantId}`,
+        `/api/evidence/exports/status?tenantId=${tenantId}`
       )
       const payload = await response.json()
       if (!response.ok) {
@@ -72,9 +74,7 @@ export default function AdminPage() {
       await fetchEvidenceStatus(data.tenantId)
     } catch (error) {
       setDemoError(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create demo tenant',
+        error instanceof Error ? error.message : 'Failed to create demo tenant'
       )
     } finally {
       setDemoLoading(false)
@@ -173,9 +173,7 @@ export default function AdminPage() {
                 {demoStatus.eventCount}
               </div>
               <div>
-                <span className="font-semibold text-gray-900">
-                  Last event:
-                </span>{' '}
+                <span className="font-semibold text-gray-900">Last event:</span>{' '}
                 {demoStatus.lastEventAt
                   ? new Date(demoStatus.lastEventAt).toLocaleString()
                   : 'No events yet'}

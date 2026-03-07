@@ -131,8 +131,8 @@
       "frozenResources": ["key-a", "key-b"],
       "snapshotted": ["key-a", "key-b"],
       "tagged": {
-        "key-a": {"lho": "active"},
-        "key-b": {"lho": "active"}
+        "key-a": { "lho": "active" },
+        "key-b": { "lho": "active" }
       }
     },
     {
@@ -152,7 +152,7 @@
       "frozenResources": ["logs/doc-1"],
       "snapshotted": ["logs/doc-1"],
       "tagged": {
-        "logs/doc-1": {"lho": "active"}
+        "logs/doc-1": { "lho": "active" }
       }
     },
     {
@@ -160,7 +160,7 @@
       "frozenResources": ["session-9"],
       "snapshotted": [],
       "tagged": {
-        "session-9": {"lho": "active"}
+        "session-9": { "lho": "active" }
       }
     }
   ]

@@ -8,13 +8,13 @@ This plan is intentionally constrained to a minimal, reversible, default-off rol
 
 ## Ground-truth claim mapping
 
-| ITEM Claim | Summit Interpretation |
-| --- | --- |
-| Planning questionnaire in agent mode | Add mandatory preflight planning questionnaire before execution |
-| Persistent todos in chat | Add durable todo ledger persisted across agent steps/runs |
-| Improved attachments + media preview | Add attachment ingestion + hashing + evidence IDs |
-| New models introduced | Expand model catalog/routing definitions with governance controls |
-| Reliability focus | Treat as orchestration hardening with deterministic artifacts |
+| ITEM Claim                           | Summit Interpretation                                             |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| Planning questionnaire in agent mode | Add mandatory preflight planning questionnaire before execution   |
+| Persistent todos in chat             | Add durable todo ledger persisted across agent steps/runs         |
+| Improved attachments + media preview | Add attachment ingestion + hashing + evidence IDs                 |
+| New models introduced                | Expand model catalog/routing definitions with governance controls |
+| Reliability focus                    | Treat as orchestration hardening with deterministic artifacts     |
 
 ## Repo-validated alignment
 
@@ -98,11 +98,11 @@ Deliver a deterministic planning gate and todo ledger behind a feature flag.
 
 ## Threat-informed controls
 
-| Threat | Mitigation | Gate |
-| --- | --- | --- |
-| Agent executes without plan | Mandatory preflight validator | `check_agent_plan` |
-| Todos lost across steps | Persistent ledger + write-through persistence | `test_todo_persistence` |
-| Malicious attachment input | Content hashing + bounded parsing + validation | `test_attachment_injection` |
+| Threat                      | Mitigation                                     | Gate                        |
+| --------------------------- | ---------------------------------------------- | --------------------------- |
+| Agent executes without plan | Mandatory preflight validator                  | `check_agent_plan`          |
+| Todos lost across steps     | Persistent ledger + write-through persistence  | `test_todo_persistence`     |
+| Malicious attachment input  | Content hashing + bounded parsing + validation | `test_attachment_injection` |
 
 ## Performance budgets
 

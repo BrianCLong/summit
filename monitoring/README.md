@@ -65,12 +65,12 @@ Ensure your IntelGraph services expose metrics endpoints:
 
 ```javascript
 // Add monitoring middleware
-const { httpMetricsMiddleware } = require('./src/monitoring/middleware');
+const { httpMetricsMiddleware } = require("./src/monitoring/middleware");
 app.use(httpMetricsMiddleware);
 
 // Add monitoring routes
-const monitoringRouter = require('./src/routes/monitoring');
-app.use('/monitoring', monitoringRouter);
+const monitoringRouter = require("./src/routes/monitoring");
+app.use("/monitoring", monitoringRouter);
 ```
 
 **ML Service (Python)**:
@@ -229,7 +229,7 @@ Prometheus retains metrics for 30 days by default. Configure retention with:
 
 ```yaml
 command:
-  - '--storage.tsdb.retention.time=30d'
+  - "--storage.tsdb.retention.time=30d"
 ```
 
 ### Backup

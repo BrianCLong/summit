@@ -1,8 +1,8 @@
-import { BasePage } from './base';
+import { BasePage } from "./base";
 
 export class LoginPage extends BasePage {
   visit() {
-    super.visit('/login');
+    super.visit("/login");
   }
 
   fillEmail(email: string) {

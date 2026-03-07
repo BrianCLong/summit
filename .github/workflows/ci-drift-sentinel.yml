@@ -3,11 +3,11 @@ name: CI Drift Sentinel
 on:
   pull_request:
     paths:
-      - '.github/workflows/**'
-      - 'scripts/ci/validate_workflows.mjs'
-      - 'scripts/ci/workflow-budget-sentinel.mjs'
+      - ".github/workflows/**"
+      - "scripts/ci/validate_workflows.mjs"
+      - "scripts/ci/workflow-budget-sentinel.mjs"
   schedule:
-    - cron: '0 0 * * *' # Daily at midnight
+    - cron: "0 0 * * *" # Daily at midnight
   workflow_dispatch:
 
 concurrency:
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Validate Workflow Drift
         run: node scripts/ci/validate_workflows.mjs

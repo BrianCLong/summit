@@ -18,36 +18,40 @@ This policy establishes the governance baseline for the General Availability (GA
 Drift is defined as any deviation from the established governance baseline.
 
 ### 2.1 Code & Configuration Drift
-*   **Definition**: Any modification to governed files that has not passed the standard pull request review process or violates the `freeze_mode` defined in `docs/policies/trust-policy.yaml`.
-*   **Detection**: Automated by `scripts/compliance/check_drift.ts` and `scripts/ci/governance_drift_detector.mjs`.
-*   **Scope**:
-    *   Files mapped in `compliance/control-map.yaml`.
-    *   Critical workflow definitions.
+
+- **Definition**: Any modification to governed files that has not passed the standard pull request review process or violates the `freeze_mode` defined in `docs/policies/trust-policy.yaml`.
+- **Detection**: Automated by `scripts/compliance/check_drift.ts` and `scripts/ci/governance_drift_detector.mjs`.
+- **Scope**:
+  - Files mapped in `compliance/control-map.yaml`.
+  - Critical workflow definitions.
 
 ### 2.2 Documentation Drift
-*   **Definition**: Governance documents that fail structural integrity checks (missing headers, broken links) or have inconsistent Evidence mappings.
-*   **Detection**: Automated by `scripts/ci/verify_governance_docs.mjs` and `scripts/ci/verify_evidence_id_consistency.mjs`.
+
+- **Definition**: Governance documents that fail structural integrity checks (missing headers, broken links) or have inconsistent Evidence mappings.
+- **Detection**: Automated by `scripts/ci/verify_governance_docs.mjs` and `scripts/ci/verify_evidence_id_consistency.mjs`.
 
 ## 3. Evidence Freshness
 
 To ensure audit validity, evidence must be timely and relevant.
 
 ### 3.1 Artifact Freshness
-*   **Standard**: Evidence artifacts (e.g., test logs, scan results) must be generated within **24 hours** of the release build.
-*   **Detection**: `scripts/ci/collect_fresh_evidence_rate.mjs`.
+
+- **Standard**: Evidence artifacts (e.g., test logs, scan results) must be generated within **24 hours** of the release build.
+- **Detection**: `scripts/ci/collect_fresh_evidence_rate.mjs`.
 
 ### 3.2 Documentation Freshness
-*   **Standard**: Active governance documents must be reviewed at least every **90 days**.
-*   **Detection**: `scripts/ci/verify_governance_docs.mjs` (checks `Last-Reviewed` header).
+
+- **Standard**: Active governance documents must be reviewed at least every **90 days**.
+- **Detection**: `scripts/ci/verify_governance_docs.mjs` (checks `Last-Reviewed` header).
 
 ## 4. Remediation Ownership
 
-| Drift Category | Owner | Representative |
-| :--- | :--- | :--- |
-| **CI / Workflows** | Platform Engineering | Claude (Systemic/CI) |
-| **Security / Secrets** | Security Operations | Security Team |
-| **Documentation / Policy** | Governance | Jules (Governance/Docs) |
-| **Code / Dependencies** | Engineering | Qwen (Package/Fix) |
+| Drift Category             | Owner                | Representative          |
+| :------------------------- | :------------------- | :---------------------- |
+| **CI / Workflows**         | Platform Engineering | Claude (Systemic/CI)    |
+| **Security / Secrets**     | Security Operations  | Security Team           |
+| **Documentation / Policy** | Governance           | Jules (Governance/Docs) |
+| **Code / Dependencies**    | Engineering          | Qwen (Package/Fix)      |
 
 ## 5. Change Management
 
@@ -63,12 +67,14 @@ Legitimate changes to the governance baseline must follow this process:
 In rare cases, blocking drift or stale evidence may be accepted temporarily.
 
 ### 6.1 Exception Protocol
-*   **Criteria**: The risk is understood, documented, and mitigated; OR the failure is a false positive waiting on tooling fix.
-*   **Process**:
-    1.  Log the exception in `docs/governance/EXCEPTION_REGISTER.md` (or `docs/governance/EXCEPTIONS.md`).
-    2.  Link to a tracking issue for remediation.
-    3.  Obtain Release Captain approval.
+
+- **Criteria**: The risk is understood, documented, and mitigated; OR the failure is a false positive waiting on tooling fix.
+- **Process**:
+  1.  Log the exception in `docs/governance/EXCEPTION_REGISTER.md` (or `docs/governance/EXCEPTIONS.md`).
+  2.  Link to a tracking issue for remediation.
+  3.  Obtain Release Captain approval.
 
 ### 6.2 Constraints
-*   **Maximum Duration**: One release cycle or 30 days, whichever is shorter.
-*   **Revalidation**: Must be re-evaluated at the next Weekly GA Ops review.
+
+- **Maximum Duration**: One release cycle or 30 days, whichever is shorter.
+- **Revalidation**: Must be re-evaluated at the next Weekly GA Ops review.

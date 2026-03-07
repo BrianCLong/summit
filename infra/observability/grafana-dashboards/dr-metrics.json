@@ -10,7 +10,7 @@
         "id": 1,
         "type": "stat",
         "title": "Actual RPO (Target: ≤ 5 minutes)",
-        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
         "targets": [
           {
             "expr": "intelgraph_dr_rpo_actual_seconds{database=\"postgres\"}",
@@ -32,9 +32,9 @@
             "thresholds": {
               "mode": "absolute",
               "steps": [
-                {"value": null, "color": "green"},
-                {"value": 240, "color": "yellow"},
-                {"value": 300, "color": "red"}
+                { "value": null, "color": "green" },
+                { "value": 240, "color": "yellow" },
+                { "value": 300, "color": "red" }
               ]
             }
           }
@@ -44,7 +44,7 @@
         "id": 2,
         "type": "stat",
         "title": "Actual RTO (Target: ≤ 1 hour)",
-        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
         "targets": [
           {
             "expr": "intelgraph_dr_rto_actual_seconds{database=\"postgres\"}",
@@ -57,9 +57,9 @@
             "thresholds": {
               "mode": "absolute",
               "steps": [
-                {"value": null, "color": "green"},
-                {"value": 3000, "color": "yellow"},
-                {"value": 3600, "color": "red"}
+                { "value": null, "color": "green" },
+                { "value": 3000, "color": "yellow" },
+                { "value": 3600, "color": "red" }
               ]
             }
           }
@@ -69,7 +69,7 @@
         "id": 3,
         "type": "graph",
         "title": "Replication Lag (All Databases)",
-        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 0},
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 0 },
         "targets": [
           {
             "expr": "intelgraph_dr_replication_lag_seconds",
@@ -97,7 +97,7 @@
         "id": 4,
         "type": "graph",
         "title": "Backup Frequency",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
         "targets": [
           {
             "expr": "time() - intelgraph_dr_last_backup_timestamp{backup_type=\"full\"}",
@@ -116,7 +116,7 @@
         "id": 5,
         "type": "graph",
         "title": "Backup Size Trend",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
         "targets": [
           {
             "expr": "intelgraph_dr_backup_size_bytes",
@@ -135,7 +135,7 @@
         "id": 6,
         "type": "table",
         "title": "DR Restore Tests (Last 30 days)",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
         "targets": [
           {
             "expr": "sum(increase(intelgraph_dr_restore_tests_total[30d])) by (database, test_type, result)",
@@ -149,7 +149,7 @@
         "id": 7,
         "type": "table",
         "title": "Chaos Experiments Summary",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
         "targets": [
           {
             "expr": "sum(increase(intelgraph_chaos_experiments_total[30d])) by (experiment_type, target, result)",
@@ -163,7 +163,7 @@
         "id": 8,
         "type": "stat",
         "title": "Chaos Drill Pass Rate (Monthly)",
-        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 22},
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 22 },
         "targets": [
           {
             "expr": "100 * (sum(increase(intelgraph_chaos_experiments_total{result=\"success\"}[30d])) / sum(increase(intelgraph_chaos_experiments_total[30d])))",
@@ -176,9 +176,9 @@
             "thresholds": {
               "mode": "absolute",
               "steps": [
-                {"value": null, "color": "red"},
-                {"value": 90, "color": "yellow"},
-                {"value": 100, "color": "green"}
+                { "value": null, "color": "red" },
+                { "value": 90, "color": "yellow" },
+                { "value": 100, "color": "green" }
               ]
             }
           }
@@ -188,7 +188,7 @@
         "id": 9,
         "type": "graph",
         "title": "Chaos Recovery Time",
-        "gridPos": {"h": 6, "w": 18, "x": 6, "y": 22},
+        "gridPos": { "h": 6, "w": 18, "x": 6, "y": 22 },
         "targets": [
           {
             "expr": "histogram_quantile(0.95, sum(rate(intelgraph_chaos_recovery_time_seconds_bucket[24h])) by (le, experiment_type))",

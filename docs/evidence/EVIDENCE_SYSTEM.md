@@ -8,19 +8,19 @@ The Summit Evidence System ensures that every meaningful change ships with machi
 
 An evidence bundle is a directory containing:
 
-*   `index.json`: The manifest mapping Evidence IDs to artifacts.
-*   `report.json`: Human-readable summary and classification.
-*   `metrics.json`: Machine-readable counters and metrics.
-*   `stamp.json`: Provenance data (timestamps, git SHA). **Only this file may contain timestamps.**
+- `index.json`: The manifest mapping Evidence IDs to artifacts.
+- `report.json`: Human-readable summary and classification.
+- `metrics.json`: Machine-readable counters and metrics.
+- `stamp.json`: Provenance data (timestamps, git SHA). **Only this file may contain timestamps.**
 
 ## Schemas
 
 Schemas are located in `evidence/schemas/`.
 
-*   `evidence.index.schema.json`
-*   `report.schema.json`
-*   `metrics.schema.json`
-*   `stamp.schema.json`
+- `evidence.index.schema.json`
+- `report.schema.json`
+- `metrics.schema.json`
+- `stamp.schema.json`
 
 ## Evidence IDs
 

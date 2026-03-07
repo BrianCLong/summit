@@ -4,21 +4,21 @@ on:
   workflow_dispatch:
     inputs:
       start_batch:
-        description: 'Start batch number'
+        description: "Start batch number"
         required: true
-        default: '1'
+        default: "1"
       end_batch:
-        description: 'End batch number'
+        description: "End batch number"
         required: true
-        default: '10'
+        default: "10"
       sleep_ms:
-        description: 'Sleep time in milliseconds'
+        description: "Sleep time in milliseconds"
         required: true
-        default: '250'
+        default: "250"
       max_parallel:
-        description: 'Maximum number of parallel jobs'
+        description: "Maximum number of parallel jobs"
         required: true
-        default: '3'
+        default: "3"
 
 concurrency:
   group: bulk-import-${{ github.run_id }}
@@ -55,8 +55,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -66,7 +66,7 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_PROJECT }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
-          PROJECT_ID: 'PVT_kwHOAGG3w84BEh1S'
+          PROJECT_ID: "PVT_kwHOAGG3w84BEh1S"
           BATCH_NUMBER: ${{ matrix.batch }}
           SLEEP_MS: ${{ github.event.inputs.sleep_ms }}
         run: |

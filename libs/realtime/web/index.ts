@@ -1,4 +1,4 @@
-import { createClient } from 'graphql-ws';
+import { createClient } from "graphql-ws";
 
 export class WebRealtimeClient {
   private client: any;
@@ -12,14 +12,19 @@ export class WebRealtimeClient {
     });
   }
 
-  subscribe(query: string, variables: any, onNext: (data: any) => void, onError: (err: any) => void) {
+  subscribe(
+    query: string,
+    variables: any,
+    onNext: (data: any) => void,
+    onError: (err: any) => void
+  ) {
     return this.client.subscribe(
       { query, variables },
       {
         next: onNext,
         error: onError,
         complete: () => {},
-      },
+      }
     );
   }
 }

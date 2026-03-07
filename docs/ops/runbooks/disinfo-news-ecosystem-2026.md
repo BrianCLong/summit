@@ -7,6 +7,7 @@ pnpm disinfo:analyze --input <path_to_bundle.json> --out <output_directory>
 ```
 
 Example:
+
 ```bash
 pnpm disinfo:analyze --input fixtures/disinfo/sample_bundle.json --out artifacts/disinfo/manual_run_01
 ```
@@ -25,6 +26,7 @@ pnpm disinfo:analyze --input fixtures/disinfo/sample_bundle.json --out artifacts
 ## What to do on drift alerts
 
 If the `disinfo-news-ecosystem-drift` job fails:
+
 1. Check `artifacts/disinfo/drift_check/metrics.json`.
 2. Compare with baseline.
 3. If `elapsed_ms` spike: Investigate logic changes in `analyzer.ts` or `network.ts`.

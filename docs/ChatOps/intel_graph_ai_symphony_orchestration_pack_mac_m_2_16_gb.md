@@ -87,37 +87,37 @@ model_list:
   - model_name: local/ollama
     litellm_params:
       provider: openai_compatible
-      api_base: 'http://127.0.0.1:11434/v1'
-      api_key: 'sk-local-ollama'
-      model: 'llama3.1' # default for generic prompts
+      api_base: "http://127.0.0.1:11434/v1"
+      api_key: "sk-local-ollama"
+      model: "llama3.1" # default for generic prompts
 
   - model_name: local/ollama-coder
     litellm_params:
       provider: openai_compatible
-      api_base: 'http://127.0.0.1:11434/v1'
-      api_key: 'sk-local-ollama'
-      model: 'qwen2.5-coder:7b'
+      api_base: "http://127.0.0.1:11434/v1"
+      api_key: "sk-local-ollama"
+      model: "qwen2.5-coder:7b"
 
   - model_name: local/lmstudio
     litellm_params:
       provider: openai_compatible
-      api_base: 'http://127.0.0.1:1234/v1'
-      api_key: 'sk-local-lms'
-      model: 'llama-3.1-8b-instruct'
+      api_base: "http://127.0.0.1:1234/v1"
+      api_key: "sk-local-lms"
+      model: "llama-3.1-8b-instruct"
 
   # ===== OPTIONAL HOSTED (DISABLED BY BUDGETS) =====
   - model_name: gemini/1.5-pro
     litellm_params:
       provider: google_ai_studio
-      model: 'gemini-1.5-pro-latest'
-      api_key: '${GOOGLE_API_KEY}'
+      model: "gemini-1.5-pro-latest"
+      api_key: "${GOOGLE_API_KEY}"
 
   - model_name: xai/grok-code-fast-1
     litellm_params:
       provider: openai_compatible
-      api_base: 'https://api.x.ai/v1'
-      api_key: '${XAI_API_KEY}'
-      model: 'grok-code-fast-1'
+      api_base: "https://api.x.ai/v1"
+      api_key: "${XAI_API_KEY}"
+      model: "grok-code-fast-1"
 
 router_settings:
   num_retries: 1
@@ -284,13 +284,13 @@ indent_size = 4
 ```js
 module.exports = {
   root: true,
-  extends: ['eslint:recommended'],
-  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  extends: ["eslint:recommended"],
+  parserOptions: { ecmaVersion: "latest", sourceType: "module" },
   env: { node: true, es2023: true, browser: true, jest: true },
-  plugins: ['import'],
+  plugins: ["import"],
   rules: {
-    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'import/order': ['warn', { 'newlines-between': 'always' }],
+    "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "import/order": ["warn", { "newlines-between": "always" }],
   },
 };
 ```
@@ -331,7 +331,7 @@ npx husky add .husky/commit-msg 'npx --no commitlint --edit "$1"'
 `commitlint.config.cjs`:
 
 ```js
-module.exports = { extends: ['@commitlint/config-conventional'] };
+module.exports = { extends: ["@commitlint/config-conventional"] };
 ```
 
 **pre-commit (Python + general):** `.pre-commit-config.yaml`
@@ -346,7 +346,7 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-        args: ['--fix']
+        args: ["--fix"]
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.3.3
     hooks:
@@ -407,8 +407,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install JS tooling
         run: |
@@ -423,7 +423,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install Python tooling
         run: |

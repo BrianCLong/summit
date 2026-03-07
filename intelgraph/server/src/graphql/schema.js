@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
   scalar DateTime
@@ -178,13 +178,13 @@ const typeDefs = gql`
 
   # Provenance Types
   type Decision {
-      id: ID!
-      title: String!
-      rationale: String!
-      status: String
-      createdAt: DateTime!
-      madeBy: User
-      evidence: [Entity!]
+    id: ID!
+    title: String!
+    rationale: String!
+    status: String
+    createdAt: DateTime!
+    madeBy: User
+    evidence: [Entity!]
   }
 
   # Graph Analysis Types
@@ -354,10 +354,10 @@ const typeDefs = gql`
   }
 
   input CreateDecisionInput {
-      investigationId: ID!
-      title: String!
-      rationale: String!
-      evidenceIds: [ID!]!
+    investigationId: ID!
+    title: String!
+    rationale: String!
+    evidenceIds: [ID!]!
   }
 
   # Search Types
@@ -432,11 +432,7 @@ const typeDefs = gql`
     entitiesByType(type: EntityType!, investigationId: ID): [Entity!]!
 
     # Relationships
-    relationships(
-      investigationId: ID
-      page: Int = 1
-      limit: Int = 50
-    ): [Relationship!]!
+    relationships(investigationId: ID, page: Int = 1, limit: Int = 50): [Relationship!]!
     relationship(id: ID!): Relationship
 
     # Graph and Visualization
@@ -445,11 +441,7 @@ const typeDefs = gql`
 
     # Search
     search(query: String!, limit: Int = 20): SearchResults!
-    searchEntities(
-      query: String!
-      investigationId: ID
-      limit: Int = 20
-    ): [Entity!]!
+    searchEntities(query: String!, investigationId: ID, limit: Int = 20): [Entity!]!
 
     # Provenance
     decision(id: ID!): Decision
@@ -479,10 +471,7 @@ const typeDefs = gql`
 
     # Investigations
     createInvestigation(input: CreateInvestigationInput!): Investigation!
-    updateInvestigation(
-      id: ID!
-      input: UpdateInvestigationInput!
-    ): Investigation!
+    updateInvestigation(id: ID!, input: UpdateInvestigationInput!): Investigation!
     deleteInvestigation(id: ID!): Boolean!
 
     # Entities

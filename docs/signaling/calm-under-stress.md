@@ -7,6 +7,7 @@
 How a system behaves under pressure reveals more than what it claims in calm conditions.
 
 Adversaries, regulators, partners, and users all observe Summit's response to:
+
 - Security incidents
 - Sudden load or adversarial probing
 - Public criticism or scrutiny
@@ -20,6 +21,7 @@ Adversaries, regulators, partners, and users all observe Summit's response to:
 > Panic is exploitable. Calm is discouraging.
 
 When a system responds to pressure with:
+
 - **Panic**: Adversaries escalate (system is reactive)
 - **Silence**: Observers assume incompetence or cover-up
 - **Chaos**: Partners lose confidence
@@ -28,12 +30,14 @@ When a system responds to pressure with:
 ## What "Calm" Means in Practice
 
 Calm signaling is **not**:
+
 - ❌ Slow response
 - ❌ Minimizing serious issues
 - ❌ Avoiding communication
 - ❌ Pretending nothing is wrong
 
 Calm signaling **is**:
+
 - ✅ Structured, predictable response protocols
 - ✅ Clear communication that things are being handled according to plan
 - ✅ Maintaining invariants even under pressure
@@ -79,17 +83,20 @@ Some non-critical activities may be **postponed** during high-stress periods:
 ### Phase 1: Detection and Initial Response (0-30 minutes)
 
 **Objectives**:
+
 - Confirm incident scope
 - Activate response protocols
 - Initiate stakeholder notification sequence
 
 **Signals**:
+
 - ✅ "We're investigating an issue and will provide updates"
 - ✅ "Response protocols have been activated"
 - ❌ "Everything is fine" (when it's not)
 - ❌ Radio silence
 
 **Invariants to Maintain**:
+
 - Evidence discipline in characterizing the incident
 - Refusal to speculate beyond known facts
 - Oversight engagement from the start
@@ -97,11 +104,13 @@ Some non-critical activities may be **postponed** during high-stress periods:
 ### Phase 2: Containment and Assessment (30 minutes - 4 hours)
 
 **Objectives**:
+
 - Contain immediate impact
 - Assess full scope
 - Develop response plan
 
 **Signals**:
+
 - ✅ "We have contained the immediate issue and are assessing scope"
 - ✅ "We're working with [oversight/security experts] to investigate"
 - ✅ "Preliminary findings indicate [evidence-based assessment]"
@@ -109,6 +118,7 @@ Some non-critical activities may be **postponed** during high-stress periods:
 - ❌ Sudden policy changes without rationale
 
 **Invariants to Maintain**:
+
 - No retroactive policy changes to "fix" the incident
 - Appeal processes remain available
 - Transparency about what is known vs. unknown
@@ -116,11 +126,13 @@ Some non-critical activities may be **postponed** during high-stress periods:
 ### Phase 3: Remediation and Communication (4-24 hours)
 
 **Objectives**:
+
 - Implement fixes
 - Communicate findings and response
 - Restore normal operation
 
 **Signals**:
+
 - ✅ "We identified the root cause as [evidence-based finding]"
 - ✅ "We've implemented [specific remediation] and verified resolution"
 - ✅ "We're conducting a retrospective to prevent recurrence"
@@ -128,6 +140,7 @@ Some non-critical activities may be **postponed** during high-stress periods:
 - ❌ Blaming external factors without evidence
 
 **Invariants to Maintain**:
+
 - Evidence for root cause analysis
 - Governance process for remediation approval
 - Independent verification of fixes
@@ -135,11 +148,13 @@ Some non-critical activities may be **postponed** during high-stress periods:
 ### Phase 4: Retrospective and Improvement (24 hours - 1 week)
 
 **Objectives**:
+
 - Conduct independent review
 - Identify preventive measures
 - Communicate learnings
 
 **Signals**:
+
 - ✅ "Independent review found [findings]"
 - ✅ "We're implementing [preventive measures] to address root causes"
 - ✅ "Full incident report available [with appropriate redactions for security]"
@@ -147,6 +162,7 @@ Some non-critical activities may be **postponed** during high-stress periods:
 - ❌ No follow-through on promised reviews
 
 **Invariants to Maintain**:
+
 - Transparency about governance changes prompted by incident
 - No silent policy shifts
 - Oversight review of response quality
@@ -158,6 +174,7 @@ Calm under stress requires **preparation, not improvisation**:
 ### 1. Response Protocols
 
 **Documented, tested procedures** for:
+
 - Incident classification
 - Notification sequences
 - Escalation triggers
@@ -167,6 +184,7 @@ Calm under stress requires **preparation, not improvisation**:
 ### 2. Communication Templates
 
 **Pre-approved language** for:
+
 - Initial acknowledgment
 - Progress updates
 - All-clear signals
@@ -177,6 +195,7 @@ Calm under stress requires **preparation, not improvisation**:
 ### 3. Stakeholder Mapping
 
 **Clear identification** of:
+
 - Who must be notified (regulatory, partners, users)
 - What information they need (abstracted for security)
 - When notifications are triggered
@@ -185,6 +204,7 @@ Calm under stress requires **preparation, not improvisation**:
 ### 4. Stress Testing
 
 **Regular exercises** that:
+
 - Simulate incident scenarios
 - Test response protocols
 - Verify communication pathways
@@ -199,6 +219,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Pattern**: Sudden policy changes, threshold adjustments, or scope shifts in response to criticism
 
 **Why It's Harmful**:
+
 - Signals that the system is reactive, not principled
 - Invites future pressure campaigns
 - Erodes trust in stated invariants
@@ -210,6 +231,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Pattern**: Committing to unrealistic timelines, capabilities, or changes to appease critics
 
 **Why It's Harmful**:
+
 - Creates new credibility gaps when promises can't be kept
 - Compounds the original incident with self-inflicted failures
 
@@ -220,6 +242,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Pattern**: Going dark during incidents, providing no updates
 
 **Why It's Harmful**:
+
 - Looks like incompetence or cover-up
 - Amplifies speculation and criticism
 - Breaks trust with partners who need reliability signals
@@ -231,6 +254,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Pattern**: Attributing incidents to external factors, users, or uncontrollable circumstances without evidence
 
 **Why It's Harmful**:
+
 - Signals lack of accountability
 - Discourages partners who need confidence in ownership
 - Often disproven by subsequent investigation
@@ -242,6 +266,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Pattern**: Suspending services, over-restricting operation, or making dramatic changes for appearance
 
 **Why It's Harmful**:
+
 - Signals lack of proportional judgment
 - Disrupts legitimate operation
 - Can be worse than the original incident
@@ -255,6 +280,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Key Message**: "We have this under control, per our established protocols"
 
 **Signals**:
+
 - Reference to pre-existing response plans
 - Engagement of independent oversight
 - Evidence-based characterization of incident
@@ -265,6 +291,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Key Message**: "This doesn't affect our core commitments or stability"
 
 **Signals**:
+
 - Distinction between incident and ongoing operation
 - Confirmation that invariants are maintained
 - Specific impact assessment for integration points
@@ -275,6 +302,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Key Message**: "We're handling this seriously and transparently"
 
 **Signals**:
+
 - Honest acknowledgment of issue
 - Clear information on impact
 - Regular updates on progress
@@ -285,6 +313,7 @@ Calm under stress requires **preparation, not improvisation**:
 **Key Message**: "Probing us is not productive"
 
 **Signals** (through behavior, not communication):
+
 - Rapid, structured response (not panicked)
 - Maintenance of detection and enforcement during incident
 - No exploitable gaps created by stress response

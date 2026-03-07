@@ -1,12 +1,12 @@
 // ===================================
 // server/src/services/AuthService.js - Authentication & Authorization
 // ===================================
-const argon2 = require('argon2');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
-const { getPostgresPool } = require('../config/database');
-const config = require('../config');
-const logger = require('../utils/logger');
+const argon2 = require("argon2");
+const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
+const { getPostgresPool } = require("../config/database");
+const config = require("../config");
+const logger = require("../utils/logger");
 
 class AuthService {
   constructor() {
@@ -17,16 +17,16 @@ class AuthService {
     const client = await this.pool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Check if user already exists
       const existingUser = await client.query(
-        'SELECT id FROM users WHERE email = $1 OR username = $2',
-        [userData.email, userData.username],
+        "SELECT id FROM users WHERE email = $1 OR username = $2",
+        [userData.email, userData.username]
       );
 
       if (existingUser.rows.length > 0) {
-        throw new Error('User with this email or username already exists');
+        throw new Error("User with this email or username already exists");
       }
 
       // Hash password
@@ -45,8 +45,8 @@ class AuthService {
           passwordHash,
           userData.firstName,
           userData.lastName,
-          userData.role || 'ANALYST',
-        ],
+          userData.role || "ANALYST",
+        ]
       );
 
       const user = userResult.rows[0];
@@ -54,17 +54,10 @@ class AuthService {
       // Generate tokens
       const { token, refreshToken } = await this.generateTokens(user, client);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       // Log audit event
-      await this.logAuditEvent(
-        user.id,
-        'USER_REGISTERED',
-        'users',
-        user.id,
-        null,
-        client,
-      );
+      await this.logAuditEvent(user.id, "USER_REGISTERED", "users", user.id, null, client);
 
       return {
         user: this.formatUser(user),
@@ -73,8 +66,8 @@ class AuthService {
         expiresIn: 24 * 60 * 60, // 24 hours
       };
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error registering user:', error);
+      await client.query("ROLLBACK");
+      logger.error("Error registering user:", error);
       throw error;
     } finally {
       client.release();
@@ -87,12 +80,12 @@ class AuthService {
     try {
       // Get user
       const userResult = await client.query(
-        'SELECT * FROM users WHERE email = $1 AND is_active = true',
-        [email],
+        "SELECT * FROM users WHERE email = $1 AND is_active = true",
+        [email]
       );
 
       if (userResult.rows.length === 0) {
-        throw new Error('Invalid credentials');
+        throw new Error("Invalid credentials");
       }
 
       const user = userResult.rows[0];
@@ -100,14 +93,13 @@ class AuthService {
       // Verify password
       const validPassword = await argon2.verify(user.password_hash, password);
       if (!validPassword) {
-        throw new Error('Invalid credentials');
+        throw new Error("Invalid credentials");
       }
 
       // Update last login
-      await client.query(
-        'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-        [user.id],
-      );
+      await client.query("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1", [
+        user.id,
+      ]);
 
       // Generate tokens
       const { token, refreshToken } = await this.generateTokens(user, client);
@@ -115,14 +107,14 @@ class AuthService {
       // Log audit event
       await this.logAuditEvent(
         user.id,
-        'USER_LOGIN',
-        'users',
+        "USER_LOGIN",
+        "users",
         user.id,
         {
           ipAddress,
           userAgent,
         },
-        client,
+        client
       );
 
       return {
@@ -132,7 +124,7 @@ class AuthService {
         expiresIn: 24 * 60 * 60,
       };
     } catch (error) {
-      logger.error('Error logging in user:', error);
+      logger.error("Error logging in user:", error);
       throw error;
     } finally {
       client.release();
@@ -150,11 +142,11 @@ class AuthService {
         JOIN users u ON s.user_id = u.id
         WHERE s.refresh_token = $1 AND s.expires_at > CURRENT_TIMESTAMP AND u.is_active = true
       `,
-        [refreshTokenValue],
+        [refreshTokenValue]
       );
 
       if (sessionResult.rows.length === 0) {
-        throw new Error('Invalid or expired refresh token');
+        throw new Error("Invalid or expired refresh token");
       }
 
       const user = sessionResult.rows[0];
@@ -164,8 +156,8 @@ class AuthService {
 
       // Update session
       await client.query(
-        'UPDATE user_sessions SET last_used = CURRENT_TIMESTAMP WHERE refresh_token = $1',
-        [refreshTokenValue],
+        "UPDATE user_sessions SET last_used = CURRENT_TIMESTAMP WHERE refresh_token = $1",
+        [refreshTokenValue]
       );
 
       return {
@@ -175,7 +167,7 @@ class AuthService {
         expiresIn: 24 * 60 * 60,
       };
     } catch (error) {
-      logger.error('Error refreshing token:', error);
+      logger.error("Error refreshing token:", error);
       throw error;
     } finally {
       client.release();
@@ -186,12 +178,10 @@ class AuthService {
     const client = await this.pool.connect();
 
     try {
-      await client.query('DELETE FROM user_sessions WHERE refresh_token = $1', [
-        refreshTokenValue,
-      ]);
+      await client.query("DELETE FROM user_sessions WHERE refresh_token = $1", [refreshTokenValue]);
       return true;
     } catch (error) {
-      logger.error('Error logging out user:', error);
+      logger.error("Error logging out user:", error);
       throw error;
     } finally {
       client.release();
@@ -221,7 +211,7 @@ class AuthService {
       INSERT INTO user_sessions (user_id, refresh_token, expires_at)
       VALUES ($1, $2, $3)
     `,
-      [user.id, refreshToken, expiresAt],
+      [user.id, refreshToken, expiresAt]
     );
 
     return { token, refreshToken };
@@ -236,8 +226,8 @@ class AuthService {
       // Get user from database to ensure they're still active
       const client = await this.pool.connect();
       const userResult = await client.query(
-        'SELECT * FROM users WHERE id = $1 AND is_active = true',
-        [decoded.userId],
+        "SELECT * FROM users WHERE id = $1 AND is_active = true",
+        [decoded.userId]
       );
       client.release();
 
@@ -247,29 +237,22 @@ class AuthService {
 
       return this.formatUser(userResult.rows[0]);
     } catch (error) {
-      logger.warn('Invalid token:', error.message);
+      logger.warn("Invalid token:", error.message);
       return null;
     }
   }
 
-  async logAuditEvent(
-    userId,
-    action,
-    resourceType,
-    resourceId,
-    details,
-    client,
-  ) {
+  async logAuditEvent(userId, action, resourceType, resourceId, details, client) {
     try {
       await client.query(
         `
         INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details)
         VALUES ($1, $2, $3, $4, $5)
       `,
-        [userId, action, resourceType, resourceId, JSON.stringify(details)],
+        [userId, action, resourceType, resourceId, JSON.stringify(details)]
       );
     } catch (error) {
-      logger.error('Error logging audit event:', error);
+      logger.error("Error logging audit event:", error);
     }
   }
 
@@ -295,9 +278,9 @@ module.exports = AuthService;
 // ===================================
 // server/src/services/InvestigationService.js - Investigation Management
 // ===================================
-const { v4: uuidv4 } = require('uuid');
-const { getNeo4jDriver } = require('../config/database');
-const logger = require('../utils/logger');
+const { v4: uuidv4 } = require("uuid");
+const { getNeo4jDriver } = require("../config/database");
+const logger = require("../utils/logger");
 
 class InvestigationService {
   constructor() {
@@ -342,8 +325,8 @@ class InvestigationService {
         userId,
         title: investigationData.title,
         description: investigationData.description || null,
-        status: 'ACTIVE',
-        priority: investigationData.priority || 'MEDIUM',
+        status: "ACTIVE",
+        priority: investigationData.priority || "MEDIUM",
         tags: investigationData.tags || [],
         metadata: investigationData.metadata || {},
         assignedTo: investigationData.assignedTo || [],
@@ -353,12 +336,12 @@ class InvestigationService {
       const result = await session.run(query, params);
 
       if (result.records.length === 0) {
-        throw new Error('Failed to create investigation');
+        throw new Error("Failed to create investigation");
       }
 
       return this.getInvestigationById(investigationId);
     } catch (error) {
-      logger.error('Error creating investigation:', error);
+      logger.error("Error creating investigation:", error);
       throw error;
     } finally {
       await session.close();
@@ -385,12 +368,12 @@ class InvestigationService {
       const result = await session.run(query, { investigationId });
 
       if (result.records.length === 0) {
-        throw new Error('Investigation not found');
+        throw new Error("Investigation not found");
       }
 
       return this.formatInvestigationResult(result.records[0]);
     } catch (error) {
-      logger.error('Error getting investigation:', error);
+      logger.error("Error getting investigation:", error);
       throw error;
     } finally {
       await session.close();
@@ -404,16 +387,16 @@ class InvestigationService {
       const { page = 1, limit = 10 } = pagination;
       const skip = (page - 1) * limit;
 
-      let whereClause = '';
+      let whereClause = "";
       const params = { skip, limit };
 
       if (filters.status) {
-        whereClause += ' AND i.status = $status';
+        whereClause += " AND i.status = $status";
         params.status = filters.status;
       }
 
       if (filters.priority) {
-        whereClause += ' AND i.priority = $priority';
+        whereClause += " AND i.priority = $priority";
         params.priority = filters.priority;
       }
 
@@ -437,11 +420,9 @@ class InvestigationService {
 
       const result = await session.run(query, params);
 
-      return result.records.map((record) =>
-        this.formatInvestigationResult(record),
-      );
+      return result.records.map((record) => this.formatInvestigationResult(record));
     } catch (error) {
-      logger.error('Error getting investigations:', error);
+      logger.error("Error getting investigations:", error);
       throw error;
     } finally {
       await session.close();
@@ -458,13 +439,13 @@ class InvestigationService {
 
       // Build dynamic SET clauses
       Object.entries(updateData).forEach(([key, value]) => {
-        if (key !== 'assignedTo' && value !== undefined) {
+        if (key !== "assignedTo" && value !== undefined) {
           setClauses.push(`i.${key} = $${key}`);
           params[key] = value;
         }
       });
 
-      let assignedQuery = '';
+      let assignedQuery = "";
       if (updateData.assignedTo) {
         assignedQuery = `
           // Remove existing assignments
@@ -483,7 +464,7 @@ class InvestigationService {
       const query = `
         MATCH (i:Investigation {id: $investigationId})
         
-        SET ${setClauses.join(', ')}, i.updatedAt = $updatedAt
+        SET ${setClauses.join(", ")}, i.updatedAt = $updatedAt
         
         ${assignedQuery}
         
@@ -493,12 +474,12 @@ class InvestigationService {
       const result = await session.run(query, params);
 
       if (result.records.length === 0) {
-        throw new Error('Investigation not found');
+        throw new Error("Investigation not found");
       }
 
       return this.getInvestigationById(investigationId);
     } catch (error) {
-      logger.error('Error updating investigation:', error);
+      logger.error("Error updating investigation:", error);
       throw error;
     } finally {
       await session.close();
@@ -532,9 +513,9 @@ class InvestigationService {
 
       const result = await session.run(query, { investigationId, userId });
 
-      return result.records[0].get('deletedCount').toNumber() > 0;
+      return result.records[0].get("deletedCount").toNumber() > 0;
     } catch (error) {
-      logger.error('Error deleting investigation:', error);
+      logger.error("Error deleting investigation:", error);
       throw error;
     } finally {
       await session.close();
@@ -542,10 +523,10 @@ class InvestigationService {
   }
 
   formatInvestigationResult(record) {
-    const investigation = record.get('i').properties;
-    const creator = record.get('creator').properties;
+    const investigation = record.get("i").properties;
+    const creator = record.get("creator").properties;
     const assignees = record
-      .get('assignees')
+      .get("assignees")
       .map((assignee) =>
         assignee
           ? {
@@ -554,11 +535,11 @@ class InvestigationService {
               firstName: assignee.properties.firstName,
               lastName: assignee.properties.lastName,
             }
-          : null,
+          : null
       )
       .filter(Boolean);
-    const entityCount = record.get('entityCount').toNumber();
-    const relationshipCount = record.get('relationshipCount').toNumber();
+    const entityCount = record.get("entityCount").toNumber();
+    const relationshipCount = record.get("relationshipCount").toNumber();
 
     return {
       id: investigation.id,
@@ -588,12 +569,12 @@ module.exports = InvestigationService;
 // ===================================
 // server/src/graphql/resolvers.js - Complete GraphQL Resolvers
 // ===================================
-const AuthService = require('../services/AuthService');
-const InvestigationService = require('../services/InvestigationService');
-const EntityService = require('../services/EntityService');
-const GraphAnalysisService = require('../services/GraphAnalysisService');
-const { withFilter } = require('graphql-subscriptions');
-const { PubSub } = require('graphql-subscriptions');
+const AuthService = require("../services/AuthService");
+const InvestigationService = require("../services/InvestigationService");
+const EntityService = require("../services/EntityService");
+const GraphAnalysisService = require("../services/GraphAnalysisService");
+const { withFilter } = require("graphql-subscriptions");
+const { PubSub } = require("graphql-subscriptions");
 
 const pubsub = new PubSub();
 
@@ -607,22 +588,22 @@ const resolvers = {
   Query: {
     // Authentication
     me: async (_, __, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return user;
     },
 
     // Users
     users: async (_, { page, limit }, { user }) => {
-      if (!user || user.role !== 'ADMIN') {
-        throw new Error('Insufficient permissions');
+      if (!user || user.role !== "ADMIN") {
+        throw new Error("Insufficient permissions");
       }
       // Implementation would fetch users from PostgreSQL
       return [];
     },
 
     user: async (_, { id }, { user }) => {
-      if (!user || (user.role !== 'ADMIN' && user.id !== id)) {
-        throw new Error('Insufficient permissions');
+      if (!user || (user.role !== "ADMIN" && user.id !== id)) {
+        throw new Error("Insufficient permissions");
       }
       // Implementation would fetch specific user
       return null;
@@ -630,7 +611,7 @@ const resolvers = {
 
     // Investigations
     investigations: async (_, { page, limit, status, priority }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const filters = {};
       if (status) filters.status = status;
@@ -643,43 +624,41 @@ const resolvers = {
     },
 
     investigation: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await investigationService.getInvestigationById(id);
     },
 
     myInvestigations: async (_, __, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       // Implementation would filter by user
       return await investigationService.getInvestigations({}, {});
     },
 
     // Entities
     entities: async (_, { investigationId, filter, page, limit }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
-      return await entityService.getEntitiesByInvestigation(
-        investigationId,
-        filter,
-        { page, limit },
-      );
+      if (!user) throw new Error("Not authenticated");
+      return await entityService.getEntitiesByInvestigation(investigationId, filter, {
+        page,
+        limit,
+      });
     },
 
     entity: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       // Implementation would get specific entity
       return null;
     },
 
     searchEntities: async (_, { query, investigationId, limit }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await entityService.searchEntities(query, investigationId, limit);
     },
 
     // Graph Data
     graphData: async (_, { investigationId }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
-      const entities =
-        await entityService.getEntitiesByInvestigation(investigationId);
+      const entities = await entityService.getEntitiesByInvestigation(investigationId);
       // Convert entities to graph format
       const nodes = entities.map((entity) => ({
         id: entity.id,
@@ -707,24 +686,24 @@ const resolvers = {
     },
 
     graphMetrics: async (_, { investigationId }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await graphAnalysisService.calculateGraphMetrics(investigationId);
     },
 
     // AI Analysis
     linkPredictions: async (_, { investigationId, limit }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await graphAnalysisService.predictLinks(investigationId, limit);
     },
 
     anomalyDetection: async (_, { investigationId }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await graphAnalysisService.detectAnomalies(investigationId);
     },
 
     // Search
     search: async (_, { query, limit }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const entities = await entityService.searchEntities(query, null, limit);
 
@@ -741,7 +720,7 @@ const resolvers = {
     login: async (_, { input }, { req }) => {
       const { email, password } = input;
       const ipAddress = req.ip;
-      const userAgent = req.get('User-Agent');
+      const userAgent = req.get("User-Agent");
 
       return await authService.login(email, password, ipAddress, userAgent);
     },
@@ -763,15 +742,12 @@ const resolvers = {
 
     // Investigations
     createInvestigation: async (_, { input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
-      const investigation = await investigationService.createInvestigation(
-        input,
-        user.id,
-      );
+      const investigation = await investigationService.createInvestigation(input, user.id);
 
       // Publish to subscribers
-      pubsub.publish('INVESTIGATION_CREATED', {
+      pubsub.publish("INVESTIGATION_CREATED", {
         investigationCreated: investigation,
       });
 
@@ -779,16 +755,12 @@ const resolvers = {
     },
 
     updateInvestigation: async (_, { id, input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
-      const investigation = await investigationService.updateInvestigation(
-        id,
-        input,
-        user.id,
-      );
+      const investigation = await investigationService.updateInvestigation(id, input, user.id);
 
       // Publish to subscribers
-      pubsub.publish('INVESTIGATION_UPDATED', {
+      pubsub.publish("INVESTIGATION_UPDATED", {
         investigationUpdated: investigation,
         investigationId: id,
       });
@@ -797,18 +769,18 @@ const resolvers = {
     },
 
     deleteInvestigation: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await investigationService.deleteInvestigation(id, user.id);
     },
 
     // Entities
     createEntity: async (_, { input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const entity = await entityService.createEntity(input, user.id);
 
       // Publish to subscribers
-      pubsub.publish('ENTITY_ADDED', {
+      pubsub.publish("ENTITY_ADDED", {
         entityAdded: entity,
         investigationId: input.investigationId,
       });
@@ -817,12 +789,12 @@ const resolvers = {
     },
 
     updateEntity: async (_, { id, input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const entity = await entityService.updateEntity(id, input, user.id);
 
       // Publish to subscribers
-      pubsub.publish('ENTITY_UPDATED', {
+      pubsub.publish("ENTITY_UPDATED", {
         entityUpdated: entity,
         investigationId: entity.investigationId,
       });
@@ -831,15 +803,15 @@ const resolvers = {
     },
 
     deleteEntity: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const deleted = await entityService.deleteEntity(id, user.id);
 
       if (deleted) {
         // Publish to subscribers
-        pubsub.publish('ENTITY_DELETED', {
+        pubsub.publish("ENTITY_DELETED", {
           entityDeleted: id,
-          investigationId: 'unknown', // Would need to track this
+          investigationId: "unknown", // Would need to track this
         });
       }
 
@@ -848,19 +820,18 @@ const resolvers = {
 
     // AI Analysis
     runGraphAnalysis: async (_, { input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const { investigationId, algorithms } = input;
       const results = [];
 
-      if (algorithms.includes('metrics')) {
-        const metrics =
-          await graphAnalysisService.calculateGraphMetrics(investigationId);
+      if (algorithms.includes("metrics")) {
+        const metrics = await graphAnalysisService.calculateGraphMetrics(investigationId);
         results.push({
-          id: require('uuid').v4(),
+          id: require("uuid").v4(),
           investigationId,
-          analysisType: 'GRAPH_METRICS',
-          algorithm: 'centrality_analysis',
+          analysisType: "GRAPH_METRICS",
+          algorithm: "centrality_analysis",
           results: metrics,
           confidenceScore: 0.95,
           createdBy: user,
@@ -868,14 +839,13 @@ const resolvers = {
         });
       }
 
-      if (algorithms.includes('link_prediction')) {
-        const predictions =
-          await graphAnalysisService.predictLinks(investigationId);
+      if (algorithms.includes("link_prediction")) {
+        const predictions = await graphAnalysisService.predictLinks(investigationId);
         results.push({
-          id: require('uuid').v4(),
+          id: require("uuid").v4(),
           investigationId,
-          analysisType: 'LINK_PREDICTION',
-          algorithm: 'common_neighbors',
+          analysisType: "LINK_PREDICTION",
+          algorithm: "common_neighbors",
           results: { predictions },
           confidenceScore: 0.75,
           createdBy: user,
@@ -887,20 +857,19 @@ const resolvers = {
     },
 
     generateLinkPredictions: async (_, { investigationId }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await graphAnalysisService.predictLinks(investigationId);
     },
 
     detectAnomalies: async (_, { investigationId }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
       return await graphAnalysisService.detectAnomalies(investigationId);
     },
 
     importEntitiesFromText: async (_, { investigationId, text }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
-      const extractedEntities =
-        await graphAnalysisService.extractEntitiesFromText(text);
+      const extractedEntities = await graphAnalysisService.extractEntitiesFromText(text);
       const createdEntities = [];
 
       for (const entityData of extractedEntities) {
@@ -910,15 +879,11 @@ const resolvers = {
               ...entityData,
               investigationId,
             },
-            user.id,
+            user.id
           );
           createdEntities.push(entity);
         } catch (error) {
-          console.warn(
-            'Failed to create entity:',
-            entityData.label,
-            error.message,
-          );
+          console.warn("Failed to create entity:", entityData.label, error.message);
         }
       }
 
@@ -929,37 +894,37 @@ const resolvers = {
   Subscription: {
     investigationUpdated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
+        () => pubsub.asyncIterator(["INVESTIGATION_UPDATED"]),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        },
+        }
       ),
     },
 
     entityAdded: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator(['ENTITY_ADDED']),
+        () => pubsub.asyncIterator(["ENTITY_ADDED"]),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        },
+        }
       ),
     },
 
     entityUpdated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator(['ENTITY_UPDATED']),
+        () => pubsub.asyncIterator(["ENTITY_UPDATED"]),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        },
+        }
       ),
     },
 
     entityDeleted: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator(['ENTITY_DELETED']),
+        () => pubsub.asyncIterator(["ENTITY_DELETED"]),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        },
+        }
       ),
     },
   },
@@ -996,21 +961,21 @@ const resolvers = {
 // Helper function
 function getNodeColor(type) {
   const colors = {
-    PERSON: '#4caf50',
-    ORGANIZATION: '#2196f3',
-    LOCATION: '#ff9800',
-    DOCUMENT: '#9c27b0',
-    PHONE: '#f44336',
-    EMAIL: '#00bcd4',
-    IP_ADDRESS: '#795548',
-    URL: '#607d8b',
-    EVENT: '#ffeb3b',
-    VEHICLE: '#8bc34a',
-    ACCOUNT: '#e91e63',
-    DEVICE: '#673ab7',
-    CUSTOM: '#9e9e9e',
+    PERSON: "#4caf50",
+    ORGANIZATION: "#2196f3",
+    LOCATION: "#ff9800",
+    DOCUMENT: "#9c27b0",
+    PHONE: "#f44336",
+    EMAIL: "#00bcd4",
+    IP_ADDRESS: "#795548",
+    URL: "#607d8b",
+    EVENT: "#ffeb3b",
+    VEHICLE: "#8bc34a",
+    ACCOUNT: "#e91e63",
+    DEVICE: "#673ab7",
+    CUSTOM: "#9e9e9e",
   };
-  return colors[type] || '#9e9e9e';
+  return colors[type] || "#9e9e9e";
 }
 
 module.exports = resolvers;
@@ -1018,7 +983,7 @@ module.exports = resolvers;
 // ===================================
 // server/src/middleware/auth.js - Authentication Middleware
 // ===================================
-const AuthService = require('../services/AuthService');
+const AuthService = require("../services/AuthService");
 
 const authService = new AuthService();
 
@@ -1033,34 +998,34 @@ const authMiddleware = {
 
   requireAuth: (req, res, next) => {
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ error: 'Access token required' });
+      return res.status(401).json({ error: "Access token required" });
     }
 
     authService
       .verifyToken(token)
       .then((user) => {
         if (!user) {
-          return res.status(401).json({ error: 'Invalid token' });
+          return res.status(401).json({ error: "Invalid token" });
         }
         req.user = user;
         next();
       })
       .catch((error) => {
-        return res.status(401).json({ error: 'Token verification failed' });
+        return res.status(401).json({ error: "Token verification failed" });
       });
   },
 
   requireRole: (roles) => {
     return (req, res, next) => {
       if (!req.user) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return res.status(401).json({ error: "Authentication required" });
       }
 
       if (!roles.includes(req.user.role)) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
+        return res.status(403).json({ error: "Insufficient permissions" });
       }
 
       next();
@@ -1073,32 +1038,32 @@ module.exports = authMiddleware;
 // ===================================
 // server/server.js - Updated Main Server File
 // ===================================
-const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const { ApolloServer } = require('apollo-server-express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
+const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const { ApolloServer } = require("apollo-server-express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 
 // Configuration and database
-require('dotenv').config();
-const config = require('./src/config');
-const logger = require('./src/utils/logger');
+require("dotenv").config();
+const config = require("./src/config");
+const logger = require("./src/utils/logger");
 const {
   connectNeo4j,
   connectPostgres,
   connectRedis,
   closeConnections,
-} = require('./src/config/database');
+} = require("./src/config/database");
 
 // GraphQL setup
-const { typeDefs } = require('./src/graphql/schema');
-const resolvers = require('./src/graphql/resolvers');
+const { typeDefs } = require("./src/graphql/schema");
+const resolvers = require("./src/graphql/resolvers");
 
 // Services
-const AuthService = require('./src/services/AuthService');
+const AuthService = require("./src/services/AuthService");
 
 async function startServer() {
   try {
@@ -1110,16 +1075,16 @@ async function startServer() {
     const io = new Server(httpServer, {
       cors: {
         origin: config.cors.origin,
-        methods: ['GET', 'POST'],
+        methods: ["GET", "POST"],
       },
     });
 
     // Connect to all databases
-    logger.info('Connecting to databases...');
+    logger.info("Connecting to databases...");
     await connectNeo4j();
     await connectPostgres();
     await connectRedis();
-    logger.info('✅ All databases connected');
+    logger.info("✅ All databases connected");
 
     // Security middleware
     app.use(
@@ -1129,10 +1094,10 @@ async function startServer() {
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             scriptSrc: ["'self'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
+            imgSrc: ["'self'", "data:", "https:"],
           },
         },
-      }),
+      })
     );
 
     // CORS configuration
@@ -1140,39 +1105,39 @@ async function startServer() {
       cors({
         origin: config.cors.origin,
         credentials: true,
-      }),
+      })
     );
 
     // Rate limiting
     const limiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
       max: config.rateLimit.maxRequests,
-      message: 'Too many requests from this IP',
+      message: "Too many requests from this IP",
     });
     app.use(limiter);
 
     // Request parsing
-    app.use(express.json({ limit: '10mb' }));
-    app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+    app.use(express.json({ limit: "10mb" }));
+    app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
     // Logging
     app.use(
-      morgan('combined', {
+      morgan("combined", {
         stream: { write: (message) => logger.info(message.trim()) },
-      }),
+      })
     );
 
     // Health check endpoint
-    app.get('/health', (req, res) => {
+    app.get("/health", (req, res) => {
       res.status(200).json({
-        status: 'OK',
+        status: "OK",
         timestamp: new Date().toISOString(),
         environment: config.env,
-        version: process.env.npm_package_version || '1.0.0',
+        version: process.env.npm_package_version || "1.0.0",
         services: {
-          neo4j: 'connected',
-          postgres: 'connected',
-          redis: 'connected',
+          neo4j: "connected",
+          postgres: "connected",
+          redis: "connected",
         },
       });
     });
@@ -1188,7 +1153,7 @@ async function startServer() {
         }
 
         // HTTP request
-        const token = req.headers.authorization?.replace('Bearer ', '');
+        const token = req.headers.authorization?.replace("Bearer ", "");
         let user = null;
 
         if (token) {
@@ -1204,7 +1169,7 @@ async function startServer() {
       },
       subscriptions: {
         onConnect: async (connectionParams) => {
-          const token = connectionParams.authorization?.replace('Bearer ', '');
+          const token = connectionParams.authorization?.replace("Bearer ", "");
           let user = null;
 
           if (token) {
@@ -1220,12 +1185,10 @@ async function startServer() {
           requestDidStart() {
             return {
               didResolveOperation(requestContext) {
-                logger.info(
-                  `GraphQL Operation: ${requestContext.request.operationName}`,
-                );
+                logger.info(`GraphQL Operation: ${requestContext.request.operationName}`);
               },
               didEncounterErrors(requestContext) {
-                logger.error('GraphQL Error:', requestContext.errors);
+                logger.error("GraphQL Error:", requestContext.errors);
               },
             };
           },
@@ -1236,29 +1199,25 @@ async function startServer() {
     await apolloServer.start();
     apolloServer.applyMiddleware({
       app,
-      path: '/graphql',
+      path: "/graphql",
       cors: false, // Handled by express cors middleware
     });
 
     // Socket.IO for real-time features
-    io.on('connection', (socket) => {
+    io.on("connection", (socket) => {
       logger.info(`Client connected: ${socket.id}`);
 
-      socket.on('join_investigation', (investigationId) => {
+      socket.on("join_investigation", (investigationId) => {
         socket.join(`investigation_${investigationId}`);
-        logger.info(
-          `Client ${socket.id} joined investigation ${investigationId}`,
-        );
+        logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
       });
 
-      socket.on('leave_investigation', (investigationId) => {
+      socket.on("leave_investigation", (investigationId) => {
         socket.leave(`investigation_${investigationId}`);
-        logger.info(
-          `Client ${socket.id} left investigation ${investigationId}`,
-        );
+        logger.info(`Client ${socket.id} left investigation ${investigationId}`);
       });
 
-      socket.on('disconnect', () => {
+      socket.on("disconnect", () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
@@ -1267,15 +1226,14 @@ async function startServer() {
     app.use((err, req, res, next) => {
       logger.error(`Unhandled error: ${err.message}`, err);
       res.status(500).json({
-        error: 'Internal Server Error',
-        message:
-          config.env === 'development' ? err.message : 'Something went wrong',
+        error: "Internal Server Error",
+        message: config.env === "development" ? err.message : "Something went wrong",
       });
     });
 
     // 404 handler
-    app.use('*', (req, res) => {
-      res.status(404).json({ error: 'Endpoint not found' });
+    app.use("*", (req, res) => {
+      res.status(404).json({ error: "Endpoint not found" });
     });
 
     // Start server
@@ -1289,12 +1247,12 @@ async function startServer() {
     });
 
     // Graceful shutdown
-    process.on('SIGTERM', async () => {
-      logger.info('SIGTERM received, shutting down gracefully');
+    process.on("SIGTERM", async () => {
+      logger.info("SIGTERM received, shutting down gracefully");
       await apolloServer.stop();
       await closeConnections();
       httpServer.close(() => {
-        logger.info('Process terminated');
+        logger.info("Process terminated");
         process.exit(0);
       });
     });
@@ -1305,12 +1263,12 @@ async function startServer() {
 }
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on("uncaughtException", (error) => {
   logger.error(`Uncaught Exception: ${error.message}`, error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on("unhandledRejection", (reason, promise) => {
   logger.error(`Unhandled Rejection:`, reason);
   process.exit(1);
 });

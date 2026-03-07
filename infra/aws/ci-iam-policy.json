@@ -15,15 +15,8 @@
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "arn:aws:s3:::summit-build-artifacts/*",
-        "arn:aws:s3:::summit-build-artifacts"
-      ]
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::summit-build-artifacts/*", "arn:aws:s3:::summit-build-artifacts"]
     }
   ]
 }

@@ -8,13 +8,13 @@ The privacy taxonomy defines how data is classified, labeled, and handled within
 
 We use a 4-tier severity model mapped to 5 sensitivity classes:
 
-| Severity | Sensitivity Class | Description | Examples |
-|----------|------------------|-------------|----------|
-| **Low** | `INTERNAL` | Internal business data, low risk if leaked. | Internal IDs, metadata, logs (sanitized). |
-| **Medium** | `CONFIDENTIAL` | PII that requires protection but isn't critical. | Name, Gender, Job Title. |
-| **High** | `HIGHLY_SENSITIVE` | PII that can cause harm if leaked. | Email, Phone, Home Address, IP. |
-| **Critical**| `TOP_SECRET` | Data causing severe harm or legal liability. | SSN, Credit Card, Health Records, Biometrics. |
-| **None** | `PUBLIC` | Publicly available data. | Public press releases, open catalog data. |
+| Severity     | Sensitivity Class  | Description                                      | Examples                                      |
+| ------------ | ------------------ | ------------------------------------------------ | --------------------------------------------- |
+| **Low**      | `INTERNAL`         | Internal business data, low risk if leaked.      | Internal IDs, metadata, logs (sanitized).     |
+| **Medium**   | `CONFIDENTIAL`     | PII that requires protection but isn't critical. | Name, Gender, Job Title.                      |
+| **High**     | `HIGHLY_SENSITIVE` | PII that can cause harm if leaked.               | Email, Phone, Home Address, IP.               |
+| **Critical** | `TOP_SECRET`       | Data causing severe harm or legal liability.     | SSN, Credit Card, Health Records, Biometrics. |
+| **None**     | `PUBLIC`           | Publicly available data.                         | Public press releases, open catalog data.     |
 
 ### 1.2 Data Categories
 
@@ -29,13 +29,13 @@ Data is grouped into functional categories for policy application:
 
 ### 1.3 Data Uses & Flows
 
-| Use Case | Allowed Data | Restrictions |
-|----------|--------------|--------------|
-| **Operations** | All | Only as required for the specific function. |
-| **Support** | Medium/High | Critical PII masked by default. "Break-glass" available. |
-| **Analytics** | Low/Medium | High/Critical must be aggregated or pseudonymized. |
-| **ML Training**| Low | No PII allowed. Synthetic data preferred. |
-| **Marketing** | Contact | Requires explicit consent (opt-in). |
+| Use Case        | Allowed Data | Restrictions                                             |
+| --------------- | ------------ | -------------------------------------------------------- |
+| **Operations**  | All          | Only as required for the specific function.              |
+| **Support**     | Medium/High  | Critical PII masked by default. "Break-glass" available. |
+| **Analytics**   | Low/Medium   | High/Critical must be aggregated or pseudonymized.       |
+| **ML Training** | Low          | No PII allowed. Synthetic data preferred.                |
+| **Marketing**   | Contact      | Requires explicit consent (opt-in).                      |
 
 ---
 
@@ -46,32 +46,32 @@ We enforce privacy by design through automated mechanisms in the ingestion and a
 ### 2.1 Minimization Strategies
 
 1.  **Ingestion Filtering**: The `IngestionHook` (`server/src/pii/ingestionHooks.ts`) scans all incoming data.
-    -   **Redaction**: High/Critical PII can be redacted at the source if not needed.
-    -   **Blocking**: Ingestion can be blocked if Critical PII is detected in non-secure pipelines.
+    - **Redaction**: High/Critical PII can be redacted at the source if not needed.
+    - **Blocking**: Ingestion can be blocked if Critical PII is detected in non-secure pipelines.
 2.  **Retention Policies**: Defined in `RetentionPolicy` (`server/src/pii/sensitivity.ts`).
-    -   **Auto-Deletion**: PII is automatically deleted after the retention period (e.g., 3 years for Confidential).
-    -   **Ephemeral Storage**: Sensitive PII in logs is never stored; it is scrubbed by the logger.
+    - **Auto-Deletion**: PII is automatically deleted after the retention period (e.g., 3 years for Confidential).
+    - **Ephemeral Storage**: Sensitive PII in logs is never stored; it is scrubbed by the logger.
 
 ### 2.2 Protection at Rest & in Transit
 
 1.  **Encryption**:
-    -   All High/Critical data is encrypted at rest (`AES-256` or `KMS`).
-    -   All data in transit is encrypted (`TLS 1.2+`).
+    - All High/Critical data is encrypted at rest (`AES-256` or `KMS`).
+    - All data in transit is encrypted (`TLS 1.2+`).
 2.  **Pseudonymization**:
-    -   User IDs are UUIDs, not emails.
-    -   Analytical datasets use hashed identifiers (salt + hash).
+    - User IDs are UUIDs, not emails.
+    - Analytical datasets use hashed identifiers (salt + hash).
 
 ### 2.3 Access Control & Redaction
 
 The `RedactionMiddleware` (`server/src/pii/redactionMiddleware.ts`) enforces view-time protection:
 
--   **Role-Based Masking**:
-    -   `VIEWER`: Sees `***` for most PII.
-    -   `ANALYST`: Sees partial data (e.g., last 4 digits `******1234`).
-    -   `ADMIN`: Can see full data (audit logged).
--   **Context-Awareness**:
-    -   Access to Critical data requires **Step-Up Auth** (MFA) and **Purpose Justification**.
-    -   All access to Critical data is logged to the `ProvenanceLedger`.
+- **Role-Based Masking**:
+  - `VIEWER`: Sees `***` for most PII.
+  - `ANALYST`: Sees partial data (e.g., last 4 digits `******1234`).
+  - `ADMIN`: Can see full data (audit logged).
+- **Context-Awareness**:
+  - Access to Critical data requires **Step-Up Auth** (MFA) and **Purpose Justification**.
+  - All access to Critical data is logged to the `ProvenanceLedger`.
 
 ---
 
@@ -92,9 +92,9 @@ The `PrivacyService` orchestrates DSAR fulfillment across the distributed archit
 1.  **Submission**: User submits request via Privacy Portal (`PrivacyService.submitRequest`).
 2.  **Verification**: System verifies identity (Email/SMS code).
 3.  **Orchestration**: `PrivacyService` publishes `DELETE_PII` event.
-    -   **PostgreSQL**: Deletes user rows, replaces PII with `[DELETED]`.
-    -   **Neo4j**: Deletes User nodes or anonymizes properties.
-    -   **Logs/Backups**: Keys added to "Crypto-Shredding" list (deletion upon rotation).
+    - **PostgreSQL**: Deletes user rows, replaces PII with `[DELETED]`.
+    - **Neo4j**: Deletes User nodes or anonymizes properties.
+    - **Logs/Backups**: Keys added to "Crypto-Shredding" list (deletion upon rotation).
 4.  **Confirmation**: `PrivacyEvidence` is generated and signed in `ProvenanceLedger`.
 5.  **Notification**: User is notified of completion.
 
@@ -112,6 +112,6 @@ The `PrivacyService` orchestrates DSAR fulfillment across the distributed archit
 
 Every privacy-impacting action is immutable.
 
--   **Provenance Ledger**: Stores a hash-linked chain of all DSAR requests and actions.
--   **Audit Logs**: Record *who* accessed *what* PII and *why* (Purpose).
--   **Regulator View**: We can generate a `PrivacyEvidence` report proving we complied with a request within the SLA (e.g., 30 days).
+- **Provenance Ledger**: Stores a hash-linked chain of all DSAR requests and actions.
+- **Audit Logs**: Record _who_ accessed _what_ PII and _why_ (Purpose).
+- **Regulator View**: We can generate a `PrivacyEvidence` report proving we complied with a request within the SLA (e.g., 30 days).

@@ -14,6 +14,7 @@ It exists to reduce rework, preserve context across sessions, and guarantee reco
 ## When to use SDD
 
 Use SDD for:
+
 - Large refactors or migrations that require cross-team alignment.
 - Multi-session work where context resets are expected.
 - Any change that must be recoverable from a single source of truth.

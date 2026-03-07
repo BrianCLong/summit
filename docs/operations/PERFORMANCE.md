@@ -45,6 +45,7 @@ cat performance-results/$(ls -t performance-results | head -1)/SUMMARY.md
 ### Database Optimization
 
 #### PostgreSQL Configuration
+
 ```sql
 -- Increase shared buffers (25% of RAM)
 ALTER SYSTEM SET shared_buffers = '16GB';
@@ -64,6 +65,7 @@ SELECT pg_reload_conf();
 ```
 
 #### Index Optimization
+
 ```sql
 -- Identify missing indexes
 SELECT schemaname, tablename, attname, n_distinct, correlation
@@ -87,6 +89,7 @@ DROP INDEX CONCURRENTLY idx_unused_index;
 ```
 
 #### Query Performance Analysis
+
 ```sql
 -- Enable query timing
 SET track_io_timing = on;
@@ -180,41 +183,42 @@ container_memory_working_set_bytes{pod=~"intelgraph-api.*"}
 
 ```yaml
 groups:
-- name: performance
-  interval: 30s
-  rules:
-  - alert: HighLatency
-    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
-    for: 5m
-    annotations:
-      summary: "High API latency detected"
-      description: "p95 latency is {{ $value }}s"
+  - name: performance
+    interval: 30s
+    rules:
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        annotations:
+          summary: "High API latency detected"
+          description: "p95 latency is {{ $value }}s"
 
-  - alert: HighErrorRate
-    expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.01
-    for: 2m
-    annotations:
-      summary: "High error rate detected"
-      description: "Error rate is {{ $value | humanizePercentage }}"
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.01
+        for: 2m
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }}"
 
-  - alert: CacheMissRate
-    expr: 1 - (sum(rate(cache_hits_total[5m])) / sum(rate(cache_requests_total[5m]))) > 0.2
-    for: 10m
-    annotations:
-      summary: "High cache miss rate"
-      description: "Cache miss rate is {{ $value | humanizePercentage }}"
+      - alert: CacheMissRate
+        expr: 1 - (sum(rate(cache_hits_total[5m])) / sum(rate(cache_requests_total[5m]))) > 0.2
+        for: 10m
+        annotations:
+          summary: "High cache miss rate"
+          description: "Cache miss rate is {{ $value | humanizePercentage }}"
 
-  - alert: DatabaseConnectionPoolExhausted
-    expr: pg_connections_active / pg_connections_max > 0.9
-    for: 5m
-    annotations:
-      summary: "Database connection pool nearly exhausted"
-      description: "{{ $value | humanizePercentage }} of connections in use"
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pg_connections_active / pg_connections_max > 0.9
+        for: 5m
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value | humanizePercentage }} of connections in use"
 ```
 
 ### Grafana Dashboards
 
 Import pre-built dashboards:
+
 ```bash
 # API Dashboard
 curl -o /tmp/api-dashboard.json https://grafana.com/api/dashboards/12345/revisions/1/download
@@ -325,15 +329,15 @@ yearly_storage_need = monthly_data_growth * 12 * 1.3  # 30% buffer
 
 ### Scaling Triggers
 
-| Metric | Warning | Critical | Action |
-|--------|---------|----------|--------|
-| CPU Usage | > 70% | > 85% | Scale up pods |
-| Memory Usage | > 75% | > 90% | Scale up pods / Add nodes |
-| Request Latency (p95) | > 500ms | > 1s | Scale up, optimize queries |
-| Error Rate | > 1% | > 5% | Investigate, rollback if needed |
-| Cache Hit Rate | < 80% | < 70% | Increase cache size, warm cache |
-| Database Connections | > 80% | > 95% | Increase pool size, add replicas |
-| Queue Depth | > 1000 | > 5000 | Scale up workers |
+| Metric                | Warning | Critical | Action                           |
+| --------------------- | ------- | -------- | -------------------------------- |
+| CPU Usage             | > 70%   | > 85%    | Scale up pods                    |
+| Memory Usage          | > 75%   | > 90%    | Scale up pods / Add nodes        |
+| Request Latency (p95) | > 500ms | > 1s     | Scale up, optimize queries       |
+| Error Rate            | > 1%    | > 5%     | Investigate, rollback if needed  |
+| Cache Hit Rate        | < 80%   | < 70%    | Increase cache size, warm cache  |
+| Database Connections  | > 80%   | > 95%    | Increase pool size, add replicas |
+| Queue Depth           | > 1000  | > 5000   | Scale up workers                 |
 
 ---
 
@@ -375,14 +379,14 @@ jobs:
   performance:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Run performance tests
-      run: k6 run --quiet scripts/performance-testing/load-test.js
-    - name: Check thresholds
-      run: |
-        # Fail if p95 latency > 500ms
-        # Fail if error rate > 1%
-        # Fail if throughput < 1000 req/sec
+      - uses: actions/checkout@v2
+      - name: Run performance tests
+        run: k6 run --quiet scripts/performance-testing/load-test.js
+      - name: Check thresholds
+        run: |
+          # Fail if p95 latency > 500ms
+          # Fail if error rate > 1%
+          # Fail if throughput < 1000 req/sec
 ```
 
 ---
@@ -399,6 +403,7 @@ jobs:
 ## Support
 
 For performance-related issues:
+
 - **Slack:** #performance-ops
 - **On-call:** PagerDuty escalation
 - **Runbooks:** `/docs/runbooks/performance/`

@@ -4,13 +4,14 @@ This guide describes the procedure for deploying Summit in air-gapped environmen
 
 ## Prerequisites
 
-*   **Bastion Host**: A machine with internet access to fetch artifacts.
-*   **Air-Gapped Registry**: A private container registry (e.g., Harbor, Artifactory) reachable from the target cluster.
-*   **Air-Gapped Cluster**: Kubernetes cluster with access to the private registry.
+- **Bastion Host**: A machine with internet access to fetch artifacts.
+- **Air-Gapped Registry**: A private container registry (e.g., Harbor, Artifactory) reachable from the target cluster.
+- **Air-Gapped Cluster**: Kubernetes cluster with access to the private registry.
 
 ## 1. Artifact Collection (Bastion Host)
 
 ### 1.1 Pull Container Images
+
 You must pull all required images and save them to a tarball or push them to an intermediate registry.
 
 ```bash
@@ -30,6 +31,7 @@ done
 ```
 
 ### 1.2 Package Helm Charts
+
 Package the Summit chart and its dependencies.
 
 ```bash
@@ -38,11 +40,13 @@ helm package helm/summit/
 ```
 
 ## 2. Artifact Transfer
+
 Transfer the Docker images and Helm chart tarball to the air-gapped environment (e.g., via secure USB, data diode).
 
 ## 3. Deployment (Air-Gapped Environment)
 
 ### 3.1 Load Images
+
 Push the images to your internal registry.
 
 ```bash
@@ -53,6 +57,7 @@ done
 ```
 
 ### 3.2 Configure Helm
+
 Create a `values.airgap.yaml` file overriding the image repositories.
 
 ```yaml
@@ -67,10 +72,12 @@ externalDatabase:
 ```
 
 ### 3.3 Install
+
 ```bash
 helm install summit ./summit-1.0.0.tgz -f values.airgap.yaml -n summit --create-namespace
 ```
 
 ## Troubleshooting
-*   **ImagePullBackOff**: Check if the private registry secrets are configured in the namespace.
-*   **CrashLoopBackOff**: Verify that the application can reach the internal database endpoints.
+
+- **ImagePullBackOff**: Check if the private registry secrets are configured in the namespace.
+- **CrashLoopBackOff**: Verify that the application can reach the internal database endpoints.

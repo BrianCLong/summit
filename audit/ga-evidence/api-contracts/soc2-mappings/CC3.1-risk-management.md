@@ -19,12 +19,14 @@ Systematically identify, assess, and mitigate risks in API design changes, ensur
 **Impact:** Client integration failures, service outages, data corruption
 
 **Examples:**
+
 - Removing endpoints or fields
 - Changing field types incompatibly
 - Making optional fields required
 - Removing enum values
 
 **Mitigation:**
+
 - Automated detection via schema diff
 - Mandatory version bump requirement
 - Blocked merge until properly versioned
@@ -37,12 +39,14 @@ Systematically identify, assess, and mitigate risks in API design changes, ensur
 **Impact:** Minimal - clients unaffected
 
 **Examples:**
+
 - Adding new endpoints
 - Adding optional fields
 - Adding new enum values
 - Making required fields optional
 
 **Mitigation:**
+
 - Documentation updates
 - Changelog entries
 - Monitoring for adoption
@@ -54,10 +58,12 @@ Systematically identify, assess, and mitigate risks in API design changes, ensur
 **Impact:** Future breaking change, advance warning needed
 
 **Examples:**
+
 - Marking fields as deprecated
 - Announcing endpoint sunset
 
 **Mitigation:**
+
 - 12-month minimum notice period
 - Deprecation headers in responses
 - Client notifications
@@ -72,20 +78,21 @@ Systematically identify, assess, and mitigate risks in API design changes, ensur
 **Mechanism:** Schema diff script analyzes all changes
 
 **Risk Scoring:**
+
 ```typescript
 // From /scripts/schema-diff.ts
 const severity = {
-  'field_removed': 'critical',
-  'type_removed': 'critical',
-  'endpoint_removed': 'critical',
-  'field_type_changed': 'high',
-  'field_made_required': 'high',
-  'method_changed': 'high',
-  'enum_value_removed': 'high',
-  'field_deprecated': 'medium',
-  'field_added': 'low',
-  'type_added': 'low',
-  'endpoint_added': 'low',
+  field_removed: "critical",
+  type_removed: "critical",
+  endpoint_removed: "critical",
+  field_type_changed: "high",
+  field_made_required: "high",
+  method_changed: "high",
+  enum_value_removed: "high",
+  field_deprecated: "medium",
+  field_added: "low",
+  type_added: "low",
+  endpoint_added: "low",
 };
 ```
 
@@ -93,12 +100,12 @@ const severity = {
 
 ### Risk Mitigation Strategies
 
-| Risk Level | Mitigation | Enforcement |
-|------------|------------|-------------|
-| Critical | Version bump required | CI blocks merge |
-| High | Version bump recommended | Warning + review |
-| Medium | Documentation required | Code review |
-| Low | Changelog entry | Automated |
+| Risk Level | Mitigation               | Enforcement      |
+| ---------- | ------------------------ | ---------------- |
+| Critical   | Version bump required    | CI blocks merge  |
+| High       | Version bump recommended | Warning + review |
+| Medium     | Documentation required   | Code review      |
+| Low        | Changelog entry          | Automated        |
 
 ## Risk Assessment Process
 
@@ -109,11 +116,13 @@ const severity = {
 **How:** Automated schema diff comparison
 
 **Output:**
+
 - List of all changes
 - Categorization (breaking/non-breaking)
 - Severity assignment
 
 **Evidence:**
+
 - CI workflow execution logs
 - Diff report JSON files
 - PR comments with analysis
@@ -125,17 +134,20 @@ const severity = {
 **How:** Impact analysis and recommendations
 
 **Criteria:**
+
 - Number of clients affected
 - Data integrity impact
 - Service availability impact
 - Migration complexity
 
 **Output:**
+
 - Risk severity (critical/high/medium/low)
 - Recommended actions
 - Version bump requirement
 
 **Evidence:**
+
 - `recommendations` field in diff reports
 - PR review comments
 - Architecture decision records
@@ -147,12 +159,14 @@ const severity = {
 **How:** Implement required controls
 
 **Actions:**
+
 - Critical: Create new version + migration guide
 - High: Version bump or refactor to non-breaking
 - Medium: Document deprecation timeline
 - Low: Update changelog
 
 **Evidence:**
+
 - New version snapshots
 - Migration guides
 - Updated documentation
@@ -165,12 +179,14 @@ const severity = {
 **How:** Track adoption and issues
 
 **Metrics:**
+
 - Deprecated version usage
 - Error rates by version
 - Client migration progress
 - Support tickets by version
 
 **Evidence:**
+
 - API metrics dashboards
 - Deprecation header analytics
 - Support ticket tracking
@@ -179,39 +195,41 @@ const severity = {
 
 ### Risk Identification
 
-| Artifact | Purpose | Location |
-|----------|---------|----------|
-| Schema Diff Reports | Automated risk identification | `/audit/ga-evidence/api-contracts/diff-reports/` |
-| Breaking Change List | Categorized risks | Diff report `breakingChanges` field |
-| Severity Classification | Risk scoring | Diff report `severity` field |
+| Artifact                | Purpose                       | Location                                         |
+| ----------------------- | ----------------------------- | ------------------------------------------------ |
+| Schema Diff Reports     | Automated risk identification | `/audit/ga-evidence/api-contracts/diff-reports/` |
+| Breaking Change List    | Categorized risks             | Diff report `breakingChanges` field              |
+| Severity Classification | Risk scoring                  | Diff report `severity` field                     |
 
 ### Risk Assessment
 
-| Artifact | Purpose | Location |
-|----------|---------|----------|
-| Recommendations | Mitigation guidance | Diff report `recommendations` field |
-| Impact Analysis | Client impact assessment | PR review comments |
-| Version Decision | Risk acceptance/mitigation | Version registry updates |
+| Artifact         | Purpose                    | Location                            |
+| ---------------- | -------------------------- | ----------------------------------- |
+| Recommendations  | Mitigation guidance        | Diff report `recommendations` field |
+| Impact Analysis  | Client impact assessment   | PR review comments                  |
+| Version Decision | Risk acceptance/mitigation | Version registry updates            |
 
 ### Risk Mitigation
 
-| Artifact | Purpose | Location |
-|----------|---------|----------|
-| Version Snapshots | Breaking change isolation | `/api-schemas/v{VERSION}/` |
-| Migration Guides | Client transition support | `/api-schemas/VERSION_POLICY.md` |
-| Deprecation Notices | Advance warning | API response headers |
+| Artifact            | Purpose                   | Location                         |
+| ------------------- | ------------------------- | -------------------------------- |
+| Version Snapshots   | Breaking change isolation | `/api-schemas/v{VERSION}/`       |
+| Migration Guides    | Client transition support | `/api-schemas/VERSION_POLICY.md` |
+| Deprecation Notices | Advance warning           | API response headers             |
 
 ## Control Testing
 
 ### Test 1: Breaking Change Risk Detection
 
 **Test Procedure:**
+
 1. Modify GraphQL schema to remove a field
 2. Create PR
 3. Observe schema diff output
 4. Verify severity = 'critical'
 
 **Expected Result:**
+
 - ✅ Change detected as breaking
 - ✅ Severity correctly assigned
 - ✅ Version bump recommended
@@ -222,12 +240,14 @@ const severity = {
 ### Test 2: Risk Categorization Accuracy
 
 **Test Procedure:**
+
 1. Introduce multiple change types in single PR
 2. Run schema diff
 3. Verify each change categorized correctly
 4. Verify overall risk assessment accurate
 
 **Expected Result:**
+
 - ✅ Breaking changes flagged critical/high
 - ✅ Non-breaking changes flagged low
 - ✅ Overall assessment reflects highest severity
@@ -238,6 +258,7 @@ const severity = {
 ### Test 3: Mitigation Enforcement
 
 **Test Procedure:**
+
 1. Create PR with critical breaking change
 2. Attempt merge without version bump
 3. Verify merge blocked
@@ -245,6 +266,7 @@ const severity = {
 5. Verify merge allowed
 
 **Expected Result:**
+
 - ❌ Initial merge blocked
 - ✅ Version bump detected
 - ✅ Merge allowed after bump
@@ -256,17 +278,17 @@ const severity = {
 
 ### Active Risks
 
-| Risk ID | Description | Severity | Mitigation | Status |
-|---------|-------------|----------|------------|--------|
-| API-001 | Undetected breaking change | Critical | Automated schema diff | Mitigated |
-| API-002 | Version bump without migration guide | High | Policy requires documentation | Mitigated |
-| API-003 | Client unaware of deprecation | Medium | Response headers + notifications | Mitigated |
-| API-004 | Schema snapshot corruption | Medium | SHA256 hashing + git versioning | Mitigated |
+| Risk ID | Description                          | Severity | Mitigation                       | Status    |
+| ------- | ------------------------------------ | -------- | -------------------------------- | --------- |
+| API-001 | Undetected breaking change           | Critical | Automated schema diff            | Mitigated |
+| API-002 | Version bump without migration guide | High     | Policy requires documentation    | Mitigated |
+| API-003 | Client unaware of deprecation        | Medium   | Response headers + notifications | Mitigated |
+| API-004 | Schema snapshot corruption           | Medium   | SHA256 hashing + git versioning  | Mitigated |
 
 ### Historical Risks (Resolved)
 
-| Risk ID | Description | Resolution | Date |
-|---------|-------------|------------|------|
+| Risk ID | Description                  | Resolution                    | Date       |
+| ------- | ---------------------------- | ----------------------------- | ---------- |
 | API-000 | No version control mechanism | Implemented versioning system | 2025-12-27 |
 
 ## Continuous Improvement
@@ -274,6 +296,7 @@ const severity = {
 ### Monthly Risk Review
 
 Platform team reviews:
+
 1. New risks identified
 2. Risk mitigation effectiveness
 3. Client impact from changes
@@ -301,9 +324,9 @@ Platform team reviews:
 
 ## Revision History
 
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-12-27 | 1.0 | Initial risk framework | Platform Team |
+| Date       | Version | Changes                | Author        |
+| ---------- | ------- | ---------------------- | ------------- |
+| 2025-12-27 | 1.0     | Initial risk framework | Platform Team |
 
 ---
 

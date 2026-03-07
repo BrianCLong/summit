@@ -38,8 +38,8 @@ capabilities:
       - policies/capability-fabric/mcp-invoke.rego
     matchers:
       - type: mcp_tool
-        server: '*'
-        tool: '*'
+        server: "*"
+        tool: "*"
   - capability_id: maestro.mcp.sessions.create
     name: Create MCP session
     description: Create a scoped MCP session for a Maestro run.

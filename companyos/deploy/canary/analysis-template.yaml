@@ -21,7 +21,7 @@ spec:
     - name: error-rate
       interval: 1m
       count: 5
-      successCondition: result[0] < 0.05  # Less than 5% error rate
+      successCondition: result[0] < 0.05 # Less than 5% error rate
       failureLimit: 3
       provider:
         prometheus:
@@ -37,7 +37,7 @@ spec:
     - name: latency-p95
       interval: 1m
       count: 5
-      successCondition: result[0] < 300  # Less than 300ms
+      successCondition: result[0] < 300 # Less than 300ms
       failureLimit: 3
       provider:
         prometheus:
@@ -53,7 +53,7 @@ spec:
     - name: latency-delta
       interval: 1m
       count: 5
-      successCondition: result[0] < 1.2  # Canary not more than 20% slower
+      successCondition: result[0] < 1.2 # Canary not more than 20% slower
       failureLimit: 2
       provider:
         prometheus:
@@ -77,7 +77,7 @@ spec:
     - name: error-rate-delta
       interval: 1m
       count: 5
-      successCondition: result[0] < 1.5  # Canary not more than 50% higher error rate
+      successCondition: result[0] < 1.5 # Canary not more than 50% higher error rate
       failureLimit: 2
       provider:
         prometheus:
@@ -114,7 +114,7 @@ spec:
     - name: opa-success-rate
       interval: 1m
       count: 5
-      successCondition: result[0] > 0.99  # 99% OPA decisions successful
+      successCondition: result[0] > 0.99 # 99% OPA decisions successful
       failureLimit: 2
       provider:
         prometheus:
@@ -139,7 +139,7 @@ spec:
       steps:
         # Step 1: Deploy canary with 10% traffic
         - setWeight: 10
-        - pause: {duration: 2m}
+        - pause: { duration: 2m }
 
         # Step 2: Run analysis
         - analysis:
@@ -151,7 +151,7 @@ spec:
 
         # Step 3: Increase to 25%
         - setWeight: 25
-        - pause: {duration: 2m}
+        - pause: { duration: 2m }
 
         # Step 4: Run analysis again
         - analysis:
@@ -160,7 +160,7 @@ spec:
 
         # Step 5: Increase to 50%
         - setWeight: 50
-        - pause: {duration: 3m}
+        - pause: { duration: 3m }
 
         # Step 6: Final analysis
         - analysis:

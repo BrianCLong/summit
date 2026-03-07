@@ -1,5 +1,5 @@
-import { componentRegistry, getComponentDefinition } from './registry.js';
-import { UiPlan } from './schema.js';
+import { componentRegistry, getComponentDefinition } from "./registry.js";
+import { UiPlan } from "./schema.js";
 
 export type LintIssue = {
   code: string;
@@ -29,7 +29,7 @@ export function lintPlan(plan: UiPlan): LintResult {
 
         if (!definition) {
           issues.push({
-            code: 'component.unknown',
+            code: "component.unknown",
             message: `Component ${panel.component} is not registered.`,
             path: `${panelPath}.component`,
           });
@@ -38,7 +38,7 @@ export function lintPlan(plan: UiPlan): LintResult {
         panel.dataRequestIds.forEach((requestId) => {
           if (!dataRequestIndex.has(requestId)) {
             issues.push({
-              code: 'data-request.missing',
+              code: "data-request.missing",
               message: `Panel references unknown dataRequestId ${requestId}.`,
               path: `${panelPath}.dataRequestIds`,
             });
@@ -48,7 +48,7 @@ export function lintPlan(plan: UiPlan): LintResult {
         panel.actionIds.forEach((actionId) => {
           if (!actionIndex.has(actionId)) {
             issues.push({
-              code: 'action.missing',
+              code: "action.missing",
               message: `Panel references unknown actionId ${actionId}.`,
               path: `${panelPath}.actionIds`,
             });
@@ -58,7 +58,7 @@ export function lintPlan(plan: UiPlan): LintResult {
         if (definition?.requiresCitations) {
           if (panel.citationIds.length === 0) {
             issues.push({
-              code: 'citations.required',
+              code: "citations.required",
               message: `Panel ${panel.id} requires citations.`,
               path: `${panelPath}.citationIds`,
             });
@@ -68,7 +68,7 @@ export function lintPlan(plan: UiPlan): LintResult {
         panel.citationIds.forEach((citationId) => {
           if (!citationIndex.has(citationId)) {
             issues.push({
-              code: 'citation.missing',
+              code: "citation.missing",
               message: `Panel references unknown citationId ${citationId}.`,
               path: `${panelPath}.citationIds`,
             });
@@ -84,7 +84,7 @@ export function lintPlan(plan: UiPlan): LintResult {
       section.panels.forEach((panel) => {
         if (!registryKinds.has(panel.component)) {
           issues.push({
-            code: 'registry.missing',
+            code: "registry.missing",
             message: `Component ${panel.component} is not part of the registry.`,
             path: `layout.pages[].sections[].panels[].component`,
           });

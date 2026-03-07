@@ -1,7 +1,7 @@
 # Docker Compose for IntelGraph Observability Stack
 # Includes Jaeger, Prometheus, Grafana, and supporting services for comprehensive monitoring
 
-version: '3.8'
+version: "3.8"
 
 networks:
   observability:
@@ -28,11 +28,11 @@ services:
       - COLLECTOR_ZIPKIN_HOST_PORT=:9411
       - COLLECTOR_OTLP_ENABLED=true
     ports:
-      - '14268:14268' # HTTP
-      - '14250:14250' # gRPC
-      - '9411:9411' # Zipkin compatible
-      - '4317:4317' # OTLP gRPC
-      - '4318:4318' # OTLP HTTP
+      - "14268:14268" # HTTP
+      - "14250:14250" # gRPC
+      - "9411:9411" # Zipkin compatible
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
     networks:
       - observability
       - intelgraph
@@ -51,10 +51,10 @@ services:
     environment:
       - REPORTER_GRPC_HOST_PORT=jaeger-collector:14250
     ports:
-      - '5775:5775/udp' # compact thrift
-      - '6831:6831/udp' # compact thrift
-      - '6832:6832/udp' # binary thrift
-      - '5778:5778' # HTTP
+      - "5775:5775/udp" # compact thrift
+      - "6831:6831/udp" # compact thrift
+      - "6832:6832/udp" # binary thrift
+      - "5778:5778" # HTTP
     networks:
       - observability
     depends_on:
@@ -69,7 +69,7 @@ services:
       - ES_USERNAME=elastic
       - ES_PASSWORD=changeme
     ports:
-      - '16686:16686'
+      - "16686:16686"
     networks:
       - observability
     depends_on:
@@ -82,11 +82,11 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     ports:
-      - '9200:9200'
+      - "9200:9200"
     networks:
       - observability
     deploy:
@@ -101,16 +101,16 @@ services:
     image: prom/prometheus:v2.47.0
     container_name: prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention.time=30d'
-      - '--storage.tsdb.retention.size=10GB'
-      - '--web.enable-lifecycle'
-      - '--web.enable-admin-api'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=10GB"
+      - "--web.enable-lifecycle"
+      - "--web.enable-admin-api"
     ports:
-      - '9090:9090'
+      - "9090:9090"
     volumes:
       - ./monitoring/prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -133,7 +133,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,redis-datasource
     ports:
-      - '3001:3000'
+      - "3001:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
@@ -148,10 +148,10 @@ services:
     image: prom/node-exporter:v1.6.1
     container_name: node-exporter
     command:
-      - '--path.rootfs=/host'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - "--path.rootfs=/host"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     ports:
-      - '9100:9100'
+      - "9100:9100"
     volumes:
       - /:/host:ro,rslave
     networks:
@@ -169,7 +169,7 @@ services:
     container_name: cadvisor
     privileged: true
     ports:
-      - '8080:8080'
+      - "8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -194,7 +194,7 @@ services:
     environment:
       - REDIS_ADDR=redis://redis:6379
     ports:
-      - '9121:9121'
+      - "9121:9121"
     networks:
       - observability
       - intelgraph
@@ -212,7 +212,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongo:27017
     ports:
-      - '9216:9216'
+      - "9216:9216"
     networks:
       - observability
       - intelgraph
@@ -232,7 +232,7 @@ services:
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=password
     ports:
-      - '9308:9308'
+      - "9308:9308"
     networks:
       - observability
       - intelgraph
@@ -248,9 +248,9 @@ services:
     image: danielqsj/kafka-exporter:v1.6.0
     container_name: kafka-exporter
     command:
-      - '--kafka.server=kafka:9092'
+      - "--kafka.server=kafka:9092"
     ports:
-      - '9308:9308'
+      - "9308:9308"
     networks:
       - observability
       - intelgraph
@@ -266,15 +266,15 @@ services:
     image: otel/opentelemetry-collector-contrib:0.87.0
     container_name: otel-collector
     command:
-      - '--config=/etc/otel-collector-config.yml'
+      - "--config=/etc/otel-collector-config.yml"
     volumes:
       - ./monitoring/otel/collector-config.yml:/etc/otel-collector-config.yml
     ports:
-      - '4317:4317' # OTLP gRPC receiver
-      - '4318:4318' # OTLP HTTP receiver
-      - '8888:8888' # Prometheus metrics
-      - '8889:8889' # Prometheus exporter
-      - '13133:13133' # Health check
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "8888:8888" # Prometheus metrics
+      - "8889:8889" # Prometheus exporter
+      - "13133:13133" # Health check
     networks:
       - observability
       - intelgraph
@@ -293,11 +293,11 @@ services:
     image: prom/alertmanager:v0.25.0
     container_name: alertmanager
     command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.external-url=http://localhost:9093'
+      - "--config.file=/etc/alertmanager/config.yml"
+      - "--storage.path=/alertmanager"
+      - "--web.external-url=http://localhost:9093"
     ports:
-      - '9093:9093'
+      - "9093:9093"
     volumes:
       - ./monitoring/alertmanager:/etc/alertmanager
     networks:
@@ -314,9 +314,9 @@ services:
     image: grafana/loki:2.9.0
     container_name: loki
     command:
-      - '-config.file=/etc/loki/local-config.yaml'
+      - "-config.file=/etc/loki/local-config.yaml"
     ports:
-      - '3100:3100'
+      - "3100:3100"
     volumes:
       - ./monitoring/loki:/etc/loki
     networks:
@@ -333,7 +333,7 @@ services:
     image: grafana/promtail:2.9.0
     container_name: promtail
     command:
-      - '-config.file=/etc/promtail/config.yml'
+      - "-config.file=/etc/promtail/config.yml"
     volumes:
       - ./monitoring/promtail:/etc/promtail
       - /var/log:/var/log:ro
@@ -348,13 +348,13 @@ services:
     image: grafana/tempo:2.2.0
     container_name: tempo
     command:
-      - '-config.file=/etc/tempo.yaml'
+      - "-config.file=/etc/tempo.yaml"
     volumes:
       - ./monitoring/tempo:/etc/tempo
     ports:
-      - '3200:3200' # Tempo HTTP
-      - '4317:4317' # OTLP gRPC
-      - '4318:4318' # OTLP HTTP
+      - "3200:3200" # Tempo HTTP
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
     networks:
       - observability
 
@@ -366,7 +366,7 @@ services:
       - ./monitoring/vector/vector.toml:/etc/vector/vector.toml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - '8686:8686' # Vector API
+      - "8686:8686" # Vector API
     networks:
       - observability
     deploy:
@@ -381,11 +381,11 @@ services:
     image: prom/blackbox-exporter:v0.24.0
     container_name: blackbox-exporter
     command:
-      - '--config.file=/etc/blackbox_exporter/config.yml'
+      - "--config.file=/etc/blackbox_exporter/config.yml"
     volumes:
       - ./monitoring/blackbox:/etc/blackbox_exporter
     ports:
-      - '9115:9115'
+      - "9115:9115"
     networks:
       - observability
       - intelgraph
@@ -404,7 +404,7 @@ services:
       - STORAGE_TYPE=elasticsearch
       - ES_HOSTS=elasticsearch:9200
     ports:
-      - '9411:9411'
+      - "9411:9411"
     networks:
       - observability
     depends_on:
@@ -421,7 +421,7 @@ services:
     image: prom/pushgateway:v1.6.2
     container_name: pushgateway
     ports:
-      - '9091:9091'
+      - "9091:9091"
     networks:
       - observability
     deploy:
@@ -436,13 +436,13 @@ services:
     image: hashicorp/consul:1.16.0
     container_name: consul
     command:
-      - 'consul'
-      - 'agent'
-      - '-dev'
-      - '-client=0.0.0.0'
-      - '-ui'
+      - "consul"
+      - "agent"
+      - "-dev"
+      - "-client=0.0.0.0"
+      - "-ui"
     ports:
-      - '8500:8500'
+      - "8500:8500"
     networks:
       - observability
     deploy:

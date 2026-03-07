@@ -4,10 +4,7 @@ import { RedactionClass, DEFAULT_REDACTION_RULES } from "./classification";
  * Redacts sensitive content based on allowed classes.
  * If a class is NOT in the allowed list, its patterns are applied to the text.
  */
-export function redact(
-  text: string,
-  allowedClasses: RedactionClass[]
-): string {
+export function redact(text: string, allowedClasses: RedactionClass[]): string {
   let redactedText = text;
 
   for (const rule of DEFAULT_REDACTION_RULES) {
@@ -23,13 +20,11 @@ export function redact(
  * Validates a tool egress request against the tool's manifest.
  * Deny-by-default if the tool is not in the manifest.
  */
-export function validateEgress(
-  toolId: string,
-  contextSpace: string,
-  manifest: any
-): boolean {
+export function validateEgress(toolId: string, contextSpace: string, manifest: any): boolean {
   const toolEntry = manifest.tools?.[toolId];
-  if (!toolEntry) {return false;}
+  if (!toolEntry) {
+    return false;
+  }
 
   return toolEntry.allowedContextSpaces.includes(contextSpace);
 }

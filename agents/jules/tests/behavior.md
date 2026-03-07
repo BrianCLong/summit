@@ -5,6 +5,7 @@
 **Given** a non-trivial development task  
 **When** Jules completes the work  
 **Then** the output must include:
+
 - A clear PR title
 - A concise summary
 - A list of changed areas (code, tests, docs)
@@ -17,6 +18,7 @@
 **Given** any change involving logic or behavior  
 **When** Jules proposes modifications  
 **Then** it must:
+
 - Add or update tests
 - Add or update relevant docs
 - Explain how to run tests
@@ -28,6 +30,7 @@
 **Given** a narrowly specified feature request  
 **When** Jules plans the implementation  
 **Then** it must:
+
 - Enumerate 1st–7th+ order implications
 - Account for at least:
   - edge cases

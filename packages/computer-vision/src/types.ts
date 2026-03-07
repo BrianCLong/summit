@@ -3,7 +3,7 @@
  * Shared types and interfaces for all CV modules
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Bounding Box Schema (x, y, width, height)
@@ -115,7 +115,7 @@ export const ModelConfigSchema = z.object({
   model_name: z.string(),
   model_path: z.string().optional(),
   model_version: z.string().optional(),
-  device: z.enum(['cpu', 'cuda', 'auto']).default('auto'),
+  device: z.enum(["cpu", "cuda", "auto"]).default("auto"),
   batch_size: z.number().int().positive().default(1),
   input_size: z.tuple([z.number(), z.number()]).optional(),
   confidence_threshold: z.number().min(0).max(1).default(0.5),
@@ -215,12 +215,14 @@ export const ColorHistogramSchema = z.object({
   bins: z.number().int().positive(),
   channels: z.array(z.string()),
   histogram: z.array(z.array(z.number())),
-  dominant_colors: z.array(
-    z.object({
-      color: z.tuple([z.number(), z.number(), z.number()]),
-      percentage: z.number().min(0).max(100),
-    })
-  ).optional(),
+  dominant_colors: z
+    .array(
+      z.object({
+        color: z.tuple([z.number(), z.number(), z.number()]),
+        percentage: z.number().min(0).max(100),
+      })
+    )
+    .optional(),
 });
 
 export type ColorHistogram = z.infer<typeof ColorHistogramSchema>;
@@ -237,9 +239,9 @@ export const SceneClassificationSchema = z.object({
       confidence: ConfidenceSchema,
     })
   ),
-  indoor_outdoor: z.enum(['indoor', 'outdoor', 'unknown']).optional(),
-  lighting: z.enum(['day', 'night', 'dawn', 'dusk', 'unknown']).optional(),
-  weather: z.enum(['clear', 'cloudy', 'rainy', 'snowy', 'unknown']).optional(),
+  indoor_outdoor: z.enum(["indoor", "outdoor", "unknown"]).optional(),
+  lighting: z.enum(["day", "night", "dawn", "dusk", "unknown"]).optional(),
+  weather: z.enum(["clear", "cloudy", "rainy", "snowy", "unknown"]).optional(),
 });
 
 export type SceneClassification = z.infer<typeof SceneClassificationSchema>;
@@ -252,7 +254,7 @@ export const DepthMapSchema = z.object({
   min_depth: z.number(),
   max_depth: z.number(),
   normalized: z.boolean(),
-  unit: z.enum(['meters', 'pixels', 'relative']),
+  unit: z.enum(["meters", "pixels", "relative"]),
 });
 
 export type DepthMap = z.infer<typeof DepthMapSchema>;
@@ -268,10 +270,12 @@ export const TrackingResultSchema = z.object({
   class_name: z.string(),
   frame_number: z.number().int(),
   trajectory: z.array(PointSchema).optional(),
-  velocity: z.object({
-    x: z.number(),
-    y: z.number(),
-  }).optional(),
+  velocity: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .optional(),
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
@@ -296,23 +300,23 @@ export type PerformanceMetrics = z.infer<typeof PerformanceMetricsSchema>;
  * Model Optimization Type
  */
 export enum OptimizationType {
-  NONE = 'none',
-  FP16 = 'fp16',
-  INT8 = 'int8',
-  TENSORRT = 'tensorrt',
-  ONNX = 'onnx',
-  QUANTIZED = 'quantized',
+  NONE = "none",
+  FP16 = "fp16",
+  INT8 = "int8",
+  TENSORRT = "tensorrt",
+  ONNX = "onnx",
+  QUANTIZED = "quantized",
 }
 
 /**
  * Device Type
  */
 export enum DeviceType {
-  CPU = 'cpu',
-  CUDA = 'cuda',
-  MPS = 'mps', // Apple Silicon
-  TENSORRT = 'tensorrt',
-  EDGE = 'edge', // Edge devices (Jetson, etc.)
+  CPU = "cpu",
+  CUDA = "cuda",
+  MPS = "mps", // Apple Silicon
+  TENSORRT = "tensorrt",
+  EDGE = "edge", // Edge devices (Jetson, etc.)
 }
 
 /**

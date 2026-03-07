@@ -4,18 +4,18 @@ metadata:
   name: { { include "companyos-console.fullname" . } }
 spec:
   targetRef:
-    apiVersion: 'apps/v1'
-    kind: 'Deployment'
+    apiVersion: "apps/v1"
+    kind: "Deployment"
     name: { { include "companyos-console.fullname" . } }
   updatePolicy:
-    updateMode: 'Off' # Or "Auto" for automatic updates, "Recreate" for recreating pods
+    updateMode: "Off" # Or "Auto" for automatic updates, "Recreate" for recreating pods
   resourcePolicy:
     containerPolicies:
-      - containerName: '*'
+      - containerName: "*"
         minAllowed:
           cpu: 50m
           memory: 64Mi
         maxAllowed:
           cpu: 1
           memory: 2Gi
-        controlledResources: ['cpu', 'memory']
+        controlledResources: ["cpu", "memory"]

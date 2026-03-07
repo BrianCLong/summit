@@ -124,7 +124,7 @@ export interface PathExplanation {
   /**
    * Element type
    */
-  elementType: 'node' | 'edge';
+  elementType: "node" | "edge";
 
   /**
    * Importance score (0-1)
@@ -238,13 +238,13 @@ export function findShortestPath(
   graph: GraphData,
   source: string,
   target: string,
-  options: PathfindingOptions = {},
+  options: PathfindingOptions = {}
 ): ShortestPathResult {
   const startTime = performance.now();
 
   const {
     directed = false,
-    weightProperty = 'weight',
+    weightProperty = "weight",
     policyFilter,
     scopeFilter,
     maxPathLength = Infinity,
@@ -391,7 +391,7 @@ export function findKShortestPaths(
   source: string,
   target: string,
   k: number,
-  options: PathfindingOptions = {},
+  options: PathfindingOptions = {}
 ): KShortestPathsResult {
   const startTime = performance.now();
 
@@ -453,39 +453,30 @@ export function findKShortestPaths(
       const rootPath = previousPath.path.slice(0, i + 1);
 
       // Create graph with removed edges/nodes
-      const modifiedGraph = createModifiedGraph(
-        filteredGraph,
-        paths,
-        rootPath,
-        i,
-        directed,
-      );
+      const modifiedGraph = createModifiedGraph(filteredGraph, paths, rootPath, i, directed);
 
       // Find spur path
-      const spurPathResult = findShortestPath(
-        modifiedGraph,
-        spurNode,
-        target,
-        {
-          ...options,
-          maxNodesToExplore: maxNodesToExplore - totalNodesExplored,
-          generateExplanations: false,
-        },
-      );
+      const spurPathResult = findShortestPath(modifiedGraph, spurNode, target, {
+        ...options,
+        maxNodesToExplore: maxNodesToExplore - totalNodesExplored,
+        generateExplanations: false,
+      });
 
       totalNodesExplored += spurPathResult.nodesExplored;
 
       if (spurPathResult.found && spurPathResult.path) {
         // Combine root path and spur path
-        const totalPath = [
-          ...rootPath.slice(0, -1),
-          ...spurPathResult.path.path,
-        ];
+        const totalPath = [...rootPath.slice(0, -1), ...spurPathResult.path.path];
         const totalDistance =
-          calculatePathDistance(rootPath, filteredGraph) +
-          spurPathResult.path.distance;
+          calculatePathDistance(rootPath, filteredGraph) + spurPathResult.path.distance;
 
-        if (!pathExists(totalPath, paths) && !pathExists(totalPath, candidatePaths.map(c => ({ path: c.path.path })))) {
+        if (
+          !pathExists(totalPath, paths) &&
+          !pathExists(
+            totalPath,
+            candidatePaths.map((c) => ({ path: c.path.path }))
+          )
+        ) {
           candidatePaths.push({
             path: {
               path: totalPath,
@@ -524,7 +515,7 @@ export function findKShortestPaths(
           totalDistance: pathResult.distance,
           nodesExplored: totalNodesExplored,
           pathLength: pathResult.path.length,
-        },
+        }
       );
     }
   }
@@ -554,7 +545,7 @@ export function findKShortestPaths(
 function applyFilters(
   graph: GraphData,
   policyFilter?: PolicyFilter,
-  scopeFilter?: ScopeFilter,
+  scopeFilter?: ScopeFilter
 ): GraphData {
   let nodes = [...graph.nodes];
   let edges = [...graph.edges];
@@ -562,42 +553,28 @@ function applyFilters(
   // Apply policy filters
   if (policyFilter) {
     if (policyFilter.allowedNodeTypes && policyFilter.allowedNodeTypes.length > 0) {
-      nodes = nodes.filter((n) =>
-        policyFilter.allowedNodeTypes!.includes(n.type || ''),
-      );
+      nodes = nodes.filter((n) => policyFilter.allowedNodeTypes!.includes(n.type || ""));
     }
 
     if (policyFilter.allowedEdgeTypes && policyFilter.allowedEdgeTypes.length > 0) {
-      edges = edges.filter((e) =>
-        policyFilter.allowedEdgeTypes!.includes(e.type || ''),
-      );
+      edges = edges.filter((e) => policyFilter.allowedEdgeTypes!.includes(e.type || ""));
     }
 
     if (policyFilter.requiredPolicyLabels && policyFilter.requiredPolicyLabels.length > 0) {
       nodes = nodes.filter((n) =>
-        n.policyLabels?.some((label) =>
-          policyFilter.requiredPolicyLabels!.includes(label),
-        ),
+        n.policyLabels?.some((label) => policyFilter.requiredPolicyLabels!.includes(label))
       );
       edges = edges.filter((e) =>
-        e.policyLabels?.some((label) =>
-          policyFilter.requiredPolicyLabels!.includes(label),
-        ),
+        e.policyLabels?.some((label) => policyFilter.requiredPolicyLabels!.includes(label))
       );
     }
 
     if (policyFilter.forbiddenPolicyLabels && policyFilter.forbiddenPolicyLabels.length > 0) {
       nodes = nodes.filter(
-        (n) =>
-          !n.policyLabels?.some((label) =>
-            policyFilter.forbiddenPolicyLabels!.includes(label),
-          ),
+        (n) => !n.policyLabels?.some((label) => policyFilter.forbiddenPolicyLabels!.includes(label))
       );
       edges = edges.filter(
-        (e) =>
-          !e.policyLabels?.some((label) =>
-            policyFilter.forbiddenPolicyLabels!.includes(label),
-          ),
+        (e) => !e.policyLabels?.some((label) => policyFilter.forbiddenPolicyLabels!.includes(label))
       );
     }
   }
@@ -642,7 +619,7 @@ function applyFilters(
 
 function buildAdjacencyList(
   graph: GraphData,
-  directed: boolean,
+  directed: boolean
 ): Map<string, Array<{ node: string; weight: number; edge: any }>> {
   const adjacency = new Map<string, Array<{ node: string; weight: number; edge: any }>>();
 
@@ -670,10 +647,7 @@ function buildAdjacencyList(
   return adjacency;
 }
 
-function reconstructPath(
-  target: string,
-  predecessors: Map<string, string>,
-): string[] {
+function reconstructPath(target: string, predecessors: Map<string, string>): string[] {
   const path: string[] = [];
   let current: string | undefined = target;
 
@@ -685,10 +659,7 @@ function reconstructPath(
   return path;
 }
 
-function reconstructPathLength(
-  node: string,
-  predecessors: Map<string, string>,
-): number {
+function reconstructPathLength(node: string, predecessors: Map<string, string>): number {
   let length = 0;
   let current: string | undefined = node;
 
@@ -702,7 +673,7 @@ function reconstructPathLength(
 
 function reconstructEdges(
   path: string[],
-  adjacency: Map<string, Array<{ node: string; weight: number; edge: any }>>,
+  adjacency: Map<string, Array<{ node: string; weight: number; edge: any }>>
 ): Array<{ source: string; target: string; weight: number }> {
   const edges: Array<{ source: string; target: string; weight: number }> = [];
 
@@ -727,7 +698,7 @@ function reconstructEdges(
 function reconstructEdgesFromPath(
   path: string[],
   graph: GraphData,
-  directed: boolean,
+  directed: boolean
 ): Array<{ source: string; target: string; weight: number }> {
   const edges: Array<{ source: string; target: string; weight: number }> = [];
 
@@ -738,7 +709,7 @@ function reconstructEdgesFromPath(
     const edge = graph.edges.find(
       (e) =>
         (e.source === source && e.target === target) ||
-        (!directed && e.source === target && e.target === source),
+        (!directed && e.source === target && e.target === source)
     );
 
     if (edge) {
@@ -756,9 +727,7 @@ function reconstructEdgesFromPath(
 function calculatePathDistance(path: string[], graph: GraphData): number {
   let distance = 0;
   for (let i = 0; i < path.length - 1; i++) {
-    const edge = graph.edges.find(
-      (e) => e.source === path[i] && e.target === path[i + 1],
-    );
+    const edge = graph.edges.find((e) => e.source === path[i] && e.target === path[i + 1]);
     distance += edge?.weight ?? 1;
   }
   return distance;
@@ -769,7 +738,7 @@ function createModifiedGraph(
   paths: PathResult[],
   rootPath: string[],
   deviationIndex: number,
-  directed: boolean,
+  directed: boolean
 ): GraphData {
   const removedEdges = new Set<string>();
   const removedNodes = new Set<string>();
@@ -810,14 +779,9 @@ function createModifiedGraph(
   return { nodes, edges };
 }
 
-function pathExists(
-  path: string[],
-  existingPaths: Array<{ path: string[] }>,
-): boolean {
+function pathExists(path: string[], existingPaths: Array<{ path: string[] }>): boolean {
   return existingPaths.some(
-    (p) =>
-      p.path.length === path.length &&
-      p.path.every((node, i) => node === path[i]),
+    (p) => p.path.length === path.length && p.path.every((node, i) => node === path[i])
   );
 }
 
@@ -829,7 +793,7 @@ function generatePathExplanations(
     totalDistance: number;
     nodesExplored: number;
     pathLength: number;
-  },
+  }
 ): PathExplanation[] {
   const explanations: PathExplanation[] = [];
 
@@ -844,7 +808,7 @@ function generatePathExplanations(
     const isEnd = i === path.length - 1;
     const isIntermediate = !isStart && !isEnd;
 
-    let reasoning = '';
+    let reasoning = "";
     const evidence: string[] = [];
     let importanceScore = 0.5;
 
@@ -860,23 +824,21 @@ function generatePathExplanations(
       reasoning = `Critical intermediary node connecting source to target`;
       evidence.push(
         `Hop ${i} of ${path.length - 1} in shortest path`,
-        `Node type: ${node.type || 'Unknown'}`,
+        `Node type: ${node.type || "Unknown"}`
       );
 
       // Calculate importance based on position and degree
-      const degree = graph.edges.filter(
-        (e) => e.source === nodeId || e.target === nodeId,
-      ).length;
+      const degree = graph.edges.filter((e) => e.source === nodeId || e.target === nodeId).length;
       importanceScore = 0.5 + (degree / (graph.nodes.length * 2)) * 0.5;
     }
 
     if (node.policyLabels && node.policyLabels.length > 0) {
-      evidence.push(`Policy labels: ${node.policyLabels.join(', ')}`);
+      evidence.push(`Policy labels: ${node.policyLabels.join(", ")}`);
     }
 
     explanations.push({
       elementId: nodeId,
-      elementType: 'node',
+      elementType: "node",
       importanceScore,
       reasoning,
       evidence,
@@ -887,9 +849,7 @@ function generatePathExplanations(
   // Explain each edge in the path
   for (let i = 0; i < edges.length; i++) {
     const edge = edges[i];
-    const graphEdge = graph.edges.find(
-      (e) => e.source === edge.source && e.target === edge.target,
-    );
+    const graphEdge = graph.edges.find((e) => e.source === edge.source && e.target === edge.target);
 
     const evidence: string[] = [
       `Connection ${i + 1} of ${edges.length} in path`,
@@ -901,14 +861,14 @@ function generatePathExplanations(
     }
 
     if (graphEdge?.policyLabels && graphEdge.policyLabels.length > 0) {
-      evidence.push(`Policy labels: ${graphEdge.policyLabels.join(', ')}`);
+      evidence.push(`Policy labels: ${graphEdge.policyLabels.join(", ")}`);
     }
 
     const importanceScore = Math.min(1.0, 1.0 / edge.weight);
 
     explanations.push({
       elementId: `${edge.source}->${edge.target}`,
-      elementType: 'edge',
+      elementType: "edge",
       importanceScore,
       reasoning: `Critical connection in shortest path from ${edge.source} to ${edge.target}`,
       evidence,

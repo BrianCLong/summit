@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
 spec:
   namespaceSelector:
-    matchNames: ['intelgraph-prod']
+    matchNames: ["intelgraph-prod"]
   selector:
     matchLabels:
       app: maestro-server

@@ -57,62 +57,62 @@ The Product Increment feature provides comprehensive sprint/iteration management
 
 The core entity representing a sprint or iteration.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique identifier |
-| tenantId | string | Multi-tenant isolation |
-| name | string | Increment name (e.g., "Sprint 42") |
-| description | string | Detailed description |
-| version | string | Version identifier (e.g., "1.2.0") |
-| status | enum | planning, active, review, completed, released, cancelled |
-| plannedStartDate | DateTime | Planned start |
-| plannedEndDate | DateTime | Planned end |
-| actualStartDate | DateTime | Actual start (auto-set on activation) |
-| actualEndDate | DateTime | Actual end (auto-set on completion) |
-| plannedCapacityPoints | int | Total team capacity |
-| committedPoints | int | Committed story points (auto-calculated) |
-| completedPoints | int | Completed points (auto-calculated) |
-| velocity | float | Points per week (auto-calculated) |
-| releaseNotes | string | Release documentation |
-| releaseTag | string | Git tag or release ID |
-| releaseUrl | string | Link to release artifacts |
+| Field                 | Type     | Description                                              |
+| --------------------- | -------- | -------------------------------------------------------- |
+| id                    | UUID     | Unique identifier                                        |
+| tenantId              | string   | Multi-tenant isolation                                   |
+| name                  | string   | Increment name (e.g., "Sprint 42")                       |
+| description           | string   | Detailed description                                     |
+| version               | string   | Version identifier (e.g., "1.2.0")                       |
+| status                | enum     | planning, active, review, completed, released, cancelled |
+| plannedStartDate      | DateTime | Planned start                                            |
+| plannedEndDate        | DateTime | Planned end                                              |
+| actualStartDate       | DateTime | Actual start (auto-set on activation)                    |
+| actualEndDate         | DateTime | Actual end (auto-set on completion)                      |
+| plannedCapacityPoints | int      | Total team capacity                                      |
+| committedPoints       | int      | Committed story points (auto-calculated)                 |
+| completedPoints       | int      | Completed points (auto-calculated)                       |
+| velocity              | float    | Points per week (auto-calculated)                        |
+| releaseNotes          | string   | Release documentation                                    |
+| releaseTag            | string   | Git tag or release ID                                    |
+| releaseUrl            | string   | Link to release artifacts                                |
 
 ### Increment Goal
 
 Objectives and goals for each increment.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique identifier |
-| incrementId | UUID | Parent increment |
-| title | string | Goal title |
-| description | string | Detailed description |
-| category | enum | feature, enhancement, bugfix, technical, security, performance, compliance, research |
-| priority | enum | critical, high, medium, low |
-| storyPoints | int | Estimated effort |
-| status | enum | pending, in_progress, blocked, completed, deferred, cancelled |
-| acceptanceCriteria | JSON | Array of success criteria |
-| successMetrics | JSON | Key metrics and targets |
+| Field              | Type   | Description                                                                          |
+| ------------------ | ------ | ------------------------------------------------------------------------------------ |
+| id                 | UUID   | Unique identifier                                                                    |
+| incrementId        | UUID   | Parent increment                                                                     |
+| title              | string | Goal title                                                                           |
+| description        | string | Detailed description                                                                 |
+| category           | enum   | feature, enhancement, bugfix, technical, security, performance, compliance, research |
+| priority           | enum   | critical, high, medium, low                                                          |
+| storyPoints        | int    | Estimated effort                                                                     |
+| status             | enum   | pending, in_progress, blocked, completed, deferred, cancelled                        |
+| acceptanceCriteria | JSON   | Array of success criteria                                                            |
+| successMetrics     | JSON   | Key metrics and targets                                                              |
 
 ### Deliverable
 
 Work items within an increment.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique identifier |
-| incrementId | UUID | Parent increment |
-| goalId | UUID | Associated goal (optional) |
-| title | string | Deliverable title |
-| description | string | Detailed description |
-| deliverableType | enum | epic, story, task, bug, spike, subtask |
-| parentId | UUID | Parent deliverable (for hierarchy) |
-| priority | enum | critical, high, medium, low |
-| storyPoints | int | Estimated effort |
-| status | enum | backlog, ready, in_progress, in_review, testing, done, blocked, cancelled |
-| assigneeId | string | Assigned user ID |
-| externalId | string | External tracker ID (Jira, GitHub) |
-| investigationId | UUID | Linked IntelGraph investigation |
+| Field           | Type   | Description                                                               |
+| --------------- | ------ | ------------------------------------------------------------------------- |
+| id              | UUID   | Unique identifier                                                         |
+| incrementId     | UUID   | Parent increment                                                          |
+| goalId          | UUID   | Associated goal (optional)                                                |
+| title           | string | Deliverable title                                                         |
+| description     | string | Detailed description                                                      |
+| deliverableType | enum   | epic, story, task, bug, spike, subtask                                    |
+| parentId        | UUID   | Parent deliverable (for hierarchy)                                        |
+| priority        | enum   | critical, high, medium, low                                               |
+| storyPoints     | int    | Estimated effort                                                          |
+| status          | enum   | backlog, ready, in_progress, in_review, testing, done, blocked, cancelled |
+| assigneeId      | string | Assigned user ID                                                          |
+| externalId      | string | External tracker ID (Jira, GitHub)                                        |
+| investigationId | UUID   | Linked IntelGraph investigation                                           |
 
 ## Increment Lifecycle
 
@@ -130,14 +130,14 @@ Work items within an increment.
 
 ### Valid Status Transitions
 
-| From | To |
-|------|-----|
-| PLANNING | ACTIVE, CANCELLED |
-| ACTIVE | REVIEW, COMPLETED, CANCELLED |
-| REVIEW | ACTIVE, COMPLETED, CANCELLED |
-| COMPLETED | RELEASED |
-| RELEASED | (terminal) |
-| CANCELLED | (terminal) |
+| From      | To                           |
+| --------- | ---------------------------- |
+| PLANNING  | ACTIVE, CANCELLED            |
+| ACTIVE    | REVIEW, COMPLETED, CANCELLED |
+| REVIEW    | ACTIVE, COMPLETED, CANCELLED |
+| COMPLETED | RELEASED                     |
+| RELEASED  | (terminal)                   |
+| CANCELLED | (terminal)                   |
 
 ## GraphQL API
 
@@ -251,16 +251,8 @@ mutation CompleteIncrement($id: ID!) {
 }
 
 # Release increment
-mutation ReleaseIncrement(
-  $id: ID!
-  $releaseNotes: String!
-  $releaseTag: String!
-) {
-  releaseProductIncrement(
-    id: $id
-    releaseNotes: $releaseNotes
-    releaseTag: $releaseTag
-  ) {
+mutation ReleaseIncrement($id: ID!, $releaseNotes: String!, $releaseTag: String!) {
+  releaseProductIncrement(id: $id, releaseNotes: $releaseNotes, releaseTag: $releaseTag) {
     id
     status
     releaseTag
@@ -320,13 +312,15 @@ Deliverables can be linked to IntelGraph investigations to track analytical work
 
 ```graphql
 mutation CreateLinkedDeliverable {
-  createDeliverable(input: {
-    incrementId: "increment-1"
-    tenantId: "tenant-1"
-    title: "Analyze threat actor network"
-    deliverableType: SPIKE
-    investigationId: "investigation-123"
-  }) {
+  createDeliverable(
+    input: {
+      incrementId: "increment-1"
+      tenantId: "tenant-1"
+      title: "Analyze threat actor network"
+      deliverableType: SPIKE
+      investigationId: "investigation-123"
+    }
+  ) {
     id
     investigation {
       id
@@ -360,6 +354,7 @@ psql -d intelgraph_dev -f server/migrations/008_product_increments.sql
 ### Auto-calculated Points
 
 The system automatically calculates:
+
 - **committedPoints**: Sum of all deliverable story points
 - **completedPoints**: Sum of story points for done deliverables
 
@@ -368,6 +363,7 @@ This is done via database triggers that update when deliverables change.
 ### Auto-calculated Velocity
 
 When an increment is completed:
+
 - Velocity = completedPoints / (actualEndDate - actualStartDate in weeks)
 
 ### Auto-set Timestamps
@@ -433,12 +429,14 @@ mutation RecordMetrics {
 ### 1. Version Naming
 
 Use consistent version naming:
+
 - Semantic versions for releases: `1.0.0`, `1.1.0`, `2.0.0`
 - Sprint identifiers for iterations: `Sprint-42`, `2024-W01`
 
 ### 2. Goal Structure
 
 Structure goals as SMART objectives:
+
 - **S**pecific: Clear title and description
 - **M**easurable: Story points and success metrics
 - **A**chievable: Realistic within increment timeline
@@ -448,6 +446,7 @@ Structure goals as SMART objectives:
 ### 3. Deliverable Hierarchy
 
 Organize work hierarchically:
+
 ```
 Epic: User Authentication System
 ├── Story: Implement login form
@@ -461,6 +460,7 @@ Epic: User Authentication System
 ### 4. Regular Metrics Recording
 
 Record metrics snapshots daily during active increments:
+
 ```bash
 # Cron job or scheduled task
 0 9 * * * curl -X POST /api/graphql -d '{"query":"mutation { recordIncrementMetrics(incrementId: \"current\") { id } }"}'
@@ -484,6 +484,7 @@ The API returns structured errors:
 ```
 
 Common error scenarios:
+
 - Invalid status transitions
 - Missing required fields
 - Duplicate version numbers
@@ -494,6 +495,7 @@ Common error scenarios:
 ### Indexes
 
 The migration creates indexes for common queries:
+
 - Tenant + status filtering
 - Date range queries
 - Assignee lookups
@@ -502,8 +504,9 @@ The migration creates indexes for common queries:
 ### Batch Loading
 
 The repository supports DataLoader patterns:
+
 ```typescript
-const increments = await repo.batchByIds(['id1', 'id2', 'id3']);
+const increments = await repo.batchByIds(["id1", "id2", "id3"]);
 ```
 
 ### View for Summary Queries

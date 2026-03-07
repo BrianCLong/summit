@@ -6,6 +6,7 @@ This directory contains performance benchmarks and fixtures.
 
 Located in `micro/`.
 Run with:
+
 ```bash
 node benchmarks/micro/serialization.js
 ```

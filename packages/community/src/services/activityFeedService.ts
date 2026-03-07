@@ -1,6 +1,6 @@
-import type { ActivityEvent, ActivityType } from '../types.js';
-import { createId } from '../utils.js';
-import { CommunityStore } from '../store.js';
+import type { ActivityEvent, ActivityType } from "../types.js";
+import { createId } from "../utils.js";
+import { CommunityStore } from "../store.js";
 
 export interface ActivityInput {
   readonly userId: string;
@@ -14,7 +14,7 @@ export class ActivityFeedService {
 
   public record(input: ActivityInput): ActivityEvent {
     const event: ActivityEvent = {
-      id: createId('act'),
+      id: createId("act"),
       userId: input.userId,
       type: input.type,
       summary: input.summary,
@@ -33,9 +33,7 @@ export class ActivityFeedService {
   public getLatest(userId: string, limit: number): ActivityEvent[] {
     return this.store
       .listActivities(userId)
-      .sort(
-        (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
-      )
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .slice(0, limit);
   }
 }

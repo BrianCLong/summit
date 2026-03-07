@@ -39,6 +39,7 @@
 ## Preconditions
 
 ### Required State
+
 - [ ] On `main` branch at commit `a1f20771eeadcc55fef9f83727edeee0d2c2dbc2`
 - [ ] Clean working tree (no uncommitted changes)
 - [ ] All required CI checks passing on main
@@ -47,6 +48,7 @@
 - [ ] No deploy freeze in effect
 
 ### Required Tools
+
 - [ ] `git` >= 2.30
 - [ ] `gh` CLI (GitHub CLI) authenticated
 - [ ] `node` >= 18.x
@@ -54,12 +56,14 @@
 - [ ] `jq` for JSON processing
 
 ### Required Permissions
+
 - [ ] Write access to `BrianCLong/summit`
 - [ ] Ability to push tags
 - [ ] Ability to create GitHub Releases
 - [ ] Access to GITHUB_TOKEN (for release blocker checks)
 
 ### Verification Commands
+
 ```bash
 # Verify branch and commit
 git checkout main
@@ -126,10 +130,12 @@ pnpm ga:verify
 **Expected Output:** All checks PASS (green)
 
 **Artifacts Generated:**
+
 - `artifacts/ga-verify/a1f20771e.../ga_verify_report.md`
 - `artifacts/evidence/evidence-summary-*.md`
 
 **If this fails:**
+
 - Review report: `cat artifacts/ga-verify/*/ga_verify_report.md`
 - Fix failing checks
 - Re-run verification
@@ -148,6 +154,7 @@ pnpm ga:verify
 ```
 
 **Expected Output:**
+
 ```
 Evidence Collection Complete
   Run ID:    20260123-HHMMSS
@@ -156,6 +163,7 @@ Evidence Collection Complete
 ```
 
 **Verification:**
+
 ```bash
 # Check evidence artifacts
 ls -lh artifacts/evidence/ga-release-v5.0.0/
@@ -188,6 +196,7 @@ ls -lh client/dist/
 **Expected Output:** Successful builds with no errors
 
 **If this fails:**
+
 - Review build errors
 - Ensure dependencies are installed
 - Check for TypeScript errors
@@ -242,6 +251,7 @@ git show HEAD
 **Expected Output:** Clean commit with version bump
 
 **Verification Checklist:**
+
 - [ ] package.json shows "version": "5.0.0"
 - [ ] CHANGELOG.md has v5.0.0 entry
 - [ ] Commit message is clear and references session
@@ -324,6 +334,7 @@ gh pr view --web
 **Expected Output:** PR created successfully, URL displayed
 
 **PR Checklist:**
+
 - [ ] PR title is clear
 - [ ] PR body explains what's included
 - [ ] PR emphasizes NO publishing actions
@@ -337,11 +348,13 @@ gh pr view --web
 **⏸ PAUSE POINT:** Wait for PR approval
 
 **Required Approvals:**
+
 - [ ] Technical review (code changes)
 - [ ] Release manager approval
 - [ ] Any required org approvals
 
 **Once Approved:**
+
 ```bash
 # Merge PR (use GitHub UI or CLI)
 gh pr merge --squash --delete-branch
@@ -351,6 +364,7 @@ gh pr merge --merge --delete-branch
 ```
 
 **After Merge:**
+
 ```bash
 # Switch back to main
 git checkout main
@@ -402,6 +416,7 @@ git rev-list -n 1 v5.0.0-ga
 ```
 
 **Expected Output:**
+
 - Tag created at commit with version 5.0.0 in package.json
 - Tag message is complete and correct
 
@@ -414,6 +429,7 @@ git rev-list -n 1 v5.0.0-ga
 **⚠️ FINAL CHECKPOINT:** Confirm before pushing
 
 **Pre-Push Checklist:**
+
 - [ ] Tag v5.0.0-ga created locally
 - [ ] Tag points to correct commit (with version 5.0.0)
 - [ ] Tag message is correct
@@ -430,12 +446,14 @@ git ls-remote --tags origin | grep v5.0.0-ga
 ```
 
 **Expected Output:**
+
 ```
 To github.com:BrianCLong/summit.git
  * [new tag]         v5.0.0-ga -> v5.0.0-ga
 ```
 
 **If push fails:**
+
 - Check network connectivity
 - Verify push permissions
 - Check for tag conflicts
@@ -493,6 +511,7 @@ gh release view v5.0.0-ga --web
 **Expected Output:** GitHub Release created successfully
 
 **Release Checklist:**
+
 - [ ] Release title is "Summit v5.0.0 - General Availability"
 - [ ] Release notes render correctly
 - [ ] Tag v5.0.0-ga is associated
@@ -515,6 +534,7 @@ gh release view v5.0.0-ga --json assets
 ```
 
 **Manual Verification:**
+
 - [ ] Visit release page in browser
 - [ ] Verify release notes display correctly
 - [ ] Verify tag link works
@@ -575,6 +595,7 @@ git push origin main
 ```
 
 **Evidence Retention Policy:**
+
 - **Minimum:** 7 years (SOC 2 compliance)
 - **Location:** `docs/releases/ga/evidence-archive-v5.0.0/`
 - **Format:** Markdown + JSON artifacts
@@ -587,6 +608,7 @@ git push origin main
 ### When to Rollback
 
 Trigger rollback if:
+
 - Critical security vulnerability discovered in release
 - Showstopper bug reported
 - Evidence tampering detected
@@ -622,6 +644,7 @@ git ls-remote --tags origin | grep v5.0.0-ga  # Should be empty
 ```
 
 **Consequences:**
+
 - Users who already pulled tag will keep it
 - Cannot re-use tag name (bad practice)
 - Creates confusion in Git history
@@ -657,6 +680,7 @@ gh release create v5.0.1 \
 **Cause:** Insufficient permissions or branch protection
 
 **Solution:**
+
 ```bash
 # Verify authentication
 gh auth status
@@ -676,6 +700,7 @@ git push origin v5.0.0-ga
 **Cause:** Tag name conflict
 
 **Solution:**
+
 ```bash
 # Check existing tags
 git tag -l v5.0.0*
@@ -692,6 +717,7 @@ git push origin :refs/tags/v5.0.0-ga  # Delete remote
 **Cause:** Pre-release checks not passing
 
 **Solution:**
+
 ```bash
 # Review detailed report
 cat artifacts/ga-verify/*/ga_verify_report.md
@@ -710,6 +736,7 @@ pnpm ga:verify
 **Cause:** Missing scripts or dependencies
 
 **Solution:**
+
 ```bash
 # Check script exists
 ls -l scripts/release/generate_evidence_bundle.sh
@@ -729,6 +756,7 @@ which gitleaks jq pnpm
 **Cause:** Tag doesn't exist or notes file missing
 
 **Solution:**
+
 ```bash
 # Verify tag exists
 git tag -l v5.0.0-ga

@@ -4,7 +4,7 @@ export class EmailAnalyzer {
     domain: string;
     breaches: any[];
   }> {
-    const domain = email.split('@')[1];
+    const domain = email.split("@")[1];
     return { valid: true, domain, breaches: [] };
   }
 }

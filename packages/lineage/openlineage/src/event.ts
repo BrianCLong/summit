@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { v7 as uuidv7, v4 as uuidv4 } from 'uuid';
-import { SourceCodeJobFacet, DocumentationJobFacet, SqlJobFacet } from './facets/core.js';
-import { TenantFacet, SecurityFacet, BuildFacet } from './facets/summit.js';
+import { z } from "zod";
+import { v7 as uuidv7, v4 as uuidv4 } from "uuid";
+import { SourceCodeJobFacet, DocumentationJobFacet, SqlJobFacet } from "./facets/core.js";
+import { TenantFacet, SecurityFacet, BuildFacet } from "./facets/summit.js";
 
 // Use v7 if available (node-uuid likely supports it in recent versions), fall back to v4
 const generateUuid = () => {
@@ -44,7 +44,7 @@ export interface Dataset {
 export type InputDataset = Dataset;
 export type OutputDataset = Dataset;
 
-export type EventType = 'START' | 'RUNNING' | 'COMPLETE' | 'ABORT' | 'FAIL' | 'OTHER';
+export type EventType = "START" | "RUNNING" | "COMPLETE" | "ABORT" | "FAIL" | "OTHER";
 
 export interface RunEvent {
   eventType: EventType;
@@ -70,7 +70,7 @@ export class OpenLineageClient {
     runId?: string;
     inputs?: InputDataset[];
     outputs?: OutputDataset[];
-    runFacets?: Run['facets'];
+    runFacets?: Run["facets"];
     eventTime?: string;
   }): RunEvent {
     const { eventType, job, runId, inputs, outputs, runFacets, eventTime } = params;
@@ -86,7 +86,7 @@ export class OpenLineageClient {
       inputs: inputs || [],
       outputs: outputs || [],
       producer: this.producer,
-      schemaURL: 'https://openlineage.io/spec/1-0-5/OpenLineage.json',
+      schemaURL: "https://openlineage.io/spec/1-0-5/OpenLineage.json",
     };
   }
 }

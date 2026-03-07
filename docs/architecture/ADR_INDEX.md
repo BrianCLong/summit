@@ -20,11 +20,11 @@ ADRs capture significant architectural decisions along with their context and co
 
 ## ADR Index
 
-| #    | Title                                            | Status   | Area           | Date       |
-| ---- | ------------------------------------------------ | -------- | -------------- | ---------- |
-| 0001 | [Monorepo Structure](adr/0001-monorepo-structure.md) | Accepted | Infrastructure | 2024-01-10 |
-| 0002 | [LLM Client Architecture](adr/0002-llm-client-architecture.md) | Accepted | AI/ML | 2024-03-01 |
-| 0003 | [Graph-First Intelligence Engine](adr/0003-graph-first-intelligence-engine.md) | Accepted | Data | 2024-01-15 |
+| #    | Title                                                                          | Status   | Area           | Date       |
+| ---- | ------------------------------------------------------------------------------ | -------- | -------------- | ---------- |
+| 0001 | [Monorepo Structure](adr/0001-monorepo-structure.md)                           | Accepted | Infrastructure | 2024-01-10 |
+| 0002 | [LLM Client Architecture](adr/0002-llm-client-architecture.md)                 | Accepted | AI/ML          | 2024-03-01 |
+| 0003 | [Graph-First Intelligence Engine](adr/0003-graph-first-intelligence-engine.md) | Accepted | Data           | 2024-01-15 |
 
 ## ADRs by Area
 
@@ -83,6 +83,7 @@ pnpm adr:create --title "My Decision Title" --area "Data"
 ### Manual Creation
 
 1. Copy the template:
+
    ```bash
    cp docs/architecture/adr/adr-template.md docs/architecture/adr/00XX-my-decision.md
    ```

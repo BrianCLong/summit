@@ -16,11 +16,11 @@ roles:
   - Repo Maintainer / Arborist
   - Merge & Release Captain
 objectives:
-  - 'Tenant-grade security: ABAC/RBAC via OPA, step-up auth (WebAuthn/FIDO2), immutable audits with reason-for-access.'
-  - 'Edge hardening & throughput: global rate limiting, CDN/edge caching, and circuit-breakers without user-visible errors.'
-  - 'Data lifecycle governance: automated retention/purge with dual-control deletes and audit evidence.'
-  - 'Resilience: scheduled failover rehearsal + partial region evacuation playbook; verify RTO/RPO in prod-like.'
-  - 'FinOps maturity: spot-friendly workers, right-sized autoscaling, and cost anomaly alerts.'
+  - "Tenant-grade security: ABAC/RBAC via OPA, step-up auth (WebAuthn/FIDO2), immutable audits with reason-for-access."
+  - "Edge hardening & throughput: global rate limiting, CDN/edge caching, and circuit-breakers without user-visible errors."
+  - "Data lifecycle governance: automated retention/purge with dual-control deletes and audit evidence."
+  - "Resilience: scheduled failover rehearsal + partial region evacuation playbook; verify RTO/RPO in prod-like."
+  - "FinOps maturity: spot-friendly workers, right-sized autoscaling, and cost anomaly alerts."
 ---
 
 # Sprint 26 Plan — Security, Edge, and Data Governance Hardening
@@ -144,15 +144,15 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredLabels
 metadata: { name: require-tenant-binding }
 spec:
-  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
   parameters:
-    labels: ['tenant']
+    labels: ["tenant"]
 ---
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sDenySecretCrossNs
 metadata: { name: deny-secret-cross-ns }
 spec:
-  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
+  match: { kinds: [{ apiGroups: [""], kinds: ["Pod"] }] }
   parameters: {}
 ```
 ````
@@ -182,11 +182,11 @@ violation[{
 **Path:** `services/gateway/src/middleware/stepup.ts`
 
 ```ts
-import { Fido2Lib } from 'fido2-lib';
+import { Fido2Lib } from "fido2-lib";
 const fido = new Fido2Lib({
   timeout: 60000,
   rpId: process.env.WEBAUTHN_RPID,
-  rpName: 'Royalcrown',
+  rpName: "Royalcrown",
   challengeSize: 64,
 });
 export function requireStepUp(action: string) {
@@ -199,10 +199,7 @@ export function requireStepUp(action: string) {
   };
 }
 function needsStepUp(user: any, action: string) {
-  return (
-    ['export', 'delete', 'privileged-query'].includes(action) &&
-    !user.recentStepUp
-  );
+  return ["export", "delete", "privileged-query"].includes(action) && !user.recentStepUp;
 }
 ```
 
@@ -211,28 +208,28 @@ function needsStepUp(user: any, action: string) {
 **Path:** `services/audit-writer/main.ts`
 
 ```ts
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import crypto from 'crypto';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import crypto from "crypto";
 const s3 = new S3Client({});
 export async function writeAudit(event) {
   const ts = new Date().toISOString();
   const id = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(JSON.stringify(event) + ts)
-    .digest('hex');
+    .digest("hex");
   await s3.send(
     new PutObjectCommand({
       Bucket: process.env.AUDIT_BUCKET,
       Key: `${ts}_${id}.json`,
       Body: JSON.stringify(event),
-      ContentType: 'application/json',
+      ContentType: "application/json",
       ChecksumSHA256: Buffer.from(
-        crypto.createHash('sha256').update(JSON.stringify(event)).digest('hex'),
-        'hex',
-      ).toString('base64'),
-      ObjectLockMode: 'GOVERNANCE',
+        crypto.createHash("sha256").update(JSON.stringify(event)).digest("hex"),
+        "hex"
+      ).toString("base64"),
+      ObjectLockMode: "GOVERNANCE",
       ObjectLockRetainUntilDate: new Date(Date.now() + 90 * 24 * 3600 * 1000),
-    }),
+    })
   );
 }
 ```
@@ -246,17 +243,17 @@ apiVersion: v1
 kind: ConfigMap
 metadata: { name: ratelimit-config }
 data:
-  global-ratelimit: '100r/s'
-  tenant-default: '20r/s'
+  global-ratelimit: "100r/s"
+  tenant-default: "20r/s"
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: api-gateway
   annotations:
-    nginx.ingress.kubernetes.io/limit-rps: '100'
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: '5'
-    nginx.ingress.kubernetes.io/limit-whitelist: '10.0.0.0/8'
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+    nginx.ingress.kubernetes.io/limit-whitelist: "10.0.0.0/8"
 spec:
   rules:
     - host: api.example.com
@@ -280,11 +277,11 @@ spec:
 
 ```ts
 export function cacheable(res, seconds = 300) {
-  res.set('Cache-Control', `public, max-age=${seconds}`);
-  res.set('Vary', 'Authorization, Accept-Encoding');
+  res.set("Cache-Control", `public, max-age=${seconds}`);
+  res.set("Vary", "Authorization, Accept-Encoding");
 }
 export function notCacheable(res) {
-  res.set('Cache-Control', 'no-store');
+  res.set("Cache-Control", "no-store");
 }
 ```
 
@@ -293,15 +290,15 @@ export function notCacheable(res) {
 **Path:** `services/*/src/http.ts`
 
 ```ts
-import axios from 'axios';
-import * as rax from 'retry-axios';
+import axios from "axios";
+import * as rax from "retry-axios";
 const client = axios.create({ timeout: 1500 });
 (client as any).defaults.raxConfig = {
   retry: 3,
   noResponseRetries: 2,
   retryDelay: 200,
-  backoffType: 'exponential',
-  httpMethodsToRetry: ['GET', 'POST'],
+  backoffType: "exponential",
+  httpMethodsToRetry: ["GET", "POST"],
 };
 rax.attach(client);
 export default client;

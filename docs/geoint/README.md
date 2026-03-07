@@ -43,24 +43,28 @@ function App() {
 ## Features
 
 ✅ **Geospatial Data Ingestion**
+
 - GeoJSON, KML, Shapefile support
 - Multiple coordinate systems
 - Metadata enrichment
 
 ✅ **Spatial Analysis**
+
 - DBSCAN clustering
-- Hotspot detection (Getis-Ord Gi*)
+- Hotspot detection (Getis-Ord Gi\*)
 - Point-in-polygon queries
 - Distance calculations
 - Movement pattern analysis
 
 ✅ **Geocoding Services**
+
 - Address geocoding
 - Reverse geocoding
 - Batch processing
 - IP geolocation
 
 ✅ **Interactive Maps**
+
 - Leaflet integration
 - Marker clusters
 - Heatmaps
@@ -69,6 +73,7 @@ function App() {
 - Real-time updates
 
 ✅ **Advanced Visualizations**
+
 - Choropleth maps
 - Time-based animations
 - 3D terrain support
@@ -82,11 +87,11 @@ function App() {
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@intelgraph/geospatial` | Core geospatial data structures and parsers |
-| `@intelgraph/spatial-analysis` | Advanced spatial analysis algorithms |
-| `@intelgraph/geocoding-api` | Geocoding and IP geolocation service |
+| Package                        | Description                                 |
+| ------------------------------ | ------------------------------------------- |
+| `@intelgraph/geospatial`       | Core geospatial data structures and parsers |
+| `@intelgraph/spatial-analysis` | Advanced spatial analysis algorithms        |
+| `@intelgraph/geocoding-api`    | Geocoding and IP geolocation service        |
 
 ## Architecture
 

@@ -19,8 +19,8 @@
  * @module offline-sync
  */
 
-import { spawn, spawnSync } from 'child_process';
-import { createHash, createHmac } from 'crypto';
+import { spawn, spawnSync } from "child_process";
+import { createHash, createHmac } from "crypto";
 import {
   createReadStream,
   createWriteStream,
@@ -31,17 +31,17 @@ import {
   statSync,
   writeFileSync,
   unlinkSync,
-} from 'fs';
-import { join, basename } from 'path';
-import { pipeline } from 'stream/promises';
-import { createGzip, createGunzip } from 'zlib';
+} from "fs";
+import { join, basename } from "path";
+import { pipeline } from "stream/promises";
+import { createGzip, createGunzip } from "zlib";
 
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
 
 export interface ImageManifest {
-  version: '1.0';
+  version: "1.0";
   generatedAt: string;
   sourceRegistry: string;
   targetRegistry: string;
@@ -118,7 +118,7 @@ export interface SyncResult {
 
 export interface SyncError {
   image: string;
-  phase: 'verify' | 'scan' | 'export' | 'import';
+  phase: "verify" | "scan" | "export" | "import";
   message: string;
   recoverable: boolean;
 }
@@ -128,9 +128,9 @@ export interface SyncError {
 // ============================================================================
 
 const DEFAULT_CONFIG: SyncConfig = {
-  sourceRegistry: 'docker.io',
-  targetRegistry: 'registry.intelgraph.local',
-  exportDir: '/var/lib/harbor-sync/export',
+  sourceRegistry: "docker.io",
+  targetRegistry: "registry.intelgraph.local",
+  exportDir: "/var/lib/harbor-sync/export",
   allowList: [],
   blockList: [],
   maxConcurrent: 5,
@@ -155,7 +155,7 @@ export class OfflineSyncService {
 
   constructor(config: Partial<SyncConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.auditLog = new AuditLogger(join(this.config.exportDir, 'audit.log'));
+    this.auditLog = new AuditLogger(join(this.config.exportDir, "audit.log"));
 
     // Ensure export directory exists
     if (!existsSync(this.config.exportDir)) {
@@ -171,15 +171,13 @@ export class OfflineSyncService {
     const errors: SyncError[] = [];
     const images: ImageEntry[] = [];
 
-    this.auditLog.log('EXPORT_START', { imageCount: imageList.length });
+    this.auditLog.log("EXPORT_START", { imageCount: imageList.length });
 
     // Process images with concurrency limit
     const chunks = this.chunkArray(imageList, this.config.maxConcurrent);
 
     for (const chunk of chunks) {
-      const results = await Promise.all(
-        chunk.map((img) => this.processImageForExport(img))
-      );
+      const results = await Promise.all(chunk.map((img) => this.processImageForExport(img)));
 
       for (const result of results) {
         if (result.error) {
@@ -204,7 +202,7 @@ export class OfflineSyncService {
     // Generate checksums file
     await this.generateChecksums(manifest);
 
-    this.auditLog.log('EXPORT_COMPLETE', {
+    this.auditLog.log("EXPORT_COMPLETE", {
       totalImages: images.length,
       blocked: errors.filter((e) => !e.recoverable).length,
       manifestPath,
@@ -225,20 +223,18 @@ export class OfflineSyncService {
     const startTime = Date.now();
     const errors: SyncError[] = [];
 
-    this.auditLog.log('IMPORT_START', { manifestPath });
+    this.auditLog.log("IMPORT_START", { manifestPath });
 
     // Load and verify manifest
-    const manifest = JSON.parse(
-      readFileSync(manifestPath, 'utf-8')
-    ) as ImageManifest;
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as ImageManifest;
 
     // Verify checksums before import
     const checksumValid = await this.verifyChecksums(manifest);
     if (!checksumValid) {
       errors.push({
-        image: '*',
-        phase: 'import',
-        message: 'Checksum verification failed - transfer may be corrupted',
+        image: "*",
+        phase: "import",
+        message: "Checksum verification failed - transfer may be corrupted",
         recoverable: false,
       });
 
@@ -255,7 +251,7 @@ export class OfflineSyncService {
       if (!entry.tarballPath || !existsSync(entry.tarballPath)) {
         errors.push({
           image: `${entry.name}:${entry.tag}`,
-          phase: 'import',
+          phase: "import",
           message: `Tarball not found: ${entry.tarballPath}`,
           recoverable: false,
         });
@@ -266,14 +262,14 @@ export class OfflineSyncService {
       if (!importResult.success) {
         errors.push({
           image: `${entry.name}:${entry.tag}`,
-          phase: 'import',
-          message: importResult.error || 'Import failed',
+          phase: "import",
+          message: importResult.error || "Import failed",
           recoverable: true,
         });
       }
     }
 
-    this.auditLog.log('IMPORT_COMPLETE', {
+    this.auditLog.log("IMPORT_COMPLETE", {
       totalImages: manifest.images.length,
       failed: errors.length,
     });
@@ -292,7 +288,7 @@ export class OfflineSyncService {
   private async processImageForExport(
     imageRef: string
   ): Promise<{ entry?: ImageEntry; error?: SyncError }> {
-    const [name, tag = 'latest'] = imageRef.split(':');
+    const [name, tag = "latest"] = imageRef.split(":");
 
     try {
       // 1. Verify signature
@@ -302,7 +298,7 @@ export class OfflineSyncService {
           return {
             error: {
               image: imageRef,
-              phase: 'verify',
+              phase: "verify",
               message: `Signature verification failed: ${sigResult.error}`,
               recoverable: false,
             },
@@ -319,7 +315,7 @@ export class OfflineSyncService {
           return {
             error: {
               image: imageRef,
-              phase: 'verify',
+              phase: "verify",
               message: `SLSA level ${slsaLevel} < required ${this.config.minSlsaLevel}`,
               recoverable: false,
             },
@@ -333,7 +329,7 @@ export class OfflineSyncService {
         return {
           error: {
             image: imageRef,
-            phase: 'scan',
+            phase: "scan",
             message: `Blocked due to vulnerabilities: ${vulnScan.critical} critical, ${vulnScan.high} high`,
             recoverable: false,
           },
@@ -361,14 +357,14 @@ export class OfflineSyncService {
         checksum,
       };
 
-      this.auditLog.log('IMAGE_EXPORTED', { imageRef, digest: imageInfo.digest });
+      this.auditLog.log("IMAGE_EXPORTED", { imageRef, digest: imageInfo.digest });
 
       return { entry };
     } catch (err) {
       return {
         error: {
           image: imageRef,
-          phase: 'export',
+          phase: "export",
           message: err instanceof Error ? err.message : String(err),
           recoverable: true,
         },
@@ -379,30 +375,28 @@ export class OfflineSyncService {
   /**
    * Verify image signature using cosign
    */
-  private async verifySignature(
-    imageRef: string
-  ): Promise<{ verified: boolean; error?: string }> {
+  private async verifySignature(imageRef: string): Promise<{ verified: boolean; error?: string }> {
     return new Promise((resolve) => {
-      const proc = spawn('cosign', [
-        'verify',
-        '--certificate-identity-regexp=.*',
-        '--certificate-oidc-issuer-regexp=.*',
+      const proc = spawn("cosign", [
+        "verify",
+        "--certificate-identity-regexp=.*",
+        "--certificate-oidc-issuer-regexp=.*",
         imageRef,
       ]);
 
-      let stderr = '';
-      proc.stderr.on('data', (data) => {
+      let stderr = "";
+      proc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         resolve({
           verified: code === 0,
           error: code !== 0 ? stderr : undefined,
         });
       });
 
-      proc.on('error', (err) => {
+      proc.on("error", (err) => {
         resolve({ verified: false, error: err.message });
       });
     });
@@ -411,30 +405,28 @@ export class OfflineSyncService {
   /**
    * Verify SLSA provenance
    */
-  private async verifySlsa(
-    imageRef: string
-  ): Promise<{ verified: boolean; level: number }> {
+  private async verifySlsa(imageRef: string): Promise<{ verified: boolean; level: number }> {
     return new Promise((resolve) => {
-      const proc = spawn('slsa-verifier', [
-        'verify-image',
+      const proc = spawn("slsa-verifier", [
+        "verify-image",
         imageRef,
-        '--source-uri',
-        'github.com/*',
-        '--print-provenance',
+        "--source-uri",
+        "github.com/*",
+        "--print-provenance",
       ]);
 
-      let stdout = '';
-      proc.stdout.on('data', (data) => {
+      let stdout = "";
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         if (code === 0) {
           // Parse provenance to get SLSA level
           try {
             const prov = JSON.parse(stdout);
-            const builderId = prov?.predicate?.runDetails?.builder?.id || '';
-            const level = builderId.includes('slsa3') ? 3 : builderId.includes('slsa2') ? 2 : 1;
+            const builderId = prov?.predicate?.runDetails?.builder?.id || "";
+            const level = builderId.includes("slsa3") ? 3 : builderId.includes("slsa2") ? 2 : 1;
             resolve({ verified: true, level });
           } catch {
             resolve({ verified: true, level: 1 });
@@ -444,7 +436,7 @@ export class OfflineSyncService {
         }
       });
 
-      proc.on('error', () => {
+      proc.on("error", () => {
         resolve({ verified: false, level: 0 });
       });
     });
@@ -453,23 +445,21 @@ export class OfflineSyncService {
   /**
    * Scan image for vulnerabilities using Trivy
    */
-  private async scanVulnerabilities(
-    imageRef: string
-  ): Promise<VulnerabilitySummary> {
+  private async scanVulnerabilities(imageRef: string): Promise<VulnerabilitySummary> {
     return new Promise((resolve) => {
-      const proc = spawn('trivy', [
-        'image',
-        '--format=json',
-        '--severity=CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN',
+      const proc = spawn("trivy", [
+        "image",
+        "--format=json",
+        "--severity=CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN",
         imageRef,
       ]);
 
-      let stdout = '';
-      proc.stdout.on('data', (data) => {
+      let stdout = "";
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         const summary: VulnerabilitySummary = {
           critical: 0,
           high: 0,
@@ -486,16 +476,16 @@ export class OfflineSyncService {
             for (const result of report.Results || []) {
               for (const vuln of result.Vulnerabilities || []) {
                 switch (vuln.Severity) {
-                  case 'CRITICAL':
+                  case "CRITICAL":
                     summary.critical++;
                     break;
-                  case 'HIGH':
+                  case "HIGH":
                     summary.high++;
                     break;
-                  case 'MEDIUM':
+                  case "MEDIUM":
                     summary.medium++;
                     break;
-                  case 'LOW':
+                  case "LOW":
                     summary.low++;
                     break;
                   default:
@@ -516,7 +506,7 @@ export class OfflineSyncService {
         resolve(summary);
       });
 
-      proc.on('error', () => {
+      proc.on("error", () => {
         resolve({
           critical: 0,
           high: 0,
@@ -537,14 +527,14 @@ export class OfflineSyncService {
     imageRef: string
   ): Promise<{ digest: string; size: number; platform: string }> {
     return new Promise((resolve, reject) => {
-      const proc = spawn('crane', ['manifest', imageRef]);
+      const proc = spawn("crane", ["manifest", imageRef]);
 
-      let stdout = '';
-      proc.stdout.on('data', (data) => {
+      let stdout = "";
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         if (code !== 0) {
           reject(new Error(`Failed to get manifest for ${imageRef}`));
           return;
@@ -552,11 +542,11 @@ export class OfflineSyncService {
 
         try {
           const manifest = JSON.parse(stdout);
-          const digest = `sha256:${createHash('sha256').update(stdout).digest('hex')}`;
+          const digest = `sha256:${createHash("sha256").update(stdout).digest("hex")}`;
           const size = manifest.config?.size || 0;
           const platform = manifest.platform
             ? `${manifest.platform.os}/${manifest.platform.architecture}`
-            : 'linux/amd64';
+            : "linux/amd64";
 
           resolve({ digest, size, platform });
         } catch (err) {
@@ -564,35 +554,29 @@ export class OfflineSyncService {
         }
       });
 
-      proc.on('error', reject);
+      proc.on("error", reject);
     });
   }
 
   /**
    * Export image to tarball
    */
-  private async exportToTarball(
-    imageRef: string,
-    digest: string
-  ): Promise<string> {
-    const safeName = imageRef.replace(/[/:@]/g, '_');
-    const tarballPath = join(
-      this.config.exportDir,
-      `${safeName}_${digest.slice(7, 19)}.tar.gz`
-    );
+  private async exportToTarball(imageRef: string, digest: string): Promise<string> {
+    const safeName = imageRef.replace(/[/:@]/g, "_");
+    const tarballPath = join(this.config.exportDir, `${safeName}_${digest.slice(7, 19)}.tar.gz`);
 
     return new Promise((resolve, reject) => {
       // Use crane to export, then compress
-      const proc = spawn('crane', ['export', imageRef, '-']);
+      const proc = spawn("crane", ["export", imageRef, "-"]);
 
       const writeStream = createWriteStream(tarballPath);
       const gzip = createGzip();
 
       proc.stdout.pipe(gzip).pipe(writeStream);
 
-      writeStream.on('finish', () => resolve(tarballPath));
-      writeStream.on('error', reject);
-      proc.on('error', reject);
+      writeStream.on("finish", () => resolve(tarballPath));
+      writeStream.on("error", reject);
+      proc.on("error", reject);
     });
   }
 
@@ -601,12 +585,12 @@ export class OfflineSyncService {
    */
   private async calculateChecksum(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const hash = createHash('sha256');
+      const hash = createHash("sha256");
       const stream = createReadStream(filePath);
 
-      stream.on('data', (data) => hash.update(data));
-      stream.on('end', () => resolve(hash.digest('hex')));
-      stream.on('error', reject);
+      stream.on("data", (data) => hash.update(data));
+      stream.on("end", () => resolve(hash.digest("hex")));
+      stream.on("error", reject);
     });
   }
 
@@ -624,14 +608,14 @@ export class OfflineSyncService {
     };
 
     return {
-      version: '1.0',
+      version: "1.0",
       generatedAt: new Date().toISOString(),
       sourceRegistry: this.config.sourceRegistry,
       targetRegistry: this.config.targetRegistry,
       images,
       verification,
       metadata: {
-        operator: process.env.USER || 'system',
+        operator: process.env.USER || "system",
         transferId: this.generateTransferId(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
       },
@@ -654,7 +638,7 @@ export class OfflineSyncService {
       this.config.exportDir,
       `checksums-${manifest.metadata.transferId}.sha256`
     );
-    writeFileSync(checksumPath, checksumLines.join('\n'));
+    writeFileSync(checksumPath, checksumLines.join("\n"));
   }
 
   /**
@@ -668,7 +652,7 @@ export class OfflineSyncService {
 
       const actualChecksum = await this.calculateChecksum(entry.tarballPath);
       if (actualChecksum !== entry.checksum) {
-        this.auditLog.log('CHECKSUM_MISMATCH', {
+        this.auditLog.log("CHECKSUM_MISMATCH", {
           file: entry.tarballPath,
           expected: entry.checksum,
           actual: actualChecksum,
@@ -690,27 +674,23 @@ export class OfflineSyncService {
 
     return new Promise((resolve) => {
       // Load from tarball and push to target
-      const loadProc = spawn('crane', [
-        'push',
-        entry.tarballPath!,
-        targetRef,
-      ]);
+      const loadProc = spawn("crane", ["push", entry.tarballPath!, targetRef]);
 
-      let stderr = '';
-      loadProc.stderr.on('data', (data) => {
+      let stderr = "";
+      loadProc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      loadProc.on('close', (code) => {
+      loadProc.on("close", (code) => {
         if (code === 0) {
-          this.auditLog.log('IMAGE_IMPORTED', { targetRef, digest: entry.digest });
+          this.auditLog.log("IMAGE_IMPORTED", { targetRef, digest: entry.digest });
           resolve({ success: true });
         } else {
           resolve({ success: false, error: stderr });
         }
       });
 
-      loadProc.on('error', (err) => {
+      loadProc.on("error", (err) => {
         resolve({ success: false, error: err.message });
       });
     });
@@ -755,10 +735,10 @@ class AuditLogger {
       ...data,
     };
 
-    const line = JSON.stringify(entry) + '\n';
+    const line = JSON.stringify(entry) + "\n";
 
     try {
-      writeFileSync(this.logPath, line, { flag: 'a' });
+      writeFileSync(this.logPath, line, { flag: "a" });
     } catch {
       console.error(`Failed to write audit log: ${line}`);
     }
@@ -783,7 +763,7 @@ export interface ImageListConfig {
  * Load image list from configuration file
  */
 export function loadImageList(configPath: string): string[] {
-  const config = JSON.parse(readFileSync(configPath, 'utf-8')) as ImageListConfig;
+  const config = JSON.parse(readFileSync(configPath, "utf-8")) as ImageListConfig;
   return config.images.map((i) => i.ref);
 }
 
@@ -795,18 +775,16 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args[0];
 
-  const configPath = args.find((a) => a.startsWith('--config='))?.split('=')[1];
-  const config = configPath
-    ? JSON.parse(readFileSync(configPath, 'utf-8'))
-    : {};
+  const configPath = args.find((a) => a.startsWith("--config="))?.split("=")[1];
+  const config = configPath ? JSON.parse(readFileSync(configPath, "utf-8")) : {};
 
   const syncService = new OfflineSyncService(config);
 
   switch (command) {
-    case 'export': {
+    case "export": {
       const imageListPath = args[1];
       if (!imageListPath) {
-        console.error('Usage: offline-sync export <image-list.json> [--config=config.json]');
+        console.error("Usage: offline-sync export <image-list.json> [--config=config.json]");
         process.exit(1);
       }
 
@@ -815,7 +793,7 @@ async function main(): Promise<void> {
 
       const result = await syncService.exportImages(images);
 
-      console.log('\n=== Export Summary ===');
+      console.log("\n=== Export Summary ===");
       console.log(`Total Images: ${result.manifest.verification.totalImages}`);
       console.log(`Signature Verified: ${result.manifest.verification.signatureVerified}`);
       console.log(`SLSA Verified: ${result.manifest.verification.slsaVerified}`);
@@ -823,7 +801,7 @@ async function main(): Promise<void> {
       console.log(`Duration: ${(result.duration / 1000).toFixed(2)}s`);
 
       if (result.errors.length > 0) {
-        console.log('\nErrors:');
+        console.log("\nErrors:");
         for (const err of result.errors) {
           console.log(`  [${err.phase}] ${err.image}: ${err.message}`);
         }
@@ -833,10 +811,10 @@ async function main(): Promise<void> {
       break;
     }
 
-    case 'import': {
+    case "import": {
       const manifestPath = args[1];
       if (!manifestPath) {
-        console.error('Usage: offline-sync import <manifest.json> [--config=config.json]');
+        console.error("Usage: offline-sync import <manifest.json> [--config=config.json]");
         process.exit(1);
       }
 
@@ -844,13 +822,13 @@ async function main(): Promise<void> {
 
       const result = await syncService.importImages(manifestPath);
 
-      console.log('\n=== Import Summary ===');
+      console.log("\n=== Import Summary ===");
       console.log(`Total Images: ${result.manifest.images.length}`);
       console.log(`Failed: ${result.errors.length}`);
       console.log(`Duration: ${(result.duration / 1000).toFixed(2)}s`);
 
       if (result.errors.length > 0) {
-        console.log('\nErrors:');
+        console.log("\nErrors:");
         for (const err of result.errors) {
           console.log(`  [${err.phase}] ${err.image}: ${err.message}`);
         }
@@ -860,40 +838,44 @@ async function main(): Promise<void> {
       break;
     }
 
-    case 'verify': {
+    case "verify": {
       const manifestPath = args[1];
       if (!manifestPath) {
-        console.error('Usage: offline-sync verify <manifest.json>');
+        console.error("Usage: offline-sync verify <manifest.json>");
         process.exit(1);
       }
 
-      const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as ImageManifest;
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as ImageManifest;
 
-      console.log('=== Manifest Verification ===');
+      console.log("=== Manifest Verification ===");
       console.log(`Transfer ID: ${manifest.metadata.transferId}`);
       console.log(`Generated: ${manifest.generatedAt}`);
-      console.log(`Expires: ${manifest.metadata.expiresAt || 'N/A'}`);
+      console.log(`Expires: ${manifest.metadata.expiresAt || "N/A"}`);
       console.log(`Images: ${manifest.images.length}`);
       console.log(`\nVerification Summary:`);
-      console.log(`  Signature Verified: ${manifest.verification.signatureVerified}/${manifest.verification.totalImages}`);
-      console.log(`  SLSA Verified: ${manifest.verification.slsaVerified}/${manifest.verification.totalImages}`);
+      console.log(
+        `  Signature Verified: ${manifest.verification.signatureVerified}/${manifest.verification.totalImages}`
+      );
+      console.log(
+        `  SLSA Verified: ${manifest.verification.slsaVerified}/${manifest.verification.totalImages}`
+      );
 
       // Verify checksums
-      console.log('\nVerifying checksums...');
+      console.log("\nVerifying checksums...");
       // Would implement checksum verification here
 
       break;
     }
 
     default:
-      console.error('Unknown command. Available: export, import, verify');
+      console.error("Unknown command. Available: export, import, verify");
       process.exit(1);
   }
 }
 
 if (require.main === module) {
   main().catch((err) => {
-    console.error('Fatal error:', err);
+    console.error("Fatal error:", err);
     process.exit(1);
   });
 }

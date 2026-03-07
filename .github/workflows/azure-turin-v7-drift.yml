@@ -1,7 +1,7 @@
 name: azure-turin-v7-drift
 on:
   schedule:
-    - cron: '0 0 * * 1' # Weekly
+    - cron: "0 0 * * 1" # Weekly
 jobs:
   check-drift:
     runs-on: ubuntu-latest
@@ -10,5 +10,5 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - run: node scripts/monitoring/azure-turin-v7-drift.mjs

@@ -44,6 +44,6 @@ spec:
         annotate: "Triggered by Prometheus ML alert. See runbook: https://runbooks.summit.ai/ml-alerting-guide"
   stakeholders:
     - team: ml-platform
-      contact: '#ml-ops'
+      contact: "#ml-ops"
     - team: sre
-      contact: '#sre-alerts'
+      contact: "#sre-alerts"

@@ -6,19 +6,31 @@
       "title": "Query Latency (p95)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(search_query_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }]
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(search_query_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
     },
     {
       "title": "QPS per Tenant",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "targets": [{ "expr": "sum(rate(search_queries_total[5m])) by (tenant)", "legendFormat": "{{tenant}}" }]
+      "targets": [
+        { "expr": "sum(rate(search_queries_total[5m])) by (tenant)", "legendFormat": "{{tenant}}" }
+      ]
     },
     {
       "title": "Error Rate",
       "type": "stat",
       "gridPos": { "h": 8, "w": 6, "x": 0, "y": 8 },
-      "targets": [{ "expr": "sum(rate(search_errors_total[5m])) / sum(rate(search_queries_total[5m])) * 100", "legendFormat": "Error %" }]
+      "targets": [
+        {
+          "expr": "sum(rate(search_errors_total[5m])) / sum(rate(search_queries_total[5m])) * 100",
+          "legendFormat": "Error %"
+        }
+      ]
     }
   ]
 }

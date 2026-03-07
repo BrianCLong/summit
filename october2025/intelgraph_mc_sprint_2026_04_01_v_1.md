@@ -212,8 +212,7 @@ type DataContract {
 }
 
 type Query {
-  contract(datasetId: ID!, version: String!): DataContract
-    @auth(abac: "contract.read")
+  contract(datasetId: ID!, version: String!): DataContract @auth(abac: "contract.read")
   auditSearch(q: String!, after: String): [AuditHit!]! @auth(abac: "audit.read")
 }
 

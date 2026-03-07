@@ -1,20 +1,27 @@
 // @ts-nocheck
-import crypto from 'crypto';
+import crypto from "crypto";
 
-type VerificationStatus = 'verified' | 'pending' | 'needs-update';
-type LegalStatus = 'approved' | 'rejected' | 'pending';
+type VerificationStatus = "verified" | "pending" | "needs-update";
+type LegalStatus = "approved" | "rejected" | "pending";
 
 type Severity = 1 | 2 | 3 | 4 | 5;
 
 const DAYS = 24 * 60 * 60 * 1000;
 
 export const redactPII = (input: string): string => {
-  const emailRedacted = input.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[REDACTED_EMAIL]');
-  const phoneRedacted = emailRedacted.replace(/\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[REDACTED_PHONE]');
+  const emailRedacted = input.replace(
+    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
+    "[REDACTED_EMAIL]"
+  );
+  const phoneRedacted = emailRedacted.replace(
+    /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
+    "[REDACTED_PHONE]"
+  );
   return phoneRedacted;
 };
 
-const hashContent = (content: string): string => crypto.createHash('sha256').update(content).digest('hex');
+const hashContent = (content: string): string =>
+  crypto.createHash("sha256").update(content).digest("hex");
 
 export interface CompetitorProfile {
   name: string;
@@ -31,9 +38,11 @@ export interface CompetitorProfile {
 export class CompetitorMatrix {
   private profiles = new Map<string, CompetitorProfile>();
 
-  addOrUpdate(profile: Omit<CompetitorProfile, 'updatedAt'> & { updatedAt?: Date }): CompetitorProfile {
+  addOrUpdate(
+    profile: Omit<CompetitorProfile, "updatedAt"> & { updatedAt?: Date }
+  ): CompetitorProfile {
     if (!profile.name || profile.features.length === 0 || profile.pricing.length === 0) {
-      throw new Error('Competitor profile requires name, features, and pricing');
+      throw new Error("Competitor profile requires name, features, and pricing");
     }
     const updatedAt = profile.updatedAt ?? new Date();
     const stored: CompetitorProfile = { ...profile, updatedAt };
@@ -47,7 +56,7 @@ export class CompetitorMatrix {
 
   staleProfiles(referenceDate: Date = new Date(), thresholdDays = 7): CompetitorProfile[] {
     return Array.from(this.profiles.values()).filter(
-      (profile) => referenceDate.getTime() - profile.updatedAt.getTime() > thresholdDays * DAYS,
+      (profile) => referenceDate.getTime() - profile.updatedAt.getTime() > thresholdDays * DAYS
     );
   }
 }
@@ -62,16 +71,18 @@ export interface DealRecord {
   tags: string[];
   createdAt: Date;
   lastReviewedAt?: Date;
-  outcome?: 'win' | 'loss';
+  outcome?: "win" | "loss";
 }
 
 export class WinLossPipeline {
   private deals = new Map<string, DealRecord>();
 
-  addDeal(input: Omit<DealRecord, 'createdAt' | 'lastReviewedAt'> & { createdAt?: Date }): DealRecord {
+  addDeal(
+    input: Omit<DealRecord, "createdAt" | "lastReviewedAt"> & { createdAt?: Date }
+  ): DealRecord {
     const required = [input.competitor, input.segment, input.useCase, input.objection];
     if (required.some((field) => !field) || input.reasonCodes.length === 0) {
-      throw new Error('Deal record missing mandatory fields');
+      throw new Error("Deal record missing mandatory fields");
     }
     const createdAt = input.createdAt ?? new Date();
     const record: DealRecord = { ...input, createdAt };
@@ -82,7 +93,7 @@ export class WinLossPipeline {
   markReviewed(id: string, date: Date = new Date()): DealRecord {
     const record = this.deals.get(id);
     if (!record) {
-      throw new Error('Deal not found');
+      throw new Error("Deal not found");
     }
     record.lastReviewedAt = date;
     return record;
@@ -101,16 +112,22 @@ export interface Verbatim {
   customer: string;
   text: string;
   anonymizedText: string;
-  sourceType: 'first-party' | 'recorded' | 'hearsay';
+  sourceType: "first-party" | "recorded" | "hearsay";
   createdAt: Date;
 }
 
 export class VerbatimIntake {
   private items: Verbatim[] = [];
 
-  submit(input: { id: string; customer: string; text: string; sourceType: Verbatim['sourceType']; createdAt?: Date }): Verbatim {
-    if (input.sourceType === 'hearsay') {
-      throw new Error('Hearsay is not accepted');
+  submit(input: {
+    id: string;
+    customer: string;
+    text: string;
+    sourceType: Verbatim["sourceType"];
+    createdAt?: Date;
+  }): Verbatim {
+    if (input.sourceType === "hearsay") {
+      throw new Error("Hearsay is not accepted");
     }
     const createdAt = input.createdAt ?? new Date();
     const anonymizedText = redactPII(input.text);
@@ -137,12 +154,12 @@ export interface Claim {
 export class ClaimLibrary {
   private claims = new Map<string, Claim>();
 
-  addClaim(input: Omit<Claim, 'lastVerified'> & { lastVerified?: Date }): Claim {
+  addClaim(input: Omit<Claim, "lastVerified"> & { lastVerified?: Date }): Claim {
     if (input.speculative) {
-      throw new Error('Speculative claims are rejected');
+      throw new Error("Speculative claims are rejected");
     }
     if (input.evidenceRating < 1 || input.evidenceRating > 5) {
-      throw new Error('Evidence rating must be between 1 and 5');
+      throw new Error("Evidence rating must be between 1 and 5");
     }
     const claim: Claim = { ...input, lastVerified: input.lastVerified ?? new Date() };
     this.claims.set(claim.id, claim);
@@ -159,7 +176,7 @@ export class ClaimLibrary {
 
   needsReverification(referenceDate: Date = new Date(), thresholdDays = 30): Claim[] {
     return Array.from(this.claims.values()).filter(
-      (claim) => referenceDate.getTime() - claim.lastVerified.getTime() > thresholdDays * DAYS,
+      (claim) => referenceDate.getTime() - claim.lastVerified.getTime() > thresholdDays * DAYS
     );
   }
 }
@@ -174,7 +191,7 @@ export interface ReleaseEvent {
 export class ReleaseCadenceTracker {
   private events: ReleaseEvent[] = [];
 
-  addEvent(event: Omit<ReleaseEvent, 'launchDate'> & { launchDate?: Date }): ReleaseEvent {
+  addEvent(event: Omit<ReleaseEvent, "launchDate"> & { launchDate?: Date }): ReleaseEvent {
     const stored: ReleaseEvent = { ...event, launchDate: event.launchDate ?? new Date() };
     this.events.push(stored);
     return stored;
@@ -201,7 +218,7 @@ export interface RiskEntry {
 export class RiskRegister {
   private entries: RiskEntry[] = [];
 
-  upsert(entry: Omit<RiskEntry, 'updatedAt'> & { updatedAt?: Date }): RiskEntry {
+  upsert(entry: Omit<RiskEntry, "updatedAt"> & { updatedAt?: Date }): RiskEntry {
     const updatedAt = entry.updatedAt ?? new Date();
     const existingIndex = this.entries.findIndex((e) => e.id === entry.id);
     const normalized: RiskEntry = { ...entry, updatedAt };
@@ -212,7 +229,9 @@ export class RiskRegister {
         this.entries.sort((a, b) => b.severity - a.severity);
         const lowest = this.entries[this.entries.length - 1];
         if (lowest.severity >= normalized.severity) {
-          throw new Error('Risk register full; new risk not severe enough to replace existing entries');
+          throw new Error(
+            "Risk register full; new risk not severe enough to replace existing entries"
+          );
         }
         this.entries.pop();
       }
@@ -239,7 +258,7 @@ export class BattlecardLibrary {
   private cards = new Map<string, Battlecard>();
   constructor(private claims: ClaimLibrary) {}
 
-  add(card: Omit<Battlecard, 'lastReviewed'> & { lastReviewed?: Date }): Battlecard {
+  add(card: Omit<Battlecard, "lastReviewed"> & { lastReviewed?: Date }): Battlecard {
     this.claims.requireEvidence(card.evidenceIds);
     const stored: Battlecard = { ...card, lastReviewed: card.lastReviewed ?? new Date() };
     this.cards.set(card.id, stored);
@@ -248,7 +267,7 @@ export class BattlecardLibrary {
 
   expired(referenceDate: Date = new Date(), ttlDays = 60): Battlecard[] {
     return Array.from(this.cards.values()).filter(
-      (card) => referenceDate.getTime() - card.lastReviewed.getTime() > ttlDays * DAYS,
+      (card) => referenceDate.getTime() - card.lastReviewed.getTime() > ttlDays * DAYS
     );
   }
 }
@@ -256,7 +275,7 @@ export class BattlecardLibrary {
 export interface TeardownAsset {
   id: string;
   competitor: string;
-  type: 'screenshot' | 'flow' | 'latency-note' | 'integration-note';
+  type: "screenshot" | "flow" | "latency-note" | "integration-note";
   content: string;
   hash: string;
   metadata: Record<string, string>;
@@ -265,7 +284,7 @@ export interface TeardownAsset {
 export class TeardownRepo {
   private assets = new Map<string, TeardownAsset>();
 
-  add(asset: Omit<TeardownAsset, 'hash'>): TeardownAsset {
+  add(asset: Omit<TeardownAsset, "hash">): TeardownAsset {
     const hash = hashContent(asset.content + JSON.stringify(asset.metadata));
     const stored: TeardownAsset = { ...asset, hash };
     this.assets.set(asset.id, stored);
@@ -300,7 +319,9 @@ export class SwitchCostInventory {
   }
 
   coverageGaps(): SwitchCostRecord[] {
-    return Array.from(this.records.values()).filter((rec) => rec.data.some((item) => !rec.importerCoverage.includes(item)));
+    return Array.from(this.records.values()).filter((rec) =>
+      rec.data.some((item) => !rec.importerCoverage.includes(item))
+    );
   }
 }
 
@@ -313,12 +334,14 @@ export interface CouncilDecision {
 export class CompetitiveCouncil {
   private meetings: CouncilDecision[] = [];
 
-  recordMeeting(meeting: Omit<CouncilDecision, 'meetingDate'> & { meetingDate?: Date }): CouncilDecision {
+  recordMeeting(
+    meeting: Omit<CouncilDecision, "meetingDate"> & { meetingDate?: Date }
+  ): CouncilDecision {
     const meetingDate = meeting.meetingDate ?? new Date();
     if (this.meetings.length > 0) {
       const last = this.meetings[this.meetings.length - 1].meetingDate;
       if (meetingDate.getTime() - last.getTime() < 28 * DAYS) {
-        throw new Error('Meetings must be spaced monthly');
+        throw new Error("Meetings must be spaced monthly");
       }
     }
     const stored: CouncilDecision = { ...meeting, meetingDate };
@@ -340,8 +363,13 @@ export interface CompetitiveResponse {
 export class CompetitiveResponseTracker {
   private responses: CompetitiveResponse[] = [];
 
-  add(response: Omit<CompetitiveResponse, 'shippedAt'> & { shippedAt?: Date }): CompetitiveResponse {
-    const stored: CompetitiveResponse = { ...response, shippedAt: response.shippedAt ?? new Date() };
+  add(
+    response: Omit<CompetitiveResponse, "shippedAt"> & { shippedAt?: Date }
+  ): CompetitiveResponse {
+    const stored: CompetitiveResponse = {
+      ...response,
+      shippedAt: response.shippedAt ?? new Date(),
+    };
     this.responses.push(stored);
     return stored;
   }
@@ -353,7 +381,7 @@ export class CompetitiveResponseTracker {
       const month = date.getMonth();
       const year = date.getFullYear();
       const hasResponse = this.responses.some(
-        (res) => res.shippedAt.getMonth() === month && res.shippedAt.getFullYear() === year,
+        (res) => res.shippedAt.getMonth() === month && res.shippedAt.getFullYear() === year
       );
       if (!hasResponse) {
         missing.push(month);
@@ -379,7 +407,7 @@ export class ImporterManager {
   run(competitor: string, input: string[], existing: string[]): ImportResult {
     const importer = this.importers.get(competitor);
     if (!importer) {
-      throw new Error('Importer not registered');
+      throw new Error("Importer not registered");
     }
     const result = importer(input);
     const missing = existing.filter((item) => !input.includes(item));
@@ -397,7 +425,7 @@ export class CompatModeManager {
 
   enable(workspaceId: string, competitor: string): void {
     if (!this.mappings.has(competitor)) {
-      throw new Error('Compat mapping missing');
+      throw new Error("Compat mapping missing");
     }
     this.workspaceToggles.set(workspaceId, competitor);
   }
@@ -424,12 +452,12 @@ interface AuditEntry {
 
 export class AuditTrail {
   private entries: AuditEntry[] = [];
-  constructor(private signingKey = 'competitive-audit-key') {}
+  constructor(private signingKey = "competitive-audit-key") {}
 
-  log(entry: Omit<AuditEntry, 'timestamp' | 'signature'> & { timestamp?: Date }): AuditEntry {
+  log(entry: Omit<AuditEntry, "timestamp" | "signature"> & { timestamp?: Date }): AuditEntry {
     const timestamp = entry.timestamp ?? new Date();
     const payload = `${entry.id}:${entry.workspaceId}:${entry.action}:${timestamp.toISOString()}`;
-    const signature = crypto.createHmac('sha256', this.signingKey).update(payload).digest('hex');
+    const signature = crypto.createHmac("sha256", this.signingKey).update(payload).digest("hex");
     const record: AuditEntry = { ...entry, timestamp, signature };
     this.entries.push(record);
     return record;
@@ -437,7 +465,7 @@ export class AuditTrail {
 
   verify(entry: AuditEntry): boolean {
     const payload = `${entry.id}:${entry.workspaceId}:${entry.action}:${entry.timestamp.toISOString()}`;
-    const expected = crypto.createHmac('sha256', this.signingKey).update(payload).digest('hex');
+    const expected = crypto.createHmac("sha256", this.signingKey).update(payload).digest("hex");
     return expected === entry.signature;
   }
 
@@ -464,11 +492,15 @@ export class BulkTooling {
     window.count += 1;
     this.rateLimits.set(workspaceId, window);
     if (window.count > maxPerMinute) {
-      throw new Error('Rate limit exceeded');
+      throw new Error("Rate limit exceeded");
     }
   }
 
-  bulkEdit(workspaceId: string, records: Record<string, unknown>[], apply: (record: Record<string, unknown>) => void): void {
+  bulkEdit(
+    workspaceId: string,
+    records: Record<string, unknown>[],
+    apply: (record: Record<string, unknown>) => void
+  ): void {
     this.enforceRateLimit(workspaceId);
     records.forEach((record) => {
       const before = { ...record };
@@ -480,21 +512,38 @@ export class BulkTooling {
 
   export(workspaceId: string, records: Record<string, unknown>[]): string {
     this.enforceRateLimit(workspaceId);
-    this.audit.log({ id: crypto.randomUUID(), workspaceId, action: `bulk-export:${records.length}` });
+    this.audit.log({
+      id: crypto.randomUUID(),
+      workspaceId,
+      action: `bulk-export:${records.length}`,
+    });
     return JSON.stringify(records);
   }
 
-  setPermissions(workspaceId: string, users: string[], role: string, assign: (user: string, role: string) => void): void {
+  setPermissions(
+    workspaceId: string,
+    users: string[],
+    role: string,
+    assign: (user: string, role: string) => void
+  ): void {
     this.enforceRateLimit(workspaceId);
     users.forEach((user) => assign(user, role));
-    this.audit.log({ id: crypto.randomUUID(), workspaceId, action: `bulk-permissions:${users.length}:${role}` });
+    this.audit.log({
+      id: crypto.randomUUID(),
+      workspaceId,
+      action: `bulk-permissions:${users.length}:${role}`,
+    });
   }
 
-  configureWorkflow(workspaceId: string, workflow: Record<string, unknown>, apply: () => void): void {
+  configureWorkflow(
+    workspaceId: string,
+    workflow: Record<string, unknown>,
+    apply: () => void
+  ): void {
     this.enforceRateLimit(workspaceId);
     apply();
     this.undoStack.push({ workspaceId, action: () => apply() });
-    this.audit.log({ id: crypto.randomUUID(), workspaceId, action: 'bulk-workflow' });
+    this.audit.log({ id: crypto.randomUUID(), workspaceId, action: "bulk-workflow" });
   }
 
   undoLast(workspaceId: string): boolean {
@@ -502,7 +551,7 @@ export class BulkTooling {
     if (index === -1) return false;
     const [item] = this.undoStack.splice(index, 1);
     item.action();
-    this.audit.log({ id: crypto.randomUUID(), workspaceId, action: 'undo' });
+    this.audit.log({ id: crypto.randomUUID(), workspaceId, action: "undo" });
     return true;
   }
 
@@ -532,10 +581,17 @@ export class IntegrationAdapterRegistry {
     this.adapters.set(adapter.id, adapter);
   }
 
-  execute(id: string, payload: string, attempt = 1): { success: boolean; signature: string; attempt: number } {
+  execute(
+    id: string,
+    payload: string,
+    attempt = 1
+  ): { success: boolean; signature: string; attempt: number } {
     const adapter = this.adapters.get(id);
-    if (!adapter) throw new Error('Adapter missing');
-    const signature = crypto.createHmac('sha256', adapter.signatureSecret).update(payload).digest('hex');
+    if (!adapter) throw new Error("Adapter missing");
+    const signature = crypto
+      .createHmac("sha256", adapter.signatureSecret)
+      .update(payload)
+      .digest("hex");
     const success = attempt <= adapter.retries + 1;
     return { success, signature, attempt };
   }
@@ -543,7 +599,7 @@ export class IntegrationAdapterRegistry {
 
 export interface CollaborationEvent {
   workspaceId: string;
-  type: 'role' | 'approval' | 'comment' | 'notification';
+  type: "role" | "approval" | "comment" | "notification";
   payload: Record<string, unknown>;
 }
 
@@ -551,19 +607,19 @@ export class CollaborationGravity {
   private events: CollaborationEvent[] = [];
 
   addRole(workspaceId: string, role: string, user: string): void {
-    this.events.push({ workspaceId, type: 'role', payload: { role, user } });
+    this.events.push({ workspaceId, type: "role", payload: { role, user } });
   }
 
   approval(workspaceId: string, requestId: string, approver: string): void {
-    this.events.push({ workspaceId, type: 'approval', payload: { requestId, approver } });
+    this.events.push({ workspaceId, type: "approval", payload: { requestId, approver } });
   }
 
   comment(workspaceId: string, threadId: string, author: string, text: string): void {
-    this.events.push({ workspaceId, type: 'comment', payload: { threadId, author, text } });
+    this.events.push({ workspaceId, type: "comment", payload: { threadId, author, text } });
   }
 
   notify(workspaceId: string, message: string): void {
-    this.events.push({ workspaceId, type: 'notification', payload: { message } });
+    this.events.push({ workspaceId, type: "notification", payload: { message } });
   }
 
   history(): CollaborationEvent[] {
@@ -616,8 +672,13 @@ export class MetricsTracker {
 export class FirstValuePackage {
   constructor(private artifactTemplate: string) {}
 
-  provision(workspaceId: string, executiveSummary: string): { workspaceId: string; artifact: string } {
-    const artifact = this.artifactTemplate.replace('{workspace}', workspaceId).replace('{summary}', executiveSummary);
+  provision(
+    workspaceId: string,
+    executiveSummary: string
+  ): { workspaceId: string; artifact: string } {
+    const artifact = this.artifactTemplate
+      .replace("{workspace}", workspaceId)
+      .replace("{summary}", executiveSummary);
     return { workspaceId, artifact };
   }
 }
@@ -639,7 +700,7 @@ export class WorkspaceManager {
 
   upgrade(workspaceId: string, nextTier: string): Workspace {
     const workspace = this.workspaces.get(workspaceId);
-    if (!workspace) throw new Error('Workspace missing');
+    if (!workspace) throw new Error("Workspace missing");
     workspace.upgradePath.push(nextTier);
     return workspace;
   }
@@ -648,7 +709,7 @@ export class WorkspaceManager {
 export interface Invitation {
   email: string;
   role: string;
-  status: 'pending' | 'accepted';
+  status: "pending" | "accepted";
 }
 
 export class InviteLoop {
@@ -656,8 +717,8 @@ export class InviteLoop {
   constructor(private notifications: (message: string) => void) {}
 
   invite(email: string, role: string): Invitation {
-    if (!role) throw new Error('Role required');
-    const invite: Invitation = { email, role, status: 'pending' };
+    if (!role) throw new Error("Role required");
+    const invite: Invitation = { email, role, status: "pending" };
     this.invites.push(invite);
     this.notifications(`Invitation sent to ${email} with role ${role}`);
     return invite;
@@ -665,7 +726,11 @@ export class InviteLoop {
 }
 
 export class ChampionKit {
-  roiDashboard(cohort: string, investment: number, returns: number): { cohort: string; roi: number } {
+  roiDashboard(
+    cohort: string,
+    investment: number,
+    returns: number
+  ): { cohort: string; roi: number } {
     const roi = Number((((returns - investment) / investment) * 100).toFixed(2));
     return { cohort, roi };
   }
@@ -757,7 +822,7 @@ export class PricingExperimentManager {
 
   run(experiment: PackagingExperiment): PackagingExperiment {
     if (experiment.holdoutPercentage <= 0 || experiment.holdoutPercentage >= 50) {
-      throw new Error('Holdout must be meaningful but less than 50%');
+      throw new Error("Holdout must be meaningful but less than 50%");
     }
     this.experiments.push(experiment);
     return experiment;
@@ -765,10 +830,10 @@ export class PricingExperimentManager {
 
   evaluate(name: string, observedUplift: number): PackagingExperiment {
     const experiment = this.experiments.find((exp) => exp.name === name);
-    if (!experiment) throw new Error('Experiment missing');
+    if (!experiment) throw new Error("Experiment missing");
     experiment.observedUplift = observedUplift;
     if (observedUplift < experiment.churnGuardrail) {
-      throw new Error('Churn guardrail violated');
+      throw new Error("Churn guardrail violated");
     }
     return experiment;
   }
@@ -789,10 +854,10 @@ export class SLOManager {
     this.slos.set(slo.id, slo);
   }
 
-  evaluateRelease(sloId: string, burnRate: number): 'proceed' | 'rollback' {
+  evaluateRelease(sloId: string, burnRate: number): "proceed" | "rollback" {
     const slo = this.slos.get(sloId);
-    if (!slo) throw new Error('SLO missing');
-    return burnRate > slo.errorBudget ? 'rollback' : 'proceed';
+    if (!slo) throw new Error("SLO missing");
+    return burnRate > slo.errorBudget ? "rollback" : "proceed";
   }
 }
 
@@ -809,10 +874,10 @@ export class SyntheticChecker {
     this.checks.push(check);
   }
 
-  run(checkId: string, passed: boolean): 'healthy' | 'rollback' {
+  run(checkId: string, passed: boolean): "healthy" | "rollback" {
     const check = this.checks.find((c) => c.id === checkId);
-    if (!check) throw new Error('Check missing');
-    return passed ? 'healthy' : 'rollback';
+    if (!check) throw new Error("Check missing");
+    return passed ? "healthy" : "rollback";
   }
 }
 
@@ -864,7 +929,7 @@ export class StatusPage {
   private incidents: Incident[] = [];
   private templates: string[] = [];
 
-  addIncident(incident: Omit<Incident, 'startedAt'> & { startedAt?: Date }): Incident {
+  addIncident(incident: Omit<Incident, "startedAt"> & { startedAt?: Date }): Incident {
     const stored: Incident = { ...incident, startedAt: incident.startedAt ?? new Date() };
     this.incidents.push(stored);
     return stored;
@@ -899,7 +964,7 @@ export class AccessManager {
   private grants = new Map<string, AccessGrant>();
 
   grantAccess(grant: AccessGrant): void {
-    if (!grant.mfa) throw new Error('MFA required');
+    if (!grant.mfa) throw new Error("MFA required");
     this.grants.set(grant.user, grant);
   }
 
@@ -919,7 +984,7 @@ export interface SecretRecord {
 export class SecretManager {
   private secrets: SecretRecord[] = [];
 
-  add(secret: Omit<SecretRecord, 'lastRotated'> & { lastRotated?: Date }): SecretRecord {
+  add(secret: Omit<SecretRecord, "lastRotated"> & { lastRotated?: Date }): SecretRecord {
     const stored: SecretRecord = { ...secret, lastRotated: secret.lastRotated ?? new Date() };
     this.secrets.push(stored);
     return stored;
@@ -927,7 +992,8 @@ export class SecretManager {
 
   rotationDue(referenceDate: Date = new Date()): SecretRecord[] {
     return this.secrets.filter(
-      (secret) => referenceDate.getTime() - secret.lastRotated.getTime() > secret.rotationDays * DAYS,
+      (secret) =>
+        referenceDate.getTime() - secret.lastRotated.getTime() > secret.rotationDays * DAYS
     );
   }
 }
@@ -937,7 +1003,7 @@ export class SBOMGate {
 
   enforce(licenses: string[]): void {
     const banned = licenses.filter((license) => this.bannedLicenses.includes(license));
-    if (banned.length > 0) throw new Error(`Banned licenses detected: ${banned.join(',')}`);
+    if (banned.length > 0) throw new Error(`Banned licenses detected: ${banned.join(",")}`);
   }
 }
 
@@ -959,7 +1025,7 @@ export class QuestionnaireAutomation {
   constructor(private standardAnswers: Record<string, string>) {}
 
   respond(question: string): string {
-    return this.standardAnswers[question] ?? 'Response requires manual review';
+    return this.standardAnswers[question] ?? "Response requires manual review";
   }
 }
 
@@ -1026,7 +1092,7 @@ export class PartnerProgram {
 
   register(partner: Partner): void {
     if (!this.tiers.find((tier) => tier.name === partner.tier)) {
-      throw new Error('Tier missing');
+      throw new Error("Tier missing");
     }
     this.partners.push(partner);
   }
@@ -1041,9 +1107,15 @@ export class PartnerCertification {
 }
 
 export class PartnerAnalytics {
-  private stats: Record<string, { installs: number; retention: number; errors: number; revenue: number }> = {};
+  private stats: Record<
+    string,
+    { installs: number; retention: number; errors: number; revenue: number }
+  > = {};
 
-  record(partnerId: string, metric: Partial<{ installs: number; retention: number; errors: number; revenue: number }>): void {
+  record(
+    partnerId: string,
+    metric: Partial<{ installs: number; retention: number; errors: number; revenue: number }>
+  ): void {
     const existing = this.stats[partnerId] ?? { installs: 0, retention: 0, errors: 0, revenue: 0 };
     this.stats[partnerId] = {
       installs: existing.installs + (metric.installs ?? 0),
@@ -1095,7 +1167,7 @@ export class IPAudit {
 export class OSSCompliance {
   enforce(attributions: string[], licensePolicy: string[]): void {
     const missing = attributions.filter((attr) => !licensePolicy.includes(attr));
-    if (missing.length > 0) throw new Error(`Missing OSS attribution: ${missing.join(',')}`);
+    if (missing.length > 0) throw new Error(`Missing OSS attribution: ${missing.join(",")}`);
   }
 }
 
@@ -1103,7 +1175,7 @@ export class BrandHygiene {
   private marks: string[] = [];
 
   register(mark: string): void {
-    if (this.marks.includes(mark)) throw new Error('Duplicate mark');
+    if (this.marks.includes(mark)) throw new Error("Duplicate mark");
     this.marks.push(mark);
   }
 }
@@ -1119,7 +1191,7 @@ export class DefamationPolicy {
 
 export class PortabilityPlaybook {
   prepare(dataset: string[]): { exportable: string[]; blocked: string[] } {
-    const blocked = dataset.filter((item) => item.includes('restricted'));
+    const blocked = dataset.filter((item) => item.includes("restricted"));
     const exportable = dataset.filter((item) => !blocked.includes(item));
     return { exportable, blocked };
   }
@@ -1135,7 +1207,7 @@ export class VendorRegister {
   private vendors: VendorRecord[] = [];
 
   add(vendor: VendorRecord): void {
-    if (!vendor.dpaSigned || !vendor.sccReady) throw new Error('Vendor not ready');
+    if (!vendor.dpaSigned || !vendor.sccReady) throw new Error("Vendor not ready");
     this.vendors.push(vendor);
   }
 }
@@ -1146,7 +1218,7 @@ export class LegalReviewScheduler {
   schedule(date: Date): void {
     const last = this.reviews[this.reviews.length - 1];
     if (last && date.getTime() - last.getTime() < 85 * DAYS) {
-      throw new Error('Legal reviews must be quarterly');
+      throw new Error("Legal reviews must be quarterly");
     }
     this.reviews.push(date);
   }

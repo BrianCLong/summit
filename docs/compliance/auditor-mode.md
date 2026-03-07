@@ -41,20 +41,22 @@ evidence/auditor-bundle-20251025/
 
 ## Evidence Sources
 
-*   **Git History:** For change management and review evidence.
-*   **CI Artifacts:** For testing and security scan results.
-*   **Live Configuration:** For current policy settings.
-*   **Database (Sanitized):** For audit logs (e.g., `audit_events` table).
+- **Git History:** For change management and review evidence.
+- **CI Artifacts:** For testing and security scan results.
+- **Live Configuration:** For current policy settings.
+- **Database (Sanitized):** For audit logs (e.g., `audit_events` table).
 
 ## Access Control
 
 Auditor Mode requires the `auditor` role. This role provides read access to:
-*   `compliance/*`
-*   `logs/*`
-*   `policies/*`
-*   `provenance/*`
+
+- `compliance/*`
+- `logs/*`
+- `policies/*`
+- `provenance/*`
 
 It explicitly denies access to:
-*   User PII
-*   Secrets/Keys
-*   Customer Data Content
+
+- User PII
+- Secrets/Keys
+- Customer Data Content

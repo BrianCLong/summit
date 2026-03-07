@@ -1,13 +1,15 @@
 export interface ProofTree {
   decision: string;
-  applied_rule: {
-    type: 'conditional';
-    label: string;
-    condition: unknown;
-  } | {
-    type: 'default';
-    label: string;
-  };
+  applied_rule:
+    | {
+        type: "conditional";
+        label: string;
+        condition: unknown;
+      }
+    | {
+        type: "default";
+        label: string;
+      };
   facts: Array<{
     name: string;
     value: unknown;

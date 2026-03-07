@@ -1,37 +1,38 @@
 # FactGov Standards & Data Handling
 
 ## Core Principles
-* **Audit Packs**: Preference for file-based evidence over UI-only displays.
-* **Validators**: All attestations must be cryptographically signed by authorized validators.
-* **Data Handling**: Strict field-level redaction for all highly sensitive metadata.
+
+- **Audit Packs**: Preference for file-based evidence over UI-only displays.
+- **Validators**: All attestations must be cryptographically signed by authorized validators.
+- **Data Handling**: Strict field-level redaction for all highly sensitive metadata.
 
 ## Import/Export Matrix
 
-| Direction | Component | Description |
-| :--- | :--- | :--- |
-| **Imports** | Summit ABAC | Uses `authDirective` and `context.user` for permission checks. |
-| **Imports** | Postgres | Uses `server/src/config/database.ts` pool for transactional data. |
-| **Imports** | GraphQL | Extends the root `Query` and `Mutation` types. |
-| **Exports** | Marketplace Entities | Agencies, Vendors, Validators exposed via GraphQL. |
-| **Exports** | Artifacts | deterministic award recommendation JSONs. |
+| Direction   | Component            | Description                                                       |
+| :---------- | :------------------- | :---------------------------------------------------------------- |
+| **Imports** | Summit ABAC          | Uses `authDirective` and `context.user` for permission checks.    |
+| **Imports** | Postgres             | Uses `server/src/config/database.ts` pool for transactional data. |
+| **Imports** | GraphQL              | Extends the root `Query` and `Mutation` types.                    |
+| **Exports** | Marketplace Entities | Agencies, Vendors, Validators exposed via GraphQL.                |
+| **Exports** | Artifacts            | deterministic award recommendation JSONs.                         |
 
 ## Data Classification
 
-| Data Type | Classification | Notes |
-| :--- | :--- | :--- |
-| Agency User Identity | **Sensitive** | PII, Role metadata |
-| RFP Text & Attachments | **Highly Sensitive** | Procurement secrets |
-| Vendor Compliance Docs | **Highly Sensitive** | Financial/Legal data |
-| Attestation Summaries | **Sensitive** | Public verification status |
-| Audit Logs | **Sensitive** | Immutable chain |
+| Data Type              | Classification       | Notes                      |
+| :--------------------- | :------------------- | :------------------------- |
+| Agency User Identity   | **Sensitive**        | PII, Role metadata         |
+| RFP Text & Attachments | **Highly Sensitive** | Procurement secrets        |
+| Vendor Compliance Docs | **Highly Sensitive** | Financial/Legal data       |
+| Attestation Summaries  | **Sensitive**        | Public verification status |
+| Audit Logs             | **Sensitive**        | Immutable chain            |
 
 ## Module Structure (`server/src/modules/factgov/`)
 
-*   `types.ts`: TypeScript interfaces mirroring the DB schema.
-*   `repo.ts`: Data access layer. SQL queries reside here.
-*   `service.ts`: Business logic (matching, rules).
-*   `resolvers.ts`: GraphQL resolvers.
-*   `schema.ts`: GraphQL type definitions (SDL).
+- `types.ts`: TypeScript interfaces mirroring the DB schema.
+- `repo.ts`: Data access layer. SQL queries reside here.
+- `service.ts`: Business logic (matching, rules).
+- `resolvers.ts`: GraphQL resolvers.
+- `schema.ts`: GraphQL type definitions (SDL).
 
 ## Retention Policy
 

@@ -301,24 +301,24 @@ jobs:
 **Load (k6)**:
 
 ```js
-import http from 'k6/http';
-import { check } from 'k6';
-export const options = { vus: 50, duration: '3m' };
+import http from "k6/http";
+import { check } from "k6";
+export const options = { vus: 50, duration: "3m" };
 export default function () {
   const res = http.post(
     __ENV.GRAPHQL_URL,
     JSON.stringify({
-      query: 'query($t:ID!){ tenantCoherence(tenantId:$t){ score status }}',
-      variables: { t: 'tenant-123' },
+      query: "query($t:ID!){ tenantCoherence(tenantId:$t){ score status }}",
+      variables: { t: "tenant-123" },
     }),
     {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${__ENV.JWT}`,
       },
-    },
+    }
   );
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
 }
 ```
 
@@ -428,22 +428,22 @@ export function computeScore(values: Array<{ v: number; w?: number }>): number {
 **`graphql/resolvers.ts` (excerpt)**
 
 ```ts
-import { neo } from '../db/neo4j';
-import { pg } from '../db/pg';
-import { getUser } from '../auth/context';
+import { neo } from "../db/neo4j";
+import { pg } from "../db/pg";
+import { getUser } from "../auth/context";
 export const resolvers = {
   Query: {
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const user = getUser(ctx);
-      ctx.opa.enforce('coherence:read', { tenantId, user });
+      ctx.opa.enforce("coherence:read", { tenantId, user });
       const row = await pg.oneOrNone(
-        'SELECT score, status, updated_at FROM coherence_scores WHERE tenant_id=$1',
-        [tenantId],
+        "SELECT score, status, updated_at FROM coherence_scores WHERE tenant_id=$1",
+        [tenantId]
       );
       return {
         tenantId,
         score: row?.score ?? 0,
-        status: row?.status ?? 'UNKNOWN',
+        status: row?.status ?? "UNKNOWN",
         updatedAt: row?.updated_at ?? new Date().toISOString(),
       };
     },
@@ -461,7 +461,7 @@ export const resolvers = {
           weight,
           source,
           ts: ts || new Date().toISOString(),
-        },
+        }
       );
       return true;
     },
@@ -472,15 +472,13 @@ export const resolvers = {
 **k6 parser (`.maestro/scripts/parse-k6.js`)**
 
 ```js
-const fs = require('fs');
-const summary = JSON.parse(fs.readFileSync('summary.json', 'utf8'));
-const p95 = summary.metrics['http_req_duration'].percentiles['p(95)'];
+const fs = require("fs");
+const summary = JSON.parse(fs.readFileSync("summary.json", "utf8"));
+const p95 = summary.metrics["http_req_duration"].percentiles["p(95)"];
 const err =
-  ((summary.metrics.http_req_failed?.passes || 0) /
-    (summary.metrics.http_reqs.count || 1)) *
-  100;
-const p95Budget = Number(process.argv[process.argv.indexOf('--p95') + 1]);
-const errBudget = Number(process.argv[process.argv.indexOf('--errorRate') + 1]);
+  ((summary.metrics.http_req_failed?.passes || 0) / (summary.metrics.http_reqs.count || 1)) * 100;
+const p95Budget = Number(process.argv[process.argv.indexOf("--p95") + 1]);
+const errBudget = Number(process.argv[process.argv.indexOf("--errorRate") + 1]);
 if (p95 > p95Budget) {
   console.error(`FAIL p95 ${p95}ms > ${p95Budget}ms`);
   process.exit(1);
@@ -489,7 +487,7 @@ if (err > errBudget) {
   console.error(`FAIL error ${err}% > ${errBudget}%`);
   process.exit(1);
 }
-console.log('SLO OK');
+console.log("SLO OK");
 ```
 
 ---

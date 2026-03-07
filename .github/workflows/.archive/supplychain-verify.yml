@@ -1,7 +1,7 @@
 name: supplychain-verify
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   workflow_dispatch: {}
 
 concurrency:
@@ -10,7 +10,7 @@ concurrency:
 
 permissions:
   contents: read
-  id-token: write    # for keyless verification if needed
+  id-token: write # for keyless verification if needed
   packages: read
 
 jobs:

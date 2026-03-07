@@ -13,9 +13,7 @@
     {
       "type": "stat",
       "title": "5xx Rate",
-      "targets": [
-        { "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))" }
-      ]
+      "targets": [{ "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))" }]
     }
   ]
 }

@@ -9,8 +9,8 @@
  */
 
 /* eslint-disable no-console */
-import chalk from 'chalk';
-import { loadConfig, saveConfig, getConfig, isConfigured } from '../config.js';
+import chalk from "chalk";
+import { loadConfig, saveConfig, getConfig, isConfigured } from "../config.js";
 
 interface LoginOptions {
   email?: string;
@@ -45,23 +45,30 @@ export async function login(options: LoginOptions): Promise<void> {
   const config = getConfig();
 
   if (!isConfigured() && !options.url) {
-    console.error(chalk.red('CLI not configured. Run `summit config init` first or provide --url.'));
+    console.error(
+      chalk.red("CLI not configured. Run `summit config init` first or provide --url.")
+    );
     process.exit(1);
   }
 
   // API Key authentication
   if (options.apiKey) {
-    console.log(chalk.blue('Authenticating with API key...'));
+    console.log(chalk.blue("Authenticating with API key..."));
 
     try {
       const response = await fetch(`${config.baseUrl}/auth/api-key`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey: options.apiKey }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Authentication failed' })) as { error?: string; message?: string };
+        const errorData = (await response
+          .json()
+          .catch(() => ({ error: "Authentication failed" }))) as {
+          error?: string;
+          message?: string;
+        };
         console.error(chalk.red(`Login failed: ${errorData.error || errorData.message}`));
         process.exit(1);
       }
@@ -74,7 +81,7 @@ export async function login(options: LoginOptions): Promise<void> {
         tenantId: data.data.user.tenantId,
       });
 
-      console.log(chalk.green('\nAuthenticated successfully!'));
+      console.log(chalk.green("\nAuthenticated successfully!"));
       console.log(`User:   ${data.data.user.email}`);
       console.log(`Tenant: ${data.data.user.tenantId}`);
       console.log(`Role:   ${data.data.user.role}`);
@@ -86,7 +93,7 @@ export async function login(options: LoginOptions): Promise<void> {
   }
 
   // Interactive email/password authentication
-  const readline = await import('readline');
+  const readline = await import("readline");
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -97,22 +104,22 @@ export async function login(options: LoginOptions): Promise<void> {
       if (hidden) {
         // Simple hidden input (basic implementation)
         process.stdout.write(prompt);
-        let input = '';
+        let input = "";
 
         process.stdin.setRawMode(true);
         process.stdin.resume();
-        process.stdin.setEncoding('utf8');
+        process.stdin.setEncoding("utf8");
 
         const onData = (char: string) => {
-          if (char === '\n' || char === '\r') {
+          if (char === "\n" || char === "\r") {
             process.stdin.setRawMode(false);
-            process.stdin.removeListener('data', onData);
-            process.stdout.write('\n');
+            process.stdin.removeListener("data", onData);
+            process.stdout.write("\n");
             resolve(input);
-          } else if (char === '\u0003') {
+          } else if (char === "\u0003") {
             // Ctrl+C
             process.exit();
-          } else if (char === '\u007F') {
+          } else if (char === "\u007F") {
             // Backspace
             input = input.slice(0, -1);
           } else {
@@ -120,7 +127,7 @@ export async function login(options: LoginOptions): Promise<void> {
           }
         };
 
-        process.stdin.on('data', onData);
+        process.stdin.on("data", onData);
       } else {
         rl.question(prompt, resolve);
       }
@@ -128,19 +135,21 @@ export async function login(options: LoginOptions): Promise<void> {
   };
 
   try {
-    const email = options.email || await question('Email: ');
-    const password = await question('Password: ', true);
+    const email = options.email || (await question("Email: "));
+    const password = await question("Password: ", true);
 
-    console.log(chalk.blue('\nAuthenticating...'));
+    console.log(chalk.blue("\nAuthenticating..."));
 
     const response = await fetch(`${config.baseUrl}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Authentication failed' })) as { error?: string; message?: string };
+      const errorData = (await response
+        .json()
+        .catch(() => ({ error: "Authentication failed" }))) as { error?: string; message?: string };
       console.error(chalk.red(`Login failed: ${errorData.error || errorData.message}`));
       process.exit(1);
     }
@@ -152,7 +161,7 @@ export async function login(options: LoginOptions): Promise<void> {
       tenantId: data.data.user.tenantId,
     });
 
-    console.log(chalk.green('\nAuthenticated successfully!'));
+    console.log(chalk.green("\nAuthenticated successfully!"));
     console.log(`User:   ${data.data.user.email}`);
     console.log(`Tenant: ${data.data.user.tenantId}`);
     console.log(`Role:   ${data.data.user.role}`);
@@ -171,10 +180,10 @@ export async function logout(): Promise<void> {
   if (config.token) {
     try {
       await fetch(`${config.baseUrl}/auth/logout`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.token}`,
         },
       });
     } catch {
@@ -187,5 +196,5 @@ export async function logout(): Promise<void> {
     apiKey: undefined,
   });
 
-  console.log(chalk.green('Logged out successfully.'));
+  console.log(chalk.green("Logged out successfully."));
 }

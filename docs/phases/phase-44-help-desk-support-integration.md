@@ -30,22 +30,22 @@ export class SupportIntegrationHub {
       let connector: SupportConnector;
 
       switch (platform.type) {
-        case 'zendesk':
+        case "zendesk":
           connector = new ZendeskConnector(platform.config);
           break;
-        case 'freshdesk':
+        case "freshdesk":
           connector = new FreshdeskConnector(platform.config);
           break;
-        case 'servicenow':
+        case "servicenow":
           connector = new ServiceNowConnector(platform.config);
           break;
-        case 'jira':
+        case "jira":
           connector = new JiraServiceDeskConnector(platform.config);
           break;
-        case 'intercom':
+        case "intercom":
           connector = new IntercomConnector(platform.config);
           break;
-        case 'salesforce':
+        case "salesforce":
           connector = new SalesforceServiceCloudConnector(platform.config);
           break;
         default:
@@ -71,18 +71,10 @@ export class SupportIntegrationHub {
     }
 
     // Route to appropriate team/agent
-    const routing = await this.intelligentRouter.route(
-      ticket,
-      analysis,
-      relevantDocs,
-    );
+    const routing = await this.intelligentRouter.route(ticket, analysis, relevantDocs);
 
     // Enhance ticket with documentation context
-    const enhancedTicket = await this.enhanceTicketWithContext(
-      ticket,
-      relevantDocs,
-      routing,
-    );
+    const enhancedTicket = await this.enhanceTicketWithContext(ticket, relevantDocs, routing);
 
     // Update support platform
     await this.updateSupportPlatform(ticket.platformId, enhancedTicket);
@@ -90,19 +82,14 @@ export class SupportIntegrationHub {
     return enhancedTicket;
   }
 
-  private async analyzeTicketContent(
-    ticket: SupportTicket,
-  ): Promise<TicketAnalysis> {
+  private async analyzeTicketContent(ticket: SupportTicket): Promise<TicketAnalysis> {
     const nlpProcessor = new NLPProcessor();
 
     // Extract key information
     const entities = await nlpProcessor.extractEntities(ticket.content);
     const intent = await nlpProcessor.classifyIntent(ticket.content);
     const sentiment = await nlpProcessor.analyzeSentiment(ticket.content);
-    const urgency = await nlpProcessor.assessUrgency(
-      ticket.content,
-      ticket.metadata,
-    );
+    const urgency = await nlpProcessor.assessUrgency(ticket.content, ticket.metadata);
     const topics = await nlpProcessor.extractTopics(ticket.content);
 
     // Technical analysis
@@ -121,7 +108,7 @@ export class SupportIntegrationHub {
   }
 
   private async findRelevantDocumentation(
-    analysis: TicketAnalysis,
+    analysis: TicketAnalysis
   ): Promise<RelevantDocumentation[]> {
     const searchQueries = this.buildSearchQueries(analysis);
     const results: RelevantDocumentation[] = [];
@@ -185,18 +172,14 @@ export class IntelligentTicketRouter {
   async route(
     ticket: SupportTicket,
     analysis: TicketAnalysis,
-    relevantDocs: RelevantDocumentation[],
+    relevantDocs: RelevantDocumentation[]
   ): Promise<RoutingDecision> {
     // Check for auto-resolution first
-    const autoResolution = await this.autoResolver.evaluate(
-      ticket,
-      analysis,
-      relevantDocs,
-    );
+    const autoResolution = await this.autoResolver.evaluate(ticket, analysis, relevantDocs);
 
     if (autoResolution.confidence > 0.8) {
       return {
-        type: 'auto-resolve',
+        type: "auto-resolve",
         autoResolution,
         confidence: autoResolution.confidence,
       };
@@ -206,29 +189,19 @@ export class IntelligentTicketRouter {
     const requiredSkills = await this.identifyRequiredSkills(analysis);
 
     // Find suitable agents
-    const suitableAgents =
-      await this.agentSkillMatrix.findSuitableAgents(requiredSkills);
+    const suitableAgents = await this.agentSkillMatrix.findSuitableAgents(requiredSkills);
 
     // Consider current workload
-    const workloadFactors =
-      await this.workloadBalancer.getWorkloadFactors(suitableAgents);
+    const workloadFactors = await this.workloadBalancer.getWorkloadFactors(suitableAgents);
 
     // Calculate best routing option
-    const bestAgent = this.calculateBestAgent(
-      suitableAgents,
-      workloadFactors,
-      analysis,
-    );
+    const bestAgent = this.calculateBestAgent(suitableAgents, workloadFactors, analysis);
 
     // Prepare routing context
-    const routingContext = await this.prepareRoutingContext(
-      ticket,
-      analysis,
-      relevantDocs,
-    );
+    const routingContext = await this.prepareRoutingContext(ticket, analysis, relevantDocs);
 
     return {
-      type: 'agent-assignment',
+      type: "agent-assignment",
       agent: bestAgent,
       context: routingContext,
       priority: this.calculatePriority(analysis),
@@ -237,9 +210,7 @@ export class IntelligentTicketRouter {
     };
   }
 
-  private async identifyRequiredSkills(
-    analysis: TicketAnalysis,
-  ): Promise<RequiredSkill[]> {
+  private async identifyRequiredSkills(analysis: TicketAnalysis): Promise<RequiredSkill[]> {
     const skills: RequiredSkill[] = [];
 
     // Technical skills based on topics
@@ -251,20 +222,20 @@ export class IntelligentTicketRouter {
     // Product knowledge requirements
     if (analysis.entities.products.length > 0) {
       const productSkills = analysis.entities.products.map((product) => ({
-        type: 'product_knowledge',
+        type: "product_knowledge",
         name: product,
-        level: 'intermediate',
+        level: "intermediate",
         importance: 0.8,
       }));
       skills.push(...productSkills);
     }
 
     // Communication skills based on complexity and sentiment
-    if (analysis.complexity === 'high' || analysis.sentiment.score < 0.3) {
+    if (analysis.complexity === "high" || analysis.sentiment.score < 0.3) {
       skills.push({
-        type: 'soft_skill',
-        name: 'complex_communication',
-        level: 'advanced',
+        type: "soft_skill",
+        name: "complex_communication",
+        level: "advanced",
         importance: 0.9,
       });
     }
@@ -285,7 +256,7 @@ export class AutoResolver {
   async evaluate(
     ticket: SupportTicket,
     analysis: TicketAnalysis,
-    relevantDocs: RelevantDocumentation[],
+    relevantDocs: RelevantDocumentation[]
   ): Promise<AutoResolutionEvaluation> {
     // Check if ticket matches known resolution patterns
     const patterns = await this.findMatchingPatterns(analysis);
@@ -315,11 +286,7 @@ export class AutoResolver {
     }
 
     // Generate resolution
-    const resolution = await this.generateResolution(
-      ticket,
-      patterns[0],
-      bestDoc,
-    );
+    const resolution = await this.generateResolution(ticket, patterns[0], bestDoc);
 
     return {
       possible: true,
@@ -333,7 +300,7 @@ export class AutoResolver {
   private async generateResolution(
     ticket: SupportTicket,
     pattern: ResolutionPattern,
-    documentation: RelevantDocumentation,
+    documentation: RelevantDocumentation
   ): Promise<Resolution> {
     const template = this.resolutionTemplates.get(pattern.templateId);
     if (!template) {
@@ -341,20 +308,17 @@ export class AutoResolver {
     }
 
     // Personalize the resolution
-    const personalizedContent = await this.personalizeContent(
-      template.content,
-      {
-        customerName: ticket.customer.name,
-        productName: ticket.product,
-        specificIssue: ticket.title,
-      },
-    );
+    const personalizedContent = await this.personalizeContent(template.content, {
+      customerName: ticket.customer.name,
+      productName: ticket.product,
+      specificIssue: ticket.title,
+    });
 
     return {
       content: personalizedContent,
       attachments: [
         {
-          type: 'documentation_link',
+          type: "documentation_link",
           title: documentation.document.title,
           url: documentation.document.url,
           relevantSections: documentation.relevance.sections,
@@ -363,7 +327,7 @@ export class AutoResolver {
       followUpActions: template.followUpActions,
       tags: pattern.tags,
       resolution_time: new Date(),
-      method: 'automated',
+      method: "automated",
     };
   }
 }
@@ -391,16 +355,16 @@ export class KnowledgeBaseSyncEngine {
       let manager: KnowledgeBaseSyncManager;
 
       switch (kb.platform) {
-        case 'zendesk':
+        case "zendesk":
           manager = new ZendeskKnowledgeSync(kb.config);
           break;
-        case 'confluence':
+        case "confluence":
           manager = new ConfluenceSync(kb.config);
           break;
-        case 'notion':
+        case "notion":
           manager = new NotionSync(kb.config);
           break;
-        case 'gitbook':
+        case "gitbook":
           manager = new GitBookSync(kb.config);
           break;
         default:
@@ -417,17 +381,13 @@ export class KnowledgeBaseSyncEngine {
 
     for (const [kbId, syncManager] of this.syncManagers) {
       try {
-        const result = await this.syncToKnowledgeBase(
-          kbId,
-          syncManager,
-          documentationContent,
-        );
+        const result = await this.syncToKnowledgeBase(kbId, syncManager, documentationContent);
         results.push(result);
       } catch (error) {
         this.logger.error(`Sync failed for knowledge base ${kbId}:`, error);
         results.push({
           knowledgeBaseId: kbId,
-          status: 'failed',
+          status: "failed",
           error: error.message,
           timestamp: new Date(),
         });
@@ -440,7 +400,7 @@ export class KnowledgeBaseSyncEngine {
   private async syncToKnowledgeBase(
     kbId: string,
     syncManager: KnowledgeBaseSyncManager,
-    content: DocumentationContent[],
+    content: DocumentationContent[]
   ): Promise<SyncResult> {
     const startTime = Date.now();
 
@@ -467,7 +427,7 @@ export class KnowledgeBaseSyncEngine {
 
     return {
       knowledgeBaseId: kbId,
-      status: 'success',
+      status: "success",
       changesApplied: appliedChanges.length,
       conflictsResolved: conflicts.length,
       duration: Date.now() - startTime,
@@ -484,7 +444,7 @@ export class KnowledgeBaseSyncEngine {
     // Setup webhooks for real-time sync
     await syncManager.setupWebhook({
       url: `${this.config.webhookBaseUrl}/knowledge-base/${kbId}`,
-      events: ['content.created', 'content.updated', 'content.deleted'],
+      events: ["content.created", "content.updated", "content.deleted"],
       secret: await this.generateWebhookSecret(kbId),
     });
 
@@ -492,23 +452,20 @@ export class KnowledgeBaseSyncEngine {
     await this.setupPeriodicSync(kbId, syncManager);
   }
 
-  async handleKnowledgeBaseWebhook(
-    kbId: string,
-    event: KnowledgeBaseEvent,
-  ): Promise<void> {
+  async handleKnowledgeBaseWebhook(kbId: string, event: KnowledgeBaseEvent): Promise<void> {
     const syncManager = this.syncManagers.get(kbId);
     if (!syncManager) {
       throw new Error(`Knowledge base not found: ${kbId}`);
     }
 
     switch (event.type) {
-      case 'content.created':
+      case "content.created":
         await this.handleContentCreated(syncManager, event);
         break;
-      case 'content.updated':
+      case "content.updated":
         await this.handleContentUpdated(syncManager, event);
         break;
-      case 'content.deleted':
+      case "content.deleted":
         await this.handleContentDeleted(syncManager, event);
         break;
     }
@@ -516,7 +473,7 @@ export class KnowledgeBaseSyncEngine {
 
   private async handleContentUpdated(
     syncManager: KnowledgeBaseSyncManager,
-    event: KnowledgeBaseEvent,
+    event: KnowledgeBaseEvent
   ): Promise<void> {
     // Get updated content from knowledge base
     const updatedContent = await syncManager.getContent(event.contentId);
@@ -524,7 +481,7 @@ export class KnowledgeBaseSyncEngine {
     // Check if this content originated from documentation
     const origin = await this.versionManager.getContentOrigin(event.contentId);
 
-    if (origin?.source === 'documentation') {
+    if (origin?.source === "documentation") {
       // This is a conflict - KB content was updated but it originated from docs
       await this.handleSyncConflict(origin, updatedContent);
     } else {
@@ -608,8 +565,7 @@ export class SupportAnalyticsEngine {
       escalationPatterns,
       volumeTrends,
       seasonalityFactors: await this.identifySeasonality(ticketData),
-      complexityDistribution:
-        await this.analyzeComplexityDistribution(ticketData),
+      complexityDistribution: await this.analyzeComplexityDistribution(ticketData),
     };
   }
 
@@ -666,22 +622,16 @@ export class SupportAnalyticsEngine {
     const prioritizedGaps = await this.prioritizeGaps(coverageAnalysis);
 
     // Generate recommendations
-    const recommendations =
-      await this.generateGapRecommendations(prioritizedGaps);
+    const recommendations = await this.generateGapRecommendations(prioritizedGaps);
 
     return {
       generatedAt: new Date(),
       totalGaps: prioritizedGaps.length,
-      highPriorityGaps: prioritizedGaps.filter((g) => g.priority === 'high')
-        .length,
-      estimatedImpact: prioritizedGaps.reduce(
-        (sum, gap) => sum + gap.estimatedImpact,
-        0,
-      ),
+      highPriorityGaps: prioritizedGaps.filter((g) => g.priority === "high").length,
+      estimatedImpact: prioritizedGaps.reduce((sum, gap) => sum + gap.estimatedImpact, 0),
       gaps: prioritizedGaps,
       recommendations,
-      implementationPlan:
-        await this.generateImplementationPlan(recommendations),
+      implementationPlan: await this.generateImplementationPlan(recommendations),
     };
   }
 }

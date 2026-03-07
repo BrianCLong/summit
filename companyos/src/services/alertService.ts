@@ -3,7 +3,7 @@
  * Business logic for alert management
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   Alert,
   CreateAlertInput,
@@ -11,7 +11,7 @@ import {
   AlertFilter,
   AlertStatus,
   AlertMetrics,
-} from '../models/alert';
+} from "../models/alert";
 
 export class AlertService {
   constructor(private db: Pool) {}
@@ -52,11 +52,7 @@ export class AlertService {
     return result.rows[0] ? this.mapRowToAlert(result.rows[0]) : null;
   }
 
-  async listAlerts(
-    filter?: AlertFilter,
-    limit = 25,
-    offset = 0
-  ): Promise<Alert[]> {
+  async listAlerts(filter?: AlertFilter, limit = 25, offset = 0): Promise<Alert[]> {
     let query = `SELECT * FROM maestro.alerts WHERE 1=1`;
     const values: any[] = [];
     let paramIndex = 1;
@@ -127,10 +123,7 @@ export class AlertService {
     }));
   }
 
-  async updateAlert(
-    id: string,
-    input: UpdateAlertInput
-  ): Promise<Alert | null> {
+  async updateAlert(id: string, input: UpdateAlertInput): Promise<Alert | null> {
     const updates: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -163,7 +156,7 @@ export class AlertService {
 
     const query = `
       UPDATE maestro.alerts
-      SET ${updates.join(', ')}, updated_at = NOW()
+      SET ${updates.join(", ")}, updated_at = NOW()
       WHERE id = $${paramIndex}
       RETURNING *
     `;
@@ -173,10 +166,7 @@ export class AlertService {
     return result.rows[0] ? this.mapRowToAlert(result.rows[0]) : null;
   }
 
-  async acknowledgeAlert(
-    id: string,
-    acknowledgedBy: string
-  ): Promise<Alert | null> {
+  async acknowledgeAlert(id: string, acknowledgedBy: string): Promise<Alert | null> {
     const query = `
       UPDATE maestro.alerts
       SET status = 'acknowledged', acknowledged_at = NOW(),
@@ -210,10 +200,7 @@ export class AlertService {
     return result.rows[0] ? this.mapRowToAlert(result.rows[0]) : null;
   }
 
-  async linkToIncident(
-    alertId: string,
-    incidentId: string
-  ): Promise<Alert | null> {
+  async linkToIncident(alertId: string, incidentId: string): Promise<Alert | null> {
     const query = `
       UPDATE maestro.alerts
       SET incident_id = $2, updated_at = NOW()

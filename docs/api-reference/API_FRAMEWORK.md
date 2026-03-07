@@ -47,42 +47,45 @@ npm install @intelgraph/api-framework
 ### Basic Setup
 
 ```typescript
-import { createSummitAPI } from '@intelgraph/api-framework';
+import { createSummitAPI } from "@intelgraph/api-framework";
 
 const api = createSummitAPI({
   rest: {
-    version: '1.0.0',
-    title: 'Summit Intelligence API',
-    description: 'API for intelligence analysis platform',
-    basePath: '/api/v1',
+    version: "1.0.0",
+    title: "Summit Intelligence API",
+    description: "API for intelligence analysis platform",
+    basePath: "/api/v1",
   },
   streaming: {
-    websocket: { enabled: true, path: '/ws' },
-    sse: { enabled: true, path: '/stream' },
+    websocket: { enabled: true, path: "/ws" },
+    sse: { enabled: true, path: "/stream" },
   },
   queryLanguage: {
     enabled: true,
-    endpoint: '/query',
+    endpoint: "/query",
   },
 });
 
 // Define REST routes
-api.rest.router
-  .get('/entities', async (req, res) => {
+api.rest.router.get(
+  "/entities",
+  async (req, res) => {
     const entities = await db.entities.find();
     res.success(entities);
-  }, {
+  },
+  {
     openapi: {
-      summary: 'List entities',
-      tags: ['entities'],
+      summary: "List entities",
+      tags: ["entities"],
       responses: {
-        '200': { description: 'List of entities' }
-      }
-    }
-  });
+        "200": { description: "List of entities" },
+      },
+    },
+  }
+);
 
 // Handle streaming events
-api.websocket?.on('subscribe', ({ connectionId, topic }) => {
+api.websocket?.on("subscribe", ({ connectionId, topic }) => {
   console.log(`${connectionId} subscribed to ${topic}`);
 });
 
@@ -95,14 +98,14 @@ api.start(3000);
 ### Resource Routes
 
 ```typescript
-api.rest.router.resource('entities', {
+api.rest.router.resource("entities", {
   list: async (req, res) => {
     const entities = await db.entities.find();
     res.success(entities);
   },
   get: async (req, res) => {
     const entity = await db.entities.findById(req.params.id);
-    if (!entity) throw new NotFoundException('Entity');
+    if (!entity) throw new NotFoundException("Entity");
     res.success(entity);
   },
   create: async (req, res) => {
@@ -123,36 +126,37 @@ api.rest.router.resource('entities', {
 ### Validation
 
 ```typescript
-import { validate } from '@intelgraph/rest-api';
+import { validate } from "@intelgraph/rest-api";
 
-api.rest.router.post('/entities', [
-  validate({
-    body: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', minLength: 1, maxLength: 255 },
-        type: { type: 'string', enum: ['Person', 'Organization'] },
-        country: { type: 'string', pattern: '^[A-Z]{2}$' },
+api.rest.router.post(
+  "/entities",
+  [
+    validate({
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string", minLength: 1, maxLength: 255 },
+          type: { type: "string", enum: ["Person", "Organization"] },
+          country: { type: "string", pattern: "^[A-Z]{2}$" },
+        },
+        required: ["name", "type"],
       },
-      required: ['name', 'type'],
-    },
-  }),
-], async (req, res) => {
-  const entity = await db.entities.create(req.validated!.body);
-  res.success(entity, { statusCode: 201 });
-});
+    }),
+  ],
+  async (req, res) => {
+    const entity = await db.entities.create(req.validated!.body);
+    res.success(entity, { statusCode: 201 });
+  }
+);
 ```
 
 ### Pagination
 
 ```typescript
-api.rest.router.get('/entities', async (req, res) => {
+api.rest.router.get("/entities", async (req, res) => {
   const { limit, offset } = req.pagination!;
 
-  const entities = await db.entities
-    .find()
-    .limit(limit)
-    .skip(offset);
+  const entities = await db.entities.find().limit(limit).skip(offset);
 
   const total = await db.entities.count();
 
@@ -172,17 +176,17 @@ import {
   NotFoundException,
   ValidationException,
   UnauthorizedException,
-} from '@intelgraph/rest-api';
+} from "@intelgraph/rest-api";
 
-api.rest.router.get('/entities/:id', async (req, res) => {
+api.rest.router.get("/entities/:id", async (req, res) => {
   const entity = await db.entities.findById(req.params.id);
 
   if (!entity) {
-    throw new NotFoundException('Entity');
+    throw new NotFoundException("Entity");
   }
 
   if (!hasPermission(req.user, entity)) {
-    throw new UnauthorizedException('Access denied');
+    throw new UnauthorizedException("Access denied");
   }
 
   res.success(entity);
@@ -244,31 +248,33 @@ api.rest.router.get('/entities/:id', async (req, res) => {
 
 ```typescript
 // Client connection
-const ws = new WebSocket('ws://localhost:3000/ws');
+const ws = new WebSocket("ws://localhost:3000/ws");
 
 // Subscribe to topic
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  id: 'sub-1',
-  topic: 'entities',
-  filter: { type: 'Person' }
-}));
+ws.send(
+  JSON.stringify({
+    type: "subscribe",
+    id: "sub-1",
+    topic: "entities",
+    filter: { type: "Person" },
+  })
+);
 
 // Receive events
 ws.onmessage = (event) => {
   const message = JSON.parse(event.data);
 
-  if (message.type === 'data') {
-    console.log('New event:', message.event);
+  if (message.type === "data") {
+    console.log("New event:", message.event);
   }
 };
 
 // Server broadcasting
-api.websocket?.broadcast('entities', {
-  id: 'event-123',
-  topic: 'entities',
-  type: 'created',
-  data: { id: '1', name: 'John Doe' },
+api.websocket?.broadcast("entities", {
+  id: "event-123",
+  topic: "entities",
+  type: "created",
+  data: { id: "1", name: "John Doe" },
   timestamp: new Date(),
 });
 ```
@@ -277,21 +283,19 @@ api.websocket?.broadcast('entities', {
 
 ```typescript
 // Client connection
-const eventSource = new EventSource(
-  'http://localhost:3000/stream?topics=entities,relationships'
-);
+const eventSource = new EventSource("http://localhost:3000/stream?topics=entities,relationships");
 
-eventSource.addEventListener('data', (event) => {
+eventSource.addEventListener("data", (event) => {
   const data = JSON.parse(event.data);
-  console.log('Event:', data);
+  console.log("Event:", data);
 });
 
 // Server broadcasting
-api.sse?.broadcast('entities', {
-  id: 'event-123',
-  topic: 'entities',
-  type: 'updated',
-  data: { id: '1', name: 'Jane Doe' },
+api.sse?.broadcast("entities", {
+  id: "event-123",
+  topic: "entities",
+  type: "updated",
+  data: { id: "1", name: "Jane Doe" },
   timestamp: new Date(),
 });
 ```
@@ -301,14 +305,14 @@ api.sse?.broadcast('entities', {
 ### Authentication
 
 ```typescript
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 // JWT middleware
 const authenticate = async (req, res, next) => {
-  const token = req.get('Authorization')?.replace('Bearer ', '');
+  const token = req.get("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
-    throw new UnauthorizedException('Missing token');
+    throw new UnauthorizedException("Missing token");
   }
 
   try {
@@ -316,12 +320,12 @@ const authenticate = async (req, res, next) => {
     req.user = payload;
     next();
   } catch (error) {
-    throw new UnauthorizedException('Invalid token');
+    throw new UnauthorizedException("Invalid token");
   }
 };
 
 // Protected routes
-api.rest.router.get('/entities', authenticate, async (req, res) => {
+api.rest.router.get("/entities", authenticate, async (req, res) => {
   // Only authenticated users
 });
 ```
@@ -329,14 +333,18 @@ api.rest.router.get('/entities', authenticate, async (req, res) => {
 ### Rate Limiting
 
 ```typescript
-api.rest.router.get('/entities', async (req, res) => {
-  // Rate limiting applied automatically based on config
-}, {
-  rateLimit: {
-    windowMs: 60000, // 1 minute
-    max: 100, // 100 requests per minute
+api.rest.router.get(
+  "/entities",
+  async (req, res) => {
+    // Rate limiting applied automatically based on config
+  },
+  {
+    rateLimit: {
+      windowMs: 60000, // 1 minute
+      max: 100, // 100 requests per minute
+    },
   }
-});
+);
 ```
 
 ### Scope-Based Access
@@ -345,18 +353,19 @@ api.rest.router.get('/entities', async (req, res) => {
 const requireScope = (scope: string) => {
   return (req, res, next) => {
     if (!req.user?.scopes?.includes(scope)) {
-      throw new ForbiddenException('Insufficient permissions');
+      throw new ForbiddenException("Insufficient permissions");
     }
     next();
   };
 };
 
-api.rest.router.post('/entities', [
-  authenticate,
-  requireScope('entities:write'),
-], async (req, res) => {
-  // Only users with entities:write scope
-});
+api.rest.router.post(
+  "/entities",
+  [authenticate, requireScope("entities:write")],
+  async (req, res) => {
+    // Only users with entities:write scope
+  }
+);
 ```
 
 ## Monitoring & Analytics
@@ -364,12 +373,12 @@ api.rest.router.post('/entities', [
 ### Request Metrics
 
 ```typescript
-import { metricsMiddleware, MemoryMetricsCollector } from '@intelgraph/rest-api';
+import { metricsMiddleware, MemoryMetricsCollector } from "@intelgraph/rest-api";
 
 const metrics = new MemoryMetricsCollector();
 
 // Get statistics
-api.rest.router.get('/metrics', authenticate, (req, res) => {
+api.rest.router.get("/metrics", authenticate, (req, res) => {
   const stats = metrics.getStats();
   res.json(stats);
 });
@@ -427,31 +436,37 @@ Link: </api/v2/entities>; rel="successor-version"
 ### Custom OpenAPI Metadata
 
 ```typescript
-api.rest.router.get('/entities', async (req, res) => {
-  // ...
-}, {
-  openapi: {
-    summary: 'List all entities',
-    description: 'Returns a paginated list of intelligence entities',
-    tags: ['entities'],
-    parameters: [{
-      name: 'type',
-      in: 'query',
-      schema: { type: 'string' },
-      description: 'Filter by entity type'
-    }],
-    responses: {
-      '200': {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/EntityList' }
-          }
-        }
-      }
-    }
+api.rest.router.get(
+  "/entities",
+  async (req, res) => {
+    // ...
+  },
+  {
+    openapi: {
+      summary: "List all entities",
+      description: "Returns a paginated list of intelligence entities",
+      tags: ["entities"],
+      parameters: [
+        {
+          name: "type",
+          in: "query",
+          schema: { type: "string" },
+          description: "Filter by entity type",
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Successful response",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/EntityList" },
+            },
+          },
+        },
+      },
+    },
   }
-});
+);
 ```
 
 ## Best Practices
@@ -482,7 +497,7 @@ api.rest.router.get('/entities', async (req, res) => {
 Always paginate large result sets:
 
 ```typescript
-api.rest.router.get('/entities', async (req, res) => {
+api.rest.router.get("/entities", async (req, res) => {
   const { limit, offset } = req.pagination!;
   // Use limit and offset
 });
@@ -491,14 +506,18 @@ api.rest.router.get('/entities', async (req, res) => {
 ### 4. Enable Caching
 
 ```typescript
-api.rest.router.get('/entities/:id', async (req, res) => {
-  // ...
-}, {
-  cache: {
-    enabled: true,
-    ttl: 3600, // 1 hour
+api.rest.router.get(
+  "/entities/:id",
+  async (req, res) => {
+    // ...
+  },
+  {
+    cache: {
+      enabled: true,
+      ttl: 3600, // 1 hour
+    },
   }
-});
+);
 ```
 
 ### 5. Validate Input
@@ -506,9 +525,7 @@ api.rest.router.get('/entities/:id', async (req, res) => {
 Always validate request data:
 
 ```typescript
-api.rest.router.post('/entities', [
-  validate({ body: entitySchema }),
-], async (req, res) => {
+api.rest.router.post("/entities", [validate({ body: entitySchema })], async (req, res) => {
   // req.validated.body is validated
 });
 ```
@@ -516,11 +533,11 @@ api.rest.router.post('/entities', [
 ### 6. Handle Errors Properly
 
 ```typescript
-api.rest.router.get('/entities/:id', async (req, res) => {
+api.rest.router.get("/entities/:id", async (req, res) => {
   const entity = await db.entities.findById(req.params.id);
 
   if (!entity) {
-    throw new NotFoundException('Entity');
+    throw new NotFoundException("Entity");
   }
 
   res.success(entity);
@@ -549,7 +566,7 @@ Use the query language optimizer:
 ```typescript
 const ql = new SummitQL({
   optimize: true,
-  target: 'postgres', // or 'neo4j', 'elasticsearch'
+  target: "postgres", // or 'neo4j', 'elasticsearch'
 });
 ```
 

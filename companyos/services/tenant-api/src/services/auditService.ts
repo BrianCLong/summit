@@ -4,9 +4,9 @@
  * Handles audit logging for tenant operations
  */
 
-import { pool } from '../db/postgres.js';
-import type { TenantAuditEvent, AuditAction } from '../types/index.js';
-import { v4 as uuidv4 } from 'uuid';
+import { pool } from "../db/postgres.js";
+import type { TenantAuditEvent, AuditAction } from "../types/index.js";
+import { v4 as uuidv4 } from "uuid";
 
 export interface AuditEventInput {
   tenantId?: string;
@@ -77,19 +77,19 @@ export class AuditService {
   async logTenantCreated(
     tenantId: string,
     tenantData: Record<string, unknown>,
-    actor: { id?: string; email?: string; ip?: string },
+    actor: { id?: string; email?: string; ip?: string }
   ): Promise<TenantAuditEvent> {
     return this.logEvent({
       tenantId,
-      eventType: 'tenant_created',
-      action: 'create',
+      eventType: "tenant_created",
+      action: "create",
       actorId: actor.id,
       actorEmail: actor.email,
       actorIp: actor.ip,
-      resourceType: 'tenant',
+      resourceType: "tenant",
       resourceId: tenantId,
       changes: { after: tenantData },
-      metadata: { source: 'tenant-api' },
+      metadata: { source: "tenant-api" },
     });
   }
 
@@ -100,19 +100,19 @@ export class AuditService {
     tenantId: string,
     before: Record<string, unknown>,
     after: Record<string, unknown>,
-    actor: { id?: string; email?: string; ip?: string },
+    actor: { id?: string; email?: string; ip?: string }
   ): Promise<TenantAuditEvent> {
     return this.logEvent({
       tenantId,
-      eventType: 'tenant_updated',
-      action: 'update',
+      eventType: "tenant_updated",
+      action: "update",
       actorId: actor.id,
       actorEmail: actor.email,
       actorIp: actor.ip,
-      resourceType: 'tenant',
+      resourceType: "tenant",
       resourceId: tenantId,
       changes: { before, after },
-      metadata: { source: 'tenant-api' },
+      metadata: { source: "tenant-api" },
     });
   }
 
@@ -121,19 +121,19 @@ export class AuditService {
    */
   async logTenantDeleted(
     tenantId: string,
-    actor: { id?: string; email?: string; ip?: string },
+    actor: { id?: string; email?: string; ip?: string }
   ): Promise<TenantAuditEvent> {
     return this.logEvent({
       tenantId,
-      eventType: 'tenant_deleted',
-      action: 'delete',
+      eventType: "tenant_deleted",
+      action: "delete",
       actorId: actor.id,
       actorEmail: actor.email,
       actorIp: actor.ip,
-      resourceType: 'tenant',
+      resourceType: "tenant",
       resourceId: tenantId,
       changes: {},
-      metadata: { source: 'tenant-api' },
+      metadata: { source: "tenant-api" },
     });
   }
 
@@ -144,19 +144,19 @@ export class AuditService {
     tenantId: string,
     flagName: string,
     enabled: boolean,
-    actor: { id?: string; email?: string; ip?: string },
+    actor: { id?: string; email?: string; ip?: string }
   ): Promise<TenantAuditEvent> {
     return this.logEvent({
       tenantId,
-      eventType: 'feature_flag_changed',
-      action: enabled ? 'enable' : 'disable',
+      eventType: "feature_flag_changed",
+      action: enabled ? "enable" : "disable",
       actorId: actor.id,
       actorEmail: actor.email,
       actorIp: actor.ip,
-      resourceType: 'feature_flag',
+      resourceType: "feature_flag",
       resourceId: flagName,
       changes: { flagName, enabled },
-      metadata: { source: 'tenant-api' },
+      metadata: { source: "tenant-api" },
     });
   }
 
@@ -204,8 +204,7 @@ export class AuditService {
       values.push(options.endDate);
     }
 
-    const whereClause =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const countQuery = `SELECT COUNT(*) FROM companyos_tenant_audit ${whereClause}`;
     const countResult = await pool.query(countQuery, values);

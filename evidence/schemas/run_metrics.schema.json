@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["perf", "stability", "mismatch"],
   "properties": {
-    "perf": {"type": "object"},
-    "stability": {"type": "object"},
-    "mismatch": {"type": "object"}
+    "perf": { "type": "object" },
+    "stability": { "type": "object" },
+    "mismatch": { "type": "object" }
   }
 }

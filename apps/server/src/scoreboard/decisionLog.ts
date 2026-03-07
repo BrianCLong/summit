@@ -1,10 +1,10 @@
-import { randomUUID } from 'crypto';
-import { DecisionLogEntry } from './types.js';
+import { randomUUID } from "crypto";
+import { DecisionLogEntry } from "./types.js";
 
 export class DecisionLog {
   private entries: DecisionLogEntry[] = [];
 
-  log(entry: Omit<DecisionLogEntry, 'id' | 'createdAt'>): DecisionLogEntry {
+  log(entry: Omit<DecisionLogEntry, "id" | "createdAt">): DecisionLogEntry {
     const record: DecisionLogEntry = {
       ...entry,
       id: randomUUID(),

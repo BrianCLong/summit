@@ -21,17 +21,17 @@ All MCP tools exposed by Summit services must conform to the `schemas/mcp/tool.s
 
 ### Required Fields
 
-*   `tool_id`: Unique identifier (e.g., `summit.github.create_issue`).
-*   `version`: Semantic version of the tool interface.
-*   `permissions`: Array of required permission scopes (e.g., `["repo:write", "issue:create"]`).
-*   `description`: Clear, concise description of the tool's purpose.
-*   `inputSchema`: JSON Schema defining the expected input arguments.
+- `tool_id`: Unique identifier (e.g., `summit.github.create_issue`).
+- `version`: Semantic version of the tool interface.
+- `permissions`: Array of required permission scopes (e.g., `["repo:write", "issue:create"]`).
+- `description`: Clear, concise description of the tool's purpose.
+- `inputSchema`: JSON Schema defining the expected input arguments.
 
 ### Execution Constraints
 
-*   **Timeouts:** All tools must specify a maximum execution time. Default is 30s.
-*   **Filesystem:** Tools interacting with the filesystem must be sandboxed to allowed directories.
-*   **Network:** Outbound network calls must be allow-listed.
+- **Timeouts:** All tools must specify a maximum execution time. Default is 30s.
+- **Filesystem:** Tools interacting with the filesystem must be sandboxed to allowed directories.
+- **Network:** Outbound network calls must be allow-listed.
 
 ## Resource Definition Standard
 
@@ -39,17 +39,17 @@ All MCP resources exposed by Summit services must conform to the `schemas/mcp/re
 
 ### Required Fields
 
-*   `resource_id`: Unique identifier (e.g., `summit.logs.error_stream`).
-*   `uri`: The URI to access the resource.
-*   `mimeType`: The MIME type of the resource content.
-*   `access`: Access level (`read-only` or `read-write`).
+- `resource_id`: Unique identifier (e.g., `summit.logs.error_stream`).
+- `uri`: The URI to access the resource.
+- `mimeType`: The MIME type of the resource content.
+- `access`: Access level (`read-only` or `read-write`).
 
 ## Evidence Hooks
 
 To support Summit's governance model, all MCP server implementations must support the following context parameters:
 
-*   `trace_id`: The distributed trace ID for the request.
-*   `evidence_id`: The ID of the evidence bundle associated with the operation.
+- `trace_id`: The distributed trace ID for the request.
+- `evidence_id`: The ID of the evidence bundle associated with the operation.
 
 ## Validation
 

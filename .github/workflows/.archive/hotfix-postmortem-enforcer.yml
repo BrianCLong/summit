@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # POST-MORTEM ENFORCEMENT WORKFLOW
 # Ensures all hotfix releases have corresponding post-mortem documentation.
 # Runs daily and can be triggered manually.

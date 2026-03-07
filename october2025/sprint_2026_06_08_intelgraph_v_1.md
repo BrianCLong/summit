@@ -106,21 +106,21 @@
 
 ```ts
 // server/src/db/regions.ts
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 const drv: Record<string, neo4j.Driver> = {
-  'us-east': neo4j.driver(
+  "us-east": neo4j.driver(
     process.env.NEO4J_USEAST!,
-    neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
+    neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!)
   ),
-  'eu-west': neo4j.driver(
+  "eu-west": neo4j.driver(
     process.env.NEO4J_EUWEST!,
-    neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
+    neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!)
   ),
 };
-export function session(kind: 'read' | 'write', region: string) {
-  const driver = drv[region] || drv['us-east'];
+export function session(kind: "read" | "write", region: string) {
+  const driver = drv[region] || drv["us-east"];
   return driver.session({
-    defaultAccessMode: kind === 'read' ? 'READ' : 'WRITE',
+    defaultAccessMode: kind === "read" ? "READ" : "WRITE",
   });
 }
 ```
@@ -130,21 +130,17 @@ export function session(kind: 'read' | 'write', region: string) {
 
 ```ts
 // server/src/middleware/residency.ts
-import { getTenantRegion } from '../tenants/map';
+import { getTenantRegion } from "../tenants/map";
 export function routeByRegion(req, res, next) {
-  const tenant = req.headers['x-tenant'] as string;
+  const tenant = req.headers["x-tenant"] as string;
   const region = getTenantRegion(tenant);
   req.ctx = { ...(req.ctx || {}), tenant, region };
   next();
 }
 export function enforceResidency(req, res, next) {
-  const allowed =
-    req.body?.variables?.region === req.ctx.region ||
-    !req.body?.variables?.region;
+  const allowed = req.body?.variables?.region === req.ctx.region || !req.body?.variables?.region;
   if (!allowed)
-    return res
-      .status(403)
-      .json({ error: 'ResidencyViolation', region: req.ctx.region });
+    return res.status(403).json({ error: "ResidencyViolation", region: req.ctx.region });
   next();
 }
 ```
@@ -238,7 +234,7 @@ burn_6x: sum_over_time(rate(http_request_errors_total[5m])[30m:]) / (0.01 * sum_
 ```ts
 // tools/slo/guard.js (excerpt)
 if (burn6x > threshold) {
-  console.error('SLO burn too high — halting rollout');
+  console.error("SLO burn too high — halting rollout");
   process.exit(1);
 }
 ```
@@ -256,11 +252,11 @@ kubectl --context $REGION -n ig scale deploy api --replicas=3
 
 ```ts
 // tools/backup/verify.ts
-import crypto from 'crypto';
-import fs from 'fs';
+import crypto from "crypto";
+import fs from "fs";
 export function verifyDump(path: string, manifest: any) {
   const bytes = fs.readFileSync(path);
-  const hash = crypto.createHash('sha256').update(bytes).digest('hex');
+  const hash = crypto.createHash("sha256").update(bytes).digest("hex");
   return hash === manifest.sha256;
 }
 ```

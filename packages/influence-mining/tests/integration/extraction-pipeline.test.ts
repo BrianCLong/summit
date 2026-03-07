@@ -1,28 +1,22 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { InfluenceNetworkExtractor } from '../../src/InfluenceNetworkExtractor.js';
-import { SourceData } from '../../src/types.js';
+import { InfluenceNetworkExtractor } from "../../src/InfluenceNetworkExtractor.js";
+import { SourceData } from "../../src/types.js";
 
-describe('Influence network extraction pipeline', () => {
+describe("Influence network extraction pipeline", () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const dataPath = path.resolve(
-    __dirname,
-    '../../test-data/sample-social-posts.json',
-  );
-  const expectedPath = path.resolve(
-    __dirname,
-    '../../test-data/expected-network.json',
-  );
+  const dataPath = path.resolve(__dirname, "../../test-data/sample-social-posts.json");
+  const expectedPath = path.resolve(__dirname, "../../test-data/expected-network.json");
 
-  it('reproduces the expected network structure from sample data', () => {
-    const posts = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-    const expected = JSON.parse(fs.readFileSync(expectedPath, 'utf-8'));
+  it("reproduces the expected network structure from sample data", () => {
+    const posts = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+    const expected = JSON.parse(fs.readFileSync(expectedPath, "utf-8"));
 
     const extractor = new InfluenceNetworkExtractor();
-    const sources: SourceData[] = [{ kind: 'social', posts }];
+    const sources: SourceData[] = [{ kind: "social", posts }];
     const network = extractor.extract(sources);
     const enriched = extractor.enrich(network);
     const ranked = extractor.rankNodes(enriched);
@@ -56,17 +50,17 @@ describe('Influence network extraction pipeline', () => {
       }),
       entities: [...actual.entities].sort((a, b) => a.id.localeCompare(b.id)),
       rankings: [...actual.rankings].sort(
-        (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id),
+        (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id)
       ),
       motifs: {
         botNetworks: [...actual.motifs.botNetworks].sort(
-          (a, b) => b.activityScore - a.activityScore,
+          (a, b) => b.activityScore - a.activityScore
         ),
         amplifierClusters: [...actual.motifs.amplifierClusters].sort(
-          (a, b) => b.amplificationScore - a.amplificationScore,
+          (a, b) => b.amplificationScore - a.amplificationScore
         ),
         coordinatedBehaviors: [...actual.motifs.coordinatedBehaviors].sort(
-          (a, b) => b.support - a.support,
+          (a, b) => b.support - a.support
         ),
       },
     };
@@ -85,31 +79,25 @@ describe('Influence network extraction pipeline', () => {
       }),
       entities: [...expected.entities].sort((a, b) => a.id.localeCompare(b.id)),
       rankings: [...expected.rankings].sort(
-        (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id),
+        (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id)
       ),
       motifs: {
         botNetworks: [...expected.motifs.botNetworks].sort(
-          (a, b) => b.activityScore - a.activityScore,
+          (a, b) => b.activityScore - a.activityScore
         ),
         amplifierClusters: [...expected.motifs.amplifierClusters].sort(
-          (a, b) => b.amplificationScore - a.amplificationScore,
+          (a, b) => b.amplificationScore - a.amplificationScore
         ),
         coordinatedBehaviors: [...expected.motifs.coordinatedBehaviors].sort(
-          (a, b) => b.support - a.support,
+          (a, b) => b.support - a.support
         ),
       },
     };
 
     expect(normalisedActual).toEqual(normalisedExpected);
     expect(normalisedActual.motifs.botNetworks.length).toBeGreaterThan(0);
-    expect(
-      normalisedActual.relationships.some((rel) => rel.type === 'share'),
-    ).toBe(true);
-    expect(
-      normalisedActual.relationships.some((rel) => rel.type === 'reply'),
-    ).toBe(true);
-    expect(
-      normalisedActual.relationships.some((rel) => rel.type === 'mention'),
-    ).toBe(true);
+    expect(normalisedActual.relationships.some((rel) => rel.type === "share")).toBe(true);
+    expect(normalisedActual.relationships.some((rel) => rel.type === "reply")).toBe(true);
+    expect(normalisedActual.relationships.some((rel) => rel.type === "mention")).toBe(true);
   });
 });

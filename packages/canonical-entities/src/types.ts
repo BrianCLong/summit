@@ -20,17 +20,12 @@
 /**
  * Classification levels for data sensitivity (legacy, use Sensitivity for new code)
  */
-export type ClassificationLevel =
-  | 'UNCLASSIFIED'
-  | 'CUI'
-  | 'CONFIDENTIAL'
-  | 'SECRET'
-  | 'TOP_SECRET';
+export type ClassificationLevel = "UNCLASSIFIED" | "CUI" | "CONFIDENTIAL" | "SECRET" | "TOP_SECRET";
 
 /**
  * Sensitivity levels for policy-based access control
  */
-export type Sensitivity = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
+export type Sensitivity = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "SECRET";
 
 /**
  * Confidence score for assertions (0-1)
@@ -162,25 +157,25 @@ export interface CanonicalEntity extends BitemporalFields, PolicyLabels {
  * Entity type discriminator
  */
 export type EntityType =
-  | 'Person'
-  | 'Organization'
-  | 'Asset'
-  | 'Location'
-  | 'Event'
-  | 'Document'
-  | 'Claim'
-  | 'Case'
-  | 'Account'
-  | 'Communication'
-  | 'Device'
-  | 'Vehicle'
-  | 'Infrastructure'
-  | 'FinancialInstrument'
-  | 'Indicator'
-  | 'Narrative'
-  | 'Campaign'
-  | 'Authority'
-  | 'License';
+  | "Person"
+  | "Organization"
+  | "Asset"
+  | "Location"
+  | "Event"
+  | "Document"
+  | "Claim"
+  | "Case"
+  | "Account"
+  | "Communication"
+  | "Device"
+  | "Vehicle"
+  | "Infrastructure"
+  | "FinancialInstrument"
+  | "Indicator"
+  | "Narrative"
+  | "Campaign"
+  | "Authority"
+  | "License";
 
 // -----------------------------------------------------------------------------
 // Person Entity
@@ -205,7 +200,7 @@ export interface PersonProps {
   /** Nationality/nationalities */
   nationalities?: string[];
   /** Gender */
-  gender?: 'male' | 'female' | 'other' | 'unknown';
+  gender?: "male" | "female" | "other" | "unknown";
   /** Identification documents */
   identifications?: {
     type: string;
@@ -215,7 +210,7 @@ export interface PersonProps {
   }[];
   /** Contact information */
   contacts?: {
-    type: 'email' | 'phone' | 'address' | 'social';
+    type: "email" | "phone" | "address" | "social";
     value: string;
     isPrimary?: boolean;
   }[];
@@ -232,7 +227,7 @@ export interface PersonProps {
 }
 
 export interface Person extends CanonicalEntity {
-  entityType: 'Person';
+  entityType: "Person";
   props: PersonProps;
 }
 
@@ -247,7 +242,7 @@ export interface OrganizationProps {
   /** Trading/DBA names */
   tradingNames?: string[];
   /** Organization type */
-  orgType?: 'corporation' | 'llc' | 'partnership' | 'nonprofit' | 'government' | 'other';
+  orgType?: "corporation" | "llc" | "partnership" | "nonprofit" | "government" | "other";
   /** Industry/sector */
   industry?: string;
   /** Registration number */
@@ -283,7 +278,7 @@ export interface OrganizationProps {
 }
 
 export interface Organization extends CanonicalEntity {
-  entityType: 'Organization';
+  entityType: "Organization";
   props: OrganizationProps;
 }
 
@@ -297,15 +292,15 @@ export interface AssetProps {
   name: string;
   /** Asset type */
   assetType:
-  | 'vehicle'
-  | 'vessel'
-  | 'aircraft'
-  | 'real_estate'
-  | 'financial_account'
-  | 'cryptocurrency'
-  | 'intellectual_property'
-  | 'equipment'
-  | 'other';
+    | "vehicle"
+    | "vessel"
+    | "aircraft"
+    | "real_estate"
+    | "financial_account"
+    | "cryptocurrency"
+    | "intellectual_property"
+    | "equipment"
+    | "other";
   /** Serial number / identifier */
   serialNumber?: string;
   /** Registration number */
@@ -319,7 +314,7 @@ export interface AssetProps {
   /** Location */
   location?: string;
   /** Status */
-  status?: 'active' | 'inactive' | 'seized' | 'disposed' | 'unknown';
+  status?: "active" | "inactive" | "seized" | "disposed" | "unknown";
   /** Vehicle-specific */
   vehicle?: {
     make: string;
@@ -365,7 +360,7 @@ export interface AssetProps {
 }
 
 export interface Asset extends CanonicalEntity {
-  entityType: 'Asset';
+  entityType: "Asset";
   props: AssetProps;
 }
 
@@ -379,15 +374,15 @@ export interface LocationProps {
   name: string;
   /** Location type */
   locationType:
-  | 'address'
-  | 'city'
-  | 'region'
-  | 'country'
-  | 'coordinates'
-  | 'facility'
-  | 'port'
-  | 'airport'
-  | 'other';
+    | "address"
+    | "city"
+    | "region"
+    | "country"
+    | "coordinates"
+    | "facility"
+    | "port"
+    | "airport"
+    | "other";
   /** Full address */
   address?: {
     street?: string;
@@ -418,11 +413,11 @@ export interface LocationProps {
   /** Point of interest type */
   poiType?: string;
   /** Risk level for this location */
-  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel?: "low" | "medium" | "high" | "critical";
 }
 
 export interface Location extends CanonicalEntity {
-  entityType: 'Location';
+  entityType: "Location";
   props: LocationProps;
 }
 
@@ -447,9 +442,9 @@ export interface EventProps {
   /** Location of event */
   location?: string;
   /** Severity/impact level */
-  severity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  severity?: "info" | "low" | "medium" | "high" | "critical";
   /** Status */
-  status?: 'planned' | 'in_progress' | 'completed' | 'cancelled';
+  status?: "planned" | "in_progress" | "completed" | "cancelled";
   /** Outcome */
   outcome?: string;
   /** Participants (entity IDs) */
@@ -464,7 +459,7 @@ export interface EventProps {
 }
 
 export interface Event extends CanonicalEntity {
-  entityType: 'Event';
+  entityType: "Event";
   props: EventProps;
 }
 
@@ -478,17 +473,17 @@ export interface DocumentProps {
   title: string;
   /** Document type */
   documentType:
-  | 'report'
-  | 'email'
-  | 'chat'
-  | 'social_media'
-  | 'news'
-  | 'legal'
-  | 'financial'
-  | 'image'
-  | 'video'
-  | 'audio'
-  | 'other';
+    | "report"
+    | "email"
+    | "chat"
+    | "social_media"
+    | "news"
+    | "legal"
+    | "financial"
+    | "image"
+    | "video"
+    | "audio"
+    | "other";
   /** MIME type */
   mimeType?: string;
   /** File size in bytes */
@@ -524,12 +519,12 @@ export interface DocumentProps {
   /** Sentiment */
   sentiment?: {
     score: number;
-    label: 'positive' | 'negative' | 'neutral';
+    label: "positive" | "negative" | "neutral";
   };
 }
 
 export interface Document extends CanonicalEntity {
-  entityType: 'Document';
+  entityType: "Document";
   props: DocumentProps;
 }
 
@@ -542,11 +537,11 @@ export interface ClaimProps {
   /** Claim statement */
   statement: string;
   /** Claim type */
-  claimType: 'assertion' | 'allegation' | 'hypothesis' | 'fact' | 'rumor' | 'denial';
+  claimType: "assertion" | "allegation" | "hypothesis" | "fact" | "rumor" | "denial";
   /** Subject of the claim (entity ID) */
   subjectId?: string;
   /** Verification status */
-  verificationStatus: 'unverified' | 'verified' | 'disputed' | 'refuted' | 'retracted';
+  verificationStatus: "unverified" | "verified" | "disputed" | "refuted" | "retracted";
   /** Supporting evidence (document/entity IDs) */
   supportingEvidence?: string[];
   /** Contradicting evidence */
@@ -554,7 +549,7 @@ export interface ClaimProps {
   /** Confidence in claim */
   claimConfidence: Confidence;
   /** Source credibility */
-  sourceCredibility?: 'high' | 'medium' | 'low' | 'unknown';
+  sourceCredibility?: "high" | "medium" | "low" | "unknown";
   /** Date of claim */
   claimDate?: Date;
   /** Expiry date (for time-bound claims) */
@@ -562,13 +557,13 @@ export interface ClaimProps {
   /** Attribution */
   attribution?: string;
   /** Impact assessment */
-  impact?: 'high' | 'medium' | 'low';
+  impact?: "high" | "medium" | "low";
   /** Related claims */
   relatedClaimIds?: string[];
 }
 
 export interface Claim extends CanonicalEntity {
-  entityType: 'Claim';
+  entityType: "Claim";
   props: ClaimProps;
 }
 
@@ -587,15 +582,9 @@ export interface CaseProps {
   /** Case description */
   description?: string;
   /** Status */
-  status:
-  | 'open'
-  | 'in_progress'
-  | 'pending_review'
-  | 'escalated'
-  | 'closed'
-  | 'archived';
+  status: "open" | "in_progress" | "pending_review" | "escalated" | "closed" | "archived";
   /** Priority */
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   /** Assigned to (user IDs) */
   assignedTo?: string[];
   /** Lead investigator */
@@ -607,7 +596,7 @@ export interface CaseProps {
   /** Due date */
   dueDate?: Date;
   /** SLA status */
-  slaStatus?: 'on_track' | 'at_risk' | 'breached';
+  slaStatus?: "on_track" | "at_risk" | "breached";
   /** Related entities */
   relatedEntityIds?: string[];
   /** Key findings */
@@ -635,7 +624,7 @@ export interface CaseProps {
 }
 
 export interface Case extends CanonicalEntity {
-  entityType: 'Case';
+  entityType: "Case";
   props: CaseProps;
 }
 
@@ -650,11 +639,11 @@ export interface AccountProps {
   /** Account name */
   name: string;
   /** Account type */
-  accountType: 'user' | 'service' | 'admin' | 'bot' | 'system' | 'other';
+  accountType: "user" | "service" | "admin" | "bot" | "system" | "other";
   /** Platform/service name */
   platform: string;
   /** Account status */
-  status?: 'active' | 'inactive' | 'suspended' | 'deleted';
+  status?: "active" | "inactive" | "suspended" | "deleted";
   /** Creation date */
   accountCreatedDate?: Date;
   /** Last activity date */
@@ -676,7 +665,7 @@ export interface AccountProps {
 }
 
 export interface Account extends CanonicalEntity {
-  entityType: 'Account';
+  entityType: "Account";
   props: AccountProps;
 }
 
@@ -689,7 +678,7 @@ export interface CommunicationProps {
   /** Communication subject/title */
   subject?: string;
   /** Communication type */
-  communicationType: 'email' | 'phone' | 'sms' | 'chat' | 'video_call' | 'meeting' | 'other';
+  communicationType: "email" | "phone" | "sms" | "chat" | "video_call" | "meeting" | "other";
   /** From (entity ID or identifier) */
   from: string;
   /** To (entity IDs or identifiers) */
@@ -707,9 +696,9 @@ export interface CommunicationProps {
   /** Attachments (document IDs) */
   attachmentIds?: string[];
   /** Direction */
-  direction?: 'inbound' | 'outbound' | 'internal';
+  direction?: "inbound" | "outbound" | "internal";
   /** Status */
-  status?: 'sent' | 'delivered' | 'read' | 'failed';
+  status?: "sent" | "delivered" | "read" | "failed";
   /** Thread/conversation ID */
   threadId?: string;
   /** Protocol/channel */
@@ -719,7 +708,7 @@ export interface CommunicationProps {
 }
 
 export interface Communication extends CanonicalEntity {
-  entityType: 'Communication';
+  entityType: "Communication";
   props: CommunicationProps;
 }
 
@@ -732,7 +721,7 @@ export interface DeviceProps {
   /** Device name */
   name: string;
   /** Device type */
-  deviceType: 'mobile' | 'computer' | 'server' | 'iot' | 'network' | 'other';
+  deviceType: "mobile" | "computer" | "server" | "iot" | "network" | "other";
   /** Manufacturer */
   manufacturer?: string;
   /** Model */
@@ -754,17 +743,17 @@ export interface DeviceProps {
   /** Last seen date */
   lastSeenDate?: Date;
   /** Device status */
-  status?: 'active' | 'inactive' | 'lost' | 'stolen' | 'decommissioned';
+  status?: "active" | "inactive" | "lost" | "stolen" | "decommissioned";
   /** IMEI (for mobile devices) */
   imei?: string;
   /** Location */
   location?: string;
   /** Security posture */
-  securityPosture?: 'compliant' | 'non_compliant' | 'compromised' | 'unknown';
+  securityPosture?: "compliant" | "non_compliant" | "compromised" | "unknown";
 }
 
 export interface Device extends CanonicalEntity {
-  entityType: 'Device';
+  entityType: "Device";
   props: DeviceProps;
 }
 
@@ -777,7 +766,7 @@ export interface VehicleProps {
   /** Vehicle name/identifier */
   name: string;
   /** Vehicle type */
-  vehicleType: 'car' | 'truck' | 'motorcycle' | 'bus' | 'other';
+  vehicleType: "car" | "truck" | "motorcycle" | "bus" | "other";
   /** Make */
   make: string;
   /** Model */
@@ -795,13 +784,13 @@ export interface VehicleProps {
   /** Owner (entity ID) */
   ownerId?: string;
   /** Registration status */
-  registrationStatus?: 'valid' | 'expired' | 'suspended' | 'unknown';
+  registrationStatus?: "valid" | "expired" | "suspended" | "unknown";
   /** Last known location */
   lastKnownLocation?: string;
 }
 
 export interface Vehicle extends CanonicalEntity {
-  entityType: 'Vehicle';
+  entityType: "Vehicle";
   props: VehicleProps;
 }
 
@@ -814,7 +803,15 @@ export interface InfrastructureProps {
   /** Infrastructure name */
   name: string;
   /** Infrastructure type */
-  infrastructureType: 'domain' | 'ip_range' | 'server' | 'cdn' | 'dns' | 'hosting' | 'network' | 'other';
+  infrastructureType:
+    | "domain"
+    | "ip_range"
+    | "server"
+    | "cdn"
+    | "dns"
+    | "hosting"
+    | "network"
+    | "other";
   /** Domain name */
   domain?: string;
   /** IP address or range */
@@ -838,13 +835,13 @@ export interface InfrastructureProps {
     validTo?: Date;
   };
   /** Status */
-  status?: 'active' | 'inactive' | 'suspended' | 'seized';
+  status?: "active" | "inactive" | "suspended" | "seized";
   /** Risk indicators */
   riskIndicators?: string[];
 }
 
 export interface Infrastructure extends CanonicalEntity {
-  entityType: 'Infrastructure';
+  entityType: "Infrastructure";
   props: InfrastructureProps;
 }
 
@@ -857,7 +854,15 @@ export interface FinancialInstrumentProps {
   /** Instrument name */
   name: string;
   /** Instrument type */
-  instrumentType: 'stock' | 'bond' | 'derivative' | 'option' | 'future' | 'crypto' | 'currency' | 'other';
+  instrumentType:
+    | "stock"
+    | "bond"
+    | "derivative"
+    | "option"
+    | "future"
+    | "crypto"
+    | "currency"
+    | "other";
   /** Ticker symbol */
   ticker?: string;
   /** ISIN */
@@ -887,7 +892,7 @@ export interface FinancialInstrumentProps {
 }
 
 export interface FinancialInstrument extends CanonicalEntity {
-  entityType: 'FinancialInstrument';
+  entityType: "FinancialInstrument";
   props: FinancialInstrumentProps;
 }
 
@@ -900,15 +905,15 @@ export interface IndicatorProps {
   /** Indicator name */
   name: string;
   /** Indicator type */
-  indicatorType: 'ioc' | 'ttp' | 'anomaly' | 'behavior' | 'pattern' | 'signature';
+  indicatorType: "ioc" | "ttp" | "anomaly" | "behavior" | "pattern" | "signature";
   /** Indicator pattern (STIX, Sigma, etc.) */
   pattern?: string;
   /** Pattern type */
-  patternType?: 'stix' | 'sigma' | 'yara' | 'snort' | 'regex' | 'custom';
+  patternType?: "stix" | "sigma" | "yara" | "snort" | "regex" | "custom";
   /** Description */
   description?: string;
   /** Severity */
-  severity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  severity?: "info" | "low" | "medium" | "high" | "critical";
   /** Confidence */
   indicatorConfidence: Confidence;
   /** Valid from */
@@ -924,7 +929,7 @@ export interface IndicatorProps {
 }
 
 export interface Indicator extends CanonicalEntity {
-  entityType: 'Indicator';
+  entityType: "Indicator";
   props: IndicatorProps;
 }
 
@@ -939,7 +944,12 @@ export interface NarrativeProps {
   /** Narrative description */
   description: string;
   /** Narrative type */
-  narrativeType: 'threat_narrative' | 'influence_campaign' | 'disinformation' | 'storyline' | 'other';
+  narrativeType:
+    | "threat_narrative"
+    | "influence_campaign"
+    | "disinformation"
+    | "storyline"
+    | "other";
   /** Key themes */
   themes?: string[];
   /** Targets (entity IDs or descriptions) */
@@ -951,7 +961,7 @@ export interface NarrativeProps {
   /** Last observed */
   lastObserved?: Date;
   /** Amplification level */
-  amplificationLevel?: 'low' | 'medium' | 'high';
+  amplificationLevel?: "low" | "medium" | "high";
   /** Reach estimate */
   reachEstimate?: number;
   /** Related narratives */
@@ -961,7 +971,7 @@ export interface NarrativeProps {
 }
 
 export interface Narrative extends CanonicalEntity {
-  entityType: 'Narrative';
+  entityType: "Narrative";
   props: NarrativeProps;
 }
 
@@ -976,9 +986,9 @@ export interface CampaignProps {
   /** Campaign description */
   description?: string;
   /** Campaign type */
-  campaignType: 'cyber' | 'influence' | 'military' | 'intelligence' | 'criminal' | 'other';
+  campaignType: "cyber" | "influence" | "military" | "intelligence" | "criminal" | "other";
   /** Status */
-  status?: 'active' | 'dormant' | 'concluded' | 'unknown';
+  status?: "active" | "dormant" | "concluded" | "unknown";
   /** Start date */
   startDate?: Date;
   /** End date */
@@ -994,13 +1004,13 @@ export interface CampaignProps {
   /** Targets (entity IDs) */
   targetIds?: string[];
   /** Impact assessment */
-  impact?: 'low' | 'medium' | 'high' | 'critical';
+  impact?: "low" | "medium" | "high" | "critical";
   /** Related campaigns */
   relatedCampaignIds?: string[];
 }
 
 export interface Campaign extends CanonicalEntity {
-  entityType: 'Campaign';
+  entityType: "Campaign";
   props: CampaignProps;
 }
 
@@ -1013,13 +1023,19 @@ export interface AuthorityProps {
   /** Authority name */
   name: string;
   /** Authority type */
-  authorityType: 'government' | 'regulatory' | 'law_enforcement' | 'judicial' | 'international' | 'other';
+  authorityType:
+    | "government"
+    | "regulatory"
+    | "law_enforcement"
+    | "judicial"
+    | "international"
+    | "other";
   /** Jurisdiction */
   jurisdiction?: string;
   /** Country */
   country?: string;
   /** Authority level */
-  level?: 'local' | 'state' | 'national' | 'international';
+  level?: "local" | "state" | "national" | "international";
   /** Contact information */
   contactInfo?: {
     email?: string;
@@ -1033,7 +1049,7 @@ export interface AuthorityProps {
 }
 
 export interface Authority extends CanonicalEntity {
-  entityType: 'Authority';
+  entityType: "Authority";
   props: AuthorityProps;
 }
 
@@ -1046,7 +1062,7 @@ export interface LicenseProps {
   /** License name */
   name: string;
   /** License type */
-  licenseType: 'export_control' | 'data_use' | 'software' | 'content' | 'regulatory' | 'other';
+  licenseType: "export_control" | "data_use" | "software" | "content" | "regulatory" | "other";
   /** License number */
   licenseNumber?: string;
   /** Issuing authority (entity ID) */
@@ -1062,13 +1078,13 @@ export interface LicenseProps {
   /** Restrictions */
   restrictions?: string[];
   /** Status */
-  status?: 'active' | 'expired' | 'revoked' | 'suspended';
+  status?: "active" | "expired" | "revoked" | "suspended";
   /** Terms and conditions */
   termsUrl?: string;
 }
 
 export interface License extends CanonicalEntity {
-  entityType: 'License';
+  entityType: "License";
   props: LicenseProps;
 }
 
@@ -1105,77 +1121,77 @@ export type AnyCanonicalEntity =
 // -----------------------------------------------------------------------------
 
 export function isPerson(entity: CanonicalEntity): entity is Person {
-  return entity.entityType === 'Person';
+  return entity.entityType === "Person";
 }
 
 export function isOrganization(entity: CanonicalEntity): entity is Organization {
-  return entity.entityType === 'Organization';
+  return entity.entityType === "Organization";
 }
 
 export function isAsset(entity: CanonicalEntity): entity is Asset {
-  return entity.entityType === 'Asset';
+  return entity.entityType === "Asset";
 }
 
 export function isLocation(entity: CanonicalEntity): entity is Location {
-  return entity.entityType === 'Location';
+  return entity.entityType === "Location";
 }
 
 export function isEvent(entity: CanonicalEntity): entity is Event {
-  return entity.entityType === 'Event';
+  return entity.entityType === "Event";
 }
 
 export function isDocument(entity: CanonicalEntity): entity is Document {
-  return entity.entityType === 'Document';
+  return entity.entityType === "Document";
 }
 
 export function isClaim(entity: CanonicalEntity): entity is Claim {
-  return entity.entityType === 'Claim';
+  return entity.entityType === "Claim";
 }
 
 export function isCase(entity: CanonicalEntity): entity is Case {
-  return entity.entityType === 'Case';
+  return entity.entityType === "Case";
 }
 
 export function isAccount(entity: CanonicalEntity): entity is Account {
-  return entity.entityType === 'Account';
+  return entity.entityType === "Account";
 }
 
 export function isCommunication(entity: CanonicalEntity): entity is Communication {
-  return entity.entityType === 'Communication';
+  return entity.entityType === "Communication";
 }
 
 export function isDevice(entity: CanonicalEntity): entity is Device {
-  return entity.entityType === 'Device';
+  return entity.entityType === "Device";
 }
 
 export function isVehicle(entity: CanonicalEntity): entity is Vehicle {
-  return entity.entityType === 'Vehicle';
+  return entity.entityType === "Vehicle";
 }
 
 export function isInfrastructure(entity: CanonicalEntity): entity is Infrastructure {
-  return entity.entityType === 'Infrastructure';
+  return entity.entityType === "Infrastructure";
 }
 
 export function isFinancialInstrument(entity: CanonicalEntity): entity is FinancialInstrument {
-  return entity.entityType === 'FinancialInstrument';
+  return entity.entityType === "FinancialInstrument";
 }
 
 export function isIndicator(entity: CanonicalEntity): entity is Indicator {
-  return entity.entityType === 'Indicator';
+  return entity.entityType === "Indicator";
 }
 
 export function isNarrative(entity: CanonicalEntity): entity is Narrative {
-  return entity.entityType === 'Narrative';
+  return entity.entityType === "Narrative";
 }
 
 export function isCampaign(entity: CanonicalEntity): entity is Campaign {
-  return entity.entityType === 'Campaign';
+  return entity.entityType === "Campaign";
 }
 
 export function isAuthority(entity: CanonicalEntity): entity is Authority {
-  return entity.entityType === 'Authority';
+  return entity.entityType === "Authority";
 }
 
 export function isLicense(entity: CanonicalEntity): entity is License {
-  return entity.entityType === 'License';
+  return entity.entityType === "License";
 }

@@ -2,12 +2,12 @@
  * Comment drafting module
  * Drafts comments for deduplicated clusters
  */
-import { IssueCluster, TriageItem } from '../types.js';
+import { IssueCluster, TriageItem } from "../types.js";
 export interface CommentDraft {
-    issueId: string;
-    comment: string;
-    relatedIssues: string[];
-    action: 'duplicate' | 'cluster-summary' | 'auto-triage';
+  issueId: string;
+  comment: string;
+  relatedIssues: string[];
+  action: "duplicate" | "cluster-summary" | "auto-triage";
 }
 /**
  * Draft deduplication comments for clustered issues
@@ -20,5 +20,8 @@ export declare function draftAutoTriageComment(item: TriageItem): CommentDraft;
 /**
  * Draft batch comments for all issues
  */
-export declare function draftBatchComments(items: TriageItem[], clusters: IssueCluster[]): CommentDraft[];
+export declare function draftBatchComments(
+  items: TriageItem[],
+  clusters: IssueCluster[]
+): CommentDraft[];
 //# sourceMappingURL=comment-drafter.d.ts.map

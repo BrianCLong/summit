@@ -32,10 +32,7 @@
   "allowed_operations": ["create", "edit"],
   "verification_requirements": {
     "tier": "C",
-    "artifacts": [
-      "pytest tests/policy tests/evidence tests/promptspec",
-      "make smoke"
-    ]
+    "artifacts": ["pytest tests/policy tests/evidence tests/promptspec", "make smoke"]
   },
   "debt_budget": {
     "permitted": 0,

@@ -1,5 +1,5 @@
-import type { AudioBuffer, AudioMetadata, AudioSegment } from './types.js';
-import { AudioFormat, SampleRate } from './types.js';
+import type { AudioBuffer, AudioMetadata, AudioSegment } from "./types.js";
+import { AudioFormat, SampleRate } from "./types.js";
 
 /**
  * Calculate audio duration in seconds
@@ -43,10 +43,18 @@ export function calculateBufferSize(
  * Validate audio metadata
  */
 export function validateAudioMetadata(metadata: AudioMetadata): boolean {
-  if (metadata.duration <= 0) {return false;}
-  if (metadata.sampleRate <= 0) {return false;}
-  if (metadata.channels <= 0) {return false;}
-  if (metadata.bitDepth && metadata.bitDepth <= 0) {return false;}
+  if (metadata.duration <= 0) {
+    return false;
+  }
+  if (metadata.sampleRate <= 0) {
+    return false;
+  }
+  if (metadata.channels <= 0) {
+    return false;
+  }
+  if (metadata.bitDepth && metadata.bitDepth <= 0) {
+    return false;
+  }
   return true;
 }
 
@@ -55,7 +63,9 @@ export function validateAudioMetadata(metadata: AudioMetadata): boolean {
  */
 export function normalizeAudio(buffer: Float32Array): Float32Array {
   const max = Math.max(...Array.from(buffer).map(Math.abs));
-  if (max === 0) {return buffer;}
+  if (max === 0) {
+    return buffer;
+  }
 
   const normalized = new Float32Array(buffer.length);
   for (let i = 0; i < buffer.length; i++) {
@@ -89,7 +99,9 @@ export function calculateSNR(signal: Float32Array, noise: Float32Array): number 
   const signalRMS = calculateRMS(signal);
   const noiseRMS = calculateRMS(noise);
 
-  if (noiseRMS === 0) {return Infinity;}
+  if (noiseRMS === 0) {
+    return Infinity;
+  }
   return 20 * Math.log10(signalRMS / noiseRMS);
 }
 
@@ -122,7 +134,9 @@ export function splitIntoChunks(
     const chunk = buffer.slice(i, end);
     chunks.push(chunk);
 
-    if (end === buffer.length) {break;}
+    if (end === buffer.length) {
+      break;
+    }
   }
 
   return chunks;
@@ -157,7 +171,9 @@ export function resampleLinear(
   inputRate: number,
   outputRate: number
 ): Float32Array {
-  if (inputRate === outputRate) {return input;}
+  if (inputRate === outputRate) {
+    return input;
+  }
 
   const ratio = inputRate / outputRate;
   const outputLength = Math.floor(input.length / ratio);
@@ -195,7 +211,7 @@ export function stereoToMono(left: Float32Array, right: Float32Array): Float32Ar
 export function monoToStereo(mono: Float32Array): { left: Float32Array; right: Float32Array } {
   return {
     left: new Float32Array(mono),
-    right: new Float32Array(mono)
+    right: new Float32Array(mono),
   };
 }
 
@@ -234,17 +250,19 @@ export function getSupportedFormats(): AudioFormat[] {
  * Get standard sample rates
  */
 export function getStandardSampleRates(): number[] {
-  return Object.values(SampleRate).filter((v): v is number => typeof v === 'number');
+  return Object.values(SampleRate).filter((v): v is number => typeof v === "number");
 }
 
 /**
  * Format bytes to human readable
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) {return '0 Bytes';}
+  if (bytes === 0) {
+    return "0 Bytes";
+  }
 
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
@@ -259,21 +277,28 @@ export function formatDuration(seconds: number): string {
   const secs = Math.floor(seconds % 60);
 
   const parts: string[] = [];
-  if (hours > 0) {parts.push(`${hours}h`);}
-  if (minutes > 0) {parts.push(`${minutes}m`);}
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (minutes > 0) {
+    parts.push(`${minutes}m`);
+  }
   parts.push(`${secs}s`);
 
-  return parts.join(' ');
+  return parts.join(" ");
 }
 
 /**
  * Create checksum of audio data
  */
-export async function createChecksum(data: Buffer | Uint8Array, algorithm: 'md5' | 'sha256' = 'sha256'): Promise<string> {
-  const crypto = await import('crypto');
+export async function createChecksum(
+  data: Buffer | Uint8Array,
+  algorithm: "md5" | "sha256" = "sha256"
+): Promise<string> {
+  const crypto = await import("crypto");
   const hash = crypto.createHash(algorithm);
   hash.update(data);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 /**
@@ -282,7 +307,7 @@ export async function createChecksum(data: Buffer | Uint8Array, algorithm: 'md5'
 export async function verifyChecksum(
   data: Buffer | Uint8Array,
   expectedChecksum: string,
-  algorithm: 'md5' | 'sha256' = 'sha256'
+  algorithm: "md5" | "sha256" = "sha256"
 ): Promise<boolean> {
   const actualChecksum = await createChecksum(data, algorithm);
   return actualChecksum === expectedChecksum;

@@ -6,14 +6,14 @@
  * @see docs/adr/ADR-010_invariant_carrying_context_capsules.md
  */
 
-import { createHash, createSign, createVerify } from 'crypto';
+import { createHash, createSign, createVerify } from "crypto";
 import {
   ContextCapsule as IContextCapsule,
   Invariant,
   CapsuleMetadata,
-  CapsuleCreationOptions
-} from './types.js';
-import { ContextSegment } from '../provenance/types.js';
+  CapsuleCreationOptions,
+} from "./types.js";
+import { ContextSegment } from "../provenance/types.js";
 
 /**
  * ContextCapsule Factory
@@ -27,13 +27,13 @@ export class ContextCapsuleFactory {
   create(
     content: ContextSegment,
     invariants: Invariant[],
-    metadata: Omit<CapsuleMetadata, 'createdAt'>,
+    metadata: Omit<CapsuleMetadata, "createdAt">,
     options?: CapsuleCreationOptions
   ): IContextCapsule {
     const fullMetadata: CapsuleMetadata = {
       ...metadata,
       createdAt: new Date(),
-      ...(options?.metadata || {})
+      ...(options?.metadata || {}),
     };
 
     // Apply TTL if specified
@@ -49,7 +49,7 @@ export class ContextCapsuleFactory {
       content,
       invariants,
       metadata: fullMetadata,
-      signature: undefined
+      signature: undefined,
     };
 
     // Sign capsule if requested
@@ -74,11 +74,11 @@ export class ContextCapsuleFactory {
       metadata: {
         ...metadata,
         // Exclude createdAt from hash for reproducibility
-        createdAt: undefined
-      }
+        createdAt: undefined,
+      },
     });
 
-    return createHash('sha256').update(payload).digest('hex');
+    return createHash("sha256").update(payload).digest("hex");
   }
 
   /**
@@ -89,14 +89,14 @@ export class ContextCapsuleFactory {
       id: capsule.id,
       content: capsule.content,
       invariants: capsule.invariants,
-      metadata: capsule.metadata
+      metadata: capsule.metadata,
     });
 
-    const sign = createSign('SHA256');
+    const sign = createSign("SHA256");
     sign.update(payload);
     sign.end();
 
-    return sign.sign(privateKey, 'hex');
+    return sign.sign(privateKey, "hex");
   }
 
   /**
@@ -111,15 +111,15 @@ export class ContextCapsuleFactory {
       id: capsule.id,
       content: capsule.content,
       invariants: capsule.invariants,
-      metadata: capsule.metadata
+      metadata: capsule.metadata,
     });
 
-    const verify = createVerify('SHA256');
+    const verify = createVerify("SHA256");
     verify.update(payload);
     verify.end();
 
     try {
-      return verify.verify(publicKey, capsule.signature, 'hex');
+      return verify.verify(publicKey, capsule.signature, "hex");
     } catch {
       return false;
     }
@@ -153,7 +153,7 @@ export class ContextCapsuleFactory {
         createdBy: capsule.metadata.createdBy,
         authorityScope: capsule.metadata.authorityScope,
         policyDomain: capsule.metadata.policyDomain,
-        validUntil: capsule.metadata.validUntil
+        validUntil: capsule.metadata.validUntil,
       },
       options
     );
@@ -177,7 +177,7 @@ export class ContextCapsuleFactory {
         authorityScope: capsule.metadata.authorityScope,
         policyDomain: capsule.metadata.policyDomain,
         validUntil: capsule.metadata.validUntil,
-        forwardingChain: [...forwardingChain, forwardedBy]
+        forwardingChain: [...forwardingChain, forwardedBy],
       },
       options
     );
@@ -194,15 +194,15 @@ export class ContextCapsuleFactory {
 export function forbidTopicsInvariant(
   id: string,
   topics: string[],
-  severity: 'info' | 'warn' | 'block' = 'block'
+  severity: "info" | "warn" | "block" = "block"
 ): Invariant {
   return {
     id,
-    type: 'reasoning_constraint',
-    rule: { kind: 'forbid_topics', topics },
+    type: "reasoning_constraint",
+    rule: { kind: "forbid_topics", topics },
     severity,
-    description: `Reasoning about topics [${topics.join(', ')}] is forbidden`,
-    remediation: 'Remove or redact content related to forbidden topics'
+    description: `Reasoning about topics [${topics.join(", ")}] is forbidden`,
+    remediation: "Remove or redact content related to forbidden topics",
   };
 }
 
@@ -212,15 +212,15 @@ export function forbidTopicsInvariant(
 export function requireClearanceInvariant(
   id: string,
   level: string,
-  severity: 'info' | 'warn' | 'block' = 'block'
+  severity: "info" | "warn" | "block" = "block"
 ): Invariant {
   return {
     id,
-    type: 'data_usage',
-    rule: { kind: 'require_clearance', level },
+    type: "data_usage",
+    rule: { kind: "require_clearance", level },
     severity,
     description: `Requires clearance level: ${level}`,
-    remediation: `Execution context must have clearance level ${level} or higher`
+    remediation: `Execution context must have clearance level ${level} or higher`,
   };
 }
 
@@ -230,15 +230,15 @@ export function requireClearanceInvariant(
 export function noExternalCallsInvariant(
   id: string,
   strict: boolean = true,
-  severity: 'info' | 'warn' | 'block' = 'block'
+  severity: "info" | "warn" | "block" = "block"
 ): Invariant {
   return {
     id,
-    type: 'authority_scope',
-    rule: { kind: 'no_external_calls', strict },
+    type: "authority_scope",
+    rule: { kind: "no_external_calls", strict },
     severity,
-    description: 'External API calls are forbidden',
-    remediation: 'Disable tool calls and external integrations for this context'
+    description: "External API calls are forbidden",
+    remediation: "Disable tool calls and external integrations for this context",
   };
 }
 
@@ -248,15 +248,15 @@ export function noExternalCallsInvariant(
 export function dataRetentionInvariant(
   id: string,
   maxDays: number,
-  severity: 'info' | 'warn' | 'block' = 'warn'
+  severity: "info" | "warn" | "block" = "warn"
 ): Invariant {
   return {
     id,
-    type: 'data_usage',
-    rule: { kind: 'data_retention', maxDays },
+    type: "data_usage",
+    rule: { kind: "data_retention", maxDays },
     severity,
     description: `Data must be deleted after ${maxDays} days`,
-    remediation: `Implement retention policy: delete context after ${maxDays} days`
+    remediation: `Implement retention policy: delete context after ${maxDays} days`,
   };
 }
 
@@ -266,14 +266,14 @@ export function dataRetentionInvariant(
 export function outputSchemaInvariant(
   id: string,
   schema: Record<string, unknown>,
-  severity: 'info' | 'warn' | 'block' = 'block'
+  severity: "info" | "warn" | "block" = "block"
 ): Invariant {
   return {
     id,
-    type: 'output_class',
-    rule: { kind: 'output_must_match', schema: schema as any },
+    type: "output_class",
+    rule: { kind: "output_must_match", schema: schema as any },
     severity,
-    description: 'Output must conform to specified JSON schema',
-    remediation: 'Validate model output against schema before accepting'
+    description: "Output must conform to specified JSON schema",
+    remediation: "Validate model output against schema before accepting",
   };
 }

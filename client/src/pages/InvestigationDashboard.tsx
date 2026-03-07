@@ -1,14 +1,14 @@
 // @ts-nocheck
-import React from 'react';
-import { Paper, Typography } from '@mui/material';
-import { Responsive, WidthProvider, Layouts } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
+import React from "react";
+import { Paper, Typography } from "@mui/material";
+import { Responsive, WidthProvider, Layouts } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const InvestigationMetadataTile: React.FC = () => (
-  <Paper sx={{ p: 2, height: '100%' }}>
+  <Paper sx={{ p: 2, height: "100%" }}>
     <Typography variant="h6" gutterBottom>
       Investigation Metadata
     </Typography>
@@ -19,7 +19,7 @@ const InvestigationMetadataTile: React.FC = () => (
 );
 
 const EntityActivityTile: React.FC = () => (
-  <Paper sx={{ p: 2, height: '100%' }}>
+  <Paper sx={{ p: 2, height: "100%" }}>
     <Typography variant="h6" gutterBottom>
       Entity Activity Over Time
     </Typography>
@@ -30,7 +30,7 @@ const EntityActivityTile: React.FC = () => (
 );
 
 const EntitiesTile: React.FC = () => (
-  <Paper sx={{ p: 2, height: '100%' }}>
+  <Paper sx={{ p: 2, height: "100%" }}>
     <Typography variant="h6" gutterBottom>
       Entities
     </Typography>
@@ -41,7 +41,7 @@ const EntitiesTile: React.FC = () => (
 );
 
 const RelationshipDensityHeatmapTile: React.FC = () => (
-  <Paper sx={{ p: 2, height: '100%' }}>
+  <Paper sx={{ p: 2, height: "100%" }}>
     <Typography variant="h6" gutterBottom>
       Relationship Density Heatmap
     </Typography>
@@ -53,10 +53,10 @@ const RelationshipDensityHeatmapTile: React.FC = () => (
 
 const defaultLayouts: Layouts = {
   lg: [
-    { i: 'metadata', x: 0, y: 0, w: 3, h: 2 },
-    { i: 'timeline', x: 3, y: 0, w: 3, h: 2 },
-    { i: 'entities', x: 0, y: 2, w: 3, h: 2 },
-    { i: 'heatmap', x: 3, y: 2, w: 3, h: 2 },
+    { i: "metadata", x: 0, y: 0, w: 3, h: 2 },
+    { i: "timeline", x: 3, y: 0, w: 3, h: 2 },
+    { i: "entities", x: 0, y: 2, w: 3, h: 2 },
+    { i: "heatmap", x: 3, y: 2, w: 3, h: 2 },
   ],
 };
 

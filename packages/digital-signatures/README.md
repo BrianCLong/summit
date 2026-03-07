@@ -21,14 +21,14 @@ pnpm add @intelgraph/digital-signatures
 ### Generate Key Pair
 
 ```typescript
-import { PKIManager } from '@intelgraph/digital-signatures';
-import pino from 'pino';
+import { PKIManager } from "@intelgraph/digital-signatures";
+import pino from "pino";
 
 const pki = new PKIManager(pino());
 
 // ECDSA (recommended for blockchain)
 const ecdsaKeys = pki.generateECDSAKeyPair();
-console.log('Public key:', ecdsaKeys.publicKey);
+console.log("Public key:", ecdsaKeys.publicKey);
 
 // RSA (for compatibility)
 const rsaKeys = pki.generateRSAKeyPair(2048);
@@ -37,14 +37,14 @@ const rsaKeys = pki.generateRSAKeyPair(2048);
 ### Sign and Verify (ECDSA)
 
 ```typescript
-const data = JSON.stringify({ message: 'Hello, World!' });
+const data = JSON.stringify({ message: "Hello, World!" });
 
 // Sign
 const signature = pki.signECDSA(data, ecdsaKeys.privateKey);
 
 // Verify
 const isValid = pki.verifyECDSA(data, signature, ecdsaKeys.publicKey);
-console.log('Signature valid:', isValid);
+console.log("Signature valid:", isValid);
 ```
 
 ### Sign and Verify (RSA)
@@ -60,14 +60,14 @@ const isValid = pki.verifyRSA(data, signature, rsaKeys.publicKey);
 const issuerKeys = pki.generateECDSAKeyPair();
 
 const certificate = pki.issueCertificate(
-  'user@example.com',
-  'IntelGraph CA',
+  "user@example.com",
+  "IntelGraph CA",
   ecdsaKeys.publicKey,
   365, // Valid for 1 year
   issuerKeys.privateKey // Sign with issuer's key
 );
 
-console.log('Certificate ID:', certificate.id);
+console.log("Certificate ID:", certificate.id);
 ```
 
 ### Verify Certificate
@@ -76,9 +76,9 @@ console.log('Certificate ID:', certificate.id);
 const result = pki.verifyCertificate(certificate.id);
 
 if (result.valid) {
-  console.log('Certificate is valid');
+  console.log("Certificate is valid");
 } else {
-  console.log('Certificate errors:', result.errors);
+  console.log("Certificate errors:", result.errors);
 }
 ```
 
@@ -108,7 +108,7 @@ const isValid = pki.verifyMultiSignature(
 ### Revoke Certificate
 
 ```typescript
-pki.revokeCertificate(certificate.id, 'Key compromised');
+pki.revokeCertificate(certificate.id, "Key compromised");
 
 // Check revocation
 const isRevoked = pki.isCertificateRevoked(certificate.id);

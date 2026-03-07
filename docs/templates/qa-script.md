@@ -13,7 +13,8 @@
 6. Export snapshot
 
 ### Pass conditions
-* [ ] Panes stay in sync
-* [ ] No console errors
-* [ ] Interaction stays responsive (no freezes > 200ms)
-* [ ] Keyboard navigation works for selection + range controls
+
+- [ ] Panes stay in sync
+- [ ] No console errors
+- [ ] Interaction stays responsive (no freezes > 200ms)
+- [ ] Keyboard navigation works for selection + range controls

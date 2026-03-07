@@ -1,5 +1,5 @@
-import type { TokenEstimator } from './utils.js';
-import { defaultTokenEstimator } from './utils.js';
+import type { TokenEstimator } from "./utils.js";
+import { defaultTokenEstimator } from "./utils.js";
 
 export interface SummarizationLayer {
   maxTokens: number;

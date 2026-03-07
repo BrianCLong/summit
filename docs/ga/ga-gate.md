@@ -9,6 +9,7 @@ CI.
 The JSON block below is parsed directly by automation. Update it intentionally and keep it stable.
 
 <!-- GA-GATE-SPEC:START -->
+
 ```json
 {
   "requiredChecks": ["tests", "typecheck", "lint", "build"],
@@ -23,6 +24,7 @@ The JSON block below is parsed directly by automation. Update it intentionally a
   }
 }
 ```
+
 <!-- GA-GATE-SPEC:END -->
 
 ## Required checks

@@ -96,7 +96,7 @@ export interface LabelPropagationOptions {
  */
 export function detectCommunitiesLouvain(
   graph: GraphData,
-  options: LouvainOptions = {},
+  options: LouvainOptions = {}
 ): CommunityDetectionResult {
   const startTime = performance.now();
 
@@ -128,7 +128,7 @@ export function detectCommunitiesLouvain(
     edges,
     nodeWeights,
     totalWeight,
-    resolution,
+    resolution
   );
 
   let improved = true;
@@ -166,7 +166,7 @@ export function detectCommunitiesLouvain(
             edges,
             nodeWeights,
             totalWeight,
-            resolution,
+            resolution
           );
 
           if (gain > bestGain) {
@@ -190,7 +190,7 @@ export function detectCommunitiesLouvain(
       edges,
       nodeWeights,
       totalWeight,
-      resolution,
+      resolution
     );
 
     if (newModularity - currentModularity < minModularityGain) {
@@ -238,15 +238,11 @@ export function detectCommunitiesLouvain(
  */
 export function detectCommunitiesLabelPropagation(
   graph: GraphData,
-  options: LabelPropagationOptions = {},
+  options: LabelPropagationOptions = {}
 ): CommunityDetectionResult {
   const startTime = performance.now();
 
-  const {
-    maxIterations = 100,
-    seed = Date.now(),
-    weightProperty,
-  } = options;
+  const { maxIterations = 100, seed = Date.now(), weightProperty } = options;
 
   const nodes = graph.nodes;
 
@@ -289,7 +285,9 @@ export function detectCommunitiesLabelPropagation(
     for (const node of shuffledNodes) {
       const neighbors = adjacency.get(node) || new Map();
 
-      if (neighbors.size === 0) {continue;}
+      if (neighbors.size === 0) {
+        continue;
+      }
 
       // Count label frequencies weighted by edge weight
       const labelWeights = new Map<number, number>();
@@ -378,10 +376,7 @@ function buildEdgeStructure(graph: GraphData, weightProperty?: string): EdgeStru
   return structure;
 }
 
-function calculateNodeWeights(
-  nodes: string[],
-  edges: EdgeStructure,
-): Map<string, number> {
+function calculateNodeWeights(nodes: string[], edges: EdgeStructure): Map<string, number> {
   const weights = new Map<string, number>();
 
   for (const node of nodes) {
@@ -408,9 +403,11 @@ function calculateModularity(
   edges: EdgeStructure,
   nodeWeights: Map<string, number>,
   totalWeight: number,
-  resolution: number,
+  resolution: number
 ): number {
-  if (totalWeight === 0) {return 0;}
+  if (totalWeight === 0) {
+    return 0;
+  }
 
   // Calculate sum of weights within each community
   let modularity = 0;
@@ -450,9 +447,11 @@ function modularityGain(
   edges: EdgeStructure,
   nodeWeights: Map<string, number>,
   totalWeight: number,
-  resolution: number,
+  resolution: number
 ): number {
-  if (fromCommunity === toCommunity) {return 0;}
+  if (fromCommunity === toCommunity) {
+    return 0;
+  }
 
   const neighbors = edges.nodes.get(node) || new Map();
   const nodeWeight = nodeWeights.get(node) || 0;
@@ -473,7 +472,7 @@ function modularityGain(
   // Calculate gain
   const gain =
     (weightToCommunity - weightFromCommunity) / (2 * totalWeight) -
-    resolution * (nodeWeight * nodeWeight) / (4 * totalWeight * totalWeight);
+    (resolution * (nodeWeight * nodeWeight)) / (4 * totalWeight * totalWeight);
 
   return gain;
 }
@@ -481,7 +480,7 @@ function modularityGain(
 function getNeighborCommunities(
   node: string,
   edges: EdgeStructure,
-  communities: Map<string, number>,
+  communities: Map<string, number>
 ): Map<number, number> {
   const neighborCommunities = new Map<number, number>();
   const neighbors = edges.nodes.get(node) || new Map();
@@ -534,11 +533,14 @@ function shuffleArray<T>(array: T[], random: () => number = Math.random): T[] {
 /**
  * Analyzes community structure quality and characteristics
  */
-export function analyzeCommunityStructure(result: CommunityDetectionResult, graph: GraphData): {
+export function analyzeCommunityStructure(
+  result: CommunityDetectionResult,
+  graph: GraphData
+): {
   avgCommunitySize: number;
   largestCommunity: number;
   smallestCommunity: number;
-  modularityClass: 'weak' | 'moderate' | 'strong';
+  modularityClass: "weak" | "moderate" | "strong";
   interCommunityEdges: number;
   intraCommunityEdges: number;
 } {
@@ -547,13 +549,13 @@ export function analyzeCommunityStructure(result: CommunityDetectionResult, grap
   const largestCommunity = Math.max(...sizes);
   const smallestCommunity = Math.min(...sizes);
 
-  let modularityClass: 'weak' | 'moderate' | 'strong';
+  let modularityClass: "weak" | "moderate" | "strong";
   if (result.modularity < 0.3) {
-    modularityClass = 'weak';
+    modularityClass = "weak";
   } else if (result.modularity < 0.7) {
-    modularityClass = 'moderate';
+    modularityClass = "moderate";
   } else {
-    modularityClass = 'strong';
+    modularityClass = "strong";
   }
 
   // Count inter vs intra community edges

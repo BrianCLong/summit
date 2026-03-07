@@ -3,8 +3,8 @@
  * Detects which areas an issue belongs to (copilot, ingestion, graph, UI, infra, etc.)
  */
 
-import { TriageItem } from '../types.js';
-import { AreaConfig } from '../config.js';
+import { TriageItem } from "../types.js";
+import { AreaConfig } from "../config.js";
 
 export function detectAreas(item: TriageItem, areaConfigs: AreaConfig[]): string[] {
   const text = `${item.title} ${item.description}`.toLowerCase();
@@ -16,14 +16,14 @@ export function detectAreas(item: TriageItem, areaConfigs: AreaConfig[]): string
     // Keyword matching
     for (const keyword of config.keywords) {
       const keywordLower = keyword.toLowerCase();
-      const count = (text.match(new RegExp(`\\b${escapeRegex(keywordLower)}\\b`, 'g')) || [])
+      const count = (text.match(new RegExp(`\\b${escapeRegex(keywordLower)}\\b`, "g")) || [])
         .length;
       score += count * config.weight;
     }
 
     // Pattern matching
     for (const pattern of config.patterns) {
-      const matches = text.match(new RegExp(pattern, 'gi')) || [];
+      const matches = text.match(new RegExp(pattern, "gi")) || [];
       score += matches.length * config.weight * 1.5; // Patterns have higher weight
     }
 
@@ -52,9 +52,9 @@ export function detectAreas(item: TriageItem, areaConfigs: AreaConfig[]): string
     .map(([area]) => area);
 
   // Return top 3 areas max, or at least 1 if any match
-  return sortedAreas.length > 0 ? sortedAreas.slice(0, 3) : ['uncategorized'];
+  return sortedAreas.length > 0 ? sortedAreas.slice(0, 3) : ["uncategorized"];
 }
 
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

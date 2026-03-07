@@ -1,15 +1,17 @@
 # Data Handling: DocGraph
 
 ## Data classes
-| Class | Handling |
-|---|---|
+
+| Class         | Handling  |
+| ------------- | --------- |
 | document text | transient |
-| entities | persisted |
-| graphs | persisted |
+| entities      | persisted |
+| graphs        | persisted |
 
 ## Never log
-* raw document text
-* personal identifiers
-* secrets
+
+- raw document text
+- personal identifiers
+- secrets
 
 Retention: graphs retained, raw text discarded.

@@ -7,8 +7,8 @@ image:
 replicaCount: 2
 
 resources:
-  requests: { cpu: '200m', memory: '256Mi' }
-  limits: { cpu: '1', memory: '1Gi' }
+  requests: { cpu: "200m", memory: "256Mi" }
+  limits: { cpu: "1", memory: "1Gi" }
 
 # ============================================================================
 # OpenTelemetry - Enabled by Default
@@ -18,7 +18,7 @@ opentelemetry:
   collector:
     endpoint: "otel-collector.observability.svc.cluster.local:4317"
   sampling:
-    ratio: 1.0  # 100% sampling in dev
+    ratio: 1.0 # 100% sampling in dev
 
 # ============================================================================
 # Prometheus Metrics - Enabled by Default
@@ -50,9 +50,9 @@ featureFlags:
 # ============================================================================
 env:
   - name: NODE_ENV
-    value: 'development'
+    value: "development"
   - name: LOG_LEVEL
-    value: 'debug'
+    value: "debug"
 
   # OTEL Configuration
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -80,9 +80,9 @@ env:
   - name: REDIS_URL
     valueFrom: { secretKeyRef: { name: maestro-secrets, key: redis_url } }
   - name: KAFKA_BROKERS
-    value: 'kafka:9092'
+    value: "kafka:9092"
   - name: S3_BUCKET
-    value: 'maestro-artifacts-dev'
+    value: "maestro-artifacts-dev"
 
 service:
   type: ClusterIP

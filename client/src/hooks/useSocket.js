@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { io } from 'socket.io-client';
-import { getSocketBaseUrl } from '../config/urls';
+import { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
+import { getSocketBaseUrl } from "../config/urls";
 
-export const useSocket = (namespace = '/', options = {}) => {
+export const useSocket = (namespace = "/", options = {}) => {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +18,7 @@ export const useSocket = (namespace = '/', options = {}) => {
     // Create new socket connection
     const baseUrl = getSocketBaseUrl();
     if (!baseUrl) {
-      setError('Socket base URL not configured');
+      setError("Socket base URL not configured");
       return undefined;
     }
     const newSocket = io(`${baseUrl}${namespace}`, {
@@ -32,45 +32,43 @@ export const useSocket = (namespace = '/', options = {}) => {
     });
 
     // Connection event handlers
-    newSocket.on('connect', () => {
-      console.log('🔗 Socket connected:', newSocket.id);
+    newSocket.on("connect", () => {
+      console.log("🔗 Socket connected:", newSocket.id);
       setConnected(true);
       setError(null);
     });
 
-    newSocket.on('disconnect', (reason) => {
-      console.log('🔌 Socket disconnected:', reason);
+    newSocket.on("disconnect", (reason) => {
+      console.log("🔌 Socket disconnected:", reason);
       setConnected(false);
     });
 
-    newSocket.on('connect_error', (err) => {
-      console.error('❌ Socket connection error:', err);
+    newSocket.on("connect_error", (err) => {
+      console.error("❌ Socket connection error:", err);
       setError(err.message);
       setConnected(false);
     });
 
-    newSocket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Socket reconnected after', attemptNumber, 'attempts');
+    newSocket.on("reconnect", (attemptNumber) => {
+      console.log("🔄 Socket reconnected after", attemptNumber, "attempts");
       setConnected(true);
       setError(null);
     });
 
-    newSocket.on('reconnect_error', (err) => {
-      console.error('🔄❌ Socket reconnection error:', err);
+    newSocket.on("reconnect_error", (err) => {
+      console.error("🔄❌ Socket reconnection error:", err);
       setError(err.message);
     });
 
-    newSocket.on('reconnect_failed', () => {
-      console.error('🔄💥 Socket reconnection failed');
-      setError('Failed to reconnect after maximum attempts');
+    newSocket.on("reconnect_failed", () => {
+      console.error("🔄💥 Socket reconnection failed");
+      setError("Failed to reconnect after maximum attempts");
     });
 
     // Development mode: handle authentication errors gracefully
-    newSocket.on('connect_error', (err) => {
-      if (err.message === 'Unauthorized') {
-        console.warn(
-          '🔐 Socket authentication failed - using development mode',
-        );
+    newSocket.on("connect_error", (err) => {
+      if (err.message === "Unauthorized") {
+        console.warn("🔐 Socket authentication failed - using development mode");
         // In development, we might want to continue without authentication
         // or implement a different authentication strategy
       }
@@ -95,7 +93,7 @@ export const useSocket = (namespace = '/', options = {}) => {
   useEffect(() => {
     if (socket && connected) {
       const interval = setInterval(() => {
-        socket.emit('presence:heartbeat');
+        socket.emit("presence:heartbeat");
       }, 30000); // Send heartbeat every 30 seconds
       heartbeatIntervalRef.current = interval;
     } else if (heartbeatIntervalRef.current) {
@@ -109,7 +107,7 @@ export const useSocket = (namespace = '/', options = {}) => {
     if (socket && connected) {
       socket.emit(event, data);
     } else {
-      console.warn('⚠️ Attempting to emit on disconnected socket:', event);
+      console.warn("⚠️ Attempting to emit on disconnected socket:", event);
     }
   };
 

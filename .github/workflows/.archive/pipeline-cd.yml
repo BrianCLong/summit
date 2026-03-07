@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Docker tag/SHA to deploy'
+        description: "Docker tag/SHA to deploy"
         required: true
-        default: 'latest'
+        default: "latest"
 
 jobs:
   # CD only runs if CI passed
@@ -47,14 +47,14 @@ jobs:
 
       - name: Verify Deployment (Performance Probe)
         run: |
-           # Install k6
-           curl https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
-           sudo mv k6 /usr/local/bin/
+          # Install k6
+          curl https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+          sudo mv k6 /usr/local/bin/
 
-           # Run probe against simulated staging URL (in real life, this would be the actual URL)
-           # Since we don't have a real running staging, we'll skip the actual k6 run or mock it
-           echo "Running k6 probe against staging..."
-           # k6 run k6/slo-probe.js --env TARGET=https://staging.summit.internal
+          # Run probe against simulated staging URL (in real life, this would be the actual URL)
+          # Since we don't have a real running staging, we'll skip the actual k6 run or mock it
+          echo "Running k6 probe against staging..."
+          # k6 run k6/slo-probe.js --env TARGET=https://staging.summit.internal
 
   # Deploy to Production (Manual Approval required via Environment)
   deploy-prod:

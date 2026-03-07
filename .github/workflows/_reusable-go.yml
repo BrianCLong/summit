@@ -10,7 +10,7 @@ on:
       working-directory:
         description: Directory containing go.mod
         type: string
-        default: '.'
+        default: "."
 
 jobs:
   go:

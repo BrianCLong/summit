@@ -45,9 +45,7 @@ export const GEOINTMap: React.FC<GEOINTMapProps> = ({
     west: number;
   } | null>(null);
   const [zoom, setZoom] = useState(initialZoom);
-  const [clusteringEnabled, setClusteringEnabled] = useState(
-    FEATURES.enableGEOINTClustering,
-  );
+  const [clusteringEnabled, setClusteringEnabled] = useState(FEATURES.enableGEOINTClustering);
   const [page, setPage] = useState(0);
 
   const { mapStyle, visibleLayers, setMapStyle } = useMapStore();
@@ -164,10 +162,7 @@ export const GEOINTMap: React.FC<GEOINTMapProps> = ({
   // Handle cluster press
   const handleClusterPress = useCallback(
     (clusterId: number, coordinates: [number, number]) => {
-      const expansionZoom = Math.min(
-        cluster.getClusterExpansionZoom(clusterId),
-        20,
-      );
+      const expansionZoom = Math.min(cluster.getClusterExpansionZoom(clusterId), 20);
 
       cameraRef.current?.setCamera({
         centerCoordinate: coordinates,
@@ -184,9 +179,7 @@ export const GEOINTMap: React.FC<GEOINTMapProps> = ({
       if (feature.properties.cluster && clusteringActive) {
         handleClusterPress(feature.properties.cluster_id, feature.geometry.coordinates);
       } else if (onFeaturePress) {
-        const originalFeature = features.find(
-          (f) => f.id === feature.properties.featureId,
-        );
+        const originalFeature = features.find((f) => f.id === feature.properties.featureId);
         if (originalFeature) {
           onFeaturePress(originalFeature);
         }
@@ -269,15 +262,7 @@ export const GEOINTMap: React.FC<GEOINTMapProps> = ({
                 50,
                 '#ef4444',
               ],
-              circleRadius: [
-                'step',
-                ['get', 'point_count'],
-                20,
-                10,
-                30,
-                50,
-                40,
-              ],
+              circleRadius: ['step', ['get', 'point_count'], 20, 10, 30, 50, 40],
               circleOpacity: 0.8,
               circleStrokeColor: '#fff',
               circleStrokeWidth: 2,
@@ -371,7 +356,9 @@ export const GEOINTMap: React.FC<GEOINTMapProps> = ({
                   disabled={page + 1 >= totalPages}
                   className="px-3 py-2 rounded-lg border border-dark-border"
                 >
-                  <Text className={page + 1 >= totalPages ? 'text-gray-500' : 'text-white'}>Next</Text>
+                  <Text className={page + 1 >= totalPages ? 'text-gray-500' : 'text-white'}>
+                    Next
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>

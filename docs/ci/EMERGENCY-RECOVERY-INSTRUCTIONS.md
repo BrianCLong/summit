@@ -9,6 +9,7 @@
 ## Current Actions (Automated)
 
 ✅ **Step 1 RUNNING**: Canceling 200+ queued workflow runs
+
 - Script: `cancel-queued-runs.sh`
 - Status: In progress (~100 canceled so far)
 - Expected completion: 5-10 minutes
@@ -28,6 +29,7 @@ URL: https://github.com/BrianCLong/summit/settings/branch_protection_rules
 ```
 
 Or navigate:
+
 ```
 Settings → Branches → Find "main" → Click Edit
 ```
@@ -41,6 +43,7 @@ Settings → Branches → Find "main" → Click Edit
 #### 3. Remove Most Checks (Keep Only These)
 
 **KEEP ONLY** (click X on all others):
+
 ```
 ✓ Gates
 ✓ Build & Test
@@ -50,6 +53,7 @@ Settings → Branches → Find "main" → Click Edit
 ```
 
 **REMOVE** (click X to uncheck):
+
 ```
 ✗ Everything else (148+ checks)
 ```
@@ -65,6 +69,7 @@ Click **"Save changes"** at bottom of page
 ## What This Achieves
 
 ### Before
+
 ```
 Required checks: 153
 Stabilization PRs: Stuck (cannot pass 153 checks)
@@ -73,6 +78,7 @@ Status: DEADLOCK
 ```
 
 ### After
+
 ```
 Required checks: 5
 Stabilization PRs: Can merge in 20-30 min
@@ -87,6 +93,7 @@ Status: RECOVERING
 ### Immediately After Branch Protection Update
 
 Check stabilization PRs:
+
 ```bash
 gh pr checks 19069  # Should show ~5 checks instead of 153
 gh pr checks 19070
@@ -116,6 +123,7 @@ gh pr list --search "author:@me is:open" --json number,title,state
 ```
 
 **Expected timeline**:
+
 - Checks start running: 15-30 min
 - PRs complete: 1-2 hours
 - PRs merge: 2-4 hours
@@ -131,27 +139,32 @@ gh pr list --search "author:@me is:open" --json number,title,state
 #### 2.1 Update Branch Protection (Second Time)
 
 Navigate back to branch protection:
+
 ```
 Settings → Branches → main → Edit
 ```
 
 **Update Required Checks** to ONLY:
+
 ```
 ✓ pr-gate
 ```
 
 **Remove**:
+
 ```
 ✗ All other checks (including the 5 temporary ones)
 ```
 
 **Enable**:
+
 ```
 ☑ Require merge queue
 ☑ Require linear history
 ```
 
 **Disable**:
+
 ```
 ☐ Require branches to be up to date before merging
 ```
@@ -165,6 +178,7 @@ bash scripts/ci/workflow_registry_cleanup.sh
 ```
 
 **Expected output**:
+
 ```
 Found 50 registered workflows
 Ghost workflows to disable: 40+
@@ -175,6 +189,7 @@ Select `y` to disable ghost workflows
 #### 2.3 Verify Activation
 
 Create test PR:
+
 ```bash
 git checkout -b test/verify-activation
 echo "# Test" >> docs/test-activation.md
@@ -186,11 +201,13 @@ gh pr create --title "[TEST] Verify new CI architecture" \
 ```
 
 Check workflows:
+
 ```bash
 gh pr checks test/verify-activation
 ```
 
 **Expected**:
+
 ```
 ✓ pr-gate (required)
 ✓ docs-ci (path matched)
@@ -201,6 +218,7 @@ gh pr checks test/verify-activation
 **Success criteria**: Only 2 workflows run
 
 Cleanup:
+
 ```bash
 gh pr close test/verify-activation --delete-branch
 ```
@@ -216,6 +234,7 @@ node scripts/ci/ci_metrics.mjs --save
 ```
 
 **Expected output**:
+
 ```
 Queue Health: NORMAL or WARNING (improving from CRITICAL)
 PR Gate Health: HEALTHY
@@ -225,11 +244,13 @@ Merge Queue: HEALTHY or NORMAL
 ### Track Recovery Progress
 
 Run every hour for first 24h:
+
 ```bash
 node scripts/ci/ci_metrics.mjs
 ```
 
 **Monitor**:
+
 - Queue depth decreasing
 - PRs merging regularly
 - pr-gate pass rate >90%
@@ -239,23 +260,27 @@ node scripts/ci/ci_metrics.mjs
 ## Success Metrics
 
 ### Hour 4 (After branch protection update)
+
 - [ ] Queue depth <100 (from 200+)
 - [ ] Stabilization PRs completed checks
 - [ ] First stabilization PR merged
 
 ### Hour 8 (After activation)
+
 - [ ] All 4 stabilization PRs merged
 - [ ] New architecture active (pr-gate only)
 - [ ] Workflow registry cleaned
 - [ ] First regular PR merged with new architecture
 
 ### Day 1
+
 - [ ] Queue depth <50
 - [ ] 5+ PRs merged
 - [ ] pr-gate pass rate >90%
 - [ ] Time to merge <60 min
 
 ### Week 1
+
 - [ ] Queue depth <25
 - [ ] 30+ PRs merged
 - [ ] pr-gate pass rate >95%
@@ -271,6 +296,7 @@ node scripts/ci/ci_metrics.mjs
 **Symptom**: Errors canceling runs
 
 **Solution**:
+
 ```bash
 # Check auth
 gh auth status
@@ -289,6 +315,7 @@ bash scripts/ci/cancel-queued-runs.sh
 **Cause**: GitHub cache delay
 
 **Solution**:
+
 ```bash
 # Close and reopen PR to refresh
 gh pr close 19069
@@ -302,6 +329,7 @@ gh pr reopen 19069
 **Symptom**: Queue depth stays >150 after 2 hours
 
 **Solution**:
+
 ```bash
 # Check if new runs are being queued
 gh run list --limit 50 --json createdAt,status
@@ -319,6 +347,7 @@ gh run list --limit 50 --json createdAt,status
 **Cause**: Insufficient permissions
 
 **Solution**:
+
 - Verify you have admin access to repo
 - Ask repo owner to make changes
 - Or use GitHub API with admin token
@@ -366,12 +395,14 @@ gh run list --limit 50 --json createdAt,status
 ### Completion Checklist
 
 #### Phase 1: Emergency Actions
+
 - [x] Queue cancellation initiated
 - [ ] Branch protection updated (5 checks)
 - [ ] Queue depth decreasing
 - [ ] Stabilization PRs running checks
 
 #### Phase 2: Activation
+
 - [ ] PR #19069 merged (pr-gate)
 - [ ] PR #19070 merged (path-filtering)
 - [ ] PR #19071 merged (main-validation + cleanup)
@@ -381,6 +412,7 @@ gh run list --limit 50 --json createdAt,status
 - [ ] Activation verified with test PR
 
 #### Phase 3: Optimization
+
 - [ ] Baseline metrics collected
 - [ ] Merge queue optimization configured
 - [ ] First 24h monitoring complete

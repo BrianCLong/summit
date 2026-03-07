@@ -4,9 +4,9 @@
  * Example of how to integrate the extension system into a server application.
  */
 
-import * as path from 'path';
-import { ExtensionManager } from './manager.js';
-import type { ExtensionAPI } from './types.js';
+import * as path from "path";
+import { ExtensionManager } from "./manager.js";
+import type { ExtensionAPI } from "./types.js";
 
 /**
  * Initialize the extension system for a server application
@@ -17,8 +17,8 @@ export async function initializeExtensions(options: {
 }): Promise<ExtensionManager> {
   const manager = new ExtensionManager({
     extensionDirs: options.extensionDirs || [
-      path.join(process.cwd(), 'extensions'),
-      path.join(process.cwd(), 'extensions/examples'),
+      path.join(process.cwd(), "extensions"),
+      path.join(process.cwd(), "extensions/examples"),
     ],
     api: options.api,
     enablePolicy: process.env.OPA_URL !== undefined,
@@ -35,7 +35,7 @@ export async function initializeExtensions(options: {
  */
 export function setupExtensionRoutes(app: any, manager: ExtensionManager) {
   // List extensions
-  app.get('/api/extensions', (req: any, res: any) => {
+  app.get("/api/extensions", (req: any, res: any) => {
     const registry = manager.getRegistry();
     const extensions = registry.getAll().map((ext) => ({
       name: ext.manifest.name,
@@ -51,11 +51,11 @@ export function setupExtensionRoutes(app: any, manager: ExtensionManager) {
   });
 
   // Get extension details
-  app.get('/api/extensions/:name', (req: any, res: any) => {
+  app.get("/api/extensions/:name", (req: any, res: any) => {
     const registry = manager.getRegistry();
     const ext = registry.get(req.params.name);
     if (!ext) {
-      return res.status(404).json({ error: 'Extension not found' });
+      return res.status(404).json({ error: "Extension not found" });
     }
     res.json({
       manifest: ext.manifest,
@@ -66,7 +66,7 @@ export function setupExtensionRoutes(app: any, manager: ExtensionManager) {
   });
 
   // Execute copilot tool
-  app.post('/api/extensions/copilot/tools/:name', async (req: any, res: any) => {
+  app.post("/api/extensions/copilot/tools/:name", async (req: any, res: any) => {
     try {
       const result = await manager.copilot.executeTool(req.params.name, req.body);
       res.json({ result });
@@ -76,7 +76,7 @@ export function setupExtensionRoutes(app: any, manager: ExtensionManager) {
   });
 
   // Execute UI command
-  app.post('/api/extensions/ui/commands/:id', async (req: any, res: any) => {
+  app.post("/api/extensions/ui/commands/:id", async (req: any, res: any) => {
     try {
       const result = await manager.commandPalette.executeCommand(req.params.id);
       res.json({ result });
@@ -86,13 +86,13 @@ export function setupExtensionRoutes(app: any, manager: ExtensionManager) {
   });
 
   // Get UI widgets
-  app.get('/api/extensions/ui/widgets', (req: any, res: any) => {
+  app.get("/api/extensions/ui/widgets", (req: any, res: any) => {
     const widgets = manager.commandPalette.getWidgets();
     res.json(widgets);
   });
 
   // Reload extensions
-  app.post('/api/extensions/reload', async (req: any, res: any) => {
+  app.post("/api/extensions/reload", async (req: any, res: any) => {
     try {
       await manager.reload();
       res.json({ success: true });
@@ -102,7 +102,7 @@ export function setupExtensionRoutes(app: any, manager: ExtensionManager) {
   });
 
   // Extension statistics
-  app.get('/api/extensions/stats', (req: any, res: any) => {
+  app.get("/api/extensions/stats", (req: any, res: any) => {
     const stats = manager.getStats();
     res.json(stats);
   });

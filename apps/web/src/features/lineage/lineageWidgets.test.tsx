@@ -8,7 +8,10 @@ const mockFetch = vi.fn()
 
 describe('Lineage UI', () => {
   beforeEach(() => {
-    mockFetch.mockResolvedValue({ ok: true, json: async () => primaryLineageFixture })
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => primaryLineageFixture,
+    })
     global.fetch = mockFetch as unknown as typeof fetch
   })
 
@@ -17,7 +20,12 @@ describe('Lineage UI', () => {
   })
 
   it('renders upstream and downstream chains in the explorer', async () => {
-    render(<LineageExplorer entityId="evidence-123" initialGraph={primaryLineageFixture} />)
+    render(
+      <LineageExplorer
+        entityId="evidence-123"
+        initialGraph={primaryLineageFixture}
+      />
+    )
 
     const explorer = screen.getByLabelText('lineage-explorer')
     expect(explorer).toBeInTheDocument()
@@ -32,12 +40,18 @@ describe('Lineage UI', () => {
   it('embeds the why-am-i-seeing-this widget in multiple host contexts', () => {
     const GraphNodeHost = () => (
       <div data-testid="graph-node">
-        <WhyAmISeeingThis entityId="evidence-123" initialGraph={primaryLineageFixture} />
+        <WhyAmISeeingThis
+          entityId="evidence-123"
+          initialGraph={primaryLineageFixture}
+        />
       </div>
     )
     const EvidenceListHost = () => (
       <div data-testid="evidence-row">
-        <WhyAmISeeingThis entityId="evidence-123" initialGraph={primaryLineageFixture} />
+        <WhyAmISeeingThis
+          entityId="evidence-123"
+          initialGraph={primaryLineageFixture}
+        />
       </div>
     )
 
@@ -48,12 +62,18 @@ describe('Lineage UI', () => {
       </div>
     )
 
-    const graphWidget = within(screen.getByTestId('graph-node')).getByLabelText('why-am-i-seeing-this')
-    const evidenceWidget = within(screen.getByTestId('evidence-row')).getByLabelText('why-am-i-seeing-this')
+    const graphWidget = within(screen.getByTestId('graph-node')).getByLabelText(
+      'why-am-i-seeing-this'
+    )
+    const evidenceWidget = within(
+      screen.getByTestId('evidence-row')
+    ).getByLabelText('why-am-i-seeing-this')
 
     expect(graphWidget).toBeInTheDocument()
     expect(evidenceWidget).toBeInTheDocument()
-    expect(within(graphWidget).getByTestId('upstream-summary').textContent).toContain('S3 Intake')
+    expect(
+      within(graphWidget).getByTestId('upstream-summary').textContent
+    ).toContain('S3 Intake')
   })
 
   it('shows restriction messaging without leaking details', () => {
@@ -67,7 +87,9 @@ describe('Lineage UI', () => {
 
     expect(screen.getByText(/warrant-based clearance/i)).toBeInTheDocument()
     expect(screen.queryByTestId('upstream-summary')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('policy-tags-inline').textContent).toContain('WARRANT_ONLY')
+    expect(screen.getByLabelText('policy-tags-inline').textContent).toContain(
+      'WARRANT_ONLY'
+    )
   })
 
   it('bubbles view details when available', () => {

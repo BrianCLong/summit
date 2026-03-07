@@ -7,11 +7,7 @@
     ":separatePatchReleases"
   ],
   "timezone": "America/New_York",
-  "schedule": [
-    "after 10pm every weekday",
-    "before 5am every weekday",
-    "every weekend"
-  ],
+  "schedule": ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
   "labels": ["dependencies", "renovate"],
   "assignees": ["BrianCLong"],
   "reviewers": ["BrianCLong"],
@@ -65,12 +61,7 @@
     },
     {
       "description": "Group Apollo GraphQL updates",
-      "matchPackageNames": [
-        "@apollo/server",
-        "@apollo/client",
-        "apollo",
-        "graphql"
-      ],
+      "matchPackageNames": ["@apollo/server", "@apollo/client", "apollo", "graphql"],
       "groupName": "Apollo GraphQL",
       "automerge": false,
       "addLabels": ["apollo-v5-compat"]

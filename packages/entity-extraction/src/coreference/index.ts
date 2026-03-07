@@ -3,7 +3,7 @@
  * Links pronouns and mentions to their antecedents
  */
 
-import type { Entity, CoreferenceChain } from '../types';
+import type { Entity, CoreferenceChain } from "../types";
 
 export class CoreferenceResolver {
   /**
@@ -20,9 +20,7 @@ export class CoreferenceResolver {
 
       if (antecedent) {
         // Find or create chain
-        let chain = chains.find((c) =>
-          c.entities.some((e) => e.text === antecedent.text)
-        );
+        let chain = chains.find((c) => c.entities.some((e) => e.text === antecedent.text));
 
         if (!chain) {
           chain = {
@@ -76,7 +74,9 @@ export class CoreferenceResolver {
     // Find entities before the pronoun
     const candidates = entities.filter((e) => e.start < pronoun.start);
 
-    if (candidates.length === 0) {return null;}
+    if (candidates.length === 0) {
+      return null;
+    }
 
     // Sort by distance (closest first)
     candidates.sort((a, b) => pronoun.start - b.start - (pronoun.start - a.start));
@@ -94,23 +94,23 @@ export class CoreferenceResolver {
     const lower = pronoun.toLowerCase();
 
     // Singular male pronouns
-    if (['he', 'him', 'his'].includes(lower)) {
-      return candidates.filter((e) => e.type === 'PERSON');
+    if (["he", "him", "his"].includes(lower)) {
+      return candidates.filter((e) => e.type === "PERSON");
     }
 
     // Singular female pronouns
-    if (['she', 'her'].includes(lower)) {
-      return candidates.filter((e) => e.type === 'PERSON');
+    if (["she", "her"].includes(lower)) {
+      return candidates.filter((e) => e.type === "PERSON");
     }
 
     // Plural pronouns
-    if (['they', 'them', 'their'].includes(lower)) {
+    if (["they", "them", "their"].includes(lower)) {
       return candidates;
     }
 
     // Neutral pronoun
-    if (lower === 'it') {
-      return candidates.filter((e) => e.type !== 'PERSON');
+    if (lower === "it") {
+      return candidates.filter((e) => e.type !== "PERSON");
     }
 
     return candidates;
@@ -123,9 +123,7 @@ export class CoreferenceResolver {
     const merged: CoreferenceChain[] = [];
 
     for (const chain of chains) {
-      const existing = merged.find((m) =>
-        this.chainsOverlap(m, chain)
-      );
+      const existing = merged.find((m) => this.chainsOverlap(m, chain));
 
       if (existing) {
         existing.entities.push(...chain.entities);
@@ -142,8 +140,6 @@ export class CoreferenceResolver {
    * Check if chains refer to same entity
    */
   private chainsOverlap(chain1: CoreferenceChain, chain2: CoreferenceChain): boolean {
-    return chain1.entities.some((e1) =>
-      chain2.entities.some((e2) => e1.text === e2.text)
-    );
+    return chain1.entities.some((e1) => chain2.entities.some((e2) => e1.text === e2.text));
   }
 }

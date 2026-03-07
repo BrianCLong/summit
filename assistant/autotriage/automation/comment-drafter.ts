@@ -3,13 +3,13 @@
  * Drafts comments for deduplicated clusters
  */
 
-import { IssueCluster, TriageItem } from '../types.js';
+import { IssueCluster, TriageItem } from "../types.js";
 
 export interface CommentDraft {
   issueId: string;
   comment: string;
   relatedIssues: string[];
-  action: 'duplicate' | 'cluster-summary' | 'auto-triage';
+  action: "duplicate" | "cluster-summary" | "auto-triage";
 }
 
 /**
@@ -24,7 +24,7 @@ export function draftDeduplicationComments(cluster: IssueCluster): CommentDraft[
 
   // Find the "primary" issue (highest impact or oldest)
   const sortedItems = [...cluster.items].sort(
-    (a, b) => b.impactScore - a.impactScore || a.id.localeCompare(b.id),
+    (a, b) => b.impactScore - a.impactScore || a.id.localeCompare(b.id)
   );
   const primaryIssue = sortedItems[0];
   const duplicates = sortedItems.slice(1);
@@ -40,9 +40,9 @@ ${duplicates
     const impactEmoji = getImpactEmoji(item.impact);
     return `- ${impactEmoji} ${formatIssueReference(item)} - ${item.title}`;
   })
-  .join('\n')}
+  .join("\n")}
 
-**Common areas**: ${cluster.area.join(', ') || 'N/A'}
+**Common areas**: ${cluster.area.join(", ") || "N/A"}
 
 Consider consolidating these issues or creating an epic to track the overall theme.
 
@@ -53,7 +53,7 @@ Consider consolidating these issues or creating an epic to track the overall the
     issueId: primaryIssue.id,
     comment: primaryComment,
     relatedIssues: duplicates.map((i) => i.id),
-    action: 'cluster-summary',
+    action: "cluster-summary",
   });
 
   // Draft comments for duplicate issues
@@ -75,7 +75,7 @@ Please review and consider closing as duplicate or linking the issues.
       issueId: item.id,
       comment: duplicateComment,
       relatedIssues: [primaryIssue.id],
-      action: 'duplicate',
+      action: "duplicate",
     });
   });
 
@@ -93,11 +93,11 @@ This issue has been automatically analyzed:
 **Classification**:
 - **Impact**: ${getImpactEmoji(item.impact)} ${item.impact.toUpperCase()} (score: ${item.impactScore.toFixed(0)})
 - **Type**: ${item.type}
-- **Areas**: ${item.area.join(', ')}
+- **Areas**: ${item.area.join(", ")}
 - **Complexity**: ${item.complexityScore.toFixed(0)}
 
-${item.isGoodFirstIssue ? '**✨ This issue is tagged as a good first issue for new contributors!**\n\n' : ''}
-${item.clusterTheme ? `**Theme**: ${item.clusterTheme}\n\n` : ''}
+${item.isGoodFirstIssue ? "**✨ This issue is tagged as a good first issue for new contributors!**\n\n" : ""}
+${item.clusterTheme ? `**Theme**: ${item.clusterTheme}\n\n` : ""}
 
 **Suggested labels**: ${generateLabelList(item)}
 
@@ -108,7 +108,7 @@ ${item.clusterTheme ? `**Theme**: ${item.clusterTheme}\n\n` : ''}
     issueId: item.id,
     comment,
     relatedIssues: [],
-    action: 'auto-triage',
+    action: "auto-triage",
   };
 }
 
@@ -127,7 +127,7 @@ export function draftBatchComments(items: TriageItem[], clusters: IssueCluster[]
 }
 
 function formatIssueReference(item: TriageItem): string {
-  if (item.source === 'github') {
+  if (item.source === "github") {
     return `#${item.sourceId}`;
   }
   return `${item.id}`;
@@ -135,16 +135,16 @@ function formatIssueReference(item: TriageItem): string {
 
 function getImpactEmoji(impact: string): string {
   switch (impact) {
-    case 'blocker':
-      return '🚨';
-    case 'high':
-      return '🔴';
-    case 'medium':
-      return '🟡';
-    case 'low':
-      return '🟢';
+    case "blocker":
+      return "🚨";
+    case "high":
+      return "🔴";
+    case "medium":
+      return "🟡";
+    case "low":
+      return "🟢";
     default:
-      return '⚪';
+      return "⚪";
   }
 }
 
@@ -152,15 +152,15 @@ function generateLabelList(item: TriageItem): string {
   const labels: string[] = [];
 
   item.area.forEach((area) => {
-    if (area !== 'uncategorized') labels.push(`area:${area}`);
+    if (area !== "uncategorized") labels.push(`area:${area}`);
   });
 
   labels.push(`priority:${item.impact}`);
   labels.push(`type:${item.type}`);
 
   if (item.isGoodFirstIssue) {
-    labels.push('good-first-issue');
+    labels.push("good-first-issue");
   }
 
-  return labels.join(', ');
+  return labels.join(", ");
 }

@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { isConnected } from '@react-native-community/netinfo';
-import { apolloClient } from './GraphQLClient';
-import { useSyncStore } from '../stores/syncStore';
-import { useAppStore } from '../stores/appStore';
-import { performanceMonitor } from './PerformanceMonitor';
+import {isConnected} from '@react-native-community/netinfo';
+import {apolloClient} from './GraphQLClient';
+import {useSyncStore} from '../stores/syncStore';
+import {useAppStore} from '../stores/appStore';
+import {performanceMonitor} from './PerformanceMonitor';
 import * as Sentry from '@sentry/react-native';
 
 const MAX_RETRIES = 3;
@@ -100,7 +100,9 @@ class EnhancedOfflineSyncService {
       useSyncStore.getState().setLastSyncTime(Date.now());
       useAppStore.getState().setLastSyncTime(Date.now());
 
-      console.log(`[EnhancedSync] Sync complete: ${result.syncedCount} synced, ${result.failedCount} failed`);
+      console.log(
+        `[EnhancedSync] Sync complete: ${result.syncedCount} synced, ${result.failedCount} failed`,
+      );
 
       // Notify listeners
       this.notifyListeners(result);
@@ -269,7 +271,7 @@ class EnhancedOfflineSyncService {
    */
   private async processUpload(item: any): Promise<void> {
     // Import the MediaUpload service dynamically to avoid circular deps
-    const { uploadMedia } = await import('./MediaUpload');
+    const {uploadMedia} = await import('./MediaUpload');
     await uploadMedia(item.data);
     console.log(`[EnhancedSync] Upload synced: ${item.id}`);
   }
@@ -305,7 +307,7 @@ class EnhancedOfflineSyncService {
    * Notify all listeners
    */
   private notifyListeners(result: SyncResult): void {
-    this.syncListeners.forEach((listener) => listener(result));
+    this.syncListeners.forEach(listener => listener(result));
   }
 
   /**
@@ -330,7 +332,7 @@ class EnhancedOfflineSyncService {
       queueSize: queue.length,
       isSyncing,
       lastSyncTime,
-      unresolvedConflicts: conflicts.filter((c) => !c.resolvedAt).length,
+      unresolvedConflicts: conflicts.filter(c => !c.resolvedAt).length,
       stats: {
         totalSynced: stats.totalSynced,
         totalFailed: stats.totalFailed,
@@ -343,7 +345,7 @@ class EnhancedOfflineSyncService {
 export const enhancedOfflineSync = new EnhancedOfflineSyncService();
 
 // Auto-sync when coming online
-NetInfo.addEventListener((state) => {
+NetInfo.addEventListener(state => {
   if (state.isConnected && state.isInternetReachable) {
     console.log('[EnhancedSync] Network connected, triggering sync');
     enhancedOfflineSync.sync();

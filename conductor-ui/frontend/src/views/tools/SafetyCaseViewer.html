@@ -7,8 +7,7 @@
     <style>
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-          Arial, sans-serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         margin: 0;
         background: #f8f9fa;
       }
@@ -87,40 +86,34 @@
 
     <script>
       $(function () {
-        const prId =
-          new URLSearchParams(window.location.search).get('pr') || 'pr-123';
+        const prId = new URLSearchParams(window.location.search).get("pr") || "pr-123";
         updateStatus(`Fetching Live Safety Case for PR #${prId}...`);
 
         $.getJSON(`/api/lsc/case/${prId}`)
           .done(function (lsc) {
-            updateStatus('Safety Case loaded successfully.');
+            updateStatus("Safety Case loaded successfully.");
             buildGsnTree(lsc);
           })
           .fail(function () {
-            updateStatus('Failed to load Safety Case.', true);
-            $('#lsc-container').html(
-              '<p style="color:red;">Could not load safety case.</p>',
-            );
+            updateStatus("Failed to load Safety Case.", true);
+            $("#lsc-container").html('<p style="color:red;">Could not load safety case.</p>');
           });
 
         function updateStatus(msg, isError = false) {
-          const color = isError ? '#ffe3e3' : '#f1f3f5';
-          $('#status')
+          const color = isError ? "#ffe3e3" : "#f1f3f5";
+          $("#status")
             .html(`<p><i>${new Date().toLocaleTimeString()}: ${msg}</i></p>`)
-            .css('background', color);
+            .css("background", color);
         }
 
-        $('#sim').on('click', () => {
-          updateStatus('Requesting twin simulation...');
-          setTimeout(
-            () => updateStatus('Twin simulation passed: perf delta -7%'),
-            1000,
-          );
+        $("#sim").on("click", () => {
+          updateStatus("Requesting twin simulation...");
+          setTimeout(() => updateStatus("Twin simulation passed: perf delta -7%"), 1000);
         });
 
-        $('#merge').on('click', () => {
-          updateStatus('Requesting merge...');
-          setTimeout(() => updateStatus('Merge request queued.'), 500);
+        $("#merge").on("click", () => {
+          updateStatus("Requesting merge...");
+          setTimeout(() => updateStatus("Merge request queued."), 500);
         });
       });
     </script>

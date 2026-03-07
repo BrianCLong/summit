@@ -16,9 +16,9 @@
 
 ## 2) Success Metrics & DoD
 
-- **Link risk (AUC ≥ 0.90)** and **entity risk (F1 ≥ 0.85)** on gold sets; nightly scoring p95 ≤ 60 min on dev graph with idempotent writes.  _DoD:_ every scored item references a valid `modelId` and persists `riskScore`, `modelId`, `scoredAt`.
-- **Explainability coverage ≥ 95%** of surfaced scores carry a ≤2 KB "why" payload (top features, subgraph IDs, evidence IDs, confidence).  _DoD:_ ≥90% explainer paths link to ≥1 evidence chip; drawer open/close ≤100 ms.
-- **Connector reliability ≥ 99% normalized events**, DLQ < 1%, toggle propagation ≤ 5s.  _DoD:_ connectors run only via SDK; sandboxed; robots/licensing honored; DPIA checklist passed; audit entries include basis.
+- **Link risk (AUC ≥ 0.90)** and **entity risk (F1 ≥ 0.85)** on gold sets; nightly scoring p95 ≤ 60 min on dev graph with idempotent writes. _DoD:_ every scored item references a valid `modelId` and persists `riskScore`, `modelId`, `scoredAt`.
+- **Explainability coverage ≥ 95%** of surfaced scores carry a ≤2 KB "why" payload (top features, subgraph IDs, evidence IDs, confidence). _DoD:_ ≥90% explainer paths link to ≥1 evidence chip; drawer open/close ≤100 ms.
+- **Connector reliability ≥ 99% normalized events**, DLQ < 1%, toggle propagation ≤ 5s. _DoD:_ connectors run only via SDK; sandboxed; robots/licensing honored; DPIA checklist passed; audit entries include basis.
 - **Ops safety:** Zero runaway jobs; GPU/CPU minute caps enforced; breach triggers safe fail + admin alert; model registry stores `{modelId, schema, params, metrics, dataHash, createdBy}`.
 
 ---
@@ -26,25 +26,30 @@
 ## 3) Scope (Epics → Stories)
 
 ### Epic A — Graph ML (Risk)
+
 - **A1. Feature Extractor (Neo4j → Parquet):** degree, betweenness pct, temporal bursts, tag co-occurrence, 2-hop motifs; 100% gold nodes/edges emit feature rows; lineage stored.
 - **A2. Model Training (PyTorch Geometric):** link prediction (edge risk) + node classification (entity risk) with targets above; registry write on every run.
 - **A3. Batch Scoring Job:** nightly score top-K neighborhoods; write back `riskScore`, `modelId`, `scoredAt`; p95 batch ≤ 60 min dev graph; idempotent writes.
 
 ### Epic B — Explanations & Evidence
+
 - **B1. GNN Attribution:** per-prediction subgraph + feature importances (GNNExplainer / Integrated Gradients) producing ≤2 KB payload.
 - **B2. Rule/Evidence Corroboration:** align explainer paths with stored evidence (docs/transforms) so ≥90% displayed paths map to evidence chips.
 - **B3. UX “Why This Score?” Drawer:** top features, path snippet, confidence, mitigating factors; copyable to case notes; open/close ≤100 ms; accessible labels and keyboard friendly.
 
 ### Epic C — OSINT Connectors (v1)
+
 - **C1. Connector SDK:** rate-limit, retry/backoff, license tagging, PII tagger hook, DLQ. All connectors must use SDK.
 - **C2. Implement X/Twitter (public), Pastebin-like, RSS/Atom:** ingest → normalize → enrich → lineage. Sandboxed; honors robots/licensing; passes DPIA checklist.
 - **C3. Source Governance:** per-connector OPA policy and per-workspace toggles. Disable/enable propagates within ≤5s; audit entries include basis.
 
 ### Epic D — Analyst Actions & Suppression
+
 - **D1. Risk Badges + Bulk Actions:** mark as reviewed, add to case, suppress false-positive with reason; actions logged; suppressed hidden from default search but audit-visible.
 - **D2. Feedback Loop:** thumbs up/down on predictions → logged to training metrics; nightly job produces lift report; prompts/thresholds versioned.
 
 ### Epic E — Ops & Registry
+
 - **E1. Model Registry:** `{modelId, schema, params, metrics, dataHash, createdBy}`; immutably versioned; every score references a valid `modelId`.
 - **E2. Cost Guards:** hard limits on GPU/CPU minutes; early stop; shard batches; breach → safe fail + admin alert; no runaway jobs.
 
@@ -117,4 +122,4 @@
 
 ---
 
-_Prepared by: Summit AI — last updated Feb 23, 2026 (America/Denver)._ 
+_Prepared by: Summit AI — last updated Feb 23, 2026 (America/Denver)._

@@ -1,20 +1,17 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-const idSchema = z
-  .string()
-  .uuid({ message: 'must be a valid UUID' })
-  .brand<'uuid'>();
-const nameSchema = z.string().trim().min(1, 'cannot be empty').max(255);
+const idSchema = z.string().uuid({ message: "must be a valid UUID" }).brand<"uuid">();
+const nameSchema = z.string().trim().min(1, "cannot be empty").max(255);
 const versionSchema = z
   .string()
   .trim()
-  .regex(/^[vV]?\d+(\.\d+){0,2}([.-][A-Za-z0-9]+)?$/, 'must be semver-like')
+  .regex(/^[vV]?\d+(\.\d+){0,2}([.-][A-Za-z0-9]+)?$/, "must be semver-like")
   .max(64);
-const bodySchema = z.string().trim().min(1, 'cannot be empty');
+const bodySchema = z.string().trim().min(1, "cannot be empty");
 const limitSchema = z.number().int().min(1).max(100);
 
 const normalizeOptional = (value: unknown) =>
-  value === '' || value === null || typeof value === 'undefined' ? undefined : value;
+  value === "" || value === null || typeof value === "undefined" ? undefined : value;
 
 const optionalBoundedString = (max: number) =>
   z.preprocess(normalizeOptional, z.string().trim().min(1).max(max).optional());
@@ -23,20 +20,20 @@ const parseOrThrow = <T>(schema: z.ZodType<T>, payload: unknown, context: string
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
     const message = parsed.error.issues
-      .map((err) => `${context}${err.path.length ? `.${err.path.join('.')}` : ''} ${err.message}`)
-      .join('; ');
+      .map((err) => `${context}${err.path.length ? `.${err.path.join(".")}` : ""} ${err.message}`)
+      .join("; ");
     throw new Error(`Validation failed: ${message}`);
   }
   return parsed.data;
 };
 
-export const validateId = (value: unknown, context = 'id') =>
+export const validateId = (value: unknown, context = "id") =>
   parseOrThrow(idSchema, value, context);
 
-export const validateName = (value: unknown, context = 'name') =>
+export const validateName = (value: unknown, context = "name") =>
   parseOrThrow(nameSchema, value, context);
 
-export const validateVersion = (value: unknown, context = 'version') =>
+export const validateVersion = (value: unknown, context = "version") =>
   parseOrThrow(versionSchema, value, context);
 
 export const validateUpsertPolicyInput = (input: unknown) =>
@@ -48,7 +45,7 @@ export const validateUpsertPolicyInput = (input: unknown) =>
       body: bodySchema,
     }),
     input,
-    'upsertPolicy',
+    "upsertPolicy"
   );
 
 export const validatePolicyHistoryInput = (input: unknown) =>
@@ -59,7 +56,7 @@ export const validatePolicyHistoryInput = (input: unknown) =>
       limit: limitSchema.default(20),
     }),
     input,
-    'policyHistory',
+    "policyHistory"
   );
 
 export const validatePolicyVersionInput = (input: unknown) =>
@@ -70,7 +67,7 @@ export const validatePolicyVersionInput = (input: unknown) =>
       version: versionSchema,
     }),
     input,
-    'policyVersion',
+    "policyVersion"
   );
 
 export const validateRecordArtifactInput = (input: unknown) =>
@@ -87,7 +84,7 @@ export const validateRecordArtifactInput = (input: unknown) =>
       artifactHash: optionalBoundedString(256),
     }),
     input,
-    'recordArtifact',
+    "recordArtifact"
   );
 
 export const validateAssignRoleInput = (input: unknown) =>
@@ -97,7 +94,7 @@ export const validateAssignRoleInput = (input: unknown) =>
       roleId: idSchema,
     }),
     input,
-    'assignRoleToUser',
+    "assignRoleToUser"
   );
 
 export const validateCreateRoleInput = (input: unknown) =>
@@ -107,7 +104,7 @@ export const validateCreateRoleInput = (input: unknown) =>
       permissionIds: z.array(idSchema).optional(),
     }),
     input,
-    'createRole',
+    "createRole"
   );
 
 export const validateCreatePermissionInput = (input: unknown) =>
@@ -117,7 +114,7 @@ export const validateCreatePermissionInput = (input: unknown) =>
       description: z.string().trim().max(512).optional(),
     }),
     input,
-    'createPermission',
+    "createPermission"
   );
 
 export const validateUserQueryInput = (input: unknown) =>
@@ -126,7 +123,7 @@ export const validateUserQueryInput = (input: unknown) =>
       id: idSchema,
     }),
     input,
-    'user',
+    "user"
   );
 
 export const validateTenantQueryInput = (input: unknown) =>
@@ -135,7 +132,7 @@ export const validateTenantQueryInput = (input: unknown) =>
       id: idSchema,
     }),
     input,
-    'tenant',
+    "tenant"
   );
 
 export const validateOrgQueryInput = (input: unknown) =>
@@ -144,5 +141,5 @@ export const validateOrgQueryInput = (input: unknown) =>
       id: idSchema,
     }),
     input,
-    'org',
+    "org"
   );

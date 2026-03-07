@@ -217,13 +217,8 @@ type Dataset {
 }
 
 type Query {
-  datasets(
-    q: String
-    license: String
-    purpose: String
-    region: String
-    after: String
-  ): [Dataset!]! @auth(abac: "catalog.read")
+  datasets(q: String, license: String, purpose: String, region: String, after: String): [Dataset!]!
+    @auth(abac: "catalog.read")
 }
 
 type Mutation {
@@ -335,7 +330,7 @@ repo/
 
 ```ts
 export function markStale(ms: number, res: any) {
-  if (ms > 0) res.setHeader('x-ig-stale-read', String(ms));
+  if (ms > 0) res.setHeader("x-ig-stale-read", String(ms));
 }
 ```
 

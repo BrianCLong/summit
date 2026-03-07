@@ -4,14 +4,14 @@
  * Redis-based caching for feature flag evaluations
  */
 
-import Redis from 'ioredis';
+import Redis from "ioredis";
 import type {
   FlagCache,
   FlagContext,
   FlagEvaluation,
   FlagVariation,
   CacheStats,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Redis cache configuration
@@ -54,7 +54,7 @@ export class RedisCache implements FlagCache {
   };
 
   constructor(config: RedisCacheConfig) {
-    this.keyPrefix = config.keyPrefix ?? 'ff:';
+    this.keyPrefix = config.keyPrefix ?? "ff:";
     this.defaultTTL = config.defaultTTL ?? 300; // 5 minutes
     this.enableStats = config.enableStats ?? true;
 
@@ -67,7 +67,7 @@ export class RedisCache implements FlagCache {
         this.redis = new Redis(config.url);
       } else {
         this.redis = new Redis({
-          host: config.host ?? 'localhost',
+          host: config.host ?? "localhost",
           port: config.port ?? 6379,
           password: config.password,
           db: config.db ?? 0,
@@ -82,7 +82,7 @@ export class RedisCache implements FlagCache {
    */
   async get<T = FlagVariation>(
     key: string,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<T> | null> {
     try {
       const cacheKey = this.buildCacheKey(key, context);
@@ -112,7 +112,7 @@ export class RedisCache implements FlagCache {
     key: string,
     context: FlagContext,
     evaluation: FlagEvaluation<T>,
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     try {
       const cacheKey = this.buildCacheKey(key, context);
@@ -206,13 +206,17 @@ export class RedisCache implements FlagCache {
     // Use the most important context attributes for cache key
     const parts: string[] = [];
 
-    if (context.userId) {parts.push(`u:${context.userId}`);}
-    if (context.tenantId) {parts.push(`t:${context.tenantId}`);}
-    if (context.environment) {parts.push(`e:${context.environment}`);}
+    if (context.userId) {
+      parts.push(`u:${context.userId}`);
+    }
+    if (context.tenantId) {
+      parts.push(`t:${context.tenantId}`);
+    }
+    if (context.environment) {
+      parts.push(`e:${context.environment}`);
+    }
     if (context.userRole) {
-      const role = Array.isArray(context.userRole)
-        ? context.userRole.join(',')
-        : context.userRole;
+      const role = Array.isArray(context.userRole) ? context.userRole.join(",") : context.userRole;
       parts.push(`r:${role}`);
     }
 
@@ -224,7 +228,7 @@ export class RedisCache implements FlagCache {
       }
     }
 
-    return parts.join('|') || 'default';
+    return parts.join("|") || "default";
   }
 
   /**

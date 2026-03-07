@@ -3,6 +3,7 @@
 This application will serve as the visualization layer for Summit Agent Gym metrics.
 
 It will display:
+
 - Regression charts per model and environment.
 - Looping index trends.
 - Context sensitivity curves.

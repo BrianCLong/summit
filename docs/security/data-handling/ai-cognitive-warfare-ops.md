@@ -8,10 +8,12 @@
 | analysis artifacts | internal |
 
 Never log:
+
 - user identifiers
 - private communications
 - API keys
 
 Retention:
+
 - analysis artifacts: 90 days
 - metrics: 1 year

@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import {
   WellbeingPrediction,
   ResourceAllocation,
   WellbeingDomain,
   CohortAnalysis,
   RiskLevel,
-} from './types.js';
+} from "./types.js";
 
 interface AllocationConfig {
   minAllocationPercent: number;
@@ -16,7 +16,7 @@ interface AllocationConfig {
 const DEFAULT_CONFIG: AllocationConfig = {
   minAllocationPercent: 0.05,
   maxAllocationPercent: 0.35,
-  reservePercent: 0.10,
+  reservePercent: 0.1,
 };
 
 /**
@@ -25,14 +25,14 @@ const DEFAULT_CONFIG: AllocationConfig = {
  * NOTE: In production, these would be configurable per-region and updated periodically.
  */
 const DOMAIN_COST_PER_CITIZEN: Record<WellbeingDomain, number> = {
-  health: 2500,           // Healthcare interventions are expensive
-  economic: 1200,         // Financial counseling, benefits enrollment
-  educational: 800,       // Training programs, tutoring
-  social: 400,            // Community programs, group activities
-  housing: 5000,          // Housing assistance is most expensive
-  mental_health: 1800,    // Therapy, counseling services
-  food_security: 600,     // Food assistance programs
-  employment: 1000,       // Job training, placement services
+  health: 2500, // Healthcare interventions are expensive
+  economic: 1200, // Financial counseling, benefits enrollment
+  educational: 800, // Training programs, tutoring
+  social: 400, // Community programs, group activities
+  housing: 5000, // Housing assistance is most expensive
+  mental_health: 1800, // Therapy, counseling services
+  food_security: 600, // Food assistance programs
+  employment: 1000, // Job training, placement services
 };
 
 /**
@@ -105,20 +105,20 @@ export class ResourceAllocator {
   ): ResourceAllocation {
     // Input validation
     if (totalBudget < 0) {
-      throw new Error('Total budget cannot be negative');
+      throw new Error("Total budget cannot be negative");
     }
     if (!predictions || predictions.length === 0) {
-      throw new Error('Predictions array cannot be empty');
+      throw new Error("Predictions array cannot be empty");
     }
-    if (!region || region.trim() === '') {
-      throw new Error('Region must be specified');
+    if (!region || region.trim() === "") {
+      throw new Error("Region must be specified");
     }
 
     const availableBudget = totalBudget * (1 - this.config.reservePercent);
     const domainNeeds = this.calculateDomainNeeds(predictions);
     const allocations = this.optimizeAllocation(domainNeeds, availableBudget, predictions.length);
     const populationAtRisk = predictions.filter(
-      (p) => p.riskLevel === 'critical' || p.riskLevel === 'high'
+      (p) => p.riskLevel === "critical" || p.riskLevel === "high"
     ).length;
 
     return {
@@ -145,12 +145,11 @@ export class ResourceAllocator {
     criteria: Record<string, unknown>
   ): CohortAnalysis {
     if (!predictions || predictions.length === 0) {
-      throw new Error('Predictions array cannot be empty for cohort analysis');
+      throw new Error("Predictions array cannot be empty for cohort analysis");
     }
 
     const avgScore =
-      predictions.reduce((sum, p) => sum + p.overallWellbeingScore, 0) /
-      predictions.length;
+      predictions.reduce((sum, p) => sum + p.overallWellbeingScore, 0) / predictions.length;
 
     const riskDistribution = this.calculateRiskDistribution(predictions);
     const topRiskFactors = this.aggregateRiskFactors(predictions);
@@ -193,12 +192,17 @@ export class ResourceAllocator {
         const current = needs.get(d) || { totalScore: 0, count: 0, atRisk: 0 };
         current.totalScore += score;
         current.count++;
-        if (score < 50) {current.atRisk++;}
+        if (score < 50) {
+          current.atRisk++;
+        }
         needs.set(d, current);
       }
     }
 
-    const result = new Map<WellbeingDomain, { avgScore: number; atRiskCount: number; severity: number }>();
+    const result = new Map<
+      WellbeingDomain,
+      { avgScore: number; atRiskCount: number; severity: number }
+    >();
     for (const [domain, stats] of needs) {
       const avgScore = stats.totalScore / stats.count;
       result.set(domain, {
@@ -224,7 +228,7 @@ export class ResourceAllocator {
     needs: Map<WellbeingDomain, { avgScore: number; atRiskCount: number; severity: number }>,
     budget: number,
     totalPopulation: number
-  ): ResourceAllocation['allocations'] {
+  ): ResourceAllocation["allocations"] {
     if (budget === 0 || needs.size === 0) {
       return [];
     }
@@ -232,7 +236,10 @@ export class ResourceAllocator {
     const totalSeverity = Array.from(needs.values()).reduce((sum, n) => sum + n.severity, 0);
 
     // Phase 1: Calculate clamped percentages
-    const clampedPercentages = new Map<WellbeingDomain, { percent: number; stats: typeof needs extends Map<WellbeingDomain, infer T> ? T : never }>();
+    const clampedPercentages = new Map<
+      WellbeingDomain,
+      { percent: number; stats: typeof needs extends Map<WellbeingDomain, infer T> ? T : never }
+    >();
     let totalClampedPercent = 0;
 
     for (const [domain, stats] of needs) {
@@ -248,7 +255,7 @@ export class ResourceAllocator {
 
     // Phase 2: Normalize to ensure percentages sum to 1.0 (or as close as constraints allow)
     // This is the critical fix - without normalization, budget doesn't balance
-    const allocations: ResourceAllocation['allocations'] = [];
+    const allocations: ResourceAllocation["allocations"] = [];
     let allocatedTotal = 0;
 
     for (const [domain, { percent, stats }] of clampedPercentages) {
@@ -283,24 +290,42 @@ export class ResourceAllocator {
     stats: { avgScore: number; atRiskCount: number; severity: number },
     percent: number
   ): string {
-    return `${Math.round(percent * 100)}% allocation for ${domain.replace('_', ' ')} ` +
-      `based on avg score of ${Math.round(stats.avgScore)}% and ${stats.atRiskCount} citizens at risk.`;
+    return (
+      `${Math.round(percent * 100)}% allocation for ${domain.replace("_", " ")} ` +
+      `based on avg score of ${Math.round(stats.avgScore)}% and ${stats.atRiskCount} citizens at risk.`
+    );
   }
 
   /**
    * Generate expected outcomes based on actual allocation amount and domain costs.
    * The number of citizens served is calculated from allocation / domain cost.
    */
-  private generateExpectedOutcomes(domain: WellbeingDomain, atRiskCount: number, allocationAmount: number): string[] {
+  private generateExpectedOutcomes(
+    domain: WellbeingDomain,
+    atRiskCount: number,
+    allocationAmount: number
+  ): string[] {
     const outcomes: Record<WellbeingDomain, string[]> = {
-      health: ['Improved healthcare access', 'Reduced emergency visits', 'Better chronic disease management'],
-      economic: ['Increased financial stability', 'Reduced debt burden', 'Improved credit scores'],
-      educational: ['Higher literacy rates', 'Increased job readiness', 'Digital skills improvement'],
-      social: ['Reduced isolation', 'Stronger community ties', 'Improved support networks'],
-      housing: ['Stable housing placements', 'Reduced homelessness', 'Better living conditions'],
-      mental_health: ['Reduced crisis incidents', 'Improved mental health scores', 'Better coping skills'],
-      food_security: ['Reduced food insecurity', 'Improved nutrition', 'Stable food access'],
-      employment: ['Reduced unemployment', 'Higher job retention', 'Increased income levels'],
+      health: [
+        "Improved healthcare access",
+        "Reduced emergency visits",
+        "Better chronic disease management",
+      ],
+      economic: ["Increased financial stability", "Reduced debt burden", "Improved credit scores"],
+      educational: [
+        "Higher literacy rates",
+        "Increased job readiness",
+        "Digital skills improvement",
+      ],
+      social: ["Reduced isolation", "Stronger community ties", "Improved support networks"],
+      housing: ["Stable housing placements", "Reduced homelessness", "Better living conditions"],
+      mental_health: [
+        "Reduced crisis incidents",
+        "Improved mental health scores",
+        "Better coping skills",
+      ],
+      food_security: ["Reduced food insecurity", "Improved nutrition", "Stable food access"],
+      employment: ["Reduced unemployment", "Higher job retention", "Increased income levels"],
     };
 
     // Calculate citizens that can be served based on domain-specific cost
@@ -319,7 +344,7 @@ export class ResourceAllocator {
    */
   private estimateCitizensServed(
     predictions: WellbeingPrediction[],
-    allocations: ResourceAllocation['allocations']
+    allocations: ResourceAllocation["allocations"]
   ): number {
     if (allocations.length === 0) {
       return 0;
@@ -343,7 +368,7 @@ export class ResourceAllocator {
     // A citizen may have multiple domain needs - deduplicate by capping at total population
     // In reality, this is a simplification; true deduplication would require tracking individuals
     const atRiskPopulation = predictions.filter(
-      (p) => p.riskLevel === 'critical' || p.riskLevel === 'high' || p.riskLevel === 'moderate'
+      (p) => p.riskLevel === "critical" || p.riskLevel === "high" || p.riskLevel === "moderate"
     ).length;
 
     return Math.min(totalCitizensServed, atRiskPopulation);
@@ -363,13 +388,14 @@ export class ResourceAllocator {
    */
   private estimateWellbeingImprovement(
     predictions: WellbeingPrediction[],
-    allocations: ResourceAllocation['allocations']
+    allocations: ResourceAllocation["allocations"]
   ): number {
     if (predictions.length === 0 || allocations.length === 0) {
       return 0;
     }
 
-    const currentAvg = predictions.reduce((sum, p) => sum + p.overallWellbeingScore, 0) / predictions.length;
+    const currentAvg =
+      predictions.reduce((sum, p) => sum + p.overallWellbeingScore, 0) / predictions.length;
     const citizenCountByDomain = this.calculateDomainNeeds(predictions);
 
     // Calculate weighted improvement across all domains
@@ -414,9 +440,7 @@ export class ResourceAllocator {
     return Math.round(projectedScore * 100) / 100;
   }
 
-  private calculateRiskDistribution(
-    predictions: WellbeingPrediction[]
-  ): Record<RiskLevel, number> {
+  private calculateRiskDistribution(predictions: WellbeingPrediction[]): Record<RiskLevel, number> {
     const distribution: Record<RiskLevel, number> = {
       critical: 0,
       high: 0,
@@ -434,7 +458,7 @@ export class ResourceAllocator {
 
   private aggregateRiskFactors(
     predictions: WellbeingPrediction[]
-  ): CohortAnalysis['topRiskFactors'] {
+  ): CohortAnalysis["topRiskFactors"] {
     const factorMap = new Map<string, { count: number; totalImpact: number }>();
 
     for (const prediction of predictions) {
@@ -471,14 +495,14 @@ export class ResourceAllocator {
     }
 
     const interventionMap: Record<WellbeingDomain, string> = {
-      housing: 'Housing Stability Programs',
-      food_security: 'Food Assistance & Nutrition',
-      employment: 'Job Training & Placement',
-      mental_health: 'Mental Health Services',
-      health: 'Healthcare Access Programs',
-      social: 'Community Connection Initiatives',
-      educational: 'Education & Skills Development',
-      economic: 'Financial Stability Support',
+      housing: "Housing Stability Programs",
+      food_security: "Food Assistance & Nutrition",
+      employment: "Job Training & Placement",
+      mental_health: "Mental Health Services",
+      health: "Healthcare Access Programs",
+      social: "Community Connection Initiatives",
+      educational: "Education & Skills Development",
+      economic: "Financial Stability Support",
     };
 
     return Array.from(domainCounts.entries())

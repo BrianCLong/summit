@@ -5,8 +5,8 @@
  * Optimizes time-to-detect vs false-attribution with auditable replay logs.
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
 import {
   CampaignCluster,
   ClusterStatus,
@@ -31,7 +31,7 @@ import {
   ReachCategory,
   createAlertId,
   calculateAlertPriority,
-} from '../core/types';
+} from "../core/types";
 
 /**
  * Alert configuration
@@ -72,7 +72,7 @@ export interface AlertThresholds {
 }
 
 export interface NotificationChannel {
-  type: 'WEBHOOK' | 'EMAIL' | 'SLACK' | 'PUBSUB' | 'SMS';
+  type: "WEBHOOK" | "EMAIL" | "SLACK" | "PUBSUB" | "SMS";
   endpoint: string;
   severities: AlertSeverity[];
   enabled: boolean;
@@ -124,7 +124,7 @@ export class AlertEngine extends EventEmitter {
    */
   async evaluateCluster(
     cluster: CampaignCluster,
-    previousState?: CampaignCluster,
+    previousState?: CampaignCluster
   ): Promise<FederatedAlert | null> {
     const context: EvaluationContext = {
       cluster,
@@ -151,17 +151,11 @@ export class AlertEngine extends EventEmitter {
     const priority = calculateAlertPriority(
       severity,
       cluster.participatingOrgs > 1,
-      cluster.participatingOrgs,
+      cluster.participatingOrgs
     );
 
     // Generate alert
-    const alert = await this.generateAlert(
-      context,
-      alertType,
-      severity,
-      priority,
-      triggers,
-    );
+    const alert = await this.generateAlert(context, alertType, severity, priority, triggers);
 
     // Store and notify
     this.storeAlert(alert);
@@ -173,7 +167,7 @@ export class AlertEngine extends EventEmitter {
     // Update metrics
     this.metrics.totalAlerts++;
 
-    this.emit('alertGenerated', alert);
+    this.emit("alertGenerated", alert);
     return alert;
   }
 
@@ -182,7 +176,7 @@ export class AlertEngine extends EventEmitter {
    */
   async evaluateClusters(
     clusters: CampaignCluster[],
-    previousStates?: Map<string, CampaignCluster>,
+    previousStates?: Map<string, CampaignCluster>
   ): Promise<FederatedAlert[]> {
     const alerts: FederatedAlert[] = [];
 
@@ -232,10 +226,7 @@ export class AlertEngine extends EventEmitter {
   /**
    * Acknowledge an alert
    */
-  acknowledgeAlert(
-    alertId: string,
-    acknowledgedBy: string,
-  ): boolean {
+  acknowledgeAlert(alertId: string, acknowledgedBy: string): boolean {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) return false;
 
@@ -243,9 +234,9 @@ export class AlertEngine extends EventEmitter {
     alert.acknowledgedBy = acknowledgedBy;
     alert.acknowledgedAt = new Date();
 
-    this.addAuditEntry(alert, 'ACKNOWLEDGED', acknowledgedBy, {});
+    this.addAuditEntry(alert, "ACKNOWLEDGED", acknowledgedBy, {});
 
-    this.emit('alertAcknowledged', alert);
+    this.emit("alertAcknowledged", alert);
     return true;
   }
 
@@ -255,7 +246,7 @@ export class AlertEngine extends EventEmitter {
   resolveAlert(
     alertId: string,
     resolvedBy: string,
-    resolution: Omit<AlertResolution, 'resolvedAt' | 'resolvedBy'>,
+    resolution: Omit<AlertResolution, "resolvedAt" | "resolvedBy">
   ): boolean {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) return false;
@@ -267,12 +258,12 @@ export class AlertEngine extends EventEmitter {
       resolvedBy,
     };
 
-    this.addAuditEntry(alert, 'RESOLVED', resolvedBy, { resolution });
+    this.addAuditEntry(alert, "RESOLVED", resolvedBy, { resolution });
 
     // Update metrics
-    if (resolution.resolutionType === 'FALSE_POSITIVE') {
+    if (resolution.resolutionType === "FALSE_POSITIVE") {
       this.metrics.falsePositives++;
-    } else if (resolution.resolutionType === 'MITIGATED') {
+    } else if (resolution.resolutionType === "MITIGATED") {
       this.metrics.truePositives++;
     }
 
@@ -280,7 +271,7 @@ export class AlertEngine extends EventEmitter {
     this.alertHistory.push(alert);
     this.activeAlerts.delete(alertId);
 
-    this.emit('alertResolved', alert);
+    this.emit("alertResolved", alert);
     return true;
   }
 
@@ -296,11 +287,11 @@ export class AlertEngine extends EventEmitter {
     // Attach to alert
     alert.responsePack = pack;
 
-    this.addAuditEntry(alert, 'RESPONSE_PACK_GENERATED', 'system', {
+    this.addAuditEntry(alert, "RESPONSE_PACK_GENERATED", "system", {
       packId: pack.packId,
     });
 
-    this.emit('responsePackGenerated', { alertId, pack });
+    this.emit("responsePackGenerated", { alertId, pack });
     return pack;
   }
 
@@ -331,9 +322,7 @@ export class AlertEngine extends EventEmitter {
   // Private Methods
   // ============================================================================
 
-  private evaluateTriggerConditions(
-    context: EvaluationContext,
-  ): TriggerCondition[] {
+  private evaluateTriggerConditions(context: EvaluationContext): TriggerCondition[] {
     const triggers: TriggerCondition[] = [];
     const { cluster, previousState } = context;
     const thresholds = this.config.thresholds;
@@ -341,10 +330,10 @@ export class AlertEngine extends EventEmitter {
     // Signal volume trigger
     if (cluster.signalCount >= thresholds.minSignalsForAlert) {
       triggers.push({
-        conditionType: 'SIGNAL_VOLUME',
+        conditionType: "SIGNAL_VOLUME",
         threshold: thresholds.minSignalsForAlert,
         actualValue: cluster.signalCount,
-        direction: 'ABOVE',
+        direction: "ABOVE",
         windowMinutes: 60,
       });
     }
@@ -363,10 +352,10 @@ export class AlertEngine extends EventEmitter {
 
       if (velocityChange >= thresholds.signalVelocitySpike) {
         triggers.push({
-          conditionType: 'VELOCITY_SPIKE',
+          conditionType: "VELOCITY_SPIKE",
           threshold: thresholds.signalVelocitySpike,
           actualValue: velocityChange,
-          direction: 'ABOVE',
+          direction: "ABOVE",
           windowMinutes: 60,
         });
       }
@@ -375,10 +364,10 @@ export class AlertEngine extends EventEmitter {
     // Cross-tenant trigger
     if (cluster.participatingOrgs >= thresholds.crossTenantMinOrgs) {
       triggers.push({
-        conditionType: 'CROSS_TENANT',
+        conditionType: "CROSS_TENANT",
         threshold: thresholds.crossTenantMinOrgs,
         actualValue: cluster.participatingOrgs,
-        direction: 'ABOVE',
+        direction: "ABOVE",
         windowMinutes: 60,
       });
     }
@@ -386,14 +375,14 @@ export class AlertEngine extends EventEmitter {
     // Coordination strength trigger
     const maxCoordinationStrength = Math.max(
       ...cluster.coordinationPatterns.map((p) => p.strength),
-      0,
+      0
     );
     if (maxCoordinationStrength >= thresholds.coordinationStrengthMin) {
       triggers.push({
-        conditionType: 'COORDINATION_DETECTED',
+        conditionType: "COORDINATION_DETECTED",
         threshold: thresholds.coordinationStrengthMin,
         actualValue: maxCoordinationStrength,
-        direction: 'ABOVE',
+        direction: "ABOVE",
         windowMinutes: 60,
       });
     }
@@ -407,16 +396,14 @@ export class AlertEngine extends EventEmitter {
       ThreatLevel.CRITICAL,
     ];
     const currentThreatIndex = threatOrder.indexOf(cluster.threatLevel);
-    const autoEscalateIndex = threatOrder.indexOf(
-      thresholds.autoEscalateThreatLevel,
-    );
+    const autoEscalateIndex = threatOrder.indexOf(thresholds.autoEscalateThreatLevel);
 
     if (currentThreatIndex >= autoEscalateIndex) {
       triggers.push({
-        conditionType: 'THREAT_LEVEL',
+        conditionType: "THREAT_LEVEL",
         threshold: autoEscalateIndex,
         actualValue: currentThreatIndex,
-        direction: 'ABOVE',
+        direction: "ABOVE",
         windowMinutes: 60,
       });
     }
@@ -424,28 +411,25 @@ export class AlertEngine extends EventEmitter {
     return triggers;
   }
 
-  private determineAlertType(
-    context: EvaluationContext,
-    triggers: TriggerCondition[],
-  ): AlertType {
+  private determineAlertType(context: EvaluationContext, triggers: TriggerCondition[]): AlertType {
     const triggerTypes = new Set(triggers.map((t) => t.conditionType));
 
-    if (triggerTypes.has('CROSS_TENANT')) {
+    if (triggerTypes.has("CROSS_TENANT")) {
       return AlertType.CROSS_TENANT_SPIKE;
     }
 
-    if (triggerTypes.has('COORDINATION_DETECTED')) {
+    if (triggerTypes.has("COORDINATION_DETECTED")) {
       return AlertType.COORDINATION_DETECTED;
     }
 
-    if (triggerTypes.has('VELOCITY_SPIKE')) {
+    if (triggerTypes.has("VELOCITY_SPIKE")) {
       if (context.cluster.status === ClusterStatus.EMERGING) {
         return AlertType.CAMPAIGN_EMERGING;
       }
       return AlertType.CAMPAIGN_ESCALATING;
     }
 
-    if (triggerTypes.has('THREAT_LEVEL')) {
+    if (triggerTypes.has("THREAT_LEVEL")) {
       return AlertType.THRESHOLD_BREACH;
     }
 
@@ -454,7 +438,7 @@ export class AlertEngine extends EventEmitter {
 
   private determineSeverity(
     context: EvaluationContext,
-    triggers: TriggerCondition[],
+    triggers: TriggerCondition[]
   ): AlertSeverity {
     const { cluster } = context;
 
@@ -477,10 +461,7 @@ export class AlertEngine extends EventEmitter {
     }
 
     // Medium: Medium threat or cross-tenant
-    if (
-      cluster.threatLevel === ThreatLevel.MEDIUM ||
-      cluster.participatingOrgs > 2
-    ) {
+    if (cluster.threatLevel === ThreatLevel.MEDIUM || cluster.participatingOrgs > 2) {
       return AlertSeverity.MEDIUM;
     }
 
@@ -497,7 +478,7 @@ export class AlertEngine extends EventEmitter {
     alertType: AlertType,
     severity: AlertSeverity,
     priority: AlertPriority,
-    triggers: TriggerCondition[],
+    triggers: TriggerCondition[]
   ): Promise<FederatedAlert> {
     const { cluster } = context;
     const now = new Date();
@@ -508,11 +489,7 @@ export class AlertEngine extends EventEmitter {
     const narrativeSummary = this.generateNarrativeSummary(cluster);
     const topSpreaders = this.identifyTopSpreaders(cluster);
     const channelDiffusion = this.analyzeChannelDiffusion(cluster);
-    const recommendedActions = this.generateRecommendedActions(
-      alertType,
-      severity,
-      cluster,
-    );
+    const recommendedActions = this.generateRecommendedActions(alertType, severity, cluster);
 
     const alert: FederatedAlert = {
       alertId: createAlertId(),
@@ -536,8 +513,8 @@ export class AlertEngine extends EventEmitter {
       auditTrail: [
         {
           timestamp: now,
-          action: 'CREATED',
-          actor: 'system',
+          action: "CREATED",
+          actor: "system",
           details: {
             evaluationId: context.evaluationId,
             triggers: triggers.map((t) => t.conditionType),
@@ -549,16 +526,13 @@ export class AlertEngine extends EventEmitter {
     return alert;
   }
 
-  private generateAlertTitle(
-    alertType: AlertType,
-    cluster: CampaignCluster,
-  ): string {
+  private generateAlertTitle(alertType: AlertType, cluster: CampaignCluster): string {
     const threatPrefix =
       cluster.threatLevel === ThreatLevel.CRITICAL
-        ? '[CRITICAL] '
+        ? "[CRITICAL] "
         : cluster.threatLevel === ThreatLevel.HIGH
-          ? '[HIGH] '
-          : '';
+          ? "[HIGH] "
+          : "";
 
     switch (alertType) {
       case AlertType.CAMPAIGN_EMERGING:
@@ -580,49 +554,46 @@ export class AlertEngine extends EventEmitter {
     }
   }
 
-  private generateAlertSummary(
-    context: EvaluationContext,
-    triggers: TriggerCondition[],
-  ): string {
+  private generateAlertSummary(context: EvaluationContext, triggers: TriggerCondition[]): string {
     const { cluster } = context;
 
     const parts: string[] = [];
 
     parts.push(
-      `Campaign cluster detected with ${cluster.signalCount} signals from ${cluster.participatingOrgs} organization(s).`,
+      `Campaign cluster detected with ${cluster.signalCount} signals from ${cluster.participatingOrgs} organization(s).`
     );
 
     if (cluster.velocityMetrics.growthRate > 50) {
       parts.push(
-        `Velocity is increasing rapidly at ${cluster.velocityMetrics.growthRate.toFixed(0)}% growth rate.`,
+        `Velocity is increasing rapidly at ${cluster.velocityMetrics.growthRate.toFixed(0)}% growth rate.`
       );
     }
 
     if (cluster.coordinationPatterns.length > 0) {
       const topPattern = cluster.coordinationPatterns[0];
       parts.push(
-        `Coordination pattern "${topPattern.patternType}" detected with ${(topPattern.strength * 100).toFixed(0)}% strength.`,
+        `Coordination pattern "${topPattern.patternType}" detected with ${(topPattern.strength * 100).toFixed(0)}% strength.`
       );
     }
 
     if (cluster.participatingOrgs > 1) {
       parts.push(
-        `Cross-tenant signal boost: ${(cluster.crossTenantConfidence * 100).toFixed(0)}% confidence.`,
+        `Cross-tenant signal boost: ${(cluster.crossTenantConfidence * 100).toFixed(0)}% confidence.`
       );
     }
 
-    return parts.join(' ');
+    return parts.join(" ");
   }
 
   private generateNarrativeSummary(cluster: CampaignCluster): string {
     if (cluster.dominantNarratives.length === 0) {
-      return 'Insufficient narrative data for summary.';
+      return "Insufficient narrative data for summary.";
     }
 
     const narratives = cluster.dominantNarratives
       .slice(0, 3)
       .map((n) => n.themeSummary)
-      .join('; ');
+      .join("; ");
 
     return `Key narratives: ${narratives}`;
   }
@@ -636,16 +607,9 @@ export class AlertEngine extends EventEmitter {
     for (let i = 0; i < spreaderCount; i++) {
       spreaders.push({
         accountHash: `account_${uuidv4().substring(0, 8)}`,
-        platform: ['twitter', 'facebook', 'telegram'][i % 3],
-        reachCategory: [
-          ReachCategory.MEDIUM,
-          ReachCategory.LARGE,
-          ReachCategory.SMALL,
-        ][i % 3],
-        activityLevel: ['HIGH', 'MEDIUM', 'LOW'][i % 3] as
-          | 'LOW'
-          | 'MEDIUM'
-          | 'HIGH',
+        platform: ["twitter", "facebook", "telegram"][i % 3],
+        reachCategory: [ReachCategory.MEDIUM, ReachCategory.LARGE, ReachCategory.SMALL][i % 3],
+        activityLevel: ["HIGH", "MEDIUM", "LOW"][i % 3] as "LOW" | "MEDIUM" | "HIGH",
         suspicionScore: 0.5 + Math.random() * 0.4,
         publicArtifacts: [],
       });
@@ -654,9 +618,7 @@ export class AlertEngine extends EventEmitter {
     return spreaders;
   }
 
-  private analyzeChannelDiffusion(
-    cluster: CampaignCluster,
-  ): ChannelDiffusionSummary {
+  private analyzeChannelDiffusion(cluster: CampaignCluster): ChannelDiffusionSummary {
     const channels: Record<
       string,
       {
@@ -667,9 +629,7 @@ export class AlertEngine extends EventEmitter {
       }
     > = {};
 
-    for (const [channel, count] of Object.entries(
-      cluster.channelDistribution,
-    )) {
+    for (const [channel, count] of Object.entries(cluster.channelDistribution)) {
       channels[channel] = {
         signalCount: count,
         estimatedReach: count * 1000,
@@ -680,17 +640,17 @@ export class AlertEngine extends EventEmitter {
 
     const primaryChannel =
       Object.entries(channels).sort((a, b) => b[1].signalCount - a[1].signalCount)[0]?.[0] ||
-      'unknown';
+      "unknown";
 
     const channelCount = Object.keys(channels).length;
     const crossPlatformScore = Math.min(1, channelCount / 5);
 
     // Determine diffusion pattern based on coordination
-    let diffusionPattern: 'ORGANIC' | 'COORDINATED' | 'MIXED' = 'ORGANIC';
+    let diffusionPattern: "ORGANIC" | "COORDINATED" | "MIXED" = "ORGANIC";
     if (cluster.coordinationPatterns.some((p) => p.strength > 0.7)) {
-      diffusionPattern = 'COORDINATED';
+      diffusionPattern = "COORDINATED";
     } else if (cluster.coordinationPatterns.some((p) => p.strength > 0.4)) {
-      diffusionPattern = 'MIXED';
+      diffusionPattern = "MIXED";
     }
 
     return {
@@ -704,7 +664,7 @@ export class AlertEngine extends EventEmitter {
   private generateRecommendedActions(
     alertType: AlertType,
     severity: AlertSeverity,
-    cluster: CampaignCluster,
+    cluster: CampaignCluster
   ): RecommendedAction[] {
     const actions: RecommendedAction[] = [];
 
@@ -713,23 +673,19 @@ export class AlertEngine extends EventEmitter {
       actionId: uuidv4(),
       actionType: ActionType.MONITOR,
       priority: 1,
-      description: 'Continue monitoring campaign evolution',
-      estimatedImpact: 'Maintain situational awareness',
+      description: "Continue monitoring campaign evolution",
+      estimatedImpact: "Maintain situational awareness",
       automatable: true,
     });
 
     // Investigation for medium+ severity
-    if (
-      [AlertSeverity.MEDIUM, AlertSeverity.HIGH, AlertSeverity.CRITICAL].includes(
-        severity,
-      )
-    ) {
+    if ([AlertSeverity.MEDIUM, AlertSeverity.HIGH, AlertSeverity.CRITICAL].includes(severity)) {
       actions.push({
         actionId: uuidv4(),
         actionType: ActionType.INVESTIGATE,
         priority: 2,
-        description: 'Conduct deep investigation into campaign origins',
-        estimatedImpact: 'Better attribution and response targeting',
+        description: "Conduct deep investigation into campaign origins",
+        estimatedImpact: "Better attribution and response targeting",
         automatable: false,
       });
     }
@@ -740,8 +696,8 @@ export class AlertEngine extends EventEmitter {
         actionId: uuidv4(),
         actionType: ActionType.ESCALATE,
         priority: 3,
-        description: 'Escalate to senior leadership and cross-functional teams',
-        estimatedImpact: 'Enable coordinated organizational response',
+        description: "Escalate to senior leadership and cross-functional teams",
+        estimatedImpact: "Enable coordinated organizational response",
         automatable: true,
       });
     }
@@ -752,8 +708,8 @@ export class AlertEngine extends EventEmitter {
         actionId: uuidv4(),
         actionType: ActionType.COUNTER_NARRATIVE,
         priority: 4,
-        description: 'Prepare counter-narrative messaging',
-        estimatedImpact: 'Reduce campaign effectiveness',
+        description: "Prepare counter-narrative messaging",
+        estimatedImpact: "Reduce campaign effectiveness",
         automatable: false,
       });
     }
@@ -764,8 +720,8 @@ export class AlertEngine extends EventEmitter {
         actionId: uuidv4(),
         actionType: ActionType.PLATFORM_REPORT,
         priority: 5,
-        description: 'Report coordinated activity to relevant platforms',
-        estimatedImpact: 'Potential account suspension and content removal',
+        description: "Report coordinated activity to relevant platforms",
+        estimatedImpact: "Potential account suspension and content removal",
         automatable: true,
       });
     }
@@ -776,8 +732,8 @@ export class AlertEngine extends EventEmitter {
         actionId: uuidv4(),
         actionType: ActionType.STAKEHOLDER_NOTIFY,
         priority: 6,
-        description: 'Notify external stakeholders and partners',
-        estimatedImpact: 'Coordinated defense across organizations',
+        description: "Notify external stakeholders and partners",
+        estimatedImpact: "Coordinated defense across organizations",
         automatable: true,
       });
     }
@@ -790,80 +746,75 @@ export class AlertEngine extends EventEmitter {
 
     const narrativeIntelligence: NarrativeIntelligence = {
       mainNarratives: [
-        'Primary narrative theme identified in campaign',
-        'Secondary supporting narrative detected',
+        "Primary narrative theme identified in campaign",
+        "Secondary supporting narrative detected",
       ],
       counterPoints: [
-        'Factual correction point 1',
-        'Context that contradicts narrative',
-        'Alternative interpretation supported by evidence',
+        "Factual correction point 1",
+        "Context that contradicts narrative",
+        "Alternative interpretation supported by evidence",
       ],
       factChecks: [
         {
-          claim: 'Primary claim from campaign',
-          verdict: 'MISLEADING',
-          explanation: 'Claim lacks important context',
-          sources: ['source1.org', 'factcheck.org'],
+          claim: "Primary claim from campaign",
+          verdict: "MISLEADING",
+          explanation: "Claim lacks important context",
+          sources: ["source1.org", "factcheck.org"],
         },
       ],
       sourceCredibilityAssessment: {
         primarySources: [
           {
-            sourceHash: 'hash1',
+            sourceHash: "hash1",
             credibilityScore: 0.3,
-            factors: ['newly_created', 'no_verification'],
+            factors: ["newly_created", "no_verification"],
           },
         ],
         amplifierSources: [],
         overallCredibility: 0.35,
       },
       audienceVulnerabilities: [
-        'Low media literacy segments',
-        'Pre-existing belief alignment',
-        'Information vacuum in specific topics',
+        "Low media literacy segments",
+        "Pre-existing belief alignment",
+        "Information vacuum in specific topics",
       ],
     };
 
     const commsPlaybook: CommsPlaybook = {
       strategy:
         alert.severity === AlertSeverity.CRITICAL
-          ? 'DEBUNK'
+          ? "DEBUNK"
           : alert.severity === AlertSeverity.HIGH
-            ? 'COUNTER_NARRATIVE'
-            : 'PREBUNK',
+            ? "COUNTER_NARRATIVE"
+            : "PREBUNK",
       keyMessages: [
-        'Core truthful message to emphasize',
-        'Context that addresses misinformation',
-        'Call to action for verification',
+        "Core truthful message to emphasize",
+        "Context that addresses misinformation",
+        "Call to action for verification",
       ],
       talkingPoints: [
-        'Specific data point that contradicts false claim',
-        'Expert source that provides authoritative information',
-        'Historical context that provides perspective',
+        "Specific data point that contradicts false claim",
+        "Expert source that provides authoritative information",
+        "Historical context that provides perspective",
       ],
-      avoidTopics: [
-        'Topics that may amplify harmful narratives',
-        'Unverified information',
-      ],
+      avoidTopics: ["Topics that may amplify harmful narratives", "Unverified information"],
       timing: {
         urgency:
           alert.severity === AlertSeverity.CRITICAL
-            ? 'IMMEDIATE'
+            ? "IMMEDIATE"
             : alert.severity === AlertSeverity.HIGH
-              ? 'WITHIN_HOURS'
-              : 'WITHIN_DAYS',
-        optimalWindows: [
-          { start: now, end: new Date(now.getTime() + 4 * 60 * 60 * 1000) },
-        ],
+              ? "WITHIN_HOURS"
+              : "WITHIN_DAYS",
+        optimalWindows: [{ start: now, end: new Date(now.getTime() + 4 * 60 * 60 * 1000) }],
         avoidWindows: [],
       },
       audienceSegments: [
         {
-          segmentId: 'segment_1',
-          description: 'Primary affected audience',
+          segmentId: "segment_1",
+          description: "Primary affected audience",
           vulnerability: 0.7,
-          recommendedApproach: 'Direct factual correction with trusted sources',
-          channels: ['twitter', 'facebook'],
+          recommendedApproach: "Direct factual correction with trusted sources",
+          channels: ["twitter", "facebook"],
         },
       ],
     };
@@ -877,38 +828,38 @@ export class AlertEngine extends EventEmitter {
       ],
       riskAssessment:
         alert.severity === AlertSeverity.CRITICAL
-          ? 'Critical risk requiring immediate executive attention'
+          ? "Critical risk requiring immediate executive attention"
           : alert.severity === AlertSeverity.HIGH
-            ? 'High risk requiring senior leadership involvement'
-            : 'Elevated risk requiring monitoring and preparation',
+            ? "High risk requiring senior leadership involvement"
+            : "Elevated risk requiring monitoring and preparation",
       recommendedActions: alert.recommendedActions.map((a) => a.description),
       escalationPath: [
-        'Security Operations Center',
-        'Communications Team Lead',
-        'VP of Communications',
-        'Executive Leadership',
+        "Security Operations Center",
+        "Communications Team Lead",
+        "VP of Communications",
+        "Executive Leadership",
       ],
     };
 
     const measurementPlan: MeasurementPlan = {
       kpis: [
         {
-          name: 'Campaign Reach',
+          name: "Campaign Reach",
           baseline: 0,
           target: -50, // 50% reduction
-          measurement: 'Estimated audience reached by campaign content',
+          measurement: "Estimated audience reached by campaign content",
         },
         {
-          name: 'Counter-narrative Engagement',
+          name: "Counter-narrative Engagement",
           baseline: 0,
           target: 1000,
-          measurement: 'Engagement on counter-messaging content',
+          measurement: "Engagement on counter-messaging content",
         },
         {
-          name: 'Narrative Velocity',
+          name: "Narrative Velocity",
           baseline: 100,
           target: 25, // 75% reduction
-          measurement: 'New signals per hour',
+          measurement: "New signals per hour",
         },
       ],
       trackingWindow: {
@@ -916,33 +867,33 @@ export class AlertEngine extends EventEmitter {
         end: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
       },
       checkpoints: [
-        { date: new Date(now.getTime() + 24 * 60 * 60 * 1000), metrics: ['reach', 'velocity'] },
-        { date: new Date(now.getTime() + 72 * 60 * 60 * 1000), metrics: ['reach', 'engagement'] },
+        { date: new Date(now.getTime() + 24 * 60 * 60 * 1000), metrics: ["reach", "velocity"] },
+        { date: new Date(now.getTime() + 72 * 60 * 60 * 1000), metrics: ["reach", "engagement"] },
       ],
       successCriteria: [
-        'Campaign velocity reduced by 50%',
-        'Counter-narrative reaches 75% of campaign audience',
-        'No escalation to traditional media',
+        "Campaign velocity reduced by 50%",
+        "Counter-narrative reaches 75% of campaign audience",
+        "No escalation to traditional media",
       ],
     };
 
     return {
       packId: uuidv4(),
       generatedAt: now,
-      clusterId: alert.clusterId || '',
+      clusterId: alert.clusterId || "",
       narrativeSummary: narrativeIntelligence,
       commsPlaybook,
       platformActions: [
         {
-          platform: 'twitter',
-          actionType: 'REPORT_COORDINATION',
+          platform: "twitter",
+          actionType: "REPORT_COORDINATION",
           priority: 1,
           steps: [
-            'Document coordinated accounts',
-            'Submit trust & safety report',
-            'Follow up with platform contact',
+            "Document coordinated accounts",
+            "Submit trust & safety report",
+            "Follow up with platform contact",
           ],
-          estimatedTimeline: '24-48 hours for initial review',
+          estimatedTimeline: "24-48 hours for initial review",
         },
       ],
       stakeholderBriefing,
@@ -966,17 +917,17 @@ export class AlertEngine extends EventEmitter {
       try {
         await this.sendNotification(channel, alert);
       } catch (error) {
-        this.emit('notificationError', { channel, alert, error });
+        this.emit("notificationError", { channel, alert, error });
       }
     }
   }
 
   private async sendNotification(
     channel: NotificationChannel,
-    alert: FederatedAlert,
+    alert: FederatedAlert
   ): Promise<void> {
     // Placeholder for actual notification implementation
-    this.emit('notificationSent', { channel: channel.type, alertId: alert.alertId });
+    this.emit("notificationSent", { channel: channel.type, alertId: alert.alertId });
   }
 
   private isInCooldown(clusterId: string): boolean {
@@ -986,17 +937,14 @@ export class AlertEngine extends EventEmitter {
   }
 
   private setCooldown(clusterId: string): void {
-    this.cooldowns.set(
-      clusterId,
-      new Date(Date.now() + this.config.alertCooldownMs),
-    );
+    this.cooldowns.set(clusterId, new Date(Date.now() + this.config.alertCooldownMs));
   }
 
   private addAuditEntry(
     alert: FederatedAlert,
     action: string,
     actor: string,
-    details: Record<string, unknown>,
+    details: Record<string, unknown>
   ): void {
     if (!this.config.enableAuditLog) return;
 

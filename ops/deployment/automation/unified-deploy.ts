@@ -1,9 +1,9 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
-import { setTimeout as wait } from 'timers/promises';
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { setTimeout as wait } from "timers/promises";
 
-type EnvironmentKey = 'dev' | 'staging' | 'prod';
+type EnvironmentKey = "dev" | "staging" | "prod";
 
 interface DeploymentProfile {
   name: string;
@@ -61,40 +61,40 @@ interface DeploymentArtifact {
 
 const PROFILES: Record<EnvironmentKey, DeploymentProfile> = {
   dev: {
-    name: 'Development',
-    cluster: 'dev-cluster',
-    namespace: 'intelgraph-dev',
-    region: 'us-west-2',
-    healthUrl: 'http://localhost:3000/health',
-    requiredSecrets: ['DEV_DATABASE_URL', 'DEV_MESSAGE_BUS'],
+    name: "Development",
+    cluster: "dev-cluster",
+    namespace: "intelgraph-dev",
+    region: "us-west-2",
+    healthUrl: "http://localhost:3000/health",
+    requiredSecrets: ["DEV_DATABASE_URL", "DEV_MESSAGE_BUS"],
     configGuards: [
-      'Development deployments permit feature flags and experimental toggles.',
-      'Deployment proceeds without change advisory approval.',
+      "Development deployments permit feature flags and experimental toggles.",
+      "Deployment proceeds without change advisory approval.",
     ],
   },
   staging: {
-    name: 'Staging',
-    cluster: 'staging-cluster',
-    namespace: 'intelgraph-staging',
-    region: 'us-east-1',
-    healthUrl: 'https://staging.intelgraph.local/health',
-    requiredSecrets: ['STAGING_DATABASE_URL', 'STAGING_MESSAGE_BUS'],
+    name: "Staging",
+    cluster: "staging-cluster",
+    namespace: "intelgraph-staging",
+    region: "us-east-1",
+    healthUrl: "https://staging.intelgraph.local/health",
+    requiredSecrets: ["STAGING_DATABASE_URL", "STAGING_MESSAGE_BUS"],
     configGuards: [
-      'Staging deployments require release candidates only.',
-      'Synthetic traffic must be enabled before health verification.',
+      "Staging deployments require release candidates only.",
+      "Synthetic traffic must be enabled before health verification.",
     ],
   },
   prod: {
-    name: 'Production',
-    cluster: 'prod-cluster',
-    namespace: 'intelgraph',
-    region: 'us-east-1',
-    healthUrl: 'https://intelgraph.local/health',
-    artifactBucket: 's3://intelgraph-deployments',
-    requiredSecrets: ['PROD_DATABASE_URL', 'PROD_MESSAGE_BUS'],
+    name: "Production",
+    cluster: "prod-cluster",
+    namespace: "intelgraph",
+    region: "us-east-1",
+    healthUrl: "https://intelgraph.local/health",
+    artifactBucket: "s3://intelgraph-deployments",
+    requiredSecrets: ["PROD_DATABASE_URL", "PROD_MESSAGE_BUS"],
     configGuards: [
-      'Production deployments must be approved and recorded.',
-      'Progressive rollout with health gates is enforced.',
+      "Production deployments must be approved and recorded.",
+      "Progressive rollout with health gates is enforced.",
     ],
   },
 };
@@ -106,31 +106,31 @@ function parseArgs(argv: string[]): CliOptions {
     const arg = argv[i];
 
     switch (arg) {
-      case '--env':
+      case "--env":
         options.env = argv[i + 1] as EnvironmentKey;
         i++;
         break;
-      case '--service':
+      case "--service":
         options.service = argv[i + 1];
         i++;
         break;
-      case '--version':
+      case "--version":
         options.version = argv[i + 1];
         i++;
         break;
-      case '--secrets-file':
+      case "--secrets-file":
         options.secretsFile = argv[i + 1];
         i++;
         break;
-      case '--artifact-dir':
+      case "--artifact-dir":
         options.artifactDir = argv[i + 1];
         i++;
         break;
-      case '--health-url':
+      case "--health-url":
         options.healthUrl = argv[i + 1];
         i++;
         break;
-      case '--dry-run':
+      case "--dry-run":
         options.dryRun = true;
         break;
       default:
@@ -144,45 +144,45 @@ function parseArgs(argv: string[]): CliOptions {
 function validateEnvironment(
   env: EnvironmentKey | undefined,
   service: string | undefined,
-  version: string | undefined,
+  version: string | undefined
 ): ValidationResult {
   const checks: string[] = [];
   const failures: string[] = [];
 
   if (!env || !PROFILES[env]) {
-    failures.push('Environment must be one of dev, staging, or prod.');
+    failures.push("Environment must be one of dev, staging, or prod.");
   } else {
     checks.push(`Environment '${env}' is recognized.`);
   }
 
   if (!service) {
-    failures.push('A service name must be provided via --service.');
+    failures.push("A service name must be provided via --service.");
   } else {
     checks.push(`Service '${service}' is set.`);
   }
 
   if (!version) {
-    failures.push('A version identifier must be provided via --version.');
+    failures.push("A version identifier must be provided via --version.");
   } else {
     checks.push(`Version '${version}' will be deployed.`);
-    if (env === 'prod' && !version.match(/^v?\d+\.\d+\.\d+/)) {
-      failures.push('Production deployments must use a semantic version tag.');
+    if (env === "prod" && !version.match(/^v?\d+\.\d+\.\d+/)) {
+      failures.push("Production deployments must use a semantic version tag.");
     }
   }
 
   if (env) {
     const profile = PROFILES[env];
     if (!profile.region) {
-      failures.push('Environment region is missing.');
+      failures.push("Environment region is missing.");
     }
     if (!profile.cluster) {
-      failures.push('Cluster configuration is required.');
+      failures.push("Cluster configuration is required.");
     }
     if (!profile.namespace) {
-      failures.push('Namespace configuration is required.');
+      failures.push("Namespace configuration is required.");
     }
-    if (!profile.healthUrl.startsWith('http')) {
-      failures.push('Health URL must be an http/https endpoint.');
+    if (!profile.healthUrl.startsWith("http")) {
+      failures.push("Health URL must be an http/https endpoint.");
     }
     checks.push(...profile.configGuards);
   }
@@ -200,20 +200,17 @@ function loadSecretSource(filePath?: string): Record<string, string> {
     throw new Error(`Secrets file not found at ${resolvedPath}`);
   }
 
-  const rawContent = fs.readFileSync(resolvedPath, 'utf8');
+  const rawContent = fs.readFileSync(resolvedPath, "utf8");
   const parsed = JSON.parse(rawContent);
 
-  if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Secrets file must contain a JSON object of key/value pairs.');
+  if (typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Secrets file must contain a JSON object of key/value pairs.");
   }
 
   return parsed as Record<string, string>;
 }
 
-function resolveSecrets(
-  env: EnvironmentKey,
-  source: Record<string, string>,
-): SecretResolution {
+function resolveSecrets(env: EnvironmentKey, source: Record<string, string>): SecretResolution {
   const resolved: Record<string, string> = {};
   const missing: string[] = [];
   const required = PROFILES[env].requiredSecrets;
@@ -233,7 +230,7 @@ function resolveSecrets(
   return {
     resolved,
     missing,
-    source: Object.keys(source).length > 0 ? 'file' : 'environment',
+    source: Object.keys(source).length > 0 ? "file" : "environment",
   };
 }
 
@@ -241,14 +238,14 @@ function redactSecrets(resolved: Record<string, string>): Record<string, string>
   return Object.fromEntries(
     Object.entries(resolved).map(([key, value]) => [
       key,
-      `sha256:${crypto.createHash('sha256').update(value).digest('hex').slice(0, 16)}`,
-    ]),
+      `sha256:${crypto.createHash("sha256").update(value).digest("hex").slice(0, 16)}`,
+    ])
   );
 }
 
 async function verifyHealth(
   url: string,
-  { timeoutMs = 5000 }: { timeoutMs?: number } = {},
+  { timeoutMs = 5000 }: { timeoutMs?: number } = {}
 ): Promise<HealthCheckResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -276,13 +273,8 @@ async function verifyHealth(
   }
 }
 
-function writeArtifact(
-  artifact: DeploymentArtifact,
-  artifactDir?: string,
-): string {
-  const dir = artifactDir
-    ? path.resolve(artifactDir)
-    : path.join(__dirname, 'artifacts');
+function writeArtifact(artifact: DeploymentArtifact, artifactDir?: string): string {
+  const dir = artifactDir ? path.resolve(artifactDir) : path.join(__dirname, "artifacts");
   fs.mkdirSync(dir, { recursive: true });
 
   const fileName = `${artifact.environment}-${artifact.service}-${Date.now()}.json`;
@@ -294,14 +286,10 @@ function writeArtifact(
 
 async function main(): Promise<void> {
   const options = parseArgs(process.argv);
-  const validations = validateEnvironment(
-    options.env,
-    options.service,
-    options.version,
-  );
+  const validations = validateEnvironment(options.env, options.service, options.version);
 
   if (!validations.valid || !options.env || !options.service || !options.version) {
-    console.error('Deployment request failed validation:');
+    console.error("Deployment request failed validation:");
     validations.failures.forEach((failure) => console.error(`- ${failure}`));
     process.exitCode = 1;
     return;
@@ -312,7 +300,7 @@ async function main(): Promise<void> {
   const secretResolution = resolveSecrets(options.env, secretSource);
 
   if (secretResolution.missing.length > 0) {
-    console.error('Missing required secrets:', secretResolution.missing.join(', '));
+    console.error("Missing required secrets:", secretResolution.missing.join(", "));
     process.exitCode = 1;
     return;
   }
@@ -323,15 +311,15 @@ async function main(): Promise<void> {
   console.log(`- Region: ${profile.region}`);
   console.log(`- Deployment version: ${options.version}`);
   console.log(
-    `- Secrets injected from ${secretResolution.source} (${Object.keys(secretResolution.resolved).length} keys)`,
+    `- Secrets injected from ${secretResolution.source} (${Object.keys(secretResolution.resolved).length} keys)`
   );
 
   if (options.dryRun) {
-    console.log('\nDry run enabled — skipping rollout and health verification.');
+    console.log("\nDry run enabled — skipping rollout and health verification.");
   } else {
-    console.log('\nInjecting secrets into deployment manifest...');
+    console.log("\nInjecting secrets into deployment manifest...");
     await wait(250);
-    console.log('Applying manifests and waiting for rollout...');
+    console.log("Applying manifests and waiting for rollout...");
     await wait(500);
   }
 
@@ -341,12 +329,12 @@ async function main(): Promise<void> {
         ok: true,
         url: healthTarget,
         durationMs: 0,
-        body: 'health check skipped (dry run)',
+        body: "health check skipped (dry run)",
       }
     : await verifyHealth(healthTarget);
 
   if (!health.ok) {
-    console.error('\nHealth verification failed:', health.error || health.status);
+    console.error("\nHealth verification failed:", health.error || health.status);
   }
 
   const artifact: DeploymentArtifact = {
@@ -366,7 +354,7 @@ async function main(): Promise<void> {
 
   const artifactPath = writeArtifact(artifact, options.artifactDir);
   console.log(`\nDeployment artifact generated at ${artifactPath}`);
-  console.log('Secret fingerprints:', redactSecrets(secretResolution.resolved));
+  console.log("Secret fingerprints:", redactSecrets(secretResolution.resolved));
 
   if (!health.ok) {
     process.exitCode = 2;
@@ -374,6 +362,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-  console.error('Deployment CLI failed:', error);
+  console.error("Deployment CLI failed:", error);
   process.exit(1);
 });

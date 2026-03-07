@@ -13,7 +13,9 @@ export const PaginationSchema = z.object({
  * Summit-specific metadata for context-budget awareness.
  */
 export const SummitMetaSchema = z.object({
-  size_estimate: z.string().describe("Rough character count or row count (e.g., '1.2KB', '50 rows')"),
+  size_estimate: z
+    .string()
+    .describe("Rough character count or row count (e.g., '1.2KB', '50 rows')"),
   recommendation: z.enum(["summarize", "fetch_more", "proceed"]).optional(),
 });
 

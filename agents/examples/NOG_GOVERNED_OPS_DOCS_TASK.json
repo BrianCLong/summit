@@ -19,12 +19,7 @@
       "prompts/registry.yaml"
     ],
     "domains": ["documentation", "governance", "security", "operations"],
-    "exclusions": [
-      "docs/ci/REQUIRED_CHECKS_POLICY.yml",
-      "SECURITY/*",
-      "secrets/*",
-      ".env"
-    ]
+    "exclusions": ["docs/ci/REQUIRED_CHECKS_POLICY.yml", "SECURITY/*", "secrets/*", ".env"]
   },
   "allowed_operations": ["create", "edit"],
   "verification_requirements": {

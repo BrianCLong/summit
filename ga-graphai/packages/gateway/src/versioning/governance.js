@@ -2,15 +2,15 @@ export function validateVersioningChange({ previous, next }) {
   const result = { breaking: false, messages: [] };
   if (!next.version) {
     result.breaking = true;
-    result.messages.push('Missing new version identifier');
+    result.messages.push("Missing new version identifier");
   }
   if (previous.version === next.version && hasBreakingSchemaChange(previous, next)) {
     result.breaking = true;
-    result.messages.push('Breaking change requires version bump');
+    result.messages.push("Breaking change requires version bump");
   }
   if (next.deprecation && !next.deprecation.sunset) {
     result.breaking = true;
-    result.messages.push('Deprecation must include sunset');
+    result.messages.push("Deprecation must include sunset");
   }
   return result;
 }

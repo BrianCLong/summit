@@ -7,7 +7,7 @@ let base: string
 
 test.beforeAll(async () => {
   server = http.createServer(app)
-  await new Promise<void>((resolve) => server.listen(0, () => resolve()))
+  await new Promise<void>(resolve => server.listen(0, () => resolve()))
   const address = server.address() as { port: number }
   const { port } = address
   base = `http://localhost:${port}`

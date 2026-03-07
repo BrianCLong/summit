@@ -1,12 +1,12 @@
 # Staging environment overrides
 global:
-  tag: '{{ .Chart.AppVersion }}-staging'
+  tag: "{{ .Chart.AppVersion }}-staging"
 
   ingress:
     host: staging.intelgraph.mycorp.com
     annotations:
-      nginx.ingress.kubernetes.io/auth-url: 'https://oauth2-proxy.auth.svc.cluster.local/oauth2/auth'
-      nginx.ingress.kubernetes.io/auth-signin: 'https://oauth2-proxy.auth.svc.cluster.local/oauth2/start?rd=https://$host$request_uri'
+      nginx.ingress.kubernetes.io/auth-url: "https://oauth2-proxy.auth.svc.cluster.local/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy.auth.svc.cluster.local/oauth2/start?rd=https://$host$request_uri"
 
 # Staging scaling (smaller than production)
 services:

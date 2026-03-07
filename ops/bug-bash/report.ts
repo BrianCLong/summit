@@ -113,8 +113,12 @@ function parseCsv(content: string): BugBashEntry[] {
       severity,
       component: record["component"] || record["service"] || record["area"] || "",
       status,
-      openedAt: parseDate(record["opened_at"] || record["created_at"] || record["opened"] || record["created"]),
-      closedAt: parseDate(record["closed_at"] || record["resolved_at"] || record["closed"] || record["resolved"]),
+      openedAt: parseDate(
+        record["opened_at"] || record["created_at"] || record["opened"] || record["created"]
+      ),
+      closedAt: parseDate(
+        record["closed_at"] || record["resolved_at"] || record["closed"] || record["resolved"]
+      ),
       owner: record["owner"] || record["assignee"] || record["developer"],
       score: record["score"] ? Number(record["score"]) : undefined,
       notes: record["notes"] || record["summary"] || "",
@@ -128,7 +132,9 @@ function formatHours(hours: number): string {
 }
 
 function computeMetrics(entries: BugBashEntry[]) {
-  const closed = entries.filter((entry) => entry.closedAt || /closed|resolved|done/i.test(entry.status));
+  const closed = entries.filter(
+    (entry) => entry.closedAt || /closed|resolved|done/i.test(entry.status)
+  );
   const total = entries.length;
   const mttrHours =
     closed.reduce((acc, entry) => {
@@ -150,7 +156,8 @@ function computeMetrics(entries: BugBashEntry[]) {
     const current = contributorScores.get(owner) || { score: 0, closed: 0 };
     contributorScores.set(owner, {
       score: current.score + (entry.score || 0),
-      closed: current.closed + (entry.closedAt || /closed|resolved|done/i.test(entry.status) ? 1 : 0),
+      closed:
+        current.closed + (entry.closedAt || /closed|resolved|done/i.test(entry.status) ? 1 : 0),
     });
   });
 
@@ -167,7 +174,9 @@ function computeMetrics(entries: BugBashEntry[]) {
     severityMap,
     contributorScores,
     componentCounts,
-    openEntries: entries.filter((entry) => !(entry.closedAt || /closed|resolved|done/i.test(entry.status))),
+    openEntries: entries.filter(
+      (entry) => !(entry.closedAt || /closed|resolved|done/i.test(entry.status))
+    ),
   };
 }
 
@@ -182,7 +191,9 @@ function renderSeverityTable(severityMap: Map<string, number>): string {
   return rows.join("\n");
 }
 
-function renderContributorTable(contributorScores: Map<string, { score: number; closed: number }>): string {
+function renderContributorTable(
+  contributorScores: Map<string, { score: number; closed: number }>
+): string {
   const rows: string[] = [];
   rows.push("| Contributor | Score | Closed |");
   rows.push("| --- | ---: | ---: |");
@@ -220,7 +231,15 @@ function renderFollowUps(entries: BugBashEntry[]): string {
 function buildReport(options: CliOptions, entries: BugBashEntry[]): string {
   const eventName = options.eventName || "bug-bash";
   const date = options.eventDate || new Date().toISOString().slice(0, 10);
-  const { total, closedCount, mttrHours, severityMap, contributorScores, componentCounts, openEntries } = computeMetrics(entries);
+  const {
+    total,
+    closedCount,
+    mttrHours,
+    severityMap,
+    contributorScores,
+    componentCounts,
+    openEntries,
+  } = computeMetrics(entries);
 
   return `# ${eventName} Bug Bash Report (${date})
 
@@ -254,13 +273,17 @@ async function main() {
   const entries = parseCsv(csvContent);
 
   if (!entries.length) {
-    throw new Error("No records found in CSV; ensure the file has a header row and at least one entry.");
+    throw new Error(
+      "No records found in CSV; ensure the file has a header row and at least one entry."
+    );
   }
 
   const report = buildReport(options, entries);
 
   await fs.promises.mkdir(options.outputDir, { recursive: true });
-  const outputName = sanitizeName(options.eventName || path.basename(options.input, path.extname(options.input))) || "bug-bash";
+  const outputName =
+    sanitizeName(options.eventName || path.basename(options.input, path.extname(options.input))) ||
+    "bug-bash";
   const outputPath = path.join(options.outputDir, `${outputName}-report.md`);
   await fs.promises.writeFile(outputPath, report, "utf8");
 

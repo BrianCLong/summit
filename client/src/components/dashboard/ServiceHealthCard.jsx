@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  CircularProgress,
-} from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, Typography, Box, Chip, CircularProgress } from "@mui/material";
 
 function kvColor(v) {
-  const ok = ['ok', 'healthy', 'connected'];
-  if (!v) return 'default';
+  const ok = ["ok", "healthy", "connected"];
+  if (!v) return "default";
   const val = String(v).toLowerCase();
-  if (ok.includes(val)) return 'success';
-  if (val.includes('fail') || val.includes('error')) return 'error';
-  return 'warning';
+  if (ok.includes(val)) return "success";
+  if (val.includes("fail") || val.includes("error")) return "error";
+  return "warning";
 }
 
 export default function ServiceHealthCard() {
@@ -23,7 +16,7 @@ export default function ServiceHealthCard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const base = import.meta?.env?.VITE_API_URL || '';
+    const base = import.meta?.env?.VITE_API_URL || "";
     const url = `${base}/health`;
     fetch(url)
       .then((r) => r.json())
@@ -33,13 +26,13 @@ export default function ServiceHealthCard() {
   }, []);
 
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: "100%" }}>
       <CardContent>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
           Service Health
         </Typography>
         {loading && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <CircularProgress size={16} />
             <Typography variant="body2" color="text.secondary">
               Loading…
@@ -54,8 +47,8 @@ export default function ServiceHealthCard() {
         {data && (
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
               rowGap: 1,
               columnGap: 2,
             }}
@@ -63,11 +56,7 @@ export default function ServiceHealthCard() {
             <Typography variant="body2" color="text.secondary">
               Status
             </Typography>
-            <Chip
-              size="small"
-              label={data.status}
-              color={kvColor(data.status)}
-            />
+            <Chip size="small" label={data.status} color={kvColor(data.status)} />
 
             <Typography variant="body2" color="text.secondary">
               Environment
@@ -79,7 +68,7 @@ export default function ServiceHealthCard() {
             </Typography>
             <Chip
               size="small"
-              label={data?.services?.neo4j || 'unknown'}
+              label={data?.services?.neo4j || "unknown"}
               color={kvColor(data?.services?.neo4j)}
             />
 
@@ -88,7 +77,7 @@ export default function ServiceHealthCard() {
             </Typography>
             <Chip
               size="small"
-              label={data?.services?.postgres || 'unknown'}
+              label={data?.services?.postgres || "unknown"}
               color={kvColor(data?.services?.postgres)}
             />
 
@@ -97,7 +86,7 @@ export default function ServiceHealthCard() {
             </Typography>
             <Chip
               size="small"
-              label={data?.services?.redis || 'unknown'}
+              label={data?.services?.redis || "unknown"}
               color={kvColor(data?.services?.redis)}
             />
           </Box>

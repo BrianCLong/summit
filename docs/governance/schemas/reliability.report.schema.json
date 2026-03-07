@@ -61,12 +61,6 @@
       "type": "string"
     }
   },
-  "required": [
-    "schema_version",
-    "run_id",
-    "metrics",
-    "errors",
-    "toolchain_version"
-  ],
+  "required": ["schema_version", "run_id", "metrics", "errors", "toolchain_version"],
   "additionalProperties": false
 }

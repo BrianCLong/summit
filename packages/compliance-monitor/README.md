@@ -20,7 +20,7 @@ pnpm add @intelgraph/compliance-monitor
 ## Usage
 
 ```typescript
-import { ComplianceMonitor } from '@intelgraph/compliance-monitor';
+import { ComplianceMonitor } from "@intelgraph/compliance-monitor";
 
 const monitor = new ComplianceMonitor();
 

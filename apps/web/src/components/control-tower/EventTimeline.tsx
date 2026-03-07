@@ -2,7 +2,7 @@
  * Event Timeline - Chronological stream of operational events
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from 'react'
 import {
   Box,
   Paper,
@@ -15,44 +15,44 @@ import {
   Skeleton,
   useTheme,
   Divider,
-} from '@mui/material';
+} from '@mui/material'
 import {
   FilterList as FilterIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
   Info as InfoIcon,
   CheckCircle as SuccessIcon,
-} from '@mui/icons-material';
+} from '@mui/icons-material'
 
 export interface OperationalEvent {
-  id: string;
-  title: string;
-  description?: string;
-  severity: 'CRITICAL' | 'WARNING' | 'NORMAL' | 'INFO' | 'SUCCESS';
-  status: 'ACTIVE' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'RESOLVED';
-  category: string;
-  source: string;
-  occurredAt: Date;
-  assignedTo?: { id: string; name: string };
-  correlatedEventsCount?: number;
+  id: string
+  title: string
+  description?: string
+  severity: 'CRITICAL' | 'WARNING' | 'NORMAL' | 'INFO' | 'SUCCESS'
+  status: 'ACTIVE' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'RESOLVED'
+  category: string
+  source: string
+  occurredAt: Date
+  assignedTo?: { id: string; name: string }
+  correlatedEventsCount?: number
 }
 
 export interface EventFilterState {
-  severity?: string[];
-  status?: string[];
-  category?: string[];
-  source?: string[];
-  timeRange?: string;
-  searchQuery?: string;
+  severity?: string[]
+  status?: string[]
+  category?: string[]
+  source?: string[]
+  timeRange?: string
+  searchQuery?: string
 }
 
 export interface EventTimelineProps {
-  events: OperationalEvent[];
-  filters: EventFilterState;
-  onFilterChange: (filters: Partial<EventFilterState>) => void;
-  onEventSelect: (eventId: string) => void;
-  selectedEventId: string | null;
-  isLoading?: boolean;
+  events: OperationalEvent[]
+  filters: EventFilterState
+  onFilterChange: (filters: Partial<EventFilterState>) => void
+  onEventSelect: (eventId: string) => void
+  selectedEventId: string | null
+  isLoading?: boolean
 }
 
 export const EventTimeline: React.FC<EventTimelineProps> = ({
@@ -63,88 +63,96 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
   selectedEventId,
   isLoading = false,
 }) => {
-  const theme = useTheme();
+  const theme = useTheme()
 
   const getSeverityColor = (severity: string): string => {
     switch (severity) {
       case 'CRITICAL':
-        return theme.palette.error.main;
+        return theme.palette.error.main
       case 'WARNING':
-        return theme.palette.warning.main;
+        return theme.palette.warning.main
       case 'INFO':
-        return theme.palette.info.main;
+        return theme.palette.info.main
       case 'SUCCESS':
-        return theme.palette.success.main;
+        return theme.palette.success.main
       default:
-        return theme.palette.grey[500];
+        return theme.palette.grey[500]
     }
-  };
+  }
 
   const getSeverityIcon = (severity: string) => {
-    const color = getSeverityColor(severity);
-    const sx = { color, fontSize: 18 };
+    const color = getSeverityColor(severity)
+    const sx = { color, fontSize: 18 }
     switch (severity) {
       case 'CRITICAL':
-        return <ErrorIcon sx={sx} />;
+        return <ErrorIcon sx={sx} />
       case 'WARNING':
-        return <WarningIcon sx={sx} />;
+        return <WarningIcon sx={sx} />
       case 'SUCCESS':
-        return <SuccessIcon sx={sx} />;
+        return <SuccessIcon sx={sx} />
       default:
-        return <InfoIcon sx={sx} />;
+        return <InfoIcon sx={sx} />
     }
-  };
+  }
 
   const formatTime = (date: Date): string => {
     return new Date(date).toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-    });
-  };
+    })
+  }
 
   const groupedEvents = useMemo(() => {
-    if (!events) return {};
+    if (!events) return {}
 
-    const groups: { [key: string]: OperationalEvent[] } = {};
+    const groups: { [key: string]: OperationalEvent[] } = {}
 
-    events.forEach((event) => {
-      const date = new Date(event.occurredAt);
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+    events.forEach(event => {
+      const date = new Date(event.occurredAt)
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
 
-      let key: string;
+      let key: string
       if (date.toDateString() === today.toDateString()) {
-        key = 'Today';
+        key = 'Today'
       } else if (date.toDateString() === yesterday.toDateString()) {
-        key = 'Yesterday';
+        key = 'Yesterday'
       } else {
         key = date.toLocaleDateString('en-US', {
           weekday: 'long',
           month: 'short',
           day: 'numeric',
-        });
+        })
       }
 
       if (!groups[key]) {
-        groups[key] = [];
+        groups[key] = []
       }
-      groups[key].push(event);
-    });
+      groups[key].push(event)
+    })
 
-    return groups;
-  }, [events]);
+    return groups
+  }, [events])
 
   if (isLoading) {
     return (
-      <Paper elevation={0} sx={{ p: 2, border: `1px solid ${theme.palette.divider}` }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 2, border: `1px solid ${theme.palette.divider}` }}
+      >
         <Skeleton variant="text" width="30%" height={32} />
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} variant="rectangular" height={60} sx={{ mt: 2, borderRadius: 1 }} />
+        {[1, 2, 3, 4, 5].map(i => (
+          <Skeleton
+            key={i}
+            variant="rectangular"
+            height={60}
+            sx={{ mt: 2, borderRadius: 1 }}
+          />
         ))}
       </Paper>
-    );
+    )
   }
 
   return (
@@ -157,7 +165,12 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
       }}
     >
       {/* Header */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
         <Typography variant="h6" fontWeight={600}>
           📜 Event Timeline
         </Typography>
@@ -166,7 +179,7 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
           <FormControl size="small" sx={{ minWidth: 100 }}>
             <Select
               value={filters.timeRange || '24h'}
-              onChange={(e) => onFilterChange({ timeRange: e.target.value })}
+              onChange={e => onFilterChange({ timeRange: e.target.value })}
               sx={{ height: 32 }}
             >
               <MenuItem value="1h">Last hour</MenuItem>
@@ -189,14 +202,18 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
             {/* Date Divider */}
             <Box display="flex" alignItems="center" gap={1} my={2}>
               <Divider sx={{ flex: 1 }} />
-              <Typography variant="caption" color="textSecondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                fontWeight={600}
+              >
                 {dateGroup}
               </Typography>
               <Divider sx={{ flex: 1 }} />
             </Box>
 
             {/* Events */}
-            {groupEvents.map((event) => (
+            {groupEvents.map(event => (
               <Box
                 key={event.id}
                 onClick={() => onEventSelect(event.id)}
@@ -247,20 +264,25 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
                       </Typography>
                     </Box>
 
-                    <Typography variant="caption" color="textSecondary" display="block">
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      display="block"
+                    >
                       {event.source}
                       {event.assignedTo && ` • @${event.assignedTo.name}`}
                     </Typography>
 
                     {/* Related events badge */}
-                    {event.correlatedEventsCount && event.correlatedEventsCount > 0 && (
-                      <Chip
-                        size="small"
-                        label={`Related: ${event.correlatedEventsCount} events`}
-                        variant="outlined"
-                        sx={{ mt: 0.5, height: 20, fontSize: 10 }}
-                      />
-                    )}
+                    {event.correlatedEventsCount &&
+                      event.correlatedEventsCount > 0 && (
+                        <Chip
+                          size="small"
+                          label={`Related: ${event.correlatedEventsCount} events`}
+                          variant="outlined"
+                          sx={{ mt: 0.5, height: 20, fontSize: 10 }}
+                        />
+                      )}
                   </Box>
                 </Box>
               </Box>
@@ -281,14 +303,17 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
           <Typography
             variant="body2"
             color="primary"
-            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { textDecoration: 'underline' },
+            }}
           >
             Load more events...
           </Typography>
         </Box>
       )}
     </Paper>
-  );
-};
+  )
+}
 
-export default EventTimeline;
+export default EventTimeline

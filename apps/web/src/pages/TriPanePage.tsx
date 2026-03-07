@@ -72,9 +72,7 @@ export default function TriPanePage() {
         setTimelineEvents(mockTimelineEvents)
         setGeospatialEvents(mockGeospatialEvents)
       } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error('Failed to load data')
-        )
+        setError(err instanceof Error ? err : new Error('Failed to load data'))
       } finally {
         setLoading(false)
       }
@@ -180,10 +178,7 @@ export default function TriPanePage() {
     <div className="h-full p-6">
       {!isDemoMode && (
         <div className="mb-4">
-          <DataIntegrityNotice
-            mode="unavailable"
-            context="Tri-pane analysis"
-          />
+          <DataIntegrityNotice mode="unavailable" context="Tri-pane analysis" />
         </div>
       )}
       <TriPaneShell

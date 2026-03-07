@@ -44,9 +44,9 @@ type SessionState = {
 }
 
 const createSessionId = () =>
-  (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? (crypto as Crypto).randomUUID()
-    : `session-${Date.now()}-${Math.random().toString(16).slice(2)}`)
+    : `session-${Date.now()}-${Math.random().toString(16).slice(2)}`
 
 const cloneFilters = (filters: FilterState): FilterState => ({
   entityTypes: [...filters.entityTypes],
@@ -121,14 +121,19 @@ const loadFromStorage = (
     }
 
     const restoredSessions = parsed.sessions.map((session, index) =>
-      buildSession(session.name ?? `Session ${index + 1}`, createDefaultFilters, {
-        ...session,
-        stale: true,
-      })
+      buildSession(
+        session.name ?? `Session ${index + 1}`,
+        createDefaultFilters,
+        {
+          ...session,
+          stale: true,
+        }
+      )
     )
 
     const activeSessionId =
-      parsed.activeSessionId && restoredSessions.some(s => s.id === parsed.activeSessionId)
+      parsed.activeSessionId &&
+      restoredSessions.some(s => s.id === parsed.activeSessionId)
         ? parsed.activeSessionId
         : restoredSessions[0].id
 
@@ -161,7 +166,9 @@ export function useSearchSessions(
   )
 
   useEffect(() => {
-    if (!persist || typeof window === 'undefined') {return}
+    if (!persist || typeof window === 'undefined') {
+      return
+    }
     const payload: StoredSearchSessionState = {
       version: SEARCH_SESSION_STORAGE_VERSION,
       activeSessionId: state.activeSessionId,
@@ -171,7 +178,10 @@ export function useSearchSessions(
         timeWindow: { ...session.timeWindow },
       })),
     }
-    window.localStorage.setItem(SEARCH_SESSION_STORAGE_KEY, JSON.stringify(payload))
+    window.localStorage.setItem(
+      SEARCH_SESSION_STORAGE_KEY,
+      JSON.stringify(payload)
+    )
   }, [persist, state.activeSessionId, state.sessions])
 
   const selectSession = useCallback((id: string) => {
@@ -220,7 +230,9 @@ export function useSearchSessions(
   const updateActiveSession = useCallback((updates: Partial<SearchSession>) => {
     setState(prev => {
       const nextSessions = prev.sessions.map(session => {
-        if (session.id !== prev.activeSessionId) {return session}
+        if (session.id !== prev.activeSessionId) {
+          return session
+        }
 
         const mergedFilters = updates.filters
           ? cloneFilters(updates.filters)
@@ -242,12 +254,18 @@ export function useSearchSessions(
   const duplicateSession = useCallback((id: string) => {
     setState(prev => {
       const source = prev.sessions.find(session => session.id === id)
-      if (!source) {return prev}
-      const copy = buildSession(`${source.name} Copy`, defaultFiltersRef.current, {
-        ...source,
-        id: undefined,
-        stale: false,
-      })
+      if (!source) {
+        return prev
+      }
+      const copy = buildSession(
+        `${source.name} Copy`,
+        defaultFiltersRef.current,
+        {
+          ...source,
+          id: undefined,
+          stale: false,
+        }
+      )
       return {
         ...prev,
         sessions: [...prev.sessions, copy],
@@ -260,7 +278,9 @@ export function useSearchSessions(
     setState(prev => {
       const nextSessions = prev.sessions.map(session =>
         session.id === id
-          ? buildSession(session.name, defaultFiltersRef.current, { id: session.id })
+          ? buildSession(session.name, defaultFiltersRef.current, {
+              id: session.id,
+            })
           : session
       )
       return { ...prev, sessions: nextSessions }
@@ -271,7 +291,9 @@ export function useSearchSessions(
     try {
       const parsed = JSON.parse(raw)
       const sessionPayload: Partial<SearchSession> =
-        (parsed as StoredSearchSessionState).sessions?.[0] || parsed.session || parsed
+        (parsed as StoredSearchSessionState).sessions?.[0] ||
+        parsed.session ||
+        parsed
 
       const imported = buildSession(
         sessionPayload.name || 'Imported Session',
@@ -294,7 +316,9 @@ export function useSearchSessions(
   const exportSession = useCallback(
     (id: string) => {
       const session = state.sessions.find(s => s.id === id)
-      if (!session) {return ''}
+      if (!session) {
+        return ''
+      }
       const payload = {
         version: SEARCH_SESSION_STORAGE_VERSION,
         session,

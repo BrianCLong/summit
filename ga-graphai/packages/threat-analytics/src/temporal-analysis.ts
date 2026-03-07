@@ -1,4 +1,4 @@
-import type { BehaviorEvent, TemporalInsight } from './types';
+import type { BehaviorEvent, TemporalInsight } from "./types";
 
 export class TemporalAnalyzer {
   private readonly history = new Map<string, BehaviorEvent[]>();

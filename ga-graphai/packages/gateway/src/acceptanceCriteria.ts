@@ -1,35 +1,35 @@
-import { AcceptanceCriteria } from '@ga-graphai/common-types';
+import { AcceptanceCriteria } from "@ga-graphai/common-types";
 
-import { normalizeWhitespace } from './utils.js';
+import { normalizeWhitespace } from "./utils.js";
 
 function buildId(index: number): string {
   return `AC-${index + 1}`;
 }
 
-function determineVerifier(statement: string): AcceptanceCriteria['verify'] {
+function determineVerifier(statement: string): AcceptanceCriteria["verify"] {
   if (/test|spec/i.test(statement)) {
-    return 'test';
+    return "test";
   }
   if (/command|script/i.test(statement)) {
-    return 'cmd';
+    return "cmd";
   }
   if (/assert|validate/i.test(statement)) {
-    return 'assert';
+    return "assert";
   }
-  return 'manual';
+  return "manual";
 }
 
 function determineMetric(statement: string): string {
   if (/latency/i.test(statement)) {
-    return 'latency-p95-ms';
+    return "latency-p95-ms";
   }
   if (/coverage/i.test(statement)) {
-    return 'coverage';
+    return "coverage";
   }
   if (/error/i.test(statement)) {
-    return 'error-rate';
+    return "error-rate";
   }
-  return 'qualitative';
+  return "qualitative";
 }
 
 function determineThreshold(statement: string): string {
@@ -41,7 +41,7 @@ function determineThreshold(statement: string): string {
   if (msMatch) {
     return `${msMatch[1]}ms`;
   }
-  return '1.0';
+  return "1.0";
 }
 
 export interface SynthesisResult {
@@ -59,8 +59,7 @@ export class AcceptanceCriteriaSynthesizer {
       metric: determineMetric(statement),
       threshold: determineThreshold(statement),
     }));
-    const missingSignals =
-      criteria.length === 0 ? ['no actionable statements found'] : [];
+    const missingSignals = criteria.length === 0 ? ["no actionable statements found"] : [];
     return { criteria, missingSignals };
   }
 
@@ -92,19 +91,14 @@ export class AcceptanceCriteriaSynthesizer {
 }
 
 export class AcceptanceCriteriaVerifier {
-  verify(
-    criteria: AcceptanceCriteria[],
-    evidence: Record<string, unknown>,
-  ): boolean {
+  verify(criteria: AcceptanceCriteria[], evidence: Record<string, unknown>): boolean {
     return criteria.every((criterion) => {
       const value = evidence[criterion.id];
-      if (typeof value === 'boolean') {
+      if (typeof value === "boolean") {
         return value;
       }
-      if (typeof value === 'number') {
-        const numericThreshold = Number.parseFloat(
-          criterion.threshold.replace(/[^0-9.]/g, ''),
-        );
+      if (typeof value === "number") {
+        const numericThreshold = Number.parseFloat(criterion.threshold.replace(/[^0-9.]/g, ""));
         if (Number.isNaN(numericThreshold)) {
           return value > 0;
         }

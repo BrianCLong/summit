@@ -55,21 +55,25 @@ This document describes the implementation of Summit's AI Copilot MVP, designed 
 ### Backend Services
 
 #### 1. **NLToCypherService.ts** (`server/src/services/`)
+
 Core service implementing natural language to Cypher translation.
 
 **Key Methods:**
+
 - `translateQuery(input)`: Convert NL to Cypher with safety checks
 - `executeQuery(cypher, investigationId, auditId)`: Execute approved queries
 - `validateAndEstimate(cypher)`: Validate syntax and estimate cost
 - `generateCypherWithLLM(nl, schema, invId)`: LLM-powered generation
 
 **Safety Features:**
+
 - Blocks dangerous operations (DELETE, CREATE, DROP)
 - Enforces investigationId filtering
 - Complexity thresholds (max 10,000 rows)
 - Guardrails integration for prompt injection
 
 **Example Flow:**
+
 ```typescript
 const service = getNLToCypherService(llm, guardrails, neo4j);
 
@@ -78,7 +82,7 @@ const preview = await service.translateQuery({
   query: "Show me all persons connected to financial entities",
   investigationId: "inv-123",
   userId: "analyst-456",
-  dryRun: true
+  dryRun: true,
 });
 
 // Returns:
@@ -94,11 +98,7 @@ const preview = await service.translateQuery({
 
 // Step 2: Execute (after analyst approval)
 if (preview.allowed) {
-  const result = await service.executeQuery(
-    preview.cypher,
-    "inv-123",
-    preview.auditId
-  );
+  const result = await service.executeQuery(preview.cypher, "inv-123", preview.auditId);
   // Returns records with execution metadata
 }
 ```
@@ -106,6 +106,7 @@ if (preview.allowed) {
 #### 2. **GraphQL Schema** (`server/src/graphql/schema/copilot-mvp.graphql`)
 
 **Queries:**
+
 ```graphql
 # Preview query without executing
 previewNLQuery(input: NLQueryInput!): CypherPreview!
@@ -121,6 +122,7 @@ generateNarrative(input: NarrativeInput!): Narrative!
 ```
 
 **Types:**
+
 ```graphql
 type CypherPreview {
   cypher: String!
@@ -130,14 +132,14 @@ type CypherPreview {
   complexity: String!
   warnings: [String!]
   allowed: Boolean!
-  blockReason: String      # Policy explanation when blocked
+  blockReason: String # Policy explanation when blocked
   auditId: ID
 }
 
 type CypherExecutionResult {
   records: [JSON!]!
   summary: ExecutionSummary!
-  citations: [ID!]!        # Entity IDs involved in results
+  citations: [ID!]! # Entity IDs involved in results
   auditId: ID
 }
 ```
@@ -145,6 +147,7 @@ type CypherExecutionResult {
 #### 3. **GraphQL Resolvers** (`server/src/graphql/resolvers.copilot-mvp.ts`)
 
 Implements the GraphQL API endpoints, coordinating between:
+
 - NLToCypherService for query translation
 - GraphRAGService for hypothesis/narrative generation
 - LLMGuardrails for security validation
@@ -156,6 +159,7 @@ Implements the GraphQL API endpoints, coordinating between:
 React component implementing the analyst-facing UI.
 
 **Features:**
+
 - **Query Tab**: Natural language input with preview/execute flow
 - **Hypotheses Tab**: AI-generated investigation hypotheses
 - **Narrative Tab**: Automated report generation
@@ -182,15 +186,14 @@ React component implementing the analyst-facing UI.
    - Audit trail reference
 
 **Usage Example:**
+
 ```tsx
-import CopilotSidebar from './components/copilot/CopilotSidebar';
+import CopilotSidebar from "./components/copilot/CopilotSidebar";
 
 function InvestigationView({ investigationId }) {
   return (
     <Box display="flex">
-      <Box flexGrow={1}>
-        {/* Main investigation view */}
-      </Box>
+      <Box flexGrow={1}>{/* Main investigation view */}</Box>
       <Box width={400}>
         <CopilotSidebar
           investigationId={investigationId}
@@ -208,6 +211,7 @@ function InvestigationView({ investigationId }) {
 #### 5. **Unit Tests** (`server/src/services/__tests__/NLToCypherService.test.ts`)
 
 **Coverage:**
+
 - ✅ Basic NL-to-Cypher translation
 - ✅ Dangerous query blocking (DELETE, DROP, etc.)
 - ✅ Prompt injection detection
@@ -217,6 +221,7 @@ function InvestigationView({ investigationId }) {
 - ✅ Full preview → execute golden path
 
 **Run tests:**
+
 ```bash
 cd server
 npm test -- NLToCypherService.test.ts
@@ -225,6 +230,7 @@ npm test -- NLToCypherService.test.ts
 #### 6. **E2E Tests** (`tests/e2e/copilot-mvp.spec.ts`)
 
 **Test Scenarios:**
+
 - ✅ Complete golden path: preview → review → execute → view results
 - ✅ Policy blocking with explanation
 - ✅ Prompt injection blocking
@@ -236,6 +242,7 @@ npm test -- NLToCypherService.test.ts
 - ✅ Keyboard accessibility
 
 **Run E2E tests:**
+
 ```bash
 npm run test:e2e -- copilot-mvp.spec.ts
 ```
@@ -317,12 +324,14 @@ npm run test:e2e -- copilot-mvp.spec.ts
 
 ```graphql
 query PreviewQuery {
-  previewNLQuery(input: {
-    query: "Find all entities connected to suspicious activity"
-    investigationId: "inv-123"
-    userId: "analyst-456"
-    dryRun: true
-  }) {
+  previewNLQuery(
+    input: {
+      query: "Find all entities connected to suspicious activity"
+      investigationId: "inv-123"
+      userId: "analyst-456"
+      dryRun: true
+    }
+  ) {
     cypher
     explanation
     estimatedRows
@@ -337,6 +346,7 @@ query PreviewQuery {
 ```
 
 **Response:**
+
 ```json
 {
   "data": {
@@ -359,11 +369,7 @@ query PreviewQuery {
 
 ```graphql
 mutation ExecuteQuery {
-  executeNLQuery(input: {
-    query: "Show me persons"
-    investigationId: "inv-123"
-    dryRun: false
-  }) {
+  executeNLQuery(input: { query: "Show me persons", investigationId: "inv-123", dryRun: false }) {
     records
     summary {
       recordCount
@@ -379,10 +385,7 @@ mutation ExecuteQuery {
 
 ```graphql
 query GetHypotheses {
-  generateHypotheses(input: {
-    investigationId: "inv-123"
-    count: 3
-  }) {
+  generateHypotheses(input: { investigationId: "inv-123", count: 3 }) {
     id
     statement
     confidence
@@ -400,10 +403,7 @@ query GetHypotheses {
 
 ```graphql
 query BuildNarrative {
-  generateNarrative(input: {
-    investigationId: "inv-123"
-    style: ANALYTICAL
-  }) {
+  generateNarrative(input: { investigationId: "inv-123", style: ANALYTICAL }) {
     id
     title
     content
@@ -422,6 +422,7 @@ query BuildNarrative {
 Analysts see **clear policy explanations** when queries are blocked:
 
 **Example 1: Dangerous Operation**
+
 ```
 ❌ Query Blocked
 
@@ -434,6 +435,7 @@ Audit ID: audit-550e8400
 ```
 
 **Example 2: Prompt Injection**
+
 ```
 ❌ Query Blocked
 
@@ -451,6 +453,7 @@ Audit ID: audit-661f9511
 ```
 
 **Example 3: Complexity Threshold**
+
 ```
 ❌ Query Blocked
 
@@ -470,6 +473,7 @@ Audit ID: audit-772g0622
 Every query result includes **entity citations** showing which entities contributed to the answer:
 
 **Results UI:**
+
 ```
 ✅ Results
 
@@ -483,6 +487,7 @@ Audit ID: audit-550e8400
 ```
 
 **Clicking a citation:**
+
 - Navigates to entity detail view
 - Highlights entity in graph visualization
 - Shows relationship context
@@ -501,6 +506,7 @@ The copilot enforces **8+ security policies** via `LLMGuardrailsService`:
 8. **Rate Limiting** - Per-user query limits
 
 **Audit Trail Example:**
+
 ```json
 {
   "audit_id": "audit-550e8400-e29b-41d4-a716-446655440000",
@@ -580,15 +586,18 @@ The copilot MVP **leverages existing Summit AI services**:
 ## Cost Optimization
 
 **Estimated costs per query:**
+
 - LLM API call (NL → Cypher): $0.002 - $0.01
 - Neo4j query execution: < $0.001
 - GraphRAG embedding (if used): $0.001 - $0.005
 
 **Monthly estimate for 1000 queries/analyst:**
+
 - 10 analysts × 1000 queries = 10,000 queries/month
 - Cost: $20 - $160/month in LLM API fees
 
 **Optimization strategies:**
+
 - Query result caching (already implemented via Redis)
 - Prompt caching for schema context
 - Batch hypothesis generation

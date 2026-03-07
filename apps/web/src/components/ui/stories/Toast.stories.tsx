@@ -63,7 +63,11 @@ export const InlineToasts: Story = {
           <ToastAction altText="undo">Undo</ToastAction>
         </Toast>
 
-        <Toast open={openReminder} onOpenChange={setOpenReminder} duration={4500}>
+        <Toast
+          open={openReminder}
+          onOpenChange={setOpenReminder}
+          duration={4500}
+        >
           <ToastTitle>Reminder</ToastTitle>
           <ToastDescription>
             Escalation runbook has pending approvals.

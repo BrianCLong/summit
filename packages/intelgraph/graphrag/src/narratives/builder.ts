@@ -1,6 +1,6 @@
-import { NarrativeGraphStore } from './index';
+import { NarrativeGraphStore } from "./index";
 
-export const FEATURE_NARRATIVE_ECOSYSTEM = process.env.FEATURE_NARRATIVE_ECOSYSTEM === 'true';
+export const FEATURE_NARRATIVE_ECOSYSTEM = process.env.FEATURE_NARRATIVE_ECOSYSTEM === "true";
 
 export class NarrativeEcosystemBuilder {
   private store: NarrativeGraphStore;
@@ -11,7 +11,7 @@ export class NarrativeEcosystemBuilder {
 
   async buildEcosystemMap(narrativeId: string) {
     if (!FEATURE_NARRATIVE_ECOSYSTEM) {
-      console.log('FEATURE_NARRATIVE_ECOSYSTEM is disabled');
+      console.log("FEATURE_NARRATIVE_ECOSYSTEM is disabled");
       return null;
     }
 
@@ -24,7 +24,7 @@ export class NarrativeEcosystemBuilder {
       metrics: {
         propagationSpeed: 0,
         crossPlatformCoupling: 0,
-      }
+      },
     };
   }
 }

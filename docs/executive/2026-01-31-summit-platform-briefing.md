@@ -24,12 +24,12 @@ Status: active
 
 ### Product definition
 
-* **“Agentic AI OSINT Platform”** with:
-  * **Multi-agent orchestration** (“autonomous research”)
-  * **Knowledge graphs (Neo4j) + GraphRAG** for connected intelligence
-  * **Real-time ingestion** (CSV, S3, REST APIs; webhooks)
-  * **Vector search / embeddings**
-  * **CompanyOS SDK** (enterprise intelligence APIs)
+- **“Agentic AI OSINT Platform”** with:
+  - **Multi-agent orchestration** (“autonomous research”)
+  - **Knowledge graphs (Neo4j) + GraphRAG** for connected intelligence
+  - **Real-time ingestion** (CSV, S3, REST APIs; webhooks)
+  - **Vector search / embeddings**
+  - **CompanyOS SDK** (enterprise intelligence APIs)
 
 ### Architecture at a glance
 
@@ -41,13 +41,13 @@ Summit describes a **microservices-style modular architecture** with an API laye
 
 ### Release and execution cadence
 
-* The repo shows a formal release stream. Example: **“GA Release v5.4.0… Orchestrator Postgres Store & ABAC Implementation”** dated **January 31, 2026**.
-* That release note asserts major platform capabilities and performance/security outcomes (numeric outcomes are release-note claims).
+- The repo shows a formal release stream. Example: **“GA Release v5.4.0… Orchestrator Postgres Store & ABAC Implementation”** dated **January 31, 2026**.
+- That release note asserts major platform capabilities and performance/security outcomes (numeric outcomes are release-note claims).
 
 ### Quality and governance automation
 
-* The README advertises **tests and E2E** (Playwright-driven).
-* A governance workflow is actively detecting **branch protection drift** against a policy-as-code file (`docs/ci/REQUIRED_CHECKS_POLICY.yml`).
+- The README advertises **tests and E2E** (Playwright-driven).
+- A governance workflow is actively detecting **branch protection drift** against a policy-as-code file (`docs/ci/REQUIRED_CHECKS_POLICY.yml`).
 
 ### Backlog reality check
 
@@ -61,30 +61,31 @@ Some issues represent tracked requirements from documentation action extraction,
 
 ### Repo-level security claims
 
-* Baseline app hardening: **Helmet**, **CORS allowlist**, **rate limiting**, “request validation,” and dependency scanning.
-* Active governance practices:
-  * **Centralized audit logs** (CIS control mapping referenced in issue #11468)
-  * **RBAC verification for investigation management / export permissions** (issue #11565)
-  * **Security batch sprint milestones** and “CI green + deployed to staging” definitions of done (issue #16313)
+- Baseline app hardening: **Helmet**, **CORS allowlist**, **rate limiting**, “request validation,” and dependency scanning.
+- Active governance practices:
+  - **Centralized audit logs** (CIS control mapping referenced in issue #11468)
+  - **RBAC verification for investigation management / export permissions** (issue #11565)
+  - **Security batch sprint milestones** and “CI green + deployed to staging” definitions of done (issue #16313)
 
 ### Higher-order controls (GA v5.4.0 Release)
 
 Release notes explicitly position Summit as implementing:
-* **Persistent orchestration state (Postgres-backed)**
-* **ABAC via Rego policies** and **OPA enforcement at the gateway**
-* **Tenant isolation**
-* **GraphQL caching + CDN headers**
-* **Sensitive-route rate limiting**
+
+- **Persistent orchestration state (Postgres-backed)**
+- **ABAC via Rego policies** and **OPA enforcement at the gateway**
+- **Tenant isolation**
+- **GraphQL caching + CDN headers**
+- **Sensitive-route rate limiting**
 
 ---
 
 ## 5) Technology Stack
 
-* **Runtime / tooling:** Node.js 18+, pnpm, Docker Compose
-* **Datastores:** Neo4j, Postgres, Redis, Qdrant
-* **API:** GraphQL + REST
-* **Languages:** TypeScript-heavy, with JavaScript + Python also present
-* **Deployment:** Docker and Kubernetes (`k8s/`)
+- **Runtime / tooling:** Node.js 18+, pnpm, Docker Compose
+- **Datastores:** Neo4j, Postgres, Redis, Qdrant
+- **API:** GraphQL + REST
+- **Languages:** TypeScript-heavy, with JavaScript + Python also present
+- **Deployment:** Docker and Kubernetes (`k8s/`)
 
 ---
 
@@ -98,9 +99,9 @@ Release notes explicitly position Summit as implementing:
 
 ### Clean comparisons
 
-* **vs. “LLM chat” tools:** Summit grounds reasoning in **a structured graph + retrieval pipeline**, rather than ad hoc context.
-* **vs. log/search platforms:** Summit is centered on **entities + relationships + investigations**, not just events and keyword search.
-* **vs. closed enterprise intel suites:** Summit’s open repo and modular architecture support transparency and extensibility.
+- **vs. “LLM chat” tools:** Summit grounds reasoning in **a structured graph + retrieval pipeline**, rather than ad hoc context.
+- **vs. log/search platforms:** Summit is centered on **entities + relationships + investigations**, not just events and keyword search.
+- **vs. closed enterprise intel suites:** Summit’s open repo and modular architecture support transparency and extensibility.
 
 ---
 
@@ -120,50 +121,60 @@ Release notes explicitly position Summit as implementing:
 ## 8) Decision Options (Next 90 Days)
 
 ### Option A — “Closed Alpha: Investigations-as-a-Product”
+
 **Goal:** 2–3 design partners using Summit for real cases.
 **Deliverables:**
-* 3 “golden path” investigation templates (ingest → graph → GraphRAG → report)
-* Read-only “briefing mode” output pack (redacted shareables)
-* Minimal connector set (REST + CSV/S3 + webhook) as reliable primitives
+
+- 3 “golden path” investigation templates (ingest → graph → GraphRAG → report)
+- Read-only “briefing mode” output pack (redacted shareables)
+- Minimal connector set (REST + CSV/S3 + webhook) as reliable primitives
 
 ### Option B — “Platform Play: Agent Orchestration + Governance Moat”
+
 **Goal:** Summit as the reference implementation for orchestration and policy stack (ABAC/OPA, audit, drift detection).
 **Deliverables:**
-* Formal policy test suite (tenant boundary + least privilege)
-* Evidence bundle generator (audit exports + policy snapshots + SBOM provenance)
-* “Enterprise readiness” checklist aligned with the controls you already reference
+
+- Formal policy test suite (tenant boundary + least privilege)
+- Evidence bundle generator (audit exports + policy snapshots + SBOM provenance)
+- “Enterprise readiness” checklist aligned with the controls you already reference
 
 ### Option C — “Community Adoption”
+
 **Goal:** Grow contributors and integrations.
 **Deliverables:**
-* “Build a connector in 30 minutes” guide
-* Example OSINT pipelines
-* Clear contribution lanes + good-first-issues
+
+- “Build a connector in 30 minutes” guide
+- Example OSINT pipelines
+- Clear contribution lanes + good-first-issues
 
 ---
 
 ## 9) Recommended KPIs
 
 **Product**
-* Time-to-first-investigation (fresh install → first graph query)
-* Template completion success rate (3 golden paths)
-* Connector reliability: ingestion success %, retry behavior, latency
+
+- Time-to-first-investigation (fresh install → first graph query)
+- Template completion success rate (3 golden paths)
+- Connector reliability: ingestion success %, retry behavior, latency
 
 **Trust/Security**
-* Cross-tenant isolation tests: pass rate (must be 100%)
-* Policy drift detection: MTTR
-* Audit log coverage: % of sensitive actions logged
+
+- Cross-tenant isolation tests: pass rate (must be 100%)
+- Policy drift detection: MTTR
+- Audit log coverage: % of sensitive actions logged
 
 **Go-to-market**
-* # active investigations / week (alpha users)
-* # decision-grade reports generated / week
-* Design partner conversion rate (pilot → paid)
+
+- # active investigations / week (alpha users)
+- # decision-grade reports generated / week
+- Design partner conversion rate (pilot → paid)
 
 ---
 
 ## 10) Note on Sources
 
 This briefing is anchored to:
-* The repo README (authoritative positioning)
-* GA Release v5.4.0 artifacts
-* Validated governance/security practices (audit logs, RBAC, branch protection drift detection)
+
+- The repo README (authoritative positioning)
+- GA Release v5.4.0 artifacts
+- Validated governance/security practices (audit logs, RBAC, branch protection drift detection)

@@ -20,32 +20,37 @@ pnpm add @intelgraph/data-integration
 ## Quick Start
 
 ```typescript
-import { PostgreSQLConnector, DataSourceConfig, SourceType, ExtractionStrategy } from '@intelgraph/data-integration';
-import { createLogger } from 'winston';
+import {
+  PostgreSQLConnector,
+  DataSourceConfig,
+  SourceType,
+  ExtractionStrategy,
+} from "@intelgraph/data-integration";
+import { createLogger } from "winston";
 
 const logger = createLogger();
 
 const config: DataSourceConfig = {
-  id: 'my-postgres-source',
-  name: 'PostgreSQL Database',
+  id: "my-postgres-source",
+  name: "PostgreSQL Database",
   type: SourceType.DATABASE,
   connectionConfig: {
-    host: 'localhost',
+    host: "localhost",
     port: 5432,
-    database: 'mydb',
-    username: 'user',
-    password: 'password'
+    database: "mydb",
+    username: "user",
+    password: "password",
   },
   extractionConfig: {
     strategy: ExtractionStrategy.INCREMENTAL,
-    incrementalColumn: 'updated_at',
-    batchSize: 1000
+    incrementalColumn: "updated_at",
+    batchSize: 1000,
   },
   loadConfig: {
-    targetTable: 'my_table',
+    targetTable: "my_table",
     strategy: LoadStrategy.UPSERT,
-    upsertKey: ['id']
-  }
+    upsertKey: ["id"],
+  },
 };
 
 const connector = new PostgreSQLConnector(config, logger);
@@ -62,11 +67,13 @@ await connector.disconnect();
 ## Available Connectors
 
 ### Databases
+
 - PostgreSQLConnector
 - MySQLConnector
 - MongoDBConnector
 
 ### APIs & Cloud
+
 - RESTAPIConnector
 - S3Connector
 
@@ -75,7 +82,7 @@ await connector.disconnect();
 Extend `BaseConnector` to create custom connectors:
 
 ```typescript
-import { BaseConnector, ConnectorCapabilities } from '@intelgraph/data-integration';
+import { BaseConnector, ConnectorCapabilities } from "@intelgraph/data-integration";
 
 export class CustomConnector extends BaseConnector {
   async connect(): Promise<void> {
@@ -97,7 +104,7 @@ export class CustomConnector extends BaseConnector {
       supportsCDC: false,
       supportsSchema: true,
       supportsPartitioning: false,
-      maxConcurrentConnections: 10
+      maxConcurrentConnections: 10,
     };
   }
 

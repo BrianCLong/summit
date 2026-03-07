@@ -14,9 +14,9 @@ spec:
     unified restore script to target a single tenant.
   prerequisites:
     - name: Backup identified
-      check: "[[ -n \"${BACKUP_ID:-}\" || -n \"${BACKUP_PATH:-}\" ]]"
+      check: '[[ -n "${BACKUP_ID:-}" || -n "${BACKUP_PATH:-}" ]]'
     - name: Tenant provided
-      check: "[[ -n \"${TENANT:-}\" ]]"
+      check: '[[ -n "${TENANT:-}" ]]'
     - name: Access to backup bucket
       check: "aws s3 ls ${S3_BUCKET:-s3://intelgraph-backups}/ >/dev/null"
   steps:

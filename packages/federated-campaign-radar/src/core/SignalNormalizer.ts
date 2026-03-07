@@ -5,8 +5,8 @@
  * Implements privacy-preserving hashing and embedding generation.
  */
 
-import { createHash, createHmac } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { createHash, createHmac } from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import {
   CampaignSignal,
   SignalType,
@@ -30,7 +30,7 @@ import {
   createSignalId,
   ExtractedEntity,
   BehavioralSignature,
-} from './types';
+} from "./types";
 
 /**
  * Raw input types for normalization
@@ -51,7 +51,7 @@ export interface RawNarrativeInput {
 
 export interface RawMediaInput {
   content: Buffer;
-  mediaType: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
+  mediaType: "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT";
   filename?: string;
   mimeType?: string;
   metadata?: Record<string, unknown>;
@@ -118,7 +118,7 @@ export class SignalNormalizer {
    */
   async normalizeNarrative(
     input: RawNarrativeInput,
-    sourceType: ProvenanceSourceType = ProvenanceSourceType.DIRECT_OBSERVATION,
+    sourceType: ProvenanceSourceType = ProvenanceSourceType.DIRECT_OBSERVATION
   ): Promise<CampaignSignal> {
     const signalId = createSignalId();
     const timestamp = input.timestamp || new Date();
@@ -140,10 +140,7 @@ export class SignalNormalizer {
 
     // Create narrative indicator
     const narrativeIndicator: NarrativeIndicator = {
-      claimText:
-        this.config.privacyLevel === PrivacyLevel.PUBLIC
-          ? input.text
-          : undefined,
+      claimText: this.config.privacyLevel === PrivacyLevel.PUBLIC ? input.text : undefined,
       claimHash: textHash,
       semanticEmbedding: embedding || [],
       language: input.language || this.detectLanguage(input.text),
@@ -161,12 +158,12 @@ export class SignalNormalizer {
 
     // Build channel metadata
     const channelMetadata = this.buildChannelMetadata(
-      input.platform || 'unknown',
-      input.engagement,
+      input.platform || "unknown",
+      input.engagement
     );
 
     // Build provenance
-    const provenance = this.buildProvenance(sourceType, ['text_extraction', 'nlp_processing']);
+    const provenance = this.buildProvenance(sourceType, ["text_extraction", "nlp_processing"]);
 
     // Build federation metadata
     const federationMetadata = this.buildFederationMetadata();
@@ -174,11 +171,9 @@ export class SignalNormalizer {
     // Create the normalized signal
     const signal: CampaignSignal = {
       id: signalId,
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp,
-      expiresAt: new Date(
-        timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000,
-      ),
+      expiresAt: new Date(timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000),
       signalType: SignalType.NARRATIVE,
       confidence: 0.9,
       indicator,
@@ -200,17 +195,14 @@ export class SignalNormalizer {
    */
   async normalizeMedia(
     input: RawMediaInput,
-    sourceType: ProvenanceSourceType = ProvenanceSourceType.DIRECT_OBSERVATION,
+    sourceType: ProvenanceSourceType = ProvenanceSourceType.DIRECT_OBSERVATION
   ): Promise<CampaignSignal> {
     const signalId = createSignalId();
     const timestamp = new Date();
 
     // Generate hashes
-    const contentHash = this.createSecureHash(input.content.toString('base64'));
-    const perceptualHash = await this.generatePerceptualHash(
-      input.content,
-      input.mediaType,
-    );
+    const contentHash = this.createSecureHash(input.content.toString("base64"));
+    const perceptualHash = await this.generatePerceptualHash(input.content, input.mediaType);
 
     // Validate C2PA manifest if present
     let c2paValidation: C2PAValidationResult | undefined;
@@ -219,21 +211,15 @@ export class SignalNormalizer {
     if (input.c2paManifestBuffer) {
       const validationResult = await this.validateC2PAManifest(
         input.content,
-        input.c2paManifestBuffer,
+        input.c2paManifestBuffer
       );
       c2paValidation = validationResult.validation;
       c2paManifest = validationResult.manifest;
     }
 
     // Detect manipulation and synthetic content
-    const manipulationScore = await this.detectManipulation(
-      input.content,
-      input.mediaType,
-    );
-    const syntheticScore = await this.detectSyntheticContent(
-      input.content,
-      input.mediaType,
-    );
+    const manipulationScore = await this.detectManipulation(input.content, input.mediaType);
+    const syntheticScore = await this.detectSyntheticContent(input.content, input.mediaType);
 
     // Create media indicator
     const mediaIndicator: MediaIndicator = {
@@ -246,12 +232,12 @@ export class SignalNormalizer {
     };
 
     // Add dimensions for images/videos
-    if (input.mediaType === 'IMAGE' || input.mediaType === 'VIDEO') {
+    if (input.mediaType === "IMAGE" || input.mediaType === "VIDEO") {
       mediaIndicator.dimensions = await this.extractDimensions(input.content);
     }
 
     // Add duration for video/audio
-    if (input.mediaType === 'VIDEO' || input.mediaType === 'AUDIO') {
+    if (input.mediaType === "VIDEO" || input.mediaType === "AUDIO") {
       mediaIndicator.duration = await this.extractDuration(input.content);
     }
 
@@ -261,24 +247,19 @@ export class SignalNormalizer {
     };
 
     const provenance = this.buildProvenance(sourceType, [
-      'media_extraction',
-      'hash_generation',
-      'c2pa_validation',
+      "media_extraction",
+      "hash_generation",
+      "c2pa_validation",
     ]);
 
     const federationMetadata = this.buildFederationMetadata();
 
     const signal: CampaignSignal = {
       id: signalId,
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp,
-      expiresAt: new Date(
-        timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000,
-      ),
-      signalType:
-        syntheticScore > 0.7
-          ? SignalType.SYNTHETIC_MEDIA
-          : SignalType.MEDIA_ARTIFACT,
+      expiresAt: new Date(timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000),
+      signalType: syntheticScore > 0.7 ? SignalType.SYNTHETIC_MEDIA : SignalType.MEDIA_ARTIFACT,
       confidence: c2paValidation?.isValid ? 0.95 : 0.7,
       indicator,
       privacyLevel: this.config.privacyLevel,
@@ -286,7 +267,7 @@ export class SignalNormalizer {
       provenance,
       c2paValidation,
       sourceOrganization: this.hashOrganizationId(this.config.organizationId),
-      channelMetadata: this.buildChannelMetadata('media'),
+      channelMetadata: this.buildChannelMetadata("media"),
       coordinationFeatures: [],
       federationMetadata,
     };
@@ -299,7 +280,7 @@ export class SignalNormalizer {
    */
   async normalizeURL(
     input: RawURLInput,
-    sourceType: ProvenanceSourceType = ProvenanceSourceType.DIRECT_OBSERVATION,
+    sourceType: ProvenanceSourceType = ProvenanceSourceType.DIRECT_OBSERVATION
   ): Promise<CampaignSignal> {
     const signalId = createSignalId();
     const timestamp = input.capturedAt || new Date();
@@ -311,9 +292,7 @@ export class SignalNormalizer {
     const fullUrlHash = this.createSecureHash(input.url);
 
     // Hash redirect chain
-    const redirectChainHashes = input.redirectChain?.map((url) =>
-      this.createSecureHash(url),
-    );
+    const redirectChainHashes = input.redirectChain?.map((url) => this.createSecureHash(url));
 
     const urlIndicator: URLIndicator = {
       domainHash,
@@ -327,17 +306,15 @@ export class SignalNormalizer {
       indicatorHash: fullUrlHash,
     };
 
-    const provenance = this.buildProvenance(sourceType, ['url_extraction']);
+    const provenance = this.buildProvenance(sourceType, ["url_extraction"]);
 
     const federationMetadata = this.buildFederationMetadata();
 
     const signal: CampaignSignal = {
       id: signalId,
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp,
-      expiresAt: new Date(
-        timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000,
-      ),
+      expiresAt: new Date(timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000),
       signalType: SignalType.URL,
       confidence: 0.85,
       indicator,
@@ -345,7 +322,7 @@ export class SignalNormalizer {
       hashedContent: fullUrlHash,
       provenance,
       sourceOrganization: this.hashOrganizationId(this.config.organizationId),
-      channelMetadata: this.buildChannelMetadata('web'),
+      channelMetadata: this.buildChannelMetadata("web"),
       coordinationFeatures: [],
       federationMetadata,
     };
@@ -358,7 +335,7 @@ export class SignalNormalizer {
    */
   async normalizeAccount(
     input: RawAccountInput,
-    sourceType: ProvenanceSourceType = ProvenanceSourceType.PLATFORM_API,
+    sourceType: ProvenanceSourceType = ProvenanceSourceType.PLATFORM_API
   ): Promise<CampaignSignal> {
     const signalId = createSignalId();
     const timestamp = new Date();
@@ -390,19 +367,17 @@ export class SignalNormalizer {
     };
 
     const provenance = this.buildProvenance(sourceType, [
-      'account_extraction',
-      'behavior_analysis',
+      "account_extraction",
+      "behavior_analysis",
     ]);
 
     const federationMetadata = this.buildFederationMetadata();
 
     const signal: CampaignSignal = {
       id: signalId,
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp,
-      expiresAt: new Date(
-        timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000,
-      ),
+      expiresAt: new Date(timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000),
       signalType: SignalType.ACCOUNT_HANDLE,
       confidence: 0.8,
       indicator,
@@ -423,7 +398,7 @@ export class SignalNormalizer {
    */
   async normalizeCoordination(
     input: RawCoordinationInput,
-    sourceType: ProvenanceSourceType = ProvenanceSourceType.AUTOMATED_DETECTION,
+    sourceType: ProvenanceSourceType = ProvenanceSourceType.AUTOMATED_DETECTION
   ): Promise<CampaignSignal> {
     const signalId = createSignalId();
     const timestamp = new Date();
@@ -439,9 +414,7 @@ export class SignalNormalizer {
     const synchronicity = this.calculateSynchronicity(timestamps);
 
     // Calculate content similarity
-    const contentSimilarity = await this.calculateContentSimilarity(
-      input.contentHashes,
-    );
+    const contentSimilarity = await this.calculateContentSimilarity(input.contentHashes);
 
     // Calculate network density
     const networkDensity = this.calculateNetworkDensity(input.actorIds);
@@ -449,7 +422,7 @@ export class SignalNormalizer {
     // Calculate amplification factor
     const amplificationFactor = this.calculateAmplificationFactor(
       input.actorIds.length,
-      input.contentHashes.length,
+      input.contentHashes.length
     );
 
     const coordinationIndicator: CoordinationIndicator = {
@@ -469,14 +442,14 @@ export class SignalNormalizer {
           actors: input.actorIds.length,
           window: temporalWindow,
           pattern: input.patternType,
-        }),
+        })
       ),
     };
 
     const provenance = this.buildProvenance(sourceType, [
-      'coordination_detection',
-      'temporal_analysis',
-      'network_analysis',
+      "coordination_detection",
+      "temporal_analysis",
+      "network_analysis",
     ]);
 
     const federationMetadata = this.buildFederationMetadata();
@@ -484,19 +457,19 @@ export class SignalNormalizer {
     // Build coordination features
     const coordinationFeatures: CoordinationFeature[] = [
       {
-        featureType: 'synchronicity',
+        featureType: "synchronicity",
         value: synchronicity,
         confidence: 0.85,
         extractedAt: timestamp,
       },
       {
-        featureType: 'content_similarity',
+        featureType: "content_similarity",
         value: contentSimilarity,
         confidence: 0.9,
         extractedAt: timestamp,
       },
       {
-        featureType: 'network_density',
+        featureType: "network_density",
         value: networkDensity,
         confidence: 0.8,
         extractedAt: timestamp,
@@ -505,11 +478,9 @@ export class SignalNormalizer {
 
     const signal: CampaignSignal = {
       id: signalId,
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp,
-      expiresAt: new Date(
-        timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000,
-      ),
+      expiresAt: new Date(timestamp.getTime() + this.config.retentionDays * 24 * 60 * 60 * 1000),
       signalType: SignalType.COORDINATION_PATTERN,
       confidence: Math.min(synchronicity, contentSimilarity) * 0.9 + 0.1,
       indicator,
@@ -530,24 +501,22 @@ export class SignalNormalizer {
   // ============================================================================
 
   private createSecureHash(input: string): string {
-    return createHmac('sha256', this.config.hashingSalt)
-      .update(input)
-      .digest('hex');
+    return createHmac("sha256", this.config.hashingSalt).update(input).digest("hex");
   }
 
   private hashOrganizationId(orgId: string): string {
     // Create anonymized org ID that's consistent but not reversible
-    return createHmac('sha256', this.config.hashingSalt)
+    return createHmac("sha256", this.config.hashingSalt)
       .update(`org:${orgId}`)
-      .digest('hex')
+      .digest("hex")
       .substring(0, 16);
   }
 
   private normalizeText(text: string): string {
     return text
       .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, " ")
+      .replace(/[^\w\s]/g, "")
       .trim();
   }
 
@@ -570,7 +539,7 @@ export class SignalNormalizer {
 
   private generateMockEmbedding(text: string, dimensions: number): number[] {
     // Simple deterministic mock embedding based on text hash
-    const hash = createHash('sha256').update(text).digest();
+    const hash = createHash("sha256").update(text).digest();
     const embedding: number[] = [];
 
     for (let i = 0; i < dimensions; i++) {
@@ -589,9 +558,9 @@ export class SignalNormalizer {
 
     // Simple pattern matching for demonstration
     const patterns = [
-      { pattern: /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b/g, type: 'PERSON' as const },
-      { pattern: /\b(?:Inc|Corp|LLC|Ltd|Company|Organization)\b/gi, type: 'ORGANIZATION' as const },
-      { pattern: /\b[A-Z][a-z]+(?:,\s*[A-Z]{2})?\b/g, type: 'LOCATION' as const },
+      { pattern: /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b/g, type: "PERSON" as const },
+      { pattern: /\b(?:Inc|Corp|LLC|Ltd|Company|Organization)\b/gi, type: "ORGANIZATION" as const },
+      { pattern: /\b[A-Z][a-z]+(?:,\s*[A-Z]{2})?\b/g, type: "LOCATION" as const },
     ];
 
     for (const { pattern, type } of patterns) {
@@ -613,9 +582,30 @@ export class SignalNormalizer {
     // Simplified topic extraction
     const words = text.toLowerCase().split(/\s+/);
     const stopWords = new Set([
-      'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been',
-      'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will',
-      'would', 'could', 'should', 'may', 'might', 'must', 'shall',
+      "the",
+      "a",
+      "an",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "been",
+      "being",
+      "have",
+      "has",
+      "had",
+      "do",
+      "does",
+      "did",
+      "will",
+      "would",
+      "could",
+      "should",
+      "may",
+      "might",
+      "must",
+      "shall",
     ]);
 
     const wordFreq = new Map<string, number>();
@@ -634,12 +624,32 @@ export class SignalNormalizer {
   private analyzeSentiment(text: string): number {
     // Simplified sentiment analysis
     const positiveWords = new Set([
-      'good', 'great', 'excellent', 'amazing', 'wonderful', 'positive',
-      'success', 'happy', 'love', 'best', 'awesome', 'fantastic',
+      "good",
+      "great",
+      "excellent",
+      "amazing",
+      "wonderful",
+      "positive",
+      "success",
+      "happy",
+      "love",
+      "best",
+      "awesome",
+      "fantastic",
     ]);
     const negativeWords = new Set([
-      'bad', 'terrible', 'awful', 'horrible', 'negative', 'fail',
-      'sad', 'hate', 'worst', 'poor', 'disaster', 'crisis',
+      "bad",
+      "terrible",
+      "awful",
+      "horrible",
+      "negative",
+      "fail",
+      "sad",
+      "hate",
+      "worst",
+      "poor",
+      "disaster",
+      "crisis",
     ]);
 
     const words = text.toLowerCase().split(/\s+/);
@@ -658,19 +668,19 @@ export class SignalNormalizer {
 
     // Check for common framing patterns
     if (/breaking|urgent|exclusive/i.test(text)) {
-      techniques.push('urgency_framing');
+      techniques.push("urgency_framing");
     }
     if (/they|them|those people/i.test(text)) {
-      techniques.push('us_vs_them');
+      techniques.push("us_vs_them");
     }
     if (/everyone knows|it's obvious|clearly/i.test(text)) {
-      techniques.push('appeal_to_common_sense');
+      techniques.push("appeal_to_common_sense");
     }
     if (/experts say|studies show|research proves/i.test(text)) {
-      techniques.push('appeal_to_authority');
+      techniques.push("appeal_to_authority");
     }
     if (/\?{2,}|!{2,}/g.test(text)) {
-      techniques.push('emotional_amplification');
+      techniques.push("emotional_amplification");
     }
 
     return techniques;
@@ -679,8 +689,21 @@ export class SignalNormalizer {
   private detectLanguage(text: string): string {
     // Simplified language detection
     const englishWords = new Set([
-      'the', 'is', 'are', 'was', 'were', 'have', 'has', 'had',
-      'do', 'does', 'did', 'will', 'would', 'could', 'should',
+      "the",
+      "is",
+      "are",
+      "was",
+      "were",
+      "have",
+      "has",
+      "had",
+      "do",
+      "does",
+      "did",
+      "will",
+      "would",
+      "could",
+      "should",
     ]);
 
     const words = text.toLowerCase().split(/\s+/);
@@ -690,22 +713,19 @@ export class SignalNormalizer {
       if (englishWords.has(word)) englishCount++;
     }
 
-    return englishCount > words.length * 0.1 ? 'en' : 'unknown';
+    return englishCount > words.length * 0.1 ? "en" : "unknown";
   }
 
-  private async generatePerceptualHash(
-    content: Buffer,
-    mediaType: string,
-  ): Promise<string> {
+  private async generatePerceptualHash(content: Buffer, mediaType: string): Promise<string> {
     // Simplified perceptual hash generation
     // In production, would use actual pHash library
-    const contentHash = createHash('sha256').update(content).digest('hex');
+    const contentHash = createHash("sha256").update(content).digest("hex");
     return `phash_${mediaType.toLowerCase()}_${contentHash.substring(0, 16)}`;
   }
 
   private async validateC2PAManifest(
     content: Buffer,
-    manifestBuffer: Buffer,
+    manifestBuffer: Buffer
   ): Promise<{ validation: C2PAValidationResult; manifest?: C2PAManifest }> {
     // Simplified C2PA validation
     // In production, would use c2pa-node or similar library
@@ -714,16 +734,16 @@ export class SignalNormalizer {
 
       const manifest: C2PAManifest = {
         manifestId: manifestData.id || uuidv4(),
-        claimGenerator: manifestData.claim_generator || 'unknown',
-        claimGeneratorVersion: manifestData.claim_generator_version || '1.0',
+        claimGenerator: manifestData.claim_generator || "unknown",
+        claimGeneratorVersion: manifestData.claim_generator_version || "1.0",
         title: manifestData.title,
-        format: manifestData.format || 'image/jpeg',
+        format: manifestData.format || "image/jpeg",
         instanceId: manifestData.instance_id || uuidv4(),
         ingredients: manifestData.ingredients || [],
         assertions: manifestData.assertions || [],
         signature: {
-          algorithm: manifestData.signature?.algorithm || 'ES256',
-          issuer: manifestData.signature?.issuer || 'unknown',
+          algorithm: manifestData.signature?.algorithm || "ES256",
+          issuer: manifestData.signature?.issuer || "unknown",
           timestamp: new Date(manifestData.signature?.timestamp || Date.now()),
           certificateChain: manifestData.signature?.certificate_chain || [],
         },
@@ -748,7 +768,7 @@ export class SignalNormalizer {
         trustChain: {
           isComplete: true,
           chainLength: manifest.signature.certificateChain.length,
-          trustedRoots: ['Adobe', 'Microsoft', 'C2PA Trust List'],
+          trustedRoots: ["Adobe", "Microsoft", "C2PA Trust List"],
           untrustedElements: [],
         },
         validationTimestamp: new Date(),
@@ -764,7 +784,7 @@ export class SignalNormalizer {
             signatureValid: false,
             integrityValid: false,
             timestampValid: false,
-            errors: ['Failed to parse C2PA manifest'],
+            errors: ["Failed to parse C2PA manifest"],
             warnings: [],
           },
           claimValidation: {
@@ -785,27 +805,19 @@ export class SignalNormalizer {
     }
   }
 
-  private async detectManipulation(
-    content: Buffer,
-    mediaType: string,
-  ): Promise<number> {
+  private async detectManipulation(content: Buffer, mediaType: string): Promise<number> {
     // Placeholder for manipulation detection
     // Would use forensic analysis models in production
     return 0.1 + Math.random() * 0.2;
   }
 
-  private async detectSyntheticContent(
-    content: Buffer,
-    mediaType: string,
-  ): Promise<number> {
+  private async detectSyntheticContent(content: Buffer, mediaType: string): Promise<number> {
     // Placeholder for synthetic content detection
     // Would use AI-generated content detectors in production
     return 0.05 + Math.random() * 0.15;
   }
 
-  private async extractDimensions(
-    content: Buffer,
-  ): Promise<{ width: number; height: number }> {
+  private async extractDimensions(content: Buffer): Promise<{ width: number; height: number }> {
     // Placeholder - would use actual image/video parsing
     return { width: 1920, height: 1080 };
   }
@@ -815,41 +827,36 @@ export class SignalNormalizer {
     return 60;
   }
 
-  private calculateAccountAgeRange(
-    createdAt?: Date,
-  ): 'NEW' | 'RECENT' | 'ESTABLISHED' | 'OLD' {
-    if (!createdAt) return 'ESTABLISHED';
+  private calculateAccountAgeRange(createdAt?: Date): "NEW" | "RECENT" | "ESTABLISHED" | "OLD" {
+    if (!createdAt) return "ESTABLISHED";
 
-    const ageInDays =
-      (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const ageInDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
-    if (ageInDays < 30) return 'NEW';
-    if (ageInDays < 180) return 'RECENT';
-    if (ageInDays < 730) return 'ESTABLISHED';
-    return 'OLD';
+    if (ageInDays < 30) return "NEW";
+    if (ageInDays < 180) return "RECENT";
+    if (ageInDays < 730) return "ESTABLISHED";
+    return "OLD";
   }
 
   private calculateFollowerRange(
-    followerCount?: number,
-  ): 'MICRO' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'MASSIVE' {
-    if (!followerCount) return 'SMALL';
+    followerCount?: number
+  ): "MICRO" | "SMALL" | "MEDIUM" | "LARGE" | "MASSIVE" {
+    if (!followerCount) return "SMALL";
 
-    if (followerCount < 1000) return 'MICRO';
-    if (followerCount < 10000) return 'SMALL';
-    if (followerCount < 100000) return 'MEDIUM';
-    if (followerCount < 1000000) return 'LARGE';
-    return 'MASSIVE';
+    if (followerCount < 1000) return "MICRO";
+    if (followerCount < 10000) return "SMALL";
+    if (followerCount < 100000) return "MEDIUM";
+    if (followerCount < 1000000) return "LARGE";
+    return "MASSIVE";
   }
 
   private buildBehavioralSignature(input: RawAccountInput): BehavioralSignature {
     const recentActivity = input.recentActivity;
 
     return {
-      postingFrequency: input.postCount
-        ? input.postCount / 30
-        : 1,
+      postingFrequency: input.postCount ? input.postCount / 30 : 1,
       activityHours: recentActivity?.postingHours || Array(24).fill(1),
-      contentTypes: recentActivity?.contentTypes || ['text'],
+      contentTypes: recentActivity?.contentTypes || ["text"],
       engagementPatterns: {
         likes: 0.5,
         shares: 0.3,
@@ -868,11 +875,9 @@ export class SignalNormalizer {
       intervals.push(timestamps[i].getTime() - timestamps[i - 1].getTime());
     }
 
-    const meanInterval =
-      intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const meanInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
     const variance =
-      intervals.reduce((sum, i) => sum + Math.pow(i - meanInterval, 2), 0) /
-      intervals.length;
+      intervals.reduce((sum, i) => sum + Math.pow(i - meanInterval, 2), 0) / intervals.length;
     const stdDev = Math.sqrt(variance);
 
     // Lower stdDev relative to mean = higher synchronicity
@@ -880,9 +885,7 @@ export class SignalNormalizer {
     return Math.max(0, Math.min(1, 1 - cv));
   }
 
-  private async calculateContentSimilarity(
-    contentHashes: string[],
-  ): Promise<number> {
+  private async calculateContentSimilarity(contentHashes: string[]): Promise<number> {
     if (contentHashes.length < 2) return 0;
 
     // Count unique hashes
@@ -899,17 +902,14 @@ export class SignalNormalizer {
     return Math.min(1, actorIds.length / (uniqueActors.size * 2));
   }
 
-  private calculateAmplificationFactor(
-    actorCount: number,
-    contentCount: number,
-  ): number {
+  private calculateAmplificationFactor(actorCount: number, contentCount: number): number {
     if (contentCount === 0) return 0;
     return actorCount / contentCount;
   }
 
   private buildChannelMetadata(
     platform: string,
-    engagement?: { likes?: number; shares?: number; comments?: number },
+    engagement?: { likes?: number; shares?: number; comments?: number }
   ): ChannelMetadata {
     const channelTypes: Record<string, ChannelType> = {
       twitter: ChannelType.SOCIAL_MEDIA,
@@ -924,9 +924,7 @@ export class SignalNormalizer {
     };
 
     const totalEngagement = engagement
-      ? (engagement.likes || 0) +
-        (engagement.shares || 0) * 2 +
-        (engagement.comments || 0) * 3
+      ? (engagement.likes || 0) + (engagement.shares || 0) * 2 + (engagement.comments || 0) * 3
       : 0;
 
     let reach: ReachCategory;
@@ -945,11 +943,11 @@ export class SignalNormalizer {
 
   private buildProvenance(
     sourceType: ProvenanceSourceType,
-    processingPipeline: string[],
+    processingPipeline: string[]
   ): SignalProvenance {
     return {
       sourceType,
-      collectionMethod: 'automated_collection',
+      collectionMethod: "automated_collection",
       collectionTimestamp: new Date(),
       processingPipeline,
       dataQuality: {
@@ -961,12 +959,10 @@ export class SignalNormalizer {
       attestations: [
         {
           attesterId: this.config.organizationId,
-          attesterType: 'AUTOMATED',
+          attesterType: "AUTOMATED",
           timestamp: new Date(),
           confidence: 0.9,
-          signature: this.createSecureHash(
-            `${this.config.organizationId}:${Date.now()}`,
-          ),
+          signature: this.createSecureHash(`${this.config.organizationId}:${Date.now()}`),
         },
       ],
     };

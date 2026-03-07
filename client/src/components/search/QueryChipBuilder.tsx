@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Chip,
@@ -9,15 +9,15 @@ import {
   IconButton,
   Tooltip,
   Button,
-} from '@mui/material';
-import { Add, Clear, FilterList, Save, Share } from '@mui/icons-material';
+} from "@mui/material";
+import { Add, Clear, FilterList, Save, Share } from "@mui/icons-material";
 
 export interface QueryChip {
   id: string;
   field: string;
   operator: string;
   value: string;
-  type: 'filter' | 'term' | 'range' | 'exists';
+  type: "filter" | "term" | "range" | "exists";
 }
 
 interface QueryChipBuilderProps {
@@ -28,28 +28,23 @@ interface QueryChipBuilderProps {
 }
 
 const FIELDS = [
-  { label: 'Title', value: 'title' },
-  { label: 'Content', value: 'content' },
-  { label: 'Author', value: 'author' },
-  { label: 'Type', value: 'type' },
-  { label: 'Created', value: 'createdAt' },
-  { label: 'Tags', value: 'tags' },
-  { label: 'Status', value: 'status' },
+  { label: "Title", value: "title" },
+  { label: "Content", value: "content" },
+  { label: "Author", value: "author" },
+  { label: "Type", value: "type" },
+  { label: "Created", value: "createdAt" },
+  { label: "Tags", value: "tags" },
+  { label: "Status", value: "status" },
 ];
 
 const OPERATORS = {
-  text: ['contains', 'equals', 'starts with', 'ends with'],
-  date: ['after', 'before', 'between'],
-  number: ['equals', 'greater than', 'less than', 'between'],
-  select: ['equals', 'in', 'not in'],
+  text: ["contains", "equals", "starts with", "ends with"],
+  date: ["after", "before", "between"],
+  number: ["equals", "greater than", "less than", "between"],
+  select: ["equals", "in", "not in"],
 };
 
-export function QueryChipBuilder({
-  chips,
-  onChipsChange,
-  onSave,
-  onShare,
-}: QueryChipBuilderProps) {
+export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: QueryChipBuilderProps) {
   const [newChip, setNewChip] = useState<Partial<QueryChip>>({});
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
@@ -61,7 +56,7 @@ export function QueryChipBuilder({
       field: newChip.field!,
       operator: newChip.operator!,
       value: newChip.value!,
-      type: 'filter',
+      type: "filter",
     };
 
     onChipsChange([...chips, chip]);
@@ -72,7 +67,7 @@ export function QueryChipBuilder({
     (chipId: string) => {
       onChipsChange(chips.filter((chip) => chip.id !== chipId));
     },
-    [chips, onChipsChange],
+    [chips, onChipsChange]
   );
 
   const parseKeyboardDSL = useCallback(
@@ -84,30 +79,25 @@ export function QueryChipBuilder({
       const newChips = matches.map((match) => ({
         id: `dsl-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         field: match[1],
-        operator:
-          match[2] === ':'
-            ? 'equals'
-            : match[2] === '>'
-              ? 'greater than'
-              : 'less than',
+        operator: match[2] === ":" ? "equals" : match[2] === ">" ? "greater than" : "less than",
         value: match[3],
-        type: 'filter' as const,
+        type: "filter" as const,
       }));
 
       if (newChips.length > 0) {
         onChipsChange([...chips, ...newChips]);
       }
     },
-    [chips, onChipsChange],
+    [chips, onChipsChange]
   );
 
   return (
     <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <FilterList color="primary" />
         <Typography variant="subtitle2">Query Builder</Typography>
 
-        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+        <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
           {onSave && (
             <Tooltip title="Save search">
               <IconButton size="small" onClick={() => setSaveDialogOpen(true)}>
@@ -134,7 +124,7 @@ export function QueryChipBuilder({
 
       {/* Active filter chips */}
       {chips.length > 0 && (
-        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Box sx={{ mb: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
           {chips.map((chip) => (
             <Chip
               key={chip.id}
@@ -155,10 +145,10 @@ export function QueryChipBuilder({
           fullWidth
           size="small"
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               const target = e.target as HTMLInputElement;
               parseKeyboardDSL(target.value);
-              target.value = '';
+              target.value = "";
             }
           }}
           helperText="Press Enter to parse. Format: field:value, field>value, field<value"
@@ -166,15 +156,13 @@ export function QueryChipBuilder({
       </Box>
 
       {/* Manual chip builder */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
         <Autocomplete
           size="small"
           sx={{ minWidth: 120 }}
           options={FIELDS}
           value={FIELDS.find((f) => f.value === newChip.field) || null}
-          onChange={(_, option) =>
-            setNewChip((prev) => ({ ...prev, field: option?.value }))
-          }
+          onChange={(_, option) => setNewChip((prev) => ({ ...prev, field: option?.value }))}
           renderInput={(params) => <TextField {...params} label="Field" />}
         />
 
@@ -183,20 +171,16 @@ export function QueryChipBuilder({
           sx={{ minWidth: 100 }}
           options={OPERATORS.text} // Simplified - would be dynamic based on field type
           value={newChip.operator || null}
-          onChange={(_, value) =>
-            setNewChip((prev) => ({ ...prev, operator: value || '' }))
-          }
+          onChange={(_, value) => setNewChip((prev) => ({ ...prev, operator: value || "" }))}
           renderInput={(params) => <TextField {...params} label="Operator" />}
         />
 
         <TextField
           size="small"
           label="Value"
-          value={newChip.value || ''}
-          onChange={(e) =>
-            setNewChip((prev) => ({ ...prev, value: e.target.value }))
-          }
-          onKeyDown={(e) => e.key === 'Enter' && addChip()}
+          value={newChip.value || ""}
+          onChange={(e) => setNewChip((prev) => ({ ...prev, value: e.target.value }))}
+          onKeyDown={(e) => e.key === "Enter" && addChip()}
           sx={{ minWidth: 120 }}
         />
 
@@ -212,12 +196,8 @@ export function QueryChipBuilder({
       </Box>
 
       {chips.length > 0 && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ mt: 1, display: 'block' }}
-        >
-          {chips.length} active filter{chips.length !== 1 ? 's' : ''}
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+          {chips.length} active filter{chips.length !== 1 ? "s" : ""}
         </Typography>
       )}
     </Paper>

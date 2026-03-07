@@ -26,7 +26,7 @@ docker pull openpolicyagent/opa:latest
 
 ## Claude Prompt
 
-```
+````
 You are implementing ABAC/RBAC with OPA policy-by-default enforcement for IntelGraph Core GA.
 
 CONTEXT:
@@ -175,9 +175,10 @@ allow if {
     input.user.authorities[_] == "PII_ACCESS"
     input.resource.classification == "pii"
 }
-```
+````
 
 SAMPLE GRAPHQL DIRECTIVE USAGE:
+
 ```graphql
 type Person {
   id: ID!
@@ -196,6 +197,7 @@ Provide:
 (e) Prometheus alerts
 (f) Integration tests
 (g) Migration guide for existing SSO/SCIM → add OPA layer
+
 ```
 
 ---
@@ -224,3 +226,4 @@ Provide:
 - OPA docs: https://www.openpolicyagent.org/docs/latest/
 - Rego tutorial: https://www.openpolicyagent.org/docs/latest/policy-language/
 - TimescaleDB: https://docs.timescale.com/
+```

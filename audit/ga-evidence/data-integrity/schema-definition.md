@@ -78,6 +78,7 @@ export interface DataEnvelope<T = any> {
 ### 1. Provenance Tracking
 
 Every response includes:
+
 - **source**: Originating system/model identifier
 - **generatedAt**: ISO 8601 timestamp
 - **lineage**: Complete transformation chain
@@ -87,6 +88,7 @@ Every response includes:
 ### 2. Confidence Scoring
 
 For AI-generated content:
+
 - **Range**: 0.0 to 1.0
 - **Interpretation**:
   - `>= 0.8`: High confidence
@@ -103,6 +105,7 @@ For AI-generated content:
 ### 4. Data Classification
 
 Five-level classification system:
+
 - **PUBLIC**: Publicly shareable
 - **INTERNAL**: Internal use only
 - **CONFIDENTIAL**: Restricted access
@@ -119,6 +122,7 @@ Five-level classification system:
 ### 6. Governance Verdict
 
 Optional reference to policy evaluation:
+
 - **verdictId**: Unique decision identifier
 - **policyId**: Evaluated policy
 - **result**: ALLOW/DENY/FLAG/REVIEW_REQUIRED
@@ -128,6 +132,7 @@ Optional reference to policy evaluation:
 ## Implementation Locations
 
 ### Backend
+
 - **Schema**: `/home/user/summit/server/src/graphql/schema/data-envelope.graphql`
 - **Types**: `/home/user/summit/server/src/types/data-envelope.ts`
 - **Resolvers**: `/home/user/summit/server/src/resolvers/data-envelope-resolvers.ts`
@@ -135,6 +140,7 @@ Optional reference to policy evaluation:
 - **Exports**: `/home/user/summit/server/src/exports/data-envelope-export.ts`
 
 ### Frontend
+
 - **Validator**: `/home/user/summit/client/src/utils/data-envelope-validator.ts`
 - **UI Components**: `/home/user/summit/client/src/components/DataIntegrityIndicators.tsx`
 
@@ -142,12 +148,12 @@ Optional reference to policy evaluation:
 
 ### SOC 2 Mapping
 
-| Control | Description | Implementation |
-|---------|-------------|----------------|
-| **PI1.1** | Processing Integrity - Completeness | All responses include provenance and lineage |
-| **PI1.2** | Processing Integrity - Timeliness | Timestamps at generation and each transformation |
-| **PI1.4** | Processing Integrity - Validity | Hash verification and confidence scoring |
-| **C1.2** | Confidentiality - Data Classification | Five-level classification system |
+| Control   | Description                           | Implementation                                   |
+| --------- | ------------------------------------- | ------------------------------------------------ |
+| **PI1.1** | Processing Integrity - Completeness   | All responses include provenance and lineage     |
+| **PI1.2** | Processing Integrity - Timeliness     | Timestamps at generation and each transformation |
+| **PI1.4** | Processing Integrity - Validity       | Hash verification and confidence scoring         |
+| **C1.2**  | Confidentiality - Data Classification | Five-level classification system                 |
 
 ## Usage Examples
 
@@ -156,6 +162,7 @@ See `/home/user/summit/audit/ga-evidence/data-integrity/example-responses.json`
 ## Verification
 
 Integrity can be verified by:
+
 1. Checking provenance.provenanceId is present
 2. Validating isSimulated flag is set
 3. Verifying dataHash matches payload
@@ -172,6 +179,7 @@ Integrity can be verified by:
 ## Audit Trail
 
 All envelope operations are logged with:
+
 - Provenance ID
 - Actor
 - Operation

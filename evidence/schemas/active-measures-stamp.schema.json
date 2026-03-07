@@ -3,8 +3,8 @@
   "type": "object",
   "required": ["created_at", "run_id"],
   "properties": {
-    "created_at": {"type": "string"},
-    "run_id": {"type": "string"}
+    "created_at": { "type": "string" },
+    "run_id": { "type": "string" }
   },
   "additionalProperties": false
 }

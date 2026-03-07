@@ -95,13 +95,13 @@ class StartupOptimizerService {
   private async runCriticalTasks(): Promise<void> {
     performanceMonitor.mark('critical_tasks');
 
-    const criticalTasks = this.tasks.filter((t) => t.priority === 'critical');
+    const criticalTasks = this.tasks.filter(t => t.priority === 'critical');
 
     console.log(`[StartupOptimizer] Running ${criticalTasks.length} critical tasks`);
 
     // Run critical tasks in parallel for faster startup
     await Promise.all(
-      criticalTasks.map(async (task) => {
+      criticalTasks.map(async task => {
         try {
           performanceMonitor.mark(task.name);
           await task.fn();
@@ -125,14 +125,14 @@ class StartupOptimizerService {
   private runHighPriorityTasks(): void {
     performanceMonitor.mark('high_priority_tasks');
 
-    const highPriorityTasks = this.tasks.filter((t) => t.priority === 'high');
+    const highPriorityTasks = this.tasks.filter(t => t.priority === 'high');
 
     console.log(`[StartupOptimizer] Running ${highPriorityTasks.length} high priority tasks`);
 
     // Run after current interactions complete
     InteractionManager.runAfterInteractions(async () => {
       await Promise.all(
-        highPriorityTasks.map(async (task) => {
+        highPriorityTasks.map(async task => {
           try {
             performanceMonitor.mark(task.name);
             await task.fn();
@@ -154,9 +154,7 @@ class StartupOptimizerService {
    * Run deferred tasks (after interactions complete)
    */
   private runDeferredTasks(): void {
-    const deferredTasks = this.tasks.filter(
-      (t) => t.priority === 'medium' || t.priority === 'low',
-    );
+    const deferredTasks = this.tasks.filter(t => t.priority === 'medium' || t.priority === 'low');
 
     console.log(`[StartupOptimizer] Deferring ${deferredTasks.length} tasks`);
 
@@ -200,7 +198,7 @@ class StartupOptimizerService {
   } {
     return {
       totalDuration: Date.now() - this.startTime,
-      tasks: this.tasks.map((t) => ({
+      tasks: this.tasks.map(t => ({
         name: t.name,
         priority: t.priority,
         duration: t.duration,
@@ -261,9 +259,9 @@ export const configureDefaultStartupTasks = () => {
     async () => {
       const NetInfo = await import('@react-native-community/netinfo');
       const state = await NetInfo.default.fetch();
-      useAppStore.getState().setOnlineStatus(
-        state.isConnected === true && state.isInternetReachable === true,
-      );
+      useAppStore
+        .getState()
+        .setOnlineStatus(state.isConnected === true && state.isInternetReachable === true);
     },
     'high',
   );

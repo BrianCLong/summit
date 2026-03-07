@@ -54,9 +54,9 @@ tokens:
 
 ```js
 // scripts/docs/export-meta.js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const out = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -64,29 +64,29 @@ const out = [];
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      const src = fs.readFileSync(p, 'utf8');
+      const src = fs.readFileSync(p, "utf8");
       const g = matter(src);
       const links = [...src.matchAll(/\]\(([^)]+)\)/g)]
         .map((m) => m[1])
-        .filter((h) => !h.startsWith('#'));
+        .filter((h) => !h.startsWith("#"));
       out.push({
-        path: p.replace(/^docs\//, ''),
+        path: p.replace(/^docs\//, ""),
         ...g.data,
         links,
         type: inferType(p),
       });
     }
   }
-})('docs');
+})("docs");
 function inferType(p) {
-  if (p.includes('/how-to/')) return 'how-to';
-  if (p.includes('/tutorials/')) return 'tutorial';
-  if (p.includes('/reference/')) return 'reference';
-  if (p.includes('/concept')) return 'concept';
-  return 'doc';
+  if (p.includes("/how-to/")) return "how-to";
+  if (p.includes("/tutorials/")) return "tutorial";
+  if (p.includes("/reference/")) return "reference";
+  if (p.includes("/concept")) return "concept";
+  return "doc";
 }
-fs.mkdirSync('docs/ops/meta', { recursive: true });
-fs.writeFileSync('docs/ops/meta/index.json', JSON.stringify(out, null, 2));
+fs.mkdirSync("docs/ops/meta", { recursive: true });
+fs.writeFileSync("docs/ops/meta/index.json", JSON.stringify(out, null, 2));
 ```
 
 - Add step to `docs-quality.yml` and upload as artifact.
@@ -97,31 +97,26 @@ fs.writeFileSync('docs/ops/meta/index.json', JSON.stringify(out, null, 2));
 
 ```js
 // scripts/docs/graph-check.js
-const meta = require('../../docs/ops/meta/index.json');
+const meta = require("../../docs/ops/meta/index.json");
 const byPath = new Map(meta.map((m) => [m.path, m]));
 const edges = [];
 for (const m of meta)
   for (const l of m.links || []) {
-    const t = l.replace(/^\.\//, '').replace(/^\//, '');
+    const t = l.replace(/^\.\//, "").replace(/^\//, "");
     if (
       byPath.has(t) ||
-      meta.find(
-        (x) => x.path.replace(/\.mdx?$/, '') === t.replace(/^[.\/]+/, ''),
-      )
+      meta.find((x) => x.path.replace(/\.mdx?$/, "") === t.replace(/^[.\/]+/, ""))
     )
       edges.push([m.path, t]);
   }
 const adjacency = new Map(meta.map((m) => [m.path, 0]));
 edges.forEach(([_, t]) => adjacency.set(t, (adjacency.get(t) || 0) + 1));
 const deadends = meta.filter(
-  (m) =>
-    m.type !== 'reference' &&
-    m.type !== 'release' &&
-    (m.links || []).length === 0,
+  (m) => m.type !== "reference" && m.type !== "release" && (m.links || []).length === 0
 );
 if (deadends.length) {
-  console.error('Dead-end pages (no links out):');
-  deadends.slice(0, 50).forEach((d) => console.error(' -', d.path));
+  console.error("Dead-end pages (no links out):");
+  deadends.slice(0, 50).forEach((d) => console.error(" -", d.path));
   process.exit(1);
 }
 ```
@@ -142,7 +137,7 @@ if (deadends.length) {
 ## C2) Conditional Content (MDX shortcodes)
 
 ```mdx
-import { IfEdition } from '@site/src/components/Edition';
+import { IfEdition } from "@site/src/components/Edition";
 
 <IfEdition is="enterprise">This feature is available in Enterprise.</IfEdition>
 ```

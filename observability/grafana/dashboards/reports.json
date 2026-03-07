@@ -5,15 +5,15 @@
       "title": "Render Duration",
       "type": "graph",
       "targets": [
-        { "expr": "rate(report_render_duration_seconds_sum[5m]) / rate(report_render_duration_seconds_count[5m])" }
+        {
+          "expr": "rate(report_render_duration_seconds_sum[5m]) / rate(report_render_duration_seconds_count[5m])"
+        }
       ]
     },
     {
       "title": "Failures",
       "type": "graph",
-      "targets": [
-        { "expr": "rate(report_render_failures_total[5m])" }
-      ]
+      "targets": [{ "expr": "rate(report_render_failures_total[5m])" }]
     }
   ]
 }

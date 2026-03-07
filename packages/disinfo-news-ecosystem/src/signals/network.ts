@@ -1,5 +1,5 @@
 export function analyzeNetwork(bundle: any) {
-  const posts = (bundle.items || []).filter((i: any) => i.type === 'social_post');
+  const posts = (bundle.items || []).filter((i: any) => i.type === "social_post");
 
   let coordinatedCount = 0;
   const timeWindowMs = 60000; // 1 min
@@ -25,22 +25,24 @@ export function analyzeNetwork(bundle: any) {
 
   const domains = new Set<string>();
   for (const item of bundle.items || []) {
-      if (item.source_meta?.domain) domains.add(item.source_meta.domain);
-      if (item.url) {
-          try {
-              domains.add(new URL(item.url).hostname);
-          } catch {}
+    if (item.source_meta?.domain) domains.add(item.source_meta.domain);
+    if (item.url) {
+      try {
+        domains.add(new URL(item.url).hostname);
+      } catch {}
+    }
+    if (item.shared_urls) {
+      for (const u of item.shared_urls) {
+        try {
+          domains.add(new URL(u).hostname);
+        } catch {}
       }
-      if (item.shared_urls) {
-        for (const u of item.shared_urls) {
-           try { domains.add(new URL(u).hostname); } catch {}
-        }
-      }
+    }
   }
 
   return {
     coordinated_sharing_events: coordinatedCount,
     unique_domains: domains.size,
-    exposure_graph_nodes: posts.length
+    exposure_graph_nodes: posts.length,
   };
 }

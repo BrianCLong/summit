@@ -2,7 +2,7 @@ name: Infra Verify CI
 on:
   pull_request:
     paths:
-      - 'src/platform/infra/**'
+      - "src/platform/infra/**"
 
 jobs:
   verify:

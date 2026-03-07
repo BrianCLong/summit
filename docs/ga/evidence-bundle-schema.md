@@ -48,5 +48,5 @@ To verify the bundle:
 
 1.  Extract the tarball.
 2.  For each file in `sbom/` or `test-results/`:
-    *   Locate the corresponding `.sig` file.
-    *   Run `cosign verify-blob --key <pubkey> --signature <file.sig> <file>`.
+    - Locate the corresponding `.sig` file.
+    - Run `cosign verify-blob --key <pubkey> --signature <file.sig> <file>`.

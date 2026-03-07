@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page, expect } from "@playwright/test";
 
 export class InvestigationPage {
   constructor(private page: Page) {}
@@ -20,9 +20,9 @@ export class InvestigationPage {
     if (await graphTab.isVisible()) {
       await graphTab.click();
       // Verify canvas
-      await expect(this.page.locator('canvas')).toBeVisible();
+      await expect(this.page.locator("canvas")).toBeVisible();
     } else {
-        console.log("Graph tab not found, skipping graph verification");
+      console.log("Graph tab not found, skipping graph verification");
     }
   }
 }

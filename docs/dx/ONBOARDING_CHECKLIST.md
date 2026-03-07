@@ -12,12 +12,12 @@
 
 ### Hardware Requirements
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| RAM | 16GB | 32GB |
-| Disk | 50GB free | 100GB free SSD |
-| CPU | 4 cores | 8+ cores |
-| OS | macOS 12+, Ubuntu 22.04+, Windows 11 WSL2 | macOS (Apple Silicon) |
+| Component | Minimum                                   | Recommended           |
+| --------- | ----------------------------------------- | --------------------- |
+| RAM       | 16GB                                      | 32GB                  |
+| Disk      | 50GB free                                 | 100GB free SSD        |
+| CPU       | 4 cores                                   | 8+ cores              |
+| OS        | macOS 12+, Ubuntu 22.04+, Windows 11 WSL2 | macOS (Apple Silicon) |
 
 ---
 
@@ -49,6 +49,7 @@ python3 --version
 ```
 
 **Checklist:**
+
 - [ ] Docker Desktop running with 8GB+ memory allocated
 - [ ] Node.js 18.18+ installed
 - [ ] pnpm 9.12+ available
@@ -77,6 +78,7 @@ ls node_modules | head -5
 ```
 
 **Checklist:**
+
 - [ ] Repository cloned successfully
 - [ ] `make bootstrap` completed without errors
 - [ ] `.env` file created
@@ -97,6 +99,7 @@ docker ps --format "table {{.Names}}\t{{.Status}}"
 ```
 
 **Checklist:**
+
 - [ ] All containers started
 - [ ] Health checks passing (green)
 
@@ -116,6 +119,7 @@ open http://localhost:7474    # Neo4j Browser (neo4j/devpassword)
 ```
 
 **Checklist:**
+
 - [ ] Smoke tests pass (100% success rate)
 - [ ] Frontend loads at localhost:3000
 - [ ] GraphQL Playground accessible at localhost:4000/graphql
@@ -129,16 +133,17 @@ open http://localhost:7474    # Neo4j Browser (neo4j/devpassword)
 
 Review these key locations:
 
-| Path | Purpose | Priority |
-|------|---------|----------|
-| `CLAUDE.md` | AI assistant guide, conventions | ⭐⭐⭐ |
-| `docs/ARCHITECTURE.md` | System design | ⭐⭐⭐ |
-| `server/src/` | API implementation | ⭐⭐ |
-| `client/src/` | React frontend | ⭐⭐ |
-| `docker-compose.dev.yml` | Service definitions | ⭐⭐ |
-| `scripts/smoke-test.js` | Golden path tests | ⭐ |
+| Path                     | Purpose                         | Priority |
+| ------------------------ | ------------------------------- | -------- |
+| `CLAUDE.md`              | AI assistant guide, conventions | ⭐⭐⭐   |
+| `docs/ARCHITECTURE.md`   | System design                   | ⭐⭐⭐   |
+| `server/src/`            | API implementation              | ⭐⭐     |
+| `client/src/`            | React frontend                  | ⭐⭐     |
+| `docker-compose.dev.yml` | Service definitions             | ⭐⭐     |
+| `scripts/smoke-test.js`  | Golden path tests               | ⭐       |
 
 **Checklist:**
+
 - [ ] Read CLAUDE.md (15 min)
 - [ ] Skim ARCHITECTURE.md (10 min)
 - [ ] Explore server/src structure (10 min)
@@ -171,6 +176,7 @@ git checkout server/src/index.ts
 ```
 
 **Checklist:**
+
 - [ ] Created branch successfully
 - [ ] Tests pass
 - [ ] Linter passes
@@ -204,6 +210,7 @@ make down                  # Stop services (data preserved)
   - Run Copilot analysis
 
 - [ ] **Task 2**: Execute a GraphQL query in the playground
+
   ```graphql
   query {
     investigations {
@@ -245,6 +252,7 @@ Before submitting your first PR:
 ## Troubleshooting Quick Reference
 
 ### "Port already in use"
+
 ```bash
 lsof -i :4000  # Find process
 kill -9 <PID>  # Kill it
@@ -252,12 +260,14 @@ make up        # Restart
 ```
 
 ### "Container unhealthy"
+
 ```bash
 docker-compose logs <service>  # Check logs
 make down && make up           # Restart stack
 ```
 
 ### "Tests fail but worked before"
+
 ```bash
 make down --volumes  # Reset databases
 make up
@@ -265,6 +275,7 @@ make smoke
 ```
 
 ### "pnpm install fails"
+
 ```bash
 rm -rf node_modules pnpm-lock.yaml
 pnpm store prune
@@ -272,6 +283,7 @@ pnpm install
 ```
 
 ### "Docker out of space"
+
 ```bash
 docker system prune -af  # Remove unused data
 docker volume prune -f   # Remove unused volumes
@@ -312,12 +324,12 @@ echo "Run 'make smoke' for full validation"
 
 ## Getting Help
 
-| Issue Type | Resource |
-|------------|----------|
-| Setup problems | This checklist, then ask in #dev-help |
-| Code questions | CLAUDE.md, then team chat |
-| Architecture | docs/ARCHITECTURE.md |
-| Bug in platform | Create GitHub issue |
+| Issue Type      | Resource                              |
+| --------------- | ------------------------------------- |
+| Setup problems  | This checklist, then ask in #dev-help |
+| Code questions  | CLAUDE.md, then team chat             |
+| Architecture    | docs/ARCHITECTURE.md                  |
+| Bug in platform | Create GitHub issue                   |
 
 ---
 

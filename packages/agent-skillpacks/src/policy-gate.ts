@@ -1,5 +1,5 @@
-import { minimatch } from 'minimatch';
-import { BreakGlassWaiver, SkillpackPolicy, ToolAccessDecision } from './types.js';
+import { minimatch } from "minimatch";
+import { BreakGlassWaiver, SkillpackPolicy, ToolAccessDecision } from "./types.js";
 
 const matchPattern = (toolName: string, patterns: string[] = []): boolean =>
   patterns.some((pattern) => minimatch(toolName, pattern, { matchBase: true }));
@@ -46,11 +46,11 @@ export const evaluateToolAccess = (options: {
     return {
       toolName: options.toolName,
       allowed: false,
-      reason: 'Conflicting policy match; deny takes precedence.',
+      reason: "Conflicting policy match; deny takes precedence.",
     };
   }
 
-  if (options.environment === 'ci' && !allowedByPattern) {
+  if (options.environment === "ci" && !allowedByPattern) {
     const waiver = options.policy.breakGlass?.waivers?.find((entry) =>
       matchPattern(options.toolName, [entry.toolPattern])
     );
@@ -58,14 +58,14 @@ export const evaluateToolAccess = (options: {
       return {
         toolName: options.toolName,
         allowed: true,
-        reason: 'Break-glass waiver active for CI.',
+        reason: "Break-glass waiver active for CI.",
         waiverId: waiver.id,
       };
     }
     return {
       toolName: options.toolName,
       allowed: false,
-      reason: 'CI default deny: tool not allowlisted.',
+      reason: "CI default deny: tool not allowlisted.",
     };
   }
 
@@ -73,7 +73,7 @@ export const evaluateToolAccess = (options: {
     return {
       toolName: options.toolName,
       allowed: false,
-      reason: 'Explicitly denied by policy.',
+      reason: "Explicitly denied by policy.",
     };
   }
 
@@ -81,12 +81,12 @@ export const evaluateToolAccess = (options: {
     return {
       toolName: options.toolName,
       allowed: true,
-      reason: 'Explicitly allowlisted by policy.',
+      reason: "Explicitly allowlisted by policy.",
     };
   }
 
-  const defaultBehavior = options.policy.defaultBehavior ?? 'deny';
-  const allowed = defaultBehavior === 'allow';
+  const defaultBehavior = options.policy.defaultBehavior ?? "deny";
+  const allowed = defaultBehavior === "allow";
   return {
     toolName: options.toolName,
     allowed,

@@ -22,11 +22,11 @@ MAJOR.MINOR.PATCH
 
 ### Current Versions
 
-| API Surface | Current Version | Stability | Support Status |
-|-------------|----------------|-----------|----------------|
-| **REST API** | `v1.0.0` | Stable | ✅ Supported |
-| **GraphQL API** | `v2.1.0` | Stable | ✅ Supported |
-| **WebSocket API** | `v1.0.0` | Beta | ⚠️ Preview |
+| API Surface       | Current Version | Stability | Support Status |
+| ----------------- | --------------- | --------- | -------------- |
+| **REST API**      | `v1.0.0`        | Stable    | ✅ Supported   |
+| **GraphQL API**   | `v2.1.0`        | Stable    | ✅ Supported   |
+| **WebSocket API** | `v1.0.0`        | Beta      | ⚠️ Preview     |
 
 ## Version Communication
 
@@ -95,6 +95,7 @@ Breaking changes require a MAJOR version bump and include:
 ### Example: v1 → v2 Migration
 
 **v1 (Deprecated):**
+
 ```json
 POST /api/v1/entity
 {
@@ -104,6 +105,7 @@ POST /api/v1/entity
 ```
 
 **v2 (Current):**
+
 ```json
 POST /api/v2/entities
 {
@@ -167,11 +169,11 @@ type Entity {
 
 ## Version Support Matrix
 
-| Version | Release Date | EOL Date | Status |
-|---------|-------------|----------|---------|
-| v2.1.0 | 2025-01-01 | - | ✅ Current |
-| v2.0.0 | 2024-06-01 | 2025-12-31 | ⚠️ Supported |
-| v1.0.0 | 2023-01-01 | 2025-06-30 | ⚠️ Deprecated |
+| Version | Release Date | EOL Date   | Status        |
+| ------- | ------------ | ---------- | ------------- |
+| v2.1.0  | 2025-01-01   | -          | ✅ Current    |
+| v2.0.0  | 2024-06-01   | 2025-12-31 | ⚠️ Supported  |
+| v1.0.0  | 2023-01-01   | 2025-06-30 | ⚠️ Deprecated |
 
 ## SDK Versioning
 
@@ -244,9 +246,9 @@ For high-performance use cases, we may introduce gRPC APIs with protobuf-based v
 
 ## Change Log
 
-| Date | Version | Change | Author |
-|------|---------|--------|--------|
-| 2025-01-15 | 1.0.0 | Initial API versioning strategy | Platform Team |
+| Date       | Version | Change                          | Author        |
+| ---------- | ------- | ------------------------------- | ------------- |
+| 2025-01-15 | 1.0.0   | Initial API versioning strategy | Platform Team |
 
 ---
 

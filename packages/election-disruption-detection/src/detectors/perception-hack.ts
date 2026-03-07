@@ -12,12 +12,8 @@
  * - Coordinated "liar's dividend" exploitation
  */
 
-import { ThreatDetector } from '../base/index.js';
-import type {
-  RawSignal,
-  ElectionContext,
-  ElectionThreatSignal,
-} from '../types.js';
+import { ThreatDetector } from "../base/index.js";
+import type { RawSignal, ElectionContext, ElectionThreatSignal } from "../types.js";
 
 export interface PerceptionHackIndicator {
   narrative: string;
@@ -30,14 +26,14 @@ export interface PerceptionHackIndicator {
 }
 
 export type PerceptionHackType =
-  | 'PREBUNKED_FRAUD_CLAIM'
-  | 'FABRICATED_EVIDENCE'
-  | 'ANOMALY_AMPLIFICATION'
-  | 'OFFICIAL_IMPERSONATION'
-  | 'LEAKED_DATA_MANIPULATION'
-  | 'FOREIGN_INTERFERENCE_CLAIM'
-  | 'TECHNOLOGY_DISTRUST'
-  | 'PROCESS_DELEGITIMIZATION';
+  | "PREBUNKED_FRAUD_CLAIM"
+  | "FABRICATED_EVIDENCE"
+  | "ANOMALY_AMPLIFICATION"
+  | "OFFICIAL_IMPERSONATION"
+  | "LEAKED_DATA_MANIPULATION"
+  | "FOREIGN_INTERFERENCE_CLAIM"
+  | "TECHNOLOGY_DISTRUST"
+  | "PROCESS_DELEGITIMIZATION";
 
 export interface CredibilityExploitation {
   source: string;
@@ -57,10 +53,7 @@ export class PerceptionHackDetector extends ThreatDetector {
     this.coordinationDetector = new CoordinationDetector();
   }
 
-  async analyze(
-    signals: RawSignal[],
-    context: ElectionContext
-  ): Promise<ElectionThreatSignal[]> {
+  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
     const threats: ElectionThreatSignal[] = [];
 
     // Track delegitimization narratives
@@ -94,10 +87,10 @@ export class PerceptionHackDetector extends ThreatDetector {
   private isPrebunking(narrative: NarrativeCluster, context: ElectionContext): boolean {
     // Prebunking: claims about fraud BEFORE results are in
     return (
-      context.currentPhase !== 'COUNTING' &&
-      context.currentPhase !== 'CERTIFICATION' &&
-      narrative.claimType === 'FRAUD' &&
-      narrative.temporalFraming === 'PREDICTIVE'
+      context.currentPhase !== "COUNTING" &&
+      context.currentPhase !== "CERTIFICATION" &&
+      narrative.claimType === "FRAUD" &&
+      narrative.temporalFraming === "PREDICTIVE"
     );
   }
 
@@ -106,8 +99,8 @@ export class PerceptionHackDetector extends ThreatDetector {
     signals: RawSignal[]
   ): Promise<boolean> {
     // Check for manipulated media, fake documents, etc.
-    const evidenceSignals = signals.filter((s) =>
-      this.isEvidenceSignal(s) && this.matchesNarrative(s, narrative)
+    const evidenceSignals = signals.filter(
+      (s) => this.isEvidenceSignal(s) && this.matchesNarrative(s, narrative)
     );
 
     for (const signal of evidenceSignals) {
@@ -120,7 +113,7 @@ export class PerceptionHackDetector extends ThreatDetector {
   }
 
   private isEvidenceSignal(signal: RawSignal): boolean {
-    return signal.type === 'IMAGE' || signal.type === 'VIDEO' || signal.type === 'DOCUMENT';
+    return signal.type === "IMAGE" || signal.type === "VIDEO" || signal.type === "DOCUMENT";
   }
 
   private matchesNarrative(signal: RawSignal, narrative: NarrativeCluster): boolean {
@@ -139,22 +132,22 @@ export class PerceptionHackDetector extends ThreatDetector {
     const threats: ElectionThreatSignal[] = [];
 
     // Look for fake official accounts/communications
-    const suspiciousOfficialComms = signals.filter((s) =>
-      this.looksOfficial(s) && !this.isVerifiedOfficial(s)
+    const suspiciousOfficialComms = signals.filter(
+      (s) => this.looksOfficial(s) && !this.isVerifiedOfficial(s)
     );
 
     for (const signal of suspiciousOfficialComms) {
       threats.push({
         id: crypto.randomUUID(),
-        type: 'PERCEPTION_HACK',
+        type: "PERCEPTION_HACK",
         confidence: 0.7,
-        severity: 'HIGH',
-        vectors: ['SOCIAL_MEDIA'],
+        severity: "HIGH",
+        vectors: ["SOCIAL_MEDIA"],
         temporalContext: {
           phase: context.currentPhase,
           daysToElection: context.daysToElection,
           timeWindow: { start: new Date(), end: new Date() },
-          trendDirection: 'STABLE',
+          trendDirection: "STABLE",
           velocity: 0,
         },
         geospatialContext: {
@@ -167,14 +160,14 @@ export class PerceptionHackDetector extends ThreatDetector {
         attribution: {
           primaryActor: null,
           confidence: 0,
-          methodology: 'TECHNICAL_FORENSICS',
+          methodology: "TECHNICAL_FORENSICS",
           indicators: [],
           alternativeHypotheses: [],
         },
         evidence: [
           {
             id: signal.id,
-            type: 'SOCIAL_POST',
+            type: "SOCIAL_POST",
             source: signal.source,
             content: signal.data,
             timestamp: signal.timestamp,
@@ -184,10 +177,10 @@ export class PerceptionHackDetector extends ThreatDetector {
         ],
         mitigationRecommendations: [
           {
-            action: 'Request platform removal and official correction',
+            action: "Request platform removal and official correction",
             priority: 1,
-            timeframe: '1 hour',
-            stakeholders: ['Platform trust & safety', 'Official communications'],
+            timeframe: "1 hour",
+            stakeholders: ["Platform trust & safety", "Official communications"],
             effectivenessEstimate: 0.8,
             riskOfEscalation: 0.2,
           },
@@ -212,15 +205,15 @@ export class PerceptionHackDetector extends ThreatDetector {
   ): ElectionThreatSignal {
     return {
       id: crypto.randomUUID(),
-      type: 'PERCEPTION_HACK',
+      type: "PERCEPTION_HACK",
       confidence: 0.8,
-      severity: 'HIGH',
-      vectors: ['SOCIAL_MEDIA', 'MEDIA_NARRATIVE'],
+      severity: "HIGH",
+      vectors: ["SOCIAL_MEDIA", "MEDIA_NARRATIVE"],
       temporalContext: {
         phase: context.currentPhase,
         daysToElection: context.daysToElection,
         timeWindow: { start: new Date(), end: new Date() },
-        trendDirection: 'ESCALATING',
+        trendDirection: "ESCALATING",
         velocity: narrative.velocity,
       },
       geospatialContext: {
@@ -233,17 +226,17 @@ export class PerceptionHackDetector extends ThreatDetector {
       attribution: {
         primaryActor: null,
         confidence: 0,
-        methodology: 'BEHAVIORAL_ANALYSIS',
+        methodology: "BEHAVIORAL_ANALYSIS",
         indicators: [],
         alternativeHypotheses: [],
       },
       evidence: [],
       mitigationRecommendations: [
         {
-          action: 'Prebunk the prebunk with proactive transparency',
+          action: "Prebunk the prebunk with proactive transparency",
           priority: 1,
-          timeframe: '24 hours',
-          stakeholders: ['Election officials', 'Media'],
+          timeframe: "24 hours",
+          stakeholders: ["Election officials", "Media"],
           effectivenessEstimate: 0.5,
           riskOfEscalation: 0.1,
         },

@@ -1,0 +1,15 @@
+{
+  "$id": "https://summit.local/schemas/evidence/lineage.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Transformation Lineage",
+  "type": "object",
+  "properties": {
+    "lineage_id": { "type": "string" },
+    "investigation_run_id": { "type": "string" },
+    "steps": {
+      "type": "array",
+      "items": { "$ref": "transformation-step.schema.json" }
+    }
+  },
+  "required": ["lineage_id", "investigation_run_id", "steps"]
+}

@@ -11,18 +11,18 @@ This package defines the versioned, contract-first schemas for IntelGraph entiti
 
 ## Canonical entity types (v1)
 
-| Type | Mandatory fields | Recommended fields | Optional fields |
-| --- | --- | --- | --- |
-| Person | `id`, `schemaVersion`, `entityType`, `name` | `givenName`, `familyName`, `roles`, `employerId` | `dateOfBirth`, `nationalities`, `contact`, `metadata`, `external` |
-| Organization | `id`, `schemaVersion`, `entityType`, `name` | `legalName`, `industry`, `hqLocationId` | `registration`, `parentOrganizationId`, `metadata`, `external` |
-| Asset | `id`, `schemaVersion`, `entityType`, `name`, `assetType` | `ownerId`, `locationId`, `value`, `currency` | `metadata`, `external` |
-| Event | `id`, `schemaVersion`, `entityType`, `name` | `category`, `occurredAt`, `locationId` | `timeRange`, `metadata`, `external` |
-| Location | `id`, `schemaVersion`, `entityType`, `name` | `country`, `geo` | `address`, `metadata`, `external` |
-| Case | `id`, `schemaVersion`, `entityType`, `title`, `status`, `createdAt` | `priority`, `ownerId`, `description` | `updatedAt`, `metadata` |
-| Evidence | `id`, `schemaVersion`, `entityType`, `title`, `artifactType` | `caseId`, `uri`, `hash`, `collectedAt` | `description`, `metadata`, `external` |
-| Claim | `id`, `schemaVersion`, `entityType`, `statement`, `support` | `subjectId`, `evidenceIds`, `confidence`, `issuedAt` | `metadata` |
-| License | `id`, `schemaVersion`, `entityType`, `name` | `holderId`, `issuedBy`, `validFor` | `scope`, `metadata` |
-| PolicyTag | `id`, `schemaVersion`, `entityType`, `label` | `description`, `appliesTo` | `metadata` |
+| Type         | Mandatory fields                                                    | Recommended fields                                   | Optional fields                                                   |
+| ------------ | ------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| Person       | `id`, `schemaVersion`, `entityType`, `name`                         | `givenName`, `familyName`, `roles`, `employerId`     | `dateOfBirth`, `nationalities`, `contact`, `metadata`, `external` |
+| Organization | `id`, `schemaVersion`, `entityType`, `name`                         | `legalName`, `industry`, `hqLocationId`              | `registration`, `parentOrganizationId`, `metadata`, `external`    |
+| Asset        | `id`, `schemaVersion`, `entityType`, `name`, `assetType`            | `ownerId`, `locationId`, `value`, `currency`         | `metadata`, `external`                                            |
+| Event        | `id`, `schemaVersion`, `entityType`, `name`                         | `category`, `occurredAt`, `locationId`               | `timeRange`, `metadata`, `external`                               |
+| Location     | `id`, `schemaVersion`, `entityType`, `name`                         | `country`, `geo`                                     | `address`, `metadata`, `external`                                 |
+| Case         | `id`, `schemaVersion`, `entityType`, `title`, `status`, `createdAt` | `priority`, `ownerId`, `description`                 | `updatedAt`, `metadata`                                           |
+| Evidence     | `id`, `schemaVersion`, `entityType`, `title`, `artifactType`        | `caseId`, `uri`, `hash`, `collectedAt`               | `description`, `metadata`, `external`                             |
+| Claim        | `id`, `schemaVersion`, `entityType`, `statement`, `support`         | `subjectId`, `evidenceIds`, `confidence`, `issuedAt` | `metadata`                                                        |
+| License      | `id`, `schemaVersion`, `entityType`, `name`                         | `holderId`, `issuedBy`, `validFor`                   | `scope`, `metadata`                                               |
+| PolicyTag    | `id`, `schemaVersion`, `entityType`, `label`                        | `description`, `appliesTo`                           | `metadata`                                                        |
 
 ## Canonical relationship types (v1)
 

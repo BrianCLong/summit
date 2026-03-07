@@ -9,7 +9,7 @@ metadata:
   labels:
     name: monitoring
     security.policy: restricted
-    monitoring.enabled: 'true'
+    monitoring.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -324,7 +324,7 @@ metadata:
   name: grafana-dashboards
   namespace: monitoring
   labels:
-    grafana_dashboard: '1'
+    grafana_dashboard: "1"
 data:
   maestro-overview.json: |
     {
@@ -501,20 +501,20 @@ kind: ClusterRole
 metadata:
   name: prometheus
 rules:
-  - apiGroups: ['']
+  - apiGroups: [""]
     resources:
       - nodes
       - nodes/proxy
       - services
       - endpoints
       - pods
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['extensions']
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
     resources:
       - ingresses
-    verbs: ['get', 'list', 'watch']
-  - nonResourceURLs: ['/metrics']
-    verbs: ['get']
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -547,22 +547,22 @@ spec:
       labels:
         app: prometheus
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
     spec:
       serviceAccountName: prometheus
       containers:
         - name: prometheus
           image: prom/prometheus:v2.45.0
           args:
-            - '--config.file=/etc/prometheus/prometheus.yml'
-            - '--storage.tsdb.path=/prometheus/'
-            - '--web.console.libraries=/etc/prometheus/console_libraries'
-            - '--web.console.templates=/etc/prometheus/consoles'
-            - '--storage.tsdb.retention.time=7d'
-            - '--storage.tsdb.retention.size=4GB'
-            - '--web.enable-lifecycle'
-            - '--web.enable-admin-api'
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus/"
+            - "--web.console.libraries=/etc/prometheus/console_libraries"
+            - "--web.console.templates=/etc/prometheus/consoles"
+            - "--storage.tsdb.retention.time=7d"
+            - "--storage.tsdb.retention.size=4GB"
+            - "--web.enable-lifecycle"
+            - "--web.enable-admin-api"
           ports:
             - containerPort: 9090
               name: http
@@ -644,9 +644,9 @@ spec:
               name: http
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: 'admin'
+              value: "admin"
             - name: GF_INSTALL_PLUGINS
-              value: 'grafana-clock-panel,grafana-simple-json-datasource'
+              value: "grafana-clock-panel,grafana-simple-json-datasource"
           resources:
             requests:
               cpu: 50m
@@ -706,8 +706,8 @@ spec:
       labels:
         app: cloudwatch-exporter
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9106'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9106"
     spec:
       containers:
         - name: cloudwatch-exporter
@@ -727,9 +727,9 @@ spec:
               mountPath: /config/
           env:
             - name: AWS_REGION
-              value: 'us-east-1'
+              value: "us-east-1"
           args:
-            - '-config.file=/config/config.yml'
+            - "-config.file=/config/config.yml"
           readinessProbe:
             httpGet:
               path: /metrics
@@ -753,7 +753,7 @@ metadata:
   namespace: monitoring
   annotations:
     # Add IAM role ARN here if using IAM roles for service accounts
-    eks.amazonaws.com/role-arn: ''
+    eks.amazonaws.com/role-arn: ""
 ---
 apiVersion: v1
 kind: Service
@@ -763,8 +763,8 @@ metadata:
   labels:
     app: cloudwatch-exporter
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9106'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9106"
 spec:
   ports:
     - port: 9106

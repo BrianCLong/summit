@@ -11,10 +11,10 @@ name: Required Checks Exceptions Validation
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
       - "docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
 

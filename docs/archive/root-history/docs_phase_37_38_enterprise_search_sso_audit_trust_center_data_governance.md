@@ -24,19 +24,19 @@ version: latest
 **`scripts/search/build-search-corpus.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 function extract(md) {
   const lines = md.split(/\r?\n/);
   const out = [];
-  let current = { h: 'h1', text: '' };
+  let current = { h: "h1", text: "" };
   for (const line of lines) {
     const m = /^(#{1,6})\s+(.*)/.exec(line);
     if (m) {
       if (current.text) out.push(current);
-      current = { h: 'h' + m[1].length, text: m[2] };
-    } else current.text += ' ' + line.replace(/`[^`]+`/g, '');
+      current = { h: "h" + m[1].length, text: m[2] };
+    } else current.text += " " + line.replace(/`[^`]+`/g, "");
   }
   if (current.text) out.push(current);
   return out;
@@ -48,25 +48,25 @@ const docs = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && docs.push(p);
   }
-})('docs');
+})("docs");
 const rows = docs.map((p) => {
-  const raw = fs.readFileSync(p, 'utf8');
+  const raw = fs.readFileSync(p, "utf8");
   const g = matter(raw);
-  const slug = p.replace(/^docs\//, '').replace(/\.mdx?$/, '');
+  const slug = p.replace(/^docs\//, "").replace(/\.mdx?$/, "");
   const sections = extract(g.content);
   return {
     id: slug,
-    path: '/' + slug,
+    path: "/" + slug,
     title: g.data.title || slug,
-    summary: g.data.summary || '',
-    version: g.data.version || 'latest',
+    summary: g.data.summary || "",
+    version: g.data.version || "latest",
     tags: g.data.tags || [],
     sections,
   };
 });
-fs.mkdirSync('docs/ops/search', { recursive: true });
-fs.writeFileSync('docs/ops/search/corpus.json', JSON.stringify(rows, null, 2));
-console.log('Search corpus:', rows.length);
+fs.mkdirSync("docs/ops/search", { recursive: true });
+fs.writeFileSync("docs/ops/search/corpus.json", JSON.stringify(rows, null, 2));
+console.log("Search corpus:", rows.length);
 ```
 
 ## A2) Typesense schema & ingest
@@ -74,39 +74,37 @@ console.log('Search corpus:', rows.length);
 **`scripts/search/typesense-ingest.js`**
 
 ```js
-const fs = require('fs');
-const Typesense = require('typesense');
-const corpus = JSON.parse(
-  fs.readFileSync('docs/ops/search/corpus.json', 'utf8'),
-);
+const fs = require("fs");
+const Typesense = require("typesense");
+const corpus = JSON.parse(fs.readFileSync("docs/ops/search/corpus.json", "utf8"));
 const client = new Typesense.Client({
   nodes: [
     {
       host: process.env.TYPESENSE_HOST,
       port: process.env.TYPESENSE_PORT || 443,
-      protocol: process.env.TYPESENSE_PROTOCOL || 'https',
+      protocol: process.env.TYPESENSE_PROTOCOL || "https",
     },
   ],
   apiKey: process.env.TYPESENSE_API_KEY,
   connectionTimeoutSeconds: 5,
 });
 (async () => {
-  const name = process.env.TYPESENSE_COLLECTION || 'intelgraph_docs';
+  const name = process.env.TYPESENSE_COLLECTION || "intelgraph_docs";
   try {
     await client.collections(name).retrieve();
   } catch {
     await client.collections().create({
       name,
       fields: [
-        { name: 'id', type: 'string' },
-        { name: 'path', type: 'string', facet: false },
-        { name: 'title', type: 'string' },
-        { name: 'summary', type: 'string' },
-        { name: 'version', type: 'string', facet: true },
-        { name: 'tags', type: 'string[]', facet: true },
-        { name: 'sections', type: 'string[]' },
+        { name: "id", type: "string" },
+        { name: "path", type: "string", facet: false },
+        { name: "title", type: "string" },
+        { name: "summary", type: "string" },
+        { name: "version", type: "string", facet: true },
+        { name: "tags", type: "string[]", facet: true },
+        { name: "sections", type: "string[]" },
       ],
-      default_sorting_field: 'title',
+      default_sorting_field: "title",
     });
   }
   const docs = corpus.map((r) => ({
@@ -118,8 +116,8 @@ const client = new Typesense.Client({
     tags: r.tags,
     sections: r.sections.map((s) => `${s.h}: ${s.text}`),
   }));
-  await client.collections(name).documents().import(docs, { action: 'upsert' });
-  console.log('Ingested', docs.length);
+  await client.collections(name).documents().import(docs, { action: "upsert" });
+  console.log("Ingested", docs.length);
 })();
 ```
 
@@ -128,9 +126,9 @@ const client = new Typesense.Client({
 **`src/components/SmartSearch.tsx`**
 
 ```tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 export default function SmartSearch() {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
   const [hits, setHits] = useState<any[]>([]);
   useEffect(() => {
     let t = setTimeout(async () => {
@@ -175,8 +173,8 @@ export default function SmartSearch() {
 ```js
 // Minimal proxy to Typesense multi-search returning title/path/snippet
 export default async (req, res) => {
-  const url = new URL(req.url, 'http://x');
-  const q = url.searchParams.get('q') || '';
+  const url = new URL(req.url, "http://x");
+  const q = url.searchParams.get("q") || "";
   if (!q) return res.status(200).json([]);
   // TODO: call Typesense search; for now, return empty
   return res.status(200).json([]);
@@ -192,7 +190,7 @@ name: Docs Search Index
 on:
   push:
     branches: [main]
-    paths: ['docs/**']
+    paths: ["docs/**"]
 jobs:
   index:
     runs-on: ubuntu-latest
@@ -239,11 +237,11 @@ server {
 **`scripts/docs/role-from-groups.js`**
 
 ```js
-module.exports = function (groups = '') {
-  const g = (groups || '').split(',').map((s) => s.trim());
-  if (g.includes('docs:internal')) return 'internal';
-  if (g.includes('docs:partner')) return 'partner';
-  return 'public';
+module.exports = function (groups = "") {
+  const g = (groups || "").split(",").map((s) => s.trim());
+  if (g.includes("docs:internal")) return "internal";
+  if (g.includes("docs:partner")) return "partner";
+  return "public";
 };
 ```
 
@@ -251,9 +249,7 @@ module.exports = function (groups = '') {
 
 ```js
 app.use((req, res, next) => {
-  req.headers['x-docs-role'] = require('./scripts/docs/role-from-groups')(
-    req.headers['x-groups'],
-  );
+  req.headers["x-docs-role"] = require("./scripts/docs/role-from-groups")(req.headers["x-groups"]);
   next();
 });
 ```
@@ -263,12 +259,12 @@ app.use((req, res, next) => {
 **`scripts/docs/audit-log.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 module.exports = function (record) {
-  fs.mkdirSync('docs/ops/audit', { recursive: true });
+  fs.mkdirSync("docs/ops/audit", { recursive: true });
   fs.appendFileSync(
-    'docs/ops/audit/access.ndjson',
-    JSON.stringify({ ts: Date.now(), ...record }) + '\n',
+    "docs/ops/audit/access.ndjson",
+    JSON.stringify({ ts: Date.now(), ...record }) + "\n"
   );
 };
 ```
@@ -277,10 +273,10 @@ module.exports = function (record) {
 
 ```js
 app.use((req, res, next) => {
-  require('./scripts/docs/audit-log')({
+  require("./scripts/docs/audit-log")({
     path: req.path,
-    user: req.headers['x-email'] || 'anon',
-    role: req.headers['x-docs-role'] || 'public',
+    user: req.headers["x-email"] || "anon",
+    role: req.headers["x-docs-role"] || "public",
   });
   next();
 });
@@ -293,7 +289,7 @@ app.use((req, res, next) => {
 ```yaml
 name: Docs Audit Rollup
 on:
-  schedule: [{ cron: '0 4 * * 1' }]
+  schedule: [{ cron: "0 4 * * 1" }]
   workflow_dispatch:
 jobs:
   audit:
@@ -373,8 +369,8 @@ body:
 **`scripts/privacy/pii-scan.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const rxEmail = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
 const rxName = /\b([A-Z][a-z]+\s[A-Z][a-z]+)\b/g; // heuristic
 let hits = [];
@@ -384,9 +380,9 @@ let hits = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.(mdx?|json|csv)$/i.test(f) && scan(p);
   }
-})('docs');
+})("docs");
 function scan(p) {
-  const txt = fs.readFileSync(p, 'utf8');
+  const txt = fs.readFileSync(p, "utf8");
   const emails = [...txt.matchAll(rxEmail)].map((m) => m[0]);
   const names = [...txt.matchAll(rxName)].map((m) => m[0]);
   if (emails.length || names.length)
@@ -396,12 +392,9 @@ function scan(p) {
       names: [...new Set(names)].slice(0, 5),
     });
 }
-fs.mkdirSync('docs/ops/privacy', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/privacy/pii-hits.json',
-  JSON.stringify(hits, null, 2),
-);
-console.log('PII hits:', hits.length);
+fs.mkdirSync("docs/ops/privacy", { recursive: true });
+fs.writeFileSync("docs/ops/privacy/pii-hits.json", JSON.stringify(hits, null, 2));
+console.log("PII hits:", hits.length);
 ```
 
 **CI** (manual/scheduled):
@@ -409,7 +402,7 @@ console.log('PII hits:', hits.length);
 ```yaml
 name: Docs PII Sweep
 on:
-  schedule: [{ cron: '0 9 * * 1' }]
+  schedule: [{ cron: "0 9 * * 1" }]
   workflow_dispatch:
 jobs:
   pii:

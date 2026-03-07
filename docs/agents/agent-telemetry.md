@@ -19,23 +19,23 @@ All agents must emit metrics to the central `telemetry-ingest` service.
 
 These metrics drive the billing and quota systems.
 
-| Metric Name | Type | Tags | Description |
-| :--- | :--- | :--- | :--- |
-| `agent_tokens_total` | Counter | `agent_id`, `model`, `type` (prompt/completion) | Volume of tokens processed. |
-| `agent_execution_seconds` | Gauge | `agent_id`, `status` | Duration of active execution. |
-| `agent_api_calls` | Counter | `agent_id`, `target_service`, `status_code` | External or internal API requests. |
-| `agent_tool_usage` | Counter | `agent_id`, `tool_name` | Frequency of specific tool invocations. |
+| Metric Name               | Type    | Tags                                            | Description                             |
+| :------------------------ | :------ | :---------------------------------------------- | :-------------------------------------- |
+| `agent_tokens_total`      | Counter | `agent_id`, `model`, `type` (prompt/completion) | Volume of tokens processed.             |
+| `agent_execution_seconds` | Gauge   | `agent_id`, `status`                            | Duration of active execution.           |
+| `agent_api_calls`         | Counter | `agent_id`, `target_service`, `status_code`     | External or internal API requests.      |
+| `agent_tool_usage`        | Counter | `agent_id`, `tool_name`                         | Frequency of specific tool invocations. |
 
 ### B. Risk & Operational Metrics
 
 These metrics drive the [Risk Scoring](./risk-scoring.md) and enforcement systems.
 
-| Metric Name | Type | Tags | Description |
-| :--- | :--- | :--- | :--- |
-| `agent_risk_score` | Gauge | `agent_id`, `run_id` | The calculated risk score for the run. |
-| `agent_files_modified` | Counter | `agent_id`, `directory` | Volume of file system changes. |
-| `agent_secrets_accessed` | Counter | `agent_id`, `secret_name` | Audit trail of credential usage. |
-| `agent_budget_percent` | Gauge | `agent_id`, `dimension` | % of allocated budget consumed (e.g., 85% of tokens). |
+| Metric Name              | Type    | Tags                      | Description                                           |
+| :----------------------- | :------ | :------------------------ | :---------------------------------------------------- |
+| `agent_risk_score`       | Gauge   | `agent_id`, `run_id`      | The calculated risk score for the run.                |
+| `agent_files_modified`   | Counter | `agent_id`, `directory`   | Volume of file system changes.                        |
+| `agent_secrets_accessed` | Counter | `agent_id`, `secret_name` | Audit trail of credential usage.                      |
+| `agent_budget_percent`   | Gauge   | `agent_id`, `dimension`   | % of allocated budget consumed (e.g., 85% of tokens). |
 
 ---
 
@@ -68,9 +68,9 @@ Beyond aggregate metrics, specific **Audit Events** must be logged to immutable 
 
 ### Retention Policy
 
-*   **Operational Logs:** 30 days (Hot storage).
-*   **Audit Trail (Governance):** 7 years (Cold storage / Archive).
-*   **Incident Snapshots:** Indefinite (High-risk failures).
+- **Operational Logs:** 30 days (Hot storage).
+- **Audit Trail (Governance):** 7 years (Cold storage / Archive).
+- **Incident Snapshots:** Indefinite (High-risk failures).
 
 ---
 
@@ -81,14 +81,14 @@ The observability platform (Prometheus/Grafana) evaluates rules against these me
 ### Standard Alerts
 
 1.  **Budget Burn Rate High:**
-    *   *Condition:* Agent consumes > 50% of budget in < 10% of expected time.
-    *   *Severity:* Warning.
+    - _Condition:_ Agent consumes > 50% of budget in < 10% of expected time.
+    - _Severity:_ Warning.
 2.  **Sudden Fan-Out:**
-    *   *Condition:* `agent_children_count` rate of change > 5/minute.
-    *   *Severity:* Critical (Potential recursive fork bomb).
+    - _Condition:_ `agent_children_count` rate of change > 5/minute.
+    - _Severity:_ Critical (Potential recursive fork bomb).
 3.  **Risk Score Spike:**
-    *   *Condition:* `agent_risk_score` > 80 (Critical Threshold).
-    *   *Severity:* Critical (Security Operations Pager).
+    - _Condition:_ `agent_risk_score` > 80 (Critical Threshold).
+    - _Severity:_ Critical (Security Operations Pager).
 
 ---
 
@@ -100,13 +100,13 @@ When an agent is terminated by the control system, a generated report explains t
 
 > **Agent Execution Halted**
 >
-> *   **Run ID:** `run-xyz-789`
-> *   **Reason:** `BUDGET_EXCEEDED`
-> *   **Details:**
->     *   **Dimension:** Token Usage
->     *   **Limit:** 200,000 tokens (Tier-2)
->     *   **Consumed:** 200,450 tokens
->     *   **Action:** Soft limit warning sent at 160k. Hard limit enforced at 200k.
+> - **Run ID:** `run-xyz-789`
+> - **Reason:** `BUDGET_EXCEEDED`
+> - **Details:**
+>   - **Dimension:** Token Usage
+>   - **Limit:** 200,000 tokens (Tier-2)
+>   - **Consumed:** 200,450 tokens
+>   - **Action:** Soft limit warning sent at 160k. Hard limit enforced at 200k.
 >
 > **Remediation:**
 > Optimize your prompt strategy to use fewer tokens, or request a Tier-3 budget override for this task.

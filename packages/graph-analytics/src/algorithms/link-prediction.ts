@@ -80,11 +80,11 @@ export interface LinkPredictionOptions {
    * Methods to use for prediction
    */
   methods?: Array<
-    | 'common-neighbors'
-    | 'jaccard'
-    | 'adamic-adar'
-    | 'preferential-attachment'
-    | 'resource-allocation'
+    | "common-neighbors"
+    | "jaccard"
+    | "adamic-adar"
+    | "preferential-attachment"
+    | "resource-allocation"
   >;
 
   /**
@@ -139,9 +139,7 @@ function buildAdjacency(graph: GraphData) {
   return { adjacency, existingEdges };
 }
 
-function deriveExistingEdges(
-  adjacency: Map<string, Set<string>>,
-): Set<string> {
+function deriveExistingEdges(adjacency: Map<string, Set<string>>): Set<string> {
   const edges = new Set<string>();
   for (const [node, neighbors] of adjacency) {
     for (const neighbor of neighbors) {
@@ -162,13 +160,9 @@ function collectCandidates(
   nodes: string[],
   adjacency: Map<string, Set<string>>,
   existingEdges: Set<string>,
-  options: CandidateEdgeOptions,
+  options: CandidateEdgeOptions
 ): CandidateEdge[] {
-  const {
-    onlyNonExisting = true,
-    maxCandidates,
-    randomize = false,
-  } = options;
+  const { onlyNonExisting = true, maxCandidates, randomize = false } = options;
 
   const pairs: CandidateEdge[] = [];
 
@@ -202,13 +196,12 @@ function collectCandidates(
  */
 export function generateCandidateEdges(
   graph: GraphData,
-  options: CandidateEdgeOptions = {},
+  options: CandidateEdgeOptions = {}
 ): CandidateEdge[] {
   const { adjacency, existingEdges } = options.adjacency
     ? {
         adjacency: options.adjacency,
-        existingEdges:
-          options.existingEdges || deriveExistingEdges(options.adjacency),
+        existingEdges: options.existingEdges || deriveExistingEdges(options.adjacency),
       }
     : buildAdjacency(graph);
 
@@ -224,12 +217,12 @@ export function generateCandidateEdges(
  */
 export function predictLinks(
   graph: GraphData,
-  options: LinkPredictionOptions = {},
+  options: LinkPredictionOptions = {}
 ): LinkPredictionResult {
   const startTime = performance.now();
 
   const {
-    methods = ['common-neighbors', 'jaccard', 'adamic-adar'],
+    methods = ["common-neighbors", "jaccard", "adamic-adar"],
     minScore = 0,
     topK = 100,
     onlyNonExisting = true,
@@ -277,19 +270,19 @@ export function predictLinks(
     let predictions: Array<{ source: string; target: string; score: number }> = [];
 
     switch (method) {
-      case 'common-neighbors':
+      case "common-neighbors":
         predictions = commonNeighbors(adjacency, normalizedCandidates);
         break;
-      case 'jaccard':
+      case "jaccard":
         predictions = jaccardCoefficient(adjacency, normalizedCandidates);
         break;
-      case 'adamic-adar':
+      case "adamic-adar":
         predictions = adamicAdar(adjacency, normalizedCandidates);
         break;
-      case 'preferential-attachment':
+      case "preferential-attachment":
         predictions = preferentialAttachment(adjacency, normalizedCandidates);
         break;
-      case 'resource-allocation':
+      case "resource-allocation":
         predictions = resourceAllocation(adjacency, normalizedCandidates);
         break;
     }
@@ -321,7 +314,7 @@ export function predictLinks(
  */
 function commonNeighbors(
   adjacency: Map<string, Set<string>>,
-  candidatePairs: CandidateEdge[],
+  candidatePairs: CandidateEdge[]
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
@@ -350,7 +343,7 @@ function commonNeighbors(
  */
 function jaccardCoefficient(
   adjacency: Map<string, Set<string>>,
-  candidatePairs: CandidateEdge[],
+  candidatePairs: CandidateEdge[]
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
@@ -385,7 +378,7 @@ function jaccardCoefficient(
  */
 function adamicAdar(
   adjacency: Map<string, Set<string>>,
-  candidatePairs: CandidateEdge[],
+  candidatePairs: CandidateEdge[]
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
@@ -423,7 +416,7 @@ function adamicAdar(
  */
 function preferentialAttachment(
   adjacency: Map<string, Set<string>>,
-  candidatePairs: CandidateEdge[],
+  candidatePairs: CandidateEdge[]
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
@@ -445,7 +438,7 @@ function preferentialAttachment(
  */
 function resourceAllocation(
   adjacency: Map<string, Set<string>>,
-  candidatePairs: CandidateEdge[],
+  candidatePairs: CandidateEdge[]
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
@@ -476,7 +469,7 @@ function resourceAllocation(
  */
 export function calculateCosineSimilarity(
   graph: GraphData,
-  targetNodes?: string[],
+  targetNodes?: string[]
 ): SimilarityResult {
   const startTime = performance.now();
 
@@ -500,7 +493,9 @@ export function calculateCosineSimilarity(
     const simMap = new Map<string, number>();
 
     for (let j = 0; j < nodes.length; j++) {
-      if (i === j) {continue;}
+      if (i === j) {
+        continue;
+      }
 
       const nodeB = nodes[j];
       const neighborsA = adjacency.get(nodeA) || new Set();
@@ -530,7 +525,7 @@ export function calculateCosineSimilarity(
   return {
     similarities,
     executionTime,
-    method: 'cosine',
+    method: "cosine",
   };
 }
 
@@ -540,7 +535,7 @@ export function calculateCosineSimilarity(
 export function findSimilarNodes(
   nodeId: string,
   similarityResult: SimilarityResult,
-  k: number = 10,
+  k: number = 10
 ): Array<{ node: string; similarity: number }> {
   const similarities = similarityResult.similarities.get(nodeId);
   if (!similarities) {
@@ -557,9 +552,7 @@ export function findSimilarNodes(
  * Calculates structural equivalence between nodes
  * Nodes are structurally equivalent if they have the same neighbors
  */
-export function calculateStructuralEquivalence(
-  graph: GraphData,
-): Map<string, Map<string, number>> {
+export function calculateStructuralEquivalence(graph: GraphData): Map<string, Map<string, number>> {
   const equivalence = new Map<string, Map<string, number>>();
 
   // Build adjacency
@@ -578,7 +571,9 @@ export function calculateStructuralEquivalence(
     const eqMap = new Map<string, number>();
 
     for (const nodeB of graph.nodes) {
-      if (nodeA === nodeB) {continue;}
+      if (nodeA === nodeB) {
+        continue;
+      }
 
       const neighborsA = adjacency.get(nodeA) || new Set();
       const neighborsB = adjacency.get(nodeB) || new Set();
@@ -615,9 +610,9 @@ export function calculateStructuralEquivalence(
  */
 export function identifyRoleEquivalence(
   graph: GraphData,
-  features?: Array<'degree' | 'clustering' | 'betweenness'>,
+  features?: Array<"degree" | "clustering" | "betweenness">
 ): Map<string, Map<string, number>> {
-  const selectedFeatures = features || ['degree', 'clustering'];
+  const selectedFeatures = features || ["degree", "clustering"];
 
   // Extract structural features
   const nodeFeatures = new Map<string, number[]>();
@@ -637,11 +632,11 @@ export function identifyRoleEquivalence(
     const features: number[] = [];
     const neighbors = adjacency.get(node) || new Set();
 
-    if (selectedFeatures.includes('degree')) {
+    if (selectedFeatures.includes("degree")) {
       features.push(neighbors.size);
     }
 
-    if (selectedFeatures.includes('clustering')) {
+    if (selectedFeatures.includes("clustering")) {
       // Local clustering coefficient
       let triangles = 0;
       let possibleTriangles = 0;
@@ -692,7 +687,9 @@ export function identifyRoleEquivalence(
     const featuresA = nodeFeatures.get(nodeA) || [];
 
     for (const nodeB of graph.nodes) {
-      if (nodeA === nodeB) {continue;}
+      if (nodeA === nodeB) {
+        continue;
+      }
 
       const featuresB = nodeFeatures.get(nodeB) || [];
       let distanceSquared = 0;

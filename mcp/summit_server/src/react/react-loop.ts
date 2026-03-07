@@ -1,5 +1,5 @@
-import type { ToolRegistry } from '../tools/tool-registry.js';
-import type { ToolExecutionContext, ToolExecutionResult } from '../types.js';
+import type { ToolRegistry } from "../tools/tool-registry.js";
+import type { ToolExecutionContext, ToolExecutionResult } from "../types.js";
 
 export type ReactAction = {
   toolId: string;
@@ -23,14 +23,14 @@ export type ReactResponse = {
 };
 
 const suggestForEmpty = (result: unknown): string[] | undefined => {
-  if (!result || typeof result !== 'object') {
+  if (!result || typeof result !== "object") {
     return undefined;
   }
   const rows = (result as { rows?: unknown[] }).rows;
   if (Array.isArray(rows) && rows.length === 0) {
     return [
-      'Try a broader query or different field filters.',
-      'Verify scope permissions for this dataset.',
+      "Try a broader query or different field filters.",
+      "Verify scope permissions for this dataset.",
     ];
   }
   return undefined;
@@ -44,8 +44,8 @@ export const executeReact = async (
   executeTool: (
     toolId: string,
     input: Record<string, unknown>,
-    context: ToolExecutionContext,
-  ) => Promise<ToolExecutionResult<unknown>>,
+    context: ToolExecutionContext
+  ) => Promise<ToolExecutionResult<unknown>>
 ): Promise<ReactResponse> => {
   const actions = request.actions.slice(0, maxToolCalls);
   const observations: ReactObservation[] = [];

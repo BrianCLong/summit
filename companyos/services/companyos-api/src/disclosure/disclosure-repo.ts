@@ -23,9 +23,7 @@ export interface DisclosurePackRecord {
   raw_json: any;
 }
 
-export async function upsertDisclosurePackFromJson(
-  pack: any
-): Promise<void> {
+export async function upsertDisclosurePackFromJson(pack: any): Promise<void> {
   const {
     id,
     tenant_id,
@@ -35,7 +33,7 @@ export async function upsertDisclosurePackFromJson(
     generated_by,
     builds,
     slo_summary,
-    residency_region
+    residency_region,
   } = pack;
 
   const build = (builds && builds[0]) || {};
@@ -108,7 +106,7 @@ export async function upsertDisclosurePackFromJson(
     slo_summary?.latency_target_ms_p95 ?? null,
     slo_summary?.latency_actual_ms_p95 ?? null,
     region,
-    packWithRegion
+    packWithRegion,
   ]);
 }
 
@@ -124,9 +122,7 @@ export async function getDisclosurePackById(
   return rows[0] ?? null;
 }
 
-export async function listDisclosurePacks(
-  tenantId: string
-): Promise<DisclosurePackRecord[]> {
+export async function listDisclosurePacks(tenantId: string): Promise<DisclosurePackRecord[]> {
   const { rows } = await pool.query<DisclosurePackRecord>(
     `SELECT * FROM disclosure_packs WHERE tenant_id = $1 ORDER BY generated_at DESC`,
     [tenantId]
@@ -155,8 +151,8 @@ export async function listDisclosurePacksHandler(req: Request, res: Response) {
         critical: p.vuln_critical,
         high: p.vuln_high,
         medium: p.vuln_medium,
-        low: p.vuln_low
-      }
-    }))
+        low: p.vuln_low,
+      },
+    })),
   });
 }

@@ -19,7 +19,7 @@ Please adhere to professional standards and respect all contributors.
 
 - **Atomic PRs**: Focus on one specific task or fix per PR.
 - **Descriptive Title**: clear and concise.
-- **Description**: Explain *what* changed and *why*.
+- **Description**: Explain _what_ changed and _why_.
 - **Tests**: Must include unit tests for new logic.
 - **Documentation**: Update docs if behavior changes.
 
@@ -29,9 +29,9 @@ Please adhere to professional standards and respect all contributors.
 - **Linting**: Run `npm run lint` before committing.
 - **Formatting**: We use Prettier.
 - **Naming**:
-    - Variables/Functions: `camelCase`
-    - Classes/Components: `PascalCase`
-    - Constants: `UPPER_SNAKE_CASE`
+  - Variables/Functions: `camelCase`
+  - Classes/Components: `PascalCase`
+  - Constants: `UPPER_SNAKE_CASE`
 
 ## Directory Structure
 

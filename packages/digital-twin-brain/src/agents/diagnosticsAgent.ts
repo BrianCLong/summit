@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { FeatureStore } from '../core/featureStore.js';
-import { Modality, TwinGraph } from '../core/types.js';
+import { FeatureStore } from "../core/featureStore.js";
+import { Modality, TwinGraph } from "../core/types.js";
 
 export interface AnomalyExplanation {
   assetId: string;
@@ -10,7 +10,10 @@ export interface AnomalyExplanation {
 }
 
 export class DiagnosticsAgent {
-  constructor(private readonly featureStore: FeatureStore, private readonly twinGraph: TwinGraph) {}
+  constructor(
+    private readonly featureStore: FeatureStore,
+    private readonly twinGraph: TwinGraph
+  ) {}
 
   detect(assetId: string, modality: Modality, threshold = 0.35): AnomalyExplanation | null {
     const latest = this.featureStore.latest(assetId, modality);
@@ -19,14 +22,19 @@ export class DiagnosticsAgent {
     const deviation = this.relativeDeviation(mean, latest.features);
     if (deviation < threshold) return null;
 
-    const neighbors = this.twinGraph.neighbors(assetId, 'depends_on');
-    const factors = neighbors.map((neighbor) => `Dependency ${neighbor.id} (${neighbor.type}) may contribute.`);
+    const neighbors = this.twinGraph.neighbors(assetId, "depends_on");
+    const factors = neighbors.map(
+      (neighbor) => `Dependency ${neighbor.id} (${neighbor.type}) may contribute.`
+    );
     factors.unshift(`Observed ${(deviation * 100).toFixed(1)}% deviation in ${modality} signals.`);
 
     return { assetId, modality, score: deviation, factors };
   }
 
-  private relativeDeviation(reference: Record<string, number>, candidate: Record<string, number>): number {
+  private relativeDeviation(
+    reference: Record<string, number>,
+    candidate: Record<string, number>
+  ): number {
     const keys = new Set([...Object.keys(reference), ...Object.keys(candidate)]);
     const deltas: number[] = [];
     keys.forEach((key) => {

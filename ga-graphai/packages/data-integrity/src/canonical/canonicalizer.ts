@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 
 export interface CanonicalizationOptions {
   normalizeTimezone?: boolean;
@@ -12,7 +12,7 @@ function normalizeNumber(value: number): number {
 }
 
 function normalizeDate(value: Date | string): string {
-  const date = typeof value === 'string' ? new Date(value) : value;
+  const date = typeof value === "string" ? new Date(value) : value;
   return date.toISOString();
 }
 
@@ -20,11 +20,11 @@ function normalizeValue(value: unknown): unknown {
   if (value === null || value === undefined) {
     return value;
   }
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     return normalizeNumber(value);
   }
-  if (typeof value === 'string') {
-    return normalizeWhitespace(value).normalize('NFC');
+  if (typeof value === "string") {
+    return normalizeWhitespace(value).normalize("NFC");
   }
   if (value instanceof Date) {
     return normalizeDate(value);
@@ -32,7 +32,7 @@ function normalizeValue(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map((entry) => normalizeValue(entry));
   }
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>);
     entries.sort(([a], [b]) => a.localeCompare(b));
     return entries.reduce<Record<string, unknown>>((acc, [key, val]) => {
@@ -44,7 +44,7 @@ function normalizeValue(value: unknown): unknown {
 }
 
 export function canonicalize(value: unknown, options: CanonicalizationOptions = {}): unknown {
-  if (options.normalizeTimezone && typeof value === 'string') {
+  if (options.normalizeTimezone && typeof value === "string") {
     return normalizeDate(value);
   }
   return normalizeValue(value);
@@ -55,15 +55,15 @@ export function canonicalStringify(value: unknown): string {
 }
 
 export function stableHash(value: unknown): string {
-  return createHash('sha256').update(canonicalStringify(value)).digest('hex');
+  return createHash("sha256").update(canonicalStringify(value)).digest("hex");
 }
 
 export function normalizeWhitespace(value: string): string {
-  return value.replace(/\s+/g, ' ').trim();
+  return value.replace(/\s+/g, " ").trim();
 }
 
 export function normalizeUnicode(value: string): string {
-  return value.normalize('NFC');
+  return value.normalize("NFC");
 }
 
 export function normalizeTimestamp(value: string | Date): string {

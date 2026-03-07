@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const logPath = path.join(__dirname, 'logs', 'agent-audit.log');
+const logPath = path.join(__dirname, "logs", "agent-audit.log");
 
 function ensureLogFile() {
   const dir = path.dirname(logPath);
@@ -9,7 +9,7 @@ function ensureLogFile() {
     fs.mkdirSync(dir, { recursive: true });
   }
   if (!fs.existsSync(logPath)) {
-    fs.writeFileSync(logPath, '', 'utf8');
+    fs.writeFileSync(logPath, "", "utf8");
   }
 }
 
@@ -19,7 +19,7 @@ function appendAuditEvent(event) {
     timestamp: new Date().toISOString(),
     ...event,
   };
-  fs.appendFileSync(logPath, `${JSON.stringify(entry)}\n`, 'utf8');
+  fs.appendFileSync(logPath, `${JSON.stringify(entry)}\n`, "utf8");
 }
 
 module.exports = {

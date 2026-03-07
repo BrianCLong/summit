@@ -11,10 +11,10 @@ import {
   ListObjectsV2Command,
   HeadObjectCommand,
   CopyObjectCommand,
-  GetObjectCommandInput
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { IStorageProvider } from './index';
+  GetObjectCommandInput,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { IStorageProvider } from "./index";
 import {
   CloudProvider,
   StorageObject,
@@ -22,8 +22,8 @@ import {
   StorageDownloadOptions,
   StorageListOptions,
   StorageListResult,
-  StorageError
-} from '../types';
+  StorageError,
+} from "../types";
 
 export class AWSStorageProvider implements IStorageProvider {
   readonly provider = CloudProvider.AWS;
@@ -31,7 +31,7 @@ export class AWSStorageProvider implements IStorageProvider {
 
   constructor(region?: string) {
     this.client = new S3Client({
-      region: region || process.env.AWS_REGION || 'us-east-1'
+      region: region || process.env.AWS_REGION || "us-east-1",
     });
   }
 
@@ -42,7 +42,7 @@ export class AWSStorageProvider implements IStorageProvider {
     options?: StorageUploadOptions
   ): Promise<void> {
     try {
-      const body = typeof data === 'string' ? Buffer.from(data) : data;
+      const body = typeof data === "string" ? Buffer.from(data) : data;
 
       await this.client.send(
         new PutObjectCommand({
@@ -51,8 +51,8 @@ export class AWSStorageProvider implements IStorageProvider {
           Body: body,
           ContentType: options?.contentType,
           Metadata: options?.metadata,
-          ServerSideEncryption: options?.encryption ? 'AES256' : undefined,
-          StorageClass: options?.storageClass
+          ServerSideEncryption: options?.encryption ? "AES256" : undefined,
+          StorageClass: options?.storageClass,
         })
       );
     } catch (error) {
@@ -64,18 +64,12 @@ export class AWSStorageProvider implements IStorageProvider {
     }
   }
 
-  async download(
-    bucket: string,
-    key: string,
-    options?: StorageDownloadOptions
-  ): Promise<Buffer> {
+  async download(bucket: string, key: string, options?: StorageDownloadOptions): Promise<Buffer> {
     try {
       const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
-        Range: options?.range
-          ? `bytes=${options.range.start}-${options.range.end}`
-          : undefined
+        Range: options?.range ? `bytes=${options.range.start}-${options.range.end}` : undefined,
       });
 
       const response = await this.client.send(command);
@@ -96,7 +90,7 @@ export class AWSStorageProvider implements IStorageProvider {
       await this.client.send(
         new DeleteObjectCommand({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       );
     } catch (error) {
@@ -108,17 +102,14 @@ export class AWSStorageProvider implements IStorageProvider {
     }
   }
 
-  async list(
-    bucket: string,
-    options?: StorageListOptions
-  ): Promise<StorageListResult> {
+  async list(bucket: string, options?: StorageListOptions): Promise<StorageListResult> {
     try {
       const response = await this.client.send(
         new ListObjectsV2Command({
           Bucket: bucket,
           Prefix: options?.prefix,
           MaxKeys: options?.maxResults,
-          ContinuationToken: options?.continuationToken
+          ContinuationToken: options?.continuationToken,
         })
       );
 
@@ -129,13 +120,13 @@ export class AWSStorageProvider implements IStorageProvider {
           lastModified: obj.LastModified!,
           etag: obj.ETag,
           contentType: undefined,
-          metadata: undefined
+          metadata: undefined,
         })) || [];
 
       return {
         objects,
         continuationToken: response.NextContinuationToken,
-        isTruncated: response.IsTruncated || false
+        isTruncated: response.IsTruncated || false,
       };
     } catch (error) {
       throw new StorageError(
@@ -151,7 +142,7 @@ export class AWSStorageProvider implements IStorageProvider {
       const response = await this.client.send(
         new HeadObjectCommand({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       );
 
@@ -161,7 +152,7 @@ export class AWSStorageProvider implements IStorageProvider {
         lastModified: response.LastModified!,
         etag: response.ETag,
         contentType: response.ContentType,
-        metadata: response.Metadata
+        metadata: response.Metadata,
       };
     } catch (error) {
       throw new StorageError(
@@ -192,7 +183,7 @@ export class AWSStorageProvider implements IStorageProvider {
         new CopyObjectCommand({
           CopySource: `${sourceBucket}/${sourceKey}`,
           Bucket: destBucket,
-          Key: destKey
+          Key: destKey,
         })
       );
     } catch (error) {
@@ -208,11 +199,11 @@ export class AWSStorageProvider implements IStorageProvider {
     bucket: string,
     key: string,
     expiresIn: number,
-    operation: 'get' | 'put'
+    operation: "get" | "put"
   ): Promise<string> {
     try {
       const command =
-        operation === 'get'
+        operation === "get"
           ? new GetObjectCommand({ Bucket: bucket, Key: key })
           : new PutObjectCommand({ Bucket: bucket, Key: key });
 

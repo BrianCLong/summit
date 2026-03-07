@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Stepper,
@@ -13,25 +13,25 @@ import {
   Checkbox,
   Alert,
   Link,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Key as KeyIcon,
   VpnKey as VpnKeyIcon,
   Security as SecurityIcon,
   CheckCircle as CheckCircleIcon,
   Info as InfoIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 const steps = [
-  'Welcome',
-  'Passkey Setup',
-  'WireGuard Setup',
-  'OIDC Client Registration',
-  'Summary & Completion',
+  "Welcome",
+  "Passkey Setup",
+  "WireGuard Setup",
+  "OIDC Client Registration",
+  "Summary & Completion",
 ];
 
 const getRedirectUri = () => {
-  if (typeof window === 'undefined') return '/auth/callback';
+  if (typeof window === "undefined") return "/auth/callback";
   return `${window.location.origin}/auth/callback`;
 };
 
@@ -44,15 +44,14 @@ function getStepContent(step: number) {
             Welcome to the CompanyOS Provisioning Wizard
           </Typography>
           <Typography variant="body1" paragraph>
-            This wizard will guide you through the initial setup of your
-            local-first, zero-trust CompanyOS environment. You will configure
-            passkeys for secure authentication, set up WireGuard for encrypted
-            communication, and register your client for OpenID Connect (OIDC)
-            with your Identity Provider.
+            This wizard will guide you through the initial setup of your local-first, zero-trust
+            CompanyOS environment. You will configure passkeys for secure authentication, set up
+            WireGuard for encrypted communication, and register your client for OpenID Connect
+            (OIDC) with your Identity Provider.
           </Typography>
           <Alert severity="info">
-            Please ensure you have access to your Identity Provider's
-            administration console if you plan to use dynamic OIDC registration.
+            Please ensure you have access to your Identity Provider's administration console if you
+            plan to use dynamic OIDC registration.
           </Alert>
         </Box>
       );
@@ -63,9 +62,9 @@ function getStepContent(step: number) {
             Step 1: Passkey Setup
           </Typography>
           <Typography variant="body1" paragraph>
-            Passkeys provide a secure, phishing-resistant way to authenticate.
-            We will generate a new passkey for your device. This passkey will be
-            stored securely in your operating system's credential manager.
+            Passkeys provide a secure, phishing-resistant way to authenticate. We will generate a
+            new passkey for your device. This passkey will be stored securely in your operating
+            system's credential manager.
           </Typography>
           <Button variant="contained" startIcon={<KeyIcon />} sx={{ mt: 2 }}>
             Generate New Passkey
@@ -81,9 +80,8 @@ function getStepContent(step: number) {
             InputProps={{ readOnly: true }}
           />
           <Alert severity="warning" sx={{ mt: 2 }}>
-            For a real application, the generated passkey would be securely
-            stored by the OS and referenced by an ID. This is a placeholder for
-            demonstration purposes.
+            For a real application, the generated passkey would be securely stored by the OS and
+            referenced by an ID. This is a placeholder for demonstration purposes.
           </Alert>
         </Box>
       );
@@ -94,8 +92,8 @@ function getStepContent(step: number) {
             Step 2: WireGuard Setup
           </Typography>
           <Typography variant="body1" paragraph>
-            WireGuard provides a fast and modern VPN for secure communication.
-            We will generate a key pair and a basic configuration.
+            WireGuard provides a fast and modern VPN for secure communication. We will generate a
+            key pair and a basic configuration.
           </Typography>
           <Button variant="contained" startIcon={<VpnKeyIcon />} sx={{ mt: 2 }}>
             Generate WireGuard Key Pair
@@ -134,9 +132,9 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
             InputProps={{ readOnly: true }}
           />
           <Alert severity="warning" sx={{ mt: 2 }}>
-            In a real Tauri/Electron app, this configuration would be used to
-            programmatically set up the WireGuard tunnel. For now, please copy
-            this configuration and set it up manually if needed.
+            In a real Tauri/Electron app, this configuration would be used to programmatically set
+            up the WireGuard tunnel. For now, please copy this configuration and set it up manually
+            if needed.
           </Alert>
         </Box>
       );
@@ -147,9 +145,8 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
             Step 3: OIDC Client Registration
           </Typography>
           <Typography variant="body1" paragraph>
-            Register your CompanyOS client with your OpenID Connect Identity
-            Provider (IdP). You can either use dynamic registration or provide
-            pre-registered client details.
+            Register your CompanyOS client with your OpenID Connect Identity Provider (IdP). You can
+            either use dynamic registration or provide pre-registered client details.
           </Typography>
           <FormControlLabel
             control={<Checkbox defaultChecked />}
@@ -168,11 +165,7 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
             value={getRedirectUri()}
             InputProps={{ readOnly: true }}
           />
-          <Button
-            variant="contained"
-            startIcon={<SecurityIcon />}
-            sx={{ mt: 2 }}
-          >
+          <Button variant="contained" startIcon={<SecurityIcon />} sx={{ mt: 2 }}>
             Perform Dynamic Registration
           </Button>
           <Typography variant="caption" display="block" sx={{ mt: 1 }}>
@@ -193,9 +186,8 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
             InputProps={{ readOnly: true }}
           />
           <Alert severity="warning" sx={{ mt: 2 }}>
-            In a real application, client secrets would be handled with extreme
-            care and ideally not displayed. This is a placeholder for
-            demonstration purposes.
+            In a real application, client secrets would be handled with extreme care and ideally not
+            displayed. This is a placeholder for demonstration purposes.
           </Alert>
         </Box>
       );
@@ -206,16 +198,15 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
             Summary & Completion
           </Typography>
           <Typography variant="body1" paragraph>
-            Congratulations! You have completed the initial provisioning for
-            your CompanyOS client. Your environment is now set up for secure
-            authentication, encrypted communication, and identity management.
+            Congratulations! You have completed the initial provisioning for your CompanyOS client.
+            Your environment is now set up for secure authentication, encrypted communication, and
+            identity management.
           </Typography>
           <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mt: 2 }}>
-            Provisioning complete! You can now proceed to use the CompanyOS
-            client.
+            Provisioning complete! You can now proceed to use the CompanyOS client.
           </Alert>
           <Typography variant="body2" sx={{ mt: 2 }}>
-            For more details on advanced configurations, please refer to the{' '}
+            For more details on advanced configurations, please refer to the{" "}
             <Link href="#" onClick={(e) => e.preventDefault()}>
               CompanyOS documentation
             </Link>
@@ -224,7 +215,7 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
         </Box>
       );
     default:
-      return 'Unknown step';
+      return "Unknown step";
   }
 }
 
@@ -244,7 +235,7 @@ export default function ProvisioningWizard() {
   };
 
   return (
-    <Card sx={{ maxWidth: 800, margin: 'auto', mt: 5, p: 3 }}>
+    <Card sx={{ maxWidth: 800, margin: "auto", mt: 5, p: 3 }}>
       <CardContent>
         <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label) => (
@@ -264,7 +255,7 @@ export default function ProvisioningWizard() {
           ) : (
             <Box>
               {getStepContent(activeStep)}
-              <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+              <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Button
                   color="inherit"
                   disabled={activeStep === 0}
@@ -273,9 +264,9 @@ export default function ProvisioningWizard() {
                 >
                   Back
                 </Button>
-                <Box sx={{ flex: '1 1 auto' }} />
+                <Box sx={{ flex: "1 1 auto" }} />
                 <Button onClick={handleNext} variant="contained">
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                  {activeStep === steps.length - 1 ? "Finish" : "Next"}
                 </Button>
               </Box>
             </Box>

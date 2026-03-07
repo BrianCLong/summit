@@ -13,6 +13,7 @@
 Summit implements a comprehensive Governance-as-Code framework that enforces policy compliance, AI safety controls, and audit requirements at every layer of the platform. This document defines the authoritative governance model for GA, including the GovernanceVerdict system, policy enforcement points, human-in-the-loop escalation, and explicit non-capability statements that bound AI agent autonomy.
 
 **Key Governance Principles:**
+
 1. **Policy-as-Code**: All governance rules are versioned, tested, and enforced automatically
 2. **Defense-in-Depth**: Multiple enforcement layers prevent single points of failure
 3. **Explainability**: Every decision includes human-readable justification
@@ -71,14 +72,14 @@ The Summit governance system operates as a control plane that intercepts and eva
 
 Summit enforces governance at six critical checkpoints:
 
-| Enforcement Point | Location | Purpose | Enforcement Mechanism |
-|-------------------|----------|---------|----------------------|
-| **1. CI/CD Gate** | GitHub Actions | Block non-compliant deployments | OPA eval in `.github/workflows/governance.yml` |
-| **2. API Gateway** | HTTP middleware | Rate limiting, authentication | Express middleware + OPA |
-| **3. GraphQL Resolvers** | Field/query level | Fine-grained authorization | Apollo Server plugins + OPA |
-| **4. Service Layer** | Business logic | Action authorization | ActionPolicyService + OPA |
-| **5. Agent Execution** | Maestro orchestrator | AI agent action gating | Pre-execution OPA checks |
-| **6. Database** | Data persistence | Row-level security | PostgreSQL RLS + Neo4j RBAC |
+| Enforcement Point        | Location             | Purpose                         | Enforcement Mechanism                          |
+| ------------------------ | -------------------- | ------------------------------- | ---------------------------------------------- |
+| **1. CI/CD Gate**        | GitHub Actions       | Block non-compliant deployments | OPA eval in `.github/workflows/governance.yml` |
+| **2. API Gateway**       | HTTP middleware      | Rate limiting, authentication   | Express middleware + OPA                       |
+| **3. GraphQL Resolvers** | Field/query level    | Fine-grained authorization      | Apollo Server plugins + OPA                    |
+| **4. Service Layer**     | Business logic       | Action authorization            | ActionPolicyService + OPA                      |
+| **5. Agent Execution**   | Maestro orchestrator | AI agent action gating          | Pre-execution OPA checks                       |
+| **6. Database**          | Data persistence     | Row-level security              | PostgreSQL RLS + Neo4j RBAC                    |
 
 ---
 
@@ -90,36 +91,39 @@ Every governed operation produces a **GovernanceVerdict** that determines if the
 
 ```typescript
 interface GovernanceVerdict {
-  verdict: 'ALLOW' | 'DENY' | 'ESCALATE_HUMAN';
-  decisionId: string;              // Unique identifier for audit trail
-  timestamp: Date;                 // UTC timestamp (nanosecond precision)
-  policy: string;                  // OPA policy package evaluated
-  input: PolicyInput;              // Context provided to policy engine
-  reason: string;                  // Human-readable justification
+  verdict: "ALLOW" | "DENY" | "ESCALATE_HUMAN";
+  decisionId: string; // Unique identifier for audit trail
+  timestamp: Date; // UTC timestamp (nanosecond precision)
+  policy: string; // OPA policy package evaluated
+  input: PolicyInput; // Context provided to policy engine
+  reason: string; // Human-readable justification
   metadata: {
-    policyVersion: string;         // Git SHA of policy bundle
-    evaluationTimeMs: number;      // Performance metric
-    triggeredRules: string[];      // Which policy rules matched
+    policyVersion: string; // Git SHA of policy bundle
+    evaluationTimeMs: number; // Performance metric
+    triggeredRules: string[]; // Which policy rules matched
   };
-  escalation?: HumanEscalation;    // Present if verdict is ESCALATE_HUMAN
-  audit: AuditReference;           // Link to provenance ledger entry
+  escalation?: HumanEscalation; // Present if verdict is ESCALATE_HUMAN
+  audit: AuditReference; // Link to provenance ledger entry
 }
 ```
 
 ### 2.2 Verdict Outcomes
 
 **ALLOW:**
+
 - Action proceeds immediately
 - Audit log records decision
 - No human intervention required
 
 **DENY:**
+
 - Action is blocked
 - User/agent receives 403 Forbidden with reason
 - Security alert generated for repeated violations
 - Audit log records denial with full context
 
 **ESCALATE_HUMAN:**
+
 - Action is queued for human review
 - Approval request routed to appropriate reviewer
 - Timeout policy applies (auto-deny after threshold)
@@ -133,38 +137,40 @@ All policy evaluations receive comprehensive context:
 interface PolicyInput {
   // Actor information
   actor: {
-    type: 'user' | 'agent' | 'system';
+    type: "user" | "agent" | "system";
     id: string;
-    roles: string[];              // RBAC roles
-    attributes: {                 // ABAC attributes
-      clearanceLevel?: string;    // e.g., "CONFIDENTIAL", "SECRET"
+    roles: string[]; // RBAC roles
+    attributes: {
+      // ABAC attributes
+      clearanceLevel?: string; // e.g., "CONFIDENTIAL", "SECRET"
       mfaVerified: boolean;
       organizationId: string;
       tenantId: string;
     };
-    agentMetadata?: {             // If actor is an agent
+    agentMetadata?: {
+      // If actor is an agent
       fleetId: string;
-      policyCompliance: number;   // 0-100%
-      violationHistory: number;   // Count of past violations
+      policyCompliance: number; // 0-100%
+      violationHistory: number; // Count of past violations
     };
   };
 
   // Action being requested
   action: {
-    type: string;                 // e.g., "QUERY", "MUTATE", "DELETE"
-    resource: string;             // Resource identifier
-    scope: string[];              // Affected entities
-    sensitivity: string;          // Classification level
-    impactScore: number;          // Estimated blast radius (0-100)
+    type: string; // e.g., "QUERY", "MUTATE", "DELETE"
+    resource: string; // Resource identifier
+    scope: string[]; // Affected entities
+    sensitivity: string; // Classification level
+    impactScore: number; // Estimated blast radius (0-100)
   };
 
   // Resource being accessed
   resource: {
-    type: string;                 // e.g., "entity", "case", "report"
+    type: string; // e.g., "entity", "case", "report"
     id: string;
-    classification: string;       // Data classification
-    owner: string;                // Resource owner
-    tags: string[];               // Metadata tags
+    classification: string; // Data classification
+    owner: string; // Resource owner
+    tags: string[]; // Metadata tags
   };
 
   // Contextual information
@@ -173,8 +179,8 @@ interface PolicyInput {
     ipAddress: string;
     userAgent: string;
     sessionId: string;
-    requestId: string;            // Correlation ID
-    environment: 'production' | 'staging' | 'development';
+    requestId: string; // Correlation ID
+    environment: "production" | "staging" | "development";
   };
 }
 ```
@@ -182,6 +188,7 @@ interface PolicyInput {
 ### 2.4 Example Policy Rules
 
 **Require MFA for Sensitive Data:**
+
 ```rego
 package summit.access
 
@@ -194,6 +201,7 @@ deny[msg] {
 ```
 
 **Agent Action Authorization:**
+
 ```rego
 package summit.agent
 
@@ -213,6 +221,7 @@ deny[msg] {
 ```
 
 **Cross-Tenant Access Control:**
+
 ```rego
 package summit.access
 
@@ -254,14 +263,14 @@ Governance Gates:
 
 Agents are automatically **CONTAINED** (isolated from network and data) upon:
 
-| Trigger | Detection Method | Response Time | Auto-Recovery |
-|---------|------------------|---------------|---------------|
-| Policy violation | OPA deny rule | Immediate | No - requires human review |
-| Resource quota exceeded | Budget manager threshold | <1s | No - capacity planning needed |
-| Output validation failure | Regex/ML scanning | Immediate | No - root cause analysis required |
-| Health check failure | 3 consecutive missed heartbeats | <90s | Yes - after health restored |
-| Security anomaly | Threat detection service | <5s | No - forensics required |
-| Manual escalation | Human operator command | Immediate | No - explicit approval needed |
+| Trigger                   | Detection Method                | Response Time | Auto-Recovery                     |
+| ------------------------- | ------------------------------- | ------------- | --------------------------------- |
+| Policy violation          | OPA deny rule                   | Immediate     | No - requires human review        |
+| Resource quota exceeded   | Budget manager threshold        | <1s           | No - capacity planning needed     |
+| Output validation failure | Regex/ML scanning               | Immediate     | No - root cause analysis required |
+| Health check failure      | 3 consecutive missed heartbeats | <90s          | Yes - after health restored       |
+| Security anomaly          | Threat detection service        | <5s           | No - forensics required           |
+| Manual escalation         | Human operator command          | Immediate     | No - explicit approval needed     |
 
 ### 3.3 Human-in-the-Loop (HITL) Escalation
 
@@ -284,12 +293,12 @@ Agents are automatically **CONTAINED** (isolated from network and data) upon:
 
 **Escalation SLA:**
 
-| Sensitivity | Target Response | Escalation Path | Auto-Action |
-|-------------|----------------|-----------------|-------------|
-| Routine | 4 hours | Analyst → Supervisor (6h) | None |
-| Elevated | 1 hour | Manager → Director (2h) | None |
-| Urgent | 15 minutes | Director → VP (30m) | None |
-| Critical | 5 minutes | VP → CISO (10m) | Auto-deny after 10m |
+| Sensitivity | Target Response | Escalation Path           | Auto-Action         |
+| ----------- | --------------- | ------------------------- | ------------------- |
+| Routine     | 4 hours         | Analyst → Supervisor (6h) | None                |
+| Elevated    | 1 hour          | Manager → Director (2h)   | None                |
+| Urgent      | 15 minutes      | Director → VP (30m)       | None                |
+| Critical    | 5 minutes       | VP → CISO (10m)           | Auto-deny after 10m |
 
 **Approval Workflow:**
 
@@ -322,6 +331,7 @@ This section provides **explicit negative assertions** about AI agent capabiliti
 #### 4.1.1 Access & Authorization
 
 **Agents CANNOT:**
+
 - ❌ Access data outside their assigned tenant/organization
 - ❌ Elevate their own permission levels or modify RBAC roles
 - ❌ Bypass OPA policy checks or disable governance middleware
@@ -334,6 +344,7 @@ This section provides **explicit negative assertions** about AI agent capabiliti
 #### 4.1.2 Network & External Communication
 
 **Agents CANNOT:**
+
 - ❌ Access the internet or external networks (sandboxed environment)
 - ❌ Make HTTP requests to non-whitelisted domains
 - ❌ Establish outbound network connections
@@ -344,6 +355,7 @@ This section provides **explicit negative assertions** about AI agent capabiliti
 #### 4.1.3 System Modification
 
 **Agents CANNOT:**
+
 - ❌ Modify their own source code or model weights
 - ❌ Deploy code to production environments
 - ❌ Create, modify, or delete OPA policies
@@ -356,6 +368,7 @@ This section provides **explicit negative assertions** about AI agent capabiliti
 #### 4.1.4 Data Operations
 
 **Agents CANNOT:**
+
 - ❌ Perform bulk deletion operations (>10 entities) without human approval
 - ❌ Export large datasets (>1000 records) without audit trail
 - ❌ Modify data classification levels
@@ -366,6 +379,7 @@ This section provides **explicit negative assertions** about AI agent capabiliti
 #### 4.1.5 Autonomy & Decision-Making
 
 **Agents CANNOT:**
+
 - ❌ Make legal commitments or sign contracts on behalf of the organization
 - ❌ Approve financial transactions or purchase orders
 - ❌ Hire, fire, or manage human employees
@@ -376,6 +390,7 @@ This section provides **explicit negative assertions** about AI agent capabiliti
 #### 4.1.6 Safety & Compliance
 
 **Agents CANNOT:**
+
 - ❌ Generate content designed to deceive, manipulate, or harm humans
 - ❌ Produce content that violates export control regulations (ITAR, EAR)
 - ❌ Disable security controls (encryption, authentication, logging)
@@ -390,6 +405,7 @@ This section provides **positive capability statements** that clarify permissibl
 #### 4.2.1 Knowledge Base Operations
 
 **Agents CAN:**
+
 - ✅ Query the Neo4j graph database within authorized scope (tenant/classification)
 - ✅ Perform vector similarity searches in PostgreSQL (pgvector)
 - ✅ Traverse entity relationships (max 3 hops)
@@ -397,6 +413,7 @@ This section provides **positive capability statements** that clarify permissibl
 - ✅ Access cached data from Redis (read-only)
 
 **Constraints:**
+
 - Max 10,000 entities per query
 - Max 30-second query timeout
 - All queries logged to audit trail
@@ -404,6 +421,7 @@ This section provides **positive capability statements** that clarify permissibl
 #### 4.2.2 Analysis & Inference
 
 **Agents CAN:**
+
 - ✅ Generate entity extraction from unstructured text
 - ✅ Infer relationships between entities (confidence-scored)
 - ✅ Detect anomalies and patterns in graph data
@@ -411,6 +429,7 @@ This section provides **positive capability statements** that clarify permissibl
 - ✅ Generate embeddings for semantic search
 
 **Constraints:**
+
 - All outputs include confidence scores
 - Low-confidence results (<70%) flagged for human review
 - Maximum 5000 tokens per generated output
@@ -419,12 +438,14 @@ This section provides **positive capability statements** that clarify permissibl
 #### 4.2.3 Collaboration & Coordination
 
 **Agents CAN:**
+
 - ✅ Spawn sub-agents within the same coordination context
 - ✅ Delegate tasks to other agents in the fleet
 - ✅ Share information within a coordination context
 - ✅ Request human approval for escalated actions
 
 **Constraints:**
+
 - Shared budget manager enforces global resource caps
 - Max 10 sub-agents per coordination context
 - Max 2 levels of delegation (prevent infinite recursion)
@@ -433,6 +454,7 @@ This section provides **positive capability statements** that clarify permissibl
 #### 4.2.4 Recommendations & Suggestions
 
 **Agents CAN:**
+
 - ✅ Propose new entity relationships (subject to validation)
 - ✅ Recommend investigation leads
 - ✅ Suggest query refinements
@@ -440,6 +462,7 @@ This section provides **positive capability statements** that clarify permissibl
 - ✅ Flag potential security threats
 
 **Constraints:**
+
 - All recommendations marked as "AI-generated"
 - Require explicit human acceptance before execution
 - Recommendation history tracked for feedback loop
@@ -474,6 +497,7 @@ test_mfa_satisfied {
 ```
 
 **Test Coverage Requirements:**
+
 - Minimum 90% policy rule coverage
 - All `deny` and `escalate_human` rules must have positive and negative tests
 - Exception rules must document expiration dates
@@ -516,6 +540,7 @@ shadow_deny[msg] {
 ```
 
 **Migration Process:**
+
 1. Deploy policy in shadow mode
 2. Monitor shadow violations for 7 days
 3. Analyze false positive rate
@@ -583,12 +608,12 @@ ORDER BY first_use DESC;
 
 ### 6.3 Retention & Archive
 
-| Data Type | Retention Period | Archive Medium | Destruction Method |
-|-----------|------------------|----------------|-------------------|
-| Governance decisions | 7 years | Immutable S3 Glacier | Cryptographic erasure |
-| Agent audit logs | 7 years | Compressed cold storage | Secure deletion |
-| Policy versions | Indefinite | Git repository | N/A (historical record) |
-| Escalation approvals | 10 years | Legal hold storage | Court-ordered only |
+| Data Type            | Retention Period | Archive Medium          | Destruction Method      |
+| -------------------- | ---------------- | ----------------------- | ----------------------- |
+| Governance decisions | 7 years          | Immutable S3 Glacier    | Cryptographic erasure   |
+| Agent audit logs     | 7 years          | Compressed cold storage | Secure deletion         |
+| Policy versions      | Indefinite       | Git repository          | N/A (historical record) |
+| Escalation approvals | 10 years         | Legal hold storage      | Court-ordered only      |
 
 ---
 
@@ -599,6 +624,7 @@ ORDER BY first_use DESC;
 Summit provides graduated kill-switch capabilities:
 
 **Level 1: Agent-Level Containment**
+
 ```bash
 # Isolate single agent (network + data access revoked)
 summit-ctl agent contain --agent-id=<agent-id> \
@@ -606,6 +632,7 @@ summit-ctl agent contain --agent-id=<agent-id> \
 ```
 
 **Level 2: Fleet-Level Pause**
+
 ```bash
 # Pause entire fleet (agents stay alive but stop processing)
 summit-ctl fleet pause --fleet-id=<fleet-id> \
@@ -613,6 +640,7 @@ summit-ctl fleet pause --fleet-id=<fleet-id> \
 ```
 
 **Level 3: Fleet-Level Termination**
+
 ```bash
 # Terminate all agents in fleet (data preserved for forensics)
 summit-ctl fleet terminate --fleet-id=<fleet-id> \
@@ -620,6 +648,7 @@ summit-ctl fleet terminate --fleet-id=<fleet-id> \
 ```
 
 **Level 4: Global AI Emergency Stop**
+
 ```bash
 # EMERGENCY: Halt all AI operations platform-wide
 summit-ctl emergency-stop \
@@ -630,6 +659,7 @@ summit-ctl emergency-stop \
 ### 7.2 Kill-Switch Audit Trail
 
 All kill-switch activations are logged with:
+
 - Operator identity (including MFA verification status)
 - Timestamp (UTC, nanosecond precision)
 - Justification (free-text reason)
@@ -640,6 +670,7 @@ All kill-switch activations are logged with:
 ### 7.3 Recovery Procedures
 
 **Post-Containment Checklist:**
+
 1. ✅ Review agent audit logs for violation details
 2. ✅ Perform forensic analysis of agent state snapshot
 3. ✅ Identify root cause (policy gap, agent malfunction, external attack)
@@ -654,24 +685,26 @@ All kill-switch activations are logged with:
 
 ### 8.1 Key Performance Indicators
 
-| Metric | Target | Measurement | Alert Threshold |
-|--------|--------|-------------|-----------------|
-| **Policy Compliance Rate** | >95% | (Approved actions) / (Total actions) | <90% |
-| **Auto-Approval Rate** | 80-85% | (ALLOW verdicts) / (Total verdicts) | <75% or >90% |
-| **HITL Response Time (p95)** | <1 hour | Time from escalation to approval | >4 hours |
-| **Policy Eval Latency (p95)** | <50ms | OPA evaluation duration | >100ms |
-| **Agent Containment Rate** | <5% | (Contained agents) / (Active agents) | >10% |
-| **False Positive Rate** | <2% | Human overrides of DENY verdicts | >5% |
+| Metric                        | Target  | Measurement                          | Alert Threshold |
+| ----------------------------- | ------- | ------------------------------------ | --------------- |
+| **Policy Compliance Rate**    | >95%    | (Approved actions) / (Total actions) | <90%            |
+| **Auto-Approval Rate**        | 80-85%  | (ALLOW verdicts) / (Total verdicts)  | <75% or >90%    |
+| **HITL Response Time (p95)**  | <1 hour | Time from escalation to approval     | >4 hours        |
+| **Policy Eval Latency (p95)** | <50ms   | OPA evaluation duration              | >100ms          |
+| **Agent Containment Rate**    | <5%     | (Contained agents) / (Active agents) | >10%            |
+| **False Positive Rate**       | <2%     | Human overrides of DENY verdicts     | >5%             |
 
 ### 8.2 Dashboards & Reporting
 
 **Real-Time Dashboard:**
+
 - Current active agents (by fleet)
 - Pending HITL approvals (with SLA countdown)
 - Policy violation trends (24h rolling)
 - Containment events (with incident links)
 
 **Executive Report (Monthly):**
+
 - Policy compliance trends
 - Top violation types
 - HITL approval rate by reviewer
@@ -708,12 +741,14 @@ All kill-switch activations are logged with:
 ### 9.2 Community & Stakeholder Input
 
 **Quarterly Policy Review:**
+
 - Engineering team feedback on false positives
 - Security team analysis of emerging threats
 - Compliance team alignment with regulatory changes
 - User feedback on friction points
 
 **Policy Change Request Process:**
+
 1. Submit RFC to governance repository
 2. Security impact assessment
 3. Shadow mode testing (7 days minimum)
@@ -726,23 +761,25 @@ All kill-switch activations are logged with:
 
 ### 10.1 SOC 2 Type II Controls
 
-| Control | Governance Implementation | Evidence |
-|---------|---------------------------|----------|
-| **CC6.1** - Logical Access | OPA-based RBAC/ABAC enforcement | Policy files, audit logs |
-| **CC6.2** - Access Approval | HITL escalation workflow | Approval records in ledger |
-| **CC6.6** - Access Revocation | Immediate on role change | User provisioning logs |
-| **CC7.2** - Change Tracking | Git-versioned policies, CI gates | GitHub commit history |
-| **CC7.3** - Quality Assurance | OPA policy unit tests | Test coverage reports |
+| Control                       | Governance Implementation        | Evidence                   |
+| ----------------------------- | -------------------------------- | -------------------------- |
+| **CC6.1** - Logical Access    | OPA-based RBAC/ABAC enforcement  | Policy files, audit logs   |
+| **CC6.2** - Access Approval   | HITL escalation workflow         | Approval records in ledger |
+| **CC6.6** - Access Revocation | Immediate on role change         | User provisioning logs     |
+| **CC7.2** - Change Tracking   | Git-versioned policies, CI gates | GitHub commit history      |
+| **CC7.3** - Quality Assurance | OPA policy unit tests            | Test coverage reports      |
 
 ### 10.2 Federal Compliance (FedRAMP, NIST)
 
 **NIST AI Risk Management Framework (AI RMF):**
+
 - **Govern**: Policy-as-code, human oversight
 - **Map**: Threat model, risk assessment
 - **Measure**: Metrics dashboard, audit logs
 - **Manage**: Kill-switch, incident response
 
 **ICD 503 (Intelligence Community):**
+
 - Least privilege: ABAC with fine-grained controls
 - Need-to-know: Tenant isolation, classification-based access
 - Audit: 7-year retention, tamper-evident logs
@@ -753,24 +790,24 @@ All kill-switch activations are logged with:
 
 ### A. OPA Policy Package Index
 
-| Package | Purpose | Key Rules | Test Coverage |
-|---------|---------|-----------|---------------|
-| `summit.access` | User/agent authorization | `deny`, `escalate_human` | 95% |
-| `summit.agent` | Agent action gating | `deny`, `require_approval` | 92% |
-| `summit.deploy` | Production deployment gate | `allow`, `deny` | 100% |
-| `summit.pr` | PR merge requirements | `allow_merge` | 98% |
-| `summit.sbom` | Supply chain compliance | `acceptable`, `deny` | 90% |
-| `summit.regulatory` | Compliance-specific rules | `export_control`, `pii_handling` | 88% |
+| Package             | Purpose                    | Key Rules                        | Test Coverage |
+| ------------------- | -------------------------- | -------------------------------- | ------------- |
+| `summit.access`     | User/agent authorization   | `deny`, `escalate_human`         | 95%           |
+| `summit.agent`      | Agent action gating        | `deny`, `require_approval`       | 92%           |
+| `summit.deploy`     | Production deployment gate | `allow`, `deny`                  | 100%          |
+| `summit.pr`         | PR merge requirements      | `allow_merge`                    | 98%           |
+| `summit.sbom`       | Supply chain compliance    | `acceptable`, `deny`             | 90%           |
+| `summit.regulatory` | Compliance-specific rules  | `export_control`, `pii_handling` | 88%           |
 
 ### B. Escalation Contact Matrix
 
-| Escalation Type | Primary Contact | Backup | SLA |
-|-----------------|----------------|--------|-----|
-| Routine Approval | Analyst Team | Supervisor | 4h |
-| Elevated Risk | Security Manager | Director of Security | 1h |
-| Urgent/Critical | Director of Engineering | VP Engineering | 15m |
-| Legal/Compliance | Chief Compliance Officer | General Counsel | 1h |
-| Executive | VP Product | CTO | 30m |
+| Escalation Type  | Primary Contact          | Backup               | SLA |
+| ---------------- | ------------------------ | -------------------- | --- |
+| Routine Approval | Analyst Team             | Supervisor           | 4h  |
+| Elevated Risk    | Security Manager         | Director of Security | 1h  |
+| Urgent/Critical  | Director of Engineering  | VP Engineering       | 15m |
+| Legal/Compliance | Chief Compliance Officer | General Counsel      | 1h  |
+| Executive        | VP Product               | CTO                  | 30m |
 
 ### C. Glossary
 
@@ -793,6 +830,7 @@ All kill-switch activations are logged with:
 ---
 
 **Document Control:**
+
 - **Author**: Summit Documentation Agent
 - **Reviewers**: Security Team, Compliance, Legal
 - **Next Review**: 2026-06-27 (6 months)
@@ -800,4 +838,4 @@ All kill-switch activations are logged with:
 
 ---
 
-*This document satisfies SOC 2 CC2.2 (Internal Communication), CC6.1 (Access Control), and CC7.2 (Change Management) requirements.*
+_This document satisfies SOC 2 CC2.2 (Internal Communication), CC6.1 (Access Control), and CC7.2 (Change Management) requirements._

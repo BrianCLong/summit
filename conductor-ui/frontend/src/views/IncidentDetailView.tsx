@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/views/IncidentDetailView.tsx
-import React from 'react';
+import React from "react";
 
 export const IncidentDetailView = () => {
   // Placeholder for fetching and displaying incident details,

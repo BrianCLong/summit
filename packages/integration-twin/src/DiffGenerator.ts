@@ -1,14 +1,14 @@
 export interface Diff {
   description: string;
   changes: Change[];
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
 }
 
 export interface Change {
   path: string;
   oldValue?: any;
   newValue?: any;
-  type: 'create' | 'update' | 'delete' | 'action';
+  type: "create" | "update" | "delete" | "action";
 }
 
 export class DiffGenerator {
@@ -18,20 +18,22 @@ export class DiffGenerator {
 
     if (dryRunResult && dryRunResult.changes) {
       return {
-        description: dryRunResult.description || 'Simulated execution',
+        description: dryRunResult.description || "Simulated execution",
         changes: dryRunResult.changes,
-        riskLevel: dryRunResult.riskLevel || 'medium'
+        riskLevel: dryRunResult.riskLevel || "medium",
       };
     }
 
     return {
-      description: typeof dryRunResult === 'string' ? dryRunResult : JSON.stringify(dryRunResult),
-      changes: [{
-        path: 'root',
-        newValue: dryRunResult,
-        type: 'action'
-      }],
-      riskLevel: 'medium'
+      description: typeof dryRunResult === "string" ? dryRunResult : JSON.stringify(dryRunResult),
+      changes: [
+        {
+          path: "root",
+          newValue: dryRunResult,
+          type: "action",
+        },
+      ],
+      riskLevel: "medium",
     };
   }
 }

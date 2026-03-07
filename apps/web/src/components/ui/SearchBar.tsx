@@ -44,14 +44,17 @@ export function SearchBar({
       let isMatch = false
       if (shortcut === '/') {
         if (e.key === '/') isMatch = true
-      } else if (shortcut.toLowerCase().includes('meta') || shortcut.toLowerCase().includes('ctrl')) {
-          // simple check for Cmd+K or Ctrl+K
-          const key = shortcut.split('+').pop()?.toLowerCase()
-          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === key) {
-             isMatch = true
-          }
+      } else if (
+        shortcut.toLowerCase().includes('meta') ||
+        shortcut.toLowerCase().includes('ctrl')
+      ) {
+        // simple check for Cmd+K or Ctrl+K
+        const key = shortcut.split('+').pop()?.toLowerCase()
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === key) {
+          isMatch = true
+        }
       } else if (e.key.toLowerCase() === shortcut.toLowerCase()) {
-         isMatch = true
+        isMatch = true
       }
 
       if (isMatch) {
@@ -107,7 +110,10 @@ export function SearchBar({
       )
     }
 
-    if (shortcut.toLowerCase().includes('meta') || shortcut.toLowerCase().includes('ctrl')) {
+    if (
+      shortcut.toLowerCase().includes('meta') ||
+      shortcut.toLowerCase().includes('ctrl')
+    ) {
       const key = shortcut.split('+').pop()?.toUpperCase() || 'K'
       return (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">

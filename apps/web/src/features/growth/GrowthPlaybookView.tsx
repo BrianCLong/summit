@@ -1,11 +1,17 @@
-import React from 'react';
-import { Playbook } from './types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { CheckCircle2, AlertTriangle, TrendingUp, Target } from 'lucide-react';
+import React from 'react'
+import { Playbook } from './types'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { CheckCircle2, AlertTriangle, TrendingUp, Target } from 'lucide-react'
 
 interface GrowthPlaybookViewProps {
-  playbook: Playbook;
+  playbook: Playbook
 }
 
 export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
@@ -16,11 +22,17 @@ export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-2xl">{playbook.title}</CardTitle>
-              <CardDescription className="mt-2">{playbook.summary}</CardDescription>
+              <CardDescription className="mt-2">
+                {playbook.summary}
+              </CardDescription>
             </div>
             <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
-              <span className="text-sm font-medium text-muted-foreground">Readiness Score</span>
-              <span className="text-3xl font-bold text-primary">{playbook.score}</span>
+              <span className="text-sm font-medium text-muted-foreground">
+                Readiness Score
+              </span>
+              <span className="text-3xl font-bold text-primary">
+                {playbook.score}
+              </span>
             </div>
           </div>
         </CardHeader>
@@ -38,7 +50,10 @@ export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
             <ul className="space-y-2">
               {playbook.strengths.map((s, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <Badge variant="outline" className="mt-1 bg-green-50 text-green-700 border-green-200">
+                  <Badge
+                    variant="outline"
+                    className="mt-1 bg-green-50 text-green-700 border-green-200"
+                  >
                     Strong
                   </Badge>
                   <span>{s}</span>
@@ -59,7 +74,10 @@ export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
             <ul className="space-y-2">
               {playbook.weaknesses.map((w, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <Badge variant="outline" className="mt-1 bg-amber-50 text-amber-700 border-amber-200">
+                  <Badge
+                    variant="outline"
+                    className="mt-1 bg-amber-50 text-amber-700 border-amber-200"
+                  >
                     Focus
                   </Badge>
                   <span>{w}</span>
@@ -80,7 +98,10 @@ export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
         <CardContent>
           <div className="grid gap-4">
             {playbook.strategic_initiatives.map((init, i) => (
-              <div key={i} className="p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors">
+              <div
+                key={i}
+                className="p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
+              >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold text-lg">{init.title}</h3>
                   <Badge>{init.timeline}</Badge>
@@ -102,7 +123,10 @@ export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
         <CardContent>
           <ul className="space-y-3">
             {playbook.tactical_actions.map((action, i) => (
-              <li key={i} className="flex items-center gap-3 p-2 rounded hover:bg-muted/50">
+              <li
+                key={i}
+                className="flex items-center gap-3 p-2 rounded hover:bg-muted/50"
+              >
                 <div className="h-6 w-6 rounded-full border-2 border-primary/20 flex items-center justify-center text-xs font-bold text-primary">
                   {i + 1}
                 </div>
@@ -113,5 +137,5 @@ export function GrowthPlaybookView({ playbook }: GrowthPlaybookViewProps) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

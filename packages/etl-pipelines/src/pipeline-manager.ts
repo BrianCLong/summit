@@ -2,9 +2,9 @@
  * ETL/ELT Pipeline Manager
  */
 
-import { Pool } from 'pg';
-import { BulkLoader } from './loaders/bulk-loader';
-import { IncrementalLoader } from './loaders/incremental-loader';
+import { Pool } from "pg";
+import { BulkLoader } from "./loaders/bulk-loader";
+import { IncrementalLoader } from "./loaders/incremental-loader";
 
 export class PipelineManager {
   public bulkLoader: BulkLoader;
@@ -19,7 +19,7 @@ export class PipelineManager {
     name: string;
     source: string;
     target: string;
-    type: 'bulk' | 'incremental';
+    type: "bulk" | "incremental";
     schedule?: string;
   }): Promise<void> {
     // Simplified pipeline execution

@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface BearingMeasurement {
   sensorId: string;
@@ -38,7 +38,7 @@ export interface CellTowerMeasurement {
 
 export interface TriangulationResult {
   id: string;
-  method: 'AOA' | 'RSSI' | 'CELL' | 'HYBRID';
+  method: "AOA" | "RSSI" | "CELL" | "HYBRID";
   latitude: number;
   longitude: number;
   accuracy: number; // meters
@@ -65,7 +65,7 @@ export class Triangulator {
    */
   triangulateAOA(bearings: BearingMeasurement[]): TriangulationResult | null {
     if (bearings.length < 2) {
-      console.warn('[TRIANGULATION] AOA requires at least 2 bearing measurements');
+      console.warn("[TRIANGULATION] AOA requires at least 2 bearing measurements");
       return null;
     }
 
@@ -95,7 +95,8 @@ export class Triangulator {
 
     // Weighted average of intersections
     let totalWeight = 0;
-    let lat = 0, lon = 0;
+    let lat = 0,
+      lon = 0;
 
     for (const int of intersections) {
       lat += int.lat * int.weight;
@@ -107,22 +108,20 @@ export class Triangulator {
     lon /= totalWeight;
 
     // Calculate accuracy from spread of intersections
-    const distances = intersections.map(int =>
+    const distances = intersections.map((int) =>
       this.calculateDistance(lat, lon, int.lat, int.lon)
     );
-    const accuracy = Math.sqrt(
-      distances.reduce((sum, d) => sum + d * d, 0) / distances.length
-    );
+    const accuracy = Math.sqrt(distances.reduce((sum, d) => sum + d * d, 0) / distances.length);
 
     // Calculate GDOP from geometry
     const gdop = this.calculateGDOP(
       { latitude: lat, longitude: lon },
-      bearings.map(b => b.sensorLocation)
+      bearings.map((b) => b.sensorLocation)
     );
 
     return {
       id: uuid(),
-      method: 'AOA',
+      method: "AOA",
       latitude: lat,
       longitude: lon,
       accuracy: accuracy * gdop,
@@ -131,9 +130,9 @@ export class Triangulator {
       timestamp: new Date(),
       details: {
         geometricDOP: gdop,
-        residualError: accuracy
+        residualError: accuracy,
       },
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -142,18 +141,18 @@ export class Triangulator {
    */
   triangulateRSSI(measurements: RSSIMeasurement[]): TriangulationResult | null {
     if (measurements.length < 3) {
-      console.warn('[TRIANGULATION] RSSI requires at least 3 measurements');
+      console.warn("[TRIANGULATION] RSSI requires at least 3 measurements");
       return null;
     }
 
     // Calculate distances from RSSI using path loss model
-    const distances = measurements.map(m => {
+    const distances = measurements.map((m) => {
       // Path loss model: RSSI = P0 - 10 * n * log10(d/d0)
       // Solving for d: d = d0 * 10^((P0 - RSSI) / (10 * n))
       const exponent = (m.referencePower - m.rssi) / (10 * m.pathLossExponent);
       return {
         location: m.sensorLocation,
-        distance: m.referenceDistance * Math.pow(10, exponent)
+        distance: m.referenceDistance * Math.pow(10, exponent),
       };
     });
 
@@ -164,7 +163,7 @@ export class Triangulator {
 
     return {
       id: uuid(),
-      method: 'RSSI',
+      method: "RSSI",
       latitude: result.lat,
       longitude: result.lon,
       accuracy: result.accuracy,
@@ -172,9 +171,9 @@ export class Triangulator {
       measurements: measurements.length,
       timestamp: new Date(),
       details: {
-        residualError: result.accuracy
+        residualError: result.accuracy,
       },
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -201,7 +200,7 @@ export class Triangulator {
 
       return {
         id: uuid(),
-        method: 'CELL',
+        method: "CELL",
         latitude: cell.location.latitude,
         longitude: cell.location.longitude,
         accuracy,
@@ -209,12 +208,12 @@ export class Triangulator {
         measurements: 1,
         timestamp: new Date(),
         details: {},
-        isSimulated: true
+        isSimulated: true,
       };
     }
 
     // Multiple cells - estimate distance from signal strength
-    const distances = sortedCells.map(cell => {
+    const distances = sortedCells.map((cell) => {
       // Approximate distance from signal strength
       // Assuming -50dBm at 100m, -110dBm at 35km
       const maxDist = 35000;
@@ -226,7 +225,7 @@ export class Triangulator {
 
       return {
         location: cell.location,
-        distance: Math.max(100, distance)
+        distance: Math.max(100, distance),
       };
     });
 
@@ -235,7 +234,8 @@ export class Triangulator {
     if (!result) {
       // Fallback to weighted centroid
       let totalWeight = 0;
-      let lat = 0, lon = 0;
+      let lat = 0,
+        lon = 0;
 
       for (const cell of sortedCells) {
         const weight = Math.pow(10, cell.signalStrength / 20);
@@ -246,7 +246,7 @@ export class Triangulator {
 
       return {
         id: uuid(),
-        method: 'CELL',
+        method: "CELL",
         latitude: lat / totalWeight,
         longitude: lon / totalWeight,
         accuracy: 1000,
@@ -254,13 +254,13 @@ export class Triangulator {
         measurements: cells.length,
         timestamp: new Date(),
         details: {},
-        isSimulated: true
+        isSimulated: true,
       };
     }
 
     return {
       id: uuid(),
-      method: 'CELL',
+      method: "CELL",
       latitude: result.lat,
       longitude: result.lon,
       accuracy: result.accuracy,
@@ -268,9 +268,9 @@ export class Triangulator {
       measurements: cells.length,
       timestamp: new Date(),
       details: {
-        residualError: result.accuracy
+        residualError: result.accuracy,
       },
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -305,7 +305,8 @@ export class Triangulator {
 
     // Weighted combination based on confidence
     let totalWeight = 0;
-    let lat = 0, lon = 0;
+    let lat = 0,
+      lon = 0;
     let bestAccuracy = Infinity;
 
     for (const result of results) {
@@ -321,24 +322,24 @@ export class Triangulator {
 
     return {
       id: uuid(),
-      method: 'HYBRID',
+      method: "HYBRID",
       latitude: lat / totalWeight,
       longitude: lon / totalWeight,
       accuracy: bestAccuracy * 0.8, // Improvement from fusion
-      confidence: Math.min(0.95, Math.max(...results.map(r => r.confidence)) * 1.1),
+      confidence: Math.min(0.95, Math.max(...results.map((r) => r.confidence)) * 1.1),
       measurements: results.reduce((sum, r) => sum + r.measurements, 0),
       timestamp: new Date(),
       details: {
         geometricDOP: this.calculateGDOP(
           { latitude: lat / totalWeight, longitude: lon / totalWeight },
           [
-            ...(bearings?.map(b => b.sensorLocation) || []),
-            ...(rssi?.map(r => r.sensorLocation) || []),
-            ...(cells?.map(c => c.location) || [])
+            ...(bearings?.map((b) => b.sensorLocation) || []),
+            ...(rssi?.map((r) => r.sensorLocation) || []),
+            ...(cells?.map((c) => c.location) || []),
           ]
-        )
+        ),
       },
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -347,7 +348,7 @@ export class Triangulator {
    */
   generateSimulatedMeasurements(
     targetLocation: { latitude: number; longitude: number },
-    method: 'AOA' | 'RSSI' | 'CELL' | 'ALL'
+    method: "AOA" | "RSSI" | "CELL" | "ALL"
   ): {
     bearings?: BearingMeasurement[];
     rssi?: RSSIMeasurement[];
@@ -359,15 +360,15 @@ export class Triangulator {
       cells?: CellTowerMeasurement[];
     } = {};
 
-    if (method === 'AOA' || method === 'ALL') {
+    if (method === "AOA" || method === "ALL") {
       result.bearings = this.generateSimulatedBearings(targetLocation, 3);
     }
 
-    if (method === 'RSSI' || method === 'ALL') {
+    if (method === "RSSI" || method === "ALL") {
       result.rssi = this.generateSimulatedRSSI(targetLocation, 4);
     }
 
-    if (method === 'CELL' || method === 'ALL') {
+    if (method === "CELL" || method === "ALL") {
       result.cells = this.generateSimulatedCellTowers(targetLocation, 3);
     }
 
@@ -388,8 +389,10 @@ export class Triangulator {
 
       // Calculate true bearing to target
       const trueBearing = this.calculateBearing(
-        sensorLat, sensorLon,
-        target.latitude, target.longitude
+        sensorLat,
+        sensorLon,
+        target.latitude,
+        target.longitude
       );
 
       bearings.push({
@@ -397,7 +400,7 @@ export class Triangulator {
         sensorLocation: { latitude: sensorLat, longitude: sensorLon },
         bearing: trueBearing + (Math.random() - 0.5) * 5, // Add error
         accuracy: 2 + Math.random() * 3,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -417,8 +420,10 @@ export class Triangulator {
       const sensorLon = target.longitude + radius * Math.sin(angle);
 
       const distance = this.calculateDistance(
-        sensorLat, sensorLon,
-        target.latitude, target.longitude
+        sensorLat,
+        sensorLon,
+        target.latitude,
+        target.longitude
       );
 
       // Calculate RSSI using path loss model
@@ -433,7 +438,7 @@ export class Triangulator {
         pathLossExponent: 3.5,
         referenceDistance: 1,
         referencePower: -30,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -453,8 +458,10 @@ export class Triangulator {
       const towerLon = target.longitude + radius * Math.sin(angle);
 
       const distance = this.calculateDistance(
-        towerLat, towerLon,
-        target.latitude, target.longitude
+        towerLat,
+        towerLon,
+        target.latitude,
+        target.longitude
       );
 
       // Signal strength decreases with distance
@@ -469,7 +476,7 @@ export class Triangulator {
         cellId: 10000 + i * 100,
         signalStrength: Math.max(-110, signalStrength),
         timingAdvance: Math.round(distance / 550),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -482,30 +489,31 @@ export class Triangulator {
     loc2: { latitude: number; longitude: number },
     bearing2: number
   ): { lat: number; lon: number } | null {
-    const lat1 = loc1.latitude * Math.PI / 180;
-    const lon1 = loc1.longitude * Math.PI / 180;
-    const lat2 = loc2.latitude * Math.PI / 180;
-    const lon2 = loc2.longitude * Math.PI / 180;
-    const b1 = bearing1 * Math.PI / 180;
-    const b2 = bearing2 * Math.PI / 180;
+    const lat1 = (loc1.latitude * Math.PI) / 180;
+    const lon1 = (loc1.longitude * Math.PI) / 180;
+    const lat2 = (loc2.latitude * Math.PI) / 180;
+    const lon2 = (loc2.longitude * Math.PI) / 180;
+    const b1 = (bearing1 * Math.PI) / 180;
+    const b2 = (bearing2 * Math.PI) / 180;
 
     const dLat = lat2 - lat1;
     const dLon = lon2 - lon1;
 
-    const dist12 = 2 * Math.asin(Math.sqrt(
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
-    ));
+    const dist12 =
+      2 *
+      Math.asin(
+        Math.sqrt(
+          Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
+        )
+      );
 
     if (Math.abs(dist12) < 1e-10) return null;
 
     const bearingA = Math.acos(
-      (Math.sin(lat2) - Math.sin(lat1) * Math.cos(dist12)) /
-      (Math.sin(dist12) * Math.cos(lat1))
+      (Math.sin(lat2) - Math.sin(lat1) * Math.cos(dist12)) / (Math.sin(dist12) * Math.cos(lat1))
     );
     const bearingB = Math.acos(
-      (Math.sin(lat1) - Math.sin(lat2) * Math.cos(dist12)) /
-      (Math.sin(dist12) * Math.cos(lat2))
+      (Math.sin(lat1) - Math.sin(lat2) * Math.cos(dist12)) / (Math.sin(dist12) * Math.cos(lat2))
     );
 
     let theta12: number, theta21: number;
@@ -517,15 +525,14 @@ export class Triangulator {
       theta21 = bearingB;
     }
 
-    const alpha1 = (b1 - theta12 + Math.PI) % (2 * Math.PI) - Math.PI;
-    const alpha2 = (theta21 - b2 + Math.PI) % (2 * Math.PI) - Math.PI;
+    const alpha1 = ((b1 - theta12 + Math.PI) % (2 * Math.PI)) - Math.PI;
+    const alpha2 = ((theta21 - b2 + Math.PI) % (2 * Math.PI)) - Math.PI;
 
     if (Math.sin(alpha1) === 0 && Math.sin(alpha2) === 0) return null;
     if (Math.sin(alpha1) * Math.sin(alpha2) < 0) return null;
 
     const alpha3 = Math.acos(
-      -Math.cos(alpha1) * Math.cos(alpha2) +
-      Math.sin(alpha1) * Math.sin(alpha2) * Math.cos(dist12)
+      -Math.cos(alpha1) * Math.cos(alpha2) + Math.sin(alpha1) * Math.sin(alpha2) * Math.cos(dist12)
     );
 
     const dist13 = Math.atan2(
@@ -534,8 +541,7 @@ export class Triangulator {
     );
 
     const lat3 = Math.asin(
-      Math.sin(lat1) * Math.cos(dist13) +
-      Math.cos(lat1) * Math.sin(dist13) * Math.cos(b1)
+      Math.sin(lat1) * Math.cos(dist13) + Math.cos(lat1) * Math.sin(dist13) * Math.cos(b1)
     );
 
     const dLon13 = Math.atan2(
@@ -546,8 +552,8 @@ export class Triangulator {
     const lon3 = lon1 + dLon13;
 
     return {
-      lat: lat3 * 180 / Math.PI,
-      lon: lon3 * 180 / Math.PI
+      lat: (lat3 * 180) / Math.PI,
+      lon: (lon3 * 180) / Math.PI,
     };
   }
 
@@ -563,10 +569,10 @@ export class Triangulator {
     const refLat = circles[0].location.latitude;
     const refLon = circles[0].location.longitude;
 
-    const points = circles.map(c => ({
-      x: (c.location.longitude - refLon) * Math.cos(refLat * Math.PI / 180) * 111320,
+    const points = circles.map((c) => ({
+      x: (c.location.longitude - refLon) * Math.cos((refLat * Math.PI) / 180) * 111320,
       y: (c.location.latitude - refLat) * 110540,
-      r: c.distance
+      r: c.distance,
     }));
 
     // Initial estimate using first 3 points
@@ -595,33 +601,37 @@ export class Triangulator {
 
     // Convert back to lat/lon
     const lat = refLat + y / 110540;
-    const lon = refLon + x / (Math.cos(refLat * Math.PI / 180) * 111320);
+    const lon = refLon + x / (Math.cos((refLat * Math.PI) / 180) * 111320);
 
     return { lat, lon, accuracy };
   }
 
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = this.earthRadius;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   private calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const lat1Rad = lat1 * Math.PI / 180;
-    const lat2Rad = lat2 * Math.PI / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const lat1Rad = (lat1 * Math.PI) / 180;
+    const lat2Rad = (lat2 * Math.PI) / 180;
 
     const x = Math.sin(dLon) * Math.cos(lat2Rad);
-    const y = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
+    const y =
+      Math.cos(lat1Rad) * Math.sin(lat2Rad) -
       Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
 
-    return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+    return ((Math.atan2(x, y) * 180) / Math.PI + 360) % 360;
   }
 
   private calculateGDOP(
@@ -636,18 +646,22 @@ export class Triangulator {
     for (let i = 0; i < sensors.length; i++) {
       for (let j = i + 1; j < sensors.length; j++) {
         const bearing1 = this.calculateBearing(
-          position.latitude, position.longitude,
-          sensors[i].latitude, sensors[i].longitude
+          position.latitude,
+          position.longitude,
+          sensors[i].latitude,
+          sensors[i].longitude
         );
         const bearing2 = this.calculateBearing(
-          position.latitude, position.longitude,
-          sensors[j].latitude, sensors[j].longitude
+          position.latitude,
+          position.longitude,
+          sensors[j].latitude,
+          sensors[j].longitude
         );
 
         let angleDiff = Math.abs(bearing1 - bearing2);
         if (angleDiff > 180) angleDiff = 360 - angleDiff;
 
-        sumAngleDiff += Math.abs(Math.sin(angleDiff * Math.PI / 180));
+        sumAngleDiff += Math.abs(Math.sin((angleDiff * Math.PI) / 180));
         count++;
       }
     }

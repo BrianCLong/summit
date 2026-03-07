@@ -3,9 +3,9 @@ name: marketplace-ga-ci
 on:
   pull_request:
     paths:
-      - 'server/**'
-      - 'client/**'
-      - 'docs/**'
+      - "server/**"
+      - "client/**"
+      - "docs/**"
 
 jobs:
   test:

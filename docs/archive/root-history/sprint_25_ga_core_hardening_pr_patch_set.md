@@ -335,16 +335,16 @@ on:
   pull_request:
     paths:
       [
-        'policies/**',
-        'server/**',
-        'services/**',
-        'grafana/**',
-        'tools/verify-bundle/**',
-        'project/pm/**',
+        "policies/**",
+        "server/**",
+        "services/**",
+        "grafana/**",
+        "tools/verify-bundle/**",
+        "project/pm/**",
       ]
   push:
     branches: [main]
-    paths: ['policies/**', 'tools/verify-bundle/**']
+    paths: ["policies/**", "tools/verify-bundle/**"]
 jobs:
   opa-tests:
     runs-on: ubuntu-latest
@@ -359,7 +359,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Self-test
         run: python tools/verify-bundle/cli.py --self-test
   grafana-json-valid:

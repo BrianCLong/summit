@@ -1,6 +1,7 @@
 # Security Vulnerability Analysis & Resolution Plan PR
 
 ## Title
+
 `security: comprehensive vulnerability analysis and batched resolution plan for summit repository`
 
 ## Description
@@ -26,6 +27,7 @@ This PR introduces a comprehensive security vulnerability analysis and structure
 ### Key Findings
 
 **Vulnerability Summary:**
+
 - **Total Vulnerabilities:** 544
 - **Critical:** 29 (5.3%)
 - **High:** 89 (16.4%)
@@ -33,6 +35,7 @@ This PR introduces a comprehensive security vulnerability analysis and structure
 - **Low:** 258 (47.4%)
 
 **Ecosystem Breakdown:**
+
 - **npm/Node.js:** 869 files, ~289 vulnerabilities (highest risk)
 - **Python:** 58 files, ~65 vulnerabilities (RCE risks)
 - **Rust:** 34 files, ~30 vulnerabilities (memory safety)
@@ -64,13 +67,13 @@ This PR introduces a comprehensive security vulnerability analysis and structure
 
 The resolution plan is organized into **5 batches** spanning 5-6 weeks:
 
-| Batch | Focus | Timeline | Priority |
-|-------|-------|----------|----------|
-| **Batch 1** | Critical npm & Python RCE vulnerabilities | Weeks 1-2 | CRITICAL |
-| **Batch 2** | High-severity Go & npm vulnerabilities | Weeks 2-3 | HIGH |
-| **Batch 3** | Medium-severity vulnerabilities (all ecosystems) | Weeks 3-4 | MEDIUM |
-| **Batch 4** | GitHub Actions & Dependabot hardening | Week 4 | MEDIUM |
-| **Batch 5** | Low-severity & archived code cleanup | Week 5+ | LOW |
+| Batch       | Focus                                            | Timeline  | Priority |
+| ----------- | ------------------------------------------------ | --------- | -------- |
+| **Batch 1** | Critical npm & Python RCE vulnerabilities        | Weeks 1-2 | CRITICAL |
+| **Batch 2** | High-severity Go & npm vulnerabilities           | Weeks 2-3 | HIGH     |
+| **Batch 3** | Medium-severity vulnerabilities (all ecosystems) | Weeks 3-4 | MEDIUM   |
+| **Batch 4** | GitHub Actions & Dependabot hardening            | Week 4    | MEDIUM   |
+| **Batch 5** | Low-severity & archived code cleanup             | Week 5+   | LOW      |
 
 **Total Estimated Effort:** 185-260 hours
 
@@ -135,11 +138,13 @@ This PR introduces no code changes and poses no risk to the repository. It serve
 ### Questions & Discussion
 
 **For Maintainers:**
+
 - Do you agree with the prioritization and batching strategy?
 - Are there any ecosystems or vulnerabilities you'd like to prioritize differently?
 - Should we enable additional scanning tools in CI/CD?
 
 **For Security Team:**
+
 - Are there any critical CVEs we should address before Batch 1?
 - Should we implement supply chain monitoring (e.g., Socket.dev)?
 - What's the preferred approach for handling ignored CVEs?

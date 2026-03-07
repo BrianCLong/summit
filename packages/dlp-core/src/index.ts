@@ -12,10 +12,10 @@
  */
 
 // Core services
-export { DLPService } from './DLPService';
-export { DetectionEngine } from './DetectionEngine';
-export { RedactionEngine } from './RedactionEngine';
-export { BarrierEnforcer } from './BarrierEnforcer';
+export { DLPService } from "./DLPService";
+export { DetectionEngine } from "./DetectionEngine";
+export { RedactionEngine } from "./RedactionEngine";
+export { BarrierEnforcer } from "./BarrierEnforcer";
 
 // Types
 export type {
@@ -52,7 +52,7 @@ export type {
   // Audit
   DLPAuditEvent,
   DLPEventType,
-} from './types';
+} from "./types";
 
 // Errors
 export {
@@ -61,12 +61,12 @@ export {
   BarrierViolationError,
   RedactionError,
   PolicyEvaluationError,
-} from './errors';
+} from "./errors";
 
 // Utilities
-export { createDLPMiddleware } from './middleware';
-export { DLPApolloPlugin } from './apollo-plugin';
-export { DLPStorageHook } from './storage-hook';
+export { createDLPMiddleware } from "./middleware";
+export { DLPApolloPlugin } from "./apollo-plugin";
+export { DLPStorageHook } from "./storage-hook";
 
 // Constants
 export {
@@ -74,4 +74,4 @@ export {
   BARRIER_TYPES,
   SCAN_ACTIONS,
   REDACTION_STRATEGIES,
-} from './constants';
+} from "./constants";

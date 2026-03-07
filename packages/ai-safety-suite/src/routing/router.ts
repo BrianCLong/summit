@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export interface RoutingPolicy {
   feature: string;
@@ -11,7 +11,7 @@ export interface RoutingDecision {
   model?: string;
   usedFallback?: boolean;
   disabled: boolean;
-  code?: 'AI_DISABLED' | 'NO_MODEL_AVAILABLE';
+  code?: "AI_DISABLED" | "NO_MODEL_AVAILABLE";
 }
 
 export class ModelRouter {
@@ -37,12 +37,12 @@ export class ModelRouter {
 
   resolve(feature: string, tenantId: string): RoutingDecision {
     if (this.killSwitch || this.featureKill.has(feature)) {
-      return { disabled: true, code: 'AI_DISABLED' };
+      return { disabled: true, code: "AI_DISABLED" };
     }
 
     const policy = this.policies.get(feature);
     if (!policy) {
-      return { disabled: true, code: 'NO_MODEL_AVAILABLE' };
+      return { disabled: true, code: "NO_MODEL_AVAILABLE" };
     }
 
     const inCanary = this.isTenantInCanary(tenantId, policy.canaryPercent ?? 0);
@@ -58,7 +58,7 @@ export class ModelRouter {
   private isTenantInCanary(tenantId: string, percent: number): boolean {
     if (percent <= 0) return false;
     if (percent >= 100) return true;
-    const hash = crypto.createHash('sha256').update(tenantId).digest('hex');
+    const hash = crypto.createHash("sha256").update(tenantId).digest("hex");
     const bucket = parseInt(hash.slice(0, 8), 16) % 100;
     return bucket < percent;
   }

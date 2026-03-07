@@ -1,5 +1,5 @@
 // Performance monitoring and optimization utilities
-import React from 'react';
+import React from "react";
 
 export interface PerformanceMetrics {
   // Core Web Vitals
@@ -51,7 +51,7 @@ export class PerformanceMonitor {
   }
 
   private setupObservers(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     // Core Web Vitals
     this.observeWebVitals();
@@ -65,74 +65,66 @@ export class PerformanceMonitor {
 
   private observeWebVitals(): void {
     // Largest Contentful Paint
-    this.createObserver('largest-contentful-paint', (entries) => {
+    this.createObserver("largest-contentful-paint", (entries) => {
       const lcp = entries[entries.length - 1];
-      this.recordMetric('lcp', lcp.startTime);
-      this.checkBudget('lcp', lcp.startTime);
+      this.recordMetric("lcp", lcp.startTime);
+      this.checkBudget("lcp", lcp.startTime);
     });
 
     // First Input Delay
-    this.createObserver('first-input', (entries) => {
+    this.createObserver("first-input", (entries) => {
       const fid = entries[0];
-      this.recordMetric('fid', fid.processingStart - fid.startTime);
-      this.checkBudget('fid', fid.processingStart - fid.startTime);
+      this.recordMetric("fid", fid.processingStart - fid.startTime);
+      this.checkBudget("fid", fid.processingStart - fid.startTime);
     });
 
     // Cumulative Layout Shift
-    this.createObserver('layout-shift', (entries) => {
+    this.createObserver("layout-shift", (entries) => {
       const cls = entries.reduce((sum, entry) => {
         if (!(entry as { hadRecentInput: boolean }).hadRecentInput) {
           sum += (entry as { value: number }).value;
         }
         return sum;
       }, 0);
-      this.recordMetric('cls', cls);
-      this.checkBudget('cls', cls);
+      this.recordMetric("cls", cls);
+      this.checkBudget("cls", cls);
     });
   }
 
   private observeNavigationTiming(): void {
-    window.addEventListener('load', () => {
+    window.addEventListener("load", () => {
       const navigation = performance.getEntriesByType(
-        'navigation',
+        "navigation"
       )[0] as PerformanceNavigationTiming;
       if (navigation) {
         // First Contentful Paint
-        const paintEntries = performance.getEntriesByType('paint');
-        const fcp = paintEntries.find(
-          (entry) => entry.name === 'first-contentful-paint',
-        );
+        const paintEntries = performance.getEntriesByType("paint");
+        const fcp = paintEntries.find((entry) => entry.name === "first-contentful-paint");
         if (fcp) {
-          this.recordMetric('fcp', fcp.startTime);
-          this.checkBudget('fcp', fcp.startTime);
+          this.recordMetric("fcp", fcp.startTime);
+          this.checkBudget("fcp", fcp.startTime);
         }
 
         // Time to First Byte
         const ttfb = navigation.responseStart - navigation.requestStart;
-        this.recordMetric('ttfb', ttfb);
+        this.recordMetric("ttfb", ttfb);
       }
     });
   }
 
   private observeResourceTiming(): void {
-    this.createObserver('resource', (entries) => {
+    this.createObserver("resource", (entries) => {
       entries.forEach((entry) => {
         const resource = entry as PerformanceResourceTiming;
-        if (resource.name.includes('/api/')) {
+        if (resource.name.includes("/api/")) {
           const apiPath = new URL(resource.name).pathname;
-          this.recordApiResponse(
-            apiPath,
-            resource.responseEnd - resource.responseStart,
-          );
+          this.recordApiResponse(apiPath, resource.responseEnd - resource.responseStart);
         }
       });
     });
   }
 
-  private createObserver(
-    type: string,
-    callback: (entries: PerformanceEntry[]) => void,
-  ): void {
+  private createObserver(type: string, callback: (entries: PerformanceEntry[]) => void): void {
     try {
       const observer = new PerformanceObserver((list) => {
         callback(list.getEntries());
@@ -159,7 +151,7 @@ export class PerformanceMonitor {
     const budget = this.budgets[metric];
     if (budget && value > budget.warning) {
       console.warn(
-        `Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`,
+        `Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`
       );
       this.onViolation?.(metric, value, budget.warning);
     }
@@ -173,14 +165,12 @@ export class PerformanceMonitor {
         this.metrics.renderTime = {};
       }
       this.metrics.renderTime[routeName] = duration;
-      this.recordMetric('routeChangeTime', duration);
-      this.checkBudget('routeChange', duration);
+      this.recordMetric("routeChangeTime", duration);
+      this.checkBudget("routeChange", duration);
     });
   }
 
-  onBudgetViolation(
-    callback: (metric: string, value: number, budget: number) => void,
-  ): void {
+  onBudgetViolation(callback: (metric: string, value: number, budget: number) => void): void {
     this.onViolation = callback;
   }
 
@@ -192,21 +182,21 @@ export class PerformanceMonitor {
     metric: string;
     value: number;
     budget: number;
-    status: 'good' | 'warning' | 'poor';
+    status: "good" | "warning" | "poor";
   }[] {
     const results: {
       metric: string;
       value: number;
       budget: number;
-      status: 'good' | 'warning' | 'poor';
+      status: "good" | "warning" | "poor";
     }[] = [];
 
     Object.entries(this.budgets).forEach(([metric, budget]) => {
       const value = this.metrics[metric as keyof PerformanceMetrics] as number;
       if (value !== undefined) {
-        let status: 'good' | 'warning' | 'poor' = 'good';
-        if (value > budget.warning) status = 'poor';
-        else if (value > budget.target) status = 'warning';
+        let status: "good" | "warning" | "poor" = "good";
+        if (value > budget.warning) status = "poor";
+        else if (value > budget.target) status = "warning";
 
         results.push({ metric, value, budget: budget.target, status });
       }
@@ -217,25 +207,24 @@ export class PerformanceMonitor {
 
   generateReport(): string {
     const status = this.getBudgetStatus();
-    const violations = status.filter((s) => s.status !== 'good');
+    const violations = status.filter((s) => s.status !== "good");
 
-    let report = '# Performance Report\n\n';
+    let report = "# Performance Report\n\n";
     report += `Generated: ${new Date().toISOString()}\n\n`;
 
     if (violations.length === 0) {
-      report += '✅ All performance budgets are within target ranges.\n\n';
+      report += "✅ All performance budgets are within target ranges.\n\n";
     } else {
       report += `⚠️ ${violations.length} performance budget violations detected:\n\n`;
       violations.forEach((v) => {
         report += `- **${v.metric}**: ${v.value.toFixed(2)}ms (budget: ${v.budget}ms) - ${v.status}\n`;
       });
-      report += '\n';
+      report += "\n";
     }
 
-    report += '## All Metrics\n\n';
+    report += "## All Metrics\n\n";
     status.forEach((s) => {
-      const icon =
-        s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
+      const icon = s.status === "good" ? "✅" : s.status === "warning" ? "⚠️" : "❌";
       report += `${icon} **${s.metric}**: ${s.value.toFixed(2)}ms (budget: ${s.budget}ms)\n`;
     });
 
@@ -249,9 +238,7 @@ export class PerformanceMonitor {
 }
 
 // React hook for performance monitoring
-export const usePerformanceMonitor = (
-  budgets?: Partial<PerformanceBudgets>,
-) => {
+export const usePerformanceMonitor = (budgets?: Partial<PerformanceBudgets>) => {
   const [monitor] = React.useState(() => new PerformanceMonitor(budgets));
   const [metrics, setMetrics] = React.useState<Partial<PerformanceMetrics>>({});
   const [violations, setViolations] = React.useState<
@@ -284,13 +271,13 @@ export const usePerformanceMonitor = (
 };
 
 function getDisplayName(WrappedComponent: React.ComponentType<object>): string {
-  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+  return WrappedComponent.displayName || WrappedComponent.name || "Component";
 }
 
 // Lazy loading utilities
 export const createLazyComponent = <T extends React.ComponentType<object>>(
   importFn: () => Promise<{ default: T }>,
-  fallback?: React.ComponentType,
+  fallback?: React.ComponentType
 ) => {
   const LazyComponent = React.lazy(importFn);
 
@@ -300,9 +287,9 @@ export const createLazyComponent = <T extends React.ComponentType<object>>(
       {
         fallback: fallback
           ? React.createElement(fallback)
-          : React.createElement('div', null, 'Loading...'),
+          : React.createElement("div", null, "Loading..."),
       },
-      React.createElement(LazyComponent, props),
+      React.createElement(LazyComponent, props)
     );
   WrappedComponent.displayName = `Lazy(${getDisplayName(LazyComponent as React.ComponentType<object>)})`;
   return WrappedComponent;
@@ -310,20 +297,16 @@ export const createLazyComponent = <T extends React.ComponentType<object>>(
 
 // Bundle splitting utility
 export const preloadRoute = (routePath: string): void => {
-  if (typeof window !== 'undefined') {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
+  if (typeof window !== "undefined") {
+    const link = document.createElement("link");
+    link.rel = "prefetch";
     link.href = routePath;
     document.head.appendChild(link);
   }
 };
 
 // Image optimization helpers
-export const createOptimizedImageSrc = (
-  src: string,
-  width: number,
-  quality = 75,
-): string => {
+export const createOptimizedImageSrc = (src: string, width: number, quality = 75): string => {
   // In production, this would integrate with an image optimization service
   return `${src}?w=${width}&q=${quality}`;
 };

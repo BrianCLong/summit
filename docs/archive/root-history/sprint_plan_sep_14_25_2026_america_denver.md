@@ -18,20 +18,24 @@
 ## 2) Scope (what ships)
 
 ### Epic A — Closed-loop FinOps (detect → explain → remediate)
+
 - **A1. Cost anomaly detection v1 (heuristic):** Detect spikes by tenant and subsystem (compute, storage, egress, adapters); trigger playbooks by thresholds and burn rates.
 - **A2. Automated remediation playbooks (policy-permitted):** Throttle runaway exports, pause ramps/features causing load, adjust retention tier with approval, recommend or auto-enable safe caching, suggest moving tenant to dedicated pool (paid add-on).
 - **A3. Cost explainability:** "Why did cost spike?" view linking metering events, receipts for heavy operations, recent deploys/flags, and adapter behavior.
 
 ### Epic B — SLA & Credit workflows (enterprise-friendly)
+
 - **B1. SLA report generator:** Monthly, tenant-scoped availability %, latency SLO compliance, incident summary, exclusions (maintenance windows) with receipts; export is auditor-disclosure ready.
 - **B2. SLA credit calculator (mechanism):** Input = SLA report + contract tier parameters; output = proposed credit amount + rationale + evidence links; dual-control approval required to issue credit.
 - **B3. Audit trail:** Credits produce receipts (calculation, approval, issuance—even if “manual credit issued”).
 
 ### Epic C — Incident learning loop (prevent repeats)
+
 - **C1. Postmortem bundle automation:** Template auto-populates from incident timeline, deploy/ramp events, policy denials, and receipts for mitigation actions; requires owner signoff with rationale; exports signed bundle.
 - **C2. Prevention action tracking:** Each postmortem produces 1–3 preventive actions with owners and due dates; Switchboard shows “incident debt” and completion rates.
 
 ### Epic D — Trust Reports as a renewal lever
+
 - **D1. Trust report enrichment:** Trust report includes SLA report summary, major incidents + postmortem bundle IDs, key cost actions + outcomes, continuous compliance exports (from Sprint 16), isolation/residency/BYOK posture (if enabled).
 - **D2. QBR auto-assembly:** QBR export automatically includes latest Trust Report, SLA report, cost & usage narrative, and expansion recommendations (from Sprint 19).
 
@@ -58,6 +62,7 @@
 ## 5) Sprint Demo (live scenario)
 
 **“Spike → fix → prove → credit (if needed)”**
+
 1. Simulate cost spike → anomaly detected → explanation shows top drivers.
 2. Run remediation playbook (approved) → cost stabilizes → receipts produced.
 3. Generate SLA report → show verifiable metrics + incident context.
@@ -115,4 +120,3 @@
 - Evaluate progression from heuristic anomalies to statistical baselines with provenance-bound feature flags.
 - Explore predictive credit risk scoring (credit likelihood) gated behind policy for future sprints.
 - Consider automated tenant-tier recommendations (dedicated pool upsell) based on anomaly history and cost drivers.
-

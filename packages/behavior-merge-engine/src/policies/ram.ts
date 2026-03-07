@@ -1,8 +1,8 @@
-import { TaskDelta, MergeResult, MergeContext, MergePolicy } from '../core/interfaces.js';
-import { EvidenceTracker } from '../evidence/tracker.js';
+import { TaskDelta, MergeResult, MergeContext, MergePolicy } from "../core/interfaces.js";
+import { EvidenceTracker } from "../evidence/tracker.js";
 
 export class RAMPolicy implements MergePolicy {
-  name = 'ram';
+  name = "ram";
 
   merge(deltas: TaskDelta[], context: MergeContext): MergeResult {
     const evidence = new EvidenceTracker();
@@ -10,7 +10,7 @@ export class RAMPolicy implements MergePolicy {
 
     // 1. Identify all parameter keys across all deltas
     const allKeys = new Set<string>();
-    deltas.forEach(d => Object.keys(d.parameters).forEach(k => allKeys.add(k)));
+    deltas.forEach((d) => Object.keys(d.parameters).forEach((k) => allKeys.add(k)));
 
     // 2. Iterate per parameter (or block)
     for (const key of allKeys) {
@@ -19,7 +19,7 @@ export class RAMPolicy implements MergePolicy {
       // If a delta is missing the key, it's effectively all zeros (or inactive)
 
       // First, determine length from the first delta that has it
-      const representative = deltas.find(d => d.parameters[key]);
+      const representative = deltas.find((d) => d.parameters[key]);
       if (!representative) continue; // Should not happen
       const len = representative.parameters[key].length;
 
@@ -79,12 +79,12 @@ export class RAMPolicy implements MergePolicy {
       let totalElements = len;
 
       for (let i = 0; i < len; i++) {
-         let count = 0;
-         for (const d of deltas) {
-             if (Math.abs((d.parameters[key]?.[i] ?? 0)) > context.threshold) count++;
-         }
-         if (count === 1) uniqueElements++;
-         else if (count > 1) sharedElements++;
+        let count = 0;
+        for (const d of deltas) {
+          if (Math.abs(d.parameters[key]?.[i] ?? 0) > context.threshold) count++;
+        }
+        if (count === 1) uniqueElements++;
+        else if (count > 1) sharedElements++;
       }
 
       evidence.addGlobalStats(uniqueElements, sharedElements, totalElements);
@@ -96,10 +96,10 @@ export class RAMPolicy implements MergePolicy {
 
     return {
       mergedDelta: {
-        id: 'merged-' + Date.now(),
-        parameters: mergedParams
+        id: "merged-" + Date.now(),
+        parameters: mergedParams,
       },
-      stats: evidence.getStats()
+      stats: evidence.getStats(),
     };
   }
 }

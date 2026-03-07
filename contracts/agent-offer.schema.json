@@ -10,12 +10,5 @@
     "predMinutes": { "type": "number" },
     "risk": { "type": "number" }
   },
-  "required": [
-    "taskId",
-    "arm",
-    "predEval",
-    "predCostUSD",
-    "predMinutes",
-    "risk"
-  ]
+  "required": ["taskId", "arm", "predEval", "predCostUSD", "predMinutes", "risk"]
 }

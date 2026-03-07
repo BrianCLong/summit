@@ -18,13 +18,6 @@
     "lib": ["DOM", "ES2020"],
     "allowImportingTsExtensions": false
   },
-  "include": [
-    "src/browser.ts",
-    "src/common/**/*",
-    "src/types.ts"
-  ],
-  "exclude": [
-    "src/node/**/*",
-    "src/cli/**/*"
-  ]
+  "include": ["src/browser.ts", "src/common/**/*", "src/types.ts"],
+  "exclude": ["src/node/**/*", "src/cli/**/*"]
 }

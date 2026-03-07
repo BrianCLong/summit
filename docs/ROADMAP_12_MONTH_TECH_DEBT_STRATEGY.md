@@ -40,13 +40,13 @@ Summit/IntelGraph platform has completed MVP-0 and MVP-1, delivering a deployabl
 
 ## Section 1: 12-Month Roadmap Table
 
-| Timeframe | Feature Work | Debt Work | Key Risks & Mitigations |
-|-----------|-------------|-----------|-------------------------|
-| **Q4 2025 (Nov-Dec)** | **Policy Intelligence v1:** Change-risk scoring, drift detection, rollback automation<br>**Inventory Graph UI v1:** Entity relationships, attack path preview<br>**SOAR v1.4:** Bulk ops, idempotent queues, circuit breakers<br>**Intel v4:** Active learning beta with inline feedback | **Critical TODO Sweep:** Close all TODOs in auth/RBAC, policy, SOAR paths<br>**GraphQL Schema Hardening:** Enable real-time subscriptions, fix schema gaps<br>**Test Coverage Uplift:** Collab sync E2E, DLP variable scanning | **Risk:** Holiday PTO reduces throughput<br>**Mitigation:** Lower commit points, strict WIP limits<br><br>**Risk:** Policy risk model mis-scores dangerous changes<br>**Mitigation:** Conservative weights, manual gates, preview-before-apply |
-| **Q1 2026 (Jan-Mar)** | **Agent Adapter Layer (AAL) v1:** LangGraph + AutoGen adapters with telemetry hooks<br>**Org Mesh Twin Console v1:** Autonomy budgets, flattening index, approval heatmap<br>**SOAR v1.5:** Graph-aware batching, per-tenant quotas, human-in-loop dashboard<br>**Memory & Tools:** Zep-style long-term memory, Bedrock Agents toolset adapters | **Neo4j Enterprise Migration:** Cluster mode, sharding config for 10M+ nodes<br>**Security Hardening Sprint:** SCIM sync implementation, external secrets operator, budget control enforcement<br>**Observability Debt:** AI model metrics dashboards, cross-modal telemetry | **Risk:** AAL integration complexity across frameworks<br>**Mitigation:** Phased rollout (LangGraph → AutoGen → SK), canary testing<br><br>**Risk:** Neo4j migration downtime<br>**Mitigation:** Blue-green deployment, readonly replica testing |
-| **Q2 2026 (Apr-Jun)** | **Contained L3 Playbooks:** SRE incident triage (OOOPSiferGPT), Finance recon, Growth ops with Tier-2/3 approvals<br>**Evidence Automation:** SOC2/ISO controls mapping, DECISIONS.md artifact streaming<br>**3 Customer Pilots:** ≥20% cycle-time reduction, ≤5% change failure rate<br>**Sector Pack Alpha:** Finserv compliance overlay (PCI-DSS) | **Performance Optimization Sprint:** Vector search migration (pgvector → Pinecone/Weaviate), graph query optimization (cypher profiling)<br>**Audit Trail Completion:** AI decision lineage, compliance evidence collectors<br>**Code Quality Sweep:** ESLint strict mode, unused dependency removal, bundle size optimization | **Risk:** Pilot customer data quality issues<br>**Mitigation:** Data validation layer, normalization pipelines, QA scripts<br><br>**Risk:** Vector DB migration causes semantic search regressions<br>**Mitigation:** A/B testing, quality metrics, rollback plan |
-| **Q3 2026 (Jul-Sep)** | **Autonomy Credits Live:** CFO dashboards, internal loan/borrow with policy enforcement<br>**Sector Packs GA:** Finserv + Public Sector with prebuilt integrations, residency toggles<br>**AAL v2:** Semantic Kernel adapter, multi-runtime plan orchestration<br>**2-Week PoV Factory:** Scripts + ROI deck, aim for ≥80% PoV win-rate<br>**Intel v5:** Active learning cadence, annotator quality metrics, disagreement detection | **Multi-Tenant Isolation Audit:** Namespace segregation, cross-tenant data leak prevention testing<br>**Backup & DR Hardening:** Encrypted backups, disaster recovery runbooks, failover testing<br>**Dependency Security Sweep:** CVE remediation, supply chain attestation, SBOM completeness | **Risk:** Autonomy Credit Market adoption slow<br>**Mitigation:** Early CFO engagement, ROI case studies, internal dogfooding<br><br>**Risk:** Multi-tenant bugs in production<br>**Mitigation:** Tenant isolation smoke tests, chaos engineering, customer data segregation audits |
-| **Q4 2026 (Oct-Dec)** | **Org Mesh Twin v2:** Planning surface (click node → autonomy redistribution with Monte Carlo)<br>**SLO-Driven Progressive Delivery:** Default for all agent deployments, Prometheus analysis gates<br>**Sovereign Mode GA:** Single-tenant VPC, FIPS crypto, air-gapped artifact mirroring<br>**IntelGraph 2.0:** AutonomyCredit + EvidenceLink + CausalOutcome entities<br>**Maestro Conductor++:** Plan evaluators library, two-man rule automation | **Final TODO Elimination:** Zero production TODOs, convert to tracked issues<br>**Compliance Readiness Sprint:** FedRAMP controls mapping, audit documentation, penetration testing<br>**Performance at Scale Validation:** 10M node load tests, 100+ concurrent user stress tests<br>**Platform Stability Hardening:** MTTR <30min, rollback <5min, 99.9% uptime SLO | **Risk:** FedRAMP audit delays GA launch<br>**Mitigation:** Early auditor engagement, continuous compliance monitoring<br><br>**Risk:** Scale testing reveals unknown bottlenecks<br>**Mitigation:** Gradual ramp testing, profiling, capacity planning, horizontal scaling |
+| Timeframe             | Feature Work                                                                                                                                                                                                                                                                                                                                                                                                                                           | Debt Work                                                                                                                                                                                                                                                                                                                                                             | Key Risks & Mitigations                                                                                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Q4 2025 (Nov-Dec)** | **Policy Intelligence v1:** Change-risk scoring, drift detection, rollback automation<br>**Inventory Graph UI v1:** Entity relationships, attack path preview<br>**SOAR v1.4:** Bulk ops, idempotent queues, circuit breakers<br>**Intel v4:** Active learning beta with inline feedback                                                                                                                                                               | **Critical TODO Sweep:** Close all TODOs in auth/RBAC, policy, SOAR paths<br>**GraphQL Schema Hardening:** Enable real-time subscriptions, fix schema gaps<br>**Test Coverage Uplift:** Collab sync E2E, DLP variable scanning                                                                                                                                        | **Risk:** Holiday PTO reduces throughput<br>**Mitigation:** Lower commit points, strict WIP limits<br><br>**Risk:** Policy risk model mis-scores dangerous changes<br>**Mitigation:** Conservative weights, manual gates, preview-before-apply                                      |
+| **Q1 2026 (Jan-Mar)** | **Agent Adapter Layer (AAL) v1:** LangGraph + AutoGen adapters with telemetry hooks<br>**Org Mesh Twin Console v1:** Autonomy budgets, flattening index, approval heatmap<br>**SOAR v1.5:** Graph-aware batching, per-tenant quotas, human-in-loop dashboard<br>**Memory & Tools:** Zep-style long-term memory, Bedrock Agents toolset adapters                                                                                                        | **Neo4j Enterprise Migration:** Cluster mode, sharding config for 10M+ nodes<br>**Security Hardening Sprint:** SCIM sync implementation, external secrets operator, budget control enforcement<br>**Observability Debt:** AI model metrics dashboards, cross-modal telemetry                                                                                          | **Risk:** AAL integration complexity across frameworks<br>**Mitigation:** Phased rollout (LangGraph → AutoGen → SK), canary testing<br><br>**Risk:** Neo4j migration downtime<br>**Mitigation:** Blue-green deployment, readonly replica testing                                    |
+| **Q2 2026 (Apr-Jun)** | **Contained L3 Playbooks:** SRE incident triage (OOOPSiferGPT), Finance recon, Growth ops with Tier-2/3 approvals<br>**Evidence Automation:** SOC2/ISO controls mapping, DECISIONS.md artifact streaming<br>**3 Customer Pilots:** ≥20% cycle-time reduction, ≤5% change failure rate<br>**Sector Pack Alpha:** Finserv compliance overlay (PCI-DSS)                                                                                                   | **Performance Optimization Sprint:** Vector search migration (pgvector → Pinecone/Weaviate), graph query optimization (cypher profiling)<br>**Audit Trail Completion:** AI decision lineage, compliance evidence collectors<br>**Code Quality Sweep:** ESLint strict mode, unused dependency removal, bundle size optimization                                        | **Risk:** Pilot customer data quality issues<br>**Mitigation:** Data validation layer, normalization pipelines, QA scripts<br><br>**Risk:** Vector DB migration causes semantic search regressions<br>**Mitigation:** A/B testing, quality metrics, rollback plan                   |
+| **Q3 2026 (Jul-Sep)** | **Autonomy Credits Live:** CFO dashboards, internal loan/borrow with policy enforcement<br>**Sector Packs GA:** Finserv + Public Sector with prebuilt integrations, residency toggles<br>**AAL v2:** Semantic Kernel adapter, multi-runtime plan orchestration<br>**2-Week PoV Factory:** Scripts + ROI deck, aim for ≥80% PoV win-rate<br>**Intel v5:** Active learning cadence, annotator quality metrics, disagreement detection                    | **Multi-Tenant Isolation Audit:** Namespace segregation, cross-tenant data leak prevention testing<br>**Backup & DR Hardening:** Encrypted backups, disaster recovery runbooks, failover testing<br>**Dependency Security Sweep:** CVE remediation, supply chain attestation, SBOM completeness                                                                       | **Risk:** Autonomy Credit Market adoption slow<br>**Mitigation:** Early CFO engagement, ROI case studies, internal dogfooding<br><br>**Risk:** Multi-tenant bugs in production<br>**Mitigation:** Tenant isolation smoke tests, chaos engineering, customer data segregation audits |
+| **Q4 2026 (Oct-Dec)** | **Org Mesh Twin v2:** Planning surface (click node → autonomy redistribution with Monte Carlo)<br>**SLO-Driven Progressive Delivery:** Default for all agent deployments, Prometheus analysis gates<br>**Sovereign Mode GA:** Single-tenant VPC, FIPS crypto, air-gapped artifact mirroring<br>**IntelGraph 2.0:** AutonomyCredit + EvidenceLink + CausalOutcome entities<br>**Maestro Conductor++:** Plan evaluators library, two-man rule automation | **Final TODO Elimination:** Zero production TODOs, convert to tracked issues<br>**Compliance Readiness Sprint:** FedRAMP controls mapping, audit documentation, penetration testing<br>**Performance at Scale Validation:** 10M node load tests, 100+ concurrent user stress tests<br>**Platform Stability Hardening:** MTTR <30min, rollback <5min, 99.9% uptime SLO | **Risk:** FedRAMP audit delays GA launch<br>**Mitigation:** Early auditor engagement, continuous compliance monitoring<br><br>**Risk:** Scale testing reveals unknown bottlenecks<br>**Mitigation:** Gradual ramp testing, profiling, capacity planning, horizontal scaling         |
 
 ---
 
@@ -54,53 +54,53 @@ Summit/IntelGraph platform has completed MVP-0 and MVP-1, delivering a deployabl
 
 ### 1. **Platform Reliability & Performance**
 
-| Metric | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method |
-|--------|----------------|----------------|----------------|-------------------|
-| System Uptime (SLO) | 99.5% | 99.7% | 99.9% | Prometheus uptime probes, incident tracking |
-| MTTR (Mean Time To Recovery) | <60 min | <45 min | <30 min | Incident timeline analysis, runbook execution time |
-| Rollback Time | <10 min | <7 min | <5 min | Deployment automation metrics, Argo Rollouts analysis |
-| Change Failure Rate | ≤8% | ≤6% | ≤5% | Failed deployments / total deployments, post-deploy incident correlation |
-| Graph Query P95 Latency | <500ms | <300ms | <200ms | Prometheus histogram metrics, Neo4j query profiling |
+| Metric                       | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method                                                       |
+| ---------------------------- | -------------- | -------------- | -------------- | ------------------------------------------------------------------------ |
+| System Uptime (SLO)          | 99.5%          | 99.7%          | 99.9%          | Prometheus uptime probes, incident tracking                              |
+| MTTR (Mean Time To Recovery) | <60 min        | <45 min        | <30 min        | Incident timeline analysis, runbook execution time                       |
+| Rollback Time                | <10 min        | <7 min         | <5 min         | Deployment automation metrics, Argo Rollouts analysis                    |
+| Change Failure Rate          | ≤8%            | ≤6%            | ≤5%            | Failed deployments / total deployments, post-deploy incident correlation |
+| Graph Query P95 Latency      | <500ms         | <300ms         | <200ms         | Prometheus histogram metrics, Neo4j query profiling                      |
 
 ### 2. **Security & Compliance**
 
-| Metric | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method |
-|--------|----------------|----------------|----------------|-------------------|
-| Critical CVEs Open | 0 | 0 | 0 | Trivy scans, dependency audits, CVE tracking |
-| Production TODOs | <50 | <10 | 0 | Automated code scanning, tech debt tracker |
-| Audit Trail Coverage | 90% | 95% | 100% | Compliance control mapping, evidence collector coverage |
-| Secrets in Code (detection) | 0 violations | 0 violations | 0 violations | Gitleaks, pre-commit hooks, SAST scans |
-| Multi-Tenant Isolation Tests | N/A | 100% pass | 100% pass | Chaos engineering, penetration testing, data segregation audits |
+| Metric                       | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method                                              |
+| ---------------------------- | -------------- | -------------- | -------------- | --------------------------------------------------------------- |
+| Critical CVEs Open           | 0              | 0              | 0              | Trivy scans, dependency audits, CVE tracking                    |
+| Production TODOs             | <50            | <10            | 0              | Automated code scanning, tech debt tracker                      |
+| Audit Trail Coverage         | 90%            | 95%            | 100%           | Compliance control mapping, evidence collector coverage         |
+| Secrets in Code (detection)  | 0 violations   | 0 violations   | 0 violations   | Gitleaks, pre-commit hooks, SAST scans                          |
+| Multi-Tenant Isolation Tests | N/A            | 100% pass      | 100% pass      | Chaos engineering, penetration testing, data segregation audits |
 
 ### 3. **Feature Adoption & Value**
 
-| Metric | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method |
-|--------|----------------|----------------|----------------|-------------------|
-| Autonomy Index (Tier ≥1 tasks) | N/A | +15% vs baseline | +40% vs baseline | Task completion telemetry, manual vs automated ratio |
-| Graph UI Adoption | ≥70% of P1/P2 investigations | ≥85% | ≥95% | UI telemetry, investigation workflow analytics |
-| SOAR Bulk Ops Success Rate | ≥92% | ≥95% | ≥98% | SOAR run logs, action success/failure tracking |
-| Intel Model Brier Score | ≤0.15 (v4) | ≤0.12 (v5) | ≤0.10 (v6) | Offline evaluation sets, calibration analysis |
-| PoV Win Rate | N/A | N/A | ≥80% | Sales pipeline tracking, pilot conversion rates |
+| Metric                         | Q4 2025 Target               | Q2 2026 Target   | Q4 2026 Target   | Measurement Method                                   |
+| ------------------------------ | ---------------------------- | ---------------- | ---------------- | ---------------------------------------------------- |
+| Autonomy Index (Tier ≥1 tasks) | N/A                          | +15% vs baseline | +40% vs baseline | Task completion telemetry, manual vs automated ratio |
+| Graph UI Adoption              | ≥70% of P1/P2 investigations | ≥85%             | ≥95%             | UI telemetry, investigation workflow analytics       |
+| SOAR Bulk Ops Success Rate     | ≥92%                         | ≥95%             | ≥98%             | SOAR run logs, action success/failure tracking       |
+| Intel Model Brier Score        | ≤0.15 (v4)                   | ≤0.12 (v5)       | ≤0.10 (v6)       | Offline evaluation sets, calibration analysis        |
+| PoV Win Rate                   | N/A                          | N/A              | ≥80%             | Sales pipeline tracking, pilot conversion rates      |
 
 ### 4. **Technical Excellence**
 
-| Metric | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method |
-|--------|----------------|----------------|----------------|-------------------|
-| Test Coverage | ≥75% | ≥80% | ≥85% | Jest/Playwright coverage reports, CI metrics |
-| Build Time (CI) | <12 min | <10 min | <8 min | GitHub Actions workflow duration, cache hit rates |
-| Bundle Size (Client) | <2.5 MB gzip | <2 MB gzip | <1.5 MB gzip | Webpack bundle analyzer, Lighthouse audits |
-| GraphQL Schema Health | 0 breaking changes | 0 breaking changes | 0 breaking changes | Schema versioning, deprecation tracking |
-| AI Model Inference P95 Latency | <3s | <2s | <1.5s | Model serving metrics, inference telemetry |
+| Metric                         | Q4 2025 Target     | Q2 2026 Target     | Q4 2026 Target     | Measurement Method                                |
+| ------------------------------ | ------------------ | ------------------ | ------------------ | ------------------------------------------------- |
+| Test Coverage                  | ≥75%               | ≥80%               | ≥85%               | Jest/Playwright coverage reports, CI metrics      |
+| Build Time (CI)                | <12 min            | <10 min            | <8 min             | GitHub Actions workflow duration, cache hit rates |
+| Bundle Size (Client)           | <2.5 MB gzip       | <2 MB gzip         | <1.5 MB gzip       | Webpack bundle analyzer, Lighthouse audits        |
+| GraphQL Schema Health          | 0 breaking changes | 0 breaking changes | 0 breaking changes | Schema versioning, deprecation tracking           |
+| AI Model Inference P95 Latency | <3s                | <2s                | <1.5s              | Model serving metrics, inference telemetry        |
 
 ### 5. **Business & ROI**
 
-| Metric | Q4 2025 Target | Q2 2026 Target | Q4 2026 Target | Measurement Method |
-|--------|----------------|----------------|----------------|-------------------|
-| Customer Pilots Active | 0 | 3 | 10 | Customer engagement tracking |
-| Cycle Time Reduction (Pilots) | N/A | ≥20% | ≥35% | Pre/post pilot analytics, investigation completion time |
-| Cost Per Outcome (Autonomy) | N/A | Baseline established | -25% vs baseline | Autonomy credit usage, outcome correlation, CFO dashboards |
-| Evidence Freshness (Audit-Ready) | N/A | ≤48h | ≤24h | Compliance evidence timestamp tracking, artifact streaming |
-| Flattening Index (Mgr:IC Ratio) | N/A | Baseline | ≤1:12 | Org structure analytics, autonomy delegation metrics |
+| Metric                           | Q4 2025 Target | Q2 2026 Target       | Q4 2026 Target   | Measurement Method                                         |
+| -------------------------------- | -------------- | -------------------- | ---------------- | ---------------------------------------------------------- |
+| Customer Pilots Active           | 0              | 3                    | 10               | Customer engagement tracking                               |
+| Cycle Time Reduction (Pilots)    | N/A            | ≥20%                 | ≥35%             | Pre/post pilot analytics, investigation completion time    |
+| Cost Per Outcome (Autonomy)      | N/A            | Baseline established | -25% vs baseline | Autonomy credit usage, outcome correlation, CFO dashboards |
+| Evidence Freshness (Audit-Ready) | N/A            | ≤48h                 | ≤24h             | Compliance evidence timestamp tracking, artifact streaming |
+| Flattening Index (Mgr:IC Ratio)  | N/A            | Baseline             | ≤1:12            | Org structure analytics, autonomy delegation metrics       |
 
 ---
 
@@ -132,23 +132,25 @@ Summit/IntelGraph platform has completed MVP-0 and MVP-1, delivering a deployabl
 
 ### A. Quarterly Feature-to-Debt Allocation
 
-| Quarter | Feature Work % | Debt Work % | Rationale |
-|---------|---------------|-------------|-----------|
-| Q4 2025 | 70% | 30% | Foundation quarter—prioritize Policy Intelligence launch while closing critical auth/RBAC TODOs |
-| Q1 2026 | 60% | 40% | Heavy infrastructure—AAL development balanced with Neo4j Enterprise migration and security hardening |
-| Q2 2026 | 75% | 25% | Customer pilots demand feature focus; performance optimization runs parallel as "enabler" work |
-| Q3 2026 | 65% | 35% | Autonomy Credits + Sector Packs launches paired with multi-tenant isolation audits and DR hardening |
-| Q4 2026 | 50% | 50% | GA hardening—equal weight to final features (Sovereign Mode, IntelGraph 2.0) and compliance/scale validation |
+| Quarter | Feature Work % | Debt Work % | Rationale                                                                                                    |
+| ------- | -------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| Q4 2025 | 70%            | 30%         | Foundation quarter—prioritize Policy Intelligence launch while closing critical auth/RBAC TODOs              |
+| Q1 2026 | 60%            | 40%         | Heavy infrastructure—AAL development balanced with Neo4j Enterprise migration and security hardening         |
+| Q2 2026 | 75%            | 25%         | Customer pilots demand feature focus; performance optimization runs parallel as "enabler" work               |
+| Q3 2026 | 65%            | 35%         | Autonomy Credits + Sector Packs launches paired with multi-tenant isolation audits and DR hardening          |
+| Q4 2026 | 50%            | 50%         | GA hardening—equal weight to final features (Sovereign Mode, IntelGraph 2.0) and compliance/scale validation |
 
 ### B. Decision Framework: Feature vs. Debt Trade-offs
 
 **When to prioritize debt retirement:**
+
 - Debt blocks feature delivery (e.g., Neo4j scale prevents 10M node target)
 - Debt creates customer-facing risk (e.g., SCIM sync gaps delay enterprise pilots)
 - Debt accumulates compound interest (e.g., GraphQL schema gaps break real-time features)
 - Regulatory/compliance forcing function (e.g., FedRAMP audit requires TODO elimination)
 
 **When to defer debt:**
+
 - Debt is isolated to non-critical paths (e.g., admin UI polish TODOs)
 - Feature unlock creates disproportionate value (e.g., AAL adoption > test coverage gains)
 - Workaround is low-risk and documented (e.g., manual SCIM sync for pilots)
@@ -157,12 +159,14 @@ Summit/IntelGraph platform has completed MVP-0 and MVP-1, delivering a deployabl
 ### C. Dependencies & Pre-requisites
 
 **External Dependencies:**
+
 - Neo4j Enterprise license procurement (Q1 2026 start)
 - Vector database vendor selection (Pinecone vs. Weaviate vs. Qdrant—Q1 decision)
 - Customer pilot agreements and data access (Q1-Q2 legal/procurement)
 - FedRAMP auditor engagement (Q3 2026 kickoff)
 
 **Internal Prerequisites:**
+
 - AAL design finalized with LangGraph/AutoGen maintainers (Q4 2025)
 - IntelGraph 2.0 schema backward compatibility plan (Q3 2026)
 - Autonomy Credits pricing model approved by CFO/board (Q2 2026)
@@ -186,8 +190,9 @@ Summit/IntelGraph platform has completed MVP-0 and MVP-1, delivering a deployabl
 **Next Review:** December 15, 2025 (Q4 2025 sprint retro + Q1 2026 planning)
 
 **Change Log:**
+
 - v1.0 (Nov 20, 2025): Initial 12-month roadmap based on codebase analysis, sprint plans, and strategic docs
 
 ---
 
-*This roadmap balances aggressive feature delivery with disciplined technical debt retirement, ensuring Summit/IntelGraph reaches enterprise-grade GA readiness while maintaining platform stability and customer trust.*
+_This roadmap balances aggressive feature delivery with disciplined technical debt retirement, ensuring Summit/IntelGraph reaches enterprise-grade GA readiness while maintaining platform stability and customer trust._

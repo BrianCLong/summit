@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 ## 1. Governance Gate Workflow Verification
 
 - [ ] **Workflow Success**: Verify the `GA Risk Gate` workflow run is **GREEN** (Success).
@@ -20,7 +19,7 @@
 
 - [ ] **Main Branch Status**: Verify the `ci.yml` run triggered by the merge is **GREEN**.
 - [ ] **Merge Queue**: Verify `pnpm pr:triage` shows the queue is processing (not stalled).
-- [ ] **No Unexpected Failures**: Check that no *new* flakes were introduced (compare with previous run).
+- [ ] **No Unexpected Failures**: Check that no _new_ flakes were introduced (compare with previous run).
 
 ## 3. Evidence Collection
 

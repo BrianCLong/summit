@@ -15,18 +15,18 @@ on:
   pull_request:
     branches: [main, release/*]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
   push:
     branches: [main, release/*]
   workflow_dispatch:
     inputs:
       smoke_timeout:
-        description: 'Smoke test timeout in seconds'
+        description: "Smoke test timeout in seconds"
         required: false
-        default: '120'
+        default: "120"
 
 concurrency:
   group: smoke-gate-${{ github.ref }}
@@ -93,7 +93,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Get pnpm store directory
         shell: bash

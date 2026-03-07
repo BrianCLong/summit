@@ -7,9 +7,9 @@ import '@testing-library/jest-dom'
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }))
 
 expect.extend(toHaveNoViolations)
@@ -35,31 +35,37 @@ describe('Investigations Page Accessibility', () => {
 
     // In our implementation, the graph nodes have role="graphics-symbol" and are focusable
     const nodes = screen.getAllByRole('graphics-symbol')
-    const firstNode = nodes.find(n => n.getAttribute('aria-label')?.includes('Strategic Hub Alpha'))
+    const firstNode = nodes.find(n =>
+      n.getAttribute('aria-label')?.includes('Strategic Hub Alpha')
+    )
 
     if (firstNode) {
-        fireEvent.click(firstNode)
+      fireEvent.click(firstNode)
 
-        // Check aria-live region (hidden)
-        const announcement = screen.getByText(/Selected entity: Strategic Hub Alpha/i)
-        expect(announcement).toBeInTheDocument()
-        expect(announcement.parentElement).toHaveAttribute('aria-live', 'polite')
+      // Check aria-live region (hidden)
+      const announcement = screen.getByText(
+        /Selected entity: Strategic Hub Alpha/i
+      )
+      expect(announcement).toBeInTheDocument()
+      expect(announcement.parentElement).toHaveAttribute('aria-live', 'polite')
     }
   })
 
   it('should support keyboard navigation to nodes', () => {
     render(<Investigations />)
-    const nodes = screen.getAllByRole('graphics-symbol').filter(n => n.tagName === 'g')
+    const nodes = screen
+      .getAllByRole('graphics-symbol')
+      .filter(n => n.tagName === 'g')
 
     if (nodes.length > 0) {
-        const firstNode = nodes[0]
-        expect(firstNode).toHaveAttribute('tabindex', '0')
+      const firstNode = nodes[0]
+      expect(firstNode).toHaveAttribute('tabindex', '0')
 
-        firstNode.focus()
-        expect(document.activeElement).toBe(firstNode)
+      firstNode.focus()
+      expect(document.activeElement).toBe(firstNode)
 
-        fireEvent.keyDown(firstNode, { key: 'Enter' })
-        expect(screen.getByText(/Strategic Hub Alpha/i)).toBeInTheDocument()
+      fireEvent.keyDown(firstNode, { key: 'Enter' })
+      expect(screen.getByText(/Strategic Hub Alpha/i)).toBeInTheDocument()
     }
   })
 })

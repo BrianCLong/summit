@@ -1,6 +1,6 @@
-import type { AdapterDescriptor, AdapterRequest } from './adapter.js';
-import { AdapterLifecycleIntent, AdapterLifecycleStage } from './lifecycle.js';
-import type { PolicyDecision } from './policy.js';
+import type { AdapterDescriptor, AdapterRequest } from "./adapter.js";
+import { AdapterLifecycleIntent, AdapterLifecycleStage } from "./lifecycle.js";
+import type { PolicyDecision } from "./policy.js";
 
 export interface LifecycleGuardContext {
   adapter: AdapterDescriptor;
@@ -22,5 +22,5 @@ export interface LifecycleGuardDecision {
 
 export type LifecycleGuard = (
   intent: AdapterLifecycleIntent,
-  context: LifecycleGuardContext,
+  context: LifecycleGuardContext
 ) => Promise<LifecycleGuardDecision>;

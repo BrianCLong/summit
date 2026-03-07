@@ -7,12 +7,14 @@
 ## Executive Summary
 
 This audit analyzed the Summit/IntelGraph CI/CD pipelines to identify bottlenecks and opportunities for optimization. The current pipeline includes 100+ workflow files with the main workflows being:
+
 - `ci.yml` (main CI pipeline)
 - `security.yml` (security scanning)
 - `release.yml` (release process)
 - `server-ci.yml`, `python-ci.yml`, etc. (component-specific CI)
 
 **Key Findings**:
+
 - Current average CI time: ~15-25 minutes for full pipeline
 - Identified 12 major bottlenecks
 - Potential time savings: 40-60% (estimated 8-12 minute pipeline)
@@ -22,14 +24,17 @@ This audit analyzed the Summit/IntelGraph CI/CD pipelines to identify bottleneck
 ## Identified Bottlenecks
 
 ### 1. **Redundant Matrix Builds** (HIGH IMPACT)
+
 **Current State**: `ci.yml` runs full test suite on both Node 18.x and 20.x
+
 ```yaml
 strategy:
   matrix:
-    node: ['18.x', '20.x']
+    node: ["18.x", "20.x"]
 ```
 
 **Problem**:
+
 - Doubles the execution time for build, lint, typecheck, and tests
 - Most checks don't need to run on multiple Node versions
 
@@ -39,14 +44,17 @@ strategy:
 ---
 
 ### 2. **Sequential Job Dependencies** (HIGH IMPACT)
+
 **Current State**: `golden-path` job waits for `build-test` to complete
+
 ```yaml
 golden-path:
   runs-on: ubuntu-latest
-  needs: build-test  # BLOCKS until build-test finishes
+  needs: build-test # BLOCKS until build-test finishes
 ```
 
 **Problem**:
+
 - Golden path tests could start earlier
 - No parallelization of independent validations
 
@@ -56,13 +64,16 @@ golden-path:
 ---
 
 ### 3. **Inefficient Docker Layer Caching** (MEDIUM IMPACT)
+
 **Current State**: Using local buildx cache
+
 ```yaml
 cache-from: type=local,src=/tmp/.buildx-cache
 cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
 ```
 
 **Problem**:
+
 - Local cache doesn't persist well across runners
 - No registry-based caching
 - Cache misses are common
@@ -73,13 +84,16 @@ cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
 ---
 
 ### 4. **Multiple Dependency Installations** (MEDIUM IMPACT)
+
 **Current State**: Each job installs dependencies separately
+
 ```yaml
 - name: Install dependencies
   run: pnpm install --frozen-lockfile
 ```
 
 **Problem**:
+
 - pnpm store cache isn't shared optimally between jobs
 - Multiple cache restores/saves slow down pipeline
 
@@ -89,13 +103,16 @@ cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
 ---
 
 ### 5. **Package Manager Inconsistency** (MEDIUM IMPACT)
+
 **Current State**: `server-ci.yml` uses npm instead of pnpm
+
 ```yaml
-cache: 'npm'  # Should be 'pnpm'
-cache-dependency-path: 'server/package-lock.json'  # Wrong file
+cache: "npm" # Should be 'pnpm'
+cache-dependency-path: "server/package-lock.json" # Wrong file
 ```
 
 **Problem**:
+
 - Violates project standards (CLAUDE.md: "Always use pnpm")
 - Slower install times with npm
 - Cache inconsistency
@@ -106,7 +123,9 @@ cache-dependency-path: 'server/package-lock.json'  # Wrong file
 ---
 
 ### 6. **Missing Concurrency Controls** (MEDIUM IMPACT)
+
 **Current State**: Main `ci.yml` has no concurrency group
+
 ```yaml
 # Missing:
 concurrency:
@@ -115,6 +134,7 @@ concurrency:
 ```
 
 **Problem**:
+
 - Multiple CI runs for rapid pushes waste resources
 - Old runs continue even when superseded
 
@@ -124,12 +144,15 @@ concurrency:
 ---
 
 ### 7. **Inefficient Frozen Lockfile Handling** (LOW-MEDIUM IMPACT)
+
 **Current State**: Changed workspace workflows use `--frozen-lockfile=false`
+
 ```yaml
-pnpm i --frozen-lockfile=false  # Allows lockfile changes
+pnpm i --frozen-lockfile=false # Allows lockfile changes
 ```
 
 **Problem**:
+
 - Slower installs (resolves dependencies instead of using lockfile)
 - Potential for non-deterministic builds
 
@@ -139,12 +162,15 @@ pnpm i --frozen-lockfile=false  # Allows lockfile changes
 ---
 
 ### 8. **No Turbo Remote Caching** (MEDIUM IMPACT)
+
 **Current State**: Turbo uses local cache only
+
 ```yaml
 turbo run build --cache-dir=.turbo
 ```
 
 **Problem**:
+
 - Build artifacts not shared across CI runs
 - Each run rebuilds from scratch
 
@@ -154,13 +180,16 @@ turbo run build --cache-dir=.turbo
 ---
 
 ### 9. **Unoptimized Test Execution** (LOW-MEDIUM IMPACT)
+
 **Current State**: Full test suite runs on every change
+
 ```yaml
 - name: Unit & integration tests
   run: pnpm -w run test
 ```
 
 **Problem**:
+
 - No test splitting or sharding
 - Tests not filtered by affected packages
 
@@ -170,13 +199,16 @@ turbo run build --cache-dir=.turbo
 ---
 
 ### 10. **Docker Compose Startup Inefficiency** (LOW IMPACT)
+
 **Current State**: `make up` runs sequentially with `--build`
+
 ```yaml
 - name: Bring up stack (make up)
   run: make up
 ```
 
 **Problem**:
+
 - Services start sequentially
 - Health check waiting is not optimized
 
@@ -186,13 +218,16 @@ turbo run build --cache-dir=.turbo
 ---
 
 ### 11. **Missing Build Parallelization** (MEDIUM IMPACT)
+
 **Current State**: Workspace build runs sequentially
+
 ```yaml
 - name: Build workspace
   run: pnpm -w run build
 ```
 
 **Problem**:
+
 - Turbo could parallelize builds better with tuning
 - No explicit concurrency limits
 
@@ -202,7 +237,9 @@ turbo run build --cache-dir=.turbo
 ---
 
 ### 12. **Excessive SBOM/Security Scans in CI** (LOW IMPACT)
+
 **Current State**: SBOM and Trivy run on every CI run
+
 ```yaml
 - name: Trivy vulnerability scan
   if: matrix.node == '20.x'
@@ -210,6 +247,7 @@ turbo run build --cache-dir=.turbo
 ```
 
 **Problem**:
+
 - Security scans slow down feedback loop
 - Could run nightly or on main only
 
@@ -237,6 +275,7 @@ turbo run build --cache-dir=.turbo
 ### Phase 1: Quick Wins (1-2 hours, 30-40% improvement)
 
 1. **Add Concurrency Controls to Main CI**
+
    ```yaml
    concurrency:
      group: ci-${{ github.head_ref || github.sha }}
@@ -260,6 +299,7 @@ turbo run build --cache-dir=.turbo
 ### Phase 2: Caching Improvements (2-4 hours, 20-30% improvement)
 
 5. **Enable Turbo Remote Cache**
+
    ```yaml
    - uses: actions/cache@v4
      with:
@@ -325,17 +365,20 @@ Total Time: ~8 minutes (vs current ~15-25 min)
 ## Implementation Priority
 
 ### Critical (Do First):
+
 1. Add concurrency controls
 2. Split into parallel lanes
 3. Remove redundant Node matrix
 4. Migrate server-ci to pnpm
 
 ### High Value:
+
 5. Enable Turbo remote cache
 6. Optimize Docker caching
 7. Improve pnpm cache strategy
 
 ### Nice to Have:
+
 8. Test sharding
 9. Pre-built base images
 10. Advanced affected detection
@@ -344,15 +387,15 @@ Total Time: ~8 minutes (vs current ~15-25 min)
 
 ## Estimated Impact
 
-| Optimization | Time Saved | Complexity | Priority |
-|-------------|-----------|-----------|----------|
-| Concurrency controls | 0-10 min (variable) | Low | Critical |
-| Parallel lanes | 5-7 min | Medium | Critical |
-| Remove Node matrix | 4-6 min | Low | Critical |
-| Turbo remote cache | 2-4 min | Medium | High |
-| Docker registry cache | 2-3 min | Medium | High |
-| pnpm optimization | 1-2 min | Low | High |
-| Test sharding | 2-4 min | High | Medium |
+| Optimization          | Time Saved          | Complexity | Priority |
+| --------------------- | ------------------- | ---------- | -------- |
+| Concurrency controls  | 0-10 min (variable) | Low        | Critical |
+| Parallel lanes        | 5-7 min             | Medium     | Critical |
+| Remove Node matrix    | 4-6 min             | Low        | Critical |
+| Turbo remote cache    | 2-4 min             | Medium     | High     |
+| Docker registry cache | 2-3 min             | Medium     | High     |
+| pnpm optimization     | 1-2 min             | Low        | High     |
+| Test sharding         | 2-4 min             | High       | Medium   |
 
 **Total Potential Savings**: 40-60% reduction in CI time
 
@@ -373,6 +416,7 @@ Total Time: ~8 minutes (vs current ~15-25 min)
 **Total Workflows**: 100+
 
 **Critical Workflows**:
+
 - ci.yml (main CI)
 - security.yml (security)
 - release.yml (releases)

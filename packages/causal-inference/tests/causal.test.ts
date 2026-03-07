@@ -2,11 +2,13 @@
  * Tests for Causal Inference
  */
 
-import { PropensityScoreMatcher } from '../src/methods/propensity-score-matching.js';
-import { DifferenceInDifferences } from '../src/methods/difference-in-differences.js';
+import { PropensityScoreMatcher } from "../src/methods/propensity-score-matching.js";
+import { DifferenceInDifferences } from "../src/methods/difference-in-differences.js";
 
-describe('PropensityScoreMatcher', () => {
-  const generateData = (n: number): {
+describe("PropensityScoreMatcher", () => {
+  const generateData = (
+    n: number
+  ): {
     covariates: number[][];
     treatment: boolean[];
     outcomes: number[];
@@ -34,32 +36,30 @@ describe('PropensityScoreMatcher', () => {
     return { covariates, treatment, outcomes };
   };
 
-  describe('estimateEffect', () => {
-    it('should estimate treatment effect', () => {
+  describe("estimateEffect", () => {
+    it("should estimate treatment effect", () => {
       const matcher = new PropensityScoreMatcher();
       const { covariates, treatment, outcomes } = generateData(200);
 
       const effect = matcher.estimateEffect(covariates, treatment, outcomes);
 
-      expect(typeof effect.ate).toBe('number');
-      expect(typeof effect.att).toBe('number');
+      expect(typeof effect.ate).toBe("number");
+      expect(typeof effect.att).toBe("number");
       expect(effect.confidence).toHaveLength(2);
       expect(effect.confidence[0]).toBeLessThan(effect.confidence[1]);
-      expect(typeof effect.pValue).toBe('number');
+      expect(typeof effect.pValue).toBe("number");
       expect(effect.pValue).toBeGreaterThanOrEqual(0);
       expect(effect.pValue).toBeLessThanOrEqual(1);
     });
 
-    it('should detect positive treatment effect', () => {
+    it("should detect positive treatment effect", () => {
       const matcher = new PropensityScoreMatcher();
 
       // Create data with clear treatment effect
       const n = 200;
       const covariates = Array.from({ length: n }, () => [Math.random(), Math.random()]);
       const treatment = covariates.map(() => Math.random() > 0.5);
-      const outcomes = treatment.map((t, i) =>
-        covariates[i][0] * 10 + (t ? 5 : 0) + Math.random()
-      );
+      const outcomes = treatment.map((t, i) => covariates[i][0] * 10 + (t ? 5 : 0) + Math.random());
 
       const effect = matcher.estimateEffect(covariates, treatment, outcomes);
 
@@ -67,13 +67,13 @@ describe('PropensityScoreMatcher', () => {
       expect(effect.ate).toBeGreaterThan(0);
     });
 
-    it('should handle unbalanced treatment groups', () => {
+    it("should handle unbalanced treatment groups", () => {
       const matcher = new PropensityScoreMatcher();
 
       const n = 150;
       const covariates = Array.from({ length: n }, () => [Math.random()]);
       const treatment = covariates.map(() => Math.random() > 0.8); // 20% treated
-      const outcomes = treatment.map(t => (t ? 15 : 10) + Math.random());
+      const outcomes = treatment.map((t) => (t ? 15 : 10) + Math.random());
 
       const effect = matcher.estimateEffect(covariates, treatment, outcomes);
 
@@ -82,9 +82,9 @@ describe('PropensityScoreMatcher', () => {
   });
 });
 
-describe('DifferenceInDifferences', () => {
-  describe('estimate', () => {
-    it('should estimate DiD effect', () => {
+describe("DifferenceInDifferences", () => {
+  describe("estimate", () => {
+    it("should estimate DiD effect", () => {
       const did = new DifferenceInDifferences();
 
       const treatmentPre = Array.from({ length: 50 }, () => 100 + Math.random() * 10);
@@ -94,13 +94,13 @@ describe('DifferenceInDifferences', () => {
 
       const effect = did.estimate(treatmentPre, treatmentPost, controlPre, controlPost);
 
-      expect(typeof effect.ate).toBe('number');
-      expect(typeof effect.att).toBe('number');
+      expect(typeof effect.ate).toBe("number");
+      expect(typeof effect.att).toBe("number");
       expect(effect.confidence).toHaveLength(2);
       expect(effect.confidence[0]).toBeLessThan(effect.confidence[1]);
     });
 
-    it('should detect treatment effect correctly', () => {
+    it("should detect treatment effect correctly", () => {
       const did = new DifferenceInDifferences();
 
       // Treatment group increases by 20, control by 5
@@ -115,7 +115,7 @@ describe('DifferenceInDifferences', () => {
       expect(effect.ate).toBeCloseTo(15, 0);
     });
 
-    it('should return zero effect when parallel trends', () => {
+    it("should return zero effect when parallel trends", () => {
       const did = new DifferenceInDifferences();
 
       // Both groups change by same amount
@@ -129,7 +129,7 @@ describe('DifferenceInDifferences', () => {
       expect(Math.abs(effect.ate)).toBeLessThan(2);
     });
 
-    it('should calculate confidence intervals', () => {
+    it("should calculate confidence intervals", () => {
       const did = new DifferenceInDifferences();
 
       const treatmentPre = Array.from({ length: 100 }, () => 100 + Math.random() * 20);

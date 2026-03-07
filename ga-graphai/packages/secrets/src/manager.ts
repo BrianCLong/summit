@@ -1,11 +1,11 @@
-import type { SecretRef } from 'common-types';
-import { rotationStatusForRef } from './rotation.js';
+import type { SecretRef } from "common-types";
+import { rotationStatusForRef } from "./rotation.js";
 import type {
   RotationStatus,
   SecretResolution,
   SecretRotationResult,
   SecretsProvider,
-} from './types.js';
+} from "./types.js";
 
 export class ZeroTrustSecretsManager {
   private readonly providers: SecretsProvider[];
@@ -26,7 +26,7 @@ export class ZeroTrustSecretsManager {
     const provider = this.providers.find((candidate) => candidate.supports(ref));
     if (!provider) {
       throw new Error(
-        `No secrets provider registered for ${(ref as { provider?: string }).provider ?? 'vault'}`,
+        `No secrets provider registered for ${(ref as { provider?: string }).provider ?? "vault"}`
       );
     }
     return provider;

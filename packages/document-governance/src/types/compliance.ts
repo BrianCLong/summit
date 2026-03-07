@@ -2,8 +2,8 @@
  * Compliance and Risk Type Definitions
  */
 
-import { z } from 'zod';
-import { RiskLevelSchema } from './document.js';
+import { z } from "zod";
+import { RiskLevelSchema } from "./document.js";
 
 // Compliance Standard Schema
 export const ComplianceStandardSchema = z.object({
@@ -32,7 +32,15 @@ export const ComplianceMappingSchema = z.object({
   document_type_id: z.string(),
   standards: z.array(z.string()),
   required_sections: z.array(RequiredSectionSchema),
-  review_frequency: z.enum(['continuous', 'per_incident', 'per_release', 'monthly', 'quarterly', 'semi_annual', 'annual']),
+  review_frequency: z.enum([
+    "continuous",
+    "per_incident",
+    "per_release",
+    "monthly",
+    "quarterly",
+    "semi_annual",
+    "annual",
+  ]),
 });
 
 export type ComplianceMapping = z.infer<typeof ComplianceMappingSchema>;
@@ -44,20 +52,24 @@ export const ComplianceCheckResultSchema = z.object({
   checked_at: z.string().datetime(),
   overall_compliant: z.boolean(),
   applicable_standards: z.array(z.string()),
-  section_results: z.array(z.object({
-    section_name: z.string(),
-    present: z.boolean(),
-    compliant: z.boolean(),
-    issues: z.array(z.string()),
-    suggestions: z.array(z.string()),
-  })),
+  section_results: z.array(
+    z.object({
+      section_name: z.string(),
+      present: z.boolean(),
+      compliant: z.boolean(),
+      issues: z.array(z.string()),
+      suggestions: z.array(z.string()),
+    })
+  ),
   missing_sections: z.array(z.string()),
-  risk_issues: z.array(z.object({
-    severity: z.enum(['low', 'medium', 'high', 'critical']),
-    description: z.string(),
-    recommendation: z.string(),
-    standard: z.string().optional(),
-  })),
+  risk_issues: z.array(
+    z.object({
+      severity: z.enum(["low", "medium", "high", "critical"]),
+      description: z.string(),
+      recommendation: z.string(),
+      standard: z.string().optional(),
+    })
+  ),
   score: z.number().min(0).max(100),
 });
 
@@ -82,17 +94,21 @@ export const RiskScoreSchema = z.object({
   dimension_scores: z.record(z.string(), z.number()),
   weighted_score: z.number().min(0).max(10),
   risk_level: RiskLevelSchema,
-  modifiers_applied: z.array(z.object({
-    name: z.string(),
-    value: z.number(),
-    reason: z.string(),
-  })),
-  factors: z.array(z.object({
-    dimension: z.string(),
-    factor: z.string(),
-    score: z.number(),
-    notes: z.string().optional(),
-  })),
+  modifiers_applied: z.array(
+    z.object({
+      name: z.string(),
+      value: z.number(),
+      reason: z.string(),
+    })
+  ),
+  factors: z.array(
+    z.object({
+      dimension: z.string(),
+      factor: z.string(),
+      score: z.number(),
+      notes: z.string().optional(),
+    })
+  ),
 });
 
 export type RiskScore = z.infer<typeof RiskScoreSchema>;
@@ -122,15 +138,29 @@ export type RiskThreshold = z.infer<typeof RiskThresholdSchema>;
 export const AuditFindingSchema = z.object({
   id: z.string().uuid(),
   document_id: z.string().uuid(),
-  finding_type: z.enum(['compliance_gap', 'missing_section', 'outdated_content', 'missing_signature', 'risk_issue', 'policy_violation']),
-  severity: z.enum(['info', 'low', 'medium', 'high', 'critical']),
+  finding_type: z.enum([
+    "compliance_gap",
+    "missing_section",
+    "outdated_content",
+    "missing_signature",
+    "risk_issue",
+    "policy_violation",
+  ]),
+  severity: z.enum(["info", "low", "medium", "high", "critical"]),
   title: z.string(),
   description: z.string(),
   recommendation: z.string(),
   compliance_standard: z.string().optional(),
   found_at: z.string().datetime(),
   found_by: z.string(),
-  status: z.enum(['open', 'acknowledged', 'in_progress', 'resolved', 'accepted_risk', 'false_positive']),
+  status: z.enum([
+    "open",
+    "acknowledged",
+    "in_progress",
+    "resolved",
+    "accepted_risk",
+    "false_positive",
+  ]),
   resolved_at: z.string().datetime().optional(),
   resolved_by: z.string().optional(),
   resolution_notes: z.string().optional(),
@@ -143,7 +173,7 @@ export const ComplianceReportSchema = z.object({
   id: z.string().uuid(),
   generated_at: z.string().datetime(),
   generated_by: z.string(),
-  report_type: z.enum(['full', 'summary', 'gap_analysis', 'risk_assessment']),
+  report_type: z.enum(["full", "summary", "gap_analysis", "risk_assessment"]),
   scope: z.object({
     document_ids: z.array(z.string().uuid()).optional(),
     document_types: z.array(z.string()).optional(),
@@ -161,13 +191,15 @@ export const ComplianceReportSchema = z.object({
     low_findings: z.number(),
   }),
   findings: z.array(AuditFindingSchema),
-  recommendations: z.array(z.object({
-    priority: z.enum(['immediate', 'short_term', 'medium_term', 'long_term']),
-    title: z.string(),
-    description: z.string(),
-    affected_documents: z.array(z.string().uuid()),
-    estimated_effort: z.string().optional(),
-  })),
+  recommendations: z.array(
+    z.object({
+      priority: z.enum(["immediate", "short_term", "medium_term", "long_term"]),
+      title: z.string(),
+      description: z.string(),
+      affected_documents: z.array(z.string().uuid()),
+      estimated_effort: z.string().optional(),
+    })
+  ),
 });
 
 export type ComplianceReport = z.infer<typeof ComplianceReportSchema>;

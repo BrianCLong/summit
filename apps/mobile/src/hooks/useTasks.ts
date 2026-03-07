@@ -30,19 +30,21 @@ export function useTasks(): UseTasksResult {
   const loadFromCache = useCallback(async () => {
     try {
       const cached = await offlineCache.tasks.getPending();
-      setTasks(cached.sort((a, b) => {
-        // Sort by priority first, then due date
-        const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-        const aPriority = priorityOrder[a.priority] ?? 4;
-        const bPriority = priorityOrder[b.priority] ?? 4;
+      setTasks(
+        cached.sort((a, b) => {
+          // Sort by priority first, then due date
+          const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+          const aPriority = priorityOrder[a.priority] ?? 4;
+          const bPriority = priorityOrder[b.priority] ?? 4;
 
-        if (aPriority !== bPriority) return aPriority - bPriority;
+          if (aPriority !== bPriority) return aPriority - bPriority;
 
-        if (a.dueDate && b.dueDate) {
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        }
-        return 0;
-      }));
+          if (a.dueDate && b.dueDate) {
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+          }
+          return 0;
+        }),
+      );
     } catch (err) {
       console.error('Failed to load tasks from cache:', err);
     }
@@ -88,47 +90,50 @@ export function useTasks(): UseTasksResult {
   }, [isOnline, fetchFromServer, loadFromCache]);
 
   // Update task status
-  const updateStatus = useCallback(async (id: string, status: TaskStatus) => {
-    const now = new Date().toISOString();
+  const updateStatus = useCallback(
+    async (id: string, status: TaskStatus) => {
+      const now = new Date().toISOString();
 
-    // Optimistic update
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              status,
-              completedAt: status === 'completed' ? now : undefined,
-            }
-          : task
-      )
-    );
+      // Optimistic update
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === id
+            ? {
+                ...task,
+                status,
+                completedAt: status === 'completed' ? now : undefined,
+              }
+            : task,
+        ),
+      );
 
-    // Get current task and update cache
-    const task = tasks.find((t) => t.id === id);
-    if (task) {
-      const updatedTask = {
-        ...task,
-        status,
-        completedAt: status === 'completed' ? now : undefined,
-      };
-      await offlineCache.tasks.set(updatedTask);
+      // Get current task and update cache
+      const task = tasks.find((t) => t.id === id);
+      if (task) {
+        const updatedTask = {
+          ...task,
+          status,
+          completedAt: status === 'completed' ? now : undefined,
+        };
+        await offlineCache.tasks.set(updatedTask);
 
-      // Queue for sync
-      await syncEngine.queueForSync('update', 'acknowledgement', {
-        taskId: id,
-        status,
-        timestamp: now,
-      });
-    }
-  }, [tasks]);
+        // Queue for sync
+        await syncEngine.queueForSync('update', 'acknowledgement', {
+          taskId: id,
+          status,
+          timestamp: now,
+        });
+      }
+    },
+    [tasks],
+  );
 
   // Get tasks by case
   const getByCase = useCallback(
     (caseId: string): Task[] => {
       return tasks.filter((t) => t.caseId === caseId);
     },
-    [tasks]
+    [tasks],
   );
 
   // Initial load
@@ -138,7 +143,7 @@ export function useTasks(): UseTasksResult {
 
   // Pending count
   const pendingCount = tasks.filter(
-    (t) => t.status === 'pending' || t.status === 'in_progress'
+    (t) => t.status === 'pending' || t.status === 'in_progress',
   ).length;
 
   return {

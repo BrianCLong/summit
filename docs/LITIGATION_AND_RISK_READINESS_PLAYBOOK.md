@@ -3,6 +3,7 @@
 This playbook operationalizes litigation readiness, IP/trade-secret defense, contract operations, regulatory posture, privacy, incident legal command, insider risk, and claims/marketing controls. It is designed to be **evidence-first, automation-heavy, and audit-ready by default**.
 
 ## Guiding Principles
+
 - **Hold beats deletion**: Retention engines must respect active holds over lifecycle policies.
 - **Evidence provability**: Every control should emit immutable, hashed evidence artifacts with custody trails.
 - **Minimal exposure**: Collect only what is necessary; default to masking/tokenization in non-prod and analytics.
@@ -12,12 +13,14 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **Governance with expiry**: Exceptions have owners, compensating controls, and automatic escalation on expiry.
 
 ## Operating Model
+
 - **Triggering authority**: General Counsel (GC) or Deputy GC initiates litigation holds; backups include CISO and Head of People for employment matters.
 - **Response clocks**: Hold issuance ≤ 4 hours from trigger; initial evidence preservation ≤ 24 hours; scoped exports within 3 business days.
 - **Tooling approach**: Central evidence registry (hash+chain-of-custody), immutable audit log service, eDiscovery export pipelines, and privacy-aware data access gateways.
 - **Testing cadence**: Quarterly discovery drill, quarterly breach tabletop, quarterly privacy review, monthly risk review, annual regulator inquiry tabletop.
 
 ## Epic 1 — Litigation Readiness
+
 - **Hold process**:
   - GC triggers via matter intake form; automatic alerts to custodians + IT.
   - Hold proof captured via signed acknowledgements and audit log entries (immutable).
@@ -33,6 +36,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: Time-to-hold, time-to-collect, % custodians acknowledged, export validation pass rate, drill success.
 
 ## Epic 2 — IP & Trade Secret Defense
+
 - **IP inventory**: Catalog patents, trademarks, key algorithms, datasets, brand assets; map owners and repo paths.
 - **Chain-of-title**: Maintain executed assignments for employees/contractors; block access until agreements signed.
 - **Source code access controls**: Role-based repo permissions, sensitive-repo review gates, and access logs.
@@ -44,6 +48,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **Quarterly IP audit**: New assets, exposures, remediation actions, and declassification decisions.
 
 ## Epic 3 — Contract Ops at Scale
+
 - **Central contract repository**: Metadata (term, renewal, obligations, SLAs, data residency), search, reminders.
 - **Standard templates**: MSA/DPA/SLA with fallbacks and redline guidance; clause library with pre-approved alternates.
 - **Approval ladder**: Deviations require approvals with expiry and compensating controls; log exceptions.
@@ -54,6 +59,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: Redline-to-signature cycle time, exceptions count/expiry rate, renewal surprises avoided.
 
 ## Epic 4 — Regulatory Readiness & Government Touchpoints
+
 - **Regulatory matrix**: By jurisdiction/industry with applicability decisions and control mappings.
 - **Controls-as-code**: Map requirements to automated checks where feasible; evidence links stored with control IDs.
 - **Inquiry playbook**: Spokespersons, production scope, timelines, secure delivery methods, privilege guidance.
@@ -65,6 +71,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: Findings count, remediation time, evidence freshness.
 
 ## Epic 5 — Privacy Program
+
 - **Data inventory/classification**: PII tiers, purpose tags, owners; synced to retention/deletion engine.
 - **Minimization**: Remove unused collection; track deletion proofs.
 - **DSAR workflows**: Export/delete with identity verification, audit logs, SLA tracking.
@@ -77,6 +84,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: DSAR turnaround, access exceptions, minimization wins, policy drift.
 
 ## Epic 6 — Breach/Incident Legal Command
+
 - **Severity + duties**: Severity matrix tied to notification triggers (contract, regulator, customer impact).
 - **Pre-approved comms**: Status page, customer email, regulator notices; legal review templates.
 - **Timeline capture**: Deploys, access events, config changes aggregated with hashes for integrity.
@@ -88,6 +96,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: MTTD/MTTR, repeat-incident rate, prevention shipped post-incident.
 
 ## Epic 7 — Workforce, Contractor, and Insider Risk
+
 - **Agreements**: Standard IP assignment and confidentiality for all workers before access.
 - **Offboarding automation**: Access removal, device return, attestations, key revocation within 24 hours.
 - **Role-based access**: Quarterly recertification, auto-expiry, least-privilege for sensitive repos and prod.
@@ -98,6 +107,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: Stale access count, offboarding latency, policy violations.
 
 ## Epic 8 — Claims, Marketing, and Competitive Safety
+
 - **Claims library**: Catalog statements, evidence, owners; proof required before publication.
 - **Competitor-safe talk tracks**: Fact-based messaging and defamation-safe guidelines.
 - **Benchmark standards**: Reproducible methodology with internal publication.
@@ -107,6 +117,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **KPIs**: Claim drift incidents, review SLA adherence, approved vs rejected claims.
 
 ## Epic 9 — Governance & Exception Control
+
 - **Unified exceptions registry**: Security, privacy, contract, and ops exceptions with expiry and owners.
 - **Compensating controls**: Required for every exception; auto-escalation on expiry.
 - **Risk review cadence**: Monthly top-10 exposures with mitigation status and decision logs.
@@ -116,6 +127,7 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **Celebrate eliminations**: Track and publicize expired exceptions and automated controls.
 
 ## Implementation Waves and Ownership
+
 - **Wave 1 (0–30 days)**: Stand up hold process, matter intake form, exceptions registry, claims library shell, IP assignment enforcement, DSAR flow design, breach severity matrix.
 - **Wave 2 (30–90 days)**: Immutable audit log service, eDiscovery export pipeline MVP, retention vs hold engine hooks, trade secret register, contract metadata centralization, regulatory matrix draft, log PII redaction CI checks.
 - **Wave 3 (90–180 days)**: Rapid chronology feed, data access gateways, SBOM in CI, trust packet automation, customer notification matrix automation, quarterly drill schedule operational.
@@ -123,12 +135,14 @@ This playbook operationalizes litigation readiness, IP/trade-secret defense, con
 - **Ownership**: GC leads legal playbooks; CISO owns security/privileged access; CTO owns controls-as-code and export tooling; DPO owns privacy; Ops owns contract repository and renewal cadence.
 
 ## Evidence and Audit Infrastructure
+
 - **Evidence registry**: Stores hashes, custody, timestamps, and links to storage locations; integrates with exports and controls.
 - **Immutable storage**: S3 Object Lock/Glacier for holds; append-only ledger for privileged events.
 - **Observability**: Metrics for hold latency, DSAR SLA, export success; alerts on expiries and unacknowledged holds.
 - **Access governance**: Centralized approvals with time limits; periodic reconciliation versus HRIS and contractor rosters.
 
 ## Forward-Looking Enhancements
+
 - **Automated chronology graph**: Event graph linking deploys, configs, incidents, and user actions for rapid fact assembly.
 - **Differential privacy in analytics**: Reduce risk in aggregated reporting while supporting discovery needs.
 - **Continuous claim validation**: Connect claims library to monitoring to auto-flag drift when SLOs regress.

@@ -30,7 +30,7 @@ VITE_FEATURE_TIMELINE_UI=true
 Use the `isFeatureEnabled` function from `client/src/flags/featureFlags.ts` to check if a feature is enabled.
 
 ```typescript
-import { isFeatureEnabled, FeatureFlags } from 'client/src/flags/featureFlags';
+import { isFeatureEnabled, FeatureFlags } from "client/src/flags/featureFlags";
 
 if (isFeatureEnabled(FeatureFlags.FEATURE_INVESTIGATION_UI)) {
   // Render new UI

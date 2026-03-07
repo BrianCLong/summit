@@ -14,19 +14,19 @@ export interface MetricsClient {
 
 export class ConsoleLogger implements Logger {
   info(message: string, meta?: LogMetadata) {
-    console.log(JSON.stringify({ level: 'info', message, ...meta }));
+    console.log(JSON.stringify({ level: "info", message, ...meta }));
   }
 
   warn(message: string, meta?: LogMetadata) {
-    console.warn(JSON.stringify({ level: 'warn', message, ...meta }));
+    console.warn(JSON.stringify({ level: "warn", message, ...meta }));
   }
 
   error(message: string, meta?: LogMetadata) {
-    console.error(JSON.stringify({ level: 'error', message, ...meta }));
+    console.error(JSON.stringify({ level: "error", message, ...meta }));
   }
 
   debug(message: string, meta?: LogMetadata) {
-    console.debug(JSON.stringify({ level: 'debug', message, ...meta }));
+    console.debug(JSON.stringify({ level: "debug", message, ...meta }));
   }
 }
 
@@ -41,7 +41,7 @@ export function getErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
 

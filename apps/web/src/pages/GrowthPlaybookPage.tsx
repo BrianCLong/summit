@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useState } from 'react';
-import { GrowthPlaybookGenerator } from '@/features/growth/GrowthPlaybookGenerator';
-import { GrowthPlaybookView } from '@/features/growth/GrowthPlaybookView';
-import { CompanyProfile, Playbook } from '@/features/growth/types';
-import { useToast } from '@/components/ui/toast';
-import { PageHeader } from '@/components/ui/PageHeader';
+import React, { useState } from 'react'
+import { GrowthPlaybookGenerator } from '@/features/growth/GrowthPlaybookGenerator'
+import { GrowthPlaybookView } from '@/features/growth/GrowthPlaybookView'
+import { CompanyProfile, Playbook } from '@/features/growth/types'
+import { useToast } from '@/components/ui/toast'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 export default function GrowthPlaybookPage(): React.ReactElement {
-  const [playbook, setPlaybook] = useState<Playbook | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [playbook, setPlaybook] = useState<Playbook | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   const handleGenerate = async (profile: CompanyProfile): Promise<void> => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       // Use relative path for proxying or full URL if CORS allowed
       const response = await fetch('/api/growth/playbook', {
@@ -22,29 +22,29 @@ export default function GrowthPlaybookPage(): React.ReactElement {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(profile),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error('Failed to generate playbook');
+        throw new Error('Failed to generate playbook')
       }
 
-      const data = await response.json();
-      setPlaybook(data.data);
+      const data = await response.json()
+      setPlaybook(data.data)
       toast({
-        title: "Success",
-        description: "Your personalized growth playbook is ready.",
-      });
+        title: 'Success',
+        description: 'Your personalized growth playbook is ready.',
+      })
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to generate playbook. Please try again.",
-        variant: "destructive"
-      });
-      console.error(error);
+        title: 'Error',
+        description: 'Failed to generate playbook. Please try again.',
+        variant: 'destructive',
+      })
+      console.error(error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -54,7 +54,10 @@ export default function GrowthPlaybookPage(): React.ReactElement {
       />
 
       {!playbook ? (
-        <GrowthPlaybookGenerator onGenerate={handleGenerate} isLoading={isLoading} />
+        <GrowthPlaybookGenerator
+          onGenerate={handleGenerate}
+          isLoading={isLoading}
+        />
       ) : (
         <div className="space-y-4">
           <button
@@ -67,5 +70,5 @@ export default function GrowthPlaybookPage(): React.ReactElement {
         </div>
       )}
     </div>
-  );
+  )
 }

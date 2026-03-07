@@ -113,15 +113,15 @@ Summit uses GitHub Actions for CI/CD with a multi-layered approach to ensure cod
 
 ### Workflow Files
 
-| Workflow | Trigger | Purpose | Duration |
-|----------|---------|---------|----------|
-| `ci.yml` | PR, main push | Core CI pipeline | ~10-15 min |
-| `pr-size-check.yml` | PR open/sync | Analyze PR size | ~1 min |
-| `pr-validation.yml` | PR open/sync | Comprehensive validation | ~15-30 min |
-| `code-quality-gates.yml` | PR code changes | Quality analysis | ~5-10 min |
-| `performance-regression.yml` | PR, main push | Performance testing | ~10-15 min |
-| `release-notes.yml` | Tag push, main push | Generate release notes | ~2-5 min |
-| `security.yml` | PR, scheduled | Security scanning | ~10-15 min |
+| Workflow                     | Trigger             | Purpose                  | Duration   |
+| ---------------------------- | ------------------- | ------------------------ | ---------- |
+| `ci.yml`                     | PR, main push       | Core CI pipeline         | ~10-15 min |
+| `pr-size-check.yml`          | PR open/sync        | Analyze PR size          | ~1 min     |
+| `pr-validation.yml`          | PR open/sync        | Comprehensive validation | ~15-30 min |
+| `code-quality-gates.yml`     | PR code changes     | Quality analysis         | ~5-10 min  |
+| `performance-regression.yml` | PR, main push       | Performance testing      | ~10-15 min |
+| `release-notes.yml`          | Tag push, main push | Generate release notes   | ~2-5 min   |
+| `security.yml`               | PR, scheduled       | Security scanning        | ~10-15 min |
 
 ---
 
@@ -132,11 +132,13 @@ Summit uses GitHub Actions for CI/CD with a multi-layered approach to ensure cod
 **Purpose**: Analyze PR size and provide splitting recommendations
 
 **Triggers**:
+
 - Pull request opened
 - Pull request synchronized (new commits)
 - Pull request reopened
 
 **What it does**:
+
 - Counts changed files and lines
 - Categorizes PR size (XS, S, M, L, XL)
 - Detects mixed concerns (infrastructure + code + docs)
@@ -145,6 +147,7 @@ Summit uses GitHub Actions for CI/CD with a multi-layered approach to ensure cod
 - Adds size label to PR
 
 **Size Categories**:
+
 - **XS**: < 100 lines changed (🟢 Excellent)
 - **S**: 100-299 lines (🟢 Good)
 - **M**: 300-599 lines (🟡 Moderate)
@@ -152,6 +155,7 @@ Summit uses GitHub Actions for CI/CD with a multi-layered approach to ensure cod
 - **XL**: 1000+ lines (🔴 Too Large)
 
 **Best Practices**:
+
 - Aim for XS or S sized PRs
 - Split large PRs by:
   - Directory/module
@@ -160,18 +164,21 @@ Summit uses GitHub Actions for CI/CD with a multi-layered approach to ensure cod
 - Use stacked PRs for large features
 
 **Example Output**:
+
 ```markdown
 ## 🟢 PR Size Analysis
 
 **Size**: `S` (245 lines changed)
 
 ### 📊 Statistics
+
 - **Files changed**: 8
 - **Additions**: +189
 - **Deletions**: -56
 - **Total changes**: 245
 
 ### ✅ Great job!
+
 This PR is well-sized and should be easy to review.
 ```
 
@@ -182,27 +189,32 @@ This PR is well-sized and should be easy to review.
 **Purpose**: Enforce code quality standards through automated analysis
 
 **Triggers**:
+
 - Pull requests modifying code files (.ts, .tsx, .js, .jsx, .py, .go, .rs)
 - Manual workflow dispatch
 
 **Quality Checks**:
 
 #### Complexity Analysis
+
 - **Cyclomatic Complexity**: Target < 15
 - **Maintainability Index**: Target > 65
 - Tools: `complexity-report`, `radon` (Python)
 
 #### Code Duplication
+
 - **Target**: < 5% duplication
 - Tool: `jscpd`
 - Detects copy-paste code across files
 
 #### Technical Debt
+
 - Scans for: TODO, FIXME, HACK, XXX markers
 - Reports count and locations
 - Recommends follow-up actions
 
 #### Enhanced Linting
+
 - ESLint with SARIF output
 - Prettier formatting checks
 - Console statement detection in production code
@@ -210,40 +222,48 @@ This PR is well-sized and should be easy to review.
 
 **Thresholds & Actions**:
 
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| Cyclomatic Complexity | > 15 | ⚠️ Warning + recommendations |
-| Maintainability Index | < 65 | ⚠️ Warning + refactoring suggestions |
-| Code Duplication | > 5% | ⚠️ Warning + extract utilities suggestion |
-| Lint Errors | > 0 | ❌ Fail + error list |
-| Console Statements | Any | ⚠️ Warning (production code) |
+| Metric                | Threshold | Action                                    |
+| --------------------- | --------- | ----------------------------------------- |
+| Cyclomatic Complexity | > 15      | ⚠️ Warning + recommendations              |
+| Maintainability Index | < 65      | ⚠️ Warning + refactoring suggestions      |
+| Code Duplication      | > 5%      | ⚠️ Warning + extract utilities suggestion |
+| Lint Errors           | > 0       | ❌ Fail + error list                      |
+| Console Statements    | Any       | ⚠️ Warning (production code)              |
 
 **Example Output**:
+
 ```markdown
 ## 🎯 Code Quality Analysis
 
 ### 🧮 Complexity Analysis
+
 ⚠️ **High complexity detected**
 
 **TypeScript/JavaScript files:**
+
 - `src/services/entityService.ts`: Cyclomatic complexity = 18 (target: <15)
 - `src/utils/dataProcessor.ts`: Cyclomatic complexity = 22 (target: <15)
 
 **Recommendations:**
+
 - Consider breaking down complex functions into smaller, focused functions
 - Extract complex logic into separate helper functions
 - Add unit tests for complex code paths
 
 ### 🔍 Code Duplication
+
 ✅ No significant code duplication detected
 
 ### 💳 Technical Debt Markers
+
 Found 5 technical debt markers:
+
 - TODO: 3
 - FIXME: 2
 - HACK: 0
 
 **Details:**
+
 - `src/api/routes.ts:45`: TODO: Add rate limiting
 - `src/db/migrations/001.ts:12`: FIXME: Handle edge case
 - `src/utils/parser.ts:89`: TODO: Optimize performance
@@ -256,6 +276,7 @@ Found 5 technical debt markers:
 **Purpose**: Detect and prevent performance degradations
 
 **Triggers**:
+
 - Pull requests with code or dependency changes
 - Push to main branch
 - Manual workflow dispatch
@@ -263,18 +284,21 @@ Found 5 technical debt markers:
 **Performance Metrics**:
 
 #### Bundle Size Analysis
+
 - Tracks total bundle size
 - Identifies large files (>500KB)
 - Compares with base branch
 - Alerts on >5% increase
 
 #### Build Performance
+
 - Build time measurement
 - TypeScript typecheck duration
 - Test suite execution time
 - Tracks trends over time
 
 #### Runtime Performance
+
 - Load testing with k6
 - API response time (P95, P99, average)
 - Error rate monitoring
@@ -282,27 +306,31 @@ Found 5 technical debt markers:
 
 **Performance Targets**:
 
-| Metric | Target | Warning Threshold |
-|--------|--------|-------------------|
-| P95 Response Time | < 500ms | > 500ms |
-| Bundle Size Growth | < 5% | > 5% |
-| Build Time | Stable | > 10% increase |
-| Error Rate | < 1% | > 1% |
+| Metric             | Target  | Warning Threshold |
+| ------------------ | ------- | ----------------- |
+| P95 Response Time  | < 500ms | > 500ms           |
+| Bundle Size Growth | < 5%    | > 5%              |
+| Build Time         | Stable  | > 10% increase    |
+| Error Rate         | < 1%    | > 1%              |
 
 **Example Output**:
+
 ```markdown
 ## ⚡ Performance Analysis
 
 ### 📦 Bundle Size
+
 **Total Size**: 3.45 MB
 ✅ Bundle size is acceptable
 
 ### 🏗️ Build Performance
+
 - **Build time**: 127s
 - **Typecheck time**: 34s
 - **Test time**: 89s
 
 ### 🚀 Runtime Performance
+
 - **Average response time**: 124ms
 - **P95 response time**: 287ms
 - **P99 response time**: 456ms
@@ -310,6 +338,7 @@ Found 5 technical debt markers:
 ✅ Response times are within acceptable range
 
 ---
+
 💡 **Performance targets**: P95 < 500ms, Bundle growth < 5%, Build time minimal
 ```
 
@@ -320,12 +349,14 @@ Found 5 technical debt markers:
 **Purpose**: Generate comprehensive release notes from conventional commits
 
 **Triggers**:
+
 - Push to main branch
-- Tag creation (v*.*.*)
+- Tag creation (v*.*.\*)
 - GitHub release creation
 - Manual workflow dispatch
 
 **Features**:
+
 - Parses conventional commits
 - Categorizes changes by type
 - Identifies breaking changes
@@ -334,6 +365,7 @@ Found 5 technical debt markers:
 - Updates GitHub releases
 
 **Commit Types Recognized**:
+
 - `feat`: New features ✨
 - `fix`: Bug fixes 🐛
 - `perf`: Performance improvements ⚡
@@ -344,6 +376,7 @@ Found 5 technical debt markers:
 - `BREAKING CHANGE`: Breaking changes ⚠️
 
 **Example Output**:
+
 ```markdown
 # Release Notes
 
@@ -381,17 +414,20 @@ Found 5 technical debt markers:
 **Update Strategy**:
 
 #### Auto-merge (Enabled)
+
 - Patch updates for production dependencies
 - Minor + patch updates for dev dependencies
 - Lock file maintenance
 - Docker image digest updates
 
 #### Manual Review (Required)
+
 - Major version updates
 - Breaking changes
 - Core dependencies (TypeScript, React, etc.)
 
 **Grouping Strategy**:
+
 - GitHub Actions updates (weekly)
 - TypeScript ecosystem (grouped)
 - React ecosystem (grouped)
@@ -402,11 +438,13 @@ Found 5 technical debt markers:
 - Docker base images (grouped)
 
 **Schedule**:
+
 - Regular updates: Monday before 8am
 - Lock file maintenance: Monday before 5am
 - Security updates: Immediate (any time)
 
 **Example PR**:
+
 ```markdown
 🤖 chore(deps): Update testing libraries
 
@@ -428,6 +466,7 @@ Found 5 technical debt markers:
 ### Pull Request Guidelines
 
 #### Size Recommendations
+
 1. **Keep PRs Small**
    - Target: < 300 lines changed
    - Ideal: < 100 lines changed
@@ -456,6 +495,7 @@ Follow **Conventional Commits**:
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -466,6 +506,7 @@ Follow **Conventional Commits**:
 - `chore`: Maintenance tasks
 
 **Examples**:
+
 ```
 feat(api): add entity search endpoint
 
@@ -518,6 +559,7 @@ Closes #789
 #### Speed Up CI Runs
 
 1. **Use Caching Effectively**
+
    ```yaml
    - uses: actions/cache@v4
      with:
@@ -528,6 +570,7 @@ Closes #789
    ```
 
 2. **Run Jobs in Parallel**
+
    ```yaml
    jobs:
      lint:
@@ -552,10 +595,10 @@ Closes #789
    on:
      pull_request:
        paths:
-         - '**.ts'
-         - '**.tsx'
-         - '**.js'
-         - '**.jsx'
+         - "**.ts"
+         - "**.tsx"
+         - "**.js"
+         - "**.jsx"
    ```
 
 #### Reduce Build Times
@@ -643,19 +686,21 @@ Closes #789
 #### Test Quality
 
 1. **Test Naming**
+
    ```typescript
-   describe('EntityService', () => {
-     describe('create', () => {
-       it('should create entity with valid data', () => {});
-       it('should throw error when name is missing', () => {});
-       it('should validate entity type', () => {});
+   describe("EntityService", () => {
+     describe("create", () => {
+       it("should create entity with valid data", () => {});
+       it("should throw error when name is missing", () => {});
+       it("should validate entity type", () => {});
      });
    });
    ```
 
 2. **Test Structure (AAA)**
+
    ```typescript
-   it('should calculate total correctly', () => {
+   it("should calculate total correctly", () => {
      // Arrange
      const items = [1, 2, 3];
 
@@ -681,11 +726,13 @@ Closes #789
 #### 1. Lint Failures
 
 **Error**:
+
 ```
 Error: 'foo' is assigned a value but never used  @typescript-eslint/no-unused-vars
 ```
 
 **Solutions**:
+
 ```bash
 # Auto-fix linting issues
 pnpm run lint --fix
@@ -701,11 +748,13 @@ const unusedVar = 'value';
 #### 2. TypeScript Errors
 
 **Error**:
+
 ```
 TS2322: Type 'string' is not assignable to type 'number'.
 ```
 
 **Solutions**:
+
 ```bash
 # Run typecheck locally
 pnpm typecheck
@@ -721,6 +770,7 @@ pnpm exec tsc -b
 #### 3. Test Failures
 
 **Error**:
+
 ```
 FAIL src/services/entityService.test.ts
   ● EntityService › create › should create entity
@@ -730,6 +780,7 @@ FAIL src/services/entityService.test.ts
 ```
 
 **Solutions**:
+
 ```bash
 # Run tests locally
 pnpm test
@@ -750,12 +801,14 @@ pnpm test --verbose
 #### 4. Docker Build Failures
 
 **Error**:
+
 ```
 ERROR [builder 3/8] COPY package*.json ./
 COPY failed: file not found
 ```
 
 **Solutions**:
+
 ```bash
 # Check Dockerfile context
 ls -la
@@ -773,12 +826,15 @@ docker builder prune -af
 #### 5. Permission Denied
 
 **Error**:
+
 ```
 Error: Resource not accessible by integration
 ```
 
 **Solutions**:
+
 1. Check workflow permissions:
+
    ```yaml
    permissions:
      contents: write
@@ -792,11 +848,13 @@ Error: Resource not accessible by integration
 #### 6. Out of Memory
 
 **Error**:
+
 ```
 FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
 ```
 
 **Solutions**:
+
 ```bash
 # Increase Node memory
 NODE_OPTIONS=--max-old-space-size=4096 pnpm build
@@ -809,11 +867,13 @@ env:
 #### 7. Timeout Errors
 
 **Error**:
+
 ```
 Error: The operation was canceled.
 ```
 
 **Solutions**:
+
 ```yaml
 # Increase job timeout
 jobs:
@@ -829,11 +889,13 @@ jobs:
 #### 8. Cache Issues
 
 **Error**:
+
 ```
 Warning: Cache restore failed: Unable to find cache
 ```
 
 **Solutions**:
+
 ```bash
 # Clear workflow cache via GitHub UI
 # Settings > Actions > Caches > Delete
@@ -851,6 +913,7 @@ key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('pnpm-lock.yaml') }}
 #### Enable Debug Logging
 
 1. **Repository Secret**:
+
    ```
    ACTIONS_STEP_DEBUG = true
    ACTIONS_RUNNER_DEBUG = true
@@ -966,8 +1029,8 @@ concurrency:
 on:
   pull_request:
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - "docs/**"
 
 # Skip for draft PRs
 jobs:
@@ -1036,7 +1099,7 @@ CMD ["node", "dist/index.js"]
 - uses: actions/checkout@v4
 
 # ✅ Use commit SHA
-- uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+- uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 ```
 
 #### 2. Limit Permissions
@@ -1058,7 +1121,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag'
+        description: "Release tag"
         required: true
         pattern: '^v[0-9]+\.[0-9]+\.[0-9]+$'
 ```
@@ -1099,9 +1162,9 @@ pnpm audit --audit-level moderate
   uses: aquasecurity/trivy-action@master
   with:
     image-ref: myimage:latest
-    format: 'sarif'
-    output: 'trivy-results.sarif'
-    severity: 'CRITICAL,HIGH'
+    format: "sarif"
+    output: "trivy-results.sarif"
+    severity: "CRITICAL,HIGH"
 ```
 
 #### 3. SBOM Generation
@@ -1146,12 +1209,14 @@ Track these metrics:
 ### GitHub Actions Insights
 
 Access via GitHub UI:
+
 - Actions tab → Workflows → [Workflow] → Insights
 - View duration trends, success rates, job timings
 
 ### Custom Dashboards
 
 Create Grafana dashboards for:
+
 - Build times over time
 - Test execution duration
 - Failure rates by job
@@ -1226,6 +1291,7 @@ git push origin feature-branch
 ---
 
 **Remember**:
+
 - Keep the main branch green 🟢
 - Write good commit messages 📝
 - Review your own PRs first 👀
@@ -1236,5 +1302,5 @@ git push origin feature-branch
 
 ---
 
-*Last Updated: 2025-11-20*
-*Maintainers: DevOps Team*
+_Last Updated: 2025-11-20_
+_Maintainers: DevOps Team_

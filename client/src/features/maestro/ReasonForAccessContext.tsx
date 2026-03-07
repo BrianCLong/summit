@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 export interface AuditEntry {
   id: string;
@@ -27,15 +21,11 @@ interface PromptState {
 
 export function useReasonForAccess() {
   const ctx = useContext(ReasonContext);
-  if (!ctx) throw new Error('ReasonForAccessProvider missing');
+  if (!ctx) throw new Error("ReasonForAccessProvider missing");
   return ctx;
 }
 
-export function ReasonForAccessProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ReasonForAccessProvider({ children }: { children: React.ReactNode }) {
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [prompt, setPrompt] = useState<PromptState | null>(null);
   const [isOpen, setOpen] = useState(false);
@@ -48,7 +38,7 @@ export function ReasonForAccessProvider({
         setPrompt({ resource, resolve });
         setOpen(true);
       }),
-    [],
+    []
   );
 
   const submitReason = useCallback(
@@ -65,7 +55,7 @@ export function ReasonForAccessProvider({
       setPrompt(null);
       setOpen(false);
     },
-    [prompt],
+    [prompt]
   );
 
   const value = useMemo(
@@ -73,7 +63,7 @@ export function ReasonForAccessProvider({
       auditLog,
       requestReason: fulfillPrompt,
     }),
-    [auditLog, fulfillPrompt],
+    [auditLog, fulfillPrompt]
   );
 
   return (
@@ -100,13 +90,13 @@ function ReasonForAccessModal({
   onCancel: () => void;
   onSubmit: (reason: string) => void;
 }) {
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState('');
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
 
   React.useEffect(() => {
     if (open) {
-      setReason('');
-      setError('');
+      setReason("");
+      setError("");
     }
   }, [open]);
 
@@ -115,18 +105,12 @@ function ReasonForAccessModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur">
       <div className="w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-        <h2 className="text-lg font-semibold text-slate-50">
-          Reason for access required
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-50">Reason for access required</h2>
         <p className="mt-2 text-sm text-slate-300">
-          Provide a justification to open{' '}
-          <span className="font-medium text-white">{resource}</span>. This
-          reason is recorded in the tenant-local audit log.
+          Provide a justification to open <span className="font-medium text-white">{resource}</span>
+          . This reason is recorded in the tenant-local audit log.
         </p>
-        <label
-          htmlFor="reason"
-          className="mt-4 block text-sm font-medium text-slate-200"
-        >
+        <label htmlFor="reason" className="mt-4 block text-sm font-medium text-slate-200">
           Reason
         </label>
         <textarea
@@ -136,7 +120,7 @@ function ReasonForAccessModal({
           value={reason}
           onChange={(event) => {
             setReason(event.target.value);
-            if (event.target.value.trim().length > 0) setError('');
+            if (event.target.value.trim().length > 0) setError("");
           }}
         />
         {error ? <p className="mt-1 text-sm text-red-400">{error}</p> : null}
@@ -144,8 +128,8 @@ function ReasonForAccessModal({
           <button
             type="button"
             onClick={() => {
-              setReason('');
-              setError('');
+              setReason("");
+              setError("");
               onCancel();
             }}
             className="rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition focus-visible:outline focus-visible:outline-emerald-500 focus-visible:outline-offset-2 hover:border-slate-400"
@@ -156,7 +140,7 @@ function ReasonForAccessModal({
             type="button"
             onClick={() => {
               if (!reason.trim()) {
-                setError('Please provide a reason to proceed.');
+                setError("Please provide a reason to proceed.");
                 return;
               }
               onSubmit(reason.trim());

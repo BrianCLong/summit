@@ -89,16 +89,16 @@ name: OPA Policy CI
 on:
   pull_request:
     paths:
-      - 'policies/**'
-      - 'tests/**'
-      - 'tools/**'
-      - 'scripts/**'
-      - 'Makefile'
+      - "policies/**"
+      - "tests/**"
+      - "tools/**"
+      - "scripts/**"
+      - "Makefile"
   push:
     branches: [main]
     paths:
-      - 'policies/**'
-      - 'tests/**'
+      - "policies/**"
+      - "tests/**"
 
 jobs:
   opa:
@@ -200,14 +200,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExportRequest'
+              $ref: "#/components/schemas/ExportRequest"
       responses:
-        '200':
+        "200":
           description: Decision payload (simulate)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DecisionPayload'
+                $ref: "#/components/schemas/DecisionPayload"
   /export:
     post:
       summary: Enforce export decision
@@ -216,14 +216,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExportRequest'
+              $ref: "#/components/schemas/ExportRequest"
       responses:
-        '200':
+        "200":
           description: Decision payload (enforced)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DecisionPayload'
+                $ref: "#/components/schemas/DecisionPayload"
 components:
   schemas:
     ExportRequest:
@@ -400,9 +400,9 @@ jobs:
 ```yaml
 apiVersion: 1
 providers:
-  - name: 'GA Core Hardening'
+  - name: "GA Core Hardening"
     orgId: 1
-    folder: 'IntelGraph/GA Core'
+    folder: "IntelGraph/GA Core"
     type: file
     disableDeletion: false
     editable: true

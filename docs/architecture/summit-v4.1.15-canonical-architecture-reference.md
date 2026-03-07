@@ -25,6 +25,7 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 ## II) Functional engines (“brains”) — role + IO
 
 ### 1) IntelGraph
+
 - **Role:** Semantic backbone storing entities/relationships for unified system state and history.【F:docs/architecture/phase1-intelgraph.md†L1-L7】
 - **Inputs:** Task/events metadata, evidence/claims (from Maestro and other producers).【F:docs/MAESTRO_GUIDE.md†L21-L38】【F:docs/architecture/phase1-maestro.md†L20-L22】
 - **Outputs:** Traversable graph context for retrieval/analysis; graph nodes for runs/evidence/claims.【F:docs/MAESTRO_GUIDE.md†L21-L48】
@@ -33,6 +34,7 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 - **Retries/Idempotency:** Governed by upstream orchestration idempotency and run semantics — **Deferred pending orchestration contract**.
 
 ### 2) Maestro Conductor
+
 - **Role:** Central orchestration engine that manages task lifecycle, dispatches to runners, and enforces governance checks before execution.【F:docs/architecture/phase1-maestro.md†L1-L27】
 - **Inputs:** Task creation requests with risk category; pipeline execution requests with `idempotency_key`.【F:docs/architecture/phase1-maestro.md†L8-L22】【F:docs/MAESTRO_GUIDE.md†L6-L19】
 - **Outputs:** Task lifecycle events (`TASK_CREATED`, `TASK_STARTED`, etc.), evidence + claims linked to runs.【F:docs/architecture/phase1-maestro.md†L20-L22】【F:docs/MAESTRO_GUIDE.md†L21-L38】
@@ -41,6 +43,7 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 - **Retries/Idempotency:** `idempotency_key` supports exactly-once initiation semantics for critical runs.【F:docs/MAESTRO_GUIDE.md†L6-L19】
 
 ### 3) Switchboard
+
 - **Role:** Local-first, zero-trust command center unifying agents, signals, and collaborators with multimodal co-pilot; connects to Maestro/agents and data backends.【F:docs/modules/switchboard-blueprint.md†L1-L57】
 - **Inputs:** Human/operator actions, agent signals, real-time status bus events, external integrations — **Deferred pending runtime wiring references**.
 - **Outputs:** Command routing to orchestration layer, collaboration events, policy-aware UI actions — **Deferred pending runtime wiring references**.
@@ -49,6 +52,7 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 - **Retries/Idempotency:** Client/edge retry semantics — **Deferred pending client retry spec**.
 
 ### 4) GraphRAG pipeline
+
 - **Role:** Graph-first retrieval that performs multi-hop traversal over Neo4j, optional vector augmentation, and deterministic context assembly with Evidence IDs.【F:docs/architecture/graph-rag-reference.md†L8-L46】
 - **Inputs:** User queries → planner → graph retriever + Cypher traversal; optional vector store enrichment.【F:docs/architecture/graph-rag-reference.md†L21-L46】
 - **Outputs:** Response with citations tied to Evidence IDs; execution traces with Cypher paths for explainability.【F:docs/architecture/graph-rag-reference.md†L45-L61】
@@ -57,6 +61,7 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 - **Retries/Idempotency:** Retrieval retry policy — **Deferred pending retry contract**.
 
 ### 5) Provenance Ledger
+
 - **Role:** Immutable evidence and claim chains, disclosure bundles with Merkle-root signatures, tenant isolation, and event emission to Kafka.【F:docs/architecture/prov-ledger.md†L1-L53】
 - **Inputs:** Evidence registration, claim creation, disclosure bundle requests.【F:docs/architecture/prov-ledger.md†L43-L53】
 - **Outputs:** Evidence IDs, claim records, disclosure manifests, Kafka events (`claim.created`, `disclosure.created`).【F:docs/architecture/prov-ledger.md†L20-L33】
@@ -74,6 +79,7 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 - **Observer:** Telemetry/monitoring + system health — **Deferred pending role definition** (no explicit observer role definition located).
 
 **Agent steering / context directories (present in repo):**
+
 - `.agent-guidance/` (agent review + verification guidance).【F:.agent-guidance/agentic-review-checklist.md†L1-L8】
 - `.agentic-prompts/` (prompt libraries + governance).【F:.agentic-prompts/README.md†L1-L12】
 - `.cursor/rules/` (editor rulesets for GraphQL/TS/React/testing).【F:.cursor/rules/project.mdc†L1-L12】
@@ -85,21 +91,27 @@ Summit is an **agentic AI OSINT platform** built around **knowledge graphs + Gra
 Mapped to documented repository structure (see `docs/REPOSITORY_STRUCTURE.md`).【F:docs/REPOSITORY_STRUCTURE.md†L1-L86】
 
 **Core infrastructure**
+
 - `server/` (GraphQL API), `api/` (REST services), `gateway/`, `services/` — API surface and orchestration touchpoints.【F:docs/REPOSITORY_STRUCTURE.md†L21-L60】
 
 **Data & storage**
+
 - `graph-service/` (Neo4j interface), `db/` + `migrations/` (DB config/migrations).【F:docs/REPOSITORY_STRUCTURE.md†L45-L52】
 
 **Agentic intelligence**
+
 - `ml/`, `copilot/`, `ai-ml-suite/`, `cognitive-insights/`, `nlp-service/` — AI/ML components and cognitive analysis engines.【F:docs/REPOSITORY_STRUCTURE.md†L33-L44】
 
 **Knowledge & logic**
+
 - `connectors/`, `data-pipelines/`, `streaming/`, `analytics/` — ingestion and processing surfaces that feed contextualization.【F:docs/REPOSITORY_STRUCTURE.md†L54-L60】
 
 **DevOps/CI/CD**
+
 - `k8s/`, `helm/`, `terraform/`, `deploy/`, `.github/` — deployment automation and workflows.【F:docs/REPOSITORY_STRUCTURE.md†L62-L70】
 
 **Testing/quality**
+
 - `tests/`, `e2e/`, `benchmarks/` — test suites and performance validation.【F:docs/REPOSITORY_STRUCTURE.md†L76-L82】
 
 ---
@@ -108,18 +120,19 @@ Mapped to documented repository structure (see `docs/REPOSITORY_STRUCTURE.md`).�
 
 > **Triage rule:** Classify only when evidence is found in README/entrypoints/tests/CI wiring.
 
-| Module | Tier | Evidence | Notes |
-| --- | --- | --- | --- |
+| Module                                  | Tier         | Evidence     | Notes                   |
+| --------------------------------------- | ------------ | ------------ | ----------------------- |
 | `adversarial-misinfo-defense-platform/` | Needs-triage | None located | Deferred pending triage |
-| `active-measures-module/` | Needs-triage | None located | Deferred pending triage |
-| `cognitive-targeting-engine/` | Needs-triage | None located | Deferred pending triage |
-| `cognitive_nlp_engine/` | Needs-triage | None located | Deferred pending triage |
-| `cognitive_insights_engine/` | Needs-triage | None located | Deferred pending triage |
-| `auto_scientist/` | Needs-triage | None located | Deferred pending triage |
-| `antigravity/` | Needs-triage | None located | Deferred pending triage |
-| `agentic_web_visibility/` | Needs-triage | None located | Deferred pending triage |
+| `active-measures-module/`               | Needs-triage | None located | Deferred pending triage |
+| `cognitive-targeting-engine/`           | Needs-triage | None located | Deferred pending triage |
+| `cognitive_nlp_engine/`                 | Needs-triage | None located | Deferred pending triage |
+| `cognitive_insights_engine/`            | Needs-triage | None located | Deferred pending triage |
+| `auto_scientist/`                       | Needs-triage | None located | Deferred pending triage |
+| `antigravity/`                          | Needs-triage | None located | Deferred pending triage |
+| `agentic_web_visibility/`               | Needs-triage | None located | Deferred pending triage |
 
 **Triage Playbook** (apply in order):
+
 1. **README/Docs**: confirm purpose, owner, and run instructions.
 2. **Entrypoints**: locate main binary/service (`package.json`, `main`, `Dockerfile`, `cmd/`, `src/index`).
 3. **Imports/Dependencies**: verify if referenced by core services (`server/`, `gateway/`, `services/`).

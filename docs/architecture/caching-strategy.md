@@ -46,21 +46,23 @@ This document formalizes the caching strategy across the Summit/IntelGraph platf
 
 **Technology**: LRU Cache (via `lru-cache` or custom implementation)
 
-| Property | Value |
-|----------|-------|
-| Latency | <1ms |
-| Capacity | 1GB default (configurable via `L1_CACHE_MAX_BYTES`) |
-| TTL | 300s default (configurable via `L1_CACHE_FALLBACK_TTL_SECONDS`) |
-| Scope | Per-instance (not shared across pods) |
-| Eviction | LRU by byte size |
+| Property | Value                                                           |
+| -------- | --------------------------------------------------------------- |
+| Latency  | <1ms                                                            |
+| Capacity | 1GB default (configurable via `L1_CACHE_MAX_BYTES`)             |
+| TTL      | 300s default (configurable via `L1_CACHE_FALLBACK_TTL_SECONDS`) |
+| Scope    | Per-instance (not shared across pods)                           |
+| Eviction | LRU by byte size                                                |
 
 **Use Cases**:
+
 - Hot configuration data
 - Session validation tokens
 - Frequently-accessed entity metadata
 - Computed values that are expensive to recalculate
 
 **Limitations**:
+
 - Not shared across instances
 - Lost on restart
 - Memory pressure concerns
@@ -69,15 +71,16 @@ This document formalizes the caching strategy across the Summit/IntelGraph platf
 
 **Technology**: Redis 7.x via ioredis
 
-| Property | Value |
-|----------|-------|
-| Latency | 1-5ms |
-| Capacity | Configurable (default: available memory) |
-| TTL | Varies by data type (see [Data Classification](#data-classification)) |
-| Scope | Shared across all instances |
-| Eviction | TTL-based + Redis maxmemory-policy |
+| Property | Value                                                                 |
+| -------- | --------------------------------------------------------------------- |
+| Latency  | 1-5ms                                                                 |
+| Capacity | Configurable (default: available memory)                              |
+| TTL      | Varies by data type (see [Data Classification](#data-classification)) |
+| Scope    | Shared across all instances                                           |
+| Eviction | TTL-based + Redis maxmemory-policy                                    |
 
 **Use Cases**:
+
 - Cross-instance session data
 - GraphQL query results
 - Entity/relationship lookups
@@ -98,14 +101,15 @@ This document formalizes the caching strategy across the Summit/IntelGraph platf
 
 **Technology**: CloudFront/CloudFlare (production only)
 
-| Property | Value |
-|----------|-------|
-| Latency | 10-50ms (edge) |
-| TTL | Up to 31536000s for immutable assets |
-| Scope | Global edge network |
-| Invalidation | API-based purge |
+| Property     | Value                                |
+| ------------ | ------------------------------------ |
+| Latency      | 10-50ms (edge)                       |
+| TTL          | Up to 31536000s for immutable assets |
+| Scope        | Global edge network                  |
+| Invalidation | API-based purge                      |
 
 **Use Cases**:
+
 - Static assets (JS, CSS, images)
 - Public API responses (with Cache-Control headers)
 - Immutable content (fingerprinted bundles)
@@ -114,12 +118,13 @@ This document formalizes the caching strategy across the Summit/IntelGraph platf
 
 **Technology**: HTTP Cache + Service Worker
 
-| Property | Value |
-|----------|-------|
-| TTL | Controlled via Cache-Control headers |
-| Scope | Per-user, per-device |
+| Property | Value                                |
+| -------- | ------------------------------------ |
+| TTL      | Controlled via Cache-Control headers |
+| Scope    | Per-user, per-device                 |
 
 **Headers Used**:
+
 ```
 # Immutable static assets
 Cache-Control: public, max-age=31536000, immutable
@@ -139,41 +144,41 @@ Pragma: no-cache
 
 ### Safe to Cache (Long TTL)
 
-| Data Type | Max TTL | Invalidation | Notes |
-|-----------|---------|--------------|-------|
-| Static assets | 1 year | Deploy-based | Use content hashing |
-| Platform configuration | 5 min | On update | Via pub/sub |
-| Entity type definitions | 5 min | On schema change | Schema version check |
-| Public API schemas | 5 min | Version-based | |
-| Feature flags | 60s | On toggle | Poll or push |
+| Data Type               | Max TTL | Invalidation     | Notes                |
+| ----------------------- | ------- | ---------------- | -------------------- |
+| Static assets           | 1 year  | Deploy-based     | Use content hashing  |
+| Platform configuration  | 5 min   | On update        | Via pub/sub          |
+| Entity type definitions | 5 min   | On schema change | Schema version check |
+| Public API schemas      | 5 min   | Version-based    |                      |
+| Feature flags           | 60s     | On toggle        | Poll or push         |
 
 ### Safe to Cache (Short TTL)
 
-| Data Type | Max TTL | Invalidation | Notes |
-|-----------|---------|--------------|-------|
-| Entity metadata | 60s | Write-through | Entity ID as tag |
-| Investigation summaries | 30s | Investigation change | |
-| Graph neighborhoods | 30 min | Node/relationship change | |
-| Aggregated statistics | 60s | TTL-only | Approximate is OK |
+| Data Type               | Max TTL | Invalidation             | Notes             |
+| ----------------------- | ------- | ------------------------ | ----------------- |
+| Entity metadata         | 60s     | Write-through            | Entity ID as tag  |
+| Investigation summaries | 30s     | Investigation change     |                   |
+| Graph neighborhoods     | 30 min  | Node/relationship change |                   |
+| Aggregated statistics   | 60s     | TTL-only                 | Approximate is OK |
 
 ### Avoid Caching
 
-| Data Type | Reason |
-|-----------|--------|
-| User credentials | Security risk |
-| Authentication tokens | Security risk |
-| PII (names, emails) | Privacy/compliance |
-| Audit logs | Must be fresh |
+| Data Type               | Reason                 |
+| ----------------------- | ---------------------- |
+| User credentials        | Security risk          |
+| Authentication tokens   | Security risk          |
+| PII (names, emails)     | Privacy/compliance     |
+| Audit logs              | Must be fresh          |
 | Real-time notifications | Staleness unacceptable |
-| Financial transactions | Consistency critical |
+| Financial transactions  | Consistency critical   |
 
 ### Conditional Caching
 
-| Data Type | Condition | TTL |
-|-----------|-----------|-----|
-| User preferences | Per-user cache key | 5 min |
-| Permission grants | Session-scoped | Until session end |
-| Search results | Query hash key | 30s |
+| Data Type         | Condition          | TTL               |
+| ----------------- | ------------------ | ----------------- |
+| User preferences  | Per-user cache key | 5 min             |
+| Permission grants | Session-scoped     | Until session end |
+| Search results    | Query hash key     | 30s               |
 
 ---
 
@@ -184,7 +189,7 @@ Pragma: no-cache
 **When to Use**: Data that can be slightly stale
 
 ```typescript
-await cache.set('key', value, { ttlSeconds: 300 });
+await cache.set("key", value, { ttlSeconds: 300 });
 ```
 
 **Pros**: Simple, automatic cleanup
@@ -210,7 +215,7 @@ await cache.set(`entity:${entity.id}`, entity);
 ```typescript
 // On write
 await database.update(entity);
-queue.publish('cache:invalidate', { key: `entity:${entity.id}` });
+queue.publish("cache:invalidate", { key: `entity:${entity.id}` });
 ```
 
 **Pros**: Lower write latency
@@ -222,10 +227,10 @@ queue.publish('cache:invalidate', { key: `entity:${entity.id}` });
 
 ```typescript
 // On write
-await cache.set('entity:123', entity, { tags: ['investigation:456'] });
+await cache.set("entity:123", entity, { tags: ["investigation:456"] });
 
 // On investigation update
-await cache.invalidateByTag('investigation:456');
+await cache.invalidateByTag("investigation:456");
 ```
 
 **Pros**: Batch invalidation
@@ -237,10 +242,13 @@ await cache.invalidateByTag('investigation:456');
 
 ```typescript
 // On write
-redis.publish('cache:invalidation', JSON.stringify({
-  type: 'key',
-  keys: ['entity:123']
-}));
+redis.publish(
+  "cache:invalidation",
+  JSON.stringify({
+    type: "key",
+    keys: ["entity:123"],
+  })
+);
 
 // All instances subscribe and evict local L1 cache
 ```
@@ -257,31 +265,35 @@ redis.publish('cache:invalidation', JSON.stringify({
 All services should use `@intelgraph/cache-core` for consistent caching:
 
 ```typescript
-import { createCache, CacheTier } from '@intelgraph/cache-core';
+import { createCache, CacheTier } from "@intelgraph/cache-core";
 
 // Create a cache instance
 const cache = createCache({
-  namespace: 'my-service',
+  namespace: "my-service",
   tiers: [CacheTier.L1, CacheTier.L2],
   defaultTtlSeconds: 300,
   metrics: true,
 });
 
 // Basic operations
-const value = await cache.get<MyType>('key');
-await cache.set('key', value, { ttlSeconds: 60 });
-await cache.delete('key');
+const value = await cache.get<MyType>("key");
+await cache.set("key", value, { ttlSeconds: 60 });
+await cache.delete("key");
 
 // Cache-aside pattern with stampede protection
-const result = await cache.getOrSet('key', async () => {
-  return await expensiveOperation();
-}, { ttlSeconds: 300 });
+const result = await cache.getOrSet(
+  "key",
+  async () => {
+    return await expensiveOperation();
+  },
+  { ttlSeconds: 300 }
+);
 
 // Tag-based invalidation
-await cache.set('entity:123', entity, {
-  tags: ['investigation:456', 'tenant:abc']
+await cache.set("entity:123", entity, {
+  tags: ["investigation:456", "tenant:abc"],
 });
-await cache.invalidateByTag('investigation:456');
+await cache.invalidateByTag("investigation:456");
 ```
 
 ### Adding Caching to a New Service
@@ -296,6 +308,7 @@ await cache.invalidateByTag('investigation:456');
 ### Caching Checklist
 
 Before adding caching:
+
 - [ ] Data is safe to cache (see classification)
 - [ ] TTL is appropriate for data freshness requirements
 - [ ] Cache has size bounds (maxSize or maxBytes)
@@ -331,6 +344,7 @@ cache_operation_duration_seconds{namespace, tier, operation}
 ### Grafana Dashboard
 
 A standard cache dashboard is available at `/d/cache-overview`:
+
 - Hit rate by service/tier
 - Cache size over time
 - Latency percentiles
@@ -397,12 +411,14 @@ const key = `user:${userId}:preferences`;
 **Symptoms**: `cache_hits_total` much lower than `cache_misses_total`
 
 **Causes**:
+
 1. TTL too short for access pattern
 2. Cache keys too specific (low reuse)
 3. Cache size too small (excessive eviction)
 4. High write rate causing invalidation
 
 **Resolution**:
+
 1. Analyze access patterns
 2. Increase TTL if staleness is acceptable
 3. Increase cache size
@@ -413,11 +429,13 @@ const key = `user:${userId}:preferences`;
 **Symptoms**: OOM errors, high memory usage
 
 **Causes**:
+
 1. L1 cache size unbounded
 2. Large objects being cached
 3. Memory leak in cache entries
 
 **Resolution**:
+
 1. Set `L1_CACHE_MAX_BYTES`
 2. Add size limits per entry
 3. Review cache cleanup intervals
@@ -427,11 +445,13 @@ const key = `user:${userId}:preferences`;
 **Symptoms**: Users see outdated information
 
 **Causes**:
+
 1. Missing invalidation on write
 2. Pub/sub messages lost
 3. TTL too long
 
 **Resolution**:
+
 1. Add write-through invalidation
 2. Verify pub/sub subscription
 3. Reduce TTL
@@ -465,7 +485,7 @@ redis-cli INFO memory
 
 ## Changelog
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author        | Change                               |
+| ---------- | ------------- | ------------------------------------ |
 | 2025-12-06 | Platform Team | Comprehensive strategy formalization |
-| 2024-XX-XX | Original | Initial GraphQL caching notes |
+| 2024-XX-XX | Original      | Initial GraphQL caching notes        |

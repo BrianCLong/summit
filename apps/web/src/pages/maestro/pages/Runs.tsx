@@ -214,7 +214,9 @@ function RunsTable() {
   }
 
   const handleBulkAction = async (action: 'cancel' | 'retry') => {
-    if (selectedRuns.length === 0) {return}
+    if (selectedRuns.length === 0) {
+      return
+    }
 
     for (const runId of selectedRuns) {
       await handleRunAction(runId, action)
@@ -258,208 +260,208 @@ function RunsTable() {
         />
       ) : (
         <>
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-        <div className="flex-1">
-          <div className="relative">
-            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search runs..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="pl-10 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search runs..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
 
-        <div className="flex space-x-2">
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="running">Running</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
-            <option value="queued">Queued</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-
-          <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            <FunnelIcon className="h-4 w-4 mr-2" />
-            More Filters
-          </button>
-        </div>
-      </div>
-
-      {/* Bulk Actions */}
-      {selectedRuns.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-800">
-              {selectedRuns.length} run{selectedRuns.length > 1 ? 's' : ''}{' '}
-              selected
-            </span>
-            <div className="space-x-2">
-              <button
-                onClick={() => handleBulkAction('cancel')}
-                className="text-sm text-red-600 hover:text-red-800"
+            <div className="flex space-x-2">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                Cancel Selected
-              </button>
-              <button
-                onClick={() => handleBulkAction('retry')}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Retry Selected
+                <option value="all">All Status</option>
+                <option value="running">Running</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="queued">Queued</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+
+              <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <FunnelIcon className="h-4 w-4 mr-2" />
+                More Filters
               </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Runs Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <input
-                  type="checkbox"
-                  checked={selectedRuns.length === filteredRuns.length}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      setSelectedRuns(filteredRuns.map(r => r.id))
-                    } else {
-                      setSelectedRuns([])
-                    }
-                  }}
-                />
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Run
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Trigger
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Duration
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Cost
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredRuns.map(run => {
-              const StatusIcon = getStatusIcon(run.status)
-              return (
-                <tr key={run.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+          {/* Bulk Actions */}
+          {selectedRuns.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-blue-800">
+                  {selectedRuns.length} run{selectedRuns.length > 1 ? 's' : ''}{' '}
+                  selected
+                </span>
+                <div className="space-x-2">
+                  <button
+                    onClick={() => handleBulkAction('cancel')}
+                    className="text-sm text-red-600 hover:text-red-800"
+                  >
+                    Cancel Selected
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('retry')}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Retry Selected
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Runs Table */}
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <input
                       type="checkbox"
-                      checked={selectedRuns.includes(run.id)}
+                      checked={selectedRuns.length === filteredRuns.length}
                       onChange={e => {
                         if (e.target.checked) {
-                          setSelectedRuns(prev => [...prev, run.id])
+                          setSelectedRuns(filteredRuns.map(r => r.id))
                         } else {
-                          setSelectedRuns(prev =>
-                            prev.filter(id => id !== run.id)
-                          )
+                          setSelectedRuns([])
                         }
                       }}
                     />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {run.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {run.runbook} • {run.environment}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {run.startTime.toLocaleString()}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${getStatusColor(run.status)}`}
-                    >
-                      <StatusIcon className="h-3 w-3 mr-1" />
-                      {run.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>{run.trigger}</div>
-                    <div className="text-xs">{run.triggeredBy}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {run.duration
-                      ? `${Math.floor(run.duration / 60)}m ${run.duration % 60}s`
-                      : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${run.cost.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => navigate(`/maestro/runs/${run.id}`)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="View Details"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
-
-                      {run.status === 'running' && (
-                        <button
-                          onClick={() => handleRunAction(run.id, 'pause')}
-                          className="text-yellow-600 hover:text-yellow-900"
-                          title="Pause"
-                        >
-                          <PauseIcon className="h-4 w-4" />
-                        </button>
-                      )}
-
-                      {(run.status === 'running' ||
-                        run.status === 'queued') && (
-                        <button
-                          onClick={() => handleRunAction(run.id, 'cancel')}
-                          className="text-red-600 hover:text-red-900"
-                          title="Cancel"
-                        >
-                          <StopIcon className="h-4 w-4" />
-                        </button>
-                      )}
-
-                      {(run.status === 'failed' ||
-                        run.status === 'cancelled') && (
-                        <button
-                          onClick={() => handleRunAction(run.id, 'retry')}
-                          className="text-green-600 hover:text-green-900"
-                          title="Retry"
-                        >
-                          <ArrowPathIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Run
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Trigger
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cost
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredRuns.map(run => {
+                  const StatusIcon = getStatusIcon(run.status)
+                  return (
+                    <tr key={run.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedRuns.includes(run.id)}
+                          onChange={e => {
+                            if (e.target.checked) {
+                              setSelectedRuns(prev => [...prev, run.id])
+                            } else {
+                              setSelectedRuns(prev =>
+                                prev.filter(id => id !== run.id)
+                              )
+                            }
+                          }}
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {run.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {run.runbook} • {run.environment}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {run.startTime.toLocaleString()}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${getStatusColor(run.status)}`}
+                        >
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {run.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div>{run.trigger}</div>
+                        <div className="text-xs">{run.triggeredBy}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {run.duration
+                          ? `${Math.floor(run.duration / 60)}m ${run.duration % 60}s`
+                          : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${run.cost.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => navigate(`/maestro/runs/${run.id}`)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="View Details"
+                          >
+                            <EyeIcon className="h-4 w-4" />
+                          </button>
+
+                          {run.status === 'running' && (
+                            <button
+                              onClick={() => handleRunAction(run.id, 'pause')}
+                              className="text-yellow-600 hover:text-yellow-900"
+                              title="Pause"
+                            >
+                              <PauseIcon className="h-4 w-4" />
+                            </button>
+                          )}
+
+                          {(run.status === 'running' ||
+                            run.status === 'queued') && (
+                            <button
+                              onClick={() => handleRunAction(run.id, 'cancel')}
+                              className="text-red-600 hover:text-red-900"
+                              title="Cancel"
+                            >
+                              <StopIcon className="h-4 w-4" />
+                            </button>
+                          )}
+
+                          {(run.status === 'failed' ||
+                            run.status === 'cancelled') && (
+                            <button
+                              onClick={() => handleRunAction(run.id, 'retry')}
+                              className="text-green-600 hover:text-green-900"
+                              title="Retry"
+                            >
+                              <ArrowPathIcon className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </div>

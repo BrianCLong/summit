@@ -1,21 +1,25 @@
 # FactFlow Demo Script (15 min)
 
 ## Intro (2 min)
+
 "Thanks for taking the time. I'll show you FactFlow in action,
 then we can discuss if it's a fit for [Newsroom Name]."
 
 ## Problem Statement (2 min)
+
 "When you cover live events — debates, press conferences —
 how do you currently fact-check claims in real-time?"
 
 [Listen to their answer]
 
 "Most newsrooms I talk to either:
+
 1. Miss claims entirely (too fast)
 2. Fact-check after the event (too slow)
 3. Rely on memory (error-prone)"
 
 ## Solution Demo (8 min)
+
 [Share screen]
 
 1. Show live transcription (paste sample transcript)
@@ -24,6 +28,7 @@ how do you currently fact-check claims in real-time?"
 4. Verdict displays in <5 seconds
 
 "Here's what you'd see during a live debate:
+
 - Speaker A claims 'Unemployment is 3%'
 - FactFlow extracts that claim
 - Searches BLS data
@@ -31,6 +36,7 @@ how do you currently fact-check claims in real-time?"
 - Reporter sees this in real-time during broadcast"
 
 ## Pricing & Next Steps (3 min)
+
 "Pricing is $2,500/month for unlimited events, 5 users.
 
 Would you be interested in a 30-day free trial

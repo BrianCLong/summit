@@ -86,48 +86,48 @@ This document defines the comprehensive Data Loss Prevention (DLP), Information 
 
 #### 1. Trade Secrets & Intellectual Property
 
-| Type | Description | Examples | Default Policy |
-|------|-------------|----------|----------------|
-| `TRADE_SECRET` | Proprietary business information | Algorithms, processes, formulas | Block external, encrypt at rest |
-| `SOURCE_CODE` | Application source code | Repositories, configs | Block external, internal-only |
-| `BUSINESS_STRATEGY` | Strategic planning documents | Roadmaps, M&A plans | Executive-only access |
-| `RESEARCH_DATA` | R&D experimental data | Lab results, patents-pending | Research team isolation |
+| Type                | Description                      | Examples                        | Default Policy                  |
+| ------------------- | -------------------------------- | ------------------------------- | ------------------------------- |
+| `TRADE_SECRET`      | Proprietary business information | Algorithms, processes, formulas | Block external, encrypt at rest |
+| `SOURCE_CODE`       | Application source code          | Repositories, configs           | Block external, internal-only   |
+| `BUSINESS_STRATEGY` | Strategic planning documents     | Roadmaps, M&A plans             | Executive-only access           |
+| `RESEARCH_DATA`     | R&D experimental data            | Lab results, patents-pending    | Research team isolation         |
 
 #### 2. Financial Data
 
-| Type | Description | Examples | Default Policy |
-|------|-------------|----------|----------------|
-| `FINANCIAL_PII` | Personal financial information | Bank accounts, credit cards | Mask, audit all access |
-| `CORPORATE_FINANCIALS` | Company financial data | P&L, balance sheets | Finance team + executives |
-| `TRADING_DATA` | Market-sensitive information | Positions, algorithms | Trading wall enforcement |
-| `TAX_RECORDS` | Tax-related documents | Returns, assessments | Compliance team only |
+| Type                   | Description                    | Examples                    | Default Policy            |
+| ---------------------- | ------------------------------ | --------------------------- | ------------------------- |
+| `FINANCIAL_PII`        | Personal financial information | Bank accounts, credit cards | Mask, audit all access    |
+| `CORPORATE_FINANCIALS` | Company financial data         | P&L, balance sheets         | Finance team + executives |
+| `TRADING_DATA`         | Market-sensitive information   | Positions, algorithms       | Trading wall enforcement  |
+| `TAX_RECORDS`          | Tax-related documents          | Returns, assessments        | Compliance team only      |
 
 #### 3. Personal Data (PII/PCI/PHI)
 
-| Type | Description | Examples | Default Policy |
-|------|-------------|----------|----------------|
-| `PII_DIRECT` | Direct identifiers | SSN, passport, DL | Full redaction, audit |
-| `PII_QUASI` | Quasi-identifiers | DOB, ZIP, IP | Partial mask, combine warning |
-| `PCI` | Payment card data | Card numbers, CVV | PCI-DSS controls, tokenize |
-| `PHI` | Protected health information | Medical records, diagnosis | HIPAA controls, minimum necessary |
+| Type         | Description                  | Examples                   | Default Policy                    |
+| ------------ | ---------------------------- | -------------------------- | --------------------------------- |
+| `PII_DIRECT` | Direct identifiers           | SSN, passport, DL          | Full redaction, audit             |
+| `PII_QUASI`  | Quasi-identifiers            | DOB, ZIP, IP               | Partial mask, combine warning     |
+| `PCI`        | Payment card data            | Card numbers, CVV          | PCI-DSS controls, tokenize        |
+| `PHI`        | Protected health information | Medical records, diagnosis | HIPAA controls, minimum necessary |
 
 #### 4. Regulated Data
 
-| Type | Description | Examples | Default Policy |
-|------|-------------|----------|----------------|
-| `GDPR_PERSONAL` | EU personal data | EU resident PII | Consent-based, right to delete |
-| `CCPA_CONSUMER` | California consumer data | CA resident PII | Opt-out support, disclosure |
-| `ITAR_CONTROLLED` | Export-controlled data | Defense articles | US persons only, no export |
-| `CLASSIFIED` | Government classified | National security | Clearance required, air-gap |
+| Type              | Description              | Examples          | Default Policy                 |
+| ----------------- | ------------------------ | ----------------- | ------------------------------ |
+| `GDPR_PERSONAL`   | EU personal data         | EU resident PII   | Consent-based, right to delete |
+| `CCPA_CONSUMER`   | California consumer data | CA resident PII   | Opt-out support, disclosure    |
+| `ITAR_CONTROLLED` | Export-controlled data   | Defense articles  | US persons only, no export     |
+| `CLASSIFIED`      | Government classified    | National security | Clearance required, air-gap    |
 
 #### 5. Internal-Only Data
 
-| Type | Description | Examples | Default Policy |
-|------|-------------|----------|----------------|
-| `INTERNAL_COMMS` | Internal communications | Emails, chat logs | No external sharing |
-| `HR_RECORDS` | Employee information | Performance, salary | HR team + management |
-| `SECURITY_LOGS` | Security event data | Auth logs, incidents | Security team only |
-| `AUDIT_TRAIL` | Audit records | Access logs, changes | Immutable, compliance team |
+| Type             | Description             | Examples             | Default Policy             |
+| ---------------- | ----------------------- | -------------------- | -------------------------- |
+| `INTERNAL_COMMS` | Internal communications | Emails, chat logs    | No external sharing        |
+| `HR_RECORDS`     | Employee information    | Performance, salary  | HR team + management       |
+| `SECURITY_LOGS`  | Security event data     | Auth logs, incidents | Security team only         |
+| `AUDIT_TRAIL`    | Audit records           | Access logs, changes | Immutable, compliance team |
 
 ### Classification Labels
 
@@ -278,17 +278,17 @@ barrier:
 
 ### Data Flow Matrix
 
-| Source → Target | Same Tenant | Cross Tenant | Same BU | Cross BU | Same Env | Cross Env |
-|-----------------|-------------|--------------|---------|----------|----------|-----------|
-| **PUBLIC** | ALLOW | ALLOW | ALLOW | ALLOW | ALLOW | ALLOW |
-| **INTERNAL** | ALLOW | DENY | ALLOW | POLICY | ALLOW | DENY |
-| **CONFIDENTIAL** | ALLOW | DENY | ALLOW | POLICY | ALLOW | DENY |
-| **RESTRICTED** | POLICY | DENY | POLICY | DENY | POLICY | DENY |
-| **TOP_SECRET** | POLICY | DENY | POLICY | DENY | DENY | DENY |
-| **PII** | POLICY | DENY | POLICY | POLICY | DENY* | DENY |
-| **TRADE_SECRET** | POLICY | DENY | DENY | DENY | POLICY | DENY |
+| Source → Target  | Same Tenant | Cross Tenant | Same BU | Cross BU | Same Env | Cross Env |
+| ---------------- | ----------- | ------------ | ------- | -------- | -------- | --------- |
+| **PUBLIC**       | ALLOW       | ALLOW        | ALLOW   | ALLOW    | ALLOW    | ALLOW     |
+| **INTERNAL**     | ALLOW       | DENY         | ALLOW   | POLICY   | ALLOW    | DENY      |
+| **CONFIDENTIAL** | ALLOW       | DENY         | ALLOW   | POLICY   | ALLOW    | DENY      |
+| **RESTRICTED**   | POLICY      | DENY         | POLICY  | DENY     | POLICY   | DENY      |
+| **TOP_SECRET**   | POLICY      | DENY         | POLICY  | DENY     | DENY     | DENY      |
+| **PII**          | POLICY      | DENY         | POLICY  | POLICY   | DENY\*   | DENY      |
+| **TRADE_SECRET** | POLICY      | DENY         | DENY    | DENY     | POLICY   | DENY      |
 
-*PII can flow to lower environments only if anonymized/synthetic
+\*PII can flow to lower environments only if anonymized/synthetic
 
 ---
 
@@ -302,32 +302,32 @@ barrier:
 interface IngestionInspector {
   // Inspection at data entry points
   inspectionPoints: [
-    'file_upload',
-    'api_payload',
-    'message_content',
-    'form_submission',
-    'import_batch',
-    'stream_event'
+    "file_upload",
+    "api_payload",
+    "message_content",
+    "form_submission",
+    "import_batch",
+    "stream_event",
   ];
 
   // Detection methods
   detection: {
-    patternMatching: boolean;    // Regex-based detection
-    mlClassification: boolean;   // ML model classification
-    fingerprinting: boolean;     // Document fingerprinting
-    contextAnalysis: boolean;    // Contextual analysis
+    patternMatching: boolean; // Regex-based detection
+    mlClassification: boolean; // ML model classification
+    fingerprinting: boolean; // Document fingerprinting
+    contextAnalysis: boolean; // Contextual analysis
     metadataInspection: boolean; // File metadata check
   };
 
   // Actions
   actions: [
-    'ALLOW',           // Pass through
-    'BLOCK',           // Reject entirely
-    'REDACT',          // Remove sensitive portions
-    'ENCRYPT',         // Encrypt before storage
-    'QUARANTINE',      // Hold for review
-    'TAG',             // Add classification labels
-    'NOTIFY'           // Alert without blocking
+    "ALLOW", // Pass through
+    "BLOCK", // Reject entirely
+    "REDACT", // Remove sensitive portions
+    "ENCRYPT", // Encrypt before storage
+    "QUARANTINE", // Hold for review
+    "TAG", // Add classification labels
+    "NOTIFY", // Alert without blocking
   ];
 }
 ```
@@ -338,36 +338,36 @@ interface IngestionInspector {
 interface EgressInspector {
   // Inspection at data exit points
   inspectionPoints: [
-    'file_download',
-    'api_response',
-    'email_attachment',
-    'report_export',
-    'bulk_export',
-    'print_job',
-    'clipboard',
-    'screen_share'
+    "file_download",
+    "api_response",
+    "email_attachment",
+    "report_export",
+    "bulk_export",
+    "print_job",
+    "clipboard",
+    "screen_share",
   ];
 
   // Enhanced detection for exports
   detection: {
     allIngestionMethods: true;
-    aggregationDetection: boolean;  // Detect PII aggregation
-    volumeAnalysis: boolean;        // Unusual volume detection
-    destinationAnalysis: boolean;   // Destination risk scoring
-    temporalAnalysis: boolean;      // Time-based anomalies
+    aggregationDetection: boolean; // Detect PII aggregation
+    volumeAnalysis: boolean; // Unusual volume detection
+    destinationAnalysis: boolean; // Destination risk scoring
+    temporalAnalysis: boolean; // Time-based anomalies
   };
 
   // Export-specific actions
   actions: [
-    'ALLOW',
-    'BLOCK',
-    'REDACT',
-    'WATERMARK',       // Add invisible watermark
-    'ENCRYPT',
-    'REQUIRE_APPROVAL',
-    'REQUIRE_JUSTIFICATION',
-    'NOTIFY_MANAGER',
-    'DELAY'            // Time-delayed release
+    "ALLOW",
+    "BLOCK",
+    "REDACT",
+    "WATERMARK", // Add invisible watermark
+    "ENCRYPT",
+    "REQUIRE_APPROVAL",
+    "REQUIRE_JUSTIFICATION",
+    "NOTIFY_MANAGER",
+    "DELAY", // Time-delayed release
   ];
 }
 ```
@@ -378,12 +378,12 @@ interface EgressInspector {
 interface TransferInspector {
   // Inspection at internal boundaries
   inspectionPoints: [
-    'service_to_service',
-    'database_query',
-    'cache_operation',
-    'queue_message',
-    'internal_api',
-    'shared_storage'
+    "service_to_service",
+    "database_query",
+    "cache_operation",
+    "queue_message",
+    "internal_api",
+    "shared_storage",
   ];
 
   // Barrier enforcement
@@ -407,18 +407,18 @@ patterns:
     regex: '(?!000|666|9\d{2})\d{3}[-\s]?(?!00)\d{2}[-\s]?(?!0000)\d{4}'
     confidence: 0.95
     context_boost:
-      - 'social security'
-      - 'SSN'
-      - 'tax id'
+      - "social security"
+      - "SSN"
+      - "tax id"
     false_positive_filters:
       - phone_number_format
       - date_format
 
   credit_card:
-    regex: '(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})'
+    regex: "(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})"
     validation: luhn_check
     confidence: 0.98
-    mask_pattern: '****-****-****-{last4}'
+    mask_pattern: "****-****-****-{last4}"
 
   email:
     regex: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
@@ -427,10 +427,10 @@ patterns:
 
   api_key:
     patterns:
-      - 'sk-[a-zA-Z0-9]{32,}'      # OpenAI style
-      - 'AKIA[0-9A-Z]{16}'         # AWS access key
-      - 'ghp_[a-zA-Z0-9]{36}'      # GitHub PAT
-      - 'xox[baprs]-[0-9a-zA-Z-]+' # Slack token
+      - "sk-[a-zA-Z0-9]{32,}" # OpenAI style
+      - "AKIA[0-9A-Z]{16}" # AWS access key
+      - "ghp_[a-zA-Z0-9]{36}" # GitHub PAT
+      - "xox[baprs]-[0-9a-zA-Z-]+" # Slack token
     confidence: 0.99
     action: BLOCK_IMMEDIATE
 ```
@@ -479,7 +479,7 @@ ml_classifiers:
 
 ```typescript
 interface BlockAction {
-  type: 'BLOCK';
+  type: "BLOCK";
 
   response: {
     statusCode: 403;
@@ -496,7 +496,7 @@ interface BlockAction {
   };
 
   audit: {
-    severity: 'HIGH';
+    severity: "HIGH";
     details: {
       content_hash: string;
       detected_patterns: string[];
@@ -512,21 +512,21 @@ interface BlockAction {
 
 ```typescript
 interface RedactAction {
-  type: 'REDACT';
+  type: "REDACT";
 
   redactionStrategy: {
     pii: {
-      ssn: 'FULL_MASK';           // ***-**-****
-      email: 'PARTIAL_DOMAIN';    // j***@example.com
-      phone: 'PARTIAL_AREA';      // (555) ***-****
-      name: 'INITIALS';           // J.D.
-      address: 'CITY_ONLY';       // ***, San Francisco, CA
-      credit_card: 'LAST_FOUR';   // ****-****-****-1234
+      ssn: "FULL_MASK"; // ***-**-****
+      email: "PARTIAL_DOMAIN"; // j***@example.com
+      phone: "PARTIAL_AREA"; // (555) ***-****
+      name: "INITIALS"; // J.D.
+      address: "CITY_ONLY"; // ***, San Francisco, CA
+      credit_card: "LAST_FOUR"; // ****-****-****-1234
     };
 
     preserveFormat: boolean;
     maintainLength: boolean;
-    deterministicMask: boolean;  // Same input = same mask
+    deterministicMask: boolean; // Same input = same mask
   };
 
   metadata: {
@@ -542,12 +542,12 @@ interface RedactAction {
 
 ```typescript
 interface WarnAction {
-  type: 'WARN';
+  type: "WARN";
 
   warning: {
     title: string;
     message: string;
-    severity: 'INFO' | 'WARNING' | 'CRITICAL';
+    severity: "INFO" | "WARNING" | "CRITICAL";
     policyReference: string;
   };
 
@@ -559,8 +559,8 @@ interface WarnAction {
   };
 
   escalation: {
-    onProceed: 'NOTIFY_MANAGER' | 'AUDIT_ONLY' | 'NONE';
-    onCancel: 'AUDIT_ONLY';
+    onProceed: "NOTIFY_MANAGER" | "AUDIT_ONLY" | "NONE";
+    onCancel: "AUDIT_ONLY";
   };
 }
 ```
@@ -569,35 +569,35 @@ interface WarnAction {
 
 ```typescript
 interface JustificationAction {
-  type: 'REQUIRE_JUSTIFICATION';
+  type: "REQUIRE_JUSTIFICATION";
 
   justificationForm: {
     fields: [
       {
-        name: 'business_purpose';
-        type: 'select';
-        options: ['legal_discovery', 'audit', 'investigation', 'customer_request', 'other'];
+        name: "business_purpose";
+        type: "select";
+        options: ["legal_discovery", "audit", "investigation", "customer_request", "other"];
         required: true;
       },
       {
-        name: 'description';
-        type: 'textarea';
+        name: "description";
+        type: "textarea";
         minLength: 50;
         required: true;
       },
       {
-        name: 'authorization_reference';
-        type: 'text';
-        pattern: 'AUTH-[0-9]{6}';
+        name: "authorization_reference";
+        type: "text";
+        pattern: "AUTH-[0-9]{6}";
         required: false;
-      }
+      },
     ];
   };
 
   approval: {
-    autoApprove: ['legal_discovery', 'audit'];
-    requireManagerApproval: ['investigation', 'customer_request'];
-    requireComplianceApproval: ['other'];
+    autoApprove: ["legal_discovery", "audit"];
+    requireManagerApproval: ["investigation", "customer_request"];
+    requireComplianceApproval: ["other"];
   };
 }
 ```
@@ -636,7 +636,7 @@ spec:
   # Custom patterns
   customPatterns:
     - name: internal-project-code
-      regex: 'PROJ-[A-Z]{3}-[0-9]{4}'
+      regex: "PROJ-[A-Z]{3}-[0-9]{4}"
       classification: INTERNAL
       action: TAG
 
@@ -772,13 +772,13 @@ spec:
   comparison:
     baseline: current-pii-detection-v1
     threshold:
-      falsePositiveRate: '<5%'
-      falseNegativeRate: '<1%'
-      latencyP99: '<100ms'
+      falsePositiveRate: "<5%"
+      falseNegativeRate: "<1%"
+      latencyP99: "<100ms"
 
   # Alerts during testing
   alerts:
-    - condition: 'false_positive_rate > 10%'
+    - condition: "false_positive_rate > 10%"
       action: NOTIFY_SECURITY
       severity: WARNING
 
@@ -786,9 +786,9 @@ spec:
   autoPromote:
     enabled: true
     conditions:
-      - 'all_metrics_pass'
-      - 'no_critical_alerts'
-      - 'manual_review_approved'
+      - "all_metrics_pass"
+      - "no_critical_alerts"
+      - "manual_review_approved"
 ```
 
 ---
@@ -800,7 +800,7 @@ spec:
 ```typescript
 interface DLPAuditEvent {
   // Event identification
-  eventId: string;           // UUID
+  eventId: string; // UUID
   timestamp: ISO8601;
   eventType: DLPEventType;
 
@@ -819,7 +819,7 @@ interface DLPAuditEvent {
   content: {
     resourceType: string;
     resourceId: string;
-    contentHash: string;      // SHA-256
+    contentHash: string; // SHA-256
     size: number;
     classification: string;
   };
@@ -845,14 +845,14 @@ interface DLPAuditEvent {
       matched: boolean;
       action: string;
     }>;
-    finalDecision: 'ALLOW' | 'BLOCK' | 'REDACT' | 'WARN';
+    finalDecision: "ALLOW" | "BLOCK" | "REDACT" | "WARN";
     exceptionApplied?: string;
   };
 
   // Outcome
   outcome: {
     action: string;
-    userResponse?: string;    // For WARN with user choice
+    userResponse?: string; // For WARN with user choice
     justification?: string;
     destinationInfo?: {
       type: string;
@@ -869,13 +869,13 @@ interface DLPAuditEvent {
 }
 
 type DLPEventType =
-  | 'INGESTION_SCAN'
-  | 'EGRESS_SCAN'
-  | 'TRANSFER_SCAN'
-  | 'BARRIER_CHECK'
-  | 'EXCEPTION_USED'
-  | 'POLICY_VIOLATION'
-  | 'ADMIN_OVERRIDE';
+  | "INGESTION_SCAN"
+  | "EGRESS_SCAN"
+  | "TRANSFER_SCAN"
+  | "BARRIER_CHECK"
+  | "EXCEPTION_USED"
+  | "POLICY_VIOLATION"
+  | "ADMIN_OVERRIDE";
 ```
 
 ### Compliance Reports
@@ -884,7 +884,7 @@ type DLPEventType =
 # Report configuration
 reports:
   daily_summary:
-    schedule: '0 0 * * *'
+    schedule: "0 0 * * *"
     recipients: [security-team@company.com]
     content:
       - total_scans
@@ -893,7 +893,7 @@ reports:
       - exception_usage
 
   weekly_compliance:
-    schedule: '0 0 * * MON'
+    schedule: "0 0 * * MON"
     recipients: [compliance@company.com, legal@company.com]
     content:
       - pii_exposure_trends
@@ -903,7 +903,7 @@ reports:
       - policy_changes
 
   monthly_executive:
-    schedule: '0 0 1 * *'
+    schedule: "0 0 1 * *"
     recipients: [ciso@company.com, cco@company.com]
     content:
       - executive_summary
@@ -923,22 +923,22 @@ reports:
 
 ```typescript
 // Express middleware example
-import { DLPMiddleware } from '@intelgraph/dlp';
+import { DLPMiddleware } from "@intelgraph/dlp";
 
 const dlpMiddleware = new DLPMiddleware({
-  inspectionPoints: ['request', 'response'],
+  inspectionPoints: ["request", "response"],
   asyncMode: false,
   failOpen: false,
 });
 
-app.use('/api/*', dlpMiddleware.inspect());
+app.use("/api/*", dlpMiddleware.inspect());
 ```
 
 #### 2. GraphQL Integration
 
 ```typescript
 // Apollo Server plugin
-import { DLPPlugin } from '@intelgraph/dlp/apollo';
+import { DLPPlugin } from "@intelgraph/dlp/apollo";
 
 const server = new ApolloServer({
   plugins: [
@@ -956,17 +956,17 @@ const server = new ApolloServer({
 
 ```typescript
 // S3/Storage hook
-import { DLPStorageHook } from '@intelgraph/dlp/storage';
+import { DLPStorageHook } from "@intelgraph/dlp/storage";
 
 const hook = new DLPStorageHook({
   scanOnUpload: true,
   scanOnDownload: true,
   blockUntilScanned: true,
-  quarantineBucket: 'dlp-quarantine',
+  quarantineBucket: "dlp-quarantine",
 });
 
-storageClient.addHook('beforeUpload', hook.beforeUpload);
-storageClient.addHook('beforeDownload', hook.beforeDownload);
+storageClient.addHook("beforeUpload", hook.beforeUpload);
+storageClient.addHook("beforeDownload", hook.beforeDownload);
 ```
 
 ### Performance Considerations
@@ -985,7 +985,7 @@ performance:
   # Sampling for high-volume
   sampling:
     enabled: true
-    rate: 0.1  # 10% for non-critical paths
+    rate: 0.1 # 10% for non-critical paths
     fullScanPaths:
       - /api/export/*
       - /api/admin/*
@@ -1088,14 +1088,14 @@ type Mutation {
 
 ### A. Compliance Mapping
 
-| Requirement | GDPR | CCPA | HIPAA | PCI-DSS | SOX |
-|-------------|------|------|-------|---------|-----|
-| Data classification | Art. 30 | 1798.100 | §164.312 | Req 9 | §302 |
-| Access controls | Art. 32 | 1798.150 | §164.312 | Req 7 | §404 |
-| Audit logging | Art. 30 | 1798.100 | §164.312 | Req 10 | §802 |
-| Data minimization | Art. 5 | 1798.100 | §164.502 | Req 3 | - |
-| Breach notification | Art. 33 | 1798.82 | §164.404 | Req 12 | - |
-| Right to erasure | Art. 17 | 1798.105 | - | - | - |
+| Requirement         | GDPR    | CCPA     | HIPAA    | PCI-DSS | SOX  |
+| ------------------- | ------- | -------- | -------- | ------- | ---- |
+| Data classification | Art. 30 | 1798.100 | §164.312 | Req 9   | §302 |
+| Access controls     | Art. 32 | 1798.150 | §164.312 | Req 7   | §404 |
+| Audit logging       | Art. 30 | 1798.100 | §164.312 | Req 10  | §802 |
+| Data minimization   | Art. 5  | 1798.100 | §164.502 | Req 3   | -    |
+| Breach notification | Art. 33 | 1798.82  | §164.404 | Req 12  | -    |
+| Right to erasure    | Art. 17 | 1798.105 | -        | -       | -    |
 
 ### B. Detection Pattern Library
 
@@ -1109,6 +1109,6 @@ See: [policy/dlp/](/policy/dlp/)
 
 **Document Control**
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | 2025-12-07 | Security Team | Initial draft |
+| Version | Date       | Author        | Changes       |
+| ------- | ---------- | ------------- | ------------- |
+| 0.1.0   | 2025-12-07 | Security Team | Initial draft |

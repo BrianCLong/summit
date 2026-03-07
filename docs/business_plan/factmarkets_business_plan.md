@@ -12,7 +12,7 @@ While FactFlow and FactLaw capture media and legal markets ($2-3M ARR each), the
 - **Hidden pain**: Fake news moves markets. CU Boulder study: Single false earnings claim caused 40% stock drop in ONE DAY, wiping $10M+ in market value. Finance teams are desperate for solutions. [colorado](https://www.colorado.edu/today/2025/03/19/rising-threat-fake-news-financial-markets)
 - **Competitive void**: No pure-play SaaS for financial fact-checking exists. Trade surveillance is reactive (detect after-the-fact); FactMarkets is preventive (detect before market impact).
 
-***
+---
 
 ## 1. The Problem: Financial Misinformation at Scale
 
@@ -46,7 +46,7 @@ While FactFlow and FactLaw capture media and legal markets ($2-3M ARR each), the
 
 **Investor due diligence nightmare**: Private equity firms evaluating 100+ companies; ESG claims scattered across PDFs, interviews, policy documents. Traditional approach: 3-5 hours per company, manual. CU Boulder study found PE teams miss 40% of inconsistencies. [sopact](https://www.sopact.com/use-case/esg-due-diligence)
 
-***
+---
 
 ## 2. FactMarkets: Product Definition
 
@@ -184,7 +184,7 @@ Output:
    - Fact-check guidance before distribution to analysts
    - Revenue: $1-5 per fact-checked claim × 1B claims/year = $1-5B potential TAM
 
-***
+---
 
 ## 3. Business Model: Pricing Tiers
 
@@ -223,7 +223,7 @@ Output:
 - Pricing: $99-299/month add-on per seat
 - Potential: 50K paying seats × $150/month × 12 months × 30% = **$27M ARR** (from one partnership)
 
-***
+---
 
 ## 4. Market Size & TAM
 
@@ -247,16 +247,16 @@ Output:
 - Licensing revenue (1-2 platform partnerships): $50M
 - **Year 3 SOM: $170M+ ARR**
 
-***
+---
 
 ## 5. Why This Is The Highest-Revenue Business
 
-| Business | Year 1 ARR | Year 3 ARR | Deal Size | Customer Type | Competitive Moat |
-|----------|-----------|-----------|-----------|---------------|------------------|
-| **FactFlow** (newsroom) | $1.5M | $10M | $5-15K/mo | Many (spread) | Moderate |
-| **FactLaw** (legal) | $2M | $20M | $10-50K/mo | Fewer (concentrated) | High |
-| **FactDatasets** (licensing) | $200K | $50M | $1-100M | Tier-1 only | Very High |
-| **FactMarkets** (financial) | $45M | $170M | $30-500K/mo | Fewer, very wealthy | Very High |
+| Business                     | Year 1 ARR | Year 3 ARR | Deal Size   | Customer Type        | Competitive Moat |
+| ---------------------------- | ---------- | ---------- | ----------- | -------------------- | ---------------- |
+| **FactFlow** (newsroom)      | $1.5M      | $10M       | $5-15K/mo   | Many (spread)        | Moderate         |
+| **FactLaw** (legal)          | $2M        | $20M       | $10-50K/mo  | Fewer (concentrated) | High             |
+| **FactDatasets** (licensing) | $200K      | $50M       | $1-100M     | Tier-1 only          | Very High        |
+| **FactMarkets** (financial)  | $45M       | $170M      | $30-500K/mo | Fewer, very wealthy  | Very High        |
 
 **FactMarkets dominates because**:
 
@@ -265,7 +265,7 @@ Output:
 3. **Catastrophic consequences of failure** (financial fraud costs companies $100M+ losses; they pay premium for solutions)
 4. **Licensing leverage** (one platform partnership = $10-50M ARR)
 
-***
+---
 
 ## 6. Operational Roadmap: 12 Weeks to Launch
 
@@ -325,7 +325,7 @@ Output:
 
 **Revenue**: $20-50K MRR by week 12 (pilots)
 
-***
+---
 
 ## 7. The Portfolio Play: Six Businesses, $50M+ ARR by Year 2
 
@@ -343,7 +343,7 @@ By end of 2026, you operate:
 
 **Profitability by Month 12-18** (because FactMarkets has 85%+ gross margins and large deal sizes)
 
-***
+---
 
 ## Conclusion
 
@@ -358,20 +358,20 @@ FactMarkets is the **crown jewel** of your portfolio. While other businesses bui
 
 **Year 2 exit value**: At 10x revenue multiple (SaaS), $50M ARR = **$500M valuation**. At 15x (financial SaaS premium), **$750M**.
 
-***
+---
 
 ## References
 
- Financial markets subjected to misinformation by AI. *NPR*, October 17, 2025. [npr](https://www.npr.org/2025/10/17/nx-s1-5575695/financial-markets-are-being-subjected-to-misinformation-spread-by-ai)
+Financial markets subjected to misinformation by AI. _NPR_, October 17, 2025. [npr](https://www.npr.org/2025/10/17/nx-s1-5575695/financial-markets-are-being-subjected-to-misinformation-spread-by-ai)
 
- Stock market manipulation and insider trading. *ACFE*, December 31, 2023. [acfe](https://www.acfe.com/acfe-insights-blog/blog-detail?s=stock-market-manipulation-insider-trading)
+Stock market manipulation and insider trading. _ACFE_, December 31, 2023. [acfe](https://www.acfe.com/acfe-insights-blog/blog-detail?s=stock-market-manipulation-insider-trading)
 
- Rising threat of fake news in financial markets. *CU Boulder*, March 18, 2025. [colorado](https://www.colorado.edu/today/2025/03/19/rising-threat-fake-news-financial-markets)
+Rising threat of fake news in financial markets. _CU Boulder_, March 18, 2025. [colorado](https://www.colorado.edu/today/2025/03/19/rising-threat-fake-news-financial-markets)
 
- AI and the future of market manipulation. *The Regulatory Review*, November 24, 2025. [theregreview](https://www.theregreview.org/2025/11/25/smith-ai-and-the-future-of-market-manipulation/)
+AI and the future of market manipulation. _The Regulatory Review_, November 24, 2025. [theregreview](https://www.theregreview.org/2025/11/25/smith-ai-and-the-future-of-market-manipulation/)
 
- How to read earnings call transcripts like a buy-side analyst. *TIKR*, January 14, 2026. [tikr](https://www.tikr.com/blog/how-to-read-earnings-call-transcripts-like-a-buy-side-analyst-and-most-important-things-to-look-for)
+How to read earnings call transcripts like a buy-side analyst. _TIKR_, January 14, 2026. [tikr](https://www.tikr.com/blog/how-to-read-earnings-call-transcripts-like-a-buy-side-analyst-and-most-important-things-to-look-for)
 
- Hidden costs of AML compliance. *Flagright*, June 30, 2025. [flagright](https://www.flagright.com/post/overcoming-the-hidden-costs-of-aml-compliance)
+Hidden costs of AML compliance. _Flagright_, June 30, 2025. [flagright](https://www.flagright.com/post/overcoming-the-hidden-costs-of-aml-compliance)
 
- AI-powered ESG due diligence. *Sopact*, November 10, 2025. [sopact](https://www.sopact.com/use-case/esg-due-diligence)
+AI-powered ESG due diligence. _Sopact_, November 10, 2025. [sopact](https://www.sopact.com/use-case/esg-due-diligence)

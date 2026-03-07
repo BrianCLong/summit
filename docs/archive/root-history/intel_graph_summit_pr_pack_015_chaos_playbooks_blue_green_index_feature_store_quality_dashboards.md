@@ -25,11 +25,11 @@ spec:
       containers:
         - name: stress
           image: alpine
-          securityContext: { capabilities: { add: ['NET_ADMIN'] } }
-          command: ['/bin/sh', '-c']
+          securityContext: { capabilities: { add: ["NET_ADMIN"] } }
+          command: ["/bin/sh", "-c"]
           args:
             [
-              'apk add --no-cache tc && tc qdisc add dev eth0 root netem delay 250ms && sleep 300 && tc qdisc del dev eth0 root netem',
+              "apk add --no-cache tc && tc qdisc add dev eth0 root netem delay 250ms && sleep 300 && tc qdisc del dev eth0 root netem",
             ]
 ```
 
@@ -58,12 +58,10 @@ spec:
 **`scripts/index_flip.ts`**
 
 ```ts
-import fs from 'fs';
-import fetch from 'node-fetch';
+import fs from "fs";
+import fetch from "node-fetch";
 async function metric(q: string) {
-  const r = await fetch(
-    process.env.PROM_URL + '/api/v1/query?query=' + encodeURIComponent(q),
-  );
+  const r = await fetch(process.env.PROM_URL + "/api/v1/query?query=" + encodeURIComponent(q));
   const j = await r.json();
   return Number(j.data.result?.[0]?.value?.[1] || 0);
 }
@@ -71,13 +69,10 @@ async function main() {
   const candidate = process.env.CANDIDATE!; // s3 URI
   const err = await metric('route:error_rate:ratio5m{path="/search"}');
   const p95 = await metric('route:latency:p95{path="/search"}');
-  if (err > 0.03 || p95 > 1.8) throw new Error('Guardrail breached');
+  if (err > 0.03 || p95 > 1.8) throw new Error("Guardrail breached");
   const pointer = { current: candidate };
-  fs.writeFileSync(
-    'search/index/pointer.json',
-    JSON.stringify(pointer, null, 2),
-  );
-  console.log('Promoted', candidate);
+  fs.writeFileSync("search/index/pointer.json", JSON.stringify(pointer, null, 2));
+  console.log("Promoted", candidate);
 }
 main().catch((e) => {
   console.error(e);
@@ -114,7 +109,7 @@ jobs:
 **`server/search/shadow.ts`**
 
 ```ts
-import { compare } from './util/diff';
+import { compare } from "./util/diff";
 export async function shadowQuery(q) {
   const cur = await searchActive(q);
   const cand = await searchCandidate(q);
@@ -184,7 +179,7 @@ features:
 **`server/features/sdk.ts`**
 
 ```ts
-import { createClient } from 'redis';
+import { createClient } from "redis";
 const r = createClient({ url: process.env.REDIS_URL });
 export async function getFeatures(userId: string) {
   const clicks = Number((await r.get(`fs:user_recent_clicks:${userId}`)) || 0);
@@ -259,7 +254,7 @@ window: 30d
 freeze_on:
   fast_burn: true
   remaining_budget_percent_lt: 20
-approvers: ['sre@intelgraph', 'search-lead@intelgraph']
+approvers: ["sre@intelgraph", "search-lead@intelgraph"]
 ```
 
 **`.github/workflows/freeze-guard.yml`**
@@ -337,7 +332,7 @@ jobs:
 export function assertFresh(features: Record<string, any>, maxAgeSec = 3600) {
   const now = Date.now() / 1000;
   for (const [k, v] of Object.entries(features)) {
-    if (v && typeof v === 'object' && v._ts && now - v._ts > maxAgeSec) {
+    if (v && typeof v === "object" && v._ts && now - v._ts > maxAgeSec) {
       metrics.stale_features_total.inc({ feature: k });
       delete features[k]; // fail-open: drop feature
     }

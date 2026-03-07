@@ -1,6 +1,7 @@
 # Auditor Verify
 
 ## Objective
+
 Auditor Verify is the flagship verification workflow for the Governed OS. It validates that a
 report is backed by deterministic evidence, policy-compliant approvals, and fully resolved
 citations within an SLO-bound window.

@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "deny_threshold": 0.70,
+  "deny_threshold": 0.7,
   "require_disclosure_fields": ["llm_assisted", "llm_tools", "human_verifier"],
   "feature_flags": {
     "advanced_cluster_detection": false,

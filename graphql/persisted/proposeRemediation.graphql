@@ -1,8 +1,4 @@
-mutation proposeRemediation(
-  $tenant: Tenant!
-  $type: RemediationType!
-  $hitl: Boolean!
-) {
+mutation proposeRemediation($tenant: Tenant!, $type: RemediationType!, $hitl: Boolean!) {
   proposeRemediation(tenant: $tenant, type: $type, hitl: $hitl) {
     ok
     audit {

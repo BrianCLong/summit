@@ -1,5 +1,5 @@
-import { GymEnvironment, Agent, EpisodeResult, Turn, Observation } from './types.js';
-import { v4 as uuidv4 } from 'uuid';
+import { GymEnvironment, Agent, EpisodeResult, Turn, Observation } from "./types.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class GymRunner {
   constructor(
@@ -36,7 +36,7 @@ export class GymRunner {
           action,
           feedback: result.feedback,
           info: result.info,
-          durationMs
+          durationMs,
         });
 
         score += result.feedback.reward || 0;
@@ -58,7 +58,7 @@ export class GymRunner {
       score,
       turns,
       metadata: {},
-      error
+      error,
     };
   }
 }

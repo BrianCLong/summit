@@ -1,16 +1,11 @@
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { ShardManager } from './ShardManager';
-import {
-  ShardKeyStrategy,
-  HashShardKey,
-  RangeShardKey,
-  GeographicShardKey,
-} from './strategies';
-import { ShardConfig, ShardingConfig, QueryContext } from './types';
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { ShardManager } from "./ShardManager";
+import { ShardKeyStrategy, HashShardKey, RangeShardKey, GeographicShardKey } from "./strategies";
+import { ShardConfig, ShardingConfig, QueryContext } from "./types";
 
-const logger = pino({ name: 'ShardRouter' });
-const tracer = trace.getTracer('database-sharding');
+const logger = pino({ name: "ShardRouter" });
+const tracer = trace.getTracer("database-sharding");
 
 /**
  * Routes queries to appropriate shards based on shard key strategy
@@ -27,13 +22,11 @@ export class ShardRouter {
 
   private createStrategy(strategyType: string): ShardKeyStrategy {
     switch (strategyType) {
-      case 'hash':
-        return new HashShardKey(
-          this.config.consistentHashingVirtualNodes || 150
-        );
-      case 'range':
+      case "hash":
+        return new HashShardKey(this.config.consistentHashingVirtualNodes || 150);
+      case "range":
         return new RangeShardKey();
-      case 'geographic':
+      case "geographic":
         return new GeographicShardKey();
       default:
         throw new Error(`Unknown sharding strategy: ${strategyType}`);
@@ -44,30 +37,28 @@ export class ShardRouter {
    * Route a query to the appropriate shard
    */
   routeQuery(context: QueryContext): ShardConfig {
-    const span = tracer.startSpan('ShardRouter.routeQuery');
+    const span = tracer.startSpan("ShardRouter.routeQuery");
 
     try {
       const shards = this.shardManager.getAllShards();
 
       if (shards.length === 0) {
-        throw new Error('No shards available');
+        throw new Error("No shards available");
       }
 
       // If no shard key provided, use default shard or first shard
       if (!context.shardKey) {
         if (this.config.defaultShard) {
-          const defaultShard = shards.find(
-            (s) => s.id === this.config.defaultShard
-          );
+          const defaultShard = shards.find((s) => s.id === this.config.defaultShard);
           if (defaultShard) {
-            span.setAttribute('shard.id', defaultShard.id);
-            span.setAttribute('routing', 'default');
+            span.setAttribute("shard.id", defaultShard.id);
+            span.setAttribute("routing", "default");
             return defaultShard;
           }
         }
 
-        span.setAttribute('shard.id', shards[0].id);
-        span.setAttribute('routing', 'first');
+        span.setAttribute("shard.id", shards[0].id);
+        span.setAttribute("routing", "first");
         return shards[0];
       }
 
@@ -75,9 +66,9 @@ export class ShardRouter {
       const shard = this.strategy.getShard(context.shardKey, shards);
 
       span.setAttributes({
-        'shard.id': shard.id,
-        'strategy': this.strategy.getName(),
-        'routing': 'strategy',
+        "shard.id": shard.id,
+        strategy: this.strategy.getName(),
+        routing: "strategy",
       });
 
       logger.debug(
@@ -86,7 +77,7 @@ export class ShardRouter {
           shardId: shard.id,
           strategy: this.strategy.getName(),
         },
-        'Query routed to shard'
+        "Query routed to shard"
       );
 
       return shard;
@@ -101,29 +92,21 @@ export class ShardRouter {
   /**
    * Route a range query to all relevant shards
    */
-  routeRangeQuery(
-    startKey: any,
-    endKey: any,
-    context: QueryContext
-  ): ShardConfig[] {
-    const span = tracer.startSpan('ShardRouter.routeRangeQuery');
+  routeRangeQuery(startKey: any, endKey: any, context: QueryContext): ShardConfig[] {
+    const span = tracer.startSpan("ShardRouter.routeRangeQuery");
 
     try {
       const shards = this.shardManager.getAllShards();
 
       if (shards.length === 0) {
-        throw new Error('No shards available');
+        throw new Error("No shards available");
       }
 
-      const targetShards = this.strategy.getShardsForRange(
-        startKey,
-        endKey,
-        shards
-      );
+      const targetShards = this.strategy.getShardsForRange(startKey, endKey, shards);
 
       span.setAttributes({
-        'shard.count': targetShards.length,
-        'strategy': this.strategy.getName(),
+        "shard.count": targetShards.length,
+        strategy: this.strategy.getName(),
       });
 
       logger.debug(
@@ -133,7 +116,7 @@ export class ShardRouter {
           shardCount: targetShards.length,
           strategy: this.strategy.getName(),
         },
-        'Range query routed to shards'
+        "Range query routed to shards"
       );
 
       return targetShards;
@@ -157,6 +140,6 @@ export class ShardRouter {
    */
   changeStrategy(strategyType: string): void {
     this.strategy = this.createStrategy(strategyType);
-    logger.info({ strategy: strategyType }, 'Sharding strategy changed');
+    logger.info({ strategy: strategyType }, "Sharding strategy changed");
   }
 }

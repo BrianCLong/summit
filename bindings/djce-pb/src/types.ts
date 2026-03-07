@@ -38,7 +38,7 @@ export interface EstimateInterval {
   relative_error: number;
 }
 
-export type RiskClassification = 'low' | 'moderate' | 'high';
+export type RiskClassification = "low" | "moderate" | "high";
 
 export interface RiskBounds {
   lower_bound: number;

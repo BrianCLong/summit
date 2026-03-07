@@ -134,52 +134,52 @@ spec:
     # Gateway can access all services
     - from:
         - source:
-            principals: ['cluster.local/ns/intelgraph-ga/sa/ga-gateway']
+            principals: ["cluster.local/ns/intelgraph-ga/sa/ga-gateway"]
       to:
         - operation:
-            methods: ['GET', 'POST', 'PUT', 'DELETE']
+            methods: ["GET", "POST", "PUT", "DELETE"]
 
     # AdminSec can be accessed by gateway and other services for auth
     - to:
         - operation:
-            paths: ['/auth/*', '/users/*', '/policies/*']
+            paths: ["/auth/*", "/users/*", "/policies/*"]
       when:
         - key: source.principal
-          values: ['cluster.local/ns/intelgraph-ga/sa/ga-gateway']
+          values: ["cluster.local/ns/intelgraph-ga/sa/ga-gateway"]
 
     # GraphAI can be accessed by gateway and worker services
     - to:
         - operation:
-            paths: ['/feature/*', '/embed/*', '/er/*', '/lp/*', '/community/*']
+            paths: ["/feature/*", "/embed/*", "/er/*", "/lp/*", "/community/*"]
       when:
         - key: source.principal
           values:
-            - 'cluster.local/ns/intelgraph-ga/sa/ga-gateway'
-            - 'cluster.local/ns/intelgraph-ga/sa/ga-worker'
+            - "cluster.local/ns/intelgraph-ga/sa/ga-gateway"
+            - "cluster.local/ns/intelgraph-ga/sa/ga-worker"
 
     # Intelligence verticals cross-communication
     - from:
         - source:
             principals:
-              - 'cluster.local/ns/intelgraph-ga/sa/ga-osint'
-              - 'cluster.local/ns/intelgraph-ga/sa/ga-fintel'
-              - 'cluster.local/ns/intelgraph-ga/sa/ga-cyber'
-              - 'cluster.local/ns/intelgraph-ga/sa/ga-tradecraft'
+              - "cluster.local/ns/intelgraph-ga/sa/ga-osint"
+              - "cluster.local/ns/intelgraph-ga/sa/ga-fintel"
+              - "cluster.local/ns/intelgraph-ga/sa/ga-cyber"
+              - "cluster.local/ns/intelgraph-ga/sa/ga-tradecraft"
       to:
         - operation:
-            methods: ['GET', 'POST']
-            paths: ['/intel/*', '/analysis/*', '/synthesis/*']
+            methods: ["GET", "POST"]
+            paths: ["/intel/*", "/analysis/*", "/synthesis/*"]
 
     # Forensics evidence integrity validation
     - to:
         - operation:
-            paths: ['/evidence/*', '/custody/*', '/integrity/*']
+            paths: ["/evidence/*", "/custody/*", "/integrity/*"]
       when:
         - key: source.principal
           values:
-            - 'cluster.local/ns/intelgraph-ga/sa/ga-gateway'
-            - 'cluster.local/ns/intelgraph-ga/sa/ga-forensics'
-            - 'cluster.local/ns/intelgraph-ga/sa/ga-adminsec'
+            - "cluster.local/ns/intelgraph-ga/sa/ga-gateway"
+            - "cluster.local/ns/intelgraph-ga/sa/ga-forensics"
+            - "cluster.local/ns/intelgraph-ga/sa/ga-adminsec"
 
 ---
 # Service Accounts for mTLS Identity
@@ -421,7 +421,7 @@ spec:
         version: v1
         monitoring: intelgraph-mtls
       annotations:
-        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/inject: "true"
     spec:
       serviceAccountName: ga-adminsec
       securityContext:
@@ -443,15 +443,15 @@ spec:
               protocol: TCP
           env:
             - name: TLS_ENABLED
-              value: 'true'
+              value: "true"
             - name: MTLS_ENABLED
-              value: 'true'
+              value: "true"
             - name: CA_CERT_PATH
-              value: '/etc/ssl/certs/ca-cert.pem'
+              value: "/etc/ssl/certs/ca-cert.pem"
             - name: TLS_CERT_PATH
-              value: '/etc/ssl/certs/tls.crt'
+              value: "/etc/ssl/certs/tls.crt"
             - name: TLS_KEY_PATH
-              value: '/etc/ssl/private/tls.key'
+              value: "/etc/ssl/private/tls.key"
           volumeMounts:
             - name: tls-certs
               mountPath: /etc/ssl/certs
@@ -475,11 +475,11 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              memory: '256Mi'
-              cpu: '100m'
+              memory: "256Mi"
+              cpu: "100m"
             limits:
-              memory: '512Mi'
-              cpu: '500m'
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
         - name: tls-certs
           secret:
@@ -548,7 +548,7 @@ spec:
       headers:
         request:
           set:
-            X-Service-Auth: 'required'
+            X-Service-Auth: "required"
     - match:
         - uri:
             prefix: /graphql
@@ -560,7 +560,7 @@ spec:
       headers:
         request:
           set:
-            X-Service-Source: 'istio'
+            X-Service-Source: "istio"
 
 ---
 # Istio Destination Rules for mTLS
@@ -570,12 +570,12 @@ metadata:
   name: ga-services-mtls
   namespace: intelgraph-ga
 spec:
-  host: '*.intelgraph-ga.svc.cluster.local'
+  host: "*.intelgraph-ga.svc.cluster.local"
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
   exportTo:
-    - '.'
+    - "."
 
 ---
 # Certificate rotation CronJob
@@ -585,7 +585,7 @@ metadata:
   name: cert-rotation-check
   namespace: intelgraph-ga
 spec:
-  schedule: '0 2 * * *' # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   jobTemplate:
     spec:
       template:

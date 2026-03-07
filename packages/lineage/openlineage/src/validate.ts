@@ -1,6 +1,10 @@
-import { z } from 'zod';
-import { SourceCodeJobFacetSchema, DocumentationJobFacetSchema, SqlJobFacetSchema } from './facets/core.js';
-import { TenantFacetSchema, SecurityFacetSchema, BuildFacetSchema } from './facets/summit.js';
+import { z } from "zod";
+import {
+  SourceCodeJobFacetSchema,
+  DocumentationJobFacetSchema,
+  SqlJobFacetSchema,
+} from "./facets/core.js";
+import { TenantFacetSchema, SecurityFacetSchema, BuildFacetSchema } from "./facets/summit.js";
 
 const DatasetSchema = z.object({
   namespace: z.string(),
@@ -9,24 +13,30 @@ const DatasetSchema = z.object({
 });
 
 export const RunEventSchema = z.object({
-  eventType: z.enum(['START', 'RUNNING', 'COMPLETE', 'ABORT', 'FAIL', 'OTHER']),
+  eventType: z.enum(["START", "RUNNING", "COMPLETE", "ABORT", "FAIL", "OTHER"]),
   eventTime: z.string().datetime(),
   run: z.object({
     runId: z.string().uuid(),
-    facets: z.object({
+    facets: z
+      .object({
         tenant: TenantFacetSchema.optional(),
         security: SecurityFacetSchema.optional(),
         build: BuildFacetSchema.optional(),
-    }).passthrough().optional()
+      })
+      .passthrough()
+      .optional(),
   }),
   job: z.object({
     namespace: z.string(),
     name: z.string(),
-    facets: z.object({
+    facets: z
+      .object({
         sourceCode: SourceCodeJobFacetSchema.optional(),
         documentation: DocumentationJobFacetSchema.optional(),
-        sql: SqlJobFacetSchema.optional()
-    }).passthrough().optional()
+        sql: SqlJobFacetSchema.optional(),
+      })
+      .passthrough()
+      .optional(),
   }),
   inputs: z.array(DatasetSchema).optional(),
   outputs: z.array(DatasetSchema).optional(),

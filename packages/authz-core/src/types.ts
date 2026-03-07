@@ -9,7 +9,7 @@
 
 export interface Subject {
   id: string;
-  type: 'user' | 'service' | 'system';
+  type: "user" | "service" | "system";
   tenantId: string;
   email?: string;
 
@@ -18,24 +18,24 @@ export interface Subject {
   permissions: string[];
 
   // ABAC attributes
-  clearance?: string;             // 'UNCLASSIFIED' | 'CUI' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET'
-  clearanceLevel?: number;        // 0-5
-  compartments?: string[];        // SCI compartments
+  clearance?: string; // 'UNCLASSIFIED' | 'CUI' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET'
+  clearanceLevel?: number; // 0-5
+  compartments?: string[]; // SCI compartments
   missionTags?: string[];
   orgId?: string;
   teamId?: string;
   groups?: string[];
 
   // Authentication context
-  loa?: string;                   // Level of Assurance (loa1, loa2, loa3)
-  acr?: string;                   // Authentication Context Class Reference
+  loa?: string; // Level of Assurance (loa1, loa2, loa3)
+  acr?: string; // Authentication Context Class Reference
   mfaVerified?: boolean;
   stepUpRequired?: boolean;
 
   // Risk & compliance
   riskScore?: number;
   lastReviewedAt?: Date;
-  residency?: string;             // Geographic residency (ISO country code)
+  residency?: string; // Geographic residency (ISO country code)
 
   // Metadata
   metadata?: Record<string, unknown>;
@@ -46,7 +46,7 @@ export interface Subject {
 // ============================================================================
 
 export interface Resource {
-  type: string;                   // 'entity', 'relationship', 'investigation', 'query', 'export'
+  type: string; // 'entity', 'relationship', 'investigation', 'query', 'export'
   id: string;
   tenantId: string;
 
@@ -62,8 +62,8 @@ export interface Resource {
   caseId?: string;
 
   // Data attributes
-  dataTypes?: string[];           // Types of data contained
-  residency?: string;             // Geographic residency
+  dataTypes?: string[]; // Types of data contained
+  residency?: string; // Geographic residency
   tags?: string[];
 
   // Metadata
@@ -75,19 +75,19 @@ export interface Resource {
 // ============================================================================
 
 export type Action =
-  | 'READ'
-  | 'CREATE'
-  | 'UPDATE'
-  | 'DELETE'
-  | 'EXPORT'
-  | 'SHARE'
-  | 'ANNOTATE'
-  | 'LINK'
-  | 'QUERY'
-  | 'COPILOT'
-  | 'DISTRIBUTE'
-  | 'MODIFY'
-  | 'DOWNLOAD';
+  | "READ"
+  | "CREATE"
+  | "UPDATE"
+  | "DELETE"
+  | "EXPORT"
+  | "SHARE"
+  | "ANNOTATE"
+  | "LINK"
+  | "QUERY"
+  | "COPILOT"
+  | "DISTRIBUTE"
+  | "MODIFY"
+  | "DOWNLOAD";
 
 // ============================================================================
 // Context Types
@@ -106,14 +106,14 @@ export interface AuthorizationContext {
   requestId?: string;
 
   // Application
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   investigationId?: string;
   caseId?: string;
 
   // Purpose tracking
-  purpose: string;                // Required: reason for access
-  justification?: string;         // Additional justification
-  minimumNecessary?: string;      // HIPAA minimum necessary explanation
+  purpose: string; // Required: reason for access
+  justification?: string; // Additional justification
+  minimumNecessary?: string; // HIPAA minimum necessary explanation
 
   // Warrant/Authority
   warrantId?: string;
@@ -126,8 +126,8 @@ export interface AuthorizationContext {
   tosAccepted?: boolean;
 
   // Risk context
-  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
-  protectedActions?: string[];   // Actions requiring step-up
+  riskLevel?: "low" | "medium" | "high" | "critical";
+  protectedActions?: string[]; // Actions requiring step-up
 
   // Authentication context
   currentAcr?: string;
@@ -142,23 +142,23 @@ export interface AuthorizationContext {
 // ============================================================================
 
 export type WarrantType =
-  | 'WARRANT'
-  | 'SUBPOENA'
-  | 'COURT_ORDER'
-  | 'ADMIN_AUTH'
-  | 'LICENSE'
-  | 'TOS'
-  | 'CONSENT'
-  | 'EMERGENCY'
-  | 'MUTUAL_AID';
+  | "WARRANT"
+  | "SUBPOENA"
+  | "COURT_ORDER"
+  | "ADMIN_AUTH"
+  | "LICENSE"
+  | "TOS"
+  | "CONSENT"
+  | "EMERGENCY"
+  | "MUTUAL_AID";
 
 export type WarrantStatus =
-  | 'PENDING'
-  | 'ACTIVE'
-  | 'EXPIRED'
-  | 'REVOKED'
-  | 'SUSPENDED'
-  | 'SUPERSEDED';
+  | "PENDING"
+  | "ACTIVE"
+  | "EXPIRED"
+  | "REVOKED"
+  | "SUSPENDED"
+  | "SUPERSEDED";
 
 export interface Warrant {
   warrantId: string;
@@ -195,7 +195,7 @@ export interface WarrantValidationResult {
   valid: boolean;
   warrant?: Warrant;
   reason?: string;
-  expiresIn?: number;             // Milliseconds until expiry
+  expiresIn?: number; // Milliseconds until expiry
 }
 
 // ============================================================================
@@ -203,21 +203,15 @@ export interface WarrantValidationResult {
 // ============================================================================
 
 export type LicenseType =
-  | 'INTERNAL_ONLY'
-  | 'RELEASABLE'
-  | 'ORCON'
-  | 'NOFORN'
-  | 'PROPIN'
-  | 'PUBLIC'
-  | 'CUSTOM';
+  | "INTERNAL_ONLY"
+  | "RELEASABLE"
+  | "ORCON"
+  | "NOFORN"
+  | "PROPIN"
+  | "PUBLIC"
+  | "CUSTOM";
 
-export type LicenseStatus =
-  | 'DRAFT'
-  | 'ACTIVE'
-  | 'SUSPENDED'
-  | 'REVOKED'
-  | 'EXPIRED'
-  | 'SUPERSEDED';
+export type LicenseStatus = "DRAFT" | "ACTIVE" | "SUSPENDED" | "REVOKED" | "EXPIRED" | "SUPERSEDED";
 
 export interface License {
   licenseId: string;
@@ -278,7 +272,7 @@ export interface LicenseValidationResult {
 }
 
 export interface LicenseCondition {
-  type: 'ATTRIBUTION' | 'NOTICE' | 'SIGNATURE' | 'EXPORT_CONTROL' | 'CUSTOM';
+  type: "ATTRIBUTION" | "NOTICE" | "SIGNATURE" | "EXPORT_CONTROL" | "CUSTOM";
   requirement: string;
   details?: Record<string, unknown>;
 }
@@ -326,7 +320,7 @@ export interface Obligation {
   description: string;
   requirement?: string;
   target?: string;
-  enforceAt?: 'BEFORE' | 'DURING' | 'AFTER';
+  enforceAt?: "BEFORE" | "DURING" | "AFTER";
   metadata?: Record<string, unknown>;
 }
 
@@ -369,7 +363,7 @@ export interface AuthorizationInput {
 
 export interface AuthorizationAuditEvent {
   eventId: string;
-  eventType: 'AUTHORIZATION_DECISION';
+  eventType: "AUTHORIZATION_DECISION";
 
   // Request
   tenantId: string;
@@ -380,7 +374,7 @@ export interface AuthorizationAuditEvent {
   resourceId: string;
 
   // Decision
-  decision: 'ALLOW' | 'DENY' | 'CHALLENGE';
+  decision: "ALLOW" | "DENY" | "CHALLENGE";
   reason: string;
 
   // Context
@@ -421,10 +415,10 @@ export interface AuthorizationConfig {
   databasePoolSize: number;
 
   // Behavior
-  failSecure: boolean;            // Deny on errors in production
-  requirePurpose: boolean;        // Always require purpose field
-  requireWarrantFor: Action[];    // Actions requiring warrant
-  requireLicenseFor: Action[];    // Actions requiring license check
+  failSecure: boolean; // Deny on errors in production
+  requirePurpose: boolean; // Always require purpose field
+  requireWarrantFor: Action[]; // Actions requiring warrant
+  requireLicenseFor: Action[]; // Actions requiring license check
 
   // Audit
   auditEnabled: boolean;
@@ -451,7 +445,7 @@ export class AuthorizationError extends Error {
     public details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'AuthorizationError';
+    this.name = "AuthorizationError";
   }
 }
 
@@ -463,7 +457,7 @@ export class WarrantError extends Error {
     public details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'WarrantError';
+    this.name = "WarrantError";
   }
 }
 
@@ -475,6 +469,6 @@ export class LicenseError extends Error {
     public details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'LicenseError';
+    this.name = "LicenseError";
   }
 }

@@ -1,7 +1,7 @@
 thresholds:
   risk:
-    max_reliability_risk_score: 2          # 0-5 scale
-    max_security_risk_score: 1             # 0-5 scale
+    max_reliability_risk_score: 2 # 0-5 scale
+    max_security_risk_score: 1 # 0-5 scale
   finops:
     max_spend_delta_percent_per_change: 3.0
     max_monthly_spend_delta_percent: 7.0

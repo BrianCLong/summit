@@ -19,14 +19,14 @@ paths:
       tags:
         - Entities
       responses:
-        '200':
+        "200":
           description: A list of entities
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Entity'
+                  $ref: "#/components/schemas/Entity"
 
   /entities/{entityId}:
     get:
@@ -42,13 +42,13 @@ paths:
             type: string
           description: ID of the entity to retrieve
       responses:
-        '200':
+        "200":
           description: Entity details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Entity'
-        '404':
+                $ref: "#/components/schemas/Entity"
+        "404":
           description: Entity not found
 
   /relationships:
@@ -58,14 +58,14 @@ paths:
       tags:
         - Relationships
       responses:
-        '200':
+        "200":
           description: A list of relationships
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Relationship'
+                  $ref: "#/components/schemas/Relationship"
 
 components:
   schemas:

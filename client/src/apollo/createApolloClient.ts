@@ -1,30 +1,30 @@
-import { ApolloClient, InMemoryCache, from, split } from '@apollo/client';
-import { onError } from '@apollo/client/link/error';
-import { BatchHttpLink } from '@apollo/client/link/batch-http';
-import { RetryLink } from '@apollo/client/link/retry';
-import { createClient as createWsClient } from 'graphql-ws';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
-import { getMainDefinition } from '@apollo/client/utilities';
-import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
-import { setContext } from '@apollo/client/link/context';
-import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
-import sha256 from 'crypto-js/sha256';
-import { DEV, VITE_TENANT_ID } from '../config/env.js';
-import { getGraphqlHttpUrl } from '../config/urls';
+import { ApolloClient, InMemoryCache, from, split } from "@apollo/client";
+import { onError } from "@apollo/client/link/error";
+import { BatchHttpLink } from "@apollo/client/link/batch-http";
+import { RetryLink } from "@apollo/client/link/retry";
+import { createClient as createWsClient } from "graphql-ws";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
+import { setContext } from "@apollo/client/link/context";
+import { persistCache, LocalStorageWrapper } from "apollo3-cache-persist";
+import sha256 from "crypto-js/sha256";
+import { DEV, VITE_TENANT_ID } from "../config/env.js";
+import { getGraphqlHttpUrl } from "../config/urls";
 
 const API_URL = getGraphqlHttpUrl();
-const TENANT = VITE_TENANT_ID || 'dev';
+const TENANT = VITE_TENANT_ID || "dev";
 
 export async function createApolloClient() {
   const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
     if (graphQLErrors?.length) {
       // minimal console metric stub (dev-only)
       // eslint-disable-next-line no-console
-      console.warn('[GQL]', operation.operationName, graphQLErrors);
+      console.warn("[GQL]", operation.operationName, graphQLErrors);
     }
     if (networkError) {
       // eslint-disable-next-line no-console
-      console.error('[NET]', networkError);
+      console.error("[NET]", networkError);
     }
   });
 
@@ -46,23 +46,20 @@ export async function createApolloClient() {
 
   // Auth context with token and tracing
   const authLink = setContext((_, { headers }) => {
-    const token =
-      typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
+    const token = typeof localStorage !== "undefined" ? localStorage.getItem("token") : "";
 
     // Generate a W3C traceparent header for end-to-end tracing
-    const traceId = crypto.randomUUID().replace(/-/g, '');
+    const traceId = crypto.randomUUID().replace(/-/g, "");
     const spanIdArray = new Uint8Array(8);
     crypto.getRandomValues(spanIdArray);
-    const spanId = Array.from(spanIdArray, (b) =>
-      b.toString(16).padStart(2, '0'),
-    ).join('');
+    const spanId = Array.from(spanIdArray, (b) => b.toString(16).padStart(2, "0")).join("");
     const traceparent = `00-${traceId}-${spanId}-01`;
 
     return {
       headers: {
         ...headers,
-        authorization: token ? `Bearer ${token}` : '',
-        'x-tenant-id': TENANT,
+        authorization: token ? `Bearer ${token}` : "",
+        "x-tenant-id": TENANT,
         traceparent,
       },
     };
@@ -78,45 +75,39 @@ export async function createApolloClient() {
     uri: API_URL,
     batchMax: 10,
     batchInterval: 20,
-    fetchOptions: { mode: 'cors', credentials: 'include' },
+    fetchOptions: { mode: "cors", credentials: "include" },
   });
 
   let link = from([errorLink, retryLink, authLink, persisted, http]);
 
   // Subscriptions (if enabled on server)
   try {
-    const wsUrl = API_URL.replace('http://', 'ws://').replace(
-      'https://',
-      'wss://',
-    );
+    const wsUrl = API_URL.replace("http://", "ws://").replace("https://", "wss://");
 
-    const token =
-      typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
+    const token = typeof localStorage !== "undefined" ? localStorage.getItem("token") : "";
 
     const ws = new GraphQLWsLink(
       createWsClient({
         url: wsUrl,
         connectionParams: {
-          authorization: token ? `Bearer ${token}` : '',
-          'x-tenant-id': TENANT,
+          authorization: token ? `Bearer ${token}` : "",
+          "x-tenant-id": TENANT,
         },
         retryAttempts: 5,
-      }),
+      })
     );
 
     link = split(
       ({ query }) => {
         const def = getMainDefinition(query);
-        return (
-          def.kind === 'OperationDefinition' && def.operation === 'subscription'
-        );
+        return def.kind === "OperationDefinition" && def.operation === "subscription";
       },
       ws,
-      from([errorLink, retryLink, authLink, persisted, http]),
+      from([errorLink, retryLink, authLink, persisted, http])
     );
   } catch (e) {
     // WebSocket subscriptions optional
-    console.warn('WebSocket subscriptions disabled:', (e as Error).message);
+    console.warn("WebSocket subscriptions disabled:", (e as Error).message);
   }
 
   const cache = new InMemoryCache({
@@ -124,7 +115,7 @@ export async function createApolloClient() {
       Query: {
         fields: {
           entities: {
-            keyArgs: ['filter', 'sort', 'tenant'],
+            keyArgs: ["filter", "sort", "tenant"],
             merge(existing = { items: [] }, incoming) {
               if (!incoming?.items) return existing;
               return {
@@ -134,7 +125,7 @@ export async function createApolloClient() {
             },
           },
           investigations: {
-            keyArgs: ['after', 'status', 'tenant'],
+            keyArgs: ["after", "status", "tenant"],
             merge(existing, incoming) {
               if (!incoming) return existing;
               if (!existing) return incoming;
@@ -151,13 +142,13 @@ export async function createApolloClient() {
   });
 
   // Set up offline cache persistence for field work
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     try {
       await persistCache({
         cache,
         storage: new LocalStorageWrapper(window.localStorage),
         key: `apollo-cache-${TENANT}`,
-        trigger: 'write',
+        trigger: "write",
         debounce: 1000,
         maxSize: 1024 * 1024 * 10, // 10MB limit
       });
@@ -165,12 +156,12 @@ export async function createApolloClient() {
       // Clear cache if it gets corrupted
       if (DEV) {
         // eslint-disable-next-line no-console
-        console.log('Apollo cache persistence enabled for tenant:', TENANT);
+        console.log("Apollo cache persistence enabled for tenant:", TENANT);
       }
     } catch (error) {
-      console.warn('Apollo cache persistence failed:', error);
+      console.warn("Apollo cache persistence failed:", error);
       // Clear potentially corrupted cache
-      if (typeof localStorage !== 'undefined') {
+      if (typeof localStorage !== "undefined") {
         localStorage.removeItem(`apollo-cache-${TENANT}`);
       }
     }
@@ -182,12 +173,12 @@ export async function createApolloClient() {
     connectToDevTools: DEV,
     defaultOptions: {
       watchQuery: {
-        errorPolicy: 'all',
-        fetchPolicy: 'cache-first', // Enable offline-first for field work
+        errorPolicy: "all",
+        fetchPolicy: "cache-first", // Enable offline-first for field work
       },
       query: {
-        errorPolicy: 'all',
-        fetchPolicy: 'cache-first',
+        errorPolicy: "all",
+        fetchPolicy: "cache-first",
       },
     },
   });

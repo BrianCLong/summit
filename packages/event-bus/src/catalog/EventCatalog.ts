@@ -4,9 +4,9 @@
  * Manage event schemas, versioning, and validation
  */
 
-import { EventEmitter } from 'events';
-import Redis from 'ioredis';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import Redis from "ioredis";
+import pino from "pino";
 
 export interface EventSchema {
   eventType: string;
@@ -35,7 +35,7 @@ export class EventCatalog extends EventEmitter {
   constructor(redis: Redis) {
     super();
     this.redis = redis;
-    this.logger = pino({ name: 'EventCatalog' });
+    this.logger = pino({ name: "EventCatalog" });
   }
 
   /**
@@ -47,18 +47,12 @@ export class EventCatalog extends EventEmitter {
     await this.redis.set(key, JSON.stringify(schema));
 
     // Update version index
-    await this.redis.sadd(
-      `event-catalog:${schema.eventType}:versions`,
-      schema.version
-    );
+    await this.redis.sadd(`event-catalog:${schema.eventType}:versions`, schema.version);
 
     // Update latest version
     const currentLatest = await this.getLatestVersion(schema.eventType);
     if (!currentLatest || schema.version > currentLatest) {
-      await this.redis.set(
-        `event-catalog:${schema.eventType}:latest`,
-        schema.version
-      );
+      await this.redis.set(`event-catalog:${schema.eventType}:latest`, schema.version);
     }
 
     // Cache locally
@@ -67,21 +61,15 @@ export class EventCatalog extends EventEmitter {
     }
     this.schemas.get(schema.eventType)!.set(schema.version, schema);
 
-    this.logger.info(
-      { eventType: schema.eventType, version: schema.version },
-      'Schema registered'
-    );
+    this.logger.info({ eventType: schema.eventType, version: schema.version }, "Schema registered");
 
-    this.emit('schema:registered', schema);
+    this.emit("schema:registered", schema);
   }
 
   /**
    * Get event schema
    */
-  async getSchema(
-    eventType: string,
-    version?: number
-  ): Promise<EventSchema | null> {
+  async getSchema(eventType: string, version?: number): Promise<EventSchema | null> {
     const targetVersion = version || (await this.getLatestVersion(eventType));
 
     if (!targetVersion) {
@@ -117,9 +105,7 @@ export class EventCatalog extends EventEmitter {
    * Get latest version for event type
    */
   async getLatestVersion(eventType: string): Promise<number | null> {
-    const version = await this.redis.get(
-      `event-catalog:${eventType}:latest`
-    );
+    const version = await this.redis.get(`event-catalog:${eventType}:latest`);
 
     return version ? parseInt(version, 10) : null;
   }
@@ -128,19 +114,15 @@ export class EventCatalog extends EventEmitter {
    * Get all versions for event type
    */
   async getVersions(eventType: string): Promise<number[]> {
-    const versions = await this.redis.smembers(
-      `event-catalog:${eventType}:versions`
-    );
+    const versions = await this.redis.smembers(`event-catalog:${eventType}:versions`);
 
-    return versions.map(v => parseInt(v, 10)).sort((a, b) => a - b);
+    return versions.map((v) => parseInt(v, 10)).sort((a, b) => a - b);
   }
 
   /**
    * Get event type metadata
    */
-  async getEventTypeMetadata(
-    eventType: string
-  ): Promise<EventTypeMetadata | null> {
+  async getEventTypeMetadata(eventType: string): Promise<EventTypeMetadata | null> {
     const latestVersion = await this.getLatestVersion(eventType);
 
     if (!latestVersion) {
@@ -155,7 +137,7 @@ export class EventCatalog extends EventEmitter {
       latestVersion,
       versions,
       description: latestSchema?.description,
-      tags: []
+      tags: [],
     };
   }
 
@@ -163,11 +145,11 @@ export class EventCatalog extends EventEmitter {
    * List all event types
    */
   async listEventTypes(): Promise<string[]> {
-    const pattern = 'event-catalog:*:latest';
+    const pattern = "event-catalog:*:latest";
     const keys = await this.redis.keys(pattern);
 
-    return keys.map(key => {
-      const parts = key.split(':');
+    return keys.map((key) => {
+      const parts = key.split(":");
       return parts[1];
     });
   }
@@ -185,7 +167,7 @@ export class EventCatalog extends EventEmitter {
     if (!schema) {
       return {
         valid: false,
-        errors: [`Schema not found: ${eventType} v${version}`]
+        errors: [`Schema not found: ${eventType} v${version}`],
       };
     }
 
@@ -197,11 +179,7 @@ export class EventCatalog extends EventEmitter {
   /**
    * Deprecate schema version
    */
-  async deprecateSchema(
-    eventType: string,
-    version: number,
-    replacedBy?: string
-  ): Promise<void> {
+  async deprecateSchema(eventType: string, version: number, replacedBy?: string): Promise<void> {
     const schema = await this.getSchema(eventType, version);
 
     if (!schema) {
@@ -214,11 +192,8 @@ export class EventCatalog extends EventEmitter {
 
     await this.registerSchema(schema);
 
-    this.logger.info(
-      { eventType, version, replacedBy },
-      'Schema deprecated'
-    );
+    this.logger.info({ eventType, version, replacedBy }, "Schema deprecated");
 
-    this.emit('schema:deprecated', { eventType, version, replacedBy });
+    this.emit("schema:deprecated", { eventType, version, replacedBy });
   }
 }

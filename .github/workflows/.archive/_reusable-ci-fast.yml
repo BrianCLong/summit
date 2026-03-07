@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20.11.x"
 
       - name: Enable corepack (belt & suspenders)

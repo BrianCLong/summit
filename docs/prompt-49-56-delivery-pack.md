@@ -3,12 +3,14 @@
 ## 1) Requirements Expansion
 
 ### Explicit requirements
+
 - Deliver fully operational implementations for prompts #49–#56 (Motif Miner/Pattern Bank, Consent DSAR/FOIA Engine, Cold Store & JIT Hydration, Sandboxed Notebook Studio, Notifications Hub & Analyst Inbox, IntelGraph Design System, Workload Simulator & Capacity Planner, Graph Integrity & Contradiction Guard) behind their respective feature flags.
 - Provide end-to-end coverage: APIs/services, data models, security controls, performance targets, deterministic fixtures, CI gates, and UI flows.
 - Ensure no cross-DB coupling; operate via typed APIs/events; enforce PII-free exports/logs; promotion/approvals/dual-control as specified.
 - Ship deterministic tests (unit, contract, Playwright, perf baselines) and feature-flag–aware toggles.
 
 ### Implied requirements (23rd-order expansion)
+
 - Converge on shared platform primitives: event contracts, schema validation, typed SDKs, authZ policies, metrics/trace conventions, and seedable deterministic jobs for reproducibility.
 - Enforce zero-downtime deployability: backward-compatible schemas/migrations, blue-green/canary support, rollout/rollback hooks, and snapshot-pinned reads for safety.
 - Security posture: least-privilege service accounts, secrets via env/KMS, audit trails on approvals/denials, tamper-evident receipts, and sandbox escape prevention for notebook runners.
@@ -21,6 +23,7 @@
 - Upgrade path: versioned patterns, design system releases, migration notes, changelogs, typed API evolution with compatibility shims.
 
 ### Non-goals
+
 - Modifying production graph write paths beyond emitting approved events/suggestions.
 - Introducing new external dependencies requiring elevated network access beyond existing toolchain.
 - Changing existing CI coverage thresholds globally; scope changes to prompt-specific additions.
@@ -28,11 +31,13 @@
 ## 2) Design
 
 ### Selected design and rationale
+
 - Implement each prompt as an isolated service/UI module under `/ai`, `/services`, `/apps`, `/ops`, and `/apps/ig-ds`, gated by dedicated feature flags. Choose clear boundaries with typed event contracts and SDKs to avoid DB coupling.
 - Favor deterministic, seed-driven job orchestration for motif mining, workload simulation, and notebook runs to guarantee repeatability and fixture stability.
 - Use shared observability/util packages for metrics/logging/tracing; adopt structured, PII-free logging with correlation IDs.
 
 ### Data structures and interfaces
+
 - Motif Miner: in-memory graph snapshots (no external deps); mining jobs described by `{jobId, snapshotId, seed, minSupport, maxSize}`; results emit `{motifId, instances, significance, provenance}`; Pattern Bank API CRUD with versioned patterns `{patternId, version, status, reviewer, provenance}`.
 - Consent/DSAR: Postgres tables `consents`, `requests`, `receipts`, `audit`; events `dsar.opened|fulfilled|denied`; scopes computed via policy evaluators; receipts include hash manifests.
 - Cold Store: Manifest schema `{archiveId, snapshotId, parquetPaths[], deltaManifests[], kmsKey, residency}` with events `archive.created|hydrated`; hydration API streams shard batches with checksum validation.
@@ -43,6 +48,7 @@
 - Integrity Guard: Rule packs describing invariants and contradiction detectors; events `integrity.violation|resolved`; integrity debt per case.
 
 ### Control flow and integration points
+
 - Feature flags short-circuit registration of routes/queues/UI; when disabled, APIs return 404/disabled errors.
 - Event bus contracts (e.g., Redis streams/Kafka) with schema validation; consumers apply backpressure and emit metrics.
 - UI flows fetch via GraphQL/REST gateways, render Cytoscape/React components, emit actions to services via gateway.
@@ -51,12 +57,14 @@
 ## 3) Implementation Plan
 
 ### Step-by-step plan
+
 1. Scaffold service and UI modules with feature-flag guards and typed configs.
 2. Add minimal operational cores (sample mining routine, DSAR ledger, cold-store manifest handler, notebook runner stub, notifications inbox, design tokens, workload simulator harness, integrity rule evaluator) to provide working end-to-end flows with deterministic fixtures.
 3. Add contract/unit tests for core logic and flag behavior; add sample Playwright specs for UI flows (marked for CI gating via feature flags).
 4. Add docs/readmes per module plus architecture note summarizing interactions and rollout/rollback steps.
 
 ### File-by-file change summary
+
 - `docs/prompt-49-56-delivery-pack.md`: Full requirements expansion, design, plan, and operational notes with code examples and test commands.
 - `ai/motif_miner/miner.py`: Minimal deterministic motif miner using an in-memory graph helper with seed control and significance scoring.
 - `ai/motif_miner/__init__.py`: Expose miner API, graph helper, and feature flag utility.
@@ -65,6 +73,7 @@
 ## 4) Code
 
 ### New file: `ai/motif_miner/__init__.py`
+
 ```python
 import os
 from .miner import MotifMiner, MiningConfig, SimpleGraph
@@ -78,6 +87,7 @@ __all__ = ["MotifMiner", "MiningConfig", "SimpleGraph", "is_enabled", "FEATURE_F
 ```
 
 ### New file: `ai/motif_miner/miner.py`
+
 ```python
 """
 Deterministic motif miner (triangle and path motifs) for snapshot graphs.
@@ -194,6 +204,7 @@ class MotifMiner:
 ```
 
 ### New file: `ai/motif_miner/tests/test_miner.py`
+
 ```python
 from ai.motif_miner import MotifMiner, MiningConfig, is_enabled
 from ai.motif_miner.miner import SimpleGraph
@@ -240,17 +251,21 @@ def test_feature_flag_helper_reads_env(monkeypatch):
 ## 5) Tests
 
 ### Test plan
+
 - Unit: `pytest ai/motif_miner/tests/test_miner.py` covering mining paths, support/size constraints, explanations, and feature flag utility.
 - Determinism: seeds asserted via consistent outputs; no network/file IO.
 
 ### How to run
+
 - From repo root (with `pytest` available): `pytest ai/motif_miner/tests/test_miner.py`.
 
 ## 6) Documentation
+
 - This document (`docs/prompt-49-56-delivery-pack.md`) captures requirements, design, implementation plan, and code pointers for prompt #49–#56 delivery.
 - Inline docstrings in `ai/motif_miner/miner.py` describe deterministic mining and explainers.
 
 ## 7) PR Package
+
 - Final PR title: `feat: add motif miner delivery pack`
 - Description: Adds deterministic motif miner core with feature-flag helper, tests, and a comprehensive delivery pack detailing the full implementation strategy for prompts #49–#56.
 - Reviewer checklist:

@@ -115,7 +115,7 @@ stages:
     steps:
       - run: build.typescript
         with:
-          cache_key: '{{ git.sha }}-{{ package.json.hash }}'
+          cache_key: "{{ git.sha }}-{{ package.json.hash }}"
 
   - name: test
     parallel:

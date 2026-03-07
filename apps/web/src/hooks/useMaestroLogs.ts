@@ -14,7 +14,9 @@ export function useLogs() {
       setEvents(prev => [e, ...prev].slice(0, 500))
     )
     return () => {
-      if (disposer.current) {disposer.current()}
+      if (disposer.current) {
+        disposer.current()
+      }
     }
   }, [])
 

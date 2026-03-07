@@ -174,7 +174,7 @@ Use Cloudflare Tunnel or egress proxy with SNI allowlist for external APIs. Log 
 ```yaml
 name: iam.audit
 on: [workflow_dispatch, schedule]
-schedule: [{ cron: '0 3 * * 2' }]
+schedule: [{ cron: "0 3 * * 2" }]
 permissions: { contents: read }
 jobs:
   access-analyzer:
@@ -245,11 +245,8 @@ violation[msg] {
 ```ts
 export function redactLog(line: string) {
   return line
-    .replace(/(api[_-]?key\s*[:=]\s*)['\"]?[A-Za-z0-9_\-]{16,}/gi, '$1***')
-    .replace(
-      /(email: )([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/gi,
-      '$1<redacted>',
-    );
+    .replace(/(api[_-]?key\s*[:=]\s*)['\"]?[A-Za-z0-9_\-]{16,}/gi, "$1***")
+    .replace(/(email: )([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/gi, "$1<redacted>");
 }
 ```
 

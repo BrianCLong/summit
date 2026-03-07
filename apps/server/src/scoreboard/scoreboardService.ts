@@ -1,7 +1,14 @@
-import { ExceptionRegistry } from './exceptionRegistry.js';
-import { DecisionLog } from './decisionLog.js';
-import { ReleaseEnvelopeRegistry } from './releaseEnvelopeRegistry.js';
-import { DomainMetrics, DomainMetricsInput, DomainScoreboard, GateStatus, GateType, HEALTH_THRESHOLDS } from './types.js';
+import { ExceptionRegistry } from "./exceptionRegistry.js";
+import { DecisionLog } from "./decisionLog.js";
+import { ReleaseEnvelopeRegistry } from "./releaseEnvelopeRegistry.js";
+import {
+  DomainMetrics,
+  DomainMetricsInput,
+  DomainScoreboard,
+  GateStatus,
+  GateType,
+  HEALTH_THRESHOLDS,
+} from "./types.js";
 
 interface DomainRecord {
   metrics: DomainMetrics;
@@ -88,7 +95,7 @@ export class ScoreboardService {
     owner: string;
     rationale: string;
     revisitDate: string;
-    decisionType: 'ONE_WAY_DOOR' | 'TWO_WAY_DOOR';
+    decisionType: "ONE_WAY_DOOR" | "TWO_WAY_DOOR";
   }) {
     return this.decisions.log(params);
   }
@@ -103,30 +110,30 @@ export class ScoreboardService {
     return this.releaseEnvelopes.register(params);
   }
 
-  private computeHealth(metrics: DomainMetrics): DomainScoreboard['health'] {
-    const reliability: DomainScoreboard['health']['reliability'] =
+  private computeHealth(metrics: DomainMetrics): DomainScoreboard["health"] {
+    const reliability: DomainScoreboard["health"]["reliability"] =
       metrics.errorBudgetRemaining <= HEALTH_THRESHOLDS.errorBudgetRemaining ||
       metrics.repeatIncidents > HEALTH_THRESHOLDS.repeatIncidents
-        ? 'POOR'
+        ? "POOR"
         : metrics.errorBudgetRemaining < HEALTH_THRESHOLDS.errorBudgetRemaining * 3
-          ? 'WATCH'
-          : 'GOOD';
+          ? "WATCH"
+          : "GOOD";
 
-    const flow: DomainScoreboard['health']['flow'] =
+    const flow: DomainScoreboard["health"]["flow"] =
       metrics.wipCount > metrics.wipLimit ||
       metrics.blockedTimeHours > HEALTH_THRESHOLDS.blockedTimeHours ||
       metrics.reworkRate > HEALTH_THRESHOLDS.reworkRate
-        ? 'POOR'
+        ? "POOR"
         : metrics.cycleTimeDays > HEALTH_THRESHOLDS.cycleTimeDays
-          ? 'WATCH'
-          : 'GOOD';
+          ? "WATCH"
+          : "GOOD";
 
-    const onCall: DomainScoreboard['health']['onCall'] =
+    const onCall: DomainScoreboard["health"]["onCall"] =
       metrics.onCall.pagesPerShift > 6 || metrics.onCall.sleepDebtHours > 12
-        ? 'POOR'
+        ? "POOR"
         : metrics.onCall.pagesPerShift > 3 || metrics.onCall.sleepDebtHours > 6
-          ? 'WATCH'
-          : 'GOOD';
+          ? "WATCH"
+          : "GOOD";
 
     return { reliability, flow, onCall };
   }
@@ -143,68 +150,75 @@ export class ScoreboardService {
   }
 
   private evaluateRoadmapGate(metrics: DomainMetrics): GateStatus {
-    const override = this.exceptions.getActive(metrics.domainId, 'ROADMAP_SCOPE');
+    const override = this.exceptions.getActive(metrics.domainId, "ROADMAP_SCOPE");
     const blocked =
       metrics.errorBudgetRemaining <= HEALTH_THRESHOLDS.errorBudgetRemaining ||
       metrics.repeatIncidents > HEALTH_THRESHOLDS.repeatIncidents;
 
     return {
-      gate: 'ROADMAP_SCOPE',
-      state: override ? 'OVERRIDDEN' : (blocked ? 'BLOCKED' : 'OPEN'),
+      gate: "ROADMAP_SCOPE",
+      state: override ? "OVERRIDDEN" : blocked ? "BLOCKED" : "OPEN",
       reason: blocked
-        ? 'Error budget depleted or repeat incidents exceed threshold; roadmap scope gated.'
-        : 'Error budget healthy; roadmap scope open.',
+        ? "Error budget depleted or repeat incidents exceed threshold; roadmap scope gated."
+        : "Error budget healthy; roadmap scope open.",
       ownerOverride: override?.owner,
       expiresAt: override?.expiresAt,
     } satisfies GateStatus;
   }
 
   private evaluateReleaseEnvelopeGate(metrics: DomainMetrics): GateStatus {
-    const override = this.exceptions.getActive(metrics.domainId, 'RELEASE_ENVELOPE');
+    const override = this.exceptions.getActive(metrics.domainId, "RELEASE_ENVELOPE");
     const envelope = this.releaseEnvelopes.get(metrics.domainId);
     const blocked = metrics.releaseEnvelopeRequired && !envelope;
 
     return {
-      gate: 'RELEASE_ENVELOPE',
-      state: override ? 'OVERRIDDEN' : (blocked ? 'BLOCKED' : 'OPEN'),
+      gate: "RELEASE_ENVELOPE",
+      state: override ? "OVERRIDDEN" : blocked ? "BLOCKED" : "OPEN",
       reason: blocked
-        ? 'Release envelope required for Tier 0/1 scope but none is registered.'
-        : 'Release envelope requirements satisfied.',
+        ? "Release envelope required for Tier 0/1 scope but none is registered."
+        : "Release envelope requirements satisfied.",
       ownerOverride: override?.owner,
       expiresAt: override?.expiresAt,
     } satisfies GateStatus;
   }
 
   private evaluatePrSizeGate(metrics: DomainMetrics): GateStatus {
-    const override = this.exceptions.getActive(metrics.domainId, 'PR_SIZE_LIMIT');
+    const override = this.exceptions.getActive(metrics.domainId, "PR_SIZE_LIMIT");
     const blocked = metrics.prSizeLimitBreaches > HEALTH_THRESHOLDS.prSizeLimitBreaches;
 
     return {
-      gate: 'PR_SIZE_LIMIT',
-      state: override ? 'OVERRIDDEN' : (blocked ? 'BLOCKED' : 'OPEN'),
+      gate: "PR_SIZE_LIMIT",
+      state: override ? "OVERRIDDEN" : blocked ? "BLOCKED" : "OPEN",
       reason: blocked
-        ? 'PR size limits breached; tighten review rotations before merging further scope.'
-        : 'PR size policy respected.',
+        ? "PR size limits breached; tighten review rotations before merging further scope."
+        : "PR size policy respected.",
       ownerOverride: override?.owner,
       expiresAt: override?.expiresAt,
     } satisfies GateStatus;
   }
 
   private evaluateWipGate(metrics: DomainMetrics): GateStatus {
-    const override = this.exceptions.getActive(metrics.domainId, 'WIP_LIMIT');
+    const override = this.exceptions.getActive(metrics.domainId, "WIP_LIMIT");
     const blocked = metrics.wipCount > metrics.wipLimit;
 
     return {
-      gate: 'WIP_LIMIT',
-      state: override ? 'OVERRIDDEN' : (blocked ? 'BLOCKED' : 'OPEN'),
-      reason: blocked ? 'WIP limit exceeded; stop starting and start finishing.' : 'WIP within limits.',
+      gate: "WIP_LIMIT",
+      state: override ? "OVERRIDDEN" : blocked ? "BLOCKED" : "OPEN",
+      reason: blocked
+        ? "WIP limit exceeded; stop starting and start finishing."
+        : "WIP within limits.",
       ownerOverride: override?.owner,
       expiresAt: override?.expiresAt,
     } satisfies GateStatus;
   }
 
   private validateMetrics(metrics: DomainMetricsInput) {
-    const requiredStrings: Array<keyof DomainMetricsInput> = ['domainId', 'domainName', 'periodStart', 'periodEnd'];
+    const requiredStrings: Array<keyof DomainMetricsInput> = [
+      "domainId",
+      "domainName",
+      "periodStart",
+      "periodEnd",
+    ];
     requiredStrings.forEach((field) => {
       if (!metrics[field]) {
         throw new Error(`Missing required field: ${field}`);
@@ -212,16 +226,16 @@ export class ScoreboardService {
     });
 
     if (metrics.wipLimit <= 0) {
-      throw new Error('WIP limit must be greater than zero to enforce gates.');
+      throw new Error("WIP limit must be greater than zero to enforce gates.");
     }
     if (metrics.errorBudgetRemaining > 1 || metrics.errorBudgetRemaining < 0) {
-      throw new Error('errorBudgetRemaining must be expressed as a value between 0 and 1.');
+      throw new Error("errorBudgetRemaining must be expressed as a value between 0 and 1.");
     }
     if (metrics.reworkRate < 0 || metrics.reworkRate > 1) {
-      throw new Error('reworkRate must be expressed as a value between 0 and 1.');
+      throw new Error("reworkRate must be expressed as a value between 0 and 1.");
     }
     if (metrics.sloBurnRate < 0 || metrics.sloBurnRate > 1) {
-      throw new Error('sloBurnRate must be expressed as a value between 0 and 1.');
+      throw new Error("sloBurnRate must be expressed as a value between 0 and 1.");
     }
   }
 }

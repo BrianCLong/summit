@@ -3,9 +3,9 @@
 // Generate comprehensive compliance report for Conductor Omniversal
 // Aggregates security, policy, data protection, and infrastructure compliance scores
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
 class ComplianceReportGenerator {
   constructor(options = {}) {
@@ -13,17 +13,17 @@ class ComplianceReportGenerator {
     this.securityCritical = parseInt(options.securityCritical) || 0;
     this.policyScore = parseFloat(options.policyScore) || 0;
     this.policyCoverage = parseFloat(options.policyCoverage) || 0;
-    this.gdprCompliant = options.gdprCompliant === 'true';
+    this.gdprCompliant = options.gdprCompliant === "true";
     this.piiScore = parseFloat(options.piiScore) || 0;
     this.infraScore = parseFloat(options.infraScore) || 0;
-    this.k8sCompliant = options.k8sCompliant === 'true';
-    this.reportsDir = options.reportsDir || './compliance-reports';
-    this.outputFile = options.outputFile || 'compliance-dashboard.html';
+    this.k8sCompliant = options.k8sCompliant === "true";
+    this.reportsDir = options.reportsDir || "./compliance-reports";
+    this.outputFile = options.outputFile || "compliance-dashboard.html";
   }
 
   async generateReport() {
     try {
-      console.log('🔍 Generating comprehensive compliance report...');
+      console.log("🔍 Generating comprehensive compliance report...");
 
       // Load detailed reports
       const detailedReports = await this.loadDetailedReports();
@@ -32,10 +32,7 @@ class ComplianceReportGenerator {
       const complianceMetrics = this.calculateComplianceMetrics();
 
       // Generate HTML dashboard
-      const htmlReport = this.generateHTMLDashboard(
-        complianceMetrics,
-        detailedReports,
-      );
+      const htmlReport = this.generateHTMLDashboard(complianceMetrics, detailedReports);
 
       // Write report to file
       fs.writeFileSync(this.outputFile, htmlReport);
@@ -43,18 +40,16 @@ class ComplianceReportGenerator {
       // Generate JSON summary
       const jsonSummary = this.generateJSONSummary(complianceMetrics);
       fs.writeFileSync(
-        this.outputFile.replace('.html', '.json'),
-        JSON.stringify(jsonSummary, null, 2),
+        this.outputFile.replace(".html", ".json"),
+        JSON.stringify(jsonSummary, null, 2)
       );
 
       console.log(`✅ Compliance report generated: ${this.outputFile}`);
-      console.log(
-        `📊 Overall compliance score: ${complianceMetrics.overallScore}%`,
-      );
+      console.log(`📊 Overall compliance score: ${complianceMetrics.overallScore}%`);
 
       return complianceMetrics;
     } catch (error) {
-      console.error('❌ Failed to generate compliance report:', error.message);
+      console.error("❌ Failed to generate compliance report:", error.message);
       throw error;
     }
   }
@@ -76,43 +71,28 @@ class ComplianceReportGenerator {
     };
 
     const overallScore = Math.round(
-      Object.entries(scores).reduce(
-        (acc, [key, score]) => acc + score * weights[key],
-        0,
-      ),
+      Object.entries(scores).reduce((acc, [key, score]) => acc + score * weights[key], 0)
     );
 
     // Determine compliance level
     let complianceLevel, riskLevel, recommendedActions;
 
     if (overallScore >= 90) {
-      complianceLevel = 'EXCELLENT';
-      riskLevel = 'LOW';
-      recommendedActions = [
-        'Continue monitoring',
-        'Maintain current practices',
-      ];
+      complianceLevel = "EXCELLENT";
+      riskLevel = "LOW";
+      recommendedActions = ["Continue monitoring", "Maintain current practices"];
     } else if (overallScore >= 85) {
-      complianceLevel = 'COMPLIANT';
-      riskLevel = 'LOW';
-      recommendedActions = [
-        'Minor improvements recommended',
-        'Review identified gaps',
-      ];
+      complianceLevel = "COMPLIANT";
+      riskLevel = "LOW";
+      recommendedActions = ["Minor improvements recommended", "Review identified gaps"];
     } else if (overallScore >= 70) {
-      complianceLevel = 'PARTIAL';
-      riskLevel = 'MEDIUM';
-      recommendedActions = [
-        'Address compliance gaps',
-        'Implement remediation plan',
-      ];
+      complianceLevel = "PARTIAL";
+      riskLevel = "MEDIUM";
+      recommendedActions = ["Address compliance gaps", "Implement remediation plan"];
     } else {
-      complianceLevel = 'NON_COMPLIANT';
-      riskLevel = 'HIGH';
-      recommendedActions = [
-        'Immediate action required',
-        'Halt production deployment',
-      ];
+      complianceLevel = "NON_COMPLIANT";
+      riskLevel = "HIGH";
+      recommendedActions = ["Immediate action required", "Halt production deployment"];
     }
 
     // Calculate specific compliance flags
@@ -126,12 +106,11 @@ class ComplianceReportGenerator {
 
     // Generate compliance requirements status
     const requirements = {
-      'SOC 2 Type II': overallScore >= 85 && this.securityScore >= 85,
-      'GDPR Article 32': this.gdprCompliant && this.piiScore >= 80,
-      'ISO 27001':
-        overallScore >= 80 && this.securityScore >= 85 && this.infraScore >= 80,
-      'NIST Cybersecurity Framework': overallScore >= 85,
-      'Production Readiness': overallScore >= 85 && this.securityCritical === 0,
+      "SOC 2 Type II": overallScore >= 85 && this.securityScore >= 85,
+      "GDPR Article 32": this.gdprCompliant && this.piiScore >= 80,
+      "ISO 27001": overallScore >= 80 && this.securityScore >= 85 && this.infraScore >= 80,
+      "NIST Cybersecurity Framework": overallScore >= 85,
+      "Production Readiness": overallScore >= 85 && this.securityCritical === 0,
     };
 
     return {
@@ -144,8 +123,8 @@ class ComplianceReportGenerator {
       requirements,
       recommendedActions,
       timestamp: new Date().toISOString(),
-      commitSha: process.env.GITHUB_SHA || 'unknown',
-      branch: process.env.GITHUB_REF_NAME || 'unknown',
+      commitSha: process.env.GITHUB_SHA || "unknown",
+      branch: process.env.GITHUB_REF_NAME || "unknown",
     };
   }
 
@@ -161,17 +140,15 @@ class ComplianceReportGenerator {
       // Load security reports
       const securityReportsPath = path.join(
         this.reportsDir,
-        `security-reports-${process.env.GITHUB_SHA}`,
+        `security-reports-${process.env.GITHUB_SHA}`
       );
       if (fs.existsSync(securityReportsPath)) {
         const files = fs.readdirSync(securityReportsPath);
         files.forEach((file) => {
-          if (file.endsWith('.json')) {
+          if (file.endsWith(".json")) {
             const filePath = path.join(securityReportsPath, file);
             try {
-              reports.security[file] = JSON.parse(
-                fs.readFileSync(filePath, 'utf8'),
-              );
+              reports.security[file] = JSON.parse(fs.readFileSync(filePath, "utf8"));
             } catch (error) {
               console.warn(`⚠️ Failed to parse security report: ${file}`);
             }
@@ -182,17 +159,15 @@ class ComplianceReportGenerator {
       // Load policy reports
       const policyReportsPath = path.join(
         this.reportsDir,
-        `policy-reports-${process.env.GITHUB_SHA}`,
+        `policy-reports-${process.env.GITHUB_SHA}`
       );
       if (fs.existsSync(policyReportsPath)) {
         const files = fs.readdirSync(policyReportsPath);
         files.forEach((file) => {
-          if (file.endsWith('.json')) {
+          if (file.endsWith(".json")) {
             const filePath = path.join(policyReportsPath, file);
             try {
-              reports.policy[file] = JSON.parse(
-                fs.readFileSync(filePath, 'utf8'),
-              );
+              reports.policy[file] = JSON.parse(fs.readFileSync(filePath, "utf8"));
             } catch (error) {
               console.warn(`⚠️ Failed to parse policy report: ${file}`);
             }
@@ -203,21 +178,17 @@ class ComplianceReportGenerator {
       // Load data protection reports
       const dataProtectionPath = path.join(
         this.reportsDir,
-        `data-protection-reports-${process.env.GITHUB_SHA}`,
+        `data-protection-reports-${process.env.GITHUB_SHA}`
       );
       if (fs.existsSync(dataProtectionPath)) {
         const files = fs.readdirSync(dataProtectionPath);
         files.forEach((file) => {
-          if (file.endsWith('.json')) {
+          if (file.endsWith(".json")) {
             const filePath = path.join(dataProtectionPath, file);
             try {
-              reports.dataProtection[file] = JSON.parse(
-                fs.readFileSync(filePath, 'utf8'),
-              );
+              reports.dataProtection[file] = JSON.parse(fs.readFileSync(filePath, "utf8"));
             } catch (error) {
-              console.warn(
-                `⚠️ Failed to parse data protection report: ${file}`,
-              );
+              console.warn(`⚠️ Failed to parse data protection report: ${file}`);
             }
           }
         });
@@ -226,17 +197,15 @@ class ComplianceReportGenerator {
       // Load infrastructure reports
       const infrastructurePath = path.join(
         this.reportsDir,
-        `infrastructure-reports-${process.env.GITHUB_SHA}`,
+        `infrastructure-reports-${process.env.GITHUB_SHA}`
       );
       if (fs.existsSync(infrastructurePath)) {
         const files = fs.readdirSync(infrastructurePath);
         files.forEach((file) => {
-          if (file.endsWith('.json')) {
+          if (file.endsWith(".json")) {
             const filePath = path.join(infrastructurePath, file);
             try {
-              reports.infrastructure[file] = JSON.parse(
-                fs.readFileSync(filePath, 'utf8'),
-              );
+              reports.infrastructure[file] = JSON.parse(fs.readFileSync(filePath, "utf8"));
             } catch (error) {
               console.warn(`⚠️ Failed to parse infrastructure report: ${file}`);
             }
@@ -244,7 +213,7 @@ class ComplianceReportGenerator {
         });
       }
     } catch (error) {
-      console.warn('⚠️ Error loading detailed reports:', error.message);
+      console.warn("⚠️ Error loading detailed reports:", error.message);
     }
 
     return reports;
@@ -252,16 +221,16 @@ class ComplianceReportGenerator {
 
   generateHTMLDashboard(metrics, reports) {
     const riskColorMap = {
-      LOW: '#28a745',
-      MEDIUM: '#ffc107',
-      HIGH: '#dc3545',
+      LOW: "#28a745",
+      MEDIUM: "#ffc107",
+      HIGH: "#dc3545",
     };
 
     const complianceColorMap = {
-      EXCELLENT: '#28a745',
-      COMPLIANT: '#17a2b8',
-      PARTIAL: '#ffc107',
-      NON_COMPLIANT: '#dc3545',
+      EXCELLENT: "#28a745",
+      COMPLIANT: "#17a2b8",
+      PARTIAL: "#ffc107",
+      NON_COMPLIANT: "#dc3545",
     };
 
     return `<!DOCTYPE html>
@@ -494,7 +463,7 @@ class ComplianceReportGenerator {
                 <div class="metric-card">
                     <div class="metric-title">🔐 Data Protection</div>
                     <div class="metric-value">${metrics.scores.dataProtection}%</div>
-                    <div class="metric-subtitle">GDPR: ${this.gdprCompliant ? '✅ Compliant' : '❌ Non-compliant'}</div>
+                    <div class="metric-subtitle">GDPR: ${this.gdprCompliant ? "✅ Compliant" : "❌ Non-compliant"}</div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${metrics.scores.dataProtection}%"></div>
                     </div>
@@ -503,7 +472,7 @@ class ComplianceReportGenerator {
                 <div class="metric-card">
                     <div class="metric-title">🏗️ Infrastructure Security</div>
                     <div class="metric-value">${metrics.scores.infrastructure}%</div>
-                    <div class="metric-subtitle">K8s: ${this.k8sCompliant ? '✅ Secure' : '⚠️ Issues found'}</div>
+                    <div class="metric-subtitle">K8s: ${this.k8sCompliant ? "✅ Secure" : "⚠️ Issues found"}</div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${metrics.scores.infrastructure}%"></div>
                     </div>
@@ -518,13 +487,13 @@ class ComplianceReportGenerator {
                         ([req, status]) => `
                         <div class="requirement-item">
                             <span class="requirement-name">${req}</span>
-                            <span class="status-badge ${status ? 'status-pass' : 'status-fail'}">
-                                ${status ? '✅ PASS' : '❌ FAIL'}
+                            <span class="status-badge ${status ? "status-pass" : "status-fail"}">
+                                ${status ? "✅ PASS" : "❌ FAIL"}
                             </span>
                         </div>
-                    `,
+                    `
                       )
-                      .join('')}
+                      .join("")}
                 </div>
             </div>
 
@@ -537,34 +506,33 @@ class ComplianceReportGenerator {
                     <span>Recommended Actions</span>
                 </div>
                 <ul class="actions-list">
-                    ${metrics.recommendedActions.map((action) => `<li>${action}</li>`).join('')}
+                    ${metrics.recommendedActions.map((action) => `<li>${action}</li>`).join("")}
                 </ul>
             </div>
             `
-                : ''
+                : ""
             }
 
             <div class="detailed-findings">
                 <div class="findings-section">
                     <div class="findings-title">🚨 Active Compliance Issues</div>
                     ${
-                      Object.entries(metrics.flags).filter(([, value]) => value)
-                        .length === 0
+                      Object.entries(metrics.flags).filter(([, value]) => value).length === 0
                         ? '<p style="color: #28a745; font-weight: bold;">✅ No critical compliance issues found</p>'
                         : Object.entries(metrics.flags)
                             .filter(([, value]) => value)
                             .map(
                               ([flag]) => `
                                 <div class="finding-item">
-                                    <div class="finding-severity severity-${flag.includes('critical') || flag.includes('breach') ? 'critical' : 'warning'}">
-                                        ${flag.includes('critical') || flag.includes('breach') ? 'CRITICAL' : 'WARNING'}
+                                    <div class="finding-severity severity-${flag.includes("critical") || flag.includes("breach") ? "critical" : "warning"}">
+                                        ${flag.includes("critical") || flag.includes("breach") ? "CRITICAL" : "WARNING"}
                                     </div>
-                                    <strong>${flag.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}:</strong>
+                                    <strong>${flag.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}:</strong>
                                     ${this.getFlagDescription(flag)}
                                 </div>
-                            `,
+                            `
                             )
-                            .join('')
+                            .join("")
                     }
                 </div>
             </div>
@@ -582,22 +550,18 @@ class ComplianceReportGenerator {
   getFlagDescription(flag) {
     const descriptions = {
       criticalSecurityFindings:
-        'Critical security vulnerabilities detected that must be resolved before production deployment.',
-      policyComplianceBreach:
-        'Authorization policies do not meet minimum compliance thresholds.',
-      gdprComplianceIssue:
-        'GDPR data protection requirements are not fully satisfied.',
-      infrastructureRisks:
-        'Infrastructure security configuration has potential vulnerabilities.',
-      policyCoverageLow:
-        'Policy test coverage is below recommended threshold (80%).',
+        "Critical security vulnerabilities detected that must be resolved before production deployment.",
+      policyComplianceBreach: "Authorization policies do not meet minimum compliance thresholds.",
+      gdprComplianceIssue: "GDPR data protection requirements are not fully satisfied.",
+      infrastructureRisks: "Infrastructure security configuration has potential vulnerabilities.",
+      policyCoverageLow: "Policy test coverage is below recommended threshold (80%).",
     };
-    return descriptions[flag] || 'Compliance issue requiring attention.';
+    return descriptions[flag] || "Compliance issue requiring attention.";
   }
 
   generateJSONSummary(metrics) {
     return {
-      version: '1.0',
+      version: "1.0",
       timestamp: metrics.timestamp,
       repository: process.env.GITHUB_REPOSITORY,
       commit: metrics.commitSha,
@@ -613,8 +577,8 @@ class ComplianceReportGenerator {
         recommendedActions: metrics.recommendedActions,
       },
       metadata: {
-        generatedBy: 'conductor-compliance-automation',
-        reportType: 'comprehensive',
+        generatedBy: "conductor-compliance-automation",
+        reportType: "comprehensive",
         retentionDays: 2555,
       },
     };
@@ -627,9 +591,7 @@ if (require.main === module) {
   const options = {};
 
   for (let i = 0; i < args.length; i += 2) {
-    const key = args[i]
-      .replace('--', '')
-      .replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    const key = args[i].replace("--", "").replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     const value = args[i + 1];
     options[key] = value;
   }
@@ -641,10 +603,10 @@ if (require.main === module) {
       console.log(`\n📊 Final Compliance Score: ${metrics.overallScore}%`);
       console.log(`🎯 Compliance Level: ${metrics.complianceLevel}`);
       console.log(`⚠️  Risk Level: ${metrics.riskLevel}`);
-      process.exit(metrics.complianceLevel === 'NON_COMPLIANT' ? 1 : 0);
+      process.exit(metrics.complianceLevel === "NON_COMPLIANT" ? 1 : 0);
     })
     .catch((error) => {
-      console.error('❌ Compliance report generation failed:', error.message);
+      console.error("❌ Compliance report generation failed:", error.message);
       process.exit(1);
     });
 }

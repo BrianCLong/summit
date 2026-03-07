@@ -1,11 +1,6 @@
-import { CommunityStore } from '../store.js';
-import type {
-  AnalyticsSnapshot,
-  ContributionSummary,
-  DiscussionThread,
-  Post,
-} from '../types.js';
-import { sum } from '../utils.js';
+import { CommunityStore } from "../store.js";
+import type { AnalyticsSnapshot, ContributionSummary, DiscussionThread, Post } from "../types.js";
+import { sum } from "../utils.js";
 
 const isActiveWithinDays = (date: Date, days: number): boolean => {
   const now = Date.now();
@@ -13,10 +8,7 @@ const isActiveWithinDays = (date: Date, days: number): boolean => {
   return date.getTime() >= cutoff;
 };
 
-const computeContentToModeratorRatio = (
-  posts: Post[],
-  moderationEvents: number,
-): number => {
+const computeContentToModeratorRatio = (posts: Post[], moderationEvents: number): number => {
   if (moderationEvents === 0) {
     return posts.length;
   }
@@ -43,12 +35,8 @@ export class AnalyticsService {
       }
     }
 
-    const activeUsers = users.filter((user) =>
-      isActiveWithinDays(user.lastActiveAt, 7),
-    );
-    const topContributors = [...contributions]
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 5);
+    const activeUsers = users.filter((user) => isActiveWithinDays(user.lastActiveAt, 7));
+    const topContributors = [...contributions].sort((a, b) => b.points - a.points).slice(0, 5);
 
     return {
       generatedAt: new Date(),
@@ -59,10 +47,7 @@ export class AnalyticsService {
       flaggedPosts: posts.filter((post) => post.flaggedBy.length > 0).length,
       badgeDistribution: Object.fromEntries(badgeDistribution.entries()),
       topContributors,
-      contentToModeratorRatio: computeContentToModeratorRatio(
-        posts,
-        moderationEvents.length,
-      ),
+      contentToModeratorRatio: computeContentToModeratorRatio(posts, moderationEvents.length),
     };
   }
 
@@ -85,9 +70,7 @@ export class AnalyticsService {
     if (users.length === 0) {
       return 0;
     }
-    const retained = users.filter((user) =>
-      isActiveWithinDays(user.lastActiveAt, 30),
-    ).length;
+    const retained = users.filter((user) => isActiveWithinDays(user.lastActiveAt, 30)).length;
     return retained / users.length;
   }
 

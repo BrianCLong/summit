@@ -1,9 +1,7 @@
 {
   "evidence_id": "EVD-REPLITAGENT-FOUND-001",
   "item_slug": "replit-agent-foundation",
-  "claims": [
-    "Evidence core schemas and README remain present and referenced."
-  ],
+  "claims": ["Evidence core schemas and README remain present and referenced."],
   "decisions": [
     {
       "decision": "retain_evidence_core",

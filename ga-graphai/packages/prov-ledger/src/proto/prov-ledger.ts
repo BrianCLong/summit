@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Minimal runtime type definition for prov-ledger gRPC service
-import type * as grpc from '@grpc/grpc-js';
-import type { MessageTypeDefinition } from '@grpc/proto-loader';
+import type * as grpc from "@grpc/grpc-js";
+import type { MessageTypeDefinition } from "@grpc/proto-loader";
 
 export interface ProtoGrpcType {
   prov: {

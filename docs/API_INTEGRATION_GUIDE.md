@@ -249,58 +249,58 @@ pnpm add @intelgraph/sdk
 #### Usage
 
 ```typescript
-import { IntelGraphClient } from '@intelgraph/sdk';
+import { IntelGraphClient } from "@intelgraph/sdk";
 
 // Initialize client
 const client = new IntelGraphClient({
   apiKey: process.env.INTELGRAPH_API_KEY,
-  baseUrl: 'https://api.intelgraph.ai',
+  baseUrl: "https://api.intelgraph.ai",
 });
 
 // Create a graph
 const graph = await client.graphs.create({
-  name: 'Financial Fraud Investigation',
-  description: 'Q4 2024 analysis',
-  tags: ['fraud', 'financial'],
+  name: "Financial Fraud Investigation",
+  description: "Q4 2024 analysis",
+  tags: ["fraud", "financial"],
 });
 
 console.log(`Created graph: ${graph.id}`);
 
 // Add entities
 const entity = await client.entities.create(graph.id, {
-  type: 'Person',
+  type: "Person",
   properties: {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: "John Doe",
+    email: "john.doe@example.com",
   },
   metadata: {
-    source: 'OSINT',
+    source: "OSINT",
     confidence: 0.85,
   },
 });
 
 // Query entities
 const entities = await client.entities.list(graph.id, {
-  type: 'Person',
+  type: "Person",
   limit: 10,
 });
 
 // Create relationship
 const relationship = await client.relationships.create(graph.id, {
-  type: 'KNOWS',
+  type: "KNOWS",
   sourceId: entity.id,
-  targetId: 'other_entity_id',
+  targetId: "other_entity_id",
   properties: {
-    since: '2020-01-01',
+    since: "2020-01-01",
   },
 });
 
 // Run AI analysis
 const analysisJob = await client.ai.analyze({
   graphId: graph.id,
-  analysisType: 'community_detection',
+  analysisType: "community_detection",
   parameters: {
-    algorithm: 'louvain',
+    algorithm: "louvain",
   },
 });
 
@@ -310,13 +310,13 @@ const results = await client.ai.waitForJob(analysisJob.jobId, {
   timeout: 60000, // 1 minute
 });
 
-console.log('Analysis results:', results);
+console.log("Analysis results:", results);
 ```
 
 #### GraphQL Queries (TypeScript SDK)
 
 ```typescript
-import { IntelGraphClient } from '@intelgraph/sdk';
+import { IntelGraphClient } from "@intelgraph/sdk";
 
 const client = new IntelGraphClient({
   apiKey: process.env.INTELGRAPH_API_KEY,
@@ -342,7 +342,7 @@ const result = await client.graphql.query({
     }
   `,
   variables: {
-    id: 'entity_123',
+    id: "entity_123",
   },
 });
 
@@ -589,6 +589,7 @@ query SearchEntities($query: String!, $filter: EntityFilter) {
 ```
 
 Variables:
+
 ```json
 {
   "query": "John Doe",
@@ -619,6 +620,7 @@ mutation CreateEntity($input: CreateEntityInput!) {
 ```
 
 Variables:
+
 ```json
 {
   "input": {
@@ -655,26 +657,26 @@ subscription EntityUpdated($investigationId: ID) {
 ### WebSocket Connection
 
 ```typescript
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const socket = io('https://api.intelgraph.ai', {
+const socket = io("https://api.intelgraph.ai", {
   auth: {
-    token: 'your_jwt_token',
+    token: "your_jwt_token",
   },
 });
 
 // Listen for entity updates
-socket.on('entity:updated', (data) => {
-  console.log('Entity updated:', data);
+socket.on("entity:updated", (data) => {
+  console.log("Entity updated:", data);
 });
 
 // Listen for relationship updates
-socket.on('relationship:created', (data) => {
-  console.log('New relationship:', data);
+socket.on("relationship:created", (data) => {
+  console.log("New relationship:", data);
 });
 
 // Join investigation room
-socket.emit('join:investigation', { investigationId: 'inv_123' });
+socket.emit("join:investigation", { investigationId: "inv_123" });
 ```
 
 ---
@@ -700,32 +702,32 @@ socket.emit('join:investigation', { investigationId: 'inv_123' });
 
 ### Common Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `UNAUTHORIZED` | 401 | Invalid or expired authentication |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `VALIDATION_ERROR` | 422 | Request validation failed |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
-| `INTERNAL_SERVER_ERROR` | 500 | Server error |
+| Code                    | HTTP Status | Description                       |
+| ----------------------- | ----------- | --------------------------------- |
+| `UNAUTHORIZED`          | 401         | Invalid or expired authentication |
+| `FORBIDDEN`             | 403         | Insufficient permissions          |
+| `NOT_FOUND`             | 404         | Resource not found                |
+| `VALIDATION_ERROR`      | 422         | Request validation failed         |
+| `RATE_LIMIT_EXCEEDED`   | 429         | Too many requests                 |
+| `INTERNAL_SERVER_ERROR` | 500         | Server error                      |
 
 ### SDK Error Handling
 
 #### TypeScript
 
 ```typescript
-import { IntelGraphClient, IntelGraphError } from '@intelgraph/sdk';
+import { IntelGraphClient, IntelGraphError } from "@intelgraph/sdk";
 
-const client = new IntelGraphClient({ apiKey: '...' });
+const client = new IntelGraphClient({ apiKey: "..." });
 
 try {
-  const graph = await client.graphs.get('invalid_id');
+  const graph = await client.graphs.get("invalid_id");
 } catch (error) {
   if (error instanceof IntelGraphError) {
     console.error(`Error ${error.code}: ${error.message}`);
-    console.error('Trace ID:', error.traceId);
+    console.error("Trace ID:", error.traceId);
 
-    if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    if (error.code === "RATE_LIMIT_EXCEEDED") {
       const retryAfter = error.retryAfter;
       console.log(`Rate limited. Retry after ${retryAfter} seconds`);
     }
@@ -756,11 +758,11 @@ except IntelGraphError as error:
 
 ### Rate Limit Tiers
 
-| Tier | Requests/Hour | Burst Limit |
-|------|--------------|-------------|
-| **Free** | 100 | 10/minute |
-| **Professional** | 1,000 | 100/minute |
-| **Enterprise** | 10,000 | 1,000/minute |
+| Tier             | Requests/Hour | Burst Limit  |
+| ---------------- | ------------- | ------------ |
+| **Free**         | 100           | 10/minute    |
+| **Professional** | 1,000         | 100/minute   |
+| **Enterprise**   | 10,000        | 1,000/minute |
 
 ### Rate Limit Headers
 
@@ -773,16 +775,16 @@ X-RateLimit-Reset: 1642262400
 ### Handling Rate Limits
 
 ```typescript
-import { IntelGraphClient } from '@intelgraph/sdk';
+import { IntelGraphClient } from "@intelgraph/sdk";
 
 const client = new IntelGraphClient({
-  apiKey: '...',
+  apiKey: "...",
   retryOnRateLimit: true,
   maxRetries: 3,
 });
 
 // Automatically retries on 429 errors with exponential backoff
-const graph = await client.graphs.get('graph_id');
+const graph = await client.graphs.get("graph_id");
 ```
 
 ---
@@ -818,6 +820,7 @@ const graph = await client.graphs.get('graph_id');
 **Cause**: Invalid or expired JWT token
 
 **Solution**:
+
 ```bash
 # Refresh your token
 curl -X POST https://api.intelgraph.ai/v2/auth/refresh \

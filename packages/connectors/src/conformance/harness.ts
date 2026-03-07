@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 import {
   ConformanceConnector,
   ConformanceReport,
   ConformanceTestResult,
   ConnectorError,
-} from './types';
+} from "./types";
 
 interface HarnessOptions {
   pageSize?: number;
@@ -16,7 +16,10 @@ interface HarnessOptions {
 export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
   private readonly options: Required<HarnessOptions>;
 
-  constructor(private readonly connector: ConformanceConnector<TResource>, options?: HarnessOptions) {
+  constructor(
+    private readonly connector: ConformanceConnector<TResource>,
+    options?: HarnessOptions
+  ) {
     this.options = {
       pageSize: options?.pageSize ?? 2,
       maxRetries: options?.maxRetries ?? 3,
@@ -28,17 +31,19 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
     const results: ConformanceTestResult[] = [];
     await this.connector.reset();
 
-    results.push(await this.runCheck('idempotency', () => this.testIdempotency()));
-    results.push(await this.runCheck('retries', () => this.testRetries()));
-    results.push(await this.runCheck('pagination', () => this.testPagination()));
-    results.push(await this.runCheck('rate limits', () => this.testRateLimits()));
-    results.push(await this.runCheck('error mapping', () => this.testErrorMapping()));
-    results.push(await this.runCheck('evidence completeness', () => this.testEvidenceCompleteness()));
-    results.push(await this.runCheck('redaction', () => this.testRedaction()));
+    results.push(await this.runCheck("idempotency", () => this.testIdempotency()));
+    results.push(await this.runCheck("retries", () => this.testRetries()));
+    results.push(await this.runCheck("pagination", () => this.testPagination()));
+    results.push(await this.runCheck("rate limits", () => this.testRateLimits()));
+    results.push(await this.runCheck("error mapping", () => this.testErrorMapping()));
+    results.push(
+      await this.runCheck("evidence completeness", () => this.testEvidenceCompleteness())
+    );
+    results.push(await this.runCheck("redaction", () => this.testRedaction()));
 
     const failures = results.filter((result) => !result.passed);
     return {
-      connectorName: (this.connector as { name?: string }).name ?? 'connector-under-test',
+      connectorName: (this.connector as { name?: string }).name ?? "connector-under-test",
       passed: failures.length === 0,
       results,
       failures,
@@ -56,21 +61,21 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
   }
 
   private async testIdempotency() {
-    const payload = { id: randomUUID(), value: 'sample', nested: { iteration: 1 } } as TResource;
+    const payload = { id: randomUUID(), value: "sample", nested: { iteration: 1 } } as TResource;
     const first = await this.connector.performIdempotentWrite(payload);
     const second = await this.connector.performIdempotentWrite(payload);
 
     if (first.id !== second.id) {
-      throw new Error('Idempotent writes must reuse the same identifier.');
+      throw new Error("Idempotent writes must reuse the same identifier.");
     }
 
     if (first.checksum !== second.checksum) {
-      throw new Error('Idempotent writes must reuse the same checksum for identical payloads.');
+      throw new Error("Idempotent writes must reuse the same checksum for identical payloads.");
     }
 
     const readBack = await this.connector.performIdempotentRead(first.id);
     if (JSON.stringify(readBack) !== JSON.stringify(payload)) {
-      throw new Error('Reads must reflect the originally provided payload.');
+      throw new Error("Reads must reflect the originally provided payload.");
     }
   }
 
@@ -90,7 +95,9 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
     }
 
     if (!success) {
-      throw new Error(`Operation did not succeed within ${this.options.maxRetries} attempts. Last error: ${lastError?.code}`);
+      throw new Error(
+        `Operation did not succeed within ${this.options.maxRetries} attempts. Last error: ${lastError?.code}`
+      );
     }
   }
 
@@ -104,17 +111,17 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
       pageCounter += 1;
 
       if (page.items.length === 0) {
-        throw new Error('Pagination returned an empty page before completion.');
+        throw new Error("Pagination returned an empty page before completion.");
       }
 
       if (page.items.length > this.options.pageSize) {
-        throw new Error('Page size exceeds requested maximum.');
+        throw new Error("Page size exceeds requested maximum.");
       }
 
       page.items.forEach((item) => {
         const candidateId = (item as { id?: string }).id ?? JSON.stringify(item);
         if (seen.has(candidateId)) {
-          throw new Error('Pagination returned duplicate items across pages.');
+          throw new Error("Pagination returned duplicate items across pages.");
         }
         seen.add(candidateId);
       });
@@ -125,12 +132,12 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
       cursor = page.nextCursor;
 
       if (pageCounter > 20) {
-        throw new Error('Pagination did not terminate within expected bounds.');
+        throw new Error("Pagination did not terminate within expected bounds.");
       }
     }
 
     if (seen.size === 0) {
-      throw new Error('Pagination yielded no results.');
+      throw new Error("Pagination yielded no results.");
     }
   }
 
@@ -142,13 +149,13 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
       const { remaining, limit } = rateLimitInfo;
 
       if (remaining < 0 || remaining > limit) {
-        throw new Error('Rate limit counters must stay within 0..limit.');
+        throw new Error("Rate limit counters must stay within 0..limit.");
       }
 
       if (previousRemaining !== null && remaining > previousRemaining) {
         const resetExpected = remaining === limit - 1;
         if (!resetExpected) {
-          throw new Error('Rate limit remaining counter increased unexpectedly.');
+          throw new Error("Rate limit remaining counter increased unexpectedly.");
         }
       }
 
@@ -175,19 +182,26 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
         if (!error.message) {
           throw new Error(`Mapped error ${code} must include a message.`);
         }
-      }),
+      })
     );
   }
 
   private async testEvidenceCompleteness() {
     const evidence = await this.connector.collectEvidence();
-    const requiredCoverage = ['idempotency', 'retries', 'pagination', 'rateLimits', 'errors', 'redaction'];
+    const requiredCoverage = [
+      "idempotency",
+      "retries",
+      "pagination",
+      "rateLimits",
+      "errors",
+      "redaction",
+    ];
 
     if (!evidence.timestamp || Number.isNaN(Date.parse(String(evidence.timestamp)))) {
-      throw new Error('Evidence must include a valid timestamp.');
+      throw new Error("Evidence must include a valid timestamp.");
     }
     if (!Array.isArray(evidence.operations) || evidence.operations.length === 0) {
-      throw new Error('Evidence must list executed operations.');
+      throw new Error("Evidence must list executed operations.");
     }
 
     for (const coverageKey of requiredCoverage) {
@@ -199,20 +213,20 @@ export class ConnectorConformanceHarness<TResource = Record<string, unknown>> {
 
   private async testRedaction() {
     const secretPayload = {
-      token: 'super-secret-token',
-      password: 'p@ssw0rd',
-      nested: { apiKey: 'abc123', safe: 'ok' },
-      headers: { authorization: 'Bearer hidden' },
+      token: "super-secret-token",
+      password: "p@ssw0rd",
+      nested: { apiKey: "abc123", safe: "ok" },
+      headers: { authorization: "Bearer hidden" },
     } satisfies Record<string, unknown>;
 
     const redacted = await this.connector.redactSecrets(secretPayload);
     const serialized = JSON.stringify(redacted).toLowerCase();
 
-    const forbidden = ['super-secret-token', 'p@ssw0rd', 'abc123', 'bearer hidden'];
+    const forbidden = ["super-secret-token", "p@ssw0rd", "abc123", "bearer hidden"];
     const stillLeaking = forbidden.filter((secret) => serialized.includes(secret));
 
     if (stillLeaking.length > 0) {
-      throw new Error(`Secrets not redacted: ${stillLeaking.join(', ')}`);
+      throw new Error(`Secrets not redacted: ${stillLeaking.join(", ")}`);
     }
   }
 }

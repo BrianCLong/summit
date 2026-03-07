@@ -6,7 +6,7 @@ on:
       node_version:
         required: false
         type: string
-        default: '20.x'
+        default: "20.x"
 
 jobs:
   security-scan:
@@ -31,8 +31,8 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '0'
-          vuln-type: 'os,library'
+          exit-code: "0"
+          vuln-type: "os,library"
 
   trufflehog:
     runs-on: ubuntu-latest
@@ -66,7 +66,7 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
           cache: pnpm
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          cache-dependency-path: "**/pnpm-lock.yaml"
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
           version: 9.12.0

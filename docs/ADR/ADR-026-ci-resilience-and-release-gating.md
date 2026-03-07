@@ -24,6 +24,7 @@ Our target customers (government, defense, regulated industries) **require opera
 ### The Traditional Approach (Inadequate)
 
 Most organizations handle CI vendor outages by:
+
 1. **Wait it out** - Delay release until vendor recovers (opportunity cost, unpredictable timeline)
 2. **Ship anyway** - Bypass checks entirely (governance risk, no audit trail)
 3. **Manual testing** - Ad-hoc verification without documentation (not reproducible, not scalable)
@@ -43,15 +44,18 @@ We adopt a **multi-signal release gate framework** that:
 ### Core Principles
 
 **Principle 1: Vendor Outages Must Not Block Business Continuity**
+
 - External infrastructure failure is a risk we accept and plan for
 - Having a documented fallback path is **more mature** than having perfect uptime
 
 **Principle 2: Governance is Mandatory, Automation is Optional**
+
 - Automated checks are preferred (faster, cheaper, more reliable)
 - But when automation fails, manual verification with audit trails is acceptable
 - What's **never** acceptable: Shipping without any verification
 
 **Principle 3: Evidence-Based Releases Require Higher Approval Authority**
+
 - Automated release (golden-main passes): Engineering Lead approval
 - Evidence-based release (manual verification): Engineering Lead + Product Owner approval
 - This balances agility with risk management
@@ -65,11 +69,13 @@ When the automated CI signal (golden-main) is unavailable due to **external fact
 ### 1. Root Cause Analysis (Mandatory)
 
 Document:
+
 - What blocked the automated CI signal?
 - Is the blocker in our control (code issue) or external (vendor infrastructure)?
 - What evidence proves this attribution?
 
 **Acceptance Criteria:**
+
 - ✅ Root cause identified with external evidence (vendor status page, community reports, etc.)
 - ✅ Clear separation between "code issues" and "platform issues"
 - ✅ Timeline of events documented
@@ -79,11 +85,13 @@ Document:
 ### 2. Remediation Evidence (Mandatory)
 
 Document:
+
 - What was broken / what blocked previous successful runs?
 - What specific actions were taken to remediate?
 - What evidence proves remediation was successful?
 
 **Acceptance Criteria:**
+
 - ✅ PRs merged with documented changes
 - ✅ Commit SHAs and git clean state verified
 - ✅ Configuration files validated (linting, parsing, etc.)
@@ -92,11 +100,13 @@ Document:
 ### 3. Forward-Looking Confidence Case (Mandatory)
 
 Explain:
+
 - Why is the code ready despite lack of recent green CI runs?
 - What alternative signals give us confidence?
 - What historical baseline exists (last known good state)?
 
 **Acceptance Criteria:**
+
 - ✅ Code changes minimal and well-understood (not large refactor)
 - ✅ CI configuration validated (workflows parse and trigger correctly)
 - ✅ Historical baseline identified (last successful run, or pre-corruption state)
@@ -104,11 +114,13 @@ Explain:
 ### 4. Risk Assessment & Mitigation (Mandatory)
 
 Document:
+
 - What could go wrong?
 - What is likelihood and impact of each risk?
 - What mitigations are in place?
 
 **Minimum Mitigations Required:**
+
 - ✅ Canary deployment (5-25% of users first, with soak period)
 - ✅ Fast-revert procedure documented and tested
 - ✅ Enhanced monitoring for first 24-48 hours
@@ -117,11 +129,13 @@ Document:
 ### 5. Audit-Grade Artifacts (Mandatory)
 
 Produce:
+
 - Comprehensive evidence document (>5 pages)
 - Stakeholder-facing summary
 - Approval signatures from required authorities
 
 **Acceptance Criteria:**
+
 - ✅ Evidence document includes: root cause, remediation, confidence case, risk assessment
 - ✅ All claims backed by verifiable artifacts (commit SHAs, run IDs, timestamps)
 - ✅ Approval authority documented (who approved, when, based on what evidence)
@@ -129,10 +143,12 @@ Produce:
 ### 6. Approval Authority (Mandatory)
 
 **Required Approvals:**
+
 - Engineering Lead (technical risk assessment)
 - Product Owner (business value vs. risk trade-off)
 
 **Optional Escalation:**
+
 - CEO/CTO (if risk is rated "High" or "Critical")
 - Legal/Compliance (if regulatory implications)
 
@@ -150,6 +166,7 @@ Produce:
 - [x] Create stakeholder communication templates
 
 **Artifacts Created:**
+
 - `/tmp/ga-readiness-evidence.md` (12-page audit-grade evidence doc)
 - `/tmp/ga-approval-request.md` (formal approval template)
 - `/tmp/monitor-golden-main.sh` (automated CI monitoring)
@@ -165,6 +182,7 @@ Produce:
 - [ ] Create approval workflow (GitHub issue template + required reviewers)
 
 **Deliverables:**
+
 - ADR published to `docs/adr/001-ci-resilience.md`
 - Playbook section: "How to Execute Evidence-Based Release"
 - Training session recording for future team members
@@ -179,6 +197,7 @@ Produce:
 - [ ] Consolidate workflows (50 → 10-15 critical paths)
 
 **Success Metrics:**
+
 - golden-main execution time: <15 minutes (from 3+ hours)
 - CI vendor as single point of failure: Eliminated
 - Workflow count: <15 (from 50)
@@ -193,6 +212,7 @@ Produce:
 - [ ] Contribute lessons learned to open-source CI/CD community
 
 **Strategic Value:**
+
 - Differentiation: "We ship reliably even under degraded conditions"
 - Customer trust: "They practice what they preach (governance-first)"
 - Recruiting: "Mature engineering culture, not cowboy coding"
@@ -219,19 +239,23 @@ Produce:
 ### Mitigation of Negative Consequences
 
 **For "Higher Overhead":**
+
 - Templates and automation reduce documentation burden
 - This is a **feature, not a bug** - we WANT higher bar for manual releases
 
 **For "Approval Bottleneck":**
+
 - Define SLA for approval requests (4-hour response time during business hours)
 - Allow async approval via documented sign-off (don't require synchronous meeting)
 
 **For "Potential for Abuse":**
+
 - Strict requirement: Root cause MUST be external (vendor issue)
 - If root cause is internal (our code/config) → evidence-based path is **blocked**
 - Quarterly audit of all evidence-based releases (are we abusing the escape hatch?)
 
 **For "Documentation Debt":**
+
 - Add to quarterly engineering review: "Are evidence-based release templates current?"
 - Version control all templates (detect staleness via git blame)
 
@@ -244,10 +268,12 @@ Produce:
 **Approach:** Block all releases until GitHub Actions recovers
 
 **Pros:**
+
 - Simple (no new process)
 - No risk of shipping bad code if CI is actually failing
 
 **Cons:**
+
 - Unpredictable timelines (could be days)
 - Loss of release authority (vendor controls our GA schedule)
 - Opportunity cost (delay to market, competitor advantage)
@@ -261,10 +287,12 @@ Produce:
 **Approach:** Bypass CI checks entirely when blocked, ship and hope
 
 **Pros:**
+
 - Fast (no delays)
 - Simple (no documentation)
 
 **Cons:**
+
 - High risk (could ship broken code)
 - No audit trail (can't defend decision to auditors)
 - Precedent problem (team learns "checks are optional")
@@ -278,10 +306,12 @@ Produce:
 **Approach:** Run identical CI pipelines on GitHub Actions + GitLab CI + CircleCI, require 2/3 to pass
 
 **Pros:**
+
 - True resilience (no single vendor dependency)
 - Automated (no manual evidence gathering)
 
 **Cons:**
+
 - Expensive (3x CI cost)
 - Complex (maintain 3 identical pipelines)
 - Overhead (not needed for most releases)
@@ -295,10 +325,12 @@ Produce:
 **Approach:** Run all CI checks locally using `act` (GitHub Actions simulator) or Docker Compose
 
 **Pros:**
+
 - No vendor dependency
 - Fast feedback loop
 
 **Cons:**
+
 - Doesn't prove "works in production CI environment"
 - No audit trail (local execution not logged)
 - Difficult to replicate exact GitHub Actions environment
@@ -332,6 +364,7 @@ Produce:
 ## Related Decisions
 
 **Future ADRs:**
+
 - ADR-002: Self-Hosted Runner Strategy (to reduce primary signal dependency on GitHub)
 - ADR-003: Workflow Consolidation Plan (50 → 15 workflows)
 - ADR-004: Multi-Signal Release Gates for Customer Deployments
@@ -364,6 +397,7 @@ Produce:
 **Stakeholders:** Product Owner, CTO
 
 **Review Checklist:**
+
 - [ ] Are evidence-based release metrics within acceptable ranges?
 - [ ] Have we had any incidents due to evidence-based releases?
 - [ ] Are templates still current and complete?
@@ -378,11 +412,13 @@ Produce:
 # Evidence-Based Release Checklist
 
 ## Pre-Requisites
+
 - [ ] Automated CI signal (golden-main) is blocked OR has exceeded timeout threshold (>3 hours)
 - [ ] Root cause is EXTERNAL (vendor outage, not our code issue)
 - [ ] External evidence collected (vendor status page, community reports, timestamps)
 
 ## Documentation Required
+
 - [ ] Root cause analysis (1-2 pages)
 - [ ] Remediation evidence (PRs merged, commit SHAs, git status clean)
 - [ ] Forward-looking confidence case (why code is ready despite lack of CI signal)
@@ -391,11 +427,13 @@ Produce:
 - [ ] Audit-grade artifacts (timeline, approvals, references)
 
 ## Approvals Required
+
 - [ ] Engineering Lead reviewed and approved (technical risk assessment)
 - [ ] Product Owner reviewed and approved (business value vs. risk trade-off)
 - [ ] (Optional) CTO/CEO if risk rated "High" or "Critical"
 
 ## Risk Mitigations Implemented
+
 - [ ] Canary deployment configured (5-25% initial rollout)
 - [ ] Fast-revert procedure documented and tested (<5 min execution)
 - [ ] Enhanced monitoring enabled (first 24-48 hours)
@@ -403,6 +441,7 @@ Produce:
 - [ ] Stakeholder communication drafted (internal + external)
 
 ## Post-Release
+
 - [ ] Monitor canary metrics (error rate, latency, user feedback)
 - [ ] Gradual rollout (5% → 25% → 50% → 100% over 24-48 hours)
 - [ ] Retrospective scheduled (what went well, what to improve)
@@ -418,11 +457,13 @@ Produce:
 ### ✅ EXTERNAL (Evidence-Based Path Allowed)
 
 **Vendor Infrastructure Issues:**
+
 - GitHub Actions runner saturation (queue >500 runs, >2 hour wait times)
 - Cloud provider outage (AWS, GCP, Azure region down)
 - Third-party API degradation (Anthropic API, Neo4j Cloud)
 
 **Evidence Required:**
+
 - Vendor status page showing incident
 - Community reports (GitHub discussions, Reddit, Twitter)
 - Timestamps showing problem persists across multiple retry attempts
@@ -435,18 +476,21 @@ Produce:
 ### ❌ INTERNAL (BLOCK Release, Fix Required)
 
 **Code Issues:**
+
 - Test failures (legitimate bugs found by CI)
 - Build failures (compilation errors, missing dependencies)
 - Security scan failures (vulnerabilities detected)
 - Policy violations (OPA/Kyverno rules failed)
 
 **Configuration Issues:**
+
 - Workflow syntax errors (YAML parsing failures)
 - Invalid secrets/credentials
 - Incorrect environment variables
 - Missing required files
 
 **Evidence:**
+
 - CI logs show actual failures (not timeouts or "no runner available")
 - Failures are deterministic (reproduce locally)
 - No corresponding vendor status page incidents

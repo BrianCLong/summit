@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const fixturePath = path.join(__dirname, '../fixtures/small.json');
-const data = fs.readFileSync(fixturePath, 'utf8');
+const fixturePath = path.join(__dirname, "../fixtures/small.json");
+const data = fs.readFileSync(fixturePath, "utf8");
 const obj = JSON.parse(data);
 
-console.log('Running Serialization Benchmark...');
+console.log("Running Serialization Benchmark...");
 
 const iterations = 100000;
 const start = process.hrtime.bigint();
@@ -21,6 +21,6 @@ console.log(`JSON.stringify ${iterations} iterations: ${duration.toFixed(2)}ms`)
 console.log(`Average: ${(duration / iterations).toFixed(4)}ms/op`);
 
 if (duration > 5000) {
-  console.error('Performance Budget Exceeded! Limit: 5000ms');
+  console.error("Performance Budget Exceeded! Limit: 5000ms");
   process.exit(1);
 }

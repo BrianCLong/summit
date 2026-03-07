@@ -2,15 +2,15 @@
 
 ## Branch naming (prevents collisions + makes CI readable)
 
-* `ep1-policy/<task-slug>`
-* `ep2-provenance/<task-slug>`
-* `ep3-pipelines/<task-slug>`
-* `ep4-workbench-ui/<task-slug>`
-* `ep5-ai-ux/<task-slug>`
-* `ep6-maestro/<task-slug>`
-* `ep7-observability/<task-slug>`
-* `ep8-security-gates/<task-slug>`
-* `ep9-perf-reliability/<task-slug>`
+- `ep1-policy/<task-slug>`
+- `ep2-provenance/<task-slug>`
+- `ep3-pipelines/<task-slug>`
+- `ep4-workbench-ui/<task-slug>`
+- `ep5-ai-ux/<task-slug>`
+- `ep6-maestro/<task-slug>`
+- `ep7-observability/<task-slug>`
+- `ep8-security-gates/<task-slug>`
+- `ep9-perf-reliability/<task-slug>`
 
 ## PR title format
 

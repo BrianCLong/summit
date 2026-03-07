@@ -24,6 +24,7 @@ A high-visibility OpenClaw incident report on 2026-02-25 describes unauthorized 
 ## Operational implications for Summit
 
 ### MAESTRO Layers
+
 - Foundation
 - Agents
 - Tools
@@ -32,6 +33,7 @@ A high-visibility OpenClaw incident report on 2026-02-25 describes unauthorized 
 - Security
 
 ### Threats considered
+
 - Goal manipulation and prompt injection
 - Tool abuse through over-scoped credentials
 - Malicious or vulnerable extensions/skills
@@ -39,6 +41,7 @@ A high-visibility OpenClaw incident report on 2026-02-25 describes unauthorized 
 - Unbounded autonomous action on sensitive systems
 
 ### Mitigations
+
 - Enforce least-privilege tokens for all agent actions (email, messaging, filesystem, shell).
 - Require policy-as-code execution gates before destructive operations.
 - Add mandatory confirmation checkpoints for high-impact actions.

@@ -6,9 +6,7 @@ import { randomUUID } from "crypto";
 export class InMemoryMemoryBroker implements MemoryBroker {
   private records: MemoryRecord[] = [];
 
-  async remember(
-    recordData: Omit<MemoryRecord, "id" | "createdAt">
-  ): Promise<MemoryRecord> {
+  async remember(recordData: Omit<MemoryRecord, "id" | "createdAt">): Promise<MemoryRecord> {
     const decision = canWrite(recordData);
     if (!decision.allow) {
       throw new Error(`Write denied: ${decision.reason}`);

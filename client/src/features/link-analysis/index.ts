@@ -1,1 +1,1 @@
-export * from './LinkAnalysisCanvas';
+export * from "./LinkAnalysisCanvas";

@@ -1,10 +1,10 @@
-import React from 'react';
-import { Skeleton, Stack, Typography } from '@mui/material';
-import { useDB_ServerStatsQuery } from '../../generated/graphql';
+import React from "react";
+import { Skeleton, Stack, Typography } from "@mui/material";
+import { useDB_ServerStatsQuery } from "../../generated/graphql";
 
 export default function StatsOverview() {
   const { data, loading, error } = useDB_ServerStatsQuery({
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   const stats = data?.serverStats;
@@ -40,7 +40,7 @@ export default function StatsOverview() {
         <Typography variant="subtitle2" color="text.secondary">
           Uptime
         </Typography>
-        {renderValue(stats?.uptime || 'n/a')}
+        {renderValue(stats?.uptime || "n/a")}
       </div>
       {error && (
         <Typography variant="caption" color="error">

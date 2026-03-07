@@ -1,7 +1,7 @@
-import path from 'node:path';
-import { OrchestratorEventPayload } from '../types/index.js';
-import { EvidenceBundleWriter, EvidenceBundleConfig } from './bundle.js';
-import { PlanIR, TraceEvent } from './types.js';
+import path from "node:path";
+import { OrchestratorEventPayload } from "../types/index.js";
+import { EvidenceBundleWriter, EvidenceBundleConfig } from "./bundle.js";
+import { PlanIR, TraceEvent } from "./types.js";
 
 export interface EvidenceManagerConfig {
   enabled?: boolean;
@@ -30,7 +30,8 @@ export class EvidenceBundleManager {
       return undefined;
     }
 
-    const bundlesDir = this.config.bundlesDir ?? path.join(process.cwd(), 'artifacts', 'evidence-bundles');
+    const bundlesDir =
+      this.config.bundlesDir ?? path.join(process.cwd(), "artifacts", "evidence-bundles");
     const bundleConfig: EvidenceBundleConfig = {
       bundlesDir,
       bundleVersion: this.config.bundleVersion,
@@ -43,7 +44,7 @@ export class EvidenceBundleManager {
     this.bundles.set(runId, writer);
 
     await writer.record({
-      type: 'run:started',
+      type: "run:started",
       timestamp: this.now().toISOString(),
       run_id: runId,
       plan_id: plan.plan_id,
@@ -68,7 +69,7 @@ export class EvidenceBundleManager {
     }
 
     const traceEvent: TraceEvent = {
-      type: payload.event as TraceEvent['type'],
+      type: payload.event as TraceEvent["type"],
       timestamp: payload.timestamp.toISOString(),
       run_id: payload.sessionId,
       plan_id: payload.chainId,
@@ -80,14 +81,14 @@ export class EvidenceBundleManager {
     await writer.record(traceEvent);
   }
 
-  async finalize(runId: string, status: 'completed' | 'failed'): Promise<void> {
+  async finalize(runId: string, status: "completed" | "failed"): Promise<void> {
     const writer = this.bundles.get(runId);
     if (!writer) {
       return;
     }
 
     await writer.record({
-      type: status === 'completed' ? 'run:completed' : 'run:failed',
+      type: status === "completed" ? "run:completed" : "run:failed",
       timestamp: this.now().toISOString(),
       run_id: runId,
     });

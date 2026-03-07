@@ -3,7 +3,6 @@
 > Evidence-IDs: EVID-GOV-OSINT-POLICY-001
 > Status: active
 
-
 # OSINT Evidence & Governance Policy
 
 ## 1. Purpose
@@ -24,6 +23,7 @@ All OSINT documentation and evidence artifacts MUST contain the following header
 ## 3. The "No-Provenance" Veto
 
 No data shall be ingested into the `IntelGraph` without a verifiable lineage trace.
+
 - Automated agents MUST refuse ingestion if `source_id` is missing.
 - Enrichment services MUST flag any node lacking an upstream `Evidence-ID` as `UNVERIFIED_ARTIFACT`.
 
@@ -36,13 +36,13 @@ No data shall be ingested into the `IntelGraph` without a verifiable lineage tra
 
 ## 5. ILSA Compliance Levels
 
-| Level | Description | Requirement |
-| :--- | :--- | :--- |
-| **1** | Anonymous / Unverified | Source is unknown or unverified. High risk. |
-| **2** | Known Source / Low Confidence | Source is identified but reliability is low. |
-| **3** | Verified Source / Moderate Confidence | Source and collection method are verified. |
-| **4** | High Confidence / Multi-Source | Verified source with cross-correlation from multiple streams. |
-| **5** | Absolute / Deterministic | Source is authenticated; payload is cryptographically signed at origin. |
+| Level | Description                           | Requirement                                                             |
+| :---- | :------------------------------------ | :---------------------------------------------------------------------- |
+| **1** | Anonymous / Unverified                | Source is unknown or unverified. High risk.                             |
+| **2** | Known Source / Low Confidence         | Source is identified but reliability is low.                            |
+| **3** | Verified Source / Moderate Confidence | Source and collection method are verified.                              |
+| **4** | High Confidence / Multi-Source        | Verified source with cross-correlation from multiple streams.           |
+| **5** | Absolute / Deterministic              | Source is authenticated; payload is cryptographically signed at origin. |
 
 ## 6. Enforcement (CI/CD)
 

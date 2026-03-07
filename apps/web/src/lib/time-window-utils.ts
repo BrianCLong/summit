@@ -1,4 +1,4 @@
-import { TimeWindow, Granularity, TimezoneMode } from '../types/time-window';
+import { TimeWindow, Granularity, TimezoneMode } from '../types/time-window'
 
 /**
  * Normalizes a TimeWindow by:
@@ -14,24 +14,24 @@ export const normalizeWindow = (
   seq: number
 ): TimeWindow => {
   // 1. Ordering
-  let safeStart = Math.min(startMs, endMs);
-  let safeEnd = Math.max(startMs, endMs);
+  let safeStart = Math.min(startMs, endMs)
+  let safeEnd = Math.max(startMs, endMs)
 
   // 2. Rounding (simple implementation)
   const roundToGranularity = (ms: number, gran: Granularity): number => {
-    const date = new Date(ms);
+    const date = new Date(ms)
     if (gran === 'minute') {
-      date.setSeconds(0, 0);
+      date.setSeconds(0, 0)
     } else if (gran === 'hour') {
-      date.setMinutes(0, 0, 0);
+      date.setMinutes(0, 0, 0)
     } else if (gran === 'day') {
-      date.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0)
     }
-    return date.getTime();
-  };
+    return date.getTime()
+  }
 
-  safeStart = roundToGranularity(safeStart, granularity);
-  safeEnd = roundToGranularity(safeEnd, granularity);
+  safeStart = roundToGranularity(safeStart, granularity)
+  safeEnd = roundToGranularity(safeEnd, granularity)
 
   // Ensure end is at least one unit of granularity after start if they are equal?
   // Spec says "pick inclusive/exclusive". Let's assume inclusive start, exclusive end for now,
@@ -45,11 +45,11 @@ export const normalizeWindow = (
     granularity,
     tzMode,
     seq,
-  };
-};
+  }
+}
 
 export const createInitialTimeWindow = (): TimeWindow => {
-  const now = Date.now();
-  const oneHourAgo = now - 3600 * 1000;
-  return normalizeWindow(oneHourAgo, now, 'minute', 'UTC', 0);
-};
+  const now = Date.now()
+  const oneHourAgo = now - 3600 * 1000
+  return normalizeWindow(oneHourAgo, now, 'minute', 'UTC', 0)
+}

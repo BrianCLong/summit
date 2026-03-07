@@ -9,6 +9,7 @@ This document provides evidence of the Platform Stewardship system in action.
 **Command:** `npx tsx server/src/scripts/stewardship-review.ts`
 
 **Example Output:**
+
 ```
 [HIGH] COST Drift (daily_burn_rate): +50
 [MEDIUM] AGENT Drift (policy_override_rate): +0.04
@@ -17,6 +18,7 @@ This document provides evidence of the Platform Stewardship system in action.
 ## 2. Forecasts with Caveats
 
 **Example Output:**
+
 ```
 COST_GROWTH (30 days): 5000
    CI: [4500, 6000]
@@ -26,6 +28,7 @@ COST_GROWTH (30 days): 5000
 ## 3. Roadmap Pressure Signal
 
 **Example Output:**
+
 ```
 [Score: 85] COST_EFFICIENCY
    Reason: Accelerating burn rate and projected budget overrun.

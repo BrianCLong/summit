@@ -7,6 +7,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 ## Key Capabilities
 
 ### 🔍 Automated Metadata Discovery
+
 - Schema extraction from PostgreSQL, MySQL, MongoDB, Neo4j
 - File and object metadata harvesting from S3, HDFS
 - API endpoint discovery and profiling
@@ -16,6 +17,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Scheduled discovery jobs with error handling
 
 ### 📚 Business Glossary
+
 - Centralized term definitions with hierarchical taxonomy
 - Multi-step approval workflows
 - Version control for term definitions
@@ -25,6 +27,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Domain expertise capture
 
 ### 🔎 Semantic Search
+
 - Full-text search across all metadata
 - Faceted search and filtering (type, status, domain, owner)
 - Advanced relevance ranking with multiple signals
@@ -34,6 +37,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Context-aware natural language queries
 
 ### 📊 Data Lineage Visualization
+
 - End-to-end lineage tracking from source to consumption
 - Column-level lineage for critical fields
 - Interactive visual lineage graphs
@@ -44,6 +48,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Export capabilities for documentation
 
 ### ✅ Data Quality & Trust Indicators
+
 - Multi-dimensional quality scores (completeness, accuracy, consistency, timeliness)
 - Certification badges (Bronze, Silver, Gold, Platinum)
 - User ratings and reviews
@@ -53,6 +58,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Trust signals with verification tracking
 
 ### 📝 Collaborative Documentation
+
 - Rich text editing with Markdown and HTML support
 - Threaded comments and discussions
 - @mentions and real-time notifications
@@ -62,6 +68,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Co-authoring with real-time collaboration
 
 ### 📈 Analytics & Reporting
+
 - Catalog usage metrics and dashboards
 - Popular assets and trending data
 - Search analytics for optimization
@@ -71,6 +78,7 @@ The Summit Data Catalog is an enterprise-grade metadata management platform desi
 - Executive summaries with key insights
 
 ### 🔐 Access Control & Security
+
 - Role-based permissions (RBAC)
 - Row-level security for sensitive data
 - Attribute-based access control (ABAC)
@@ -197,33 +205,33 @@ pnpm dev
 ### API Usage
 
 ```typescript
-import { CatalogService } from '@intelgraph/data-catalog';
-import { SearchService } from '@intelgraph/semantic-search';
-import { DiscoveryJobRunner } from '@intelgraph/metadata-discovery';
+import { CatalogService } from "@intelgraph/data-catalog";
+import { SearchService } from "@intelgraph/semantic-search";
+import { DiscoveryJobRunner } from "@intelgraph/metadata-discovery";
 
 // Create and manage assets
 const catalogService = new CatalogService(catalogStore);
 const asset = await catalogService.createAsset({
   type: AssetType.TABLE,
-  name: 'customer_transactions',
-  displayName: 'Customer Transactions',
-  description: 'Daily customer transaction data',
-  owner: 'data-team@company.com',
+  name: "customer_transactions",
+  displayName: "Customer Transactions",
+  description: "Daily customer transaction data",
+  owner: "data-team@company.com",
   // ... other properties
 });
 
 // Search for assets
 const searchService = new SearchService(searchIndex);
 const results = await searchService.search({
-  query: 'customer',
+  query: "customer",
   filters: [
-    { field: 'type', operator: 'EQUALS', value: 'TABLE' },
-    { field: 'status', operator: 'EQUALS', value: 'ACTIVE' }
+    { field: "type", operator: "EQUALS", value: "TABLE" },
+    { field: "status", operator: "EQUALS", value: "ACTIVE" },
   ],
-  facets: ['domain', 'owner'],
-  sort: [{ field: '_score', direction: 'DESC' }],
+  facets: ["domain", "owner"],
+  sort: [{ field: "_score", direction: "DESC" }],
   offset: 0,
-  limit: 20
+  limit: 20,
 });
 
 // Run discovery job
@@ -236,6 +244,7 @@ await jobRunner.executeJob(jobConfig, sourceConfig);
 ### Endpoints
 
 **Catalog Management**
+
 ```
 GET    /api/v1/catalog/assets          # List assets
 GET    /api/v1/catalog/assets/:id      # Get asset
@@ -246,6 +255,7 @@ POST   /api/v1/catalog/assets/:id/tags # Add tags
 ```
 
 **Search**
+
 ```
 GET    /api/v1/search?q=query          # Simple search
 POST   /api/v1/search                  # Advanced search
@@ -253,6 +263,7 @@ GET    /api/v1/search/suggestions      # Get suggestions
 ```
 
 **Lineage**
+
 ```
 GET    /api/v1/lineage/:assetId                   # Get lineage
 GET    /api/v1/lineage/:assetId/upstream          # Upstream
@@ -262,6 +273,7 @@ GET    /api/v1/lineage/:assetId/column/:name      # Column lineage
 ```
 
 **Analytics**
+
 ```
 GET    /api/v1/analytics/summary       # Executive summary
 GET    /api/v1/analytics/coverage      # Coverage metrics
@@ -276,18 +288,18 @@ GET    /api/v1/analytics/trending      # Trending assets
 
 ## Features Comparison
 
-| Feature | Summit Catalog | Alation | Collibra | Atlan |
-|---------|---------------|---------|----------|-------|
-| Automated Discovery | ✅ | ✅ | ✅ | ✅ |
-| Column-Level Lineage | ✅ | ✅ | ✅ | ✅ |
-| Real-time Collaboration | ✅ | ⚠️ | ⚠️ | ✅ |
-| Intelligence-Focused | ✅ | ❌ | ❌ | ❌ |
-| Open Source Core | ✅ | ❌ | ❌ | ❌ |
-| Advanced Analytics | ✅ | ⚠️ | ⚠️ | ✅ |
-| Impact Analysis | ✅ | ✅ | ✅ | ✅ |
-| Semantic Search | ✅ | ✅ | ✅ | ✅ |
-| Classification Tags | ✅ | ✅ | ✅ | ✅ |
-| Custom Workflows | ✅ | ⚠️ | ✅ | ⚠️ |
+| Feature                 | Summit Catalog | Alation | Collibra | Atlan |
+| ----------------------- | -------------- | ------- | -------- | ----- |
+| Automated Discovery     | ✅             | ✅      | ✅       | ✅    |
+| Column-Level Lineage    | ✅             | ✅      | ✅       | ✅    |
+| Real-time Collaboration | ✅             | ⚠️      | ⚠️       | ✅    |
+| Intelligence-Focused    | ✅             | ❌      | ❌       | ❌    |
+| Open Source Core        | ✅             | ❌      | ❌       | ❌    |
+| Advanced Analytics      | ✅             | ⚠️      | ⚠️       | ✅    |
+| Impact Analysis         | ✅             | ✅      | ✅       | ✅    |
+| Semantic Search         | ✅             | ✅      | ✅       | ✅    |
+| Classification Tags     | ✅             | ✅      | ✅       | ✅    |
+| Custom Workflows        | ✅             | ⚠️      | ✅       | ⚠️    |
 
 ✅ Full Support | ⚠️ Partial Support | ❌ Not Available
 

@@ -2,7 +2,7 @@ export enum ConflictState {
   NORMAL = "NORMAL",
   ELEVATED = "ELEVATED",
   CRISIS = "CRISIS",
-  LOCKDOWN = "LOCKDOWN"
+  LOCKDOWN = "LOCKDOWN",
 }
 
 export class ConflictModeController {

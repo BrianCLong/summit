@@ -8,7 +8,7 @@
  * @see https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 // ============================================================================
 // Signal Schema Types
@@ -49,24 +49,24 @@ export interface CampaignSignal {
 }
 
 export enum SignalType {
-  NARRATIVE = 'NARRATIVE',
-  CLAIM = 'CLAIM',
-  MEDIA_ARTIFACT = 'MEDIA_ARTIFACT',
-  URL = 'URL',
-  ACCOUNT_HANDLE = 'ACCOUNT_HANDLE',
-  HASHTAG = 'HASHTAG',
-  COORDINATION_PATTERN = 'COORDINATION_PATTERN',
-  AMPLIFICATION_NETWORK = 'AMPLIFICATION_NETWORK',
-  BOT_NETWORK = 'BOT_NETWORK',
-  SYNTHETIC_MEDIA = 'SYNTHETIC_MEDIA',
+  NARRATIVE = "NARRATIVE",
+  CLAIM = "CLAIM",
+  MEDIA_ARTIFACT = "MEDIA_ARTIFACT",
+  URL = "URL",
+  ACCOUNT_HANDLE = "ACCOUNT_HANDLE",
+  HASHTAG = "HASHTAG",
+  COORDINATION_PATTERN = "COORDINATION_PATTERN",
+  AMPLIFICATION_NETWORK = "AMPLIFICATION_NETWORK",
+  BOT_NETWORK = "BOT_NETWORK",
+  SYNTHETIC_MEDIA = "SYNTHETIC_MEDIA",
 }
 
 export enum PrivacyLevel {
-  PUBLIC = 'PUBLIC', // Can be shared openly
-  HASHED = 'HASHED', // Only hash shared, not content
-  ENCRYPTED = 'ENCRYPTED', // Encrypted for MPC computation
-  AGGREGATE_ONLY = 'AGGREGATE_ONLY', // Only aggregate stats shared
-  INTERNAL_ONLY = 'INTERNAL_ONLY', // Never shared externally
+  PUBLIC = "PUBLIC", // Can be shared openly
+  HASHED = "HASHED", // Only hash shared, not content
+  ENCRYPTED = "ENCRYPTED", // Encrypted for MPC computation
+  AGGREGATE_ONLY = "AGGREGATE_ONLY", // Only aggregate stats shared
+  INTERNAL_ONLY = "INTERNAL_ONLY", // Never shared externally
 }
 
 /**
@@ -104,7 +104,7 @@ export interface NarrativeIndicator {
 }
 
 export interface MediaIndicator {
-  mediaType: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
+  mediaType: "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT";
   perceptualHash: string; // pHash for images/videos
   contentHash: string; // SHA-256 of content
   dimensions?: { width: number; height: number };
@@ -128,8 +128,8 @@ export interface URLIndicator {
 export interface AccountIndicator {
   platformHash: string; // Hash of platform name
   handleHash: string; // Hash of account handle
-  accountAgeRange: 'NEW' | 'RECENT' | 'ESTABLISHED' | 'OLD';
-  followerRange: 'MICRO' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'MASSIVE';
+  accountAgeRange: "NEW" | "RECENT" | "ESTABLISHED" | "OLD";
+  followerRange: "MICRO" | "SMALL" | "MEDIUM" | "LARGE" | "MASSIVE";
   behavioralSignature: BehavioralSignature;
   networkPosition?: NetworkPosition;
 }
@@ -145,14 +145,14 @@ export interface CoordinationIndicator {
 }
 
 export enum CoordinationPatternType {
-  SYNCHRONIZED_POSTING = 'SYNCHRONIZED_POSTING',
-  COPY_PASTE_CAMPAIGN = 'COPY_PASTE_CAMPAIGN',
-  HASHTAG_HIJACKING = 'HASHTAG_HIJACKING',
-  BRIGADING = 'BRIGADING',
-  ASTROTURFING = 'ASTROTURFING',
-  BOT_AMPLIFICATION = 'BOT_AMPLIFICATION',
-  SOCKPUPPET_NETWORK = 'SOCKPUPPET_NETWORK',
-  INAUTHENTIC_BEHAVIOR = 'INAUTHENTIC_BEHAVIOR',
+  SYNCHRONIZED_POSTING = "SYNCHRONIZED_POSTING",
+  COPY_PASTE_CAMPAIGN = "COPY_PASTE_CAMPAIGN",
+  HASHTAG_HIJACKING = "HASHTAG_HIJACKING",
+  BRIGADING = "BRIGADING",
+  ASTROTURFING = "ASTROTURFING",
+  BOT_AMPLIFICATION = "BOT_AMPLIFICATION",
+  SOCKPUPPET_NETWORK = "SOCKPUPPET_NETWORK",
+  INAUTHENTIC_BEHAVIOR = "INAUTHENTIC_BEHAVIOR",
 }
 
 // ============================================================================
@@ -169,12 +169,12 @@ export interface SignalProvenance {
 }
 
 export enum ProvenanceSourceType {
-  DIRECT_OBSERVATION = 'DIRECT_OBSERVATION',
-  PLATFORM_API = 'PLATFORM_API',
-  CROWDSOURCED = 'CROWDSOURCED',
-  PARTNER_FEED = 'PARTNER_FEED',
-  AUTOMATED_DETECTION = 'AUTOMATED_DETECTION',
-  INTELLIGENCE_REPORT = 'INTELLIGENCE_REPORT',
+  DIRECT_OBSERVATION = "DIRECT_OBSERVATION",
+  PLATFORM_API = "PLATFORM_API",
+  CROWDSOURCED = "CROWDSOURCED",
+  PARTNER_FEED = "PARTNER_FEED",
+  AUTOMATED_DETECTION = "AUTOMATED_DETECTION",
+  INTELLIGENCE_REPORT = "INTELLIGENCE_REPORT",
 }
 
 export interface DataQualityMetrics {
@@ -186,7 +186,7 @@ export interface DataQualityMetrics {
 
 export interface Attestation {
   attesterId: string;
-  attesterType: 'HUMAN' | 'AUTOMATED' | 'HYBRID';
+  attesterType: "HUMAN" | "AUTOMATED" | "HYBRID";
   timestamp: Date;
   confidence: number;
   signature: string;
@@ -248,14 +248,14 @@ export interface C2PAIngredient {
   format: string;
   documentId?: string;
   instanceId: string;
-  relationship: 'parentOf' | 'componentOf' | 'inputTo';
+  relationship: "parentOf" | "componentOf" | "inputTo";
   manifest?: C2PAManifest;
 }
 
 export interface C2PAAssertion {
   label: string;
   data: Record<string, unknown>;
-  kind: 'Json' | 'Cbor' | 'Binary' | 'Uri';
+  kind: "Json" | "Cbor" | "Binary" | "Uri";
 }
 
 export interface C2PASignature {
@@ -278,31 +278,31 @@ export interface ChannelMetadata {
 }
 
 export enum ChannelType {
-  SOCIAL_MEDIA = 'SOCIAL_MEDIA',
-  MESSAGING_APP = 'MESSAGING_APP',
-  NEWS_SITE = 'NEWS_SITE',
-  BLOG = 'BLOG',
-  FORUM = 'FORUM',
-  VIDEO_PLATFORM = 'VIDEO_PLATFORM',
-  PODCAST = 'PODCAST',
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  OFFLINE = 'OFFLINE',
+  SOCIAL_MEDIA = "SOCIAL_MEDIA",
+  MESSAGING_APP = "MESSAGING_APP",
+  NEWS_SITE = "NEWS_SITE",
+  BLOG = "BLOG",
+  FORUM = "FORUM",
+  VIDEO_PLATFORM = "VIDEO_PLATFORM",
+  PODCAST = "PODCAST",
+  EMAIL = "EMAIL",
+  SMS = "SMS",
+  OFFLINE = "OFFLINE",
 }
 
 export enum ReachCategory {
-  MICRO = 'MICRO', // < 1K
-  SMALL = 'SMALL', // 1K - 10K
-  MEDIUM = 'MEDIUM', // 10K - 100K
-  LARGE = 'LARGE', // 100K - 1M
-  MASSIVE = 'MASSIVE', // 1M+
+  MICRO = "MICRO", // < 1K
+  SMALL = "SMALL", // 1K - 10K
+  MEDIUM = "MEDIUM", // 10K - 100K
+  LARGE = "LARGE", // 100K - 1M
+  MASSIVE = "MASSIVE", // 1M+
 }
 
 export interface AudienceProfile {
   geographicDistribution: Record<string, number>; // region -> percentage
   demographicIndicators: Record<string, number>;
   interestCategories: string[];
-  engagementLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  engagementLevel: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export interface CoordinationFeature {
@@ -337,7 +337,7 @@ export interface CertificateInfo {
 
 export interface ExtractedEntity {
   text: string;
-  type: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'EVENT' | 'PRODUCT' | 'OTHER';
+  type: "PERSON" | "ORGANIZATION" | "LOCATION" | "EVENT" | "PRODUCT" | "OTHER";
   confidence: number;
   entityHash?: string;
 }
@@ -378,10 +378,10 @@ export interface FederationParticipant {
 }
 
 export enum ParticipantStatus {
-  ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  REVOKED = 'REVOKED',
+  ACTIVE = "ACTIVE",
+  SUSPENDED = "SUSPENDED",
+  PENDING_APPROVAL = "PENDING_APPROVAL",
+  REVOKED = "REVOKED",
 }
 
 export interface ParticipantCapability {
@@ -458,7 +458,7 @@ export interface CampaignCluster {
 
   // Trend analysis
   velocityMetrics: VelocityMetrics;
-  growthTrajectory: 'EMERGING' | 'GROWING' | 'STABLE' | 'DECLINING' | 'DORMANT';
+  growthTrajectory: "EMERGING" | "GROWING" | "STABLE" | "DECLINING" | "DORMANT";
 
   // Federation metadata
   crossTenantConfidence: number; // Confidence boost from multiple orgs
@@ -466,20 +466,20 @@ export interface CampaignCluster {
 }
 
 export enum ClusterStatus {
-  EMERGING = 'EMERGING',
-  ACTIVE = 'ACTIVE',
-  PEAK = 'PEAK',
-  DECLINING = 'DECLINING',
-  DORMANT = 'DORMANT',
-  RESOLVED = 'RESOLVED',
+  EMERGING = "EMERGING",
+  ACTIVE = "ACTIVE",
+  PEAK = "PEAK",
+  DECLINING = "DECLINING",
+  DORMANT = "DORMANT",
+  RESOLVED = "RESOLVED",
 }
 
 export enum ThreatLevel {
-  INFORMATIONAL = 'INFORMATIONAL',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
+  INFORMATIONAL = "INFORMATIONAL",
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 export interface NarrativeClusterSummary {
@@ -506,7 +506,7 @@ export interface GeographicSpread {
 
 export interface AttributionHypothesis {
   hypothesisId: string;
-  actorType: 'STATE' | 'NON_STATE' | 'COMMERCIAL' | 'UNKNOWN';
+  actorType: "STATE" | "NON_STATE" | "COMMERCIAL" | "UNKNOWN";
   countryCode?: string;
   confidence: number;
   supportingIndicators: string[];
@@ -522,7 +522,7 @@ export interface VelocityMetrics {
 }
 
 export interface PrivacyPreservedMetrics {
-  aggregationMethod: 'DIFFERENTIAL_PRIVACY' | 'SECURE_AGGREGATION' | 'MPC';
+  aggregationMethod: "DIFFERENTIAL_PRIVACY" | "SECURE_AGGREGATION" | "MPC";
   epsilon?: number; // Differential privacy parameter
   noiseAdded: boolean;
   minimumThreshold: number; // Minimum signals before aggregation
@@ -576,46 +576,46 @@ export interface FederatedAlert {
 }
 
 export enum AlertType {
-  CAMPAIGN_EMERGING = 'CAMPAIGN_EMERGING',
-  CAMPAIGN_ESCALATING = 'CAMPAIGN_ESCALATING',
-  CROSS_TENANT_SPIKE = 'CROSS_TENANT_SPIKE',
-  COORDINATION_DETECTED = 'COORDINATION_DETECTED',
-  NARRATIVE_SHIFT = 'NARRATIVE_SHIFT',
-  SYNTHETIC_MEDIA_SURGE = 'SYNTHETIC_MEDIA_SURGE',
-  ATTRIBUTION_UPDATE = 'ATTRIBUTION_UPDATE',
-  THRESHOLD_BREACH = 'THRESHOLD_BREACH',
+  CAMPAIGN_EMERGING = "CAMPAIGN_EMERGING",
+  CAMPAIGN_ESCALATING = "CAMPAIGN_ESCALATING",
+  CROSS_TENANT_SPIKE = "CROSS_TENANT_SPIKE",
+  COORDINATION_DETECTED = "COORDINATION_DETECTED",
+  NARRATIVE_SHIFT = "NARRATIVE_SHIFT",
+  SYNTHETIC_MEDIA_SURGE = "SYNTHETIC_MEDIA_SURGE",
+  ATTRIBUTION_UPDATE = "ATTRIBUTION_UPDATE",
+  THRESHOLD_BREACH = "THRESHOLD_BREACH",
 }
 
 export enum AlertSeverity {
-  INFO = 'INFO',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
+  INFO = "INFO",
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 export enum AlertPriority {
-  P4 = 'P4', // Low
-  P3 = 'P3', // Normal
-  P2 = 'P2', // High
-  P1 = 'P1', // Urgent
-  P0 = 'P0', // Emergency
+  P4 = "P4", // Low
+  P3 = "P3", // Normal
+  P2 = "P2", // High
+  P1 = "P1", // Urgent
+  P0 = "P0", // Emergency
 }
 
 export enum AlertStatus {
-  NEW = 'NEW',
-  ACKNOWLEDGED = 'ACKNOWLEDGED',
-  INVESTIGATING = 'INVESTIGATING',
-  MITIGATING = 'MITIGATING',
-  RESOLVED = 'RESOLVED',
-  FALSE_POSITIVE = 'FALSE_POSITIVE',
+  NEW = "NEW",
+  ACKNOWLEDGED = "ACKNOWLEDGED",
+  INVESTIGATING = "INVESTIGATING",
+  MITIGATING = "MITIGATING",
+  RESOLVED = "RESOLVED",
+  FALSE_POSITIVE = "FALSE_POSITIVE",
 }
 
 export interface TriggerCondition {
   conditionType: string;
   threshold: number;
   actualValue: number;
-  direction: 'ABOVE' | 'BELOW' | 'EQUALS';
+  direction: "ABOVE" | "BELOW" | "EQUALS";
   windowMinutes: number;
 }
 
@@ -623,7 +623,7 @@ export interface SpreaderSummary {
   accountHash: string;
   platform: string;
   reachCategory: ReachCategory;
-  activityLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  activityLevel: "LOW" | "MEDIUM" | "HIGH";
   suspicionScore: number; // 0-1
   publicArtifacts: string[]; // URLs to public posts
 }
@@ -632,7 +632,7 @@ export interface ChannelDiffusionSummary {
   channels: Record<string, ChannelMetrics>;
   primaryChannel: string;
   crossPlatformScore: number;
-  diffusionPattern: 'ORGANIC' | 'COORDINATED' | 'MIXED';
+  diffusionPattern: "ORGANIC" | "COORDINATED" | "MIXED";
 }
 
 export interface ChannelMetrics {
@@ -652,15 +652,15 @@ export interface RecommendedAction {
 }
 
 export enum ActionType {
-  MONITOR = 'MONITOR',
-  INVESTIGATE = 'INVESTIGATE',
-  ESCALATE = 'ESCALATE',
-  COUNTER_NARRATIVE = 'COUNTER_NARRATIVE',
-  PLATFORM_REPORT = 'PLATFORM_REPORT',
-  PREBUNK = 'PREBUNK',
-  INOCULATION = 'INOCULATION',
-  STAKEHOLDER_NOTIFY = 'STAKEHOLDER_NOTIFY',
-  PUBLIC_STATEMENT = 'PUBLIC_STATEMENT',
+  MONITOR = "MONITOR",
+  INVESTIGATE = "INVESTIGATE",
+  ESCALATE = "ESCALATE",
+  COUNTER_NARRATIVE = "COUNTER_NARRATIVE",
+  PLATFORM_REPORT = "PLATFORM_REPORT",
+  PREBUNK = "PREBUNK",
+  INOCULATION = "INOCULATION",
+  STAKEHOLDER_NOTIFY = "STAKEHOLDER_NOTIFY",
+  PUBLIC_STATEMENT = "PUBLIC_STATEMENT",
 }
 
 /**
@@ -697,7 +697,7 @@ export interface NarrativeIntelligence {
 
 export interface FactCheck {
   claim: string;
-  verdict: 'TRUE' | 'FALSE' | 'MISLEADING' | 'MISSING_CONTEXT' | 'UNVERIFIED';
+  verdict: "TRUE" | "FALSE" | "MISLEADING" | "MISSING_CONTEXT" | "UNVERIFIED";
   explanation: string;
   sources: string[];
 }
@@ -715,7 +715,7 @@ export interface SourceAssessment {
 }
 
 export interface CommsPlaybook {
-  strategy: 'IGNORE' | 'MONITOR' | 'PREBUNK' | 'DEBUNK' | 'COUNTER_NARRATIVE';
+  strategy: "IGNORE" | "MONITOR" | "PREBUNK" | "DEBUNK" | "COUNTER_NARRATIVE";
   keyMessages: string[];
   talkingPoints: string[];
   avoidTopics: string[];
@@ -724,7 +724,7 @@ export interface CommsPlaybook {
 }
 
 export interface TimingRecommendation {
-  urgency: 'IMMEDIATE' | 'WITHIN_HOURS' | 'WITHIN_DAYS' | 'ONGOING';
+  urgency: "IMMEDIATE" | "WITHIN_HOURS" | "WITHIN_DAYS" | "ONGOING";
   optimalWindows: { start: Date; end: Date }[];
   avoidWindows: { start: Date; end: Date; reason: string }[];
 }
@@ -771,7 +771,7 @@ export interface KPI {
 export interface AlertResolution {
   resolvedAt: Date;
   resolvedBy: string;
-  resolutionType: 'MITIGATED' | 'EXPIRED' | 'FALSE_POSITIVE' | 'ESCALATED';
+  resolutionType: "MITIGATED" | "EXPIRED" | "FALSE_POSITIVE" | "ESCALATED";
   notes: string;
   lessonsLearned?: string[];
 }
@@ -794,7 +794,7 @@ export interface PrivacyBudget {
   usedEpsilon: number;
   totalDelta: number;
   usedDelta: number;
-  resetPeriod: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  resetPeriod: "DAILY" | "WEEKLY" | "MONTHLY";
   lastResetAt: Date;
   nextResetAt: Date;
 }
@@ -803,7 +803,7 @@ export interface DifferentialPrivacyConfig {
   epsilon: number;
   delta: number;
   sensitivityBound: number;
-  noiseType: 'LAPLACE' | 'GAUSSIAN';
+  noiseType: "LAPLACE" | "GAUSSIAN";
   clippingNorm?: number;
 }
 
@@ -811,11 +811,11 @@ export interface SecureAggregationConfig {
   minimumParticipants: number;
   threshold: number;
   roundTimeout: number;
-  protocol: 'SECAGG' | 'SECAGG_PLUS';
+  protocol: "SECAGG" | "SECAGG_PLUS";
 }
 
 export interface MPCConfig {
-  protocol: 'SHAMIR' | 'BGW' | 'GMW' | 'SPDZ';
+  protocol: "SHAMIR" | "BGW" | "GMW" | "SPDZ";
   threshold: number;
   totalParties: number;
   securityParameter: number;
@@ -899,7 +899,7 @@ export function calculateThreatLevel(
   signalCount: number,
   orgCount: number,
   velocityMetrics: VelocityMetrics,
-  coordinationStrength: number,
+  coordinationStrength: number
 ): ThreatLevel {
   // Composite threat scoring
   let score = 0;
@@ -933,7 +933,7 @@ export function calculateThreatLevel(
 export function calculateAlertPriority(
   severity: AlertSeverity,
   crossTenantSignal: boolean,
-  orgCount: number,
+  orgCount: number
 ): AlertPriority {
   let priorityScore = 0;
 

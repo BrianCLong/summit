@@ -6,12 +6,14 @@
 - **Status:** Disclosed for prior art; designed for repeatable, deterministic mirrors
 
 ## Objectives
+
 - Preserve supply-chain integrity in disconnected environments.
 - Guarantee reproducible installs via content-hash pinning and deterministic manifests.
 - Provide fast first-boot by priming caches with the minimal working set plus warm-path artifacts.
 - Enable atomic rollback to a previously signed snapshot.
 
 ## Source Snapshot and Manifesting
+
 1. **Harvest:** Pull artifacts from allowed upstreams (npm registry, OCI registry, OS repos) while online.
 2. **Fingerprint:** For each artifact `a`, compute `sha256(a)` and store as `H_a`.
 3. **Snapshot manifest:** Build `manifest.json` containing `{name, version, type, source, sha256, size, licenses, build-meta}`.
@@ -19,6 +21,7 @@
 5. **Merkle root:** Compute `root = Merkle(manifest_entries)` to anchor signatures and rollback pointers.
 
 ## Signing Pipeline
+
 ```
 for artifact in harvest:
   cosign sign --key airgap.key artifact
@@ -26,9 +29,11 @@ for artifact in harvest:
 cosign sign-blob --key airgap.key manifest.json
 cosign sign-blob --key airgap.key merkle-root.txt
 ```
+
 - Keys are kept inside an HSM-backed signer. Offline site verifies using public key + transparency log copy (rekor mirror) shipped with the bundle.
 
 ## Cache Priming Algorithm
+
 We precompute the warm set by tracing dependency graphs and install telemetry from connected staging:
 
 ```
@@ -38,10 +43,12 @@ for pkg in promoted:
   stage_to_cache(pkg)
   record_cache_index(pkg, sha256(pkg))
 ```
+
 - `stage_to_cache` stores tarballs/layers inside `/var/lib/airgap-cache` with deterministic paths `<type>/<name>/<version>/<sha256>/payload`.
 - Hot OCI layers are converted to oci-archive format and indexed by digest for `ctr image import` consumption.
 
 ## Air-Gap Deployment Workflow
+
 1. Transfer bundle via encrypted drive with `manifest.json`, `merkle-root.txt`, signatures, attestations, and caches.
 2. On arrival, verify chain:
    - `cosign verify-blob` for manifest and Merkle root.
@@ -54,6 +61,7 @@ for pkg in promoted:
 4. Lock registry to read-only; enable periodic integrity sweeps: `cron: merkle-verify && cosign verify` every 6 hours.
 
 ## Rollback Safety
+
 - Each snapshot is stored as `{manifest, signatures, merkle-root, cache}` under `releases/<timestamp>`.
 - To rollback, select prior release `r` and execute:
 
@@ -67,9 +75,11 @@ re-enable_cosign_policy(r)
 - Rollback is atomic because registries read from an immutable, content-addressed cache path; symlink flips are single syscalls.
 
 ## Drift and Tamper Detection
+
 - A diff job computes `Δ = manifest_active ⊕ manifest_expected`; non-empty `Δ` triggers quarantine.
 - Randomized byte-range sampling of cached blobs (5% per sweep) ensures large artifacts are not subtly corrupted.
 - Provenance attestations are compared against SBOM expectations to detect build drift.
 
 ## Prior Art Claim
+
 This publication discloses deterministic manifest generation, HSM-backed cosign signing of both artifacts and Merkle roots, cache priming via telemetry-derived warm sets, and atomic symlink-based rollbacks for offline mirrors. Archiving here establishes prior art for equivalent offline mirror orchestration schemes in air-gapped deployments.

@@ -25,15 +25,15 @@ explicit evidence IDs and deny-by-default policies.
 
 ## Evidence Map
 
-| Evidence ID | Focus |
-| --- | --- |
-| EVD-REPLITAGENT-FOUND-001 | Evidence core presence + schema sanity |
-| EVD-REPLITAGENT-POLICY-001 | Deny-by-default enforcement |
-| EVD-REPLITAGENT-INTEG-001 | Integration registry behavior |
-| EVD-REPLITAGENT-AUTO-001 | Autonomy budget fail-closed |
-| EVD-REPLITAGENT-SCAFF-001 | Scaffold gating + determinism |
-| EVD-REPLITAGENT-REPAIR-001 | Repair gating + constrained output |
-| EVD-REPLITAGENT-AUTOM-001 | Automations gating + metadata |
+| Evidence ID                | Focus                                  |
+| -------------------------- | -------------------------------------- |
+| EVD-REPLITAGENT-FOUND-001  | Evidence core presence + schema sanity |
+| EVD-REPLITAGENT-POLICY-001 | Deny-by-default enforcement            |
+| EVD-REPLITAGENT-INTEG-001  | Integration registry behavior          |
+| EVD-REPLITAGENT-AUTO-001   | Autonomy budget fail-closed            |
+| EVD-REPLITAGENT-SCAFF-001  | Scaffold gating + determinism          |
+| EVD-REPLITAGENT-REPAIR-001 | Repair gating + constrained output     |
+| EVD-REPLITAGENT-AUTOM-001  | Automations gating + metadata          |
 
 ## Governance Alignment
 

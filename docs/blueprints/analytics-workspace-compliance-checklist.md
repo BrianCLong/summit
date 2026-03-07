@@ -9,6 +9,7 @@
 This checklist defines the compliance requirements for analytics workspaces in the Safe Analytics Workbench. A workspace is considered **compliant** if it meets all REQUIRED items and at least 80% of RECOMMENDED items.
 
 Use this checklist when:
+
 - Creating a new analytics workspace
 - Conducting periodic compliance reviews
 - Auditing workspace configurations
@@ -18,11 +19,11 @@ Use this checklist when:
 
 ## Compliance Tiers
 
-| Tier | Requirements | Review Frequency |
-|------|-------------|------------------|
-| **Standard** | All REQUIRED items | Quarterly |
-| **Enhanced** | All REQUIRED + 80% RECOMMENDED | Monthly |
-| **Restricted** | All items including RESTRICTED | Weekly |
+| Tier           | Requirements                   | Review Frequency |
+| -------------- | ------------------------------ | ---------------- |
+| **Standard**   | All REQUIRED items             | Quarterly        |
+| **Enhanced**   | All REQUIRED + 80% RECOMMENDED | Monthly          |
+| **Restricted** | All items including RESTRICTED | Weekly           |
 
 ---
 
@@ -291,12 +292,12 @@ For RESTRICTED workspaces, all RESTRICTED items are treated as REQUIRED.
 
 ## Non-Compliance Consequences
 
-| Severity | Example | Action |
-|----------|---------|--------|
-| **Critical** | PII exported without approval | Immediate workspace suspension |
-| **High** | Audit logging disabled | 24-hour remediation or suspension |
-| **Medium** | Missing documentation | 7-day remediation window |
-| **Low** | Training not current | 30-day remediation window |
+| Severity     | Example                       | Action                            |
+| ------------ | ----------------------------- | --------------------------------- |
+| **Critical** | PII exported without approval | Immediate workspace suspension    |
+| **High**     | Audit logging disabled        | 24-hour remediation or suspension |
+| **Medium**   | Missing documentation         | 7-day remediation window          |
+| **Low**      | Training not current          | 30-day remediation window         |
 
 ---
 
@@ -326,6 +327,6 @@ All exceptions must be logged and reviewed quarterly.
 
 ## Changelog
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-12-07 | Data Governance | Initial version |
+| Version | Date       | Author          | Changes         |
+| ------- | ---------- | --------------- | --------------- |
+| 1.0.0   | 2025-12-07 | Data Governance | Initial version |

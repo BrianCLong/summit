@@ -5,19 +5,13 @@
  * Overview of labeling tasks and performance metrics.
  */
 
-import React from 'react';
-import {
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
-import { useMyJobs, useMyProfile, useAnnotatorLeaderboard } from '../hooks/useApi';
-import { CheckCircle, Clock, AlertCircle, Trophy, Target, Zap } from 'lucide-react';
-import { cn } from '../utils/cn';
+import React from "react";
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useMyJobs, useMyProfile, useAnnotatorLeaderboard } from "../hooks/useApi";
+import { CheckCircle, Clock, AlertCircle, Trophy, Target, Zap } from "lucide-react";
+import { cn } from "../utils/cn";
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 export function DashboardPage() {
   const { data: jobs, isLoading: jobsLoading } = useMyJobs();
@@ -27,9 +21,9 @@ export function DashboardPage() {
   const jobStats = React.useMemo(() => {
     if (!jobs) return { queued: 0, inProgress: 0, completed: 0, total: 0 };
     return {
-      queued: jobs.filter((j) => j.status === 'queued' || j.status === 'assigned').length,
-      inProgress: jobs.filter((j) => j.status === 'in_progress').length,
-      completed: jobs.filter((j) => ['submitted', 'approved'].includes(j.status)).length,
+      queued: jobs.filter((j) => j.status === "queued" || j.status === "assigned").length,
+      inProgress: jobs.filter((j) => j.status === "in_progress").length,
+      completed: jobs.filter((j) => ["submitted", "approved"].includes(j.status)).length,
       total: jobs.length,
     };
   }, [jobs]);
@@ -41,7 +35,7 @@ export function DashboardPage() {
       counts[job.taskType] = (counts[job.taskType] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({
-      name: name.replace(/_/g, ' '),
+      name: name.replace(/_/g, " "),
       value,
     }));
   }, [jobs]);
@@ -60,12 +54,7 @@ export function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatCard
-          title="Queued Tasks"
-          value={jobStats.queued}
-          icon={Clock}
-          color="text-blue-500"
-        />
+        <StatCard title="Queued Tasks" value={jobStats.queued} icon={Clock} color="text-blue-500" />
         <StatCard
           title="In Progress"
           value={jobStats.inProgress}
@@ -126,15 +115,10 @@ export function DashboardPage() {
                   outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} (${(percent * 100).toFixed(0)}%)`
-                  }
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                 >
                   {taskTypeData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -155,38 +139,47 @@ export function DashboardPage() {
           </h3>
           {leaderboard && leaderboard.length > 0 ? (
             <div className="space-y-3">
-              {leaderboard.slice(0, 5).map((annotator: { rank: number; displayName: string; performanceMetrics: { totalLabeled: number } }, index: number) => (
-                <div
-                  key={annotator.rank}
-                  className={cn(
-                    'flex items-center justify-between rounded-lg p-3',
-                    index === 0 ? 'bg-yellow-500/10' : 'bg-muted/50'
-                  )}
-                >
-                  <div className="flex items-center">
-                    <span
+              {leaderboard
+                .slice(0, 5)
+                .map(
+                  (
+                    annotator: {
+                      rank: number;
+                      displayName: string;
+                      performanceMetrics: { totalLabeled: number };
+                    },
+                    index: number
+                  ) => (
+                    <div
+                      key={annotator.rank}
                       className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full font-bold',
-                        index === 0
-                          ? 'bg-yellow-500 text-white'
-                          : index === 1
-                          ? 'bg-gray-400 text-white'
-                          : index === 2
-                          ? 'bg-amber-600 text-white'
-                          : 'bg-muted text-muted-foreground'
+                        "flex items-center justify-between rounded-lg p-3",
+                        index === 0 ? "bg-yellow-500/10" : "bg-muted/50"
                       )}
                     >
-                      {annotator.rank}
-                    </span>
-                    <span className="ml-3 font-medium">
-                      {annotator.displayName}
-                    </span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {annotator.performanceMetrics.totalLabeled.toLocaleString()} labels
-                  </span>
-                </div>
-              ))}
+                      <div className="flex items-center">
+                        <span
+                          className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-full font-bold",
+                            index === 0
+                              ? "bg-yellow-500 text-white"
+                              : index === 1
+                                ? "bg-gray-400 text-white"
+                                : index === 2
+                                  ? "bg-amber-600 text-white"
+                                  : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {annotator.rank}
+                        </span>
+                        <span className="ml-3 font-medium">{annotator.displayName}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {annotator.performanceMetrics.totalLabeled.toLocaleString()} labels
+                      </span>
+                    </div>
+                  )
+                )}
             </div>
           ) : (
             <div className="flex h-[200px] items-center justify-center text-muted-foreground">
@@ -242,7 +235,7 @@ function StatCard({
           <p className="text-sm text-muted-foreground">{title}</p>
           <p className="text-3xl font-bold">{value}</p>
         </div>
-        <Icon className={cn('h-8 w-8', color)} />
+        <Icon className={cn("h-8 w-8", color)} />
       </div>
     </div>
   );

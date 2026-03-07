@@ -3,7 +3,7 @@
  * Database layer for metadata catalog operations (DataSource, Dataset, Field, Mapping, License)
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   DataSource,
   Dataset,
@@ -13,7 +13,7 @@ import {
   SchemaVersion,
   ConnectorRegistration,
   LineageSummary,
-} from '../types/metadata.js';
+} from "../types/metadata.js";
 
 export interface IMetadataStore {
   // DataSource operations
@@ -68,21 +68,18 @@ export interface IMetadataStore {
 }
 
 export class PostgresMetadataStore implements IMetadataStore {
-  constructor(private pool: Pool) { }
+  constructor(private pool: Pool) {}
 
   // ====== DataSource Operations ======
 
   async getDataSource(id: string): Promise<DataSource | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_data_sources WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_data_sources WHERE id = $1", [id]);
     return result.rows.length > 0 ? this.mapRowToDataSource(result.rows[0]) : null;
   }
 
   async listDataSources(): Promise<DataSource[]> {
     const result = await this.pool.query(
-      'SELECT * FROM catalog_data_sources ORDER BY created_at DESC'
+      "SELECT * FROM catalog_data_sources ORDER BY created_at DESC"
     );
     return result.rows.map((row: any) => this.mapRowToDataSource(row));
   }
@@ -99,13 +96,27 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      source.id, source.name, source.displayName, source.description,
-      source.type, source.connectorId, source.connectorVersion,
-      JSON.stringify(source.connectionConfig), source.connectionStatus,
-      source.lastConnectedAt, source.lastSyncedAt, source.owner, source.team,
-      JSON.stringify(source.tags), JSON.stringify(source.properties),
-      source.schemaId, source.schemaVersion, source.createdAt, source.updatedAt,
-      source.createdBy, source.updatedBy,
+      source.id,
+      source.name,
+      source.displayName,
+      source.description,
+      source.type,
+      source.connectorId,
+      source.connectorVersion,
+      JSON.stringify(source.connectionConfig),
+      source.connectionStatus,
+      source.lastConnectedAt,
+      source.lastSyncedAt,
+      source.owner,
+      source.team,
+      JSON.stringify(source.tags),
+      JSON.stringify(source.properties),
+      source.schemaId,
+      source.schemaVersion,
+      source.createdAt,
+      source.updatedAt,
+      source.createdBy,
+      source.updatedBy,
     ];
 
     const result = await this.pool.query(query, values);
@@ -113,7 +124,7 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async updateDataSource(id: string, updates: Partial<DataSource>): Promise<DataSource> {
-    const setClauses: string[] = ['updated_at = CURRENT_TIMESTAMP'];
+    const setClauses: string[] = ["updated_at = CURRENT_TIMESTAMP"];
     const values: any[] = [id];
     let paramIndex = 2;
 
@@ -140,7 +151,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     const query = `
       UPDATE catalog_data_sources
-      SET ${setClauses.join(', ')}
+      SET ${setClauses.join(", ")}
       WHERE id = $1
       RETURNING *
     `;
@@ -153,16 +164,13 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async deleteDataSource(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM catalog_data_sources WHERE id = $1', [id]);
+    await this.pool.query("DELETE FROM catalog_data_sources WHERE id = $1", [id]);
   }
 
   // ====== Dataset Operations ======
 
   async getDataset(id: string): Promise<Dataset | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_datasets WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_datasets WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -175,15 +183,15 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async listDatasets(sourceId?: string): Promise<Dataset[]> {
-    let query = 'SELECT * FROM catalog_datasets';
+    let query = "SELECT * FROM catalog_datasets";
     const params: any[] = [];
 
     if (sourceId) {
-      query += ' WHERE source_id = $1';
+      query += " WHERE source_id = $1";
       params.push(sourceId);
     }
 
-    query += ' ORDER BY created_at DESC';
+    query += " ORDER BY created_at DESC";
 
     const result = await this.pool.query(query, params);
     return result.rows.map((row: any) => this.mapRowToDataset(row));
@@ -204,16 +212,32 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      dataset.id, dataset.sourceId, dataset.name, dataset.displayName,
-      dataset.description, dataset.fullyQualifiedName, dataset.datasetType,
-      dataset.schemaId, dataset.schemaVersion, dataset.canonicalMappingId,
-      dataset.canonicalMappingVersion, dataset.licenseId,
-      JSON.stringify(dataset.policyTags), dataset.retentionDays,
-      dataset.legalBasis, dataset.rowCount, dataset.sizeBytes,
-      dataset.lastProfiledAt, dataset.qualityScore, dataset.owner,
-      JSON.stringify(dataset.stewards), JSON.stringify(dataset.tags),
-      JSON.stringify(dataset.properties), dataset.createdAt,
-      dataset.updatedAt, dataset.lastAccessedAt,
+      dataset.id,
+      dataset.sourceId,
+      dataset.name,
+      dataset.displayName,
+      dataset.description,
+      dataset.fullyQualifiedName,
+      dataset.datasetType,
+      dataset.schemaId,
+      dataset.schemaVersion,
+      dataset.canonicalMappingId,
+      dataset.canonicalMappingVersion,
+      dataset.licenseId,
+      JSON.stringify(dataset.policyTags),
+      dataset.retentionDays,
+      dataset.legalBasis,
+      dataset.rowCount,
+      dataset.sizeBytes,
+      dataset.lastProfiledAt,
+      dataset.qualityScore,
+      dataset.owner,
+      JSON.stringify(dataset.stewards),
+      JSON.stringify(dataset.tags),
+      JSON.stringify(dataset.properties),
+      dataset.createdAt,
+      dataset.updatedAt,
+      dataset.lastAccessedAt,
     ];
 
     const result = await this.pool.query(query, values);
@@ -221,7 +245,7 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async updateDataset(id: string, updates: Partial<Dataset>): Promise<Dataset> {
-    const setClauses: string[] = ['updated_at = CURRENT_TIMESTAMP'];
+    const setClauses: string[] = ["updated_at = CURRENT_TIMESTAMP"];
     const values: any[] = [id];
     let paramIndex = 2;
 
@@ -244,7 +268,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     const query = `
       UPDATE catalog_datasets
-      SET ${setClauses.join(', ')}
+      SET ${setClauses.join(", ")}
       WHERE id = $1
       RETURNING *
     `;
@@ -257,22 +281,19 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async deleteDataset(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM catalog_datasets WHERE id = $1', [id]);
+    await this.pool.query("DELETE FROM catalog_datasets WHERE id = $1", [id]);
   }
 
   // ====== Field Operations ======
 
   async getField(id: string): Promise<Field | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_fields WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_fields WHERE id = $1", [id]);
     return result.rows.length > 0 ? this.mapRowToField(result.rows[0]) : null;
   }
 
   async listFields(datasetId: string): Promise<Field[]> {
     const result = await this.pool.query(
-      'SELECT * FROM catalog_fields WHERE dataset_id = $1 ORDER BY name',
+      "SELECT * FROM catalog_fields WHERE dataset_id = $1 ORDER BY name",
       [datasetId]
     );
     return result.rows.map((row: any) => this.mapRowToField(row));
@@ -292,14 +313,26 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      field.id, field.datasetId, field.name, field.displayName,
-      field.description, field.dataType, field.semanticType,
-      field.nullable, field.isPrimaryKey, field.isForeignKey,
-      field.foreignKeyRef, field.canonicalFieldName,
-      field.transformationLogic, JSON.stringify(field.policyTags),
-      field.sensitivityLevel, field.statistics ? JSON.stringify(field.statistics) : null,
-      JSON.stringify(field.tags), JSON.stringify(field.properties),
-      field.createdAt, field.updatedAt,
+      field.id,
+      field.datasetId,
+      field.name,
+      field.displayName,
+      field.description,
+      field.dataType,
+      field.semanticType,
+      field.nullable,
+      field.isPrimaryKey,
+      field.isForeignKey,
+      field.foreignKeyRef,
+      field.canonicalFieldName,
+      field.transformationLogic,
+      JSON.stringify(field.policyTags),
+      field.sensitivityLevel,
+      field.statistics ? JSON.stringify(field.statistics) : null,
+      JSON.stringify(field.tags),
+      JSON.stringify(field.properties),
+      field.createdAt,
+      field.updatedAt,
     ];
 
     const result = await this.pool.query(query, values);
@@ -307,7 +340,7 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async updateField(id: string, updates: Partial<Field>): Promise<Field> {
-    const setClauses: string[] = ['updated_at = CURRENT_TIMESTAMP'];
+    const setClauses: string[] = ["updated_at = CURRENT_TIMESTAMP"];
     const values: any[] = [id];
     let paramIndex = 2;
 
@@ -326,7 +359,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     const query = `
       UPDATE catalog_fields
-      SET ${setClauses.join(', ')}
+      SET ${setClauses.join(", ")}
       WHERE id = $1
       RETURNING *
     `;
@@ -339,16 +372,13 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async deleteField(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM catalog_fields WHERE id = $1', [id]);
+    await this.pool.query("DELETE FROM catalog_fields WHERE id = $1", [id]);
   }
 
   // ====== Mapping Operations ======
 
   async getMapping(id: string): Promise<Mapping | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_mappings WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_mappings WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -358,7 +388,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     // Load field mappings
     const fieldMappingsResult = await this.pool.query(
-      'SELECT * FROM catalog_field_mappings WHERE mapping_id = $1',
+      "SELECT * FROM catalog_field_mappings WHERE mapping_id = $1",
       [id]
     );
     mapping.fieldMappings = fieldMappingsResult.rows.map((row: any) => ({
@@ -373,7 +403,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     // Load transformation rules
     const rulesResult = await this.pool.query(
-      'SELECT * FROM catalog_transformation_rules WHERE mapping_id = $1 ORDER BY execution_order',
+      "SELECT * FROM catalog_transformation_rules WHERE mapping_id = $1 ORDER BY execution_order",
       [id]
     );
     mapping.transformationRules = rulesResult.rows.map((row: any) => ({
@@ -394,15 +424,15 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async listMappings(sourceId?: string): Promise<Mapping[]> {
-    let query = 'SELECT * FROM catalog_mappings';
+    let query = "SELECT * FROM catalog_mappings";
     const params: any[] = [];
 
     if (sourceId) {
-      query += ' WHERE source_id = $1';
+      query += " WHERE source_id = $1";
       params.push(sourceId);
     }
 
-    query += ' ORDER BY created_at DESC';
+    query += " ORDER BY created_at DESC";
 
     const result = await this.pool.query(query, params);
     return result.rows.map((row: any) => this.mapRowToMapping(row));
@@ -422,13 +452,27 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      mapping.id, mapping.name, mapping.description, mapping.sourceId,
-      mapping.datasetId, mapping.sourceSchemaId, mapping.sourceSchemaVersion,
-      mapping.canonicalSchemaId, mapping.canonicalSchemaVersion,
-      mapping.canonicalEntityType, mapping.status, mapping.validatedAt,
-      mapping.validatedBy, mapping.version, mapping.previousVersionId,
-      JSON.stringify(mapping.tags), JSON.stringify(mapping.properties),
-      mapping.createdAt, mapping.updatedAt, mapping.createdBy, mapping.updatedBy,
+      mapping.id,
+      mapping.name,
+      mapping.description,
+      mapping.sourceId,
+      mapping.datasetId,
+      mapping.sourceSchemaId,
+      mapping.sourceSchemaVersion,
+      mapping.canonicalSchemaId,
+      mapping.canonicalSchemaVersion,
+      mapping.canonicalEntityType,
+      mapping.status,
+      mapping.validatedAt,
+      mapping.validatedBy,
+      mapping.version,
+      mapping.previousVersionId,
+      JSON.stringify(mapping.tags),
+      JSON.stringify(mapping.properties),
+      mapping.createdAt,
+      mapping.updatedAt,
+      mapping.createdBy,
+      mapping.updatedBy,
     ];
 
     const result = await this.pool.query(query, values);
@@ -436,7 +480,7 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async updateMapping(id: string, updates: Partial<Mapping>): Promise<Mapping> {
-    const setClauses: string[] = ['updated_at = CURRENT_TIMESTAMP'];
+    const setClauses: string[] = ["updated_at = CURRENT_TIMESTAMP"];
     const values: any[] = [id];
     let paramIndex = 2;
 
@@ -455,7 +499,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     const query = `
       UPDATE catalog_mappings
-      SET ${setClauses.join(', ')}
+      SET ${setClauses.join(", ")}
       WHERE id = $1
       RETURNING *
     `;
@@ -468,23 +512,18 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async deleteMapping(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM catalog_mappings WHERE id = $1', [id]);
+    await this.pool.query("DELETE FROM catalog_mappings WHERE id = $1", [id]);
   }
 
   // ====== License Operations ======
 
   async getLicense(id: string): Promise<License | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_licenses WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_licenses WHERE id = $1", [id]);
     return result.rows.length > 0 ? this.mapRowToLicense(result.rows[0]) : null;
   }
 
   async listLicenses(): Promise<License[]> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_licenses ORDER BY created_at DESC'
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_licenses ORDER BY created_at DESC");
     return result.rows.map((row: any) => this.mapRowToLicense(row));
   }
 
@@ -504,18 +543,32 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      license.id, license.name, license.displayName, license.description,
-      license.licenseType, license.termsAndConditions,
+      license.id,
+      license.name,
+      license.displayName,
+      license.description,
+      license.licenseType,
+      license.termsAndConditions,
       JSON.stringify(license.usageRestrictions),
       JSON.stringify(license.allowedPurposes),
       JSON.stringify(license.prohibitedPurposes),
-      license.requiresAttribution, license.attributionText,
+      license.requiresAttribution,
+      license.attributionText,
       JSON.stringify(license.complianceFrameworks),
-      license.legalBasis, JSON.stringify(license.jurisdictions),
-      license.expiresAt, license.autoRenew, license.licensor,
-      license.contactEmail, license.contactUrl, license.status,
-      JSON.stringify(license.tags), JSON.stringify(license.properties),
-      license.createdAt, license.updatedAt, license.createdBy, license.updatedBy,
+      license.legalBasis,
+      JSON.stringify(license.jurisdictions),
+      license.expiresAt,
+      license.autoRenew,
+      license.licensor,
+      license.contactEmail,
+      license.contactUrl,
+      license.status,
+      JSON.stringify(license.tags),
+      JSON.stringify(license.properties),
+      license.createdAt,
+      license.updatedAt,
+      license.createdBy,
+      license.updatedBy,
     ];
 
     const result = await this.pool.query(query, values);
@@ -523,7 +576,7 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async updateLicense(id: string, updates: Partial<License>): Promise<License> {
-    const setClauses: string[] = ['updated_at = CURRENT_TIMESTAMP'];
+    const setClauses: string[] = ["updated_at = CURRENT_TIMESTAMP"];
     const values: any[] = [id];
     let paramIndex = 2;
 
@@ -538,7 +591,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
     const query = `
       UPDATE catalog_licenses
-      SET ${setClauses.join(', ')}
+      SET ${setClauses.join(", ")}
       WHERE id = $1
       RETURNING *
     `;
@@ -551,14 +604,14 @@ export class PostgresMetadataStore implements IMetadataStore {
   }
 
   async deleteLicense(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM catalog_licenses WHERE id = $1', [id]);
+    await this.pool.query("DELETE FROM catalog_licenses WHERE id = $1", [id]);
   }
 
   // ====== Schema Registry Operations ======
 
   async getSchemaVersion(schemaId: string, version: number): Promise<SchemaVersion | null> {
     const result = await this.pool.query(
-      'SELECT * FROM catalog_schema_registry WHERE schema_id = $1 AND version = $2',
+      "SELECT * FROM catalog_schema_registry WHERE schema_id = $1 AND version = $2",
       [schemaId, version]
     );
     return result.rows.length > 0 ? this.mapRowToSchemaVersion(result.rows[0]) : null;
@@ -566,7 +619,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
   async getLatestSchemaVersion(schemaId: string): Promise<SchemaVersion | null> {
     const result = await this.pool.query(
-      'SELECT * FROM catalog_schema_registry WHERE schema_id = $1 ORDER BY version DESC LIMIT 1',
+      "SELECT * FROM catalog_schema_registry WHERE schema_id = $1 ORDER BY version DESC LIMIT 1",
       [schemaId]
     );
     return result.rows.length > 0 ? this.mapRowToSchemaVersion(result.rows[0]) : null;
@@ -583,12 +636,20 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      schemaVersion.id, schemaVersion.schemaId, schemaVersion.version,
-      JSON.stringify(schemaVersion.schema), schemaVersion.schemaFormat,
-      schemaVersion.backwardCompatible, schemaVersion.forwardCompatible,
-      JSON.stringify(schemaVersion.breakingChanges), schemaVersion.status,
-      schemaVersion.deprecatedAt, schemaVersion.description,
-      schemaVersion.changelog, schemaVersion.createdAt, schemaVersion.createdBy,
+      schemaVersion.id,
+      schemaVersion.schemaId,
+      schemaVersion.version,
+      JSON.stringify(schemaVersion.schema),
+      schemaVersion.schemaFormat,
+      schemaVersion.backwardCompatible,
+      schemaVersion.forwardCompatible,
+      JSON.stringify(schemaVersion.breakingChanges),
+      schemaVersion.status,
+      schemaVersion.deprecatedAt,
+      schemaVersion.description,
+      schemaVersion.changelog,
+      schemaVersion.createdAt,
+      schemaVersion.createdBy,
     ];
 
     const result = await this.pool.query(query, values);
@@ -597,7 +658,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
   async listSchemaVersions(schemaId: string): Promise<SchemaVersion[]> {
     const result = await this.pool.query(
-      'SELECT * FROM catalog_schema_registry WHERE schema_id = $1 ORDER BY version DESC',
+      "SELECT * FROM catalog_schema_registry WHERE schema_id = $1 ORDER BY version DESC",
       [schemaId]
     );
     return result.rows.map((row: any) => this.mapRowToSchemaVersion(row));
@@ -606,17 +667,14 @@ export class PostgresMetadataStore implements IMetadataStore {
   // ====== Connector Registry Operations ======
 
   async getConnector(id: string): Promise<ConnectorRegistration | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_connector_registry WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_connector_registry WHERE id = $1", [
+      id,
+    ]);
     return result.rows.length > 0 ? this.mapRowToConnector(result.rows[0]) : null;
   }
 
   async listConnectors(): Promise<ConnectorRegistration[]> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_connector_registry ORDER BY name'
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_connector_registry ORDER BY name");
     return result.rows.map((row: any) => this.mapRowToConnector(row));
   }
 
@@ -634,14 +692,27 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      connector.id, connector.name, connector.displayName, connector.description,
-      connector.version, connector.sourceType, connector.implementationClass,
-      connector.packageName, JSON.stringify(connector.configSchema),
-      JSON.stringify(connector.requiredPermissions), connector.supportsBulkExtract,
-      connector.supportsIncrementalSync, connector.supportsRealtime,
-      connector.supportsSchemaDiscovery, connector.status, connector.certified,
-      connector.vendor, connector.documentation, JSON.stringify(connector.tags),
-      connector.createdAt, connector.updatedAt,
+      connector.id,
+      connector.name,
+      connector.displayName,
+      connector.description,
+      connector.version,
+      connector.sourceType,
+      connector.implementationClass,
+      connector.packageName,
+      JSON.stringify(connector.configSchema),
+      JSON.stringify(connector.requiredPermissions),
+      connector.supportsBulkExtract,
+      connector.supportsIncrementalSync,
+      connector.supportsRealtime,
+      connector.supportsSchemaDiscovery,
+      connector.status,
+      connector.certified,
+      connector.vendor,
+      connector.documentation,
+      JSON.stringify(connector.tags),
+      connector.createdAt,
+      connector.updatedAt,
     ];
 
     const result = await this.pool.query(query, values);
@@ -652,7 +723,7 @@ export class PostgresMetadataStore implements IMetadataStore {
 
   async getLineageSummary(entityId: string): Promise<LineageSummary | null> {
     const result = await this.pool.query(
-      'SELECT * FROM catalog_lineage_summary WHERE entity_id = $1',
+      "SELECT * FROM catalog_lineage_summary WHERE entity_id = $1",
       [entityId]
     );
     return result.rows.length > 0 ? this.mapRowToLineageSummary(result.rows[0]) : null;
@@ -680,7 +751,8 @@ export class PostgresMetadataStore implements IMetadataStore {
     `;
 
     const values = [
-      summary.entityId, summary.entityType,
+      summary.entityId,
+      summary.entityType,
       JSON.stringify(summary.upstreamSources),
       JSON.stringify(summary.upstreamDatasets),
       JSON.stringify(summary.upstreamFields),

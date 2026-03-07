@@ -1,42 +1,42 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // --- Enums ---
 
 export enum RiskClass {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum RunStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  PAUSED = 'paused',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
+  PENDING = "pending",
+  RUNNING = "running",
+  PAUSED = "paused",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
 }
 
 export enum EventType {
-  RUN_STARTED = 'RunStarted',
-  RUN_ENDED = 'RunEnded',
-  MODEL_CALL_REQUESTED = 'ModelCallRequested',
-  MODEL_CALL_COMPLETED = 'ModelCallCompleted',
-  PLAN_PROPOSED = 'PlanProposed',
-  PLAN_ACCEPTED = 'PlanAccepted',
-  PLAN_REVISED = 'PlanRevised',
-  TOOL_CALL_REQUESTED = 'ToolCallRequested',
-  TOOL_CALL_COMPLETED = 'ToolCallCompleted',
-  TOOL_CALL_FAILED = 'ToolCallFailed',
-  RETRIEVAL_QUERY = 'RetrievalQuery',
-  RETRIEVAL_RESULT = 'RetrievalResult',
-  ASSERTION_RAISED = 'AssertionRaised',
-  ASSERTION_CHECKED = 'AssertionChecked',
-  POLICY_DECISION = 'PolicyDecision',
-  COST_UPDATE = 'CostUpdate',
-  HUMAN_FEEDBACK_RECEIVED = 'HumanFeedbackReceived',
-  AUTO_GRADE_COMPUTED = 'AutoGradeComputed',
+  RUN_STARTED = "RunStarted",
+  RUN_ENDED = "RunEnded",
+  MODEL_CALL_REQUESTED = "ModelCallRequested",
+  MODEL_CALL_COMPLETED = "ModelCallCompleted",
+  PLAN_PROPOSED = "PlanProposed",
+  PLAN_ACCEPTED = "PlanAccepted",
+  PLAN_REVISED = "PlanRevised",
+  TOOL_CALL_REQUESTED = "ToolCallRequested",
+  TOOL_CALL_COMPLETED = "ToolCallCompleted",
+  TOOL_CALL_FAILED = "ToolCallFailed",
+  RETRIEVAL_QUERY = "RetrievalQuery",
+  RETRIEVAL_RESULT = "RetrievalResult",
+  ASSERTION_RAISED = "AssertionRaised",
+  ASSERTION_CHECKED = "AssertionChecked",
+  POLICY_DECISION = "PolicyDecision",
+  COST_UPDATE = "CostUpdate",
+  HUMAN_FEEDBACK_RECEIVED = "HumanFeedbackReceived",
+  AUTO_GRADE_COMPUTED = "AutoGradeComputed",
 }
 
 // --- Zod Schemas & Types ---
@@ -50,11 +50,13 @@ export const ToolSchema = z.object({
   schema_out: z.record(z.any()), // JSON Schema
   scopes_required: z.array(z.string()),
   risk_class: z.nativeEnum(RiskClass),
-  limits: z.object({
-    timeout_ms: z.number().optional(),
-    max_retries: z.number().optional(),
-    cost_per_call: z.number().optional(),
-  }).optional(),
+  limits: z
+    .object({
+      timeout_ms: z.number().optional(),
+      max_retries: z.number().optional(),
+      cost_per_call: z.number().optional(),
+    })
+    .optional(),
 });
 export type Tool = z.infer<typeof ToolSchema>;
 

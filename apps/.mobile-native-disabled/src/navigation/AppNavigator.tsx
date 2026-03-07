@@ -116,11 +116,7 @@ export const AppNavigator: React.FC = () => {
               component={GraphScreen}
               options={{headerShown: true, title: 'Graph View'}}
             />
-            <Stack.Screen
-              name="Camera"
-              component={CameraScreen}
-              options={{headerShown: false}}
-            />
+            <Stack.Screen name="Camera" component={CameraScreen} options={{headerShown: false}} />
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}

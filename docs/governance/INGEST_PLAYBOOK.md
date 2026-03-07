@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # System Ingest Playbook
 
 **Mission**: Define how external systems are evaluated, classified, and absorbed into Summit.

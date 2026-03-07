@@ -2,16 +2,16 @@
  * Base connector class that all data source connectors extend
  */
 
-import { EventEmitter } from 'events';
-import { Logger } from 'winston';
+import { EventEmitter } from "events";
+import { Logger } from "winston";
 import {
   DataSourceConfig,
   ExtractionStrategy,
   PipelineRun,
   PipelineStatus,
   PipelineError,
-  ConnectorCapabilities
-} from '../types';
+  ConnectorCapabilities,
+} from "../types";
 
 export abstract class BaseConnector extends EventEmitter {
   protected config: DataSourceConfig;
@@ -59,13 +59,13 @@ export abstract class BaseConnector extends EventEmitter {
    */
   protected validateConfig(): void {
     if (!this.config.id) {
-      throw new Error('Data source ID is required');
+      throw new Error("Data source ID is required");
     }
     if (!this.config.name) {
-      throw new Error('Data source name is required');
+      throw new Error("Data source name is required");
     }
     if (!this.config.type) {
-      throw new Error('Data source type is required');
+      throw new Error("Data source type is required");
     }
   }
 
@@ -73,10 +73,10 @@ export abstract class BaseConnector extends EventEmitter {
    * Emit progress event
    */
   protected emitProgress(recordsProcessed: number, bytesProcessed: number): void {
-    this.emit('progress', {
+    this.emit("progress", {
       recordsProcessed,
       bytesProcessed,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -84,21 +84,18 @@ export abstract class BaseConnector extends EventEmitter {
    * Emit error event
    */
   protected emitError(error: PipelineError): void {
-    this.emit('error', error);
+    this.emit("error", error);
   }
 
   /**
    * Handle retry logic with exponential backoff
    */
-  protected async withRetry<T>(
-    operation: () => Promise<T>,
-    operationName: string
-  ): Promise<T> {
+  protected async withRetry<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
     const retryConfig = this.config.connectionConfig.retryConfig || {
       maxRetries: 3,
       initialDelayMs: 1000,
       maxDelayMs: 30000,
-      backoffMultiplier: 2
+      backoffMultiplier: 2,
     };
 
     let lastError: Error;
@@ -111,7 +108,7 @@ export abstract class BaseConnector extends EventEmitter {
 
         if (attempt === retryConfig.maxRetries) {
           this.logger.error(`${operationName} failed after ${retryConfig.maxRetries} retries`, {
-            error: lastError.message
+            error: lastError.message,
           });
           throw lastError;
         }
@@ -121,9 +118,12 @@ export abstract class BaseConnector extends EventEmitter {
           retryConfig.maxDelayMs
         );
 
-        this.logger.warn(`${operationName} failed, retrying in ${delay}ms (attempt ${attempt + 1}/${retryConfig.maxRetries})`, {
-          error: lastError.message
-        });
+        this.logger.warn(
+          `${operationName} failed, retrying in ${delay}ms (attempt ${attempt + 1}/${retryConfig.maxRetries})`,
+          {
+            error: lastError.message,
+          }
+        );
 
         await this.sleep(delay);
       }
@@ -136,7 +136,7 @@ export abstract class BaseConnector extends EventEmitter {
    * Sleep utility
    */
   protected sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -144,7 +144,9 @@ export abstract class BaseConnector extends EventEmitter {
    */
   protected async rateLimit(): Promise<void> {
     const rateLimitConfig = this.config.extractionConfig.rateLimitConfig;
-    if (!rateLimitConfig) {return;}
+    if (!rateLimitConfig) {
+      return;
+    }
 
     // Simple rate limiting implementation
     // In production, use a more sophisticated rate limiter like bottleneck

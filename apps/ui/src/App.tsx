@@ -22,7 +22,11 @@ export default function App() {
           cy={(cy) => {
             cyRef.current = cy;
           }}
-          elements={[{ data: { id: "a" } }, { data: { id: "b" } }, { data: { id: "ab", source: "a", target: "b" } }]}
+          elements={[
+            { data: { id: "a" } },
+            { data: { id: "b" } },
+            { data: { id: "ab", source: "a", target: "b" } },
+          ]}
         />
       </div>
       <div id="timeline">

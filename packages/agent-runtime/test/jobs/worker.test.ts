@@ -10,11 +10,16 @@ async function runTests() {
     const store = new InMemoryJobStore();
     const worker = new JobWorker(store, 50, 2);
     let executed = false;
-    const handler: JobHandler = { run: async (job: Job) => { executed = true; return "success"; } };
+    const handler: JobHandler = {
+      run: async (job: Job) => {
+        executed = true;
+        return "success";
+      },
+    };
     worker.register("test", handler);
     worker.start();
     const job = await store.create("test", {});
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 200));
     worker.stop();
     const updated = await store.get(job.id);
     assert.strictEqual(updated?.status, "completed");
@@ -22,4 +27,7 @@ async function runTests() {
     assert.strictEqual(executed, true);
   }
 }
-runTests().catch(err => { console.error(err); process.exit(1); });
+runTests().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -112,18 +112,18 @@
 
 ```ts
 // server/src/db/driver.ts
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 const primary = neo4j.driver(
   process.env.NEO4J_PRIMARY!,
-  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
+  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!)
 );
 const replica = neo4j.driver(
   process.env.NEO4J_REPLICA!,
-  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
+  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!)
 );
-export function session(kind: 'read' | 'write') {
-  return (kind === 'read' ? replica : primary).session({
-    defaultAccessMode: kind === 'read' ? 'READ' : 'WRITE',
+export function session(kind: "read" | "write") {
+  return (kind === "read" ? replica : primary).session({
+    defaultAccessMode: kind === "read" ? "READ" : "WRITE",
   });
 }
 ```
@@ -133,22 +133,18 @@ export function session(kind: 'read' | 'write') {
 
 ```ts
 // server/src/analytics/overlays.ts
-export async function materializeCommunityOverlay(
-  caseId: string,
-  runId: string,
-  driver,
-) {
-  const s = driver.session({ defaultAccessMode: 'WRITE' });
+export async function materializeCommunityOverlay(caseId: string, runId: string, driver) {
+  const s = driver.session({ defaultAccessMode: "WRITE" });
   try {
     await s.run(`MATCH (n:Entity { caseId:$caseId }) WITH n LIMIT 1 RETURN n`); // warmup
     await s.run(
       `CALL gds.graph.project('case-'+$caseId,'Entity','RELATED',{relationshipProperties:'weight'})`,
-      { caseId },
+      { caseId }
     );
-    await s.run(
-      `CALL gds.leiden.write('case-'+$caseId,{ writeProperty:'community_'+$runId })`,
-      { caseId, runId },
-    );
+    await s.run(`CALL gds.leiden.write('case-'+$caseId,{ writeProperty:'community_'+$runId })`, {
+      caseId,
+      runId,
+    });
     await s.run(`CALL gds.graph.drop('case-'+$caseId)`, { caseId });
   } finally {
     await s.close();
@@ -160,7 +156,7 @@ export async function materializeCommunityOverlay(
 
 ```ts
 // server/src/cache/overlays-cache.ts
-import LRU from 'lru-cache';
+import LRU from "lru-cache";
 const overlays = new LRU({ max: 1000, ttl: 1000 * 60 * 15 });
 export function getOverlay(key) {
   return overlays.get(key);
@@ -179,14 +175,14 @@ export function invalidateOnWrite(entityId) {
 
 ```ts
 // server/src/security/headers.ts
-import helmet from 'helmet';
+import helmet from "helmet";
 export const security = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
-      connectSrc: ["'self'", 'https://api.stripe.com'],
-      imgSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'", "https://api.stripe.com"],
+      imgSrc: ["'self'", "data:"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       frameAncestors: ["'none'"],
     },
@@ -197,9 +193,9 @@ export const security = helmet({
 
 ```ts
 // server/src/security/csrf.ts
-import csrf from 'csurf';
+import csrf from "csurf";
 export const csrfProtect = csrf({
-  cookie: { httpOnly: true, sameSite: 'strict', secure: true },
+  cookie: { httpOnly: true, sameSite: "strict", secure: true },
 });
 ```
 
@@ -207,11 +203,11 @@ export const csrfProtect = csrf({
 
 ```ts
 // server/src/billing/meter.ts
-import { Counter } from 'prom-client';
+import { Counter } from "prom-client";
 export const gqlOps = new Counter({
-  name: 'gql_ops_total',
-  help: 'GraphQL ops by org',
-  labelNames: ['org', 'op'],
+  name: "gql_ops_total",
+  help: "GraphQL ops by org",
+  labelNames: ["org", "op"],
 });
 export function meter(org: string, op: string) {
   gqlOps.labels(org, op).inc();
@@ -221,7 +217,7 @@ export function meter(org: string, op: string) {
 export function checkQuota(ctx, op) {
   const used = getUsage(ctx.org, op);
   const limit = getLimit(ctx.org, op);
-  if (used >= limit) throw new Error('QuotaExceeded');
+  if (used >= limit) throw new Error("QuotaExceeded");
 }
 ```
 
@@ -229,9 +225,9 @@ export function checkQuota(ctx, op) {
 
 ```ts
 // server/src/billing/webhooks.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function verifyStripeSig(payload: string, sig: string, secret: string) {
-  const mac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const mac = crypto.createHmac("sha256", secret).update(payload).digest("hex");
   return mac === sig;
 }
 ```
@@ -248,7 +244,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: CycloneDX/gh-node-module-generatebom@v2
-        with: { output: 'sbom.json' }
+        with: { output: "sbom.json" }
       - uses: actions/upload-artifact@v4
         with: { name: sbom, path: sbom.json }
 ```
@@ -271,25 +267,25 @@ jobs:
 ```js
 // apps/web/src/ux/jquery-guard.js
 $(function () {
-  window.addEventListener('error', function (e) {
-    localStorage.setItem('lastView', window.location.pathname);
-    $('#crash-banner').show().text('We hit a snag. Restoring your last view…');
+  window.addEventListener("error", function (e) {
+    localStorage.setItem("lastView", window.location.pathname);
+    $("#crash-banner").show().text("We hit a snag. Restoring your last view…");
   });
-  const last = localStorage.getItem('lastView');
-  if (last) history.replaceState({}, '', last);
+  const last = localStorage.getItem("lastView");
+  if (last) history.replaceState({}, "", last);
 });
 ```
 
 ### 4.10 k6 — Scale Perf
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 80, duration: '5m' };
+import http from "k6/http";
+export const options = { vus: 80, duration: "5m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({ query: '{ searchEntities(q:"acme", limit:10){ type } }' }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

@@ -4,14 +4,14 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - '**/*.go'
-      - '**/go.mod'
-      - '**/go.sum'
+      - "**/*.go"
+      - "**/go.mod"
+      - "**/go.sum"
   pull_request:
     paths:
-      - '**/*.go'
-      - '**/go.mod'
-      - '**/go.sum'
+      - "**/*.go"
+      - "**/go.mod"
+      - "**/go.sum"
 
 jobs:
   go-ci:

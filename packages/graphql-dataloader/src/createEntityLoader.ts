@@ -1,10 +1,10 @@
-import DataLoader from 'dataloader';
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { BatchLoadFn, LoaderOptions } from './types';
+import DataLoader from "dataloader";
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { BatchLoadFn, LoaderOptions } from "./types";
 
-const logger = pino({ name: 'EntityLoader' });
-const tracer = trace.getTracer('graphql-dataloader');
+const logger = pino({ name: "EntityLoader" });
+const tracer = trace.getTracer("graphql-dataloader");
 
 /**
  * Create entity loader for batching database queries
@@ -22,26 +22,23 @@ export function createEntityLoader<K, V>(
   options?: LoaderOptions<K, V>
 ): DataLoader<K, V> {
   const instrumentedBatchFn = async (keys: readonly K[]): Promise<(V | Error)[]> => {
-    const span = tracer.startSpan('EntityLoader.batchLoad');
+    const span = tracer.startSpan("EntityLoader.batchLoad");
 
     try {
-      span.setAttribute('batch.size', keys.length);
+      span.setAttribute("batch.size", keys.length);
       const startTime = Date.now();
 
       const results = await batchFn(keys);
 
       const duration = Date.now() - startTime;
-      span.setAttribute('batch.duration', duration);
+      span.setAttribute("batch.duration", duration);
 
-      logger.debug(
-        { keyCount: keys.length, duration },
-        'Batch load completed'
-      );
+      logger.debug({ keyCount: keys.length, duration }, "Batch load completed");
 
       return results;
     } catch (error) {
       span.recordException(error as Error);
-      logger.error({ error, keyCount: keys.length }, 'Batch load failed');
+      logger.error({ error, keyCount: keys.length }, "Batch load failed");
       throw error;
     } finally {
       span.end();

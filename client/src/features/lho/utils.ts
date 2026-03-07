@@ -1,4 +1,4 @@
-import type { CustodyEvent } from './types';
+import type { CustodyEvent } from "./types";
 
 type VerificationResult = {
   valid: boolean;
@@ -11,7 +11,7 @@ function timestampToUnixNano(timestamp: string): string {
     throw new Error(`invalid timestamp ${timestamp}`);
   }
 
-  const [, year, month, day, hour, minute, second, fraction = ''] = match;
+  const [, year, month, day, hour, minute, second, fraction = ""] = match;
   const secondsSinceEpoch = BigInt(
     Date.UTC(
       Number(year),
@@ -23,21 +23,21 @@ function timestampToUnixNano(timestamp: string): string {
     ) / 1000
   );
 
-  const nanos = BigInt((fraction.padEnd(9, '0')).slice(0, 9));
+  const nanos = BigInt(fraction.padEnd(9, "0").slice(0, 9));
   return (secondsSinceEpoch * 1_000_000_000n + nanos).toString();
 }
 
 async function sha256Hex(input: string): Promise<string> {
-  if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.subtle) {
+  if (typeof globalThis.crypto !== "undefined" && globalThis.crypto.subtle) {
     const encoder = new TextEncoder();
-    const digest = await globalThis.crypto.subtle.digest('SHA-256', encoder.encode(input));
+    const digest = await globalThis.crypto.subtle.digest("SHA-256", encoder.encode(input));
     return Array.from(new Uint8Array(digest))
-      .map((byte) => byte.toString(16).padStart(2, '0'))
-      .join('');
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
   }
 
-  const { createHash } = await import('crypto');
-  return createHash('sha256').update(input).digest('hex');
+  const { createHash } = await import("crypto");
+  return createHash("sha256").update(input).digest("hex");
 }
 
 async function computeHash(prevHash: string, event: CustodyEvent): Promise<string> {
@@ -48,12 +48,12 @@ async function computeHash(prevHash: string, event: CustodyEvent): Promise<strin
 
 export async function verifyCustodyChain(events: CustodyEvent[]): Promise<VerificationResult> {
   if (events.length === 0) {
-    return { valid: false, message: 'No custody events recorded.' };
+    return { valid: false, message: "No custody events recorded." };
   }
 
   const applyFingerprints = new Map<string, string>();
   const verifiedSystems = new Set<string>();
-  let prevHash = '';
+  let prevHash = "";
 
   for (const event of events) {
     const expectedHash = await computeHash(prevHash, event);
@@ -64,11 +64,11 @@ export async function verifyCustodyChain(events: CustodyEvent[]): Promise<Verifi
       };
     }
 
-    if (event.action === 'apply') {
+    if (event.action === "apply") {
       applyFingerprints.set(event.system, event.scopeFingerprint);
     }
 
-    if (event.action === 'verify') {
+    if (event.action === "verify") {
       const fingerprint = applyFingerprints.get(event.system);
       if (!fingerprint) {
         return {
@@ -89,7 +89,7 @@ export async function verifyCustodyChain(events: CustodyEvent[]): Promise<Verifi
   }
 
   if (verifiedSystems.size === 0) {
-    return { valid: false, message: 'No verification events were captured.' };
+    return { valid: false, message: "No verification events were captured." };
   }
 
   return { valid: true };

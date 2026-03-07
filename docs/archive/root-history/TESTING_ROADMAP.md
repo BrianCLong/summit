@@ -14,6 +14,7 @@ The codebase has **strong E2E test coverage** (~60+ Playwright tests) but **crit
 - **apps/:** 2.5% coverage (6/239 files)
 
 **Critical Risk Areas:**
+
 - ❌ Security layer: 0% coverage (9 files)
 - ❌ Database & repos: 0% coverage (27 files)
 - ❌ Background workers: 0% coverage (13 files)
@@ -28,7 +29,9 @@ The codebase has **strong E2E test coverage** (~60+ Playwright tests) but **crit
 As a starting point, comprehensive test suites have been created for the most critical areas:
 
 ### 1. Security Layer
+
 **File:** `server/src/security/__tests__/jwt-security.test.ts`
+
 - ✅ JWT token signing and verification
 - ✅ Key rotation and management
 - ✅ Replay attack protection using JTI
@@ -38,7 +41,9 @@ As a starting point, comprehensive test suites have been created for the most cr
 - **Coverage:** ~95% of jwt-security.ts
 
 ### 2. Database Layer
+
 **File:** `server/src/db/__tests__/postgres.test.ts`
+
 - ✅ Connection pool initialization
 - ✅ Read/write pool routing
 - ✅ Circuit breaker with automatic recovery
@@ -50,7 +55,9 @@ As a starting point, comprehensive test suites have been created for the most cr
 - **Coverage:** ~85% of postgres.ts
 
 ### 3. Repository Layer
+
 **File:** `server/src/repos/__tests__/EntityRepo.test.ts`
+
 - ✅ Entity CRUD operations
 - ✅ Dual-write to PostgreSQL and Neo4j
 - ✅ Transaction handling and rollbacks
@@ -60,6 +67,7 @@ As a starting point, comprehensive test suites have been created for the most cr
 - **Coverage:** ~90% of EntityRepo.ts
 
 **File:** `server/src/repos/__tests__/InvestigationRepo.test.ts`
+
 - ✅ Investigation CRUD operations
 - ✅ Status management (active, archived, completed)
 - ✅ List and filter functionality
@@ -69,7 +77,9 @@ As a starting point, comprehensive test suites have been created for the most cr
 - **Coverage:** ~90% of InvestigationRepo.ts
 
 ### 4. Services Layer
+
 **File:** `server/src/services/__tests__/AuthService.test.ts`
+
 - ✅ User registration with argon2 hashing
 - ✅ User login with credential validation
 - ✅ JWT token generation and verification
@@ -85,6 +95,7 @@ As a starting point, comprehensive test suites have been created for the most cr
 ### Phase 1: Complete Security & Data Layer Testing
 
 #### Week 1: Security & Crypto
+
 **Priority: CRITICAL 🔴**
 
 1. **Security Module (9 files - 0% coverage)**
@@ -108,6 +119,7 @@ As a starting point, comprehensive test suites have been created for the most cr
 **Risk if not done:** Data integrity issues, silent data corruption
 
 #### Week 2: Database Operations
+
 **Priority: CRITICAL 🔴**
 
 3. **Database Layer (23 files - 0% coverage)**
@@ -138,11 +150,13 @@ As a starting point, comprehensive test suites have been created for the most cr
 ### Phase 2: Core Business Logic
 
 #### Week 3-4: Services Layer
+
 **Priority: HIGH 🟠**
 
 **Services (85 files - 1.2% coverage)**
 
 Top 10 services by criticality:
+
 1. [x] `services/AuthService.ts` - Created comprehensive test
 2. [ ] `services/ComplianceService.ts` - Regulatory compliance
 3. [ ] `services/GraphRAGService.ts` - Graph retrieval-augmented generation
@@ -158,15 +172,18 @@ Top 10 services by criticality:
 **Risk if not done:** Business logic bugs, user-facing feature failures
 
 #### Week 5: API Routes
+
 **Priority: HIGH 🟠**
 
 **Routes (60 files - 3.3% coverage)**
 
 Current coverage:
+
 - ✅ `routes/__tests__/disclosures.test.ts`
 - ✅ `routes/__tests__/investigations.test.ts`
 
 Priority routes for testing:
+
 1. [ ] `routes/entities.ts` - Entity management endpoints
 2. [ ] `routes/relationships.ts` - Relationship endpoints
 3. [ ] `routes/alerts.ts` - Alert management
@@ -182,11 +199,13 @@ Priority routes for testing:
 **Risk if not done:** Breaking API changes, contract violations
 
 #### Week 6: GraphQL Layer
+
 **Priority: HIGH 🟠**
 
 **GraphQL (87 files - 1.1% coverage)**
 
 Priority resolvers:
+
 1. [ ] `graphql/resolvers/Entity.ts` - Entity queries/mutations
 2. [ ] `graphql/resolvers/Investigation.ts` - Investigation operations
 3. [ ] `graphql/resolvers/Relationship.ts` - Relationship graph
@@ -205,9 +224,11 @@ Priority resolvers:
 ### Phase 3: Supporting Infrastructure
 
 #### Week 7-8: AI/ML & Utilities
+
 **Priority: MEDIUM 🟡**
 
 **AI/ML Components (23 files - 4.3% coverage)**
+
 - [ ] `ai/embeddingService.ts` - Vector embeddings
 - [ ] `ai/promptEngineering.ts` - LLM prompts
 - [ ] `ai/modelRegistry.ts` - Model management
@@ -215,6 +236,7 @@ Priority resolvers:
 - [ ] `ai/entityExtraction.ts` - NLP entity extraction
 
 **Server Utilities (11 files - 0% coverage)**
+
 - [ ] `utils/validation.ts` - Input validation
 - [ ] `utils/crypto.ts` - Cryptographic utilities
 - [ ] `utils/date.ts` - Date formatting and parsing
@@ -225,19 +247,23 @@ Priority resolvers:
 **Risk if not done:** AI model failures, utility bugs affecting multiple features
 
 #### Week 9-10: Client Services & Hooks
+
 **Priority: MEDIUM 🟡**
 
 **Client Services (15 files - ~40% coverage)**
+
 - [ ] `client/src/services/disclosures.ts`
 - [ ] `client/src/services/orchestrator/modules.ts`
 - [ ] `client/src/services/orchestrator/presets.ts`
 
 **Client Hooks (5 files - 0% coverage)**
+
 - [ ] `client/src/hooks/useFlag.ts` - Feature flags
 - [ ] `client/src/hooks/useSafeQuery.ts` - Safe GraphQL queries
 - [ ] `client/src/hooks/useI18n.ts` - Internationalization
 
 **Client Libraries (6 files - ~15% coverage)**
+
 - [ ] `client/src/lib/utils.ts` - Common utilities
 - [ ] `client/src/lib/toastBus.ts` - Toast notifications
 - [ ] `client/src/lib/graphql.ts` - GraphQL client utilities
@@ -252,9 +278,11 @@ Priority resolvers:
 ### Phase 4: Components & Integration
 
 #### Apps Directory (239 files - 2.5% coverage)
+
 **Priority: LOW 🟢**
 
 While coverage is very low, E2E tests likely cover user flows. Focus on:
+
 - Complex component logic
 - Custom hooks
 - State management
@@ -268,6 +296,7 @@ While coverage is very low, E2E tests likely cover user flows. Focus on:
 ## Testing Infrastructure Improvements
 
 ### 1. Coverage Enforcement
+
 **File:** `server/jest.config.ts`, `client/jest.config.ts`
 
 ```typescript
@@ -307,6 +336,7 @@ coverageThreshold: {
 ```
 
 ### 2. CI/CD Integration
+
 **File:** `.github/workflows/test.yml`
 
 ```yaml
@@ -324,6 +354,7 @@ coverageThreshold: {
 ```
 
 ### 3. Pre-commit Hooks
+
 **File:** `.husky/pre-commit`
 
 ```bash
@@ -338,10 +369,12 @@ pnpm test:coverage:check
 ```
 
 ### 4. Test Requirements in PRs
+
 **File:** `.github/pull_request_template.md`
 
 ```markdown
 ## Testing Checklist
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated (if applicable)
 - [ ] E2E tests added/updated (if user-facing changes)
@@ -350,6 +383,7 @@ pnpm test:coverage:check
 ```
 
 ### 5. Mutation Testing (Future)
+
 **File:** `stryker.conf.json`
 
 ```json
@@ -357,12 +391,7 @@ pnpm test:coverage:check
   "mutator": "typescript",
   "testRunner": "jest",
   "coverageAnalysis": "perTest",
-  "mutate": [
-    "src/security/**/*.ts",
-    "src/repos/**/*.ts",
-    "src/services/**/*.ts",
-    "src/db/**/*.ts"
-  ]
+  "mutate": ["src/security/**/*.ts", "src/repos/**/*.ts", "src/services/**/*.ts", "src/db/**/*.ts"]
 }
 ```
 
@@ -371,14 +400,16 @@ pnpm test:coverage:check
 ## Test Patterns & Best Practices
 
 ### 1. Unit Tests
+
 - Test individual functions and classes in isolation
 - Mock external dependencies (database, APIs, Redis)
 - Fast execution (<1s per test file)
 - High coverage (>90%)
 
 **Example:**
+
 ```typescript
-describe('EntityRepo', () => {
+describe("EntityRepo", () => {
   let repo: EntityRepo;
   let mockPool: jest.Mocked<Pool>;
 
@@ -387,7 +418,7 @@ describe('EntityRepo', () => {
     repo = new EntityRepo(mockPool, mockNeo4jDriver);
   });
 
-  it('should create entity successfully', async () => {
+  it("should create entity successfully", async () => {
     mockPool.query.mockResolvedValue({ rows: [mockEntity] });
     const result = await repo.create(input, userId);
     expect(result.id).toBe(mockEntity.id);
@@ -396,14 +427,16 @@ describe('EntityRepo', () => {
 ```
 
 ### 2. Integration Tests
+
 - Test interaction between multiple components
 - Use test database or in-memory database
 - Test actual database queries
 - Test API endpoints with real routing
 
 **Example:**
+
 ```typescript
-describe('Entity API Integration', () => {
+describe("Entity API Integration", () => {
   let app: Express;
   let testDb: TestDatabase;
 
@@ -412,15 +445,12 @@ describe('Entity API Integration', () => {
     app = createApp(testDb);
   });
 
-  it('should create and retrieve entity', async () => {
-    const response = await request(app)
-      .post('/api/entities')
-      .send(entityData);
+  it("should create and retrieve entity", async () => {
+    const response = await request(app).post("/api/entities").send(entityData);
 
     expect(response.status).toBe(201);
 
-    const getResponse = await request(app)
-      .get(`/api/entities/${response.body.id}`);
+    const getResponse = await request(app).get(`/api/entities/${response.body.id}`);
 
     expect(getResponse.body.name).toBe(entityData.name);
   });
@@ -428,19 +458,21 @@ describe('Entity API Integration', () => {
 ```
 
 ### 3. Contract Tests
+
 - Test API contracts between services
 - Use schema validation (GraphQL, OpenAPI)
 - Ensure backward compatibility
 
 **Example:**
+
 ```typescript
-describe('GraphQL Schema Contract', () => {
-  it('should match expected schema', () => {
+describe("GraphQL Schema Contract", () => {
+  it("should match expected schema", () => {
     const schema = buildSchema();
     expect(printSchema(schema)).toMatchSnapshot();
   });
 
-  it('should validate query response', async () => {
+  it("should validate query response", async () => {
     const result = await executeQuery(ENTITY_QUERY);
     expect(result).toMatchSchema(EntitySchema);
   });
@@ -448,6 +480,7 @@ describe('GraphQL Schema Contract', () => {
 ```
 
 ### 4. E2E Tests (Already Strong)
+
 - Test complete user workflows
 - Use Playwright for browser automation
 - Test across different browsers/devices
@@ -508,16 +541,16 @@ pnpm test:ci:junit
 
 ### Coverage Targets
 
-| Component | Current | Target (3 months) | Target (6 months) |
-|-----------|---------|-------------------|-------------------|
-| Security | 0% → 10% | 100% | 100% |
-| Database & Repos | 0% | 90% | 95% |
-| Background Workers | 0% | 80% | 90% |
-| Services | 1.2% | 70% | 85% |
-| API Routes | 3.3% | 75% | 85% |
-| GraphQL Resolvers | 1.1% | 70% | 80% |
-| **Overall Server** | **6.2%** | **60%** | **75%** |
-| **Overall Client** | **7.5%** | **50%** | **65%** |
+| Component          | Current  | Target (3 months) | Target (6 months) |
+| ------------------ | -------- | ----------------- | ----------------- |
+| Security           | 0% → 10% | 100%              | 100%              |
+| Database & Repos   | 0%       | 90%               | 95%               |
+| Background Workers | 0%       | 80%               | 90%               |
+| Services           | 1.2%     | 70%               | 85%               |
+| API Routes         | 3.3%     | 75%               | 85%               |
+| GraphQL Resolvers  | 1.1%     | 70%               | 80%               |
+| **Overall Server** | **6.2%** | **60%**           | **75%**           |
+| **Overall Client** | **7.5%** | **50%**           | **65%**           |
 
 ### Quality Metrics
 
@@ -558,6 +591,7 @@ These can be tackled immediately for quick improvements:
 ## Resources & Documentation
 
 ### Testing Tools Used
+
 - **Jest:** Unit and integration testing framework
 - **Playwright:** E2E testing framework
 - **Supertest:** HTTP assertion library
@@ -565,12 +599,14 @@ These can be tackled immediately for quick improvements:
 - **@faker-js/faker:** Test data generation
 
 ### Documentation
+
 - [Jest Best Practices](https://jestjs.io/docs/getting-started)
 - [Testing Library Guide](https://testing-library.com/docs/)
 - [Playwright Docs](https://playwright.dev/docs/intro)
 - [Martin Fowler: Testing Strategies](https://martinfowler.com/testing/)
 
 ### Internal Resources
+
 - Test examples: `server/src/**/__tests__/`
 - Test setup: `jest.setup.ts`
 - E2E examples: `e2e/`

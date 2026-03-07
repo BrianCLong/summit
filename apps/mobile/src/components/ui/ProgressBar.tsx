@@ -1,9 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
@@ -59,9 +56,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       {(showLabel || label) && (
         <View className="flex-row justify-between mb-1">
           {label && <Text className="text-sm text-dark-muted">{label}</Text>}
-          {showLabel && (
-            <Text className="text-sm text-dark-muted">{Math.round(percentage)}%</Text>
-          )}
+          {showLabel && <Text className="text-sm text-dark-muted">{Math.round(percentage)}%</Text>}
         </View>
       )}
       <View
@@ -70,10 +65,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           heightClasses[height],
         )}
       >
-        <Animated.View
-          style={animatedStyle}
-          className={progressVariants({ variant })}
-        />
+        <Animated.View style={animatedStyle} className={progressVariants({ variant })} />
       </View>
     </View>
   );
@@ -105,7 +97,10 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <View className={cn('items-center justify-center', className)} style={{ width: size, height: size }}>
+    <View
+      className={cn('items-center justify-center', className)}
+      style={{ width: size, height: size }}
+    >
       <View
         className="absolute"
         style={{

@@ -87,10 +87,7 @@
       "policy_tags": ["internal_only"]
     }
   ],
-  "block_order": [
-    "block-governance-drift-context",
-    "block-governance-drift-procedure"
-  ],
+  "block_order": ["block-governance-drift-context", "block-governance-drift-procedure"],
   "actions": [
     {
       "kind": "issue",

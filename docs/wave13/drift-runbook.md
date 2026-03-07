@@ -1,6 +1,7 @@
 # Drift Detection & Remediation Runbook
 
 ## Detection Pipeline
+
 1. **IaC Diff**: nightly `terraform plan -detailed-exitcode` + `kubectl diff` for Kubernetes resources.
 2. **Runtime Snapshot**: export config from running pods (`/config/runtime.json`) and compare to git-tracked desired state.
 3. **Severity**:
@@ -9,6 +10,7 @@
    - Critical: security controls, network policies, data retention; triggers PagerDuty.
 
 ## Response Steps
+
 1. **Triage**: confirm drift is real (exclude expected changes) and classify severity.
 2. **Containment**: for critical drift, freeze deployments in affected namespace via ArgoCD pause.
 3. **Remediation**:
@@ -18,8 +20,10 @@
 5. **Postmortem**: capture root cause, add guardrail (e.g., policy check) if needed.
 
 ## Controlled Drift Drill
+
 - Staging introduces a mismatched `ConfigMap` value; detector should raise a warning within one cycle (<1h) and produce diff artifact.
 
 ## Contacts
+
 - On-call: `#platform-oncall`
 - Escalation: SRE manager after 2 hours unresolved critical drift

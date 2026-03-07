@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 type Pin = {
   step?: string;
@@ -9,27 +9,24 @@ type Pin = {
 };
 
 async function getPins(): Promise<Pin[]> {
-  const base =
-    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? "/api/maestro/v1";
   const res = await fetch(`${base}/routing/pins`);
-  if (!res.ok) throw new Error('Failed to load pins');
+  if (!res.ok) throw new Error("Failed to load pins");
   return res.json();
 }
 async function putPin(pin: Pin): Promise<void> {
-  const base =
-    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? "/api/maestro/v1";
   await fetch(`${base}/routing/pin`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(pin),
   });
 }
 async function explainPolicy(payload: any): Promise<any> {
-  const base =
-    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? "/api/maestro/v1";
   const res = await fetch(`${base}/policies/explain`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   return res.json();
@@ -37,9 +34,9 @@ async function explainPolicy(payload: any): Promise<any> {
 
 export default function RoutingPinPanel() {
   const [pins, setPins] = useState<Pin[]>([]);
-  const [step, setStep] = useState('');
-  const [model, setModel] = useState('');
-  const [note, setNote] = useState('');
+  const [step, setStep] = useState("");
+  const [model, setModel] = useState("");
+  const [note, setNote] = useState("");
   const [explain, setExplain] = useState<any | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -58,7 +55,7 @@ export default function RoutingPinPanel() {
     setErr(null);
     try {
       const resp = await explainPolicy({
-        action: 'route.pin',
+        action: "route.pin",
         step,
         model,
         note,
@@ -77,7 +74,7 @@ export default function RoutingPinPanel() {
       await putPin({ step: step || undefined, model, reason: note });
       await refresh();
       setExplain(null);
-      setNote('');
+      setNote("");
     } catch (e) {
       setErr(String(e));
     } finally {
@@ -112,11 +109,7 @@ export default function RoutingPinPanel() {
         />
       </div>
       <div className="flex gap-2">
-        <button
-          className="border rounded px-3 py-1"
-          onClick={onExplain}
-          disabled={busy}
-        >
+        <button className="border rounded px-3 py-1" onClick={onExplain} disabled={busy}>
           Explain (Policy)
         </button>
         <button
@@ -137,12 +130,9 @@ export default function RoutingPinPanel() {
         <h4 className="text-sm font-medium mt-2">Current Pins</h4>
         <ul className="text-sm mt-1 space-y-1 max-h-[30vh] overflow-auto pr-1">
           {pins.map((p, idx) => (
-            <li
-              key={idx}
-              className="border rounded p-2 flex items-center justify-between"
-            >
+            <li key={idx} className="border rounded p-2 flex items-center justify-between">
               <div>
-                <span className="font-mono">{p.step || '*'}</span> →{' '}
+                <span className="font-mono">{p.step || "*"}</span> →{" "}
                 <span className="font-mono">{p.model}</span>
               </div>
               <div className="text-xs text-gray-600">{p.reason}</div>

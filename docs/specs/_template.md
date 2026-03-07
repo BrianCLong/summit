@@ -2,18 +2,18 @@
 
 ## Overview
 
-- **Goal**: 
-- **Owner**: 
-- **Scope**: 
-- **Out of Scope**: 
+- **Goal**:
+- **Owner**:
+- **Scope**:
+- **Out of Scope**:
 
 ## Non-goals
 
-- 
+-
 
 ## Constraints
 
-- 
+-
 
 ## Threats
 
@@ -27,7 +27,7 @@ List threats, impact, and mitigations.
 
 Write acceptance tests that can be executed in CI.
 
-1. 
+1.
 
 ## Task Checklist
 

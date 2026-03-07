@@ -28,16 +28,16 @@ export async function generateSummary(params: SummaryParams): Promise<Investigat
 
   const summary: InvestigationSummary = {
     id: investigationId,
-    title: 'Financial Network Investigation',
+    title: "Financial Network Investigation",
     entityCount: 156,
     relationshipCount: 423,
     keyFindings: [
-      'Identified 12 shell companies in the network',
-      'Traced $2.3M in suspicious transactions',
-      'Found connections to 3 known entities of interest',
-      'Detected circular ownership patterns',
+      "Identified 12 shell companies in the network",
+      "Traced $2.3M in suspicious transactions",
+      "Found connections to 3 known entities of interest",
+      "Detected circular ownership patterns",
     ],
-    status: 'active',
+    status: "active",
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString(),
   };

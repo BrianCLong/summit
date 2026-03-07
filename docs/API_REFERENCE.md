@@ -19,26 +19,26 @@ Authorization: Bearer <your_access_token>
 
 ### Authentication
 
-| Method | Endpoint | Description | Request Body | Response |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/auth/signup` | Register a new user | `{ email, password, name }` | `{ user, message }` |
-| `POST` | `/auth/login` | Log in a user | `{ email, password }` | `{ user, accessToken, refreshToken }` |
-| `POST` | `/auth/refresh_token` | Refresh access token | (Cookie: refreshToken) | `{ accessToken }` |
-| `POST` | `/auth/verify-email` | Verify email address | `{ token }` | `{ message }` |
+| Method | Endpoint              | Description          | Request Body                | Response                              |
+| :----- | :-------------------- | :------------------- | :-------------------------- | :------------------------------------ |
+| `POST` | `/auth/signup`        | Register a new user  | `{ email, password, name }` | `{ user, message }`                   |
+| `POST` | `/auth/login`         | Log in a user        | `{ email, password }`       | `{ user, accessToken, refreshToken }` |
+| `POST` | `/auth/refresh_token` | Refresh access token | (Cookie: refreshToken)      | `{ accessToken }`                     |
+| `POST` | `/auth/verify-email`  | Verify email address | `{ token }`                 | `{ message }`                         |
 
 ### System
 
-| Method | Endpoint | Description | Response |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Deep system health check | `{ status, services: { ... } }` |
-| `GET` | `/metrics` | Prometheus metrics | (Text format) |
+| Method | Endpoint   | Description              | Response                        |
+| :----- | :--------- | :----------------------- | :------------------------------ |
+| `GET`  | `/health`  | Deep system health check | `{ status, services: { ... } }` |
+| `GET`  | `/metrics` | Prometheus metrics       | (Text format)                   |
 
 ### Ingestion & Webhooks
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/ingestion/batch` | Submit a batch of entities/edges for ingestion |
-| `POST` | `/webhooks/:source` | Receive webhooks from external providers |
+| Method | Endpoint            | Description                                    |
+| :----- | :------------------ | :--------------------------------------------- |
+| `POST` | `/ingestion/batch`  | Submit a batch of entities/edges for ingestion |
+| `POST` | `/webhooks/:source` | Receive webhooks from external providers       |
 
 ## GraphQL API
 
@@ -50,6 +50,7 @@ The primary data interface is GraphQL.
 ### Common Queries
 
 **Search Entities**
+
 ```graphql
 query Search($query: String!) {
   search(query: $query) {
@@ -65,6 +66,7 @@ query Search($query: String!) {
 ```
 
 **Get Entity Details**
+
 ```graphql
 query GetEntity($id: ID!) {
   entity(id: $id) {
@@ -86,6 +88,7 @@ query GetEntity($id: ID!) {
 ### Common Mutations
 
 **Create Investigation**
+
 ```graphql
 mutation CreateInvestigation($name: String!) {
   createInvestigation(name: $name) {

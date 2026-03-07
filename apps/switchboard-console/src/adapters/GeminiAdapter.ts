@@ -1,8 +1,8 @@
-import { ProviderAdapter, ProviderSession } from '../types';
+import { ProviderAdapter, ProviderSession } from "../types";
 
 export class GeminiAdapter implements ProviderAdapter {
-  id: ProviderAdapter['id'] = 'gemini';
-  displayName = 'Gemini CLI';
+  id: ProviderAdapter["id"] = "gemini";
+  displayName = "Gemini CLI";
 
   async isAvailable(): Promise<boolean> {
     return false;
@@ -10,6 +10,6 @@ export class GeminiAdapter implements ProviderAdapter {
 
   async startSession(): Promise<ProviderSession> {
     // TODO: implement Gemini CLI adapter with streaming and tool action parsing.
-    throw new Error('Gemini adapter not implemented yet.');
+    throw new Error("Gemini adapter not implemented yet.");
   }
 }

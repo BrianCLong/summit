@@ -4,44 +4,44 @@
  * Displays source credibility rating using Admiralty/NATO system.
  */
 
-import React from 'react';
-import type { CredibilityRating, InformationRating } from '../constants.js';
-import { CREDIBILITY_RATINGS, INFORMATION_RATINGS } from '../constants.js';
+import React from "react";
+import type { CredibilityRating, InformationRating } from "../constants.js";
+import { CREDIBILITY_RATINGS, INFORMATION_RATINGS } from "../constants.js";
 
 export interface CredibilityBadgeProps {
   sourceRating: CredibilityRating;
   infoRating?: InformationRating;
   score?: number;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   showLabel?: boolean;
   showScore?: boolean;
 }
 
 const getRatingColor = (rating: CredibilityRating): string => {
   const colors: Record<CredibilityRating, string> = {
-    A: '#10b981', // Green - Completely reliable
-    B: '#22c55e', // Light green - Usually reliable
-    C: '#f59e0b', // Amber - Fairly reliable
-    D: '#f97316', // Orange - Not usually reliable
-    E: '#ef4444', // Red - Unreliable
-    F: '#6b7280', // Gray - Cannot be judged
+    A: "#10b981", // Green - Completely reliable
+    B: "#22c55e", // Light green - Usually reliable
+    C: "#f59e0b", // Amber - Fairly reliable
+    D: "#f97316", // Orange - Not usually reliable
+    E: "#ef4444", // Red - Unreliable
+    F: "#6b7280", // Gray - Cannot be judged
   };
   return colors[rating];
 };
 
 const getScoreColor = (score: number): string => {
-  if (score >= 80) return '#10b981';
-  if (score >= 60) return '#22c55e';
-  if (score >= 40) return '#f59e0b';
-  if (score >= 20) return '#f97316';
-  return '#ef4444';
+  if (score >= 80) return "#10b981";
+  if (score >= 60) return "#22c55e";
+  if (score >= 40) return "#f59e0b";
+  if (score >= 20) return "#f97316";
+  return "#ef4444";
 };
 
 export const CredibilityBadge: React.FC<CredibilityBadgeProps> = ({
   sourceRating,
   infoRating,
   score,
-  size = 'medium',
+  size = "medium",
   showLabel = true,
   showScore = false,
 }) => {
@@ -49,9 +49,9 @@ export const CredibilityBadge: React.FC<CredibilityBadgeProps> = ({
   const infoRatingInfo = infoRating ? INFORMATION_RATINGS[infoRating] : null;
 
   const sizeClasses: Record<string, string> = {
-    small: 'badge-small',
-    medium: 'badge-medium',
-    large: 'badge-large',
+    small: "badge-small",
+    medium: "badge-medium",
+    large: "badge-large",
   };
 
   return (
@@ -90,9 +90,7 @@ export const CredibilityBadge: React.FC<CredibilityBadgeProps> = ({
       {showLabel && (
         <div className="rating-labels">
           <span className="source-label">{ratingInfo.label}</span>
-          {infoRatingInfo && (
-            <span className="info-label">{infoRatingInfo.label}</span>
-          )}
+          {infoRatingInfo && <span className="info-label">{infoRatingInfo.label}</span>}
         </div>
       )}
 
@@ -132,11 +130,11 @@ export const CredibilityInline: React.FC<CredibilityInlineProps> = ({
       className="credibility-inline"
       style={{ color: getRatingColor(sourceRating) }}
       title={`${CREDIBILITY_RATINGS[sourceRating].label}${
-        infoRating ? ` / ${INFORMATION_RATINGS[infoRating].label}` : ''
+        infoRating ? ` / ${INFORMATION_RATINGS[infoRating].label}` : ""
       }`}
     >
       {sourceRating}
-      {infoRating || ''}
+      {infoRating || ""}
     </span>
   );
 };
@@ -145,7 +143,7 @@ export const CredibilityInline: React.FC<CredibilityInlineProps> = ({
  * Credibility trend indicator
  */
 export interface CredibilityTrendProps {
-  trend: 'IMPROVING' | 'STABLE' | 'DECLINING';
+  trend: "IMPROVING" | "STABLE" | "DECLINING";
   previousScore?: number;
   currentScore?: number;
 }
@@ -156,16 +154,14 @@ export const CredibilityTrend: React.FC<CredibilityTrendProps> = ({
   currentScore,
 }) => {
   const trendConfig = {
-    IMPROVING: { icon: '↑', color: '#10b981', label: 'Improving' },
-    STABLE: { icon: '→', color: '#6b7280', label: 'Stable' },
-    DECLINING: { icon: '↓', color: '#ef4444', label: 'Declining' },
+    IMPROVING: { icon: "↑", color: "#10b981", label: "Improving" },
+    STABLE: { icon: "→", color: "#6b7280", label: "Stable" },
+    DECLINING: { icon: "↓", color: "#ef4444", label: "Declining" },
   };
 
   const config = trendConfig[trend];
   const delta =
-    previousScore !== undefined && currentScore !== undefined
-      ? currentScore - previousScore
-      : null;
+    previousScore !== undefined && currentScore !== undefined ? currentScore - previousScore : null;
 
   return (
     <span className="credibility-trend" style={{ color: config.color }}>
@@ -173,7 +169,7 @@ export const CredibilityTrend: React.FC<CredibilityTrendProps> = ({
       <span className="trend-label">{config.label}</span>
       {delta !== null && (
         <span className="trend-delta">
-          ({delta > 0 ? '+' : ''}
+          ({delta > 0 ? "+" : ""}
           {delta})
         </span>
       )}

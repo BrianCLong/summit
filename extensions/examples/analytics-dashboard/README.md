@@ -36,6 +36,7 @@ Create a config file at `.summit/extensions/config/analytics-dashboard.json`:
 ### Copilot
 
 Ask the copilot:
+
 - "Show me entity statistics for the past week"
 - "Generate a summary of investigation INV-123"
 
@@ -95,6 +96,7 @@ summit ext list
 ## Permissions
 
 This extension requires:
+
 - `entities:read` - Read entity data
 - `relationships:read` - Read relationship data
 

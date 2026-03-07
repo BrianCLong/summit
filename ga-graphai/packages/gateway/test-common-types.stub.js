@@ -15,8 +15,8 @@ export const computeValueDensity = (input = {}) => {
 };
 
 export const normalizeLatency = (input) => {
-  const p95 = typeof input === 'number' ? input : input?.p95 ?? 0;
-  const p99 = typeof input === 'number' ? input : input?.p99 ?? p95;
+  const p95 = typeof input === "number" ? input : (input?.p95 ?? 0);
+  const p99 = typeof input === "number" ? input : (input?.p99 ?? p95);
   return { p95, p99 };
 };
 
@@ -38,8 +38,8 @@ export const normalizeCaps = (caps) => caps ?? {};
 export const buildReplayEnvironment = (input) => input;
 export const createReplayDescriptor = (descriptor) => ({
   ...(descriptor ?? {}),
-  id: descriptor?.request?.requestId ?? 'replay-stub',
+  id: descriptor?.request?.requestId ?? "replay-stub",
 });
-export const hashIdentifier = (value) => String(value ?? '');
+export const hashIdentifier = (value) => String(value ?? "");
 export const persistReplayDescriptor = () => undefined;
 export const sanitizePayload = (payload) => payload;

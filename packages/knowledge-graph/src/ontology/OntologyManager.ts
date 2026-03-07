@@ -2,8 +2,8 @@
  * Ontology and Schema Management System
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 import {
   Ontology,
   OntologySchema,
@@ -12,7 +12,7 @@ import {
   SchemaChange,
   SchemaChangeSchema,
   STANDARD_NAMESPACES,
-} from '../types/ontology.js';
+} from "../types/ontology.js";
 
 export class OntologyManager {
   constructor(private driver: Driver) {}
@@ -20,7 +20,9 @@ export class OntologyManager {
   /**
    * Create a new ontology
    */
-  async createOntology(ontology: Omit<Ontology, 'id' | 'createdAt' | 'updatedAt'>): Promise<Ontology> {
+  async createOntology(
+    ontology: Omit<Ontology, "id" | "createdAt" | "updatedAt">
+  ): Promise<Ontology> {
     const now = new Date().toISOString();
     const fullOntology: Ontology = {
       ...ontology,
@@ -56,7 +58,7 @@ export class OntologyManager {
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
           updatedAt: validated.updatedAt,
-        },
+        }
       );
 
       // Create entity types
@@ -90,7 +92,7 @@ export class OntologyManager {
                collect(DISTINCT et) as entityTypes,
                collect(DISTINCT rt) as relationshipTypes
         `,
-        { ontologyId },
+        { ontologyId }
       );
 
       if (result.records.length === 0) {
@@ -98,23 +100,23 @@ export class OntologyManager {
       }
 
       const record = result.records[0];
-      const ontologyNode = record.get('o').properties;
-      const entityTypes = record.get('entityTypes').map((n: any) => n.properties);
-      const relationshipTypes = record.get('relationshipTypes').map((n: any) => n.properties);
+      const ontologyNode = record.get("o").properties;
+      const entityTypes = record.get("entityTypes").map((n: any) => n.properties);
+      const relationshipTypes = record.get("relationshipTypes").map((n: any) => n.properties);
 
       return OntologySchema.parse({
         ...ontologyNode,
-        metadata: JSON.parse(ontologyNode.metadata || '{}'),
+        metadata: JSON.parse(ontologyNode.metadata || "{}"),
         entityTypes: entityTypes.map((et: any) => ({
           ...et,
-          properties: JSON.parse(et.properties || '[]'),
-          parentTypes: JSON.parse(et.parentTypes || '[]'),
+          properties: JSON.parse(et.properties || "[]"),
+          parentTypes: JSON.parse(et.parentTypes || "[]"),
         })),
         relationshipTypes: relationshipTypes.map((rt: any) => ({
           ...rt,
-          properties: JSON.parse(rt.properties || '[]'),
-          sourceTypes: JSON.parse(rt.sourceTypes || '[]'),
-          targetTypes: JSON.parse(rt.targetTypes || '[]'),
+          properties: JSON.parse(rt.properties || "[]"),
+          sourceTypes: JSON.parse(rt.sourceTypes || "[]"),
+          targetTypes: JSON.parse(rt.targetTypes || "[]"),
         })),
         imports: [],
       });
@@ -156,7 +158,7 @@ export class OntologyManager {
           version: entityType.version,
           createdAt: entityType.createdAt,
           updatedAt: entityType.updatedAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -168,7 +170,7 @@ export class OntologyManager {
    */
   private async createRelationshipType(
     ontologyId: string,
-    relType: RelationshipType,
+    relType: RelationshipType
   ): Promise<void> {
     const session = this.driver.session();
     try {
@@ -207,7 +209,7 @@ export class OntologyManager {
           version: relType.version,
           createdAt: relType.createdAt,
           updatedAt: relType.updatedAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -217,44 +219,42 @@ export class OntologyManager {
   /**
    * Import a standard ontology (FOAF, Schema.org, etc.)
    */
-  async importStandardOntology(
-    namespace: keyof typeof STANDARD_NAMESPACES,
-  ): Promise<Ontology> {
+  async importStandardOntology(namespace: keyof typeof STANDARD_NAMESPACES): Promise<Ontology> {
     const now = new Date().toISOString();
 
     // Define standard ontology templates
     const standardOntologies: Record<string, Partial<Ontology>> = {
       FOAF: {
-        name: 'Friend of a Friend (FOAF)',
+        name: "Friend of a Friend (FOAF)",
         namespace: STANDARD_NAMESPACES.FOAF,
-        version: '0.1',
-        description: 'FOAF vocabulary for describing people and organizations',
+        version: "0.1",
+        description: "FOAF vocabulary for describing people and organizations",
         entityTypes: [
           {
             id: uuidv4(),
-            name: 'Person',
+            name: "Person",
             namespace: STANDARD_NAMESPACES.FOAF,
             properties: [
-              { name: 'name', type: 'string', required: true },
-              { name: 'mbox', type: 'string', required: false },
-              { name: 'homepage', type: 'uri', required: false },
-              { name: 'nick', type: 'string', required: false },
+              { name: "name", type: "string", required: true },
+              { name: "mbox", type: "string", required: false },
+              { name: "homepage", type: "uri", required: false },
+              { name: "nick", type: "string", required: false },
             ],
             parentTypes: [],
-            version: '0.1',
+            version: "0.1",
             createdAt: now,
             updatedAt: now,
           },
           {
             id: uuidv4(),
-            name: 'Organization',
+            name: "Organization",
             namespace: STANDARD_NAMESPACES.FOAF,
             properties: [
-              { name: 'name', type: 'string', required: true },
-              { name: 'homepage', type: 'uri', required: false },
+              { name: "name", type: "string", required: true },
+              { name: "homepage", type: "uri", required: false },
             ],
             parentTypes: [],
-            version: '0.1',
+            version: "0.1",
             createdAt: now,
             updatedAt: now,
           },
@@ -262,15 +262,15 @@ export class OntologyManager {
         relationshipTypes: [
           {
             id: uuidv4(),
-            name: 'knows',
+            name: "knows",
             namespace: STANDARD_NAMESPACES.FOAF,
-            sourceTypes: ['Person'],
-            targetTypes: ['Person'],
+            sourceTypes: ["Person"],
+            targetTypes: ["Person"],
             properties: [],
-            cardinality: 'many-to-many',
+            cardinality: "many-to-many",
             symmetric: true,
             transitive: false,
-            version: '0.1',
+            version: "0.1",
             createdAt: now,
             updatedAt: now,
           },
@@ -278,22 +278,22 @@ export class OntologyManager {
         imports: [],
       },
       SCHEMA_ORG: {
-        name: 'Schema.org',
+        name: "Schema.org",
         namespace: STANDARD_NAMESPACES.SCHEMA_ORG,
-        version: '1.0',
-        description: 'Schema.org vocabulary for structured data',
+        version: "1.0",
+        description: "Schema.org vocabulary for structured data",
         entityTypes: [
           {
             id: uuidv4(),
-            name: 'Thing',
+            name: "Thing",
             namespace: STANDARD_NAMESPACES.SCHEMA_ORG,
             properties: [
-              { name: 'name', type: 'string', required: true },
-              { name: 'description', type: 'string', required: false },
-              { name: 'url', type: 'uri', required: false },
+              { name: "name", type: "string", required: true },
+              { name: "description", type: "string", required: false },
+              { name: "url", type: "uri", required: false },
             ],
             parentTypes: [],
-            version: '1.0',
+            version: "1.0",
             createdAt: now,
             updatedAt: now,
           },
@@ -308,15 +308,15 @@ export class OntologyManager {
       throw new Error(`Unknown standard ontology: ${namespace}`);
     }
 
-    return this.createOntology(ontologyTemplate as Omit<Ontology, 'id' | 'createdAt' | 'updatedAt'>);
+    return this.createOntology(
+      ontologyTemplate as Omit<Ontology, "id" | "createdAt" | "updatedAt">
+    );
   }
 
   /**
    * Record a schema change for versioning
    */
-  async recordSchemaChange(
-    change: Omit<SchemaChange, 'id' | 'createdAt'>,
-  ): Promise<SchemaChange> {
+  async recordSchemaChange(change: Omit<SchemaChange, "id" | "createdAt">): Promise<SchemaChange> {
     const fullChange: SchemaChange = {
       ...change,
       id: uuidv4(),
@@ -355,7 +355,7 @@ export class OntologyManager {
           appliedAt: validated.appliedAt || null,
           createdBy: validated.createdBy,
           createdAt: validated.createdAt,
-        },
+        }
       );
 
       return validated;
@@ -376,11 +376,11 @@ export class OntologyManager {
         RETURN sc
         ORDER BY sc.createdAt DESC
         `,
-        { ontologyId },
+        { ontologyId }
       );
 
       return result.records.map((record) => {
-        const props = record.get('sc').properties;
+        const props = record.get("sc").properties;
         return SchemaChangeSchema.parse({
           ...props,
           changes: JSON.parse(props.changes),
@@ -394,7 +394,10 @@ export class OntologyManager {
   /**
    * Validate entity against ontology
    */
-  async validateEntity(entityTypeId: string, properties: Record<string, any>): Promise<{
+  async validateEntity(
+    entityTypeId: string,
+    properties: Record<string, any>
+  ): Promise<{
     valid: boolean;
     errors: string[];
   }> {
@@ -405,15 +408,15 @@ export class OntologyManager {
         MATCH (et:EntityType {id: $entityTypeId})
         RETURN et
         `,
-        { entityTypeId },
+        { entityTypeId }
       );
 
       if (result.records.length === 0) {
-        return { valid: false, errors: ['Entity type not found'] };
+        return { valid: false, errors: ["Entity type not found"] };
       }
 
-      const entityType = result.records[0].get('et').properties;
-      const typeProperties = JSON.parse(entityType.properties || '[]');
+      const entityType = result.records[0].get("et").properties;
+      const typeProperties = JSON.parse(entityType.properties || "[]");
 
       const errors: string[] = [];
 
@@ -426,13 +429,13 @@ export class OntologyManager {
         if (prop.name in properties) {
           const value = properties[prop.name];
           // Basic type checking
-          if (prop.type === 'number' && typeof value !== 'number') {
+          if (prop.type === "number" && typeof value !== "number") {
             errors.push(`Property '${prop.name}' must be a number`);
           }
-          if (prop.type === 'string' && typeof value !== 'string') {
+          if (prop.type === "string" && typeof value !== "string") {
             errors.push(`Property '${prop.name}' must be a string`);
           }
-          if (prop.type === 'boolean' && typeof value !== 'boolean') {
+          if (prop.type === "boolean" && typeof value !== "boolean") {
             errors.push(`Property '${prop.name}' must be a boolean`);
           }
         }

@@ -70,12 +70,12 @@ Sensor, Runbook, Authority, License
 ```typescript
 interface PolicyLabels {
   origin: string; // Source attribution
-  sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
-  clearance: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
+  sensitivity: "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "SECRET" | "TOP_SECRET";
+  clearance: "UNCLASSIFIED" | "CONFIDENTIAL" | "SECRET" | "TOP_SECRET";
   legalBasis: string; // Legal authority (required if sensitivity > INTERNAL)
   needToKnow: string[]; // Compartmentation tags
   purposeLimitation: string[]; // Allowable purposes
-  retentionClass: 'TRANSIENT' | 'SHORT' | 'MEDIUM' | 'LONG' | 'PERMANENT';
+  retentionClass: "TRANSIENT" | "SHORT" | "MEDIUM" | "LONG" | "PERMANENT";
 }
 ```
 

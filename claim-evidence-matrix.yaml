@@ -144,4 +144,4 @@ verification:
 
   exceptions:
     # Claims that are verified through manual review rather than automated tests
-    - claim_id: null  # No exceptions currently
+    - claim_id: null # No exceptions currently

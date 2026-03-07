@@ -4,15 +4,7 @@
   "title": "LaunchpadProject",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "project_id",
-    "agent_id",
-    "title",
-    "tagline",
-    "category",
-    "links",
-    "submitted_day"
-  ],
+  "required": ["project_id", "agent_id", "title", "tagline", "category", "links", "submitted_day"],
   "properties": {
     "project_id": {
       "type": "string",

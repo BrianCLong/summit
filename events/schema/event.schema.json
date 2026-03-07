@@ -4,9 +4,9 @@
   "ts": "RFC3339",
   "tenant": "t1",
   "type": "graph.node.created|graph.edge.updated|search.indexed|workflow.status",
-  "entity": {"kind":"node|edge|report","id":"..."},
+  "entity": { "kind": "node|edge|report", "id": "..." },
   "revision": 42,
   "payload": { "diff": {}, "after": {} },
-  "causality": {"txid":"...", "source":"postgres|neo4j|typesense|service-x"},
-  "trace": {"trace_id":"...", "span_id":"..."}
+  "causality": { "txid": "...", "source": "postgres|neo4j|typesense|service-x" },
+  "trace": { "trace_id": "...", "span_id": "..." }
 }

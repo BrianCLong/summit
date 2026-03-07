@@ -2,11 +2,11 @@ name: Container Security Scan
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 permissions:
   contents: read
@@ -36,9 +36,9 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: 'intelgraph/maestro:latest'
-          format: 'table'
-          exit-code: '1'
+          image-ref: "intelgraph/maestro:latest"
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"

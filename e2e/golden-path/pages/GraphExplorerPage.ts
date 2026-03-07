@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from "@playwright/test";
 
 export class GraphExplorerPage {
   readonly page: Page;
@@ -8,7 +8,7 @@ export class GraphExplorerPage {
   }
 
   async goto() {
-    await this.page.goto('/graph');
+    await this.page.goto("/graph");
   }
 
   async verifyLoaded() {

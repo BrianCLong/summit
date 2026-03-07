@@ -144,14 +144,10 @@ Observability: digest metrics, motif heatmaps, WS latency; Security: CSRF, CSP, 
 
 ```ts
 // apps/web/src/pwa/sw.ts
-self.addEventListener('install', (e: any) => {
-  e.waitUntil(
-    caches
-      .open('ig-shell')
-      .then((c) => c.addAll(['/', '/mobile', '/manifest.json'])),
-  );
+self.addEventListener("install", (e: any) => {
+  e.waitUntil(caches.open("ig-shell").then((c) => c.addAll(["/", "/mobile", "/manifest.json"])));
 });
-self.addEventListener('fetch', (e: any) => {
+self.addEventListener("fetch", (e: any) => {
   e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request)));
 });
 ```
@@ -160,8 +156,8 @@ self.addEventListener('fetch', (e: any) => {
 
 ```tsx
 // apps/web/src/mobile/TriPaneMobile.tsx
-import React, { useEffect } from 'react';
-import $ from 'jquery';
+import React, { useEffect } from "react";
+import $ from "jquery";
 export default function TriPaneMobile() {
   useEffect(() => {
     /* subscribe to WS alerts */
@@ -180,11 +176,11 @@ export default function TriPaneMobile() {
 
 ```ts
 // server/src/notify/webpush.ts
-import webpush from 'web-push';
+import webpush from "web-push";
 webpush.setVapidDetails(
-  process.env.WEBPUSH_SUBJECT || 'mailto:ops@example.com',
+  process.env.WEBPUSH_SUBJECT || "mailto:ops@example.com",
   process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
 );
 export async function sendWebPush(sub: any, payload: any) {
   return webpush.sendNotification(sub, JSON.stringify(payload));
@@ -201,10 +197,7 @@ export type Cascade = {
   intensity: number;
   why: string;
 };
-export async function findCascades(
-  events: any[],
-  days: number,
-): Promise<Cascade[]> {
+export async function findCascades(events: any[], days: number): Promise<Cascade[]> {
   // placeholder implementation; replace with indexed scan + time windows
   const out: Cascade[] = [];
   return out;
@@ -215,14 +208,14 @@ export async function findCascades(
 // server/src/analytics/motifs/bridges.ts
 export type Bridge = { node: string; score: number; why: string };
 export async function findBridges(
-  centrality: { node: string; bet: number; pr: number; community: string }[],
+  centrality: { node: string; bet: number; pr: number; community: string }[]
 ): Promise<Bridge[]> {
   return centrality
     .filter((c) => c.bet > 0.6 && c.pr < 0.2)
     .map((c) => ({
       node: c.node,
       score: c.bet - c.pr,
-      why: 'high betweenness, low in‑community PR',
+      why: "high betweenness, low in‑community PR",
     }));
 }
 ```
@@ -231,16 +224,16 @@ export async function findBridges(
 
 ```ts
 // server/src/security/headers.ts
-import helmet from 'helmet';
-import csurf from 'csurf';
+import helmet from "helmet";
+import csurf from "csurf";
 export const securityMiddlewares = [
   helmet({
-    frameguard: { action: 'deny' },
+    frameguard: { action: "deny" },
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
-        'script-src': ["'self'"],
-        'connect-src': ["'self'", 'https://pushservice.example'],
+        "script-src": ["'self'"],
+        "connect-src": ["'self'", "https://pushservice.example"],
       },
     },
   }),
@@ -273,20 +266,20 @@ jobs:
 
 ```ts
 // server/src/metrics/notify_digest.ts
-import client from 'prom-client';
+import client from "prom-client";
 export const digestBuild = new client.Histogram({
-  name: 'notify_digest_build_ms',
-  help: 'Digest build time',
+  name: "notify_digest_build_ms",
+  help: "Digest build time",
   buckets: [50, 100, 200, 500, 1000, 2000],
 });
 export const digestDelivery = new client.Histogram({
-  name: 'notify_digest_delivery_ms',
-  help: 'Digest delivery time',
+  name: "notify_digest_delivery_ms",
+  help: "Digest delivery time",
   buckets: [100, 200, 500, 1000, 2000, 5000],
 });
 export const digestFailures = new client.Counter({
-  name: 'notify_digest_failures_total',
-  help: 'Digest failures',
+  name: "notify_digest_failures_total",
+  help: "Digest failures",
 });
 ```
 

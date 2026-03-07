@@ -12,23 +12,27 @@ NDS v0.1 converts the Narrative Dominance Suite PRD into an executable, Summit-n
 ## Repo targets (implementation map)
 
 **Core data & governance**
+
 - `packages/knowledge-graph/`: NOG schema, lifecycle state machine, propagation tensors, deterministic query patterns.
 - `packages/prov-ledger/`: provenance signing, policy decision records, audit trails for interventions.
 - `packages/policy/`: policy-as-code for governor agent constraints (OPA-style).
 - `packages/common-types/`: shared NOG and agent contract types.
 
 **Orchestration & agents**
+
 - `packages/maestro-conductor/`: multi-agent control loop orchestration, scheduling, and telemetry.
 - `packages/workflow-diff-engine/`: scenario diffing and counterfactual comparison outputs.
 - `packages/graphai/` or `packages/graphai`-adjacent: graph-aware ML scoring primitives.
 
 **API + UX surfaces**
+
 - `server/`: narrative radar API, simulation endpoints, governance decisions feed.
 - `apps/web/`: narrative radar UI, graph explorer, simulator, governance console.
 
 ## v0.1 deliverables
 
 ### 1) Narrative Operating Graph (NOG) core
+
 - **Graph entities**: Narrative, NarrativeStage, NarrativeMutation, Actor, Channel, Event, Asset, Outcome.
 - **Lifecycle state machine**: seed → propagate → peak → mutate → decline.
 - **Propagation tensors**: cross-channel propagation edges with `observed_at`, `geo`, `language`, `medium`, and `weight`.
@@ -37,31 +41,38 @@ NDS v0.1 converts the Narrative Dominance Suite PRD into an executable, Summit-n
 ### 2) Multi-agent control loop (templates)
 
 **Scout Agent**
+
 - Inputs: OSINT feeds, anomaly triggers, prior seeds.
 - Outputs: candidate seeds + evidence bundle references.
 
 **Cartographer Agent**
+
 - Inputs: seeds + entities.
 - Outputs: NOG updates (nodes/edges), lifecycle stage tags, mutation detection.
 
 **Forecaster Agent**
+
 - Inputs: NOG slice + historical trajectories.
 - Outputs: forecast curves, inflection points, risk score distributions.
 
 **Strategist Agent**
+
 - Inputs: objectives + constraints + forecasts.
 - Outputs: candidate interventions + predicted impacts.
 
 **Governor Agent**
+
 - Inputs: interventions + policies + provenance.
 - Outputs: allow/deny decisions, rationale, evidence pointers.
 
 ### 3) Counterfactual Simulator
+
 - Takes Strategist interventions + NOG snapshot.
 - Produces side-by-side trajectories, risk deltas, and uncertainty intervals.
 - Emits governance decision records alongside scenario artifacts.
 
 ### 4) Governance & provenance rail
+
 - Every intervention must carry: policy decision, provenance signature, jurisdictional flags.
 - Evidence bundle structure aligned to `prov-ledger` + audit requirements.
 

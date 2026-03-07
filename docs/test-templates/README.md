@@ -5,9 +5,11 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 ## Available Templates
 
 ### 1. GraphQL Resolver Tests
+
 **File:** `graphql-resolver.test.ts`
 
 **Use for:**
+
 - Testing GraphQL queries and mutations
 - Validating resolver logic
 - Testing authorization
@@ -15,6 +17,7 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Error handling
 
 **Key Features:**
+
 - Mock context setup
 - Service mocking patterns
 - Authorization testing
@@ -22,9 +25,11 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Subscription testing
 
 ### 2. Neo4j Graph Operations Tests
+
 **File:** `neo4j-operations.test.ts`
 
 **Use for:**
+
 - Testing graph database operations
 - Node and relationship CRUD
 - Cypher query execution
@@ -32,6 +37,7 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Transaction handling
 
 **Key Features:**
+
 - Driver and session mocking
 - Query validation
 - Performance testing
@@ -39,9 +45,11 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Transaction rollback testing
 
 ### 3. Narrative Simulation Engine Tests
+
 **File:** `narrative-engine.test.ts`
 
 **Use for:**
+
 - Testing simulation engine logic
 - Actor behavior validation
 - Event processing
@@ -49,6 +57,7 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Scenario execution
 
 **Key Features:**
+
 - Deterministic testing
 - State management
 - Influence propagation
@@ -56,9 +65,11 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Performance benchmarks
 
 ### 4. AI/ML Pipeline Tests
+
 **File:** `ai-ml-pipeline.test.ts`
 
 **Use for:**
+
 - Testing ML model inference
 - Pipeline orchestration
 - Data preprocessing
@@ -66,6 +77,7 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Performance testing
 
 **Key Features:**
+
 - Model loading and caching
 - Batch prediction testing
 - Input validation
@@ -73,9 +85,11 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Monitoring and metrics
 
 ### 5. Golden Path Integration Tests
+
 **File:** `golden-path-integration.test.ts`
 
 **Use for:**
+
 - End-to-end workflow testing
 - Database integration testing
 - Multi-service orchestration
@@ -83,6 +97,7 @@ This directory contains comprehensive test templates for the Summit/IntelGraph p
 - Real-time update testing
 
 **Key Features:**
+
 - Complete workflow coverage
 - Database integration
 - WebSocket testing
@@ -130,9 +145,11 @@ pnpm test:coverage
 ### Arrange-Act-Assert (AAA)
 
 ```typescript
-it('should do something', async () => {
+it("should do something", async () => {
   // Arrange: Setup test data and mocks
-  const input = { /* test data */ };
+  const input = {
+    /* test data */
+  };
   const mockService = { method: jest.fn() };
 
   // Act: Execute the operation
@@ -147,9 +164,9 @@ it('should do something', async () => {
 ### Given-When-Then (BDD)
 
 ```typescript
-describe('Given a user is authenticated', () => {
-  describe('When creating an entity', () => {
-    it('Then should create entity successfully', async () => {
+describe("Given a user is authenticated", () => {
+  describe("When creating an entity", () => {
+    it("Then should create entity successfully", async () => {
       // Test implementation
     });
   });
@@ -160,8 +177,8 @@ describe('Given a user is authenticated', () => {
 
 ```typescript
 const createMockEntity = (overrides = {}) => ({
-  id: 'entity-' + Math.random(),
-  name: 'Test Entity',
+  id: "entity-" + Math.random(),
+  name: "Test Entity",
   ...overrides,
 });
 ```
@@ -186,9 +203,9 @@ const createMockServices = () => ({
 
 ```typescript
 const createTestInvestigation = () => ({
-  id: 'inv-' + Date.now(),
-  name: 'Test Investigation',
-  status: 'active',
+  id: "inv-" + Date.now(),
+  name: "Test Investigation",
+  status: "active",
   createdAt: new Date(),
 });
 ```
@@ -200,9 +217,9 @@ const waitFor = async (condition, timeout = 5000) => {
   const start = Date.now();
   while (!condition()) {
     if (Date.now() - start > timeout) {
-      throw new Error('Timeout');
+      throw new Error("Timeout");
     }
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 };
 ```

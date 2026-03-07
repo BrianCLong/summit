@@ -1,5 +1,5 @@
-import React from 'react';
-import { useReasonForAccess } from '../ReasonForAccessContext';
+import React from "react";
+import { useReasonForAccess } from "../ReasonForAccessContext";
 
 export function AdminPage() {
   const { auditLog } = useReasonForAccess();
@@ -27,9 +27,7 @@ export function AdminPage() {
                   {new Date(entry.timestamp).toLocaleString()}
                 </p>
                 <p className="mt-1 text-sm text-slate-300">
-                  <span className="font-semibold text-white">
-                    {entry.resource}
-                  </span>
+                  <span className="font-semibold text-white">{entry.resource}</span>
                 </p>
                 <p className="mt-2 text-sm text-emerald-300">{entry.reason}</p>
               </li>

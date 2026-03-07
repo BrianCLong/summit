@@ -34,6 +34,7 @@ Trace events conform to `evals/runner/trace-event.schema.json` and are stored as
 ## Deterministic Checks
 
 Deterministic graders inspect trace events and artifacts to verify:
+
 - Trigger accuracy (positive and negative controls)
 - Required artifacts exist (and forbidden paths were untouched)
 - Command execution outcomes and boundaries
@@ -44,9 +45,7 @@ The output is machine-readable:
 {
   "overall_pass": true,
   "score": 100,
-  "checks": [
-    { "id": "trigger-case-1", "pass": true, "notes": "..." }
-  ]
+  "checks": [{ "id": "trigger-case-1", "pass": true, "notes": "..." }]
 }
 ```
 

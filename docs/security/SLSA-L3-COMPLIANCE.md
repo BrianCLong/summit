@@ -25,16 +25,17 @@ This document describes IntelGraph's implementation of [SLSA (Supply-chain Level
 
 SLSA is a security framework that provides a checklist of standards and controls to prevent tampering, improve integrity, and secure packages and infrastructure. It consists of four levels:
 
-| Level | Description |
-|-------|-------------|
-| SLSA 1 | Documentation of the build process |
-| SLSA 2 | Tamper resistance of the build service |
-| SLSA 3 | Extra resistance to specific threats |
+| Level  | Description                                      |
+| ------ | ------------------------------------------------ |
+| SLSA 1 | Documentation of the build process               |
+| SLSA 2 | Tamper resistance of the build service           |
+| SLSA 3 | Extra resistance to specific threats             |
 | SLSA 4 | Highest level of assurance (reproducible builds) |
 
 ### Why SLSA Level 3?
 
 SLSA Level 3 provides:
+
 - **Hermetic builds**: Build environment is isolated with no network access
 - **Signed provenance**: Cryptographic proof of build origin
 - **Non-falsifiable attestations**: Attestations cannot be forged
@@ -46,33 +47,33 @@ SLSA Level 3 provides:
 
 ### Build Requirements
 
-| Requirement | Implementation |
-|-------------|----------------|
-| **Scripted Build** | Dockerfile and GitHub Actions workflows |
-| **Build Service** | GitHub-hosted runners |
-| **Build as Code** | All build logic in repository |
-| **Ephemeral Environment** | Fresh runner for each build |
-| **Isolated** | Docker Buildx with `network=none` |
-| **Parameterless** | No manual inputs during build |
+| Requirement               | Implementation                          |
+| ------------------------- | --------------------------------------- |
+| **Scripted Build**        | Dockerfile and GitHub Actions workflows |
+| **Build Service**         | GitHub-hosted runners                   |
+| **Build as Code**         | All build logic in repository           |
+| **Ephemeral Environment** | Fresh runner for each build             |
+| **Isolated**              | Docker Buildx with `network=none`       |
+| **Parameterless**         | No manual inputs during build           |
 
 ### Source Requirements
 
-| Requirement | Implementation |
-|-------------|----------------|
-| **Version Controlled** | Git repository |
-| **Verified History** | Commit signatures (optional) |
-| **Retained 18 months** | GitHub retention policies |
-| **Two-Person Reviewed** | PR review requirements |
+| Requirement             | Implementation               |
+| ----------------------- | ---------------------------- |
+| **Version Controlled**  | Git repository               |
+| **Verified History**    | Commit signatures (optional) |
+| **Retained 18 months**  | GitHub retention policies    |
+| **Two-Person Reviewed** | PR review requirements       |
 
 ### Provenance Requirements
 
-| Requirement | Implementation |
-|-------------|----------------|
-| **Available** | SLSA provenance generated for all builds |
-| **Authenticated** | OIDC keyless signing via Sigstore |
-| **Service Generated** | slsa-github-generator workflow |
-| **Non-Falsifiable** | Signed by trusted builder identity |
-| **Dependencies Complete** | SBOM (CycloneDX + SPDX) included |
+| Requirement               | Implementation                           |
+| ------------------------- | ---------------------------------------- |
+| **Available**             | SLSA provenance generated for all builds |
+| **Authenticated**         | OIDC keyless signing via Sigstore        |
+| **Service Generated**     | slsa-github-generator workflow           |
+| **Non-Falsifiable**       | Signed by trusted builder identity       |
+| **Dependencies Complete** | SBOM (CycloneDX + SPDX) included         |
 
 ---
 
@@ -129,6 +130,7 @@ SLSA Level 3 provides:
 **File**: `.github/workflows/slsa-l3-provenance.yml`
 
 This workflow runs on:
+
 - Push to `main` branch
 - Tag creation (`v*`)
 - Pull requests (verification only)
@@ -152,10 +154,10 @@ For federal/government deployments requiring offline installation:
 ```yaml
 # Create air-gapped bundle
 gh workflow run slsa-l3-airgap-build.yml \
-  -f bundle_version=v1.0.0 \
-  -f target_classification=CUI \
-  -f transfer_media=secure_usb \
-  -f fips_mode=true
+-f bundle_version=v1.0.0 \
+-f target_classification=CUI \
+-f transfer_media=secure_usb \
+-f fips_mode=true
 ```
 
 ### Reusable Build Workflow
@@ -273,17 +275,20 @@ airgap-bundle/
 1. **Transfer the bundle** using approved media (USB, DVD, etc.)
 
 2. **Verify bundle integrity**:
+
    ```bash
    sha256sum -c intelgraph-airgap-bundle-*.sha256
    ```
 
 3. **Run verification script**:
+
    ```bash
    cd airgap-bundle
    ./tools/verify-bundle.sh
    ```
 
 4. **Load container image**:
+
    ```bash
    docker load -i images/intelgraph-server.tar
    ```
@@ -297,6 +302,7 @@ airgap-bundle/
 ### FIPS 140-2 Compliance
 
 When `fips_mode=true`:
+
 - Build uses FIPS-validated cryptographic modules
 - TLS configuration enforces FIPS-approved algorithms
 - Container base image includes FIPS OpenSSL
@@ -316,6 +322,7 @@ Error: no matching signatures found
 **Cause**: The image was not signed, or the identity doesn't match.
 
 **Solution**:
+
 1. Ensure the image was built with the SLSA workflow
 2. Check the certificate identity pattern matches your repository
 3. Verify you're using the correct OIDC issuer
@@ -329,6 +336,7 @@ Error: no matching attestations found
 **Cause**: SBOM was not attached during build.
 
 **Solution**:
+
 1. Check workflow logs for SBOM generation step
 2. Ensure `sbom: true` is set in the workflow
 3. Verify the image was pushed (PRs don't push)
@@ -342,6 +350,7 @@ Error: expected source 'github.com/org/repo' but got 'github.com/other/repo'
 **Cause**: Source repository mismatch.
 
 **Solution**:
+
 1. Verify you're checking the correct image
 2. Check the `--source-uri` parameter
 
@@ -367,33 +376,33 @@ cosign verify ghcr.io/your-org/your-image:tag --output text
 
 ### SLSA v1.0 Requirements Mapping
 
-| Track | Requirement | Level 1 | Level 2 | Level 3 | Our Implementation |
-|-------|-------------|---------|---------|---------|-------------------|
-| **Build** | Scripted build | ✅ | ✅ | ✅ | Dockerfile + GHA |
-| **Build** | Build service | | ✅ | ✅ | GitHub Actions |
-| **Build** | Build as code | | | ✅ | Workflows in repo |
-| **Build** | Ephemeral environment | | | ✅ | Fresh GHA runners |
-| **Build** | Isolated | | | ✅ | Buildx network=none |
-| **Build** | Parameterless | | | ✅ | No manual inputs |
-| **Source** | Version controlled | ✅ | ✅ | ✅ | Git |
-| **Source** | Verified history | | | ✅ | Commit signing |
-| **Source** | Retained 18mo | ✅ | ✅ | ✅ | GH retention |
-| **Source** | Two-person reviewed | | | ✅ | PR reviews |
-| **Provenance** | Available | ✅ | ✅ | ✅ | SLSA attestation |
-| **Provenance** | Authenticated | | ✅ | ✅ | OIDC keyless |
-| **Provenance** | Service generated | | ✅ | ✅ | slsa-generator |
-| **Provenance** | Non-falsifiable | | | ✅ | Signed by builder |
-| **Provenance** | Dependencies | | | ✅ | SBOM included |
+| Track          | Requirement           | Level 1 | Level 2 | Level 3 | Our Implementation  |
+| -------------- | --------------------- | ------- | ------- | ------- | ------------------- |
+| **Build**      | Scripted build        | ✅      | ✅      | ✅      | Dockerfile + GHA    |
+| **Build**      | Build service         |         | ✅      | ✅      | GitHub Actions      |
+| **Build**      | Build as code         |         |         | ✅      | Workflows in repo   |
+| **Build**      | Ephemeral environment |         |         | ✅      | Fresh GHA runners   |
+| **Build**      | Isolated              |         |         | ✅      | Buildx network=none |
+| **Build**      | Parameterless         |         |         | ✅      | No manual inputs    |
+| **Source**     | Version controlled    | ✅      | ✅      | ✅      | Git                 |
+| **Source**     | Verified history      |         |         | ✅      | Commit signing      |
+| **Source**     | Retained 18mo         | ✅      | ✅      | ✅      | GH retention        |
+| **Source**     | Two-person reviewed   |         |         | ✅      | PR reviews          |
+| **Provenance** | Available             | ✅      | ✅      | ✅      | SLSA attestation    |
+| **Provenance** | Authenticated         |         | ✅      | ✅      | OIDC keyless        |
+| **Provenance** | Service generated     |         | ✅      | ✅      | slsa-generator      |
+| **Provenance** | Non-falsifiable       |         |         | ✅      | Signed by builder   |
+| **Provenance** | Dependencies          |         |         | ✅      | SBOM included       |
 
 ### Attestation Types
 
-| Type | Format | Purpose |
-|------|--------|---------|
-| Image Signature | Cosign | Verify image authenticity |
-| CycloneDX SBOM | in-toto | Software bill of materials |
-| SPDX SBOM | in-toto | License and dependency info |
-| SLSA Provenance | in-toto v1 | Build provenance |
-| Vulnerability Scan | Custom | Security findings |
+| Type               | Format     | Purpose                     |
+| ------------------ | ---------- | --------------------------- |
+| Image Signature    | Cosign     | Verify image authenticity   |
+| CycloneDX SBOM     | in-toto    | Software bill of materials  |
+| SPDX SBOM          | in-toto    | License and dependency info |
+| SLSA Provenance    | in-toto v1 | Build provenance            |
+| Vulnerability Scan | Custom     | Security findings           |
 
 ---
 
@@ -401,33 +410,33 @@ cosign verify ghcr.io/your-org/your-image:tag --output text
 
 ### Build Time Impact
 
-| Configuration | Build Time Delta |
-|---------------|------------------|
-| Basic build | Baseline |
-| + SBOM generation | +30-60 seconds |
-| + Cosign signing | +10-20 seconds |
-| + SLSA provenance | +60-90 seconds |
-| + Vulnerability scan | +60-120 seconds |
-| **Total overhead** | **+2-5 minutes** |
+| Configuration        | Build Time Delta |
+| -------------------- | ---------------- |
+| Basic build          | Baseline         |
+| + SBOM generation    | +30-60 seconds   |
+| + Cosign signing     | +10-20 seconds   |
+| + SLSA provenance    | +60-90 seconds   |
+| + Vulnerability scan | +60-120 seconds  |
+| **Total overhead**   | **+2-5 minutes** |
 
 ### Storage Impact
 
-| Artifact | Size |
-|----------|------|
-| CycloneDX SBOM | ~500KB-2MB |
-| SPDX SBOM | ~500KB-2MB |
-| SLSA Provenance | ~5-10KB |
-| Signatures | ~2-5KB |
+| Artifact            | Size       |
+| ------------------- | ---------- |
+| CycloneDX SBOM      | ~500KB-2MB |
+| SPDX SBOM           | ~500KB-2MB |
+| SLSA Provenance     | ~5-10KB    |
+| Signatures          | ~2-5KB     |
 | **Total per build** | **~1-5MB** |
 
 ### Benefits vs. Costs
 
-| Benefit | Cost |
-|---------|------|
-| Supply chain security | +5 min build time |
-| Compliance (FedRAMP, SOC2) | Storage for attestations |
-| Vulnerability visibility | Tooling maintenance |
-| Incident response capability | Learning curve |
+| Benefit                      | Cost                     |
+| ---------------------------- | ------------------------ |
+| Supply chain security        | +5 min build time        |
+| Compliance (FedRAMP, SOC2)   | Storage for attestations |
+| Vulnerability visibility     | Tooling maintenance      |
+| Incident response capability | Learning curve           |
 
 ---
 
@@ -445,6 +454,6 @@ cosign verify ghcr.io/your-org/your-image:tag --output text
 
 ## Changelog
 
-| Date | Version | Changes |
-|------|---------|---------|
-| 2025-11-29 | 1.0.0 | Initial SLSA L3 implementation |
+| Date       | Version | Changes                        |
+| ---------- | ------- | ------------------------------ |
+| 2025-11-29 | 1.0.0   | Initial SLSA L3 implementation |

@@ -106,7 +106,7 @@ This document outlines the hardening strategies for ephemeral preview environmen
     pull_request:
       types: [closed]
     schedule:
-      - cron: '0 * * * *'
+      - cron: "0 * * * *"
   concurrency: preview-cleanup
   permissions:
     id-token: write
@@ -127,6 +127,7 @@ This document outlines the hardening strategies for ephemeral preview environmen
         - name: Cleanup namespace(s)
           run: ./scripts/preview/cleanup.sh "${{ github.event.pull_request.number || '' }}"
   ```
+
 - **Inputs + gating**:
   - Require `concurrency: preview-pr-${{ github.event.pull_request.number }}` to serialize deployments per PR and avoid race conditions on namespace updates.
   - Guard on `if: github.repository == 'summit/summit'` and `github.event.pull_request.head.repo.full_name == github.repository` to prevent forks from writing cluster secrets.

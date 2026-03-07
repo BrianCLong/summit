@@ -4,16 +4,16 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - 'README.md'
-      - 'scripts/check-doc-links.ts'
-      - '.doclinkignore'
+      - "docs/**"
+      - "README.md"
+      - "scripts/check-doc-links.ts"
+      - ".doclinkignore"
   pull_request:
     paths:
-      - 'docs/**'
-      - 'README.md'
-      - 'scripts/check-doc-links.ts'
-      - '.doclinkignore'
+      - "docs/**"
+      - "README.md"
+      - "scripts/check-doc-links.ts"
+      - ".doclinkignore"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,9 +31,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
-          node-version: '20'
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+          node-version: "20"
 
       - name: Install tsx
         run: npm install -g tsx

@@ -26,15 +26,15 @@ spec:
                 - intelgraph-stage
       verifyImages:
         - imageReferences:
-            - 'ghcr.io/brianclong/intelgraph/*'
+            - "ghcr.io/brianclong/intelgraph/*"
           attestors:
             - entries:
                 - keyless:
-                    subject: 'https://github.com/BrianCLong/summit/.github/workflows/*'
-                    issuer: 'https://token.actions.githubusercontent.com'
+                    subject: "https://github.com/BrianCLong/summit/.github/workflows/*"
+                    issuer: "https://token.actions.githubusercontent.com"
                     additionalExtensions:
-                      github_workflow_trigger: 'push'
-                      github_workflow_repository: 'BrianCLong/summit'
+                      github_workflow_trigger: "push"
+                      github_workflow_repository: "BrianCLong/summit"
 
 ---
 apiVersion: kyverno.io/v1
@@ -64,14 +64,14 @@ spec:
                 - intelgraph-stage
       verifyImages:
         - imageReferences:
-            - 'ghcr.io/brianclong/intelgraph/*'
+            - "ghcr.io/brianclong/intelgraph/*"
           attestations:
             - predicateType: https://spdx.dev/Document
               attestors:
                 - entries:
                     - keyless:
-                        subject: 'https://github.com/BrianCLong/summit/.github/workflows/*'
-                        issuer: 'https://token.actions.githubusercontent.com'
+                        subject: "https://github.com/BrianCLong/summit/.github/workflows/*"
+                        issuer: "https://token.actions.githubusercontent.com"
 
 ---
 apiVersion: kyverno.io/v1
@@ -100,11 +100,11 @@ spec:
                 - intelgraph-prod
                 - intelgraph-stage
       validate:
-        message: 'Container images must be signed and from approved registries'
+        message: "Container images must be signed and from approved registries"
         pattern:
           spec:
             containers:
-              - image: 'ghcr.io/brianclong/intelgraph/*'
+              - image: "ghcr.io/brianclong/intelgraph/*"
     - name: deny-privileged-containers
       match:
         any:
@@ -115,11 +115,11 @@ spec:
                 - intelgraph-prod
                 - intelgraph-stage
       validate:
-        message: 'Privileged containers are not allowed in production'
+        message: "Privileged containers are not allowed in production"
         pattern:
           spec:
             =(securityContext):
-              =(privileged): 'false'
+              =(privileged): "false"
             containers:
               - =(securityContext):
-                  =(privileged): 'false'
+                  =(privileged): "false"

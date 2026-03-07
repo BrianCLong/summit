@@ -8,11 +8,11 @@
 
 federal:
   enabled: true
-  classification: "UNCLASSIFIED"  # Override: CONFIDENTIAL, SECRET
+  classification: "UNCLASSIFIED" # Override: CONFIDENTIAL, SECRET
 
   airGap:
     enabled: true
-    mode: "STRICT"  # STRICT (no external), RESTRICTED (controlled), CONTROLLED (monitored)
+    mode: "STRICT" # STRICT (no external), RESTRICTED (controlled), CONTROLLED (monitored)
 
     offlineRegistry:
       path: "/opt/intelgraph/registry"
@@ -20,16 +20,16 @@ federal:
       encryptionEnabled: true
 
     updateProtocol:
-      transferMedia: "secure_usb"  # secure_usb, dvd_rom, tape_archive, paper_qr
+      transferMedia: "secure_usb" # secure_usb, dvd_rom, tape_archive, paper_qr
       requireMultipleApprovals: true
       minimumApprovers: 3
-      quarantinePeriod: 24  # hours
+      quarantinePeriod: 24 # hours
 
   breakGlass:
     enabled: true
-    maxDuration: 4  # hours
+    maxDuration: 4 # hours
     requiredApprovers: 2
-    auditLevel: "COMPREHENSIVE"  # COMPREHENSIVE, DETAILED
+    auditLevel: "COMPREHENSIVE" # COMPREHENSIVE, DETAILED
     emergencyNetworkOverride: false
 
   compliance:
@@ -49,27 +49,27 @@ networkPolicy:
   # Only internal cluster communication allowed
   egress:
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: intelgraph
+        - namespaceSelector:
+            matchLabels:
+              name: intelgraph
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: kube-system
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
       ports:
-      - protocol: TCP
-        port: 53  # DNS
-      - protocol: UDP
-        port: 53  # DNS
+        - protocol: TCP
+          port: 53 # DNS
+        - protocol: UDP
+          port: 53 # DNS
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: monitoring
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
       ports:
-      - protocol: TCP
-        port: 9090  # Prometheus
-      - protocol: TCP
-        port: 3000  # Grafana
+        - protocol: TCP
+          port: 9090 # Prometheus
+        - protocol: TCP
+          port: 3000 # Grafana
 
 # ==============================================================================
 # Container Registry (Local/Internal Only)
@@ -77,8 +77,8 @@ networkPolicy:
 
 image:
   # All images must be pulled from internal registry
-  registry: "registry.internal.local"  # Override with your internal registry
-  pullPolicy: "IfNotPresent"  # Never pull from external
+  registry: "registry.internal.local" # Override with your internal registry
+  pullPolicy: "IfNotPresent" # Never pull from external
 
   app:
     repository: "registry.internal.local/intelgraph/app"
@@ -92,7 +92,7 @@ image:
     repository: "registry.internal.local/intelgraph/sync-service"
     tag: "v1.0.0"
 
-imagePullSecrets: []  # No external registry access
+imagePullSecrets: [] # No external registry access
 
 # ==============================================================================
 # Sync Service Configuration
@@ -103,9 +103,9 @@ syncService:
   replicaCount: 1
 
   deployment:
-    id: "edge-001"  # Unique deployment identifier
-    name: "Edge Deployment 1"  # Human-readable name
-    environment: "edge"  # core or edge
+    id: "edge-001" # Unique deployment identifier
+    name: "Edge Deployment 1" # Human-readable name
+    environment: "edge" # core or edge
     classification: "UNCLASSIFIED"
 
   bundleStorage:
@@ -114,7 +114,7 @@ syncService:
     path: "/opt/intelgraph/bundles"
 
   crypto:
-    keyStorage: "pvc"  # pvc, secret, hsm
+    keyStorage: "pvc" # pvc, secret, hsm
     privateKeyPath: "/opt/intelgraph/keys/private.pem"
     publicKeyPath: "/opt/intelgraph/keys/public.pem"
 
@@ -163,9 +163,9 @@ postgres:
       storageClass: "local-path"
 
   auth:
-    postgresPassword: ""  # Set via sealed secret
+    postgresPassword: "" # Set via sealed secret
     username: "intelgraph"
-    password: ""  # Set via sealed secret
+    password: "" # Set via sealed secret
     database: "intelgraph"
 
 neo4j:
@@ -177,7 +177,7 @@ neo4j:
 
   neo4j:
     acceptLicenseAgreement: "yes"
-    password: ""  # Set via sealed secret
+    password: "" # Set via sealed secret
 
   volumes:
     data:
@@ -245,7 +245,7 @@ spire:
     dataStore:
       sql:
         databaseType: "postgres"
-        connectionString: ""  # Set via secret
+        connectionString: "" # Set via secret
 
   agent:
     image: "registry.internal.local/spiffe/spire-agent:1.9.0"
@@ -273,7 +273,7 @@ gatekeeper:
 # FIPS compliance
 fips:
   enabled: true
-  mode: "enforced"  # enforced, audit
+  mode: "enforced" # enforced, audit
   cryptoProvider: "openssl-fips"
 
   validation:
@@ -289,9 +289,9 @@ audit:
 
   # WORM storage for audit logs
   storage:
-    type: "worm"  # write-once-read-many
+    type: "worm" # write-once-read-many
     size: "100Gi"
-    retentionDays: 2555  # 7 years
+    retentionDays: 2555 # 7 years
     objectLock: true
 
   # Log everything
@@ -321,7 +321,7 @@ provenance:
 
 ingress:
   enabled: true
-  className: "nginx"  # Internal ingress controller
+  className: "nginx" # Internal ingress controller
 
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -379,18 +379,18 @@ podSecurityPolicy:
     requiredDropCapabilities:
       - ALL
     runAsUser:
-      rule: 'MustRunAsNonRoot'
+      rule: "MustRunAsNonRoot"
     seLinux:
-      rule: 'RunAsAny'
+      rule: "RunAsAny"
     fsGroup:
-      rule: 'RunAsAny'
+      rule: "RunAsAny"
     volumes:
-      - 'configMap'
-      - 'emptyDir'
-      - 'projected'
-      - 'secret'
-      - 'downwardAPI'
-      - 'persistentVolumeClaim'
+      - "configMap"
+      - "emptyDir"
+      - "projected"
+      - "secret"
+      - "downwardAPI"
+      - "persistentVolumeClaim"
 
 # ==============================================================================
 # Backup & Disaster Recovery (Offline)
@@ -400,8 +400,8 @@ backup:
   enabled: true
 
   # Local backup to removable media
-  schedule: "0 2 * * *"  # Daily at 2 AM
-  retention: 30  # days
+  schedule: "0 2 * * *" # Daily at 2 AM
+  retention: 30 # days
 
   targets:
     - postgres

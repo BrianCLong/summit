@@ -634,13 +634,13 @@
       "symmetric": false,
       "transitive": true,
       "valid_pairs": [
-        {"from": "doc.msa", "to": "doc.sow"},
-        {"from": "doc.msa", "to": "doc.dpa"},
-        {"from": "doc.security_policy", "to": "doc.access_control_policy"},
-        {"from": "doc.security_policy", "to": "doc.incident_response_plan"},
-        {"from": "doc.articles_of_incorporation", "to": "doc.bylaws"},
-        {"from": "doc.bylaws", "to": "doc.board_resolution"},
-        {"from": "doc.employee_handbook", "to": "doc.employment_agreement"}
+        { "from": "doc.msa", "to": "doc.sow" },
+        { "from": "doc.msa", "to": "doc.dpa" },
+        { "from": "doc.security_policy", "to": "doc.access_control_policy" },
+        { "from": "doc.security_policy", "to": "doc.incident_response_plan" },
+        { "from": "doc.articles_of_incorporation", "to": "doc.bylaws" },
+        { "from": "doc.bylaws", "to": "doc.board_resolution" },
+        { "from": "doc.employee_handbook", "to": "doc.employment_agreement" }
       ]
     },
     {
@@ -650,9 +650,9 @@
       "symmetric": false,
       "transitive": true,
       "valid_pairs": [
-        {"from": "doc.tech_spec", "to": "doc.prd"},
-        {"from": "doc.runbook", "to": "doc.tech_spec"},
-        {"from": "doc.adr", "to": "doc.tech_spec"}
+        { "from": "doc.tech_spec", "to": "doc.prd" },
+        { "from": "doc.runbook", "to": "doc.tech_spec" },
+        { "from": "doc.adr", "to": "doc.tech_spec" }
       ]
     },
     {
@@ -662,9 +662,9 @@
       "symmetric": false,
       "transitive": true,
       "valid_pairs": [
-        {"from": "doc.sow", "to": "doc.msa"},
-        {"from": "doc.dpa", "to": "doc.msa"},
-        {"from": "doc.board_resolution", "to": "doc.board_minutes"}
+        { "from": "doc.sow", "to": "doc.msa" },
+        { "from": "doc.dpa", "to": "doc.msa" },
+        { "from": "doc.board_resolution", "to": "doc.board_minutes" }
       ]
     },
     {
@@ -681,10 +681,10 @@
       "symmetric": false,
       "transitive": false,
       "valid_pairs": [
-        {"from": "doc.incident_postmortem", "to": "doc.runbook"},
-        {"from": "doc.vulnerability_assessment", "to": "doc.incident_response_plan"},
-        {"from": "doc.audit_report", "to": "doc.risk_assessment"},
-        {"from": "doc.model_evaluation_report", "to": "doc.model_card"}
+        { "from": "doc.incident_postmortem", "to": "doc.runbook" },
+        { "from": "doc.vulnerability_assessment", "to": "doc.incident_response_plan" },
+        { "from": "doc.audit_report", "to": "doc.risk_assessment" },
+        { "from": "doc.model_evaluation_report", "to": "doc.model_card" }
       ]
     },
     {
@@ -694,9 +694,9 @@
       "symmetric": false,
       "transitive": false,
       "valid_pairs": [
-        {"from": "doc.audit_report", "to": "doc.compliance_attestation"},
-        {"from": "doc.penetration_test_report", "to": "doc.compliance_attestation"},
-        {"from": "doc.vulnerability_assessment", "to": "doc.audit_report"}
+        { "from": "doc.audit_report", "to": "doc.compliance_attestation" },
+        { "from": "doc.penetration_test_report", "to": "doc.compliance_attestation" },
+        { "from": "doc.vulnerability_assessment", "to": "doc.audit_report" }
       ]
     },
     {
@@ -730,12 +730,31 @@
   ],
   "lifecycle_states": {
     "Contract": {
-      "states": ["Draft", "Negotiation", "PendingApproval", "Approved", "Executed", "Active", "Expired", "Terminated", "Superseded", "Archived"],
+      "states": [
+        "Draft",
+        "Negotiation",
+        "PendingApproval",
+        "Approved",
+        "Executed",
+        "Active",
+        "Expired",
+        "Terminated",
+        "Superseded",
+        "Archived"
+      ],
       "default_state": "Draft",
       "terminal_states": ["Archived", "Terminated"]
     },
     "Policy": {
-      "states": ["Draft", "Review", "PendingApproval", "Approved", "Published", "Superseded", "Archived"],
+      "states": [
+        "Draft",
+        "Review",
+        "PendingApproval",
+        "Approved",
+        "Published",
+        "Superseded",
+        "Archived"
+      ],
       "default_state": "Draft",
       "terminal_states": ["Archived"]
     },
@@ -745,7 +764,15 @@
       "terminal_states": ["Destroyed"]
     },
     "Versioned": {
-      "states": ["Draft", "Review", "PendingApproval", "Approved", "Released", "Superseded", "Archived"],
+      "states": [
+        "Draft",
+        "Review",
+        "PendingApproval",
+        "Approved",
+        "Released",
+        "Superseded",
+        "Archived"
+      ],
       "default_state": "Draft",
       "terminal_states": ["Archived"]
     },
@@ -765,7 +792,15 @@
       "terminal_states": ["Archived"]
     },
     "ExternalPolicy": {
-      "states": ["Draft", "Review", "LegalReview", "Approved", "Published", "Superseded", "Archived"],
+      "states": [
+        "Draft",
+        "Review",
+        "LegalReview",
+        "Approved",
+        "Published",
+        "Superseded",
+        "Archived"
+      ],
       "default_state": "Draft",
       "terminal_states": ["Archived"]
     },
@@ -820,35 +855,93 @@
     }
   ],
   "compliance_standards": [
-    {"id": "SOC2", "name": "SOC 2", "authority": "AICPA", "description": "Service Organization Control 2"},
-    {"id": "ISO27001", "name": "ISO/IEC 27001", "authority": "ISO", "description": "Information Security Management"},
-    {"id": "GDPR", "name": "GDPR", "authority": "EU", "description": "General Data Protection Regulation"},
-    {"id": "CCPA", "name": "CCPA/CPRA", "authority": "California", "description": "California Consumer Privacy Act"},
-    {"id": "SOX", "name": "Sarbanes-Oxley", "authority": "US", "description": "Financial reporting and auditing"},
-    {"id": "HIPAA", "name": "HIPAA", "authority": "US HHS", "description": "Health Insurance Portability and Accountability"},
-    {"id": "PCI_DSS", "name": "PCI DSS", "authority": "PCI SSC", "description": "Payment Card Industry Data Security Standard"},
-    {"id": "NIST_CSF", "name": "NIST CSF", "authority": "NIST", "description": "Cybersecurity Framework"},
-    {"id": "NIST_800_53", "name": "NIST 800-53", "authority": "NIST", "description": "Security and Privacy Controls"},
-    {"id": "FedRAMP", "name": "FedRAMP", "authority": "US GSA", "description": "Federal Risk and Authorization Management Program"},
-    {"id": "EU_AI_Act", "name": "EU AI Act", "authority": "EU", "description": "Artificial Intelligence Act"}
+    {
+      "id": "SOC2",
+      "name": "SOC 2",
+      "authority": "AICPA",
+      "description": "Service Organization Control 2"
+    },
+    {
+      "id": "ISO27001",
+      "name": "ISO/IEC 27001",
+      "authority": "ISO",
+      "description": "Information Security Management"
+    },
+    {
+      "id": "GDPR",
+      "name": "GDPR",
+      "authority": "EU",
+      "description": "General Data Protection Regulation"
+    },
+    {
+      "id": "CCPA",
+      "name": "CCPA/CPRA",
+      "authority": "California",
+      "description": "California Consumer Privacy Act"
+    },
+    {
+      "id": "SOX",
+      "name": "Sarbanes-Oxley",
+      "authority": "US",
+      "description": "Financial reporting and auditing"
+    },
+    {
+      "id": "HIPAA",
+      "name": "HIPAA",
+      "authority": "US HHS",
+      "description": "Health Insurance Portability and Accountability"
+    },
+    {
+      "id": "PCI_DSS",
+      "name": "PCI DSS",
+      "authority": "PCI SSC",
+      "description": "Payment Card Industry Data Security Standard"
+    },
+    {
+      "id": "NIST_CSF",
+      "name": "NIST CSF",
+      "authority": "NIST",
+      "description": "Cybersecurity Framework"
+    },
+    {
+      "id": "NIST_800_53",
+      "name": "NIST 800-53",
+      "authority": "NIST",
+      "description": "Security and Privacy Controls"
+    },
+    {
+      "id": "FedRAMP",
+      "name": "FedRAMP",
+      "authority": "US GSA",
+      "description": "Federal Risk and Authorization Management Program"
+    },
+    {
+      "id": "EU_AI_Act",
+      "name": "EU AI Act",
+      "authority": "EU",
+      "description": "Artificial Intelligence Act"
+    }
   ],
   "compliance_mappings": [
-    {"document": "doc.security_policy", "standards": ["ISO27001", "SOC2", "NIST_CSF"]},
-    {"document": "doc.access_control_policy", "standards": ["ISO27001", "SOC2", "NIST_800_53"]},
-    {"document": "doc.incident_response_plan", "standards": ["ISO27001", "SOC2", "GDPR", "NIST_CSF"]},
-    {"document": "doc.incident_postmortem", "standards": ["SOC2", "ISO27001"]},
-    {"document": "doc.general_ledger", "standards": ["SOX"]},
-    {"document": "doc.financial_statement", "standards": ["SOX", "GAAP"]},
-    {"document": "doc.privacy_policy", "standards": ["GDPR", "CCPA"]},
-    {"document": "doc.dpa", "standards": ["GDPR", "CCPA"]},
-    {"document": "doc.business_continuity_plan", "standards": ["ISO27001", "SOC2", "NIST_CSF"]},
-    {"document": "doc.disaster_recovery_plan", "standards": ["ISO27001", "SOC2"]},
-    {"document": "doc.vulnerability_assessment", "standards": ["ISO27001", "SOC2", "PCI_DSS"]},
-    {"document": "doc.penetration_test_report", "standards": ["ISO27001", "SOC2", "PCI_DSS"]},
-    {"document": "doc.model_card", "standards": ["EU_AI_Act"]},
-    {"document": "doc.dataset_card", "standards": ["GDPR", "EU_AI_Act"]},
-    {"document": "doc.sbom", "standards": ["NIST_CSF", "Executive_Order_14028"]},
-    {"document": "doc.risk_assessment", "standards": ["ISO27001", "SOC2", "NIST_CSF"]},
-    {"document": "doc.audit_report", "standards": ["SOX", "ISO27001", "SOC2"]}
+    { "document": "doc.security_policy", "standards": ["ISO27001", "SOC2", "NIST_CSF"] },
+    { "document": "doc.access_control_policy", "standards": ["ISO27001", "SOC2", "NIST_800_53"] },
+    {
+      "document": "doc.incident_response_plan",
+      "standards": ["ISO27001", "SOC2", "GDPR", "NIST_CSF"]
+    },
+    { "document": "doc.incident_postmortem", "standards": ["SOC2", "ISO27001"] },
+    { "document": "doc.general_ledger", "standards": ["SOX"] },
+    { "document": "doc.financial_statement", "standards": ["SOX", "GAAP"] },
+    { "document": "doc.privacy_policy", "standards": ["GDPR", "CCPA"] },
+    { "document": "doc.dpa", "standards": ["GDPR", "CCPA"] },
+    { "document": "doc.business_continuity_plan", "standards": ["ISO27001", "SOC2", "NIST_CSF"] },
+    { "document": "doc.disaster_recovery_plan", "standards": ["ISO27001", "SOC2"] },
+    { "document": "doc.vulnerability_assessment", "standards": ["ISO27001", "SOC2", "PCI_DSS"] },
+    { "document": "doc.penetration_test_report", "standards": ["ISO27001", "SOC2", "PCI_DSS"] },
+    { "document": "doc.model_card", "standards": ["EU_AI_Act"] },
+    { "document": "doc.dataset_card", "standards": ["GDPR", "EU_AI_Act"] },
+    { "document": "doc.sbom", "standards": ["NIST_CSF", "Executive_Order_14028"] },
+    { "document": "doc.risk_assessment", "standards": ["ISO27001", "SOC2", "NIST_CSF"] },
+    { "document": "doc.audit_report", "standards": ["SOX", "ISO27001", "SOC2"] }
   ]
 }

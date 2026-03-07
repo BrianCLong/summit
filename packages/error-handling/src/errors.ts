@@ -2,8 +2,8 @@
  * Standardized Error Classes for Summit Platform
  */
 
-import { randomUUID } from 'node:crypto';
-import { ErrorCode, ErrorCodes } from './error-codes.js';
+import { randomUUID } from "node:crypto";
+import { ErrorCode, ErrorCodes } from "./error-codes.js";
 
 /**
  * Standard error response format
@@ -33,16 +33,11 @@ export class AppError extends Error {
   public readonly details?: Record<string, any>;
   public readonly cause?: Error;
 
-  constructor(
-    code: ErrorCode,
-    message?: string,
-    details?: Record<string, any>,
-    cause?: Error,
-  ) {
+  constructor(code: ErrorCode, message?: string, details?: Record<string, any>, cause?: Error) {
     const errorDef = ErrorCodes[code];
     super(message || errorDef.message);
 
-    this.name = 'AppError';
+    this.name = "AppError";
     this.code = code;
     this.httpStatus = errorDef.httpStatus;
     this.traceId = randomUUID();
@@ -101,13 +96,9 @@ export class AppError extends Error {
  * Validation error - for input validation failures
  */
 export class ValidationError extends AppError {
-  constructor(
-    message?: string,
-    details?: Record<string, any>,
-    cause?: Error,
-  ) {
-    super('VALIDATION_FAILED', message, details, cause);
-    this.name = 'ValidationError';
+  constructor(message?: string, details?: Record<string, any>, cause?: Error) {
+    super("VALIDATION_FAILED", message, details, cause);
+    this.name = "ValidationError";
   }
 }
 
@@ -115,13 +106,9 @@ export class ValidationError extends AppError {
  * Authentication error - for auth failures
  */
 export class AuthenticationError extends AppError {
-  constructor(
-    code: ErrorCode = 'AUTH_FAILED',
-    message?: string,
-    details?: Record<string, any>,
-  ) {
+  constructor(code: ErrorCode = "AUTH_FAILED", message?: string, details?: Record<string, any>) {
     super(code, message, details);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
@@ -129,13 +116,9 @@ export class AuthenticationError extends AppError {
  * Authorization error - for permission failures
  */
 export class AuthorizationError extends AppError {
-  constructor(
-    code: ErrorCode = 'FORBIDDEN',
-    message?: string,
-    details?: Record<string, any>,
-  ) {
+  constructor(code: ErrorCode = "FORBIDDEN", message?: string, details?: Record<string, any>) {
     super(code, message, details);
-    this.name = 'AuthorizationError';
+    this.name = "AuthorizationError";
   }
 }
 
@@ -143,15 +126,10 @@ export class AuthorizationError extends AppError {
  * Not found error
  */
 export class NotFoundError extends AppError {
-  constructor(
-    resource?: string,
-    details?: Record<string, any>,
-  ) {
-    const message = resource
-      ? `${resource} not found`
-      : ErrorCodes.RESOURCE_NOT_FOUND.message;
-    super('RESOURCE_NOT_FOUND', message, details);
-    this.name = 'NotFoundError';
+  constructor(resource?: string, details?: Record<string, any>) {
+    const message = resource ? `${resource} not found` : ErrorCodes.RESOURCE_NOT_FOUND.message;
+    super("RESOURCE_NOT_FOUND", message, details);
+    this.name = "NotFoundError";
   }
 }
 
@@ -159,12 +137,9 @@ export class NotFoundError extends AppError {
  * Conflict error - for duplicate resources, etc.
  */
 export class ConflictError extends AppError {
-  constructor(
-    message?: string,
-    details?: Record<string, any>,
-  ) {
-    super('RESOURCE_CONFLICT', message, details);
-    this.name = 'ConflictError';
+  constructor(message?: string, details?: Record<string, any>) {
+    super("RESOURCE_CONFLICT", message, details);
+    this.name = "ConflictError";
   }
 }
 
@@ -172,15 +147,10 @@ export class ConflictError extends AppError {
  * Rate limit error
  */
 export class RateLimitError extends AppError {
-  constructor(
-    retryAfter?: number,
-    details?: Record<string, any>,
-  ) {
-    const detailsWithRetry = retryAfter
-      ? { ...details, retryAfter }
-      : details;
-    super('RATE_LIMIT_EXCEEDED', undefined, detailsWithRetry);
-    this.name = 'RateLimitError';
+  constructor(retryAfter?: number, details?: Record<string, any>) {
+    const detailsWithRetry = retryAfter ? { ...details, retryAfter } : details;
+    super("RATE_LIMIT_EXCEEDED", undefined, detailsWithRetry);
+    this.name = "RateLimitError";
   }
 }
 
@@ -188,14 +158,9 @@ export class RateLimitError extends AppError {
  * Database error
  */
 export class DatabaseError extends AppError {
-  constructor(
-    code: ErrorCode,
-    message?: string,
-    details?: Record<string, any>,
-    cause?: Error,
-  ) {
+  constructor(code: ErrorCode, message?: string, details?: Record<string, any>, cause?: Error) {
     super(code, message, details, cause);
-    this.name = 'DatabaseError';
+    this.name = "DatabaseError";
   }
 }
 
@@ -208,11 +173,11 @@ export class ExternalServiceError extends AppError {
     serviceName: string,
     message?: string,
     details?: Record<string, any>,
-    cause?: Error,
+    cause?: Error
   ) {
     const detailsWithService = { ...details, service: serviceName };
     super(code, message, detailsWithService, cause);
-    this.name = 'ExternalServiceError';
+    this.name = "ExternalServiceError";
   }
 }
 
@@ -220,14 +185,10 @@ export class ExternalServiceError extends AppError {
  * Timeout error
  */
 export class TimeoutError extends AppError {
-  constructor(
-    operation: string,
-    timeoutMs: number,
-    details?: Record<string, any>,
-  ) {
+  constructor(operation: string, timeoutMs: number, details?: Record<string, any>) {
     const detailsWithTimeout = { ...details, operation, timeoutMs };
-    super('OPERATION_TIMEOUT', `${operation} timed out after ${timeoutMs}ms`, detailsWithTimeout);
-    this.name = 'TimeoutError';
+    super("OPERATION_TIMEOUT", `${operation} timed out after ${timeoutMs}ms`, detailsWithTimeout);
+    this.name = "TimeoutError";
   }
 }
 
@@ -235,13 +196,10 @@ export class TimeoutError extends AppError {
  * Circuit breaker open error
  */
 export class CircuitBreakerError extends AppError {
-  constructor(
-    serviceName: string,
-    details?: Record<string, any>,
-  ) {
+  constructor(serviceName: string, details?: Record<string, any>) {
     const detailsWithService = { ...details, service: serviceName };
-    super('CIRCUIT_BREAKER_OPEN', `Circuit breaker open for ${serviceName}`, detailsWithService);
-    this.name = 'CircuitBreakerError';
+    super("CIRCUIT_BREAKER_OPEN", `Circuit breaker open for ${serviceName}`, detailsWithService);
+    this.name = "CircuitBreakerError";
   }
 }
 
@@ -249,13 +207,9 @@ export class CircuitBreakerError extends AppError {
  * Internal server error - for unexpected errors
  */
 export class InternalError extends AppError {
-  constructor(
-    message?: string,
-    details?: Record<string, any>,
-    cause?: Error,
-  ) {
-    super('INTERNAL_SERVER_ERROR', message, details, cause);
-    this.name = 'InternalError';
+  constructor(message?: string, details?: Record<string, any>, cause?: Error) {
+    super("INTERNAL_SERVER_ERROR", message, details, cause);
+    this.name = "InternalError";
   }
 }
 
@@ -263,12 +217,9 @@ export class InternalError extends AppError {
  * Service unavailable error
  */
 export class ServiceUnavailableError extends AppError {
-  constructor(
-    message?: string,
-    details?: Record<string, any>,
-  ) {
-    super('SERVICE_UNAVAILABLE', message, details);
-    this.name = 'ServiceUnavailableError';
+  constructor(message?: string, details?: Record<string, any>) {
+    super("SERVICE_UNAVAILABLE", message, details);
+    this.name = "ServiceUnavailableError";
   }
 }
 
@@ -310,7 +261,7 @@ export function sanitizeError(error: AppError, isProduction: boolean): ErrorResp
     return {
       error: {
         code: error.code,
-        message: 'An internal error occurred',
+        message: "An internal error occurred",
         traceId: error.traceId,
         timestamp: error.timestamp.toISOString(),
       },

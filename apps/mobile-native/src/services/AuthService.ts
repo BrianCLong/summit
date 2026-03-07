@@ -5,7 +5,7 @@ import ReactNativeBiometrics from 'react-native-biometrics';
 import DeviceInfo from 'react-native-device-info';
 import axios from 'axios';
 
-import { API_URL } from '../config';
+import {API_URL} from '../config';
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -108,7 +108,7 @@ export const login = async (credentials: LoginCredentials): Promise<LoginRespons
       deviceName,
     });
 
-    const { user, token, refreshToken, mfaRequired, sessionToken } = response.data;
+    const {user, token, refreshToken, mfaRequired, sessionToken} = response.data;
 
     if (!mfaRequired) {
       await setAuthToken(token);
@@ -136,7 +136,7 @@ export const verifyMFA = async (sessionToken: string, code: string): Promise<Log
       code,
     });
 
-    const { user, token, refreshToken } = response.data;
+    const {user, token, refreshToken} = response.data;
 
     await setAuthToken(token);
     await setRefreshToken(refreshToken);
@@ -153,7 +153,7 @@ export const verifyMFA = async (sessionToken: string, code: string): Promise<Log
 export const logout = async (): Promise<void> => {
   try {
     await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY]);
-    await Keychain.resetGenericPassword({ service: 'intelgraph.auth' });
+    await Keychain.resetGenericPassword({service: 'intelgraph.auth'});
   } catch (error) {
     console.error('Logout failed:', error);
   }
@@ -171,7 +171,7 @@ export const refreshAuthToken = async (): Promise<string | null> => {
       refreshToken,
     });
 
-    const { token } = response.data;
+    const {token} = response.data;
     await setAuthToken(token);
 
     return token;
@@ -185,7 +185,7 @@ export const refreshAuthToken = async (): Promise<string | null> => {
 // Check if biometric authentication is available
 export const isBiometricAvailable = async (): Promise<boolean> => {
   try {
-    const { available } = await rnBiometrics.isSensorAvailable();
+    const {available} = await rnBiometrics.isSensorAvailable();
     return available;
   } catch (error) {
     console.error('Failed to check biometric availability:', error);
@@ -196,7 +196,7 @@ export const isBiometricAvailable = async (): Promise<boolean> => {
 // Enable biometric authentication
 export const enableBiometric = async (): Promise<boolean> => {
   try {
-    const { success } = await rnBiometrics.simplePrompt({
+    const {success} = await rnBiometrics.simplePrompt({
       promptMessage: 'Confirm your identity',
       cancelButtonText: 'Cancel',
     });
@@ -227,7 +227,7 @@ export const isBiometricEnabled = async (): Promise<boolean> => {
 // Login with biometric
 export const loginWithBiometric = async (): Promise<User | null> => {
   try {
-    const { success } = await rnBiometrics.simplePrompt({
+    const {success} = await rnBiometrics.simplePrompt({
       promptMessage: 'Authenticate to login',
       cancelButtonText: 'Cancel',
     });

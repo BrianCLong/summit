@@ -2,8 +2,8 @@
 
 MRSE augments Summit's MCO (truth substrate) and MIFE (intent substrate) with a
 predictive simulation substrate that projects future repository trajectories
-before agents execute real changes. The engine constructs a branching *reality
-graph* of possible worlds, evaluates each trajectory, and recommends optimal
+before agents execute real changes. The engine constructs a branching _reality
+graph_ of possible worlds, evaluates each trajectory, and recommends optimal
 paths for orchestrators.
 
 ## Core Concepts

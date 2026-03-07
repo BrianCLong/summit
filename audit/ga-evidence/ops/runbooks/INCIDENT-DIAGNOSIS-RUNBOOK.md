@@ -19,13 +19,13 @@ This runbook provides step-by-step procedures for operators to diagnose and trou
 
 ## Quick Reference
 
-| Incident Type | First Step | Key Tool |
-|---------------|------------|----------|
-| API Errors | Get correlation ID from response header | Grafana Log Search |
-| Slow Requests | Check latency dashboard | Grafana Metrics |
-| AI Copilot Issues | Review AI metrics panel | AI Copilot Dashboard |
-| Governance Failures | Check verdict distribution | Governance Panel |
-| Authentication Errors | Search audit logs | Audit Log System |
+| Incident Type         | First Step                              | Key Tool             |
+| --------------------- | --------------------------------------- | -------------------- |
+| API Errors            | Get correlation ID from response header | Grafana Log Search   |
+| Slow Requests         | Check latency dashboard                 | Grafana Metrics      |
+| AI Copilot Issues     | Review AI metrics panel                 | AI Copilot Dashboard |
+| Governance Failures   | Check verdict distribution              | Governance Panel     |
+| Authentication Errors | Search audit logs                       | Audit Log System     |
 
 ## Common Incident Types
 
@@ -36,6 +36,7 @@ This runbook provides step-by-step procedures for operators to diagnose and trou
 **Diagnosis Steps**:
 
 1. **Obtain Correlation ID**
+
    ```bash
    # From error response header
    X-Correlation-ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
@@ -47,6 +48,7 @@ This runbook provides step-by-step procedures for operators to diagnose and trou
    - Review "Request Flow by Correlation ID" panel
 
 3. **Analyze Request Flow**
+
    ```logql
    # In Grafana Explore or dashboard
    {service="summit-api"}
@@ -60,6 +62,7 @@ This runbook provides step-by-step procedures for operators to diagnose and trou
    - Note the operation/service where error occurred
 
 5. **Check Error Patterns**
+
    ```promql
    # Check if this is a widespread issue
    sum(rate(http_requests_total{
@@ -76,12 +79,14 @@ This runbook provides step-by-step procedures for operators to diagnose and trou
    - Permission errors → Check auth/authz logs
 
 **Resolution Paths**:
+
 - Database issues → Escalate to DBA team
 - Service dependency → Check service health dashboard
 - Application error → Create bug ticket with correlation ID
 - Configuration issue → Review recent config changes
 
 **Example Log Query** (local files):
+
 ```bash
 # Search structured logs
 cat /logs/app-structured.log | \
@@ -106,12 +111,14 @@ grep "correlationId\":\"a1b2c3d4" /logs/app-structured.log | grep "\"level\":50"
    - Identify affected endpoints with high p95/p99
 
 2. **Obtain Correlation ID from Slow Request**
+
    ```bash
    # From response header or user report
    X-Correlation-ID: <correlation-id>
    ```
 
 3. **Analyze Request Timeline**
+
    ```bash
    # Local log search with timestamps
    cat /logs/app-structured.log | \
@@ -127,6 +134,7 @@ grep "correlationId\":\"a1b2c3d4" /logs/app-structured.log | grep "\"level\":50"
    - Examine cache hit/miss patterns
 
 5. **Check System Resources**
+
    ```promql
    # CPU usage
    rate(process_cpu_seconds_total{service="summit-api"}[5m])
@@ -145,12 +153,14 @@ grep "correlationId\":\"a1b2c3d4" /logs/app-structured.log | grep "\"level\":50"
    ```
 
 **Resolution Paths**:
+
 - Database slow queries → Add indexes, optimize queries
 - High load → Scale horizontally, enable rate limiting
 - External API slow → Add circuit breaker, caching
 - Memory pressure → Increase pod resources, investigate leaks
 
 **Performance Tracing**:
+
 ```bash
 # OpenTelemetry trace lookup
 curl -H "Authorization: Bearer $TOKEN" \
@@ -173,6 +183,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 2. **Get Correlation ID from Failed Request**
 
 3. **Search AI-Specific Logs**
+
    ```logql
    {service="summit-api"}
      | json
@@ -181,6 +192,7 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 4. **Check AI Service Metrics**
+
    ```promql
    # AI request rate by operation
    sum(rate(ai_copilot_requests_total[5m])) by (operation)
@@ -212,12 +224,14 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 **Resolution Paths**:
+
 - Rate limiting → Check provider quotas, implement backoff
 - Timeout → Reduce prompt size, optimize context
 - Quality issues → Review prompt templates, model selection
 - Model errors → Check LLM provider status page
 
 **AI-Specific Log Fields**:
+
 ```json
 {
   "correlationId": "...",
@@ -245,6 +259,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 2. **Get Correlation ID from Denied Request**
 
 3. **Search Governance Logs**
+
    ```logql
    {service="summit-api"}
      | json
@@ -253,6 +268,7 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 4. **Analyze Verdict Details**
+
    ```bash
    cat /logs/app-structured.log | \
      jq 'select(.correlationId == "<correlation-id>" and
@@ -267,6 +283,7 @@ curl -H "Authorization: Bearer $TOKEN" \
    - Check `context` for evaluated conditions
 
 6. **Verify Policy Configuration**
+
    ```bash
    # Check OPA policy bundle freshness
    curl http://opa:8181/v1/policies/<policy-id>
@@ -276,12 +293,14 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 **Resolution Paths**:
+
 - Policy misconfiguration → Review policy rules in OPA
 - Stale policy bundle → Trigger policy refresh
 - User permission issue → Check RBAC/ABAC assignments
 - Data residency violation → Verify tenant/region mapping
 
 **Governance Log Fields**:
+
 ```json
 {
   "correlationId": "...",
@@ -305,6 +324,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 1. **Obtain Correlation ID from Auth Error**
 
 2. **Search Authentication Logs**
+
    ```logql
    {service="summit-api"}
      | json
@@ -313,6 +333,7 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 3. **Check Audit Logs**
+
    ```bash
    # Search audit pipeline logs
    cat /logs/audit/*.log | \
@@ -336,12 +357,14 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 **Resolution Paths**:
+
 - Expired token → User needs to re-authenticate
 - Missing permissions → Update user role assignments
 - Policy failure → Review OPA policy evaluation
 - Rate limiting → Check auth rate limiter status
 
 **Authentication Log Fields**:
+
 ```json
 {
   "correlationId": "...",
@@ -363,6 +386,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 **Diagnosis Steps**:
 
 1. **Check Residency Logs**
+
    ```logql
    {service="summit-api"}
      | json
@@ -371,6 +395,7 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 2. **Verify Tenant Configuration**
+
    ```bash
    cat /logs/app-structured.log | \
      jq 'select(.correlationId == "<correlation-id>")' | \
@@ -385,6 +410,7 @@ curl -H "Authorization: Bearer $TOKEN" \
    ```
 
 **Resolution Paths**:
+
 - Invalid region access → Verify tenant region assignment
 - Missing exception → Create residency exception request
 - Configuration error → Update tenant residency settings
@@ -394,6 +420,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Log Query Patterns
 
 ### By Correlation ID (Complete Flow)
+
 ```bash
 cat /logs/app-structured.log | \
   jq 'select(.correlationId == "<correlation-id>")' | \
@@ -402,6 +429,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### By Tenant ID (Tenant-Specific Issues)
+
 ```bash
 cat /logs/app-structured.log | \
   jq 'select(.tenantId == "<tenant-id>" and .level >= 50)' | \
@@ -409,6 +437,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### By Error Type
+
 ```bash
 # Database errors
 cat /logs/app-structured.log | \
@@ -424,6 +453,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### Recent Errors (Last N)
+
 ```bash
 # Last 20 errors
 cat /logs/app-structured.log | \
@@ -432,6 +462,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### Time Range Search
+
 ```bash
 # Errors between specific times
 cat /logs/app-structured.log | \
@@ -443,6 +474,7 @@ cat /logs/app-structured.log | \
 ## Grafana Loki Query Patterns
 
 ### Basic Correlation ID Search
+
 ```logql
 {service="summit-api"}
   | json
@@ -450,6 +482,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### Error Logs Only
+
 ```logql
 {service="summit-api"}
   | json
@@ -457,6 +490,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### Pattern Matching
+
 ```logql
 {service="summit-api"}
   | json
@@ -464,6 +498,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### Tenant-Specific
+
 ```logql
 {service="summit-api"}
   | json
@@ -472,6 +507,7 @@ cat /logs/app-structured.log | \
 ```
 
 ### Performance Queries
+
 ```logql
 {service="summit-api"}
   | json
@@ -481,12 +517,14 @@ cat /logs/app-structured.log | \
 ## Prometheus Query Patterns
 
 ### Error Rate by Endpoint
+
 ```promql
 sum(rate(http_requests_total{service="summit-api",status=~"5.."}[5m])) by (path) /
 sum(rate(http_requests_total{service="summit-api"}[5m])) by (path)
 ```
 
 ### Latency Percentiles
+
 ```promql
 histogram_quantile(0.95,
   sum(rate(http_request_duration_seconds_bucket{service="summit-api"}[5m])) by (le, path)
@@ -494,11 +532,13 @@ histogram_quantile(0.95,
 ```
 
 ### Request Volume
+
 ```promql
 sum(rate(http_requests_total{service="summit-api"}[5m])) by (method, path)
 ```
 
 ### Active Connections
+
 ```promql
 sum(http_requests_in_flight{service="summit-api"})
 ```
@@ -506,19 +546,23 @@ sum(http_requests_in_flight{service="summit-api"})
 ## Escalation Paths
 
 ### Level 1: Self-Service (This Runbook)
+
 - Use correlation ID to trace request
 - Check dashboards for patterns
 - Review logs for errors
 - Attempt known resolutions
 
 ### Level 2: Platform Ops Team
+
 **When to Escalate**:
+
 - Issue not resolved after 30 minutes
 - Widespread system impact
 - Data corruption suspected
 - Security incident suspected
 
 **Escalation Info to Provide**:
+
 - Correlation ID(s)
 - Time range of incident
 - Affected endpoints/operations
@@ -526,29 +570,36 @@ sum(http_requests_in_flight{service="summit-api"})
 - Reproduction steps if known
 
 **Contact**:
+
 - Slack: #platform-ops-oncall
 - PagerDuty: Platform Ops rotation
 - Email: platform-ops@intelgraph.example
 
 ### Level 3: Engineering Team
+
 **When to Escalate**:
+
 - Bug requiring code changes
 - Performance optimization needed
 - Architecture issue identified
 - Feature request related to incident
 
 **Contact**:
+
 - Jira: Create ticket with label `incident-<date>`
 - Slack: #engineering-support
 
 ### Level 4: Security Team
+
 **When to Escalate**:
+
 - Authentication bypass suspected
 - Data leak suspected
 - Unusual access patterns
 - Potential security breach
 
 **Contact**:
+
 - Slack: #security-incidents (immediate)
 - Email: security@intelgraph.example
 - PagerDuty: Security rotation (urgent)
@@ -579,16 +630,19 @@ sum(http_requests_in_flight{service="summit-api"})
 ## Tools Reference
 
 ### Local Log Files
+
 - **Application Logs**: `/logs/app-structured.log`
 - **Error Logs**: `/logs/app-error.log`
 - **Audit Logs**: `/logs/audit/*.log`
 
 ### Dashboards
+
 - **Main Dashboard**: "Summit Operations - Self-Service Diagnostics"
 - **AI Dashboard**: "AI Copilot Monitoring"
 - **Policy Dashboard**: "Policy Bundles"
 
 ### APIs
+
 ```bash
 # Health check
 curl http://localhost:3000/health
@@ -602,6 +656,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```
 
 ### CLI Tools
+
 ```bash
 # jq - JSON parsing
 jq --version
@@ -634,6 +689,7 @@ curl -G http://prometheus:9090/api/v1/query \
 ## Compliance Notes
 
 This runbook supports:
+
 - **SOC 2 CC7.3**: Incident identification procedures
 - **SOC 2 CC7.4**: Incident response and investigation
 - **SOC 2 A1.2**: Recovery procedures and documentation
@@ -643,6 +699,7 @@ All incident diagnosis activities should be logged for audit compliance.
 ---
 
 **Document History:**
+
 - 2025-12-27: Initial version (v1.0) - GA hardening initiative
 
 **Next Review**: 2026-01-27

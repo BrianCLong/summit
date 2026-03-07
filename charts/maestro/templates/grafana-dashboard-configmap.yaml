@@ -4,7 +4,7 @@ metadata:
   name: maestro-grafana-dashboard
   namespace: { { .Release.Namespace } }
   labels:
-    grafana_dashboard: '1' # Label for Grafana to discover the dashboard
+    grafana_dashboard: "1" # Label for Grafana to discover the dashboard
 data:
   maestro-production.json: |-
     {{ .Files.Get "grafana-dashboard-full.json" | nindent 4 }}

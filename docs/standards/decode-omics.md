@@ -1,6 +1,7 @@
 # 1.7 INTEROP & STANDARDS
 
 ### Import
+
 | source       | format               |
 | ------------ | -------------------- |
 | bulk RNA     | TSV                  |
@@ -8,6 +9,7 @@
 | metabolomics | metabolite abundance |
 
 ### Export
+
 graph nodes: CellType
 graph edges: PRESENT_IN_SAMPLE
 

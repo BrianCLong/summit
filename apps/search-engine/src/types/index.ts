@@ -3,7 +3,7 @@ export interface SearchQuery {
   filters?: SearchFilters;
   sort?: SortOptions;
   pagination?: PaginationOptions;
-  searchType?: 'fulltext' | 'semantic' | 'hybrid' | 'fuzzy';
+  searchType?: "fulltext" | "semantic" | "hybrid" | "fuzzy";
   boost?: BoostConfig;
   facets?: string[];
   highlight?: HighlightConfig;
@@ -27,8 +27,8 @@ export interface SearchFilters {
 
 export interface SortOptions {
   field: string;
-  order: 'asc' | 'desc';
-  mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';
+  order: "asc" | "desc";
+  mode?: "min" | "max" | "sum" | "avg" | "median";
 }
 
 export interface PaginationOptions {
@@ -43,20 +43,20 @@ export interface BoostConfig {
 }
 
 export interface BoostFunction {
-  type: 'field_value_factor' | 'decay' | 'script_score';
+  type: "field_value_factor" | "decay" | "script_score";
   field?: string;
   factor?: number;
   modifier?:
-    | 'none'
-    | 'log'
-    | 'log1p'
-    | 'log2p'
-    | 'ln'
-    | 'ln1p'
-    | 'ln2p'
-    | 'square'
-    | 'sqrt'
-    | 'reciprocal';
+    | "none"
+    | "log"
+    | "log1p"
+    | "log2p"
+    | "ln"
+    | "ln1p"
+    | "ln2p"
+    | "square"
+    | "sqrt"
+    | "reciprocal";
   missing?: number;
 }
 
@@ -70,7 +70,7 @@ export interface HighlightConfig {
 
 export interface SearchResult {
   id: string;
-  type: 'entity' | 'case' | 'document' | 'comment' | 'event';
+  type: "entity" | "case" | "document" | "comment" | "event";
   score: number;
   source: any;
   highlight?: Record<string, string[]>;
@@ -88,7 +88,7 @@ export interface SearchResponse {
   results: SearchResult[];
   total: {
     value: number;
-    relation: 'eq' | 'gte';
+    relation: "eq" | "gte";
   };
   took: number;
   timedOut: boolean;
@@ -136,24 +136,16 @@ export interface SearchIndex {
   aliases: string[];
   documentCount: number;
   sizeInBytes: number;
-  status: 'green' | 'yellow' | 'red';
+  status: "green" | "yellow" | "red";
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface QueryBuilder {
-  type:
-    | 'bool'
-    | 'match'
-    | 'term'
-    | 'range'
-    | 'wildcard'
-    | 'fuzzy'
-    | 'nested'
-    | 'geo_distance';
+  type: "bool" | "match" | "term" | "range" | "wildcard" | "fuzzy" | "nested" | "geo_distance";
   field?: string;
   value?: any;
-  operator?: 'and' | 'or';
+  operator?: "and" | "or";
   boost?: number;
   minimum_should_match?: number;
   must?: QueryBuilder[];

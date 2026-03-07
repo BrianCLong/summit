@@ -4,15 +4,15 @@
  * Transform events from old versions to new versions
  */
 
-import pino from 'pino';
-import type { DomainEvent, EventUpcaster as IEventUpcaster } from '../store/types.js';
+import pino from "pino";
+import type { DomainEvent, EventUpcaster as IEventUpcaster } from "../store/types.js";
 
 export class EventUpcasterChain {
   private upcasters: Map<string, IEventUpcaster[]> = new Map();
   private logger: pino.Logger;
 
   constructor() {
-    this.logger = pino({ name: 'EventUpcasterChain' });
+    this.logger = pino({ name: "EventUpcasterChain" });
   }
 
   /**
@@ -31,7 +31,7 @@ export class EventUpcasterChain {
 
     this.logger.debug(
       { eventType, fromVersion: upcaster.fromVersion, toVersion: upcaster.toVersion },
-      'Upcaster registered'
+      "Upcaster registered"
     );
   }
 
@@ -53,9 +53,9 @@ export class EventUpcasterChain {
           {
             eventType: event.eventType,
             fromVersion: upcaster.fromVersion,
-            toVersion: upcaster.toVersion
+            toVersion: upcaster.toVersion,
           },
-          'Event upcasted'
+          "Event upcasted"
         );
       }
     }
@@ -67,7 +67,7 @@ export class EventUpcasterChain {
    * Upcast multiple events
    */
   upcastMany(events: DomainEvent[]): DomainEvent[] {
-    return events.map(event => this.upcast(event));
+    return events.map((event) => this.upcast(event));
   }
 
   /**
@@ -85,7 +85,7 @@ export class EventUpcasterChain {
     const upcasters = this.upcasters.get(event.eventType) || [];
     const currentVersion = this.getEventSchemaVersion(event);
 
-    return upcasters.some(u => u.fromVersion === currentVersion);
+    return upcasters.some((u) => u.fromVersion === currentVersion);
   }
 
   /**
@@ -98,7 +98,7 @@ export class EventUpcasterChain {
       return 1;
     }
 
-    return Math.max(...upcasters.map(u => u.toVersion));
+    return Math.max(...upcasters.map((u) => u.toVersion));
   }
 }
 
@@ -129,7 +129,7 @@ export class UpcastHelpers {
     return (event: DomainEvent): DomainEvent => {
       const payload = {
         ...event.payload,
-        [fieldName]: defaultValue
+        [fieldName]: defaultValue,
       };
 
       return { ...event, payload };
@@ -151,10 +151,7 @@ export class UpcastHelpers {
   /**
    * Transform a field value
    */
-  static transformField(
-    fieldName: string,
-    transform: (value: any) => any
-  ) {
+  static transformField(fieldName: string, transform: (value: any) => any) {
     return (event: DomainEvent): DomainEvent => {
       const payload = { ...event.payload };
 

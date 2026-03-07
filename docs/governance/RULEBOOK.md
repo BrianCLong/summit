@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # The Living Rulebook
 
 **Custodian:** Jules (Fundamental Lawmaker)

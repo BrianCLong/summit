@@ -11,13 +11,12 @@ import type { WorkspacePresetId } from './presets'
 
 const STORAGE_PREFIX = 'intelgraph.workspaces'
 
-const getDefaultWorkspaceState = (
-  currentPath: string
-): WorkspaceState => {
+const getDefaultWorkspaceState = (currentPath: string): WorkspaceState => {
   const presets: Record<WorkspacePresetId, WorkspacePreset> = {
     investigate: {
       ...defaultWorkspacePresets.investigate,
-      lastRoute: currentPath || defaultWorkspacePresets.investigate.defaultRoute,
+      lastRoute:
+        currentPath || defaultWorkspacePresets.investigate.defaultRoute,
       lastUpdated: Date.now(),
     },
     review: { ...defaultWorkspacePresets.review },
@@ -35,16 +34,14 @@ const ensurePanelCoverage = (
   panels: WorkspacePreset['panels'],
   presetId: WorkspacePresetId = 'investigate'
 ): WorkspacePreset['panels'] => {
-  const defaultPanels = defaultWorkspacePresets[presetId].panels;
-  const merged = { ...panels };
-  (Object.keys(defaultPanels) as WorkspacePanelKey[]).forEach(
-    panelKey => {
-      merged[panelKey] = {
-        ...defaultPanels[panelKey],
-        ...(panels[panelKey] || {}),
-      }
+  const defaultPanels = defaultWorkspacePresets[presetId].panels
+  const merged = { ...panels }
+  ;(Object.keys(defaultPanels) as WorkspacePanelKey[]).forEach(panelKey => {
+    merged[panelKey] = {
+      ...defaultPanels[panelKey],
+      ...(panels[panelKey] || {}),
     }
-  )
+  })
   return merged
 }
 
@@ -67,7 +64,10 @@ const migrateFromV1 = (
     workspaces[id as WorkspacePresetId] = {
       ...workspaces[id as WorkspacePresetId],
       panels: layout?.panels
-        ? ensurePanelCoverage(layout.panels as WorkspacePreset['panels'], id as WorkspacePresetId)
+        ? ensurePanelCoverage(
+            layout.panels as WorkspacePreset['panels'],
+            id as WorkspacePresetId
+          )
         : workspaces[id as WorkspacePresetId].panels,
       defaultRoute:
         layout?.defaultRoute ||
@@ -96,23 +96,26 @@ export const migrateWorkspaceState = (
   if (parsed.version === WORKSPACE_STORAGE_VERSION && parsed.workspaces) {
     const workspaces = Object.entries(parsed.workspaces).reduce<
       WorkspaceState['workspaces']
-    >((acc, [id, workspace]) => {
-      const presetId = id as WorkspacePresetId
-      const preset = workspace || defaultWorkspacePresets[presetId]
-      if (!preset) return acc
+    >(
+      (acc, [id, workspace]) => {
+        const presetId = id as WorkspacePresetId
+        const preset = workspace || defaultWorkspacePresets[presetId]
+        if (!preset) return acc
 
-      acc[presetId] = {
-        ...defaultWorkspacePresets[presetId],
-        ...preset,
-        panels: ensurePanelCoverage(preset.panels, presetId),
-        lastUpdated: preset.lastUpdated || Date.now(),
-        lastRoute:
-          preset.lastRoute ||
-          preset.defaultRoute ||
-          defaultWorkspacePresets[presetId].defaultRoute,
-      }
-      return acc
-    }, {} as WorkspaceState['workspaces'])
+        acc[presetId] = {
+          ...defaultWorkspacePresets[presetId],
+          ...preset,
+          panels: ensurePanelCoverage(preset.panels, presetId),
+          lastUpdated: preset.lastUpdated || Date.now(),
+          lastRoute:
+            preset.lastRoute ||
+            preset.defaultRoute ||
+            defaultWorkspacePresets[presetId].defaultRoute,
+        }
+        return acc
+      },
+      {} as WorkspaceState['workspaces']
+    )
 
     const activeWorkspaceId =
       parsed.activeWorkspaceId && workspaces[parsed.activeWorkspaceId]
@@ -132,8 +135,7 @@ export const migrateWorkspaceState = (
 
   if ((parsed.version || 0) < WORKSPACE_STORAGE_VERSION) {
     const downgraded = {
-      activeWorkspaceId:
-        parsed.activeWorkspaceId || 'investigate',
+      activeWorkspaceId: parsed.activeWorkspaceId || 'investigate',
       layouts: (parsed as unknown as LegacyWorkspaceLayoutV1).layouts || {},
     }
     return migrateFromV1(downgraded, currentPath)

@@ -7,11 +7,11 @@
  * @module polling-connector
  */
 
-import type { Logger } from 'pino';
+import type { Logger } from "pino";
 
-import type { RawSignalInput, SignalTypeIdType } from '@intelgraph/signal-contracts';
+import type { RawSignalInput, SignalTypeIdType } from "@intelgraph/signal-contracts";
 
-import { BaseConnector, type BaseConnectorConfig } from './base-connector.js';
+import { BaseConnector, type BaseConnectorConfig } from "./base-connector.js";
 
 /**
  * Polling connector configuration
@@ -58,7 +58,7 @@ export class PollingConnector extends BaseConnector {
     // Perform initial fetch to verify connectivity
     await this.poll();
     this.startPolling();
-    this.logger.info({ intervalMs: this.pollingConfig.pollingIntervalMs }, 'Polling started');
+    this.logger.info({ intervalMs: this.pollingConfig.pollingIntervalMs }, "Polling started");
   }
 
   /**
@@ -66,7 +66,7 @@ export class PollingConnector extends BaseConnector {
    */
   protected async doDisconnect(): Promise<void> {
     this.stopPolling();
-    this.logger.info('Polling stopped');
+    this.logger.info("Polling stopped");
   }
 
   /**
@@ -110,7 +110,7 @@ export class PollingConnector extends BaseConnector {
    * Poll and reschedule
    */
   private async pollAndReschedule(): Promise<void> {
-    if (this.status !== 'connected') {
+    if (this.status !== "connected") {
       return;
     }
 
@@ -119,14 +119,11 @@ export class PollingConnector extends BaseConnector {
       this.consecutiveErrors = 0;
     } catch (error) {
       this.consecutiveErrors++;
-      this.logger.error(
-        { error, consecutiveErrors: this.consecutiveErrors },
-        'Polling error',
-      );
+      this.logger.error({ error, consecutiveErrors: this.consecutiveErrors }, "Polling error");
 
       if (this.consecutiveErrors >= (this.pollingConfig.maxConsecutiveErrors ?? 5)) {
-        this.logger.error('Max consecutive errors reached, triggering reconnect');
-        this.emit('error', new Error('Max consecutive polling errors reached'));
+        this.logger.error("Max consecutive errors reached, triggering reconnect");
+        this.emit("error", new Error("Max consecutive polling errors reached"));
         return;
       }
     }
@@ -139,7 +136,7 @@ export class PollingConnector extends BaseConnector {
    */
   private async poll(): Promise<void> {
     if (this.isPolling) {
-      this.logger.warn('Poll already in progress, skipping');
+      this.logger.warn("Poll already in progress, skipping");
       return;
     }
 
@@ -165,11 +162,11 @@ export class PollingConnector extends BaseConnector {
           ...signal,
           tenantId: signal.tenantId ?? this.pollingConfig.tenantId,
           sourceId: signal.sourceId ?? this.pollingConfig.connectorId,
-          sourceType: signal.sourceType ?? 'feed',
+          sourceType: signal.sourceType ?? "feed",
         });
       }
 
-      this.logger.debug({ signalCount: signalArray.length }, 'Poll completed');
+      this.logger.debug({ signalCount: signalArray.length }, "Poll completed");
     } finally {
       this.isPolling = false;
     }
@@ -188,7 +185,7 @@ export class PollingConnector extends BaseConnector {
  */
 export function createPollingConnector(
   config: PollingConnectorConfig,
-  logger: Logger,
+  logger: Logger
 ): PollingConnector {
   return new PollingConnector(config, logger);
 }

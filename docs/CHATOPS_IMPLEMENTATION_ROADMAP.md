@@ -19,12 +19,14 @@ This roadmap breaks down the 18-month ChatOps strategy into concrete sprints wit
 **Goal**: Establish basic intent classification pipeline
 
 **Deliverables**:
+
 - [ ] Intent router service scaffolding (`services/chatops/src/router/`)
 - [ ] Single-model classification (Claude Sonnet 4)
 - [ ] Basic intent categories (10 types)
 - [ ] Integration tests with mock LLM responses
 
 **Files Created**:
+
 ```
 services/chatops/src/router/
 ├── intent-router.ts       ✅ Created
@@ -36,6 +38,7 @@ services/chatops/src/router/
 **Dependencies**: None
 
 **Acceptance Criteria**:
+
 - [ ] Classify 10 intent types with >80% accuracy on test set
 - [ ] p95 latency <500ms
 - [ ] Unit test coverage >80%
@@ -47,12 +50,14 @@ services/chatops/src/router/
 **Goal**: Enable parallel LLM execution with confidence voting
 
 **Deliverables**:
+
 - [ ] Parallel model execution (Claude + GPT-4)
 - [ ] Confidence voting aggregation
 - [ ] Disagreement escalation logic
 - [ ] Model fallback on failure
 
 **Files to Modify**:
+
 ```
 services/chatops/src/router/
 ├── intent-router.ts       ✅ Enhance
@@ -65,6 +70,7 @@ services/chatops/src/router/
 **Dependencies**: Sprint 1-2
 
 **Acceptance Criteria**:
+
 - [ ] 2+ models execute in parallel
 - [ ] Consensus score calculated correctly
 - [ ] Graceful fallback on model failure
@@ -77,12 +83,14 @@ services/chatops/src/router/
 **Goal**: Extract threat intelligence entities from queries
 
 **Deliverables**:
+
 - [ ] OSINT entity extractor (8 types)
 - [ ] MITRE ATT&CK ID recognition
 - [ ] Entity linking to knowledge graph
 - [ ] Confidence scoring per entity
 
 **Files to Create**:
+
 ```
 services/chatops/src/router/
 ├── osint-fusion.ts        To create
@@ -93,8 +101,9 @@ services/chatops/src/router/
 **Dependencies**: Sprint 3-4, Entity Extraction package
 
 **Acceptance Criteria**:
+
 - [ ] Extract 8 OSINT entity types
-- [ ] >90% precision on known patterns (APT, CVE, MITRE)
+- [ ] > 90% precision on known patterns (APT, CVE, MITRE)
 - [ ] Entity linking to Neo4j >70% accuracy
 - [ ] Integration with existing `entity-extraction` package
 
@@ -105,12 +114,14 @@ services/chatops/src/router/
 **Goal**: Implement short and medium-term memory
 
 **Deliverables**:
+
 - [ ] Short-term memory (Redis, last 5 turns)
 - [ ] Medium-term memory (PostgreSQL, compressed summaries)
 - [ ] Automatic tier promotion
 - [ ] Token counting and budget tracking
 
 **Files Created**:
+
 ```
 services/chatops/src/memory/
 ├── hierarchical-memory.ts  ✅ Created
@@ -122,6 +133,7 @@ services/chatops/src/memory/
 **Dependencies**: Redis, PostgreSQL
 
 **Acceptance Criteria**:
+
 - [ ] 5-turn verbatim storage
 - [ ] Automatic compression at turn 6+
 - [ ] Token budget respected
@@ -134,12 +146,14 @@ services/chatops/src/memory/
 **Goal**: Implement long-term graph memory and semantic retrieval
 
 **Deliverables**:
+
 - [ ] Long-term memory (Neo4j facts/relationships)
 - [ ] Fact extraction from summaries
 - [ ] Semantic similarity search
 - [ ] Context window construction
 
 **Files to Create**:
+
 ```
 services/chatops/src/memory/
 ├── long-term.ts            To create
@@ -151,6 +165,7 @@ services/chatops/src/memory/
 **Dependencies**: Sprint 7-8, Neo4j, Embeddings service
 
 **Acceptance Criteria**:
+
 - [ ] Extract facts to Neo4j
 - [ ] Semantic search over conversation history
 - [ ] 3-tier context window construction
@@ -163,12 +178,14 @@ services/chatops/src/memory/
 **Goal**: Implement risk-tiered operation classification
 
 **Deliverables**:
+
 - [ ] Risk classifier with default rules
 - [ ] OPA policy integration
 - [ ] Clearance level checking
 - [ ] Bulk operation detection
 
 **Files Created**:
+
 ```
 services/chatops/src/autonomy/
 ├── bounded-autonomy.ts     ✅ Created (RiskClassifier)
@@ -179,6 +196,7 @@ services/chatops/src/autonomy/
 **Dependencies**: OPA/ABAC infrastructure
 
 **Acceptance Criteria**:
+
 - [ ] 3 risk tiers (autonomous/HITL/prohibited)
 - [ ] OPA policy evaluation
 - [ ] Clearance-based restrictions
@@ -191,12 +209,14 @@ services/chatops/src/autonomy/
 **Goal**: Implement execution tracing for explainability
 
 **Deliverables**:
+
 - [ ] ReAct trace recorder
 - [ ] Thought/Action/Observation logging
 - [ ] Trace storage (audit log integration)
 - [ ] Trace visualization data format
 
 **Files Created**:
+
 ```
 services/chatops/src/autonomy/
 ├── bounded-autonomy.ts     ✅ Created (ReActTraceRecorder)
@@ -207,6 +227,7 @@ services/chatops/src/autonomy/
 **Dependencies**: Sprint 11-12, Audit log service
 
 **Acceptance Criteria**:
+
 - [ ] Full trace capture for all operations
 - [ ] 98%+ trace coverage
 - [ ] Integration with audit log
@@ -219,12 +240,14 @@ services/chatops/src/autonomy/
 **Goal**: Enable basic Slack integration
 
 **Deliverables**:
+
 - [ ] Slack Bolt app setup
 - [ ] Message event handling
 - [ ] App mention handling
 - [ ] Basic slash commands (/intel, /entity)
 
 **Files Created**:
+
 ```
 services/chatops/src/adapters/slack/
 ├── slack-adapter.ts        ✅ Created
@@ -235,6 +258,7 @@ services/chatops/src/adapters/slack/
 **Dependencies**: Sprint 1-6 (intent router)
 
 **Acceptance Criteria**:
+
 - [ ] Respond to DMs and @mentions
 - [ ] /intel and /entity commands work
 - [ ] Proper error handling
@@ -247,12 +271,14 @@ services/chatops/src/adapters/slack/
 **Goal**: Enable rich interactive components
 
 **Deliverables**:
+
 - [ ] Block Kit response formatting
 - [ ] Approval button workflows
 - [ ] Entity cards
 - [ ] ReAct trace expansion
 
 **Files to Modify**:
+
 ```
 services/chatops/src/adapters/slack/
 ├── slack-adapter.ts        ✅ Enhance
@@ -263,6 +289,7 @@ services/chatops/src/adapters/slack/
 **Dependencies**: Sprint 15-16
 
 **Acceptance Criteria**:
+
 - [ ] Entity cards render correctly
 - [ ] Approval buttons functional
 - [ ] Trace expansion works
@@ -275,12 +302,14 @@ services/chatops/src/adapters/slack/
 **Goal**: Enable web UI integration
 
 **Deliverables**:
+
 - [ ] WebSocket-based adapter
 - [ ] Connection management
 - [ ] Streaming responses
 - [ ] Session persistence
 
 **Files to Create**:
+
 ```
 services/chatops/src/adapters/web/
 ├── web-adapter.ts          To create
@@ -291,6 +320,7 @@ services/chatops/src/adapters/web/
 **Dependencies**: WebSocket server
 
 **Acceptance Criteria**:
+
 - [ ] WebSocket connection stable
 - [ ] Streaming token delivery
 - [ ] Session resumption
@@ -303,12 +333,14 @@ services/chatops/src/adapters/web/
 **Goal**: Production readiness for Phase 1
 
 **Deliverables**:
+
 - [ ] End-to-end integration tests
 - [ ] Load testing (100 concurrent users)
 - [ ] Security audit
 - [ ] Documentation
 
 **Files to Create**:
+
 ```
 services/chatops/__tests__/
 ├── integration/
@@ -322,6 +354,7 @@ services/chatops/__tests__/
 **Dependencies**: All Phase 1 sprints
 
 **Acceptance Criteria**:
+
 - [ ] 80% test coverage
 - [ ] p95 <500ms intent routing
 - [ ] 100 concurrent user support
@@ -337,13 +370,15 @@ services/chatops/__tests__/
 **Goal**: Detect and block prompt injection attempts
 
 **Deliverables**:
+
 - [ ] Pattern-based jailbreak detection
 - [ ] ML-based detection model
 - [ ] Escalation workflow
 - [ ] False positive handling
 
 **Acceptance Criteria**:
-- [ ] >95% detection rate on known jailbreaks
+
+- [ ] > 95% detection rate on known jailbreaks
 - [ ] <5% false positive rate
 - [ ] Sub-100ms detection latency
 
@@ -354,6 +389,7 @@ services/chatops/__tests__/
 **Goal**: Verify tool/plugin provenance
 
 **Deliverables**:
+
 - [ ] SLSA attestation verification
 - [ ] Cosign signature checking
 - [ ] SBOM integration
@@ -362,6 +398,7 @@ services/chatops/__tests__/
 **Dependencies**: Plugin registry, Cosign infrastructure
 
 **Acceptance Criteria**:
+
 - [ ] 100% tool attestation coverage
 - [ ] Blocked unattested tools
 - [ ] Audit trail for tool usage
@@ -373,6 +410,7 @@ services/chatops/__tests__/
 **Goal**: Ensure strict tenant boundaries
 
 **Deliverables**:
+
 - [ ] Namespace-based isolation
 - [ ] Cross-tenant request detection
 - [ ] Audit logging for violations
@@ -381,6 +419,7 @@ services/chatops/__tests__/
 **Dependencies**: OPA policies
 
 **Acceptance Criteria**:
+
 - [ ] Zero cross-tenant data leakage
 - [ ] <5ms overhead per request
 - [ ] Comprehensive audit trail
@@ -392,13 +431,15 @@ services/chatops/__tests__/
 **Goal**: Enable agents to recover from errors
 
 **Deliverables**:
+
 - [ ] Error detection and classification
 - [ ] Retry strategies
 - [ ] Alternative approach selection
 - [ ] User feedback incorporation
 
 **Acceptance Criteria**:
-- [ ] >50% error recovery rate
+
+- [ ] > 50% error recovery rate
 - [ ] Graceful degradation
 - [ ] User notification on failure
 
@@ -409,12 +450,14 @@ services/chatops/__tests__/
 **Goal**: Microsoft Teams integration
 
 **Deliverables**:
+
 - [ ] Teams Bot Framework integration
 - [ ] Adaptive Cards
 - [ ] Approval workflows
 - [ ] SSO integration
 
 **Acceptance Criteria**:
+
 - [ ] Feature parity with Slack
 - [ ] Teams-specific UI patterns
 - [ ] Enterprise compliance
@@ -426,12 +469,14 @@ services/chatops/__tests__/
 **Goal**: Scale validation and compliance
 
 **Deliverables**:
+
 - [ ] 1,000 concurrent user support
 - [ ] FedRAMP control documentation
 - [ ] Security assessment preparation
 - [ ] Penetration testing
 
 **Acceptance Criteria**:
+
 - [ ] p95 <200ms GraphQL
 - [ ] 1k concurrent WebSocket users
 - [ ] FedRAMP control evidence
@@ -443,12 +488,14 @@ services/chatops/__tests__/
 **Goal**: Real-world validation
 
 **Deliverables**:
+
 - [ ] 3-5 IC pilot deployments
 - [ ] Customer feedback integration
 - [ ] Bug fixes and improvements
 - [ ] Documentation updates
 
 **Acceptance Criteria**:
+
 - [ ] 5 active pilot customers
 - [ ] $250-500k MRR
 - [ ] NPS >30
@@ -459,16 +506,17 @@ services/chatops/__tests__/
 
 ### Key Sprints
 
-| Sprint | Focus | Goal |
-|--------|-------|------|
-| 49-52 | Multi-hop NL Reasoning | Complex graph queries via NL |
-| 53-56 | Federated Graphs | Cross-agency, zero-knowledge |
-| 57-60 | Autonomous Threat Tracking | Proactive monitoring |
-| 61-64 | 20+ OSINT Transforms | Comprehensive tool library |
-| 65-68 | Sales Enablement | GTM materials, demos |
-| 69-72 | Partnership Integrations | Booz Allen, AWS, etc. |
+| Sprint | Focus                      | Goal                         |
+| ------ | -------------------------- | ---------------------------- |
+| 49-52  | Multi-hop NL Reasoning     | Complex graph queries via NL |
+| 53-56  | Federated Graphs           | Cross-agency, zero-knowledge |
+| 57-60  | Autonomous Threat Tracking | Proactive monitoring         |
+| 61-64  | 20+ OSINT Transforms       | Comprehensive tool library   |
+| 65-68  | Sales Enablement           | GTM materials, demos         |
+| 69-72  | Partnership Integrations   | Booz Allen, AWS, etc.        |
 
 **Phase 3 Success Criteria**:
+
 - [ ] 15+ IC contracts
 - [ ] $2-5M ARR
 - [ ] 500 daily active users
@@ -479,12 +527,14 @@ services/chatops/__tests__/
 ## Technical Debt & Maintenance
 
 **Ongoing Tasks** (every sprint):
+
 - Dependency updates
 - Security patches
 - Performance monitoring
 - Documentation maintenance
 
 **Quarterly Tasks**:
+
 - Security audit
 - Load test validation
 - Disaster recovery test
@@ -494,13 +544,13 @@ services/chatops/__tests__/
 
 ## Risk Mitigation
 
-| Risk | Mitigation |
-|------|------------|
-| LLM API instability | Multi-provider fallback |
-| Memory scaling | Tiered compression, pruning |
-| Approval workflow delays | Timeout + auto-escalation |
-| FedRAMP timeline | Early 3PAO engagement |
-| Talent gaps | Training, contractor support |
+| Risk                     | Mitigation                   |
+| ------------------------ | ---------------------------- |
+| LLM API instability      | Multi-provider fallback      |
+| Memory scaling           | Tiered compression, pruning  |
+| Approval workflow delays | Timeout + auto-escalation    |
+| FedRAMP timeline         | Early 3PAO engagement        |
+| Talent gaps              | Training, contractor support |
 
 ---
 
@@ -508,14 +558,14 @@ services/chatops/__tests__/
 
 ### Engineering Team (Phase 1)
 
-| Role | Count | Focus |
-|------|-------|-------|
-| Backend Engineer | 3 | Memory, Autonomy, Router |
-| ML Engineer | 1 | Intent classification, NER |
-| DevOps Engineer | 1 | Infrastructure, CI/CD |
-| Security Engineer | 1 | OPA, Audit, Compliance |
-| Frontend Engineer | 1 | Web adapter, UI |
-| QA Engineer | 1 | Testing, Load testing |
+| Role              | Count | Focus                      |
+| ----------------- | ----- | -------------------------- |
+| Backend Engineer  | 3     | Memory, Autonomy, Router   |
+| ML Engineer       | 1     | Intent classification, NER |
+| DevOps Engineer   | 1     | Infrastructure, CI/CD      |
+| Security Engineer | 1     | OPA, Audit, Compliance     |
+| Frontend Engineer | 1     | Web adapter, UI            |
+| QA Engineer       | 1     | Testing, Load testing      |
 
 **Total**: 8 engineers
 
@@ -533,38 +583,38 @@ services/chatops/__tests__/
 
 ### Phase 1 (Month 6)
 
-| Metric | Target |
-|--------|--------|
-| Intent Accuracy | >85% |
-| Routing Latency (p95) | <500ms |
+| Metric                 | Target |
+| ---------------------- | ------ |
+| Intent Accuracy        | >85%   |
+| Routing Latency (p95)  | <500ms |
 | Memory Retrieval (p95) | <100ms |
-| Test Coverage | >80% |
-| Concurrent Users | 100 |
+| Test Coverage          | >80%   |
+| Concurrent Users       | 100    |
 
 ### Phase 2 (Month 12)
 
-| Metric | Target |
-|--------|--------|
-| Jailbreak Detection | >95% |
-| Tool Attestation | 100% |
-| Concurrent Users | 1,000 |
-| Pilot Customers | 5 |
-| MRR | $500k |
+| Metric              | Target |
+| ------------------- | ------ |
+| Jailbreak Detection | >95%   |
+| Tool Attestation    | 100%   |
+| Concurrent Users    | 1,000  |
+| Pilot Customers     | 5      |
+| MRR                 | $500k  |
 
 ### Phase 3 (Month 18)
 
-| Metric | Target |
-|--------|--------|
-| IC Contracts | 15+ |
-| ARR | $2-5M |
-| DAU | 500 |
-| NPS | 70 |
-| Trace Coverage | 99.5% |
+| Metric         | Target |
+| -------------- | ------ |
+| IC Contracts   | 15+    |
+| ARR            | $2-5M  |
+| DAU            | 500    |
+| NPS            | 70     |
+| Trace Coverage | 99.5%  |
 
 ---
 
 ## Document Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-04 | Claude | Initial creation |
+| Version | Date       | Author | Changes          |
+| ------- | ---------- | ------ | ---------------- |
+| 1.0     | 2025-12-04 | Claude | Initial creation |

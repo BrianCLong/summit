@@ -3,16 +3,16 @@ name: SGF CI
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
-      - 'packages/sgf-*/**'
+      - "packages/sgf-*/**"
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'packages/sgf-*/**'
+      - "packages/sgf-*/**"
 
 concurrency:
   group: sgf-ci-${{ github.ref }}

@@ -1,22 +1,22 @@
-import { readFileSync, writeFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { parse } from 'yaml';
-import { validateModelCard } from './validator.js';
-import { canonicalize } from './canonical.js';
-import { signCanonicalPayload } from './signer.js';
-import { CompiledModelCard, CompileOptions, CompileResult, ModelCardInput } from './types.js';
+import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { parse } from "yaml";
+import { validateModelCard } from "./validator.js";
+import { canonicalize } from "./canonical.js";
+import { signCanonicalPayload } from "./signer.js";
+import { CompiledModelCard, CompileOptions, CompileResult, ModelCardInput } from "./types.js";
 
 function hashSource(content: string): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(content);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function toCompiledCard(
   input: ModelCardInput,
   options: CompileOptions,
   sourceHash: string
-): Omit<CompiledModelCard, 'signature'> {
+): Omit<CompiledModelCard, "signature"> {
   const now = (options.now ?? new Date()).toISOString();
   return {
     metadata: {
@@ -46,7 +46,7 @@ export function compileModelCardFromFile(
   outputPath: string | undefined,
   options: CompileOptions
 ): CompileResult {
-  const raw = readFileSync(yamlPath, 'utf8');
+  const raw = readFileSync(yamlPath, "utf8");
   const parsed = parse(raw);
   const validated = validateModelCard(parsed);
   return compileModelCard(validated, raw, outputPath, options);
@@ -69,7 +69,11 @@ export function compileModelCard(
     risk: compiled.risk,
     enforcement: compiled.enforcement,
   });
-  const signature = signCanonicalPayload(canonicalPayload, options.privateKeyPath, options.publicKeyPath);
+  const signature = signCanonicalPayload(
+    canonicalPayload,
+    options.privateKeyPath,
+    options.publicKeyPath
+  );
 
   const card: CompiledModelCard = {
     ...compiled,
@@ -77,7 +81,7 @@ export function compileModelCard(
   };
 
   if (outputPath) {
-    writeFileSync(outputPath, JSON.stringify(card, null, 2), 'utf8');
+    writeFileSync(outputPath, JSON.stringify(card, null, 2), "utf8");
   }
 
   return { card, canonicalPayload };

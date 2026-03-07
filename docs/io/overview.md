@@ -3,7 +3,7 @@
 **Summit Readiness Assertion:** This track aligns to the readiness standard defined in
 `docs/SUMMIT_READINESS_ASSERTION.md` and is governed by the Law of Consistency. It is
 intentionally constrained to evidence-first, deterministic outputs with audit-grade
-provenance. 
+provenance.
 
 ## Purpose
 

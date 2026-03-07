@@ -128,10 +128,10 @@ status: experimental
 logsource: { product: app, service: switchboard }
 detection:
   sel1:
-    event: 'acl.update'
-    new_scope: 'widget:*'
+    event: "acl.update"
+    new_scope: "widget:*"
   sel2:
-    actor_role: '<not in>[Admin,SecDuty]'
+    actor_role: "<not in>[Admin,SecDuty]"
   condition: sel1 and sel2
 level: high
 tags: [attack.persistence, attack.privilege_escalation]
@@ -213,7 +213,7 @@ suppressions:
     reason: admin dashboard activity baseline
     expires: 2025-11-30
   - id: ig-bulk-export-service
-    match: { service: intelgraph, event: download, actor_id: 'svc-exporter' }
+    match: { service: intelgraph, event: download, actor_id: "svc-exporter" }
     reason: service account bulk export job
     expires: 2025-12-31
 ```

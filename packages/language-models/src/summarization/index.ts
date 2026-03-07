@@ -2,7 +2,7 @@
  * Text summarization
  */
 
-import type { SummaryResult } from '../types';
+import type { SummaryResult } from "../types";
 
 export class Summarizer {
   /**
@@ -10,11 +10,11 @@ export class Summarizer {
    */
   async extractive(text: string, maxSentences: number = 3): Promise<SummaryResult> {
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    const summary = sentences.slice(0, maxSentences).join(' ');
+    const summary = sentences.slice(0, maxSentences).join(" ");
 
     return {
       summary,
-      type: 'extractive',
+      type: "extractive",
       compressionRatio: summary.length / text.length,
     };
   }
@@ -29,7 +29,7 @@ export class Summarizer {
 
     return {
       ...extractiveResult,
-      type: 'abstractive',
+      type: "abstractive",
     };
   }
 
@@ -45,7 +45,7 @@ export class Summarizer {
    * Multi-document summarization
    */
   async multiDocument(documents: string[], maxLength: number = 300): Promise<SummaryResult> {
-    const combined = documents.join(' ');
+    const combined = documents.join(" ");
     return this.abstractive(combined, maxLength);
   }
 }

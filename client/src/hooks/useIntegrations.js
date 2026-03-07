@@ -8,13 +8,13 @@
  * @module hooks/useIntegrations
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   IntegrationCatalogAPI,
   IntegrationAPI,
   IntegrationApprovalAPI,
   IntegrationAuditAPI,
-} from '../services/integration-api';
+} from "../services/integration-api";
 
 /**
  * Hook for listing available integration types
@@ -214,33 +214,39 @@ export function useIntegrationApprovals() {
     fetchApprovals();
   }, [fetchApprovals]);
 
-  const approve = useCallback(async (id, comment) => {
-    try {
-      setProcessing(true);
-      setError(null);
-      await IntegrationApprovalAPI.approve(id, comment);
-      await fetchApprovals();
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setProcessing(false);
-    }
-  }, [fetchApprovals]);
+  const approve = useCallback(
+    async (id, comment) => {
+      try {
+        setProcessing(true);
+        setError(null);
+        await IntegrationApprovalAPI.approve(id, comment);
+        await fetchApprovals();
+      } catch (err) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setProcessing(false);
+      }
+    },
+    [fetchApprovals]
+  );
 
-  const reject = useCallback(async (id, comment) => {
-    try {
-      setProcessing(true);
-      setError(null);
-      await IntegrationApprovalAPI.reject(id, comment);
-      await fetchApprovals();
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setProcessing(false);
-    }
-  }, [fetchApprovals]);
+  const reject = useCallback(
+    async (id, comment) => {
+      try {
+        setProcessing(true);
+        setError(null);
+        await IntegrationApprovalAPI.reject(id, comment);
+        await fetchApprovals();
+      } catch (err) {
+        setError(err.message);
+        throw err;
+      } finally {
+        setProcessing(false);
+      }
+    },
+    [fetchApprovals]
+  );
 
   return {
     approvals,

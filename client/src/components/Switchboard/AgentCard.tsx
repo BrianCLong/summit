@@ -1,15 +1,8 @@
-'use client';
-import React from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-} from '@mui/material';
-import { Group, Message, Phone, Videocam } from '@mui/icons-material';
-import { Agent } from './types';
+"use client";
+import React from "react";
+import { Box, Button, Card, CardContent, CardHeader, Typography } from "@mui/material";
+import { Group, Message, Phone, Videocam } from "@mui/icons-material";
+import { Agent } from "./types";
 
 interface AgentCardProps {
   agents: Agent[];
@@ -38,26 +31,17 @@ export default function AgentCard({ agents, onChat }: AgentCardProps) {
                 {a.name}
               </Typography>
               <Typography variant="caption" className="text-xs opacity-70">
-                {a.tags.join(' • ')}
+                {a.tags.join(" • ")}
               </Typography>
             </Box>
             <Box className="flex gap-2">
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={onChat}
-                startIcon={<Message />}
-              >
+              <Button size="small" variant="outlined" onClick={onChat} startIcon={<Message />}>
                 Chat
               </Button>
               <Button size="small" variant="outlined" startIcon={<Phone />}>
                 Call
               </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<Videocam />}
-              >
+              <Button size="small" variant="outlined" startIcon={<Videocam />}>
                 Video
               </Button>
             </Box>

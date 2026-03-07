@@ -3,14 +3,14 @@
  * Receives alerts from Prometheus Alertmanager and creates incidents/alerts
  */
 
-import { Router } from 'express';
-import { Pool } from 'pg';
-import { AlertService } from '../services/alertService';
-import { SLOService } from '../services/sloService';
-import { IncidentService } from '../services/incidentService';
-import { AlertSeverity, AlertSource } from '../models/alert';
-import { IncidentSeverity } from '../models/incident';
-import { SLOType, ViolationSeverity } from '../models/slo';
+import { Router } from "express";
+import { Pool } from "pg";
+import { AlertService } from "../services/alertService";
+import { SLOService } from "../services/sloService";
+import { IncidentService } from "../services/incidentService";
+import { AlertSeverity, AlertSource } from "../models/alert";
+import { IncidentSeverity } from "../models/incident";
+import { SLOType, ViolationSeverity } from "../models/slo";
 
 export function createPrometheusWebhookRouter(db: Pool): Router {
   const router = Router();
@@ -19,13 +19,13 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
   const incidentService = new IncidentService(db);
 
   // Alertmanager webhook endpoint
-  router.post('/prometheus-webhook', async (req, res) => {
+  router.post("/prometheus-webhook", async (req, res) => {
     const payload = req.body;
 
     try {
       // Alertmanager sends alerts in groups
       if (!payload.alerts || !Array.isArray(payload.alerts)) {
-        return res.status(400).json({ error: 'Invalid payload' });
+        return res.status(400).json({ error: "Invalid payload" });
       }
 
       for (const alert of payload.alerts) {
@@ -34,8 +34,8 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
 
       res.json({ received: true, processed: payload.alerts.length });
     } catch (error) {
-      console.error('Error handling Prometheus webhook:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error("Error handling Prometheus webhook:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -53,11 +53,11 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     console.log(`Prometheus alert: ${labels.alertname} [${status}]`);
 
     // Determine severity
-    const severity = mapSeverity(labels.severity || annotations.severity || 'warning');
+    const severity = mapSeverity(labels.severity || annotations.severity || "warning");
 
     // Create alert record
     const createdAlert = await alertService.createAlert({
-      alertName: labels.alertname || 'Unknown Alert',
+      alertName: labels.alertname || "Unknown Alert",
       alertSource: AlertSource.PROMETHEUS,
       severity,
       serviceName: labels.service || labels.job,
@@ -82,25 +82,25 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     }
 
     // Auto-create incident for critical alerts
-    if (severity === AlertSeverity.CRITICAL && status === 'firing') {
+    if (severity === AlertSeverity.CRITICAL && status === "firing") {
       await autoCreateIncident(createdAlert, labels, annotations);
     }
 
     // Auto-resolve alert if status is resolved
-    if (status === 'resolved') {
+    if (status === "resolved") {
       await alertService.resolveAlert(createdAlert.id);
     }
   }
 
   function mapSeverity(severity: string): AlertSeverity {
     switch (severity.toLowerCase()) {
-      case 'critical':
-      case 'page':
+      case "critical":
+      case "page":
         return AlertSeverity.CRITICAL;
-      case 'warning':
-      case 'warn':
+      case "warning":
+      case "warn":
         return AlertSeverity.WARNING;
-      case 'info':
+      case "info":
       default:
         return AlertSeverity.INFO;
     }
@@ -108,29 +108,27 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
 
   function isSLOAlert(labels: any, annotations: any): boolean {
     return (
-      labels.alertname?.toLowerCase().includes('slo') ||
-      labels.slo_name ||
-      annotations.slo_name
+      labels.alertname?.toLowerCase().includes("slo") || labels.slo_name || annotations.slo_name
     );
   }
 
   async function handleSLOViolation(alert: any, labels: any, annotations: any) {
     const sloName = labels.slo_name || annotations.slo_name || labels.alertname;
-    const serviceName = labels.service || labels.job || 'unknown';
+    const serviceName = labels.service || labels.job || "unknown";
 
     // Determine SLO type
     let sloType: SLOType = SLOType.AVAILABILITY;
-    if (sloName.toLowerCase().includes('latency')) {
+    if (sloName.toLowerCase().includes("latency")) {
       sloType = SLOType.LATENCY;
-    } else if (sloName.toLowerCase().includes('error')) {
+    } else if (sloName.toLowerCase().includes("error")) {
       sloType = SLOType.ERROR_RATE;
-    } else if (sloName.toLowerCase().includes('throughput')) {
+    } else if (sloName.toLowerCase().includes("throughput")) {
       sloType = SLOType.THROUGHPUT;
     }
 
     // Extract threshold and actual values
-    const thresholdValue = parseFloat(labels.threshold || annotations.threshold || '0');
-    const actualValue = parseFloat(labels.value || annotations.value || '0');
+    const thresholdValue = parseFloat(labels.threshold || annotations.threshold || "0");
+    const actualValue = parseFloat(labels.value || annotations.value || "0");
 
     // Create SLO violation
     await sloService.createViolation({
@@ -140,9 +138,10 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
       thresholdValue,
       actualValue,
       measurementWindow: labels.window || annotations.window,
-      severity: alert.severity === AlertSeverity.CRITICAL
-        ? ViolationSeverity.CRITICAL
-        : ViolationSeverity.WARNING,
+      severity:
+        alert.severity === AlertSeverity.CRITICAL
+          ? ViolationSeverity.CRITICAL
+          : ViolationSeverity.WARNING,
       prometheusQuery: annotations.query,
       prometheusValueJson: { labels, annotations },
       metadata: {
@@ -155,8 +154,8 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
   async function autoCreateIncident(alert: any, labels: any, annotations: any) {
     // Check if incident already exists for this alert
     const existingIncidents = await db.query(
-      'SELECT id FROM maestro.incidents WHERE status NOT IN ($1, $2) AND metadata->\'alertFingerprint\' = $3',
-      ['resolved', 'closed', alert.fingerprint]
+      "SELECT id FROM maestro.incidents WHERE status NOT IN ($1, $2) AND metadata->'alertFingerprint' = $3",
+      ["resolved", "closed", alert.fingerprint]
     );
 
     if (existingIncidents.rows.length > 0) {
@@ -170,17 +169,17 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
 
     // Create new incident
     const incident = await incidentService.createIncident({
-      title: `[AUTO] ${labels.alertname}: ${annotations.summary || ''}`,
-      description: annotations.description || annotations.message || '',
+      title: `[AUTO] ${labels.alertname}: ${annotations.summary || ""}`,
+      description: annotations.description || annotations.message || "",
       severity: incidentSeverity,
       affectedServices: [labels.service || labels.job].filter(Boolean),
       impactDescription: annotations.impact,
       customerImpact: shouldFlagCustomerImpact(labels, annotations),
-      createdBy: 'alertmanager-auto',
+      createdBy: "alertmanager-auto",
       metadata: {
         alertFingerprint: alert.fingerprint,
         autoCreated: true,
-        source: 'prometheus',
+        source: "prometheus",
       },
     });
 
@@ -198,7 +197,7 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
 
     // Map alert severity to incident severity
     if (alertSeverity === AlertSeverity.CRITICAL) {
-      return labels.service?.includes('api') || labels.customer_facing === 'true'
+      return labels.service?.includes("api") || labels.customer_facing === "true"
         ? IncidentSeverity.SEV1
         : IncidentSeverity.SEV2;
     }
@@ -208,11 +207,11 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
 
   function shouldFlagCustomerImpact(labels: any, annotations: any): boolean {
     return (
-      labels.customer_facing === 'true' ||
-      labels.customer_impact === 'true' ||
-      annotations.customer_impact === 'true' ||
-      labels.service?.includes('api') ||
-      labels.service?.includes('web')
+      labels.customer_facing === "true" ||
+      labels.customer_impact === "true" ||
+      annotations.customer_impact === "true" ||
+      labels.service?.includes("api") ||
+      labels.service?.includes("web")
     );
   }
 

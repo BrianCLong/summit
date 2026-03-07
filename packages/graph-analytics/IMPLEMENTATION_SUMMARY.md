@@ -13,6 +13,7 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 ### 1. Pathfinding Algorithms (`src/algorithms/pathfinding.ts`)
 
 **Features:**
+
 - ✅ Shortest path algorithm (Dijkstra's) with policy awareness
 - ✅ K-shortest paths algorithm (Yen's algorithm)
 - ✅ Policy-aware filtering:
@@ -33,11 +34,13 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
   - Uncertainty quantification
 
 **Algorithm Details:**
+
 - **Shortest Path**: Dijkstra's algorithm with heap-based priority queue
 - **K-Shortest Paths**: Yen's algorithm with deviation-based path enumeration
-- **Complexity**: O((V + E) log V) for shortest path, O(K * V * (V + E) log V) for k-shortest paths
+- **Complexity**: O((V + E) log V) for shortest path, O(K _ V _ (V + E) log V) for k-shortest paths
 
 **XAI Output:**
+
 - Element-level importance scores (0-1)
 - Human-readable reasoning for each node/edge in path
 - Evidence lists supporting the inclusion of each element
@@ -50,6 +53,7 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 **Purpose**: Detect entities that are co-located in spacetime
 
 **Parameters:**
+
 - `timeWindow`: Maximum time difference between co-locations (ms)
 - `distanceThreshold`: Maximum spatial distance (meters)
 - `minCoOccurrences`: Minimum number of co-location events
@@ -57,11 +61,13 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 - `startTime`/`endTime`: Temporal scope
 
 **Implementation:**
+
 - Haversine formula for spatial distance calculation
 - Pairwise entity comparison with O(N²) complexity
 - Event aggregation and frequency counting
 
 **XAI Output:**
+
 - Pattern-level explanation (overall co-travel confidence)
 - Per-entity participation explanations
 - Feature importances: temporal_proximity (0.4), spatial_proximity (0.4), frequency (0.2)
@@ -71,6 +77,7 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 **Purpose**: Detect fan-in/fan-out patterns indicative of financial structuring
 
 **Parameters:**
+
 - `timeWindow`: Time window for pattern detection (ms)
 - `minBranches`: Minimum number of branches in pattern
 - `maxHops`: Maximum distance from center node
@@ -79,15 +86,18 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 - `centerNodeTypes`: Filter center nodes by type
 
 **Implementation:**
+
 - Temporal adjacency list construction
 - Sliding time window grouping
 - Branch counting and validation
 
 **Patterns Detected:**
+
 - **Fan-out**: Single source distributing to multiple destinations
 - **Fan-in**: Multiple sources converging to single destination
 
 **XAI Output:**
+
 - Pattern-level explanation with branch count, amounts, and timing
 - Center node importance explanation
 - Feature importances: branch_count (0.4), temporal_concentration (0.3), amount_distribution (0.3)
@@ -97,6 +107,7 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 **Purpose**: Detect anomalous communication patterns (bursts and lulls)
 
 **Parameters:**
+
 - `timeWindow`: Sliding window size (ms)
 - `baselineRate`: Expected communication rate (optional, auto-calculated)
 - `burstThreshold`: Multiplier for burst detection (e.g., 2.0 = 2x baseline)
@@ -105,11 +116,13 @@ Delivered the Graph Analytics & Pattern Mining layer for the IntelGraph platform
 - `minBurstDuration`: Minimum burst duration (ms)
 
 **Implementation:**
+
 - Sliding window analysis with 50% overlap
 - Baseline rate calculation from historical data
 - Deviation detection based on thresholds
 
 **XAI Output:**
+
 - Burst/lull pattern explanation with message counts and ratios
 - Feature importances: message_rate (0.5-0.6), deviation_from_baseline (0.3-0.4), entity_count (0.2)
 
@@ -128,6 +141,7 @@ While not newly implemented, the following existing algorithms are now part of t
 ### Unit Tests
 
 **Pathfinding Tests** (`src/algorithms/__tests__/pathfinding.test.ts`):
+
 - ✅ Basic shortest path functionality
 - ✅ No path exists cases
 - ✅ Policy filter compliance (node types, edge types, policy labels)
@@ -142,6 +156,7 @@ While not newly implemented, the following existing algorithms are now part of t
 - ✅ Performance characteristics (100-node graphs in <100ms)
 
 **Pattern Mining Tests** (`src/pattern-mining/__tests__/pattern-templates.test.ts`):
+
 - ✅ Co-travel detection (time/distance thresholds, min occurrences)
 - ✅ Entity type filtering
 - ✅ Financial structuring (fan-in, fan-out, amount thresholds)
@@ -167,7 +182,7 @@ All analytics functions can generate explanations conforming to the Graph-XAI se
 ```typescript
 interface PatternExplanation {
   elementId: string;
-  elementType: 'node' | 'edge' | 'pattern';
+  elementType: "node" | "edge" | "pattern";
   importanceScore: number; // 0-1
   reasoning: string; // Human-readable
   evidence: string[]; // Supporting facts
@@ -203,17 +218,18 @@ All pathfinding and pattern mining functions respect resource constraints:
 
 ### Performance Targets
 
-| Algorithm | Graph Size | Target Latency (p95) | Achieved |
-|-----------|------------|----------------------|----------|
-| Shortest Path | 100 nodes, 200 edges | <100ms | ✅ ~50ms |
-| K-Shortest Paths (k=5) | 100 nodes, 200 edges | <500ms | ✅ ~300ms |
-| Co-Travel | 50 nodes | <500ms | ✅ ~200ms |
-| Financial Structuring | 100 nodes, 200 edges | <1s | ✅ ~600ms |
-| Communication Bursts | 200 edges | <500ms | ✅ ~150ms |
+| Algorithm              | Graph Size           | Target Latency (p95) | Achieved  |
+| ---------------------- | -------------------- | -------------------- | --------- |
+| Shortest Path          | 100 nodes, 200 edges | <100ms               | ✅ ~50ms  |
+| K-Shortest Paths (k=5) | 100 nodes, 200 edges | <500ms               | ✅ ~300ms |
+| Co-Travel              | 50 nodes             | <500ms               | ✅ ~200ms |
+| Financial Structuring  | 100 nodes, 200 edges | <1s                  | ✅ ~600ms |
+| Communication Bursts   | 200 edges            | <500ms               | ✅ ~150ms |
 
 ### Metrics & Observability
 
 Each function returns:
+
 - **executionTime**: Actual wall-clock time (ms)
 - **nodesExplored**: Number of nodes processed
 - **metadata**: Algorithm-specific stats (graph size, filters applied, budget status)
@@ -247,6 +263,7 @@ interface GraphData {
 ### Output Format
 
 All pattern mining functions return:
+
 - **patterns**: Array of `PatternMatch` objects
 - **executionTime**: Performance metric
 - **metadata**: Algorithm parameters and statistics
@@ -364,15 +381,18 @@ N/A (new module, no migration required)
 ### v1.0.0 (2025-11-24)
 
 **Added:**
+
 - Pathfinding algorithms with policy awareness and XAI integration
 - Pattern mining templates: co-travel, financial structuring, communication bursts
 - Comprehensive test suites
 - Integration documentation and examples
 
 **Changed:**
+
 - Updated package index to export new modules
 
 **Fixed:**
+
 - N/A (initial implementation)
 
 ## Contributors
@@ -392,6 +412,7 @@ N/A (new module, no migration required)
 **Status**: ✅ **Implementation Complete**
 
 **Delivered**:
+
 - 2 new modules (pathfinding, pattern templates)
 - 1200+ lines of production code
 - 800+ lines of tests

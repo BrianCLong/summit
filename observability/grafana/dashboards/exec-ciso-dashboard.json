@@ -270,8 +270,18 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "green", "index": 0, "text": "Clean ✓" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "red", "index": 1, "text": "VIOLATIONS" }, "to": 999 }, "type": "range" }
+            {
+              "options": { "0": { "color": "green", "index": 0, "text": "Clean ✓" } },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "red", "index": 1, "text": "VIOLATIONS" },
+                "to": 999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -332,10 +342,22 @@
               {
                 "id": "mappings",
                 "value": [
-                  { "options": { "critical": { "color": "red", "index": 0, "text": "CRITICAL" } }, "type": "value" },
-                  { "options": { "high": { "color": "orange", "index": 1, "text": "HIGH" } }, "type": "value" },
-                  { "options": { "medium": { "color": "yellow", "index": 2, "text": "MEDIUM" } }, "type": "value" },
-                  { "options": { "low": { "color": "blue", "index": 3, "text": "LOW" } }, "type": "value" }
+                  {
+                    "options": { "critical": { "color": "red", "index": 0, "text": "CRITICAL" } },
+                    "type": "value"
+                  },
+                  {
+                    "options": { "high": { "color": "orange", "index": 1, "text": "HIGH" } },
+                    "type": "value"
+                  },
+                  {
+                    "options": { "medium": { "color": "yellow", "index": 2, "text": "MEDIUM" } },
+                    "type": "value"
+                  },
+                  {
+                    "options": { "low": { "color": "blue", "index": 3, "text": "LOW" } },
+                    "type": "value"
+                  }
                 ]
               },
               { "id": "custom.displayMode", "value": "color-background-solid" }
@@ -421,10 +443,22 @@
           "mappings": []
         },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "critical" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "high" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "medium" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "low" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+          {
+            "matcher": { "id": "byName", "options": "critical" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "high" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "medium" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "low" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }]
+          }
         ]
       },
       "gridPos": { "h": 8, "w": 5, "x": 14, "y": 7 },
@@ -476,8 +510,14 @@
           }
         },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "opened" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "closed" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+          {
+            "matcher": { "id": "byName", "options": "opened" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "closed" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          }
         ]
       },
       "gridPos": { "h": 8, "w": 5, "x": 19, "y": 7 },
@@ -531,9 +571,18 @@
               {
                 "id": "mappings",
                 "value": [
-                  { "options": { "passed": { "color": "green", "index": 0, "text": "●" } }, "type": "value" },
-                  { "options": { "failed": { "color": "red", "index": 1, "text": "○" } }, "type": "value" },
-                  { "options": { "partial": { "color": "yellow", "index": 2, "text": "◐" } }, "type": "value" }
+                  {
+                    "options": { "passed": { "color": "green", "index": 0, "text": "●" } },
+                    "type": "value"
+                  },
+                  {
+                    "options": { "failed": { "color": "red", "index": 1, "text": "○" } },
+                    "type": "value"
+                  },
+                  {
+                    "options": { "partial": { "color": "yellow", "index": 2, "text": "◐" } },
+                    "type": "value"
+                  }
                 ]
               },
               { "id": "custom.displayMode", "value": "color-text" },
@@ -737,14 +786,25 @@
           "unit": "opm"
         },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "allow" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "deny" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+          {
+            "matcher": { "id": "byName", "options": "allow" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "deny" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
         ]
       },
       "gridPos": { "h": 4, "w": 12, "x": 12, "y": 20 },
       "id": 14,
       "options": {
-        "legend": { "calcs": ["mean"], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -839,9 +899,30 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "from": 0, "result": { "color": "green", "index": 0, "text": "LOW" }, "to": 0.3 }, "type": "range" },
-            { "options": { "from": 0.3, "result": { "color": "yellow", "index": 1, "text": "MEDIUM" }, "to": 0.7 }, "type": "range" },
-            { "options": { "from": 0.7, "result": { "color": "red", "index": 2, "text": "HIGH" }, "to": 1 }, "type": "range" }
+            {
+              "options": {
+                "from": 0,
+                "result": { "color": "green", "index": 0, "text": "LOW" },
+                "to": 0.3
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.3,
+                "result": { "color": "yellow", "index": 1, "text": "MEDIUM" },
+                "to": 0.7
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.7,
+                "result": { "color": "red", "index": 2, "text": "HIGH" },
+                "to": 1
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -913,7 +994,12 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
       "id": 18,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -1114,7 +1200,10 @@
         "multi": true,
         "name": "severity",
         "options": [],
-        "query": { "query": "label_values(security_vulnerability_info, severity)", "refId": "StandardVariableQuery" },
+        "query": {
+          "query": "label_values(security_vulnerability_info, severity)",
+          "refId": "StandardVariableQuery"
+        },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1131,7 +1220,10 @@
         "multi": true,
         "name": "framework",
         "options": [],
-        "query": { "query": "label_values(compliance_control_status, framework)", "refId": "StandardVariableQuery" },
+        "query": {
+          "query": "label_values(compliance_control_status, framework)",
+          "refId": "StandardVariableQuery"
+        },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,

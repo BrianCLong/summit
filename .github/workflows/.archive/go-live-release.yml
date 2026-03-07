@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # This workflow creates a full go-live release with all artifacts.
 # It runs the go-live gate, generates SBOM/provenance, and creates a GitHub release.
 

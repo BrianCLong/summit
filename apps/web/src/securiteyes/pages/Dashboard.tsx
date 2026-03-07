@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
-import { AlertCircle, CheckCircle, Shield } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { InvestigationWorkbench } from '../components/InvestigationWorkbench';
-import { RiskProfileView } from '../components/RiskProfileView';
+import React, { useEffect, useState } from 'react'
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/Table'
+import { Badge } from '@/components/ui/Badge'
+import { AlertCircle, CheckCircle, Shield } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import { InvestigationWorkbench } from '../components/InvestigationWorkbench'
+import { RiskProfileView } from '../components/RiskProfileView'
 
 interface Incident {
   id: string
@@ -16,37 +23,37 @@ interface Incident {
 }
 
 interface Stats {
-  activeIncidentsCount: number;
-  recentEventsCount: number;
-  highRiskCount: number;
-  activeIncidents: Incident[];
-  recentEvents: unknown[];
+  activeIncidentsCount: number
+  recentEventsCount: number
+  highRiskCount: number
+  activeIncidents: Incident[]
+  recentEvents: unknown[]
 }
 
 export const SecuriteyesDashboard: React.FC = () => {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Mock fetch for now as we don't have the full client api client set up in this context
     fetch('/securiteyes/dashboard/stats', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}` // Simplified
-        }
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('auth_token')}`, // Simplified
+      },
     })
       .then(res => res.json())
       .then(data => {
-          setStats(data);
-          setLoading(false);
+        setStats(data)
+        setLoading(false)
       })
       .catch(err => {
-          console.error(err);
-          setLoading(false);
-      });
-  }, []);
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
 
-  if (loading) return <div>Loading Securiteyes...</div>;
-  if (!stats) return <div>Error loading data</div>;
+  if (loading) return <div>Loading Securiteyes...</div>
+  if (!stats) return <div>Error loading data</div>
 
   return (
     <div className="p-6 space-y-6">
@@ -61,7 +68,9 @@ export const SecuriteyesDashboard: React.FC = () => {
             <CardTitle>Active Incidents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-red-600">{stats.activeIncidentsCount}</div>
+            <div className="text-4xl font-bold text-red-600">
+              {stats.activeIncidentsCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -69,68 +78,80 @@ export const SecuriteyesDashboard: React.FC = () => {
             <CardTitle>Recent Events</CardTitle>
           </CardHeader>
           <CardContent>
-             <div className="text-4xl font-bold text-yellow-600">{stats.recentEventsCount}</div>
+            <div className="text-4xl font-bold text-yellow-600">
+              {stats.recentEventsCount}
+            </div>
           </CardContent>
         </Card>
-         <Card>
+        <Card>
           <CardHeader>
             <CardTitle>High Risk Accounts</CardTitle>
           </CardHeader>
           <CardContent>
-             <div className="text-4xl font-bold text-orange-600">{stats.highRiskCount}</div>
+            <div className="text-4xl font-bold text-orange-600">
+              {stats.highRiskCount}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="incidents">
-          <TabsList>
-              <TabsTrigger value="incidents">Incidents</TabsTrigger>
-              <TabsTrigger value="investigation">Investigation</TabsTrigger>
-              <TabsTrigger value="risk">Insider Risk</TabsTrigger>
-          </TabsList>
+        <TabsList>
+          <TabsTrigger value="incidents">Incidents</TabsTrigger>
+          <TabsTrigger value="investigation">Investigation</TabsTrigger>
+          <TabsTrigger value="risk">Insider Risk</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="incidents">
-              <Card>
-                <CardHeader>
-                    <CardTitle>Active Incidents</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Severity</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Created</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {stats.activeIncidents.map((inc) => (
-                                <TableRow key={inc.id}>
-                                    <TableCell>{inc.title}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={inc.severity === 'critical' ? 'destructive' : 'default'}>
-                                            {inc.severity}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>{inc.status}</TableCell>
-                                    <TableCell>{new Date(inc.createdAt).toLocaleString()}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-              </Card>
-          </TabsContent>
+        <TabsContent value="incidents">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Incidents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Severity</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stats.activeIncidents.map(inc => (
+                    <TableRow key={inc.id}>
+                      <TableCell>{inc.title}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            inc.severity === 'critical'
+                              ? 'destructive'
+                              : 'default'
+                          }
+                        >
+                          {inc.severity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{inc.status}</TableCell>
+                      <TableCell>
+                        {new Date(inc.createdAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="investigation">
-              <InvestigationWorkbench />
-          </TabsContent>
+        <TabsContent value="investigation">
+          <InvestigationWorkbench />
+        </TabsContent>
 
-          <TabsContent value="risk">
-              <RiskProfileView />
-          </TabsContent>
+        <TabsContent value="risk">
+          <RiskProfileView />
+        </TabsContent>
       </Tabs>
     </div>
-  );
-};
+  )
+}

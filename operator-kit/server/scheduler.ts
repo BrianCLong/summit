@@ -1,5 +1,5 @@
-import { budgetFraction, powerWindowOpen } from './metrics';
-import { emit } from './events';
+import { budgetFraction, powerWindowOpen } from "./metrics";
+import { emit } from "./events";
 
 type Job = { id: string; model: string; payload: any };
 const queues: Record<string, Job[]> = { power: [] };
@@ -34,7 +34,7 @@ export function startScheduler() {
       return;
     }
     emit({
-      type: 'budget.update',
+      type: "budget.update",
       model: job.model,
       fraction: budgetFrac(job.model),
     });

@@ -1,42 +1,52 @@
 # Mobile & On-Call MVP Scope v0
 
 ## Mission Focus
+
 Design mobile-first, on-call-ready workflows so operators and leaders can act safely from anywhere—optimized for the critical 5% of actions that must work at 3am.
 
 ## 1) Mobile-First Use Cases
+
 ### On-call engineers
+
 - **Receive & triage incidents**: rich push alerts (severity, service, runbook link, graph of blast radius) with quick actions (ack/resolve).
 - **Acknowledge & escalate**: single-tap ack with SLA timers, quick escalate to secondary/on-call manager, add note/annotation.
 - **Resolve & document**: resolve with cause code, attach evidence (screenshots/log snippets), add timeline entries.
 - **Key dashboards**: live incident list, personal queue, service health summary, runbook shortcuts, pager state (on-call/OOO), recent changes feed.
 
 ### Leaders / commanders
+
 - **Status overview**: portfolio-wide incident rollup, red/yellow/green view, major incident banner with ETA to next update.
 - **Approvals**: change/rollback approval, comms sign-off, customer-impact messaging templates.
 - **Summaries**: auto-generated SITREP digest (channels, impact, mitigations), subscribe/unsubscribe to incident threads.
 
 ### Cross-functional/others
+
 - **Notifications**: proactive tasks (review postmortem, follow-up action due), service announcements, maintenance windows.
 - **Lightweight worklists**: assigned tasks with due dates, checklist progress, ability to mark done or comment.
 - **Reference**: view runbooks, quick-start checks, service ownership directory with contact options.
 
 ## 2) Mobile Surfaces
+
 ### Web vs. native app (MVP)
+
 - **Native shell for core on-call**: push notifications, biometric unlock, deep links into incident views, limited offline caching.
 - **Mobile web for breadth**: read-only dashboards, task worklists, runbook viewer; avoid heavy data entry.
 - **Shared design system**: responsive components with touch targets ≥44px, high-contrast dark mode as default for low-light usage.
 
 ### Navigation patterns
+
 - **Home tabs**: Incidents · Tasks · Status · Profile. Persistent bottom nav; sticky “Now” banner for active incident.
 - **Within incident**: accordion for timeline/impact/actions; floating ack/resolve CTA; quick toggle to call bridge/Slack room.
 - **Leaders’ view**: card stack by severity; tap opens status sheet; swipe to mark “seen/needs follow-up”.
 
 ### Offline / poor connectivity
+
 - **Graceful degradation**: cache current on-call schedule, last 20 incident headers, runbook snippets.
 - **Queued intents**: allow ack/add-note offline with clear “pending sync” state and retry/backoff.
 - **Bandwidth-aware**: fallback to text-only alerts; avoid auto-playing media; compress attachments.
 
 ## 3) Security & Guardrails
+
 - **Auth**: SSO + MFA required; biometric re-auth for high-risk actions (resolve, approvals). Session pinning to device + jailbreak/root detection.
 - **Device posture**: block high-risk actions on non-compliant devices; read-only mode when posture unknown.
 - **Scoped actions**: mobile allows ack/resolve/escalate, add short notes, approve pre-approved changes; blocks schema edits, bulk config changes, secret rotation.
@@ -44,7 +54,9 @@ Design mobile-first, on-call-ready workflows so operators and leaders can act sa
 - **Auditability**: every mobile action emits event with device ID, geo coarse, auth strength.
 
 ## 4) Artifacts
+
 ### Mobile & On-Call MVP Scope v0
+
 - **Goal**: Ship a dependable incident/on-call strip with leader status visibility and safe approvals.
 - **Included**:
   - Native push alerts with deep links; quick ack/resolve.
@@ -56,7 +68,9 @@ Design mobile-first, on-call-ready workflows so operators and leaders can act sa
 - **Quality bar**: sub-2s load on 4G for incident list; actionable push taps-to-ack ≤2; offline ack sync success ≥99% within 2 min of reconnect.
 
 ### Text Wireframes
+
 **Main On-Call Screen (Incident detail)**
+
 ```
 [App Bar: Incident #, Severity pill (RED), Timer since open]
 [Banner: "You are on call" · Pager toggle · Escalate]
@@ -81,6 +95,7 @@ Design mobile-first, on-call-ready workflows so operators and leaders can act sa
 ```
 
 **Leader Status Overview**
+
 ```
 [App Bar: Org Status · last refreshed 02:20]
 [Major Incident Banner]
@@ -99,6 +114,7 @@ Design mobile-first, on-call-ready workflows so operators and leaders can act sa
 ```
 
 ### Checklist: “Workflow is mobile-appropriate if…”
+
 - Critical path can be completed in ≤3 taps with thumb reach (bottom-half of screen).
 - Works in 1-hand mode: large touch targets, no multi-field forms.
 - Degrades gracefully offline (cached view) and queues actions with clear pending state.

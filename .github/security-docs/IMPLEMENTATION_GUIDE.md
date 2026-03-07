@@ -44,18 +44,21 @@ git checkout -b security/implementation-tracking
 **Branch:** `security/batch-1-critical-npm-python`
 
 **Tasks:**
+
 1. npm supply chain audit and remediation
 2. Update critical npm dependencies (axios, express, ws)
 3. Patch Python RCE vulnerabilities
 4. Re-evaluate and document ignored CVEs
 
 **Key Files:**
+
 - `.github/security-docs/BATCH_1_IMPLEMENTATION.md`
 - `.github/security-docs/IGNORED_CVES.md`
 - `package.json` (npm dependencies)
 - `api/requirements.txt` (Python dependencies)
 
 **Success Criteria:**
+
 - All critical npm vulnerabilities resolved
 - All critical Python RCE vulnerabilities patched
 - Ignored CVEs documented with rationale
@@ -72,17 +75,20 @@ git checkout -b security/implementation-tracking
 **Branch:** `security/batch-2-high-severity-go-npm`
 
 **Tasks:**
+
 1. Upgrade all Go modules to Go 1.24.5+
 2. Patch containerd integer overflow vulnerability
 3. Update npm core dependencies (apollo-server-express, neo4j-driver, pg, redis)
 4. Test database connections
 
 **Key Files:**
+
 - All `go.mod` files (44 total)
 - `package.json` (npm dependencies)
 - Database connection tests
 
 **Success Criteria:**
+
 - All Go modules updated to 1.24.5+
 - All npm core dependencies updated
 - Database connection tests pass
@@ -99,18 +105,21 @@ git checkout -b security/implementation-tracking
 **Branch:** `security/batch-3-medium-severity-all`
 
 **Tasks:**
+
 1. Rust dependency audit and RUSTSEC advisory fixes
 2. npm transitive dependency cleanup
 3. Python dependency consolidation
 4. Add security-focused tests
 
 **Key Files:**
+
 - All `Cargo.toml` files (34 total)
 - `package.json` and `package-lock.json`
 - All `requirements.txt` files (58 total)
 - Test files
 
 **Success Criteria:**
+
 - All medium-severity vulnerabilities addressed
 - Transitive dependency tree cleaned
 - Test coverage improved
@@ -127,15 +136,18 @@ git checkout -b security/implementation-tracking
 **Branch:** `security/batch-4-github-actions-hardening`
 
 **Tasks:**
+
 1. Pin all GitHub Actions to commit SHAs
 2. Restrict GITHUB_TOKEN permissions to least-privilege
 3. Enable Dependabot auto-merge for patch updates
 
 **Key Files:**
+
 - All `.github/workflows/*.yml` files (100+)
 - `.github/dependabot.yml`
 
 **Success Criteria:**
+
 - All actions pinned to commit SHAs
 - Token permissions minimized
 - Auto-merge configured for safe updates
@@ -152,16 +164,19 @@ git checkout -b security/implementation-tracking
 **Branch:** `security/batch-5-low-severity-cleanup`
 
 **Tasks:**
+
 1. Address all remaining low-severity vulnerabilities
 2. Clean up archived code and remove obsolete dependencies
 3. Review Gradle files if Android app is re-activated
 
 **Key Files:**
+
 - Various dependency files
 - `.archive/` and `.disabled/` directories
 - `build.gradle` files
 
 **Success Criteria:**
+
 - All low-severity vulnerabilities addressed
 - Archived code cleaned or documented
 - Technical debt reduced
@@ -349,13 +364,13 @@ For each merged PR:
 
 ### Communication Schedule
 
-| Phase | Audience | Message | Frequency |
-|-------|----------|---------|-----------|
-| Planning | All | Batch overview and timeline | Once per batch |
-| Implementation | Dev Team | Daily standup updates | Daily |
-| Testing | QA Team | Test results and coverage | Per PR |
-| Deployment | DevOps | Deployment readiness | Per PR |
-| Completion | All | Batch completion summary | Once per batch |
+| Phase          | Audience | Message                     | Frequency      |
+| -------------- | -------- | --------------------------- | -------------- |
+| Planning       | All      | Batch overview and timeline | Once per batch |
+| Implementation | Dev Team | Daily standup updates       | Daily          |
+| Testing        | QA Team  | Test results and coverage   | Per PR         |
+| Deployment     | DevOps   | Deployment readiness        | Per PR         |
+| Completion     | All      | Batch completion summary    | Once per batch |
 
 ---
 
@@ -366,6 +381,7 @@ For each merged PR:
 #### Issue: npm audit fails with permission errors
 
 **Solution:**
+
 ```bash
 npm audit fix --force
 # or
@@ -375,6 +391,7 @@ pnpm audit --fix
 #### Issue: Python tests fail due to missing dependencies
 
 **Solution:**
+
 ```bash
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
@@ -383,6 +400,7 @@ pip install -r requirements-dev.txt
 #### Issue: Go tests fail with version mismatch
 
 **Solution:**
+
 ```bash
 go mod tidy
 go mod download
@@ -391,6 +409,7 @@ go mod download
 #### Issue: Cargo tests fail with unsafe code
 
 **Solution:**
+
 ```bash
 cargo audit fix
 cargo test -- --nocapture
@@ -402,14 +421,14 @@ cargo test -- --nocapture
 
 ### Quantitative Metrics
 
-| Metric | Target | Batch 1 | Batch 2 | Batch 3 | Batch 4 | Batch 5 |
-|--------|--------|---------|---------|---------|---------|---------|
-| Critical Vulns Fixed | 29 | 18 | 3 | 1 | 0 | 7 |
-| High Vulns Fixed | 89 | 18 | 45 | 20 | 0 | 6 |
-| Medium Vulns Fixed | 168 | 0 | 0 | 168 | 0 | 0 |
-| Low Vulns Fixed | 258 | 0 | 0 | 0 | 0 | 258 |
-| Test Coverage | >90% | Maintain | Maintain | Improve | Maintain | Maintain |
-| CI Pass Rate | 100% | 100% | 100% | 100% | 100% | 100% |
+| Metric               | Target | Batch 1  | Batch 2  | Batch 3 | Batch 4  | Batch 5  |
+| -------------------- | ------ | -------- | -------- | ------- | -------- | -------- |
+| Critical Vulns Fixed | 29     | 18       | 3        | 1       | 0        | 7        |
+| High Vulns Fixed     | 89     | 18       | 45       | 20      | 0        | 6        |
+| Medium Vulns Fixed   | 168    | 0        | 0        | 168     | 0        | 0        |
+| Low Vulns Fixed      | 258    | 0        | 0        | 0       | 0        | 258      |
+| Test Coverage        | >90%   | Maintain | Maintain | Improve | Maintain | Maintain |
+| CI Pass Rate         | 100%   | 100%     | 100%     | 100%    | 100%     | 100%     |
 
 ### Qualitative Metrics
 

@@ -1,4 +1,4 @@
-import type { IterationMetrics, LongRunBudgets } from './types.js';
+import type { IterationMetrics, LongRunBudgets } from "./types.js";
 
 export class BudgetTracker {
   private readonly budgets: LongRunBudgets;

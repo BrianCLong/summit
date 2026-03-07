@@ -17,6 +17,7 @@ Successfully merged all 4 PRs in the CI stabilization stack to main branch:
 ## Workflow Consolidation Results
 
 ### Before: 260+ Active Workflows
+
 - Caused complete CI gridlock (200+ queued, 0 running)
 - Every PR triggered ~260 workflow runs
 - Exceeded GitHub Actions concurrent run limits (60 max)
@@ -24,15 +25,16 @@ Successfully merged all 4 PRs in the CI stabilization stack to main branch:
 ### After: 8 Active Workflows
 
 1. **pr-gate.yml** - Unified PR validation (lint, typecheck, unit tests, queue saturation check, workflow drift sentinel)
-2. **client-ci.yml** - Client-specific tests (only runs when client/** changes)
+2. **client-ci.yml** - Client-specific tests (only runs when client/\*\* changes)
 3. **server-ci.yml** - Server-specific tests (only runs when server/** or packages/** changes)
-4. **docs-ci.yml** - Documentation validation (only runs when docs/** changes)
+4. **docs-ci.yml** - Documentation validation (only runs when docs/\*\* changes)
 5. **infra-ci.yml** - Infrastructure validation (only runs when infra/** or deployment/** changes)
 6. **main-validation.yml** - Main branch validation (integration tests, security audit, graph validation)
 7. **release-ga.yml** - Release workflow
-8. **_reusable-ga-readiness.yml** - Reusable helper workflow
+8. **\_reusable-ga-readiness.yml** - Reusable helper workflow
 
 ### 252 Workflows Archived
+
 - All moved to `.github/workflows/.archive/`
 - No longer trigger on new PRs/pushes
 - Old PRs (created before consolidation) may still reference archived workflows
@@ -40,11 +42,13 @@ Successfully merged all 4 PRs in the CI stabilization stack to main branch:
 ## Branch Protection Updated
 
 **Required Status Checks**:
+
 - `gate` (from pr-gate workflow)
 
 **Removed**: `CI Core Gate ✅`, `Unit Tests` (these are now part of pr-gate)
 
 **Settings**:
+
 - Require PR before merging: ✅
 - Require 1 approval: ✅
 - Require conversation resolution: ✅
@@ -62,6 +66,7 @@ Successfully merged all 4 PRs in the CI stabilization stack to main branch:
 ### Queue Composition
 
 Most queued runs are from PRs created BEFORE the consolidation:
+
 - PR #19076 and others still reference old workflow definitions
 - These will naturally fail when they try to load archived workflow files
 - New PRs will use the new 8-workflow system
@@ -81,6 +86,7 @@ on:
 ```
 
 **Impact**:
+
 - PRs touching only client code: ~3 workflows (pr-gate, client-ci, possibly infra-ci)
 - PRs touching only docs: ~2 workflows (pr-gate, docs-ci)
 - PRs touching multiple areas: ~4-5 workflows max
@@ -89,6 +95,7 @@ on:
 ## Workflow Drift Sentinel
 
 Added `scripts/ci/validate_workflows.mjs` - runs on every PR via pr-gate:
+
 - Validates workflow file names match registry
 - Prevents accidental workflow sprawl
 - Enforces `.archive/` prefix for old workflows
@@ -99,11 +106,13 @@ Added `scripts/ci/validate_workflows.mjs` - runs on every PR via pr-gate:
 Added two emergency management scripts:
 
 ### 1. `scripts/ci/monitor-runner-capacity.sh`
+
 ```bash
 bash scripts/ci/monitor-runner-capacity.sh
 ```
 
 **Shows**:
+
 - Queue depth
 - In-progress workflow count
 - MERGE_SURGE mode status
@@ -112,6 +121,7 @@ bash scripts/ci/monitor-runner-capacity.sh
 - Health recommendations (HEALTHY/WARNING/CRITICAL/GRIDLOCK)
 
 ### 2. `scripts/ci/cancel-queued-runs.sh`
+
 ```bash
 bash scripts/ci/cancel-queued-runs.sh
 ```
@@ -125,6 +135,7 @@ bash scripts/ci/cancel-queued-runs.sh
 PRs like #19076 still have 75+ queued checks from archived workflows.
 
 **Options**:
+
 1. **Wait**: Old workflow runs will fail naturally ("workflow not found")
 2. **Update PR**: Push new commit or close/reopen to trigger new workflows
 3. **Manual intervention**: Cancel all queued runs for specific PRs
@@ -199,6 +210,7 @@ All six post-emergency verification steps completed:
 **Root Cause**: Workflow proliferation over time (260 active workflows)
 
 **Cascading Failure**:
+
 - 23 PRs in merge train
 - 260 workflows × 23 PRs = 5,980 jobs
 - GitHub Actions concurrent limit: 60 jobs
@@ -219,6 +231,7 @@ All six post-emergency verification steps completed:
 #### New Steady-State Architecture
 
 **Active Workflows** (8/12 budget):
+
 1. pr-gate.yml - Unified PR validation
 2. client-ci.yml - Client tests (path-filtered)
 3. server-ci.yml - Server tests (path-filtered)
@@ -231,6 +244,7 @@ All six post-emergency verification steps completed:
 **Required Checks**: Single "gate" check (replaces 3 legacy checks)
 
 **Capacity Impact**:
+
 - Before: ~5,980 jobs for 23 PRs (260 workflows each)
 - After: ~161 jobs for 23 PRs (~7 workflows each)
 - **Reduction**: 97% fewer jobs per PR cohort
@@ -274,6 +288,7 @@ All six post-emergency verification steps completed:
 #### Escalation Procedures (If Gridlock Recurs)
 
 **Level 1: Queue > 100** (Elevated)
+
 ```bash
 # Check health status
 bash scripts/ci/monitor-runner-capacity.sh
@@ -283,6 +298,7 @@ gh variable set MERGE_SURGE --body "true"
 ```
 
 **Level 2: Queue > 200** (Critical)
+
 ```bash
 # Cancel archived workflow runs only
 bash scripts/ci/cancel-archived-workflow-runs.sh
@@ -292,6 +308,7 @@ bash scripts/ci/monitor-runner-capacity.sh
 ```
 
 **Level 3: Queue > 300** (Gridlock)
+
 ```bash
 # Emergency: Cancel ALL queued runs
 bash scripts/ci/cancel-queued-runs.sh
@@ -304,6 +321,7 @@ watch -n 300 bash scripts/ci/monitor-runner-capacity.sh
 ```
 
 **Level 4: Gridlock Persists >1h**
+
 1. Review recent workflow additions: `ls -lt .github/workflows/ | head -20`
 2. Check for budget violations: `node scripts/ci/workflow-budget-sentinel.mjs`
 3. Consider temporary workflow archival
@@ -312,6 +330,7 @@ watch -n 300 bash scripts/ci/monitor-runner-capacity.sh
 #### Evidence: Before vs. After
 
 **T-0 (Before Emergency Deployment)**:
+
 - Queue depth: 200+
 - In-progress: 0
 - Duration: 3+ hours
@@ -320,6 +339,7 @@ watch -n 300 bash scripts/ci/monitor-runner-capacity.sh
 - Status: GRIDLOCK ❌
 
 **T+15min (After Emergency Deployment)**:
+
 - Queue depth: 100 (clearing)
 - In-progress: 14
 - Duration: Recovering
@@ -328,6 +348,7 @@ watch -n 300 bash scripts/ci/monitor-runner-capacity.sh
 - Status: WARNING ⚠️ → Improving
 
 **T+4h (Post-Deployment Validation)**:
+
 - Queue depth: 100 (stable)
 - In-progress: 11
 - Migration rate: 45% PRs on new system
@@ -335,12 +356,14 @@ watch -n 300 bash scripts/ci/monitor-runner-capacity.sh
 - Status: ELEVATED ⚠️ → Monitoring
 
 **T+8h (Evening Spike Investigation)**:
+
 - Queue depth: 500 (spike from migration activity)
 - Root cause: PR authors rebasing (positive signal)
 - Automated recovery: ACTIVE (cron restored)
 - Status: CRITICAL ⚠️ → Self-healing
 
 **T+12h (Post-Emergency Closeout)**:
+
 - Queue depth: ~100-200 (old PRs draining)
 - In-progress: 13
 - a11y-keyboard-smoke.yml: ✅ Path-filtered (prevented regression)
@@ -351,16 +374,19 @@ watch -n 300 bash scripts/ci/monitor-runner-capacity.sh
 #### Business Impact
 
 **Cost Savings**: $494k/year (97% workflow reduction)
+
 - Before: 5,200 workflow runs/day × $0.26/run = $1,352/day
 - After: 70 workflow runs/day × $0.26/run = $18/day
 - **Daily savings**: $1,334 ($40k/month, $494k/year)
 
 **Operational Impact**:
+
 - CI latency: Reduced from gridlock (infinite wait) to <10min average
 - Merge train capacity: 23 PRs → stable (previously blocked)
 - Developer productivity: Unblocked 23 developers
 
 **Risk Reduction**:
+
 - 6 automated anti-regression controls deployed
 - Self-healing system (automated recovery every 5 min)
 - Emergency runbooks + monitoring dashboards

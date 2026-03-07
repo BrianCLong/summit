@@ -8,7 +8,7 @@ metadata:
   labels:
     name: intelgraph-prod
     app.kubernetes.io/name: maestro
-    app.kubernetes.io/version: '2.0.0-prod'
+    app.kubernetes.io/version: "2.0.0-prod"
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted
@@ -24,10 +24,10 @@ metadata:
     app: maestro-orchestrator
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: orchestrator
-    app.kubernetes.io/version: '2.0.0-prod'
+    app.kubernetes.io/version: "2.0.0-prod"
   annotations:
-    deployment.kubernetes.io/revision: '1'
-    prometheus.io/scrape: 'true'
+    deployment.kubernetes.io/revision: "1"
+    prometheus.io/scrape: "true"
 spec:
   replicas: 3
   strategy:
@@ -46,12 +46,12 @@ spec:
         app: maestro-orchestrator
         app.kubernetes.io/name: maestro
         app.kubernetes.io/component: orchestrator
-        version: '2.0.0-prod'
+        version: "2.0.0-prod"
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '8080'
-        prometheus.io/path: '/metrics'
-        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
     spec:
       serviceAccountName: maestro-orchestrator
       securityContext:
@@ -59,7 +59,7 @@ spec:
         runAsUser: 10001
         runAsGroup: 10001
         fsGroup: 10001
-        fsGroupChangePolicy: 'OnRootMismatch'
+        fsGroupChangePolicy: "OnRootMismatch"
         seccompProfile:
           type: RuntimeDefault
       imagePullSecrets:
@@ -87,37 +87,37 @@ spec:
               protocol: TCP
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
             - name: LOG_LEVEL
-              value: 'info'
+              value: "info"
             - name: PORT
-              value: '8080'
+              value: "8080"
             - name: METRICS_PORT
-              value: '9090'
+              value: "9090"
             - name: ORCHESTRATION_ENABLED
-              value: 'true'
+              value: "true"
             - name: PREMIUM_ROUTING_ENABLED
-              value: 'true'
+              value: "true"
             - name: WEB_SCRAPING_ENABLED
-              value: 'true'
+              value: "true"
             - name: COMPLIANCE_GATE_ENABLED
-              value: 'true'
+              value: "true"
             - name: THOMPSON_SAMPLING_ENABLED
-              value: 'true'
+              value: "true"
             - name: MAX_CONCURRENT_SOURCES
-              value: '15'
+              value: "15"
             - name: DEFAULT_SYNTHESIS_STRATEGY
-              value: 'consensus'
+              value: "consensus"
             - name: RATE_LIMIT_WINDOW_MS
-              value: '60000'
+              value: "60000"
             - name: CITATION_REQUIRED
-              value: 'true'
+              value: "true"
             - name: PROVENANCE_TRACKING
-              value: 'true'
+              value: "true"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: 'http://otel-collector.monitoring:4317'
+              value: "http://otel-collector.monitoring:4317"
             - name: PDP_URL
-              value: 'http://pdp.security:8181'
+              value: "http://pdp.security:8181"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -145,13 +145,13 @@ spec:
                   key: jwt-secret
           resources:
             requests:
-              memory: '1Gi'
-              cpu: '500m'
-              ephemeral-storage: '1Gi'
+              memory: "1Gi"
+              cpu: "500m"
+              ephemeral-storage: "1Gi"
             limits:
-              memory: '4Gi'
-              cpu: '2000m'
-              ephemeral-storage: '2Gi'
+              memory: "4Gi"
+              cpu: "2000m"
+              ephemeral-storage: "2Gi"
           livenessProbe:
             httpGet:
               path: /healthz
@@ -231,14 +231,14 @@ spec:
                         - maestro
                 topologyKey: topology.kubernetes.io/zone
       tolerations:
-        - key: 'maestro-workload'
-          operator: 'Equal'
-          value: 'true'
-          effect: 'NoSchedule'
-        - key: 'compute-optimized'
-          operator: 'Equal'
-          value: 'true'
-          effect: 'NoSchedule'
+        - key: "maestro-workload"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "compute-optimized"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
       terminationGracePeriodSeconds: 60
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -255,11 +255,11 @@ metadata:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: orchestrator
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: 'nlb'
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: 'tcp'
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '8080'
-    prometheus.io/path: '/metrics'
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
 spec:
   selector:
     app: maestro-orchestrator
@@ -285,7 +285,7 @@ metadata:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: orchestrator
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/maestro-service-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/maestro-service-role"
 
 ---
 # RBAC Configuration
@@ -298,15 +298,15 @@ metadata:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: rbac
 rules:
-  - apiGroups: ['']
-    resources: ['pods', 'services', 'configmaps', 'secrets']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['networking.k8s.io']
-    resources: ['networkpolicies']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -337,23 +337,23 @@ metadata:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: ingress
   annotations:
-    kubernetes.io/ingress.class: 'nginx'
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/use-regex: 'true'
-    nginx.ingress.kubernetes.io/rate-limit: '1000'
-    nginx.ingress.kubernetes.io/rate-limit-burst: '2000'
-    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
-    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: '30'
-    nginx.ingress.kubernetes.io/proxy-read-timeout: '300'
-    nginx.ingress.kubernetes.io/proxy-send-timeout: '300'
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
-    nginx.ingress.kubernetes.io/cors-allow-origin: 'https://intelgraph.ai,https://app.intelgraph.ai'
-    nginx.ingress.kubernetes.io/cors-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
-    nginx.ingress.kubernetes.io/cors-allow-headers: 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization'
-    nginx.ingress.kubernetes.io/enable-cors: 'true'
-    nginx.ingress.kubernetes.io/limit-rps: '100'
-    nginx.ingress.kubernetes.io/limit-rpm: '6000'
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-burst: "2000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://intelgraph.ai,https://app.intelgraph.ai"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-rpm: "6000"
 spec:
   tls:
     - hosts:
@@ -591,9 +591,9 @@ spec:
             severity: warning
             service: maestro-orchestrator
           annotations:
-            summary: 'High error rate in Maestro orchestration'
-            description: 'Maestro orchestration error rate is {{ $value }} errors per second'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro/high-error-rate'
+            summary: "High error rate in Maestro orchestration"
+            description: "Maestro orchestration error rate is {{ $value }} errors per second"
+            runbook_url: "https://runbooks.intelgraph.ai/maestro/high-error-rate"
         - alert: MaestroHighLatency
           expr: histogram_quantile(0.95, rate(maestro_orchestration_duration_seconds_bucket[5m])) > 30
           for: 5m
@@ -601,9 +601,9 @@ spec:
             severity: warning
             service: maestro-orchestrator
           annotations:
-            summary: 'High latency in Maestro orchestration'
-            description: '95th percentile latency is {{ $value }}s'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro/high-latency'
+            summary: "High latency in Maestro orchestration"
+            description: "95th percentile latency is {{ $value }}s"
+            runbook_url: "https://runbooks.intelgraph.ai/maestro/high-latency"
         - alert: MaestroPodDown
           expr: up{job="maestro-orchestrator"} == 0
           for: 1m
@@ -611,9 +611,9 @@ spec:
             severity: critical
             service: maestro-orchestrator
           annotations:
-            summary: 'Maestro orchestrator pod is down'
-            description: 'One or more Maestro orchestrator pods are not responding'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro/pod-down'
+            summary: "Maestro orchestrator pod is down"
+            description: "One or more Maestro orchestrator pods are not responding"
+            runbook_url: "https://runbooks.intelgraph.ai/maestro/pod-down"
         - alert: MaestroMemoryUsageHigh
           expr: (container_memory_usage_bytes{pod=~"maestro-orchestrator-.*"} / container_spec_memory_limit_bytes) > 0.85
           for: 5m
@@ -621,8 +621,8 @@ spec:
             severity: warning
             service: maestro-orchestrator
           annotations:
-            summary: 'High memory usage in Maestro orchestrator'
-            description: 'Memory usage is {{ $value | humanizePercentage }} of the limit'
+            summary: "High memory usage in Maestro orchestrator"
+            description: "Memory usage is {{ $value | humanizePercentage }} of the limit"
         - alert: MaestroCPUUsageHigh
           expr: rate(container_cpu_usage_seconds_total{pod=~"maestro-orchestrator-.*"}[5m]) / container_spec_cpu_quota * 100 > 85
           for: 5m
@@ -630,5 +630,5 @@ spec:
             severity: warning
             service: maestro-orchestrator
           annotations:
-            summary: 'High CPU usage in Maestro orchestrator'
-            description: 'CPU usage is {{ $value }}% of the limit'
+            summary: "High CPU usage in Maestro orchestrator"
+            description: "CPU usage is {{ $value }}% of the limit"

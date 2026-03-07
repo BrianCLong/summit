@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import React, { useMemo, useState } from "react";
+import { gql, useMutation } from "@apollo/client";
 
 type Props = {
   onApply: (filter: {
@@ -18,46 +18,39 @@ type Props = {
     to?: string;
     contains?: string;
   };
-  scope?: 'incident' | 'investigation';
+  scope?: "incident" | "investigation";
   id?: string;
 };
 
 const KNOWN_CODES = [
-  'DUAL_CONTROL_DENIED',
-  'INCIDENT_CLOSED_CANCELLED',
-  'ATTESTATION_MISSING',
-  'SBOM_POLICY_FAIL',
-  'POLICY_DENY',
+  "DUAL_CONTROL_DENIED",
+  "INCIDENT_CLOSED_CANCELLED",
+  "ATTESTATION_MISSING",
+  "SBOM_POLICY_FAIL",
+  "POLICY_DENY",
 ];
 
 const KNOWN_KINDS = [
-  'prompt',
-  'retrieval',
-  'policy',
-  'inference',
-  'action',
-  'action_start',
-  'action_complete',
+  "prompt",
+  "retrieval",
+  "policy",
+  "inference",
+  "action",
+  "action_start",
+  "action_complete",
 ];
-const KNOWN_SOURCES = ['graphrag', 'soar', 'connector', 'system'];
+const KNOWN_SOURCES = ["graphrag", "soar", "connector", "system"];
 
-export default function ProvenanceFilterPanel({
-  onApply,
-  initial,
-  scope,
-  id,
-}: Props) {
+export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: Props) {
   const [codes, setCodes] = useState<string[]>(initial?.reasonCodeIn || []);
-  const [from, setFrom] = useState<string>(initial?.from || '');
-  const [to, setTo] = useState<string>(initial?.to || '');
+  const [from, setFrom] = useState<string>(initial?.from || "");
+  const [to, setTo] = useState<string>(initial?.to || "");
   const [kinds, setKinds] = useState<string[]>(initial?.kindIn || ([] as any));
-  const [sources, setSources] = useState<string[]>(
-    initial?.sourceIn || ([] as any),
-  );
-  const [contains, setContains] = useState<string>(initial?.contains || '');
+  const [sources, setSources] = useState<string[]>(initial?.sourceIn || ([] as any));
+  const [contains, setContains] = useState<string>(initial?.contains || "");
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [exporting, setExporting] = useState<'csv' | 'json' | null>(null);
+  const [exporting, setExporting] = useState<"csv" | "json" | null>(null);
 
   const EXPORT_MUT = useMemo(
     () => gql`
@@ -78,18 +71,14 @@ export default function ProvenanceFilterPanel({
         }
       }
     `,
-    [],
+    []
   );
   const [exportProv] = useMutation(EXPORT_MUT);
 
-  const buildCurl = (scope?: 'incident' | 'investigation', id?: string) => {
-    if (!scope || !id) return '';
-    const opName =
-      scope === 'incident' ? 'ProvByIncident' : 'ProvByInvestigation';
-    const field =
-      scope === 'incident'
-        ? 'provenanceByIncident'
-        : 'provenanceByInvestigation';
+  const buildCurl = (scope?: "incident" | "investigation", id?: string) => {
+    if (!scope || !id) return "";
+    const opName = scope === "incident" ? "ProvByIncident" : "ProvByInvestigation";
+    const field = scope === "incident" ? "provenanceByIncident" : "provenanceByInvestigation";
     const query = `query ${opName}($id: ID!, $filter: ProvenanceFilter, $first: Int, $offset: Int) { ${field}(${scope}Id: $id, filter: $filter, first: $first, offset: $offset) { id kind createdAt metadata } }`;
     const filter: any = {};
     if (codes.length) filter.reasonCodeIn = codes;
@@ -100,7 +89,7 @@ export default function ProvenanceFilterPanel({
     if (contains && contains.trim().length) filter.contains = contains.trim();
     const body = { query, variables: { id, filter, first: 50, offset: 0 } };
     const payload = JSON.stringify(body);
-    const endpoint = '/graphql';
+    const endpoint = "/graphql";
     return `curl -sS -X POST '${endpoint}' -H 'Content-Type: application/json' --data-binary '${payload.replace(/'/g, "'\\''")}'`;
   };
   return (
@@ -112,9 +101,7 @@ export default function ProvenanceFilterPanel({
           <select
             multiple
             value={codes}
-            onChange={(e) =>
-              setCodes(Array.from(e.target.selectedOptions).map((o) => o.value))
-            }
+            onChange={(e) => setCodes(Array.from(e.target.selectedOptions).map((o) => o.value))}
             className="ml-2 border p-1"
           >
             {KNOWN_CODES.map((c) => (
@@ -129,9 +116,7 @@ export default function ProvenanceFilterPanel({
           <select
             multiple
             value={kinds}
-            onChange={(e) =>
-              setKinds(Array.from(e.target.selectedOptions).map((o) => o.value))
-            }
+            onChange={(e) => setKinds(Array.from(e.target.selectedOptions).map((o) => o.value))}
             className="ml-2 border p-1"
           >
             {KNOWN_KINDS.map((c) => (
@@ -146,11 +131,7 @@ export default function ProvenanceFilterPanel({
           <select
             multiple
             value={sources}
-            onChange={(e) =>
-              setSources(
-                Array.from(e.target.selectedOptions).map((o) => o.value),
-              )
-            }
+            onChange={(e) => setSources(Array.from(e.target.selectedOptions).map((o) => o.value))}
             className="ml-2 border p-1"
           >
             {KNOWN_SOURCES.map((c) => (
@@ -221,7 +202,7 @@ export default function ProvenanceFilterPanel({
               disabled={!!exporting}
               onClick={async () => {
                 if (!scope || !id) return;
-                setExporting('json');
+                setExporting("json");
                 try {
                   const filter: any = {};
                   if (codes.length) filter.reasonCodeIn = codes;
@@ -229,29 +210,28 @@ export default function ProvenanceFilterPanel({
                   if (sources.length) filter.sourceIn = sources;
                   if (from) filter.from = from;
                   if (to) filter.to = to;
-                  if (contains && contains.trim().length)
-                    filter.contains = contains.trim();
-                  const variables: any = { format: 'json' };
-                  if (scope === 'incident') variables.incidentId = id;
+                  if (contains && contains.trim().length) filter.contains = contains.trim();
+                  const variables: any = { format: "json" };
+                  if (scope === "incident") variables.incidentId = id;
                   else variables.investigationId = id;
                   if (Object.keys(filter).length) variables.filter = filter;
                   const res = await exportProv({ variables });
                   const url = res.data?.exportProvenance?.url;
-                  if (url) window.open(url, '_blank', 'noopener');
+                  if (url) window.open(url, "_blank", "noopener");
                 } finally {
                   setExporting(null);
                 }
               }}
               title="Export filtered provenance as JSON"
             >
-              {exporting === 'json' ? 'Exporting…' : 'Export JSON'}
+              {exporting === "json" ? "Exporting…" : "Export JSON"}
             </button>
             <button
               className="border px-3 py-1"
               disabled={!!exporting}
               onClick={async () => {
                 if (!scope || !id) return;
-                setExporting('csv');
+                setExporting("csv");
                 try {
                   const filter: any = {};
                   if (codes.length) filter.reasonCodeIn = codes;
@@ -259,22 +239,21 @@ export default function ProvenanceFilterPanel({
                   if (sources.length) filter.sourceIn = sources;
                   if (from) filter.from = from;
                   if (to) filter.to = to;
-                  if (contains && contains.trim().length)
-                    filter.contains = contains.trim();
-                  const variables: any = { format: 'csv' };
-                  if (scope === 'incident') variables.incidentId = id;
+                  if (contains && contains.trim().length) filter.contains = contains.trim();
+                  const variables: any = { format: "csv" };
+                  if (scope === "incident") variables.incidentId = id;
                   else variables.investigationId = id;
                   if (Object.keys(filter).length) variables.filter = filter;
                   const res = await exportProv({ variables });
                   const url = res.data?.exportProvenance?.url;
-                  if (url) window.open(url, '_blank', 'noopener');
+                  if (url) window.open(url, "_blank", "noopener");
                 } finally {
                   setExporting(null);
                 }
               }}
               title="Export filtered provenance as CSV"
             >
-              {exporting === 'csv' ? 'Exporting…' : 'Export CSV'}
+              {exporting === "csv" ? "Exporting…" : "Export CSV"}
             </button>
           </>
         )}
@@ -292,7 +271,7 @@ function CopyCurlButton({
   copied,
   busy,
 }: {
-  scope?: 'incident' | 'investigation';
+  scope?: "incident" | "investigation";
   id?: string;
   build: (s?: any, i?: any) => string;
   setCopied: (v: boolean) => void;
@@ -314,14 +293,14 @@ function CopyCurlButton({
           setTimeout(() => setCopied(false), 1500);
         } catch (e) {
           // fallback: prompt
-          window.prompt('Copy cURL', cmd);
+          window.prompt("Copy cURL", cmd);
         } finally {
           setBusy(false);
         }
       }}
       title="Copy GraphQL query as cURL"
     >
-      {copied ? 'Copied!' : 'Copy as cURL'}
+      {copied ? "Copied!" : "Copy as cURL"}
     </button>
   );
 }

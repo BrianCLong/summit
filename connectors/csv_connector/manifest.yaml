@@ -20,7 +20,7 @@ golden_io_tests:
 
 # Rate limiting policy
 rate_limit:
-  requests_per_hour: 10000  # High limit for batch processing
+  requests_per_hour: 10000 # High limit for batch processing
   burst_limit: 100
   backoff_strategy: exponential
   max_retries: 3
@@ -31,7 +31,7 @@ pii_flags:
   - field_name: name
     description: Person names may be PII
     severity: medium
-    redaction_policy: prompt  # Ask user during wizard
+    redaction_policy: prompt # Ask user during wizard
     legal_basis: Legitimate business interest for entity resolution
 
   - field_name: email

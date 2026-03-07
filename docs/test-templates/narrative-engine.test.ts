@@ -19,18 +19,12 @@
  * 4. Add domain-specific test cases
  */
 
-import { SimulationEngine } from '../src/core/SimulationEngine';
-import { NarrativeState } from '../src/core/NarrativeState';
-import { EventProcessor } from '../src/core/EventProcessor';
-import type {
-  SimConfig,
-  Actor,
-  Relationship,
-  SimulationEvent,
-  EventType,
-} from '../src/core/types';
+import { SimulationEngine } from "../src/core/SimulationEngine";
+import { NarrativeState } from "../src/core/NarrativeState";
+import { EventProcessor } from "../src/core/EventProcessor";
+import type { SimConfig, Actor, Relationship, SimulationEvent, EventType } from "../src/core/types";
 
-describe('SimulationEngine', () => {
+describe("SimulationEngine", () => {
   let engine: SimulationEngine;
   let baseConfig: SimConfig;
 
@@ -40,42 +34,42 @@ describe('SimulationEngine', () => {
       initialTimestamp: 0,
       actors: [
         {
-          id: 'mayor',
-          name: 'Mayor Reed',
+          id: "mayor",
+          name: "Mayor Reed",
           mood: 2,
           resilience: 0.2,
           influence: 2,
-          traits: ['diplomatic', 'cautious'],
+          traits: ["diplomatic", "cautious"],
         },
         {
-          id: 'chief',
-          name: 'Chief Silva',
+          id: "chief",
+          name: "Chief Silva",
           mood: 1,
           resilience: 0.3,
           influence: 2,
-          traits: ['authoritative', 'decisive'],
+          traits: ["authoritative", "decisive"],
         },
         {
-          id: 'activist',
-          name: 'Jane Activist',
+          id: "activist",
+          name: "Jane Activist",
           mood: -1,
           resilience: 0.5,
           influence: 1,
-          traits: ['passionate', 'persistent'],
+          traits: ["passionate", "persistent"],
         },
       ],
       relationships: [
         {
-          sourceId: 'mayor',
-          targetId: 'chief',
-          type: 'ally',
+          sourceId: "mayor",
+          targetId: "chief",
+          type: "ally",
           intensity: 0.8,
           trust: 0.7,
         },
         {
-          sourceId: 'mayor',
-          targetId: 'activist',
-          type: 'adversary',
+          sourceId: "mayor",
+          targetId: "activist",
+          type: "adversary",
           intensity: 0.6,
           trust: 0.2,
         },
@@ -93,8 +87,8 @@ describe('SimulationEngine', () => {
   // INITIALIZATION TESTS
   // ===========================================
 
-  describe('initialization', () => {
-    it('should initialize with actors and timestamp', () => {
+  describe("initialization", () => {
+    it("should initialize with actors and timestamp", () => {
       // Act
       engine.initialize(baseConfig);
       const state = engine.getState();
@@ -102,37 +96,35 @@ describe('SimulationEngine', () => {
       // Assert
       expect(state.timestamp).toBe(0);
       expect(state.actors.size).toBe(3);
-      expect(state.ensureActor('mayor').getMood()).toBeCloseTo(2);
-      expect(state.ensureActor('chief').getMood()).toBeCloseTo(1);
-      expect(state.ensureActor('activist').getMood()).toBeCloseTo(-1);
+      expect(state.ensureActor("mayor").getMood()).toBeCloseTo(2);
+      expect(state.ensureActor("chief").getMood()).toBeCloseTo(1);
+      expect(state.ensureActor("activist").getMood()).toBeCloseTo(-1);
     });
 
-    it('should initialize relationships correctly', () => {
+    it("should initialize relationships correctly", () => {
       // Act
       engine.initialize(baseConfig);
       const state = engine.getState();
 
       // Assert
-      const mayorRelationships = state.getRelationships('mayor');
+      const mayorRelationships = state.getRelationships("mayor");
       expect(mayorRelationships).toHaveLength(2);
 
-      const allyRelationship = mayorRelationships.find(
-        (r) => r.targetId === 'chief',
-      );
+      const allyRelationship = mayorRelationships.find((r) => r.targetId === "chief");
       expect(allyRelationship).toBeDefined();
-      expect(allyRelationship?.type).toBe('ally');
+      expect(allyRelationship?.type).toBe("ally");
       expect(allyRelationship?.intensity).toBe(0.8);
       expect(allyRelationship?.trust).toBe(0.7);
     });
 
-    it('should validate actor configuration', () => {
+    it("should validate actor configuration", () => {
       // Arrange
       const invalidConfig = {
         ...baseConfig,
         actors: [
           {
-            id: 'invalid',
-            name: 'Invalid Actor',
+            id: "invalid",
+            name: "Invalid Actor",
             mood: 100, // Out of range
             resilience: 0.5,
             influence: 1,
@@ -142,19 +134,19 @@ describe('SimulationEngine', () => {
 
       // Act & Assert
       expect(() => engine.initialize(invalidConfig)).toThrow(
-        'Actor mood must be between -10 and 10',
+        "Actor mood must be between -10 and 10"
       );
     });
 
-    it('should validate relationship references', () => {
+    it("should validate relationship references", () => {
       // Arrange
       const invalidConfig = {
         ...baseConfig,
         relationships: [
           {
-            sourceId: 'mayor',
-            targetId: 'nonexistent', // Invalid actor reference
-            type: 'ally',
+            sourceId: "mayor",
+            targetId: "nonexistent", // Invalid actor reference
+            type: "ally",
             intensity: 0.5,
             trust: 0.5,
           },
@@ -163,7 +155,7 @@ describe('SimulationEngine', () => {
 
       // Act & Assert
       expect(() => engine.initialize(invalidConfig)).toThrow(
-        'Relationship references non-existent actor',
+        "Relationship references non-existent actor"
       );
     });
   });
@@ -172,20 +164,20 @@ describe('SimulationEngine', () => {
   // EVENT PROCESSING TESTS
   // ===========================================
 
-  describe('event processing', () => {
+  describe("event processing", () => {
     beforeEach(() => {
       engine.initialize(baseConfig);
     });
 
-    it('should process queued events on step', () => {
+    it("should process queued events on step", () => {
       // Arrange
       const event: SimulationEvent = {
-        id: 'event-1',
-        type: 'crisis',
-        actorId: 'mayor',
+        id: "event-1",
+        type: "crisis",
+        actorId: "mayor",
         intensity: 1.5,
         timestamp: 0,
-        description: 'Major policy failure',
+        description: "Major policy failure",
       };
 
       engine.injectEvent(event);
@@ -195,28 +187,28 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const mayorMood = state.ensureActor('mayor').getMood();
+      const mayorMood = state.ensureActor("mayor").getMood();
 
       // Crisis should decrease mood
       expect(mayorMood).toBeLessThan(2);
       expect(state.events).toHaveLength(1);
-      expect(state.events[0].id).toBe('event-1');
+      expect(state.events[0].id).toBe("event-1");
     });
 
-    it('should apply resilience to mood changes', () => {
+    it("should apply resilience to mood changes", () => {
       // Arrange
       const mayorEvent: SimulationEvent = {
-        id: 'event-mayor',
-        type: 'crisis',
-        actorId: 'mayor',
+        id: "event-mayor",
+        type: "crisis",
+        actorId: "mayor",
         intensity: 2,
         timestamp: 0,
       };
 
       const activistEvent: SimulationEvent = {
-        id: 'event-activist',
-        type: 'crisis',
-        actorId: 'activist',
+        id: "event-activist",
+        type: "crisis",
+        actorId: "activist",
         intensity: 2,
         timestamp: 0,
       };
@@ -229,7 +221,7 @@ describe('SimulationEngine', () => {
       engine.injectEvent(mayorEvent);
       engine.step();
       const mayorMoodChange = Math.abs(
-        engine.getState().ensureActor('mayor').getMood() - initialMayorMood,
+        engine.getState().ensureActor("mayor").getMood() - initialMayorMood
       );
 
       engine.reset();
@@ -237,8 +229,7 @@ describe('SimulationEngine', () => {
       engine.injectEvent(activistEvent);
       engine.step();
       const activistMoodChange = Math.abs(
-        engine.getState().ensureActor('activist').getMood() -
-          initialActivistMood,
+        engine.getState().ensureActor("activist").getMood() - initialActivistMood
       );
 
       // Assert
@@ -246,27 +237,27 @@ describe('SimulationEngine', () => {
       expect(mayorMoodChange).toBeGreaterThan(activistMoodChange);
     });
 
-    it('should process multiple events in order', () => {
+    it("should process multiple events in order", () => {
       // Arrange
       const events: SimulationEvent[] = [
         {
-          id: 'event-1',
-          type: 'crisis',
-          actorId: 'mayor',
+          id: "event-1",
+          type: "crisis",
+          actorId: "mayor",
           intensity: 1,
           timestamp: 0,
         },
         {
-          id: 'event-2',
-          type: 'success',
-          actorId: 'mayor',
+          id: "event-2",
+          type: "success",
+          actorId: "mayor",
           intensity: 1.5,
           timestamp: 0,
         },
         {
-          id: 'event-3',
-          type: 'neutral',
-          actorId: 'chief',
+          id: "event-3",
+          type: "neutral",
+          actorId: "chief",
           intensity: 0.5,
           timestamp: 0,
         },
@@ -280,24 +271,20 @@ describe('SimulationEngine', () => {
       // Assert
       const state = engine.getState();
       expect(state.events).toHaveLength(3);
-      expect(state.events.map((e) => e.id)).toEqual([
-        'event-1',
-        'event-2',
-        'event-3',
-      ]);
+      expect(state.events.map((e) => e.id)).toEqual(["event-1", "event-2", "event-3"]);
     });
 
-    it('should handle different event types correctly', () => {
+    it("should handle different event types correctly", () => {
       // Arrange
       const testCases: Array<{
         type: EventType;
-        expectedMoodDirection: 'increase' | 'decrease' | 'neutral';
+        expectedMoodDirection: "increase" | "decrease" | "neutral";
       }> = [
-        { type: 'crisis', expectedMoodDirection: 'decrease' },
-        { type: 'success', expectedMoodDirection: 'increase' },
-        { type: 'scandal', expectedMoodDirection: 'decrease' },
-        { type: 'victory', expectedMoodDirection: 'increase' },
-        { type: 'neutral', expectedMoodDirection: 'neutral' },
+        { type: "crisis", expectedMoodDirection: "decrease" },
+        { type: "success", expectedMoodDirection: "increase" },
+        { type: "scandal", expectedMoodDirection: "decrease" },
+        { type: "victory", expectedMoodDirection: "increase" },
+        { type: "neutral", expectedMoodDirection: "neutral" },
       ];
 
       testCases.forEach(({ type, expectedMoodDirection }) => {
@@ -309,7 +296,7 @@ describe('SimulationEngine', () => {
         const event: SimulationEvent = {
           id: `event-${type}`,
           type,
-          actorId: 'mayor',
+          actorId: "mayor",
           intensity: 1,
           timestamp: 0,
         };
@@ -317,12 +304,12 @@ describe('SimulationEngine', () => {
         // Act
         engine.injectEvent(event);
         engine.step();
-        const finalMood = engine.getState().ensureActor('mayor').getMood();
+        const finalMood = engine.getState().ensureActor("mayor").getMood();
 
         // Assert
-        if (expectedMoodDirection === 'increase') {
+        if (expectedMoodDirection === "increase") {
           expect(finalMood).toBeGreaterThan(initialMood);
-        } else if (expectedMoodDirection === 'decrease') {
+        } else if (expectedMoodDirection === "decrease") {
           expect(finalMood).toBeLessThan(initialMood);
         } else {
           expect(Math.abs(finalMood - initialMood)).toBeLessThan(0.1);
@@ -335,17 +322,17 @@ describe('SimulationEngine', () => {
   // INFLUENCE PROPAGATION TESTS
   // ===========================================
 
-  describe('influence propagation', () => {
+  describe("influence propagation", () => {
     beforeEach(() => {
       engine.initialize(baseConfig);
     });
 
-    it('should propagate influence to related actors', () => {
+    it("should propagate influence to related actors", () => {
       // Arrange
       const event: SimulationEvent = {
-        id: 'event-mayor-crisis',
-        type: 'crisis',
-        actorId: 'mayor',
+        id: "event-mayor-crisis",
+        type: "crisis",
+        actorId: "mayor",
         intensity: 3,
         timestamp: 0,
       };
@@ -358,29 +345,29 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const chiefMood = state.ensureActor('chief').getMood();
+      const chiefMood = state.ensureActor("chief").getMood();
 
       // Chief is an ally, so should be affected by mayor's crisis
       expect(chiefMood).toBeLessThan(initialChiefMood);
     });
 
-    it('should scale influence by relationship intensity', () => {
+    it("should scale influence by relationship intensity", () => {
       // Arrange
       // Create two allies with different relationship intensities
       const config: SimConfig = {
         initialTimestamp: 0,
         actors: [
-          { id: 'source', name: 'Source', mood: 0, resilience: 0.5, influence: 2 },
+          { id: "source", name: "Source", mood: 0, resilience: 0.5, influence: 2 },
           {
-            id: 'close-ally',
-            name: 'Close Ally',
+            id: "close-ally",
+            name: "Close Ally",
             mood: 0,
             resilience: 0.5,
             influence: 1,
           },
           {
-            id: 'distant-ally',
-            name: 'Distant Ally',
+            id: "distant-ally",
+            name: "Distant Ally",
             mood: 0,
             resilience: 0.5,
             influence: 1,
@@ -388,16 +375,16 @@ describe('SimulationEngine', () => {
         ],
         relationships: [
           {
-            sourceId: 'source',
-            targetId: 'close-ally',
-            type: 'ally',
+            sourceId: "source",
+            targetId: "close-ally",
+            type: "ally",
             intensity: 0.9, // Strong relationship
             trust: 0.8,
           },
           {
-            sourceId: 'source',
-            targetId: 'distant-ally',
-            type: 'ally',
+            sourceId: "source",
+            targetId: "distant-ally",
+            type: "ally",
             intensity: 0.3, // Weak relationship
             trust: 0.4,
           },
@@ -408,9 +395,9 @@ describe('SimulationEngine', () => {
       engine.initialize(config);
 
       const event: SimulationEvent = {
-        id: 'event-1',
-        type: 'crisis',
-        actorId: 'source',
+        id: "event-1",
+        type: "crisis",
+        actorId: "source",
         intensity: 5,
         timestamp: 0,
       };
@@ -421,23 +408,19 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const closeAllyMoodChange = Math.abs(
-        state.ensureActor('close-ally').getMood(),
-      );
-      const distantAllyMoodChange = Math.abs(
-        state.ensureActor('distant-ally').getMood(),
-      );
+      const closeAllyMoodChange = Math.abs(state.ensureActor("close-ally").getMood());
+      const distantAllyMoodChange = Math.abs(state.ensureActor("distant-ally").getMood());
 
       // Close ally should be more affected
       expect(closeAllyMoodChange).toBeGreaterThan(distantAllyMoodChange);
     });
 
-    it('should handle adversarial relationships inversely', () => {
+    it("should handle adversarial relationships inversely", () => {
       // Arrange
       const event: SimulationEvent = {
-        id: 'event-mayor-success',
-        type: 'success',
-        actorId: 'mayor',
+        id: "event-mayor-success",
+        type: "success",
+        actorId: "mayor",
         intensity: 3,
         timestamp: 0,
       };
@@ -450,46 +433,46 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const activistMood = state.ensureActor('activist').getMood();
+      const activistMood = state.ensureActor("activist").getMood();
 
       // Activist is an adversary, so mayor's success should worsen activist's mood
       expect(activistMood).toBeLessThan(initialActivistMood);
     });
 
-    it('should respect actor influence levels', () => {
+    it("should respect actor influence levels", () => {
       // Arrange
       // Create actors with different influence levels
       const config: SimConfig = {
         initialTimestamp: 0,
         actors: [
           {
-            id: 'high-influence',
-            name: 'High Influence',
+            id: "high-influence",
+            name: "High Influence",
             mood: 0,
             resilience: 0.5,
             influence: 5, // High influence
           },
           {
-            id: 'low-influence',
-            name: 'Low Influence',
+            id: "low-influence",
+            name: "Low Influence",
             mood: 0,
             resilience: 0.5,
             influence: 1, // Low influence
           },
-          { id: 'target', name: 'Target', mood: 0, resilience: 0.5, influence: 1 },
+          { id: "target", name: "Target", mood: 0, resilience: 0.5, influence: 1 },
         ],
         relationships: [
           {
-            sourceId: 'high-influence',
-            targetId: 'target',
-            type: 'ally',
+            sourceId: "high-influence",
+            targetId: "target",
+            type: "ally",
             intensity: 0.5,
             trust: 0.5,
           },
           {
-            sourceId: 'low-influence',
-            targetId: 'target',
-            type: 'ally',
+            sourceId: "low-influence",
+            targetId: "target",
+            type: "ally",
             intensity: 0.5,
             trust: 0.5,
           },
@@ -501,37 +484,35 @@ describe('SimulationEngine', () => {
 
       // Act
       const highInfluenceEvent: SimulationEvent = {
-        id: 'event-high',
-        type: 'crisis',
-        actorId: 'high-influence',
+        id: "event-high",
+        type: "crisis",
+        actorId: "high-influence",
         intensity: 2,
         timestamp: 0,
       };
 
       engine.injectEvent(highInfluenceEvent);
       engine.step();
-      const targetMoodAfterHigh = engine.getState().ensureActor('target').getMood();
+      const targetMoodAfterHigh = engine.getState().ensureActor("target").getMood();
 
       engine.reset();
       engine.initialize(config);
 
       const lowInfluenceEvent: SimulationEvent = {
-        id: 'event-low',
-        type: 'crisis',
-        actorId: 'low-influence',
+        id: "event-low",
+        type: "crisis",
+        actorId: "low-influence",
         intensity: 2,
         timestamp: 0,
       };
 
       engine.injectEvent(lowInfluenceEvent);
       engine.step();
-      const targetMoodAfterLow = engine.getState().ensureActor('target').getMood();
+      const targetMoodAfterLow = engine.getState().ensureActor("target").getMood();
 
       // Assert
       // High influence actor should have more impact
-      expect(Math.abs(targetMoodAfterHigh)).toBeGreaterThan(
-        Math.abs(targetMoodAfterLow),
-      );
+      expect(Math.abs(targetMoodAfterHigh)).toBeGreaterThan(Math.abs(targetMoodAfterLow));
     });
   });
 
@@ -539,20 +520,20 @@ describe('SimulationEngine', () => {
   // RELATIONSHIP DYNAMICS TESTS
   // ===========================================
 
-  describe('relationship dynamics', () => {
+  describe("relationship dynamics", () => {
     beforeEach(() => {
       engine.initialize(baseConfig);
     });
 
-    it('should update trust based on actor behavior', () => {
+    it("should update trust based on actor behavior", () => {
       // Arrange
       const initialTrust = baseConfig.relationships[0].trust;
 
       // Mayor (ally) has a success
       const event: SimulationEvent = {
-        id: 'event-success',
-        type: 'success',
-        actorId: 'mayor',
+        id: "event-success",
+        type: "success",
+        actorId: "mayor",
         intensity: 2,
         timestamp: 0,
       };
@@ -563,26 +544,21 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const relationship = state
-        .getRelationships('mayor')
-        .find((r) => r.targetId === 'chief');
+      const relationship = state.getRelationships("mayor").find((r) => r.targetId === "chief");
 
       // Success should increase trust between allies
       expect(relationship?.trust).toBeGreaterThanOrEqual(initialTrust);
     });
 
-    it('should degrade relationships during prolonged conflict', () => {
+    it("should degrade relationships during prolonged conflict", () => {
       // Arrange
-      const conflictEvents: SimulationEvent[] = Array.from(
-        { length: 10 },
-        (_, i) => ({
-          id: `conflict-${i}`,
-          type: 'crisis' as EventType,
-          actorId: i % 2 === 0 ? 'mayor' : 'activist',
-          intensity: 1,
-          timestamp: i,
-        }),
-      );
+      const conflictEvents: SimulationEvent[] = Array.from({ length: 10 }, (_, i) => ({
+        id: `conflict-${i}`,
+        type: "crisis" as EventType,
+        actorId: i % 2 === 0 ? "mayor" : "activist",
+        intensity: 1,
+        timestamp: i,
+      }));
 
       const initialIntensity = baseConfig.relationships[1].intensity; // mayor-activist
 
@@ -594,27 +570,22 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const relationship = state
-        .getRelationships('mayor')
-        .find((r) => r.targetId === 'activist');
+      const relationship = state.getRelationships("mayor").find((r) => r.targetId === "activist");
 
       // Prolonged conflict should intensify adversarial relationship
       expect(relationship?.intensity).toBeGreaterThanOrEqual(initialIntensity);
     });
 
-    it('should allow relationship type changes based on interactions', () => {
+    it("should allow relationship type changes based on interactions", () => {
       // Arrange
-      const positiveInteractions: SimulationEvent[] = Array.from(
-        { length: 20 },
-        (_, i) => ({
-          id: `positive-${i}`,
-          type: 'cooperation' as EventType,
-          actorId: i % 2 === 0 ? 'mayor' : 'activist',
-          targetId: i % 2 === 0 ? 'activist' : 'mayor',
-          intensity: 1,
-          timestamp: i,
-        }),
-      );
+      const positiveInteractions: SimulationEvent[] = Array.from({ length: 20 }, (_, i) => ({
+        id: `positive-${i}`,
+        type: "cooperation" as EventType,
+        actorId: i % 2 === 0 ? "mayor" : "activist",
+        targetId: i % 2 === 0 ? "activist" : "mayor",
+        intensity: 1,
+        timestamp: i,
+      }));
 
       // Act
       positiveInteractions.forEach((event) => {
@@ -624,12 +595,10 @@ describe('SimulationEngine', () => {
 
       // Assert
       const state = engine.getState();
-      const relationship = state
-        .getRelationships('mayor')
-        .find((r) => r.targetId === 'activist');
+      const relationship = state.getRelationships("mayor").find((r) => r.targetId === "activist");
 
       // Sufficient positive interactions should change adversary to neutral or ally
-      expect(['neutral', 'ally']).toContain(relationship?.type);
+      expect(["neutral", "ally"]).toContain(relationship?.type);
     });
   });
 
@@ -637,43 +606,43 @@ describe('SimulationEngine', () => {
   // SCENARIO EXECUTION TESTS
   // ===========================================
 
-  describe('scenario execution', () => {
-    it('should execute complete scenario', () => {
+  describe("scenario execution", () => {
+    it("should execute complete scenario", () => {
       // Arrange
       engine.initialize(baseConfig);
 
       const scenario: SimulationEvent[] = [
         {
-          id: 'initial-crisis',
-          type: 'crisis',
-          actorId: 'mayor',
+          id: "initial-crisis",
+          type: "crisis",
+          actorId: "mayor",
           intensity: 3,
           timestamp: 0,
-          description: 'Budget scandal breaks',
+          description: "Budget scandal breaks",
         },
         {
-          id: 'response',
-          type: 'neutral',
-          actorId: 'chief',
+          id: "response",
+          type: "neutral",
+          actorId: "chief",
           intensity: 1,
           timestamp: 1,
-          description: 'Chief remains neutral',
+          description: "Chief remains neutral",
         },
         {
-          id: 'activist-response',
-          type: 'protest',
-          actorId: 'activist',
+          id: "activist-response",
+          type: "protest",
+          actorId: "activist",
           intensity: 2,
           timestamp: 2,
-          description: 'Activists organize protest',
+          description: "Activists organize protest",
         },
         {
-          id: 'mayor-recovery',
-          type: 'success',
-          actorId: 'mayor',
+          id: "mayor-recovery",
+          type: "success",
+          actorId: "mayor",
           intensity: 2,
           timestamp: 3,
-          description: 'Mayor addresses concerns',
+          description: "Mayor addresses concerns",
         },
       ];
 
@@ -689,8 +658,8 @@ describe('SimulationEngine', () => {
       expect(state.events).toHaveLength(4);
 
       // Verify final state makes sense
-      const mayorFinalMood = state.ensureActor('mayor').getMood();
-      const activistFinalMood = state.ensureActor('activist').getMood();
+      const mayorFinalMood = state.ensureActor("mayor").getMood();
+      const activistFinalMood = state.ensureActor("activist").getMood();
 
       // Mayor should have recovered somewhat
       expect(mayorFinalMood).toBeGreaterThan(-5);
@@ -699,14 +668,14 @@ describe('SimulationEngine', () => {
       expect(activistFinalMood).toBeLessThan(0);
     });
 
-    it('should maintain deterministic results', () => {
+    it("should maintain deterministic results", () => {
       // Arrange
       const events: SimulationEvent[] = [
-        { id: 'e1', type: 'crisis', actorId: 'mayor', intensity: 2, timestamp: 0 },
+        { id: "e1", type: "crisis", actorId: "mayor", intensity: 2, timestamp: 0 },
         {
-          id: 'e2',
-          type: 'success',
-          actorId: 'chief',
+          id: "e2",
+          type: "success",
+          actorId: "chief",
           intensity: 1,
           timestamp: 1,
         },
@@ -717,27 +686,27 @@ describe('SimulationEngine', () => {
       events.forEach((e) => engine.injectEvent(e));
       events.forEach(() => engine.step());
       const state1 = engine.getState();
-      const mayorMood1 = state1.ensureActor('mayor').getMood();
+      const mayorMood1 = state1.ensureActor("mayor").getMood();
 
       engine.reset();
       engine.initialize(baseConfig);
       events.forEach((e) => engine.injectEvent(e));
       events.forEach(() => engine.step());
       const state2 = engine.getState();
-      const mayorMood2 = state2.ensureActor('mayor').getMood();
+      const mayorMood2 = state2.ensureActor("mayor").getMood();
 
       // Assert - Should get identical results
       expect(mayorMood1).toBeCloseTo(mayorMood2, 10);
     });
 
-    it('should support scenario branching', () => {
+    it("should support scenario branching", () => {
       // Arrange
       engine.initialize(baseConfig);
 
       const baseEvent: SimulationEvent = {
-        id: 'base',
-        type: 'crisis',
-        actorId: 'mayor',
+        id: "base",
+        type: "crisis",
+        actorId: "mayor",
         intensity: 2,
         timestamp: 0,
       };
@@ -750,15 +719,15 @@ describe('SimulationEngine', () => {
 
       // Branch 1: Mayor responds positively
       const branch1Event: SimulationEvent = {
-        id: 'branch1',
-        type: 'success',
-        actorId: 'mayor',
+        id: "branch1",
+        type: "success",
+        actorId: "mayor",
         intensity: 3,
         timestamp: 1,
       };
       engine.injectEvent(branch1Event);
       engine.step();
-      const branch1Result = engine.getState().ensureActor('mayor').getMood();
+      const branch1Result = engine.getState().ensureActor("mayor").getMood();
 
       // Branch 2: Mayor responds poorly
       engine.reset();
@@ -767,15 +736,15 @@ describe('SimulationEngine', () => {
       engine.step();
 
       const branch2Event: SimulationEvent = {
-        id: 'branch2',
-        type: 'scandal',
-        actorId: 'mayor',
+        id: "branch2",
+        type: "scandal",
+        actorId: "mayor",
         intensity: 3,
         timestamp: 1,
       };
       engine.injectEvent(branch2Event);
       engine.step();
-      const branch2Result = engine.getState().ensureActor('mayor').getMood();
+      const branch2Result = engine.getState().ensureActor("mayor").getMood();
 
       // Assert - Different branches should yield different outcomes
       expect(branch1Result).toBeGreaterThan(branch2Result);
@@ -786,14 +755,14 @@ describe('SimulationEngine', () => {
   // STATE MANAGEMENT TESTS
   // ===========================================
 
-  describe('state management', () => {
-    it('should reset simulation state', () => {
+  describe("state management", () => {
+    it("should reset simulation state", () => {
       // Arrange
       engine.initialize(baseConfig);
       engine.injectEvent({
-        id: 'event-1',
-        type: 'crisis',
-        actorId: 'mayor',
+        id: "event-1",
+        type: "crisis",
+        actorId: "mayor",
         intensity: 2,
         timestamp: 0,
       });
@@ -809,13 +778,13 @@ describe('SimulationEngine', () => {
       expect(state.events).toHaveLength(0);
     });
 
-    it('should export and import state', () => {
+    it("should export and import state", () => {
       // Arrange
       engine.initialize(baseConfig);
       engine.injectEvent({
-        id: 'event-1',
-        type: 'success',
-        actorId: 'mayor',
+        id: "event-1",
+        type: "success",
+        actorId: "mayor",
         intensity: 1,
         timestamp: 0,
       });
@@ -833,7 +802,7 @@ describe('SimulationEngine', () => {
       expect(state.actors.size).toBe(3);
     });
 
-    it('should validate imported state', () => {
+    it("should validate imported state", () => {
       // Arrange
       const invalidState = {
         timestamp: -1, // Invalid timestamp
@@ -843,7 +812,7 @@ describe('SimulationEngine', () => {
 
       // Act & Assert
       expect(() => engine.importState(invalidState as any)).toThrow(
-        'Invalid state: timestamp cannot be negative',
+        "Invalid state: timestamp cannot be negative"
       );
     });
   });
@@ -852,8 +821,8 @@ describe('SimulationEngine', () => {
   // PERFORMANCE TESTS
   // ===========================================
 
-  describe('performance', () => {
-    it('should handle large number of actors efficiently', () => {
+  describe("performance", () => {
+    it("should handle large number of actors efficiently", () => {
       // Arrange
       const largeConfig: SimConfig = {
         initialTimestamp: 0,
@@ -877,13 +846,13 @@ describe('SimulationEngine', () => {
       expect(engine.getState().actors.size).toBe(1000);
     });
 
-    it('should process events efficiently', () => {
+    it("should process events efficiently", () => {
       // Arrange
       engine.initialize(baseConfig);
 
       const events: SimulationEvent[] = Array.from({ length: 100 }, (_, i) => ({
         id: `event-${i}`,
-        type: (i % 2 === 0 ? 'crisis' : 'success') as EventType,
+        type: (i % 2 === 0 ? "crisis" : "success") as EventType,
         actorId: baseConfig.actors[i % 3].id,
         intensity: Math.random() * 3,
         timestamp: i,

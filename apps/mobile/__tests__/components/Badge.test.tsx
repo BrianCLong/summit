@@ -1,6 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { Badge, PriorityBadge, ClassificationBadge, EntityTypeBadge } from '../../src/components/ui/Badge';
+import {
+  Badge,
+  PriorityBadge,
+  ClassificationBadge,
+  EntityTypeBadge,
+} from '../../src/components/ui/Badge';
 
 describe('Badge', () => {
   it('renders correctly with text', () => {
@@ -9,9 +14,7 @@ describe('Badge', () => {
   });
 
   it('applies variant styles', () => {
-    const { getByText, rerender } = render(
-      <Badge variant="primary">Primary</Badge>
-    );
+    const { getByText, rerender } = render(<Badge variant="primary">Primary</Badge>);
     expect(getByText('Primary')).toBeTruthy();
 
     rerender(<Badge variant="destructive">Destructive</Badge>);
@@ -52,16 +55,12 @@ describe('PriorityBadge', () => {
 
 describe('ClassificationBadge', () => {
   it('renders UNCLASSIFIED', () => {
-    const { getByText } = render(
-      <ClassificationBadge classification="UNCLASSIFIED" />
-    );
+    const { getByText } = render(<ClassificationBadge classification="UNCLASSIFIED" />);
     expect(getByText('UNCLASSIFIED')).toBeTruthy();
   });
 
   it('renders TOP_SECRET with space', () => {
-    const { getByText } = render(
-      <ClassificationBadge classification="TOP_SECRET" />
-    );
+    const { getByText } = render(<ClassificationBadge classification="TOP_SECRET" />);
     expect(getByText('TOP SECRET')).toBeTruthy();
   });
 });
@@ -73,14 +72,7 @@ describe('EntityTypeBadge', () => {
   });
 
   it('renders all entity types', () => {
-    const types = [
-      'PERSON',
-      'ORGANIZATION',
-      'LOCATION',
-      'EVENT',
-      'DOCUMENT',
-      'THREAT',
-    ] as const;
+    const types = ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT', 'DOCUMENT', 'THREAT'] as const;
     types.forEach((type) => {
       const { getByText } = render(<EntityTypeBadge type={type} />);
       expect(getByText(type)).toBeTruthy();

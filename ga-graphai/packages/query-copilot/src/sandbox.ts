@@ -1,68 +1,63 @@
-import type {
-  SandboxDataset,
-  SandboxExecuteInput,
-  SandboxResult,
-  SandboxRow,
-} from './types.js';
+import type { SandboxDataset, SandboxExecuteInput, SandboxResult, SandboxRow } from "./types.js";
 import {
   buildReplayEnvironment,
   createReplayDescriptor,
   hashIdentifier,
   persistReplayDescriptor,
   sanitizePayload,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 
 const WRITE_PATTERN = /\b(create|merge|delete|drop|set)\b/i;
 
 const DEFAULT_DATASET: SandboxDataset = {
   nodes: [
     {
-      id: 'person-1',
-      label: 'Person',
-      properties: { name: 'Alice Carter', risk: 'medium', location: 'Berlin' },
+      id: "person-1",
+      label: "Person",
+      properties: { name: "Alice Carter", risk: "medium", location: "Berlin" },
     },
     {
-      id: 'person-2',
-      label: 'Person',
-      properties: { name: 'Brian Lewis', risk: 'low', location: 'Paris' },
+      id: "person-2",
+      label: "Person",
+      properties: { name: "Brian Lewis", risk: "low", location: "Paris" },
     },
     {
-      id: 'org-1',
-      label: 'Organization',
-      properties: { name: 'Helios Analytics', sector: 'Energy' },
+      id: "org-1",
+      label: "Organization",
+      properties: { name: "Helios Analytics", sector: "Energy" },
     },
     {
-      id: 'org-2',
-      label: 'Organization',
-      properties: { name: 'Northwind Intelligence', sector: 'Security' },
+      id: "org-2",
+      label: "Organization",
+      properties: { name: "Northwind Intelligence", sector: "Security" },
     },
     {
-      id: 'case-1',
-      label: 'Case',
-      properties: { title: 'Orion Breach', severity: 'high' },
+      id: "case-1",
+      label: "Case",
+      properties: { title: "Orion Breach", severity: "high" },
     },
   ],
   relationships: [
     {
-      id: 'r-1',
-      type: 'EMPLOYED_BY',
-      from: 'person-1',
-      to: 'org-1',
-      properties: { role: 'Analyst' },
+      id: "r-1",
+      type: "EMPLOYED_BY",
+      from: "person-1",
+      to: "org-1",
+      properties: { role: "Analyst" },
     },
     {
-      id: 'r-2',
-      type: 'EMPLOYED_BY',
-      from: 'person-2',
-      to: 'org-2',
-      properties: { role: 'Consultant' },
+      id: "r-2",
+      type: "EMPLOYED_BY",
+      from: "person-2",
+      to: "org-2",
+      properties: { role: "Consultant" },
     },
     {
-      id: 'r-3',
-      type: 'INVOLVED_IN',
-      from: 'person-1',
-      to: 'case-1',
-      properties: { role: 'suspect' },
+      id: "r-3",
+      type: "INVOLVED_IN",
+      from: "person-1",
+      to: "case-1",
+      properties: { role: "suspect" },
     },
   ],
 };
@@ -70,11 +65,11 @@ const DEFAULT_DATASET: SandboxDataset = {
 function recordReplayFromError(input: SandboxExecuteInput, error: unknown): void {
   const dataset = input.dataset ?? DEFAULT_DATASET;
   const descriptor = createReplayDescriptor({
-    service: 'intelgraph',
-    flow: 'intelgraph-cypher-sandbox',
+    service: "intelgraph",
+    flow: "intelgraph-cypher-sandbox",
     request: {
-      path: '/sandbox/execute',
-      method: 'POST',
+      path: "/sandbox/execute",
+      method: "POST",
       payload: sanitizePayload({
         cypher: input.cypher,
         timeoutMs: input.timeoutMs,
@@ -95,28 +90,24 @@ function recordReplayFromError(input: SandboxExecuteInput, error: unknown): void
     },
     environment: buildReplayEnvironment({ env: { INTELGRAPH_ENV: input.environment } }),
     outcome: {
-      status: 'error',
-      message: error instanceof Error ? error.message : 'unknown error',
-      classification: 'query-validation',
+      status: "error",
+      message: error instanceof Error ? error.message : "unknown error",
+      classification: "query-validation",
     },
     originalResponse: error instanceof Error ? { stack: error.stack } : undefined,
-    privacy: { notes: ['Auto-captured sandbox replay; headers stripped.'] },
-    tags: ['auto-captured'],
+    privacy: { notes: ["Auto-captured sandbox replay; headers stripped."] },
+    tags: ["auto-captured"],
   });
   persistReplayDescriptor(descriptor);
 }
 
 function ensureReadOnly(cypher: string): void {
   if (WRITE_PATTERN.test(cypher)) {
-    throw new Error(
-      'Sandbox execution only supports read-only Cypher statements',
-    );
+    throw new Error("Sandbox execution only supports read-only Cypher statements");
   }
 }
 
-function extractPrimaryMatch(
-  cypher: string,
-): { alias: string; label: string } | null {
+function extractPrimaryMatch(cypher: string): { alias: string; label: string } | null {
   const match = cypher.match(/MATCH\s*\((\w+):([^)]+)\)/i);
   if (!match) {
     return null;
@@ -131,7 +122,7 @@ function extractRelationshipMatch(cypher: string): {
   neighborLabel: string;
 } | null {
   const relationMatch = cypher.match(
-    /MATCH\s*\((\w+)\)[-<]*\[([^:\]]+):([A-Z0-9_]+)\][-*>]*\((\w+):([^)]+)\)/i,
+    /MATCH\s*\((\w+)\)[-<]*\[([^:\]]+):([A-Z0-9_]+)\][-*>]*\((\w+):([^)]+)\)/i
   );
   if (!relationMatch) {
     return null;
@@ -145,10 +136,10 @@ function extractRelationshipMatch(cypher: string): {
 }
 
 function extractWhereClause(
-  cypher: string,
+  cypher: string
 ): { alias: string; property: string; value: string; operator: string } | null {
   const whereMatch = cypher.match(
-    /WHERE\s+(\w+)\.(\w+)\s+(CONTAINS|=)\s+toLower\('([^']+)'\)|WHERE\s+(\w+)\.(\w+)\s+(CONTAINS|=)\s+'([^']+)'/i,
+    /WHERE\s+(\w+)\.(\w+)\s+(CONTAINS|=)\s+toLower\('([^']+)'\)|WHERE\s+(\w+)\.(\w+)\s+(CONTAINS|=)\s+'([^']+)'/i
   );
   if (!whereMatch) {
     return null;
@@ -169,27 +160,24 @@ function extractWhereClause(
   };
 }
 
-function selectNodes(
-  dataset: SandboxDataset,
-  label: string,
-): SandboxDataset['nodes'] {
+function selectNodes(dataset: SandboxDataset, label: string): SandboxDataset["nodes"] {
   return dataset.nodes.filter((node) => node.label === label);
 }
 
 function matchesFilter(
-  node: SandboxDataset['nodes'][number],
-  filter: ReturnType<typeof extractWhereClause>,
+  node: SandboxDataset["nodes"][number],
+  filter: ReturnType<typeof extractWhereClause>
 ): boolean {
   if (!filter) {
     return true;
   }
   if (filter.alias && filter.property in node.properties) {
     const rawValue = node.properties[filter.property];
-    if (typeof rawValue !== 'string') {
+    if (typeof rawValue !== "string") {
       return false;
     }
     const compare = rawValue.toLowerCase();
-    if (filter.operator.toUpperCase() === 'CONTAINS') {
+    if (filter.operator.toUpperCase() === "CONTAINS") {
       return compare.includes(filter.value.toLowerCase());
     }
     return compare === filter.value.toLowerCase();
@@ -199,9 +187,9 @@ function matchesFilter(
 
 function buildRow(
   alias: string,
-  node: SandboxDataset['nodes'][number],
+  node: SandboxDataset["nodes"][number],
   relationship: { type: string; neighborAlias: string } | null,
-  neighbor: SandboxDataset['nodes'][number] | null,
+  neighbor: SandboxDataset["nodes"][number] | null
 ): SandboxRow {
   const columns = [alias];
   const values: Record<string, unknown> = { [alias]: node.properties };
@@ -214,33 +202,31 @@ function buildRow(
 
 function evaluatePolicy(tenantId: string, purpose: string): string[] {
   const warnings: string[] = [];
-  if (purpose === 'exploration' && tenantId.startsWith('prod')) {
-    warnings.push(
-      'Exploration mode in production tenant triggers manual review.',
-    );
+  if (purpose === "exploration" && tenantId.startsWith("prod")) {
+    warnings.push("Exploration mode in production tenant triggers manual review.");
   }
   return warnings;
 }
 
 function buildPlan(
   primaryLabel: string,
-  relationship: { type: string; neighborLabel: string } | null,
+  relationship: { type: string; neighborLabel: string } | null
 ): string[] {
   const plan = [`NodeByLabelScan(${primaryLabel})`];
   if (relationship) {
     plan.push(`Expand(${relationship.type} -> ${relationship.neighborLabel})`);
   }
-  plan.push('Projection(columns)');
+  plan.push("Projection(columns)");
   return plan;
 }
 
 function lookupNeighbor(
   dataset: SandboxDataset,
   relationship: { type: string; neighborAlias: string; neighborLabel: string },
-  nodeId: string,
+  nodeId: string
 ) {
   const edges = dataset.relationships.filter(
-    (rel) => rel.type === relationship.type && rel.from === nodeId,
+    (rel) => rel.type === relationship.type && rel.from === nodeId
   );
   if (edges.length === 0) {
     return null;
@@ -248,8 +234,7 @@ function lookupNeighbor(
   const neighborNodeId = edges[0].to;
   return (
     dataset.nodes.find(
-      (node) =>
-        node.id === neighborNodeId && node.label === relationship.neighborLabel,
+      (node) => node.id === neighborNodeId && node.label === relationship.neighborLabel
     ) ?? null
   );
 }
@@ -261,18 +246,16 @@ export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
     const dataset = input.dataset ?? DEFAULT_DATASET;
     const primary = extractPrimaryMatch(cypher);
     if (!primary) {
-      throw new Error('Unable to parse MATCH clause from Cypher statement');
+      throw new Error("Unable to parse MATCH clause from Cypher statement");
     }
     const relationship = extractRelationshipMatch(cypher);
     const filter = extractWhereClause(cypher);
     const candidates = selectNodes(dataset, primary.label).filter((node) =>
-      matchesFilter(node, filter),
+      matchesFilter(node, filter)
     );
     const rows: SandboxRow[] = [];
     for (const node of candidates) {
-      const neighbor = relationship
-        ? lookupNeighbor(dataset, relationship, node.id)
-        : null;
+      const neighbor = relationship ? lookupNeighbor(dataset, relationship, node.id) : null;
       rows.push(
         buildRow(
           primary.alias,
@@ -283,20 +266,18 @@ export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
                 neighborAlias: relationship.neighborAlias,
               }
             : null,
-          neighbor,
-        ),
+          neighbor
+        )
       );
     }
     const latencyMs = Math.min(
       input.timeoutMs ?? 800,
-      60 + rows.length * 8 + (relationship ? 45 : 25),
+      60 + rows.length * 8 + (relationship ? 45 : 25)
     );
     const policyWarnings = evaluatePolicy(input.tenantId, input.policy.purpose);
     const plan = buildPlan(
       primary.label,
-      relationship
-        ? { type: relationship.type, neighborLabel: relationship.neighborLabel }
-        : null,
+      relationship ? { type: relationship.type, neighborLabel: relationship.neighborLabel } : null
     );
 
     return {

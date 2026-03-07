@@ -66,7 +66,7 @@ spec:
     labelSelectors:
       app: intelgraph-server
   scheduler:
-    cron: "@weekly"  # Run weekly as part of chaos drill
+    cron: "@weekly" # Run weekly as part of chaos drill
   duration: "30s"
 
 ---
@@ -88,7 +88,7 @@ spec:
     labelSelectors:
       app: postgres
   scheduler:
-    cron: "0 2 1 * *"  # Monthly at 2 AM on the 1st
+    cron: "0 2 1 * *" # Monthly at 2 AM on the 1st
   duration: "2m"
 
 ---
@@ -110,7 +110,7 @@ spec:
     labelSelectors:
       app: neo4j
   scheduler:
-    cron: "0 3 1 * *"  # Monthly at 3 AM on the 1st
+    cron: "0 3 1 * *" # Monthly at 3 AM on the 1st
   duration: "1m"
 
 ---
@@ -140,7 +140,7 @@ spec:
       labelSelectors:
         app: postgres
   scheduler:
-    cron: "0 4 1 * *"  # Monthly at 4 AM on the 1st
+    cron: "0 4 1 * *" # Monthly at 4 AM on the 1st
   duration: "1m"
 
 ---
@@ -166,7 +166,7 @@ spec:
     correlation: "50"
     jitter: "10ms"
   scheduler:
-    cron: "0 5 1 * *"  # Monthly at 5 AM on the 1st
+    cron: "0 5 1 * *" # Monthly at 5 AM on the 1st
   duration: "5m"
 
 ---
@@ -190,9 +190,9 @@ spec:
   volumePath: /var/lib/postgresql/data
   path: /var/lib/postgresql/data/**/*
   percent: 10
-  errno: 5  # EIO (I/O error)
+  errno: 5 # EIO (I/O error)
   scheduler:
-    cron: "0 6 1 * *"  # Monthly at 6 AM on the 1st
+    cron: "0 6 1 * *" # Monthly at 6 AM on the 1st
   duration: "2m"
 
 ---
@@ -217,7 +217,7 @@ spec:
       workers: 2
       load: 80
   scheduler:
-    cron: "0 7 1 * *"  # Monthly at 7 AM on the 1st
+    cron: "0 7 1 * *" # Monthly at 7 AM on the 1st
   duration: "3m"
 
 ---
@@ -242,7 +242,7 @@ spec:
       workers: 4
       size: "1GB"
   scheduler:
-    cron: "0 8 1 * *"  # Monthly at 8 AM on the 1st
+    cron: "0 8 1 * *" # Monthly at 8 AM on the 1st
   duration: "2m"
 
 ---
@@ -264,7 +264,7 @@ spec:
     labelSelectors:
       app: redis
   scheduler:
-    cron: "0 9 1 * *"  # Monthly at 9 AM on the 1st
+    cron: "0 9 1 * *" # Monthly at 9 AM on the 1st
   duration: "30s"
 
 ---
@@ -286,7 +286,7 @@ spec:
       app: intelgraph-server
   timeOffset: "-10m"
   scheduler:
-    cron: "0 10 1 * *"  # Monthly at 10 AM on the 1st
+    cron: "0 10 1 * *" # Monthly at 10 AM on the 1st
   duration: "5m"
 
 ---

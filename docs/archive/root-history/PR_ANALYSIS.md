@@ -1,4 +1,5 @@
 # Open Pull Requests Analysis for BrianCLong/summit
+
 **Analysis Date:** November 20, 2025
 **Repository:** https://github.com/BrianCLong/summit
 
@@ -16,11 +17,13 @@
 ## 1. Author Breakdown
 
 ### Bot-Created PRs
+
 **Author: google-labs-jules[bot]**
 
 Based on sampling from pages 1-3, approximately **40-50 PRs** appear to be from google-labs-jules[bot], representing roughly **9-12%** of open PRs.
 
 **Recent bot PR examples (Nov 20, 2025):**
+
 - #12031: Implement outgoing webhook infrastructure
 - #11985: Search Infrastructure V2: Analytics & Enhanced Indexing
 - #11977: Predictive Threat Suite (Alpha)
@@ -59,16 +62,19 @@ Based on sampling from pages 1-3, approximately **40-50 PRs** appear to be from 
 - #11824: feat: Add tests for cognitive bias scenarios
 
 **Bot PR Characteristics:**
+
 - Many are marked as "Draft"
 - Focus on infrastructure, security, and platform improvements
 - Created in batches on the same dates
 
 ### Human-Created PRs
+
 **Author: BrianCLong**
 
 Approximately **378-388 PRs** (88-91% of total) are authored by BrianCLong.
 
 **Breakdown by time period:**
+
 - **November 2025 (recent):** ~70+ PRs
 - **October 2025:** ~50+ PRs
 - **September 2025:** ~250+ PRs (MASSIVE batch)
@@ -81,9 +87,11 @@ Approximately **378-388 PRs** (88-91% of total) are authored by BrianCLong.
 ### By Time Period:
 
 #### < 7 days old (Nov 14-20, 2025)
+
 **Estimated: ~100-120 PRs**
 
 Sample PRs:
+
 - #12031, #11985, #11977, #11971, #11970, #11968, #11963, #11962, #11960, #11958, #11957, #11956
 - #11946, #11945, #11944, #11943, #11942, #11941, #11938, #11934, #11930, #11929, #11928, #11927, #11915
 - #11912, #11906, #11905, #11898, #11895, #11894, #11893, #11892, #11891, #11887, #11886, #11885
@@ -92,13 +100,16 @@ Sample PRs:
 - #11832, #11831, #11827, #11826, #11825, #11824
 
 **Characteristics:**
+
 - Mix of bot and human PRs
 - Wide range of topics: platform features, security, infrastructure, analytics, ML/AI
 
 #### 7-30 days old (Oct 21 - Nov 13, 2025)
+
 **Estimated: ~20-30 PRs**
 
 Sample PRs:
+
 - #11796 (Nov 7): fix: harden client env fallbacks
 - #11795 (Nov 3): feat: deliver research integration capabilities
 - #11793 (Nov 3): chore: upgrade server lint tooling
@@ -108,9 +119,11 @@ Sample PRs:
 - #11762 (Oct 17): feat: Anthropic Claude Skills pack with CI integration
 
 #### 1-3 months old (Aug 20 - Oct 20, 2025)
+
 **Estimated: ~50-70 PRs**
 
 Sample PRs from October 2025:
+
 - #11360 (Oct 16): fix(ts): TextAnalysisEngine stats typing
 - #11068 (Oct 16): MUI migration
 - #10869 (Oct 16): fix(python): syntax/async fixes
@@ -141,6 +154,7 @@ Sample PRs from October 2025:
 - #9795 (Oct 3): Fix/bulk import lockfile sync
 
 #### 3-6 months old (May 20 - Aug 19, 2025)
+
 **Estimated: ~200-250 PRs**
 
 **MASSIVE BATCH from September 24-27, 2025:**
@@ -148,6 +162,7 @@ Sample PRs from October 2025:
 This represents the largest concentration of open PRs in the repository. Nearly all PRs in the #1330-1704 range were created during this 4-day period.
 
 Sample PRs (there are 200+ similar):
+
 - #1704-1689 (Sep 27): Various "codex" labeled features
 - #1688-1617 (Sep 27): Continued batch of codex features
 - #1616-1540 (Sep 27): More codex features
@@ -156,6 +171,7 @@ Sample PRs (there are 200+ similar):
 - #1358, #1330 (Sep 22-24): Tail end of batch
 
 **Common patterns in this batch:**
+
 - Nearly all labeled with "codex"
 - Nearly all labeled with "needs-review"
 - Most labeled with "risk:low"
@@ -164,6 +180,7 @@ Sample PRs (there are 200+ similar):
 - Topics: privacy, governance, ML, data, compliance, analytics
 
 #### 6+ months old (Before May 20, 2025)
+
 **Estimated: <10 PRs**
 
 Very few PRs older than 6 months remain open.
@@ -177,11 +194,13 @@ Very few PRs older than 6 months remain open.
 **Identified Pattern:** `claude/[description]-[session-id]`
 
 **Examples:**
+
 - PR #11971: `claude/test-coverage-gap-analysis-012KPtF66RZec6DeLBtkMekP`
 
 **Estimated Count:** 5-15 PRs
 
 **Characteristics:**
+
 - Created by BrianCLong (human using Claude AI assistant)
 - Long alphanumeric session IDs
 - Recent (mostly November 2025)
@@ -191,6 +210,7 @@ Very few PRs older than 6 months remain open.
 **Identified Pattern:** `codex/[descriptive-feature-name]`
 
 **Examples:**
+
 - PR #1704: `codex/build-djce-pb-library-for-join-cardinality`
 - PR #10091: `codex/build-immutable-training-capsules-system`
 - PR #11840: `codex/fix-high-priority-bugs-from-codex-review`
@@ -199,6 +219,7 @@ Very few PRs older than 6 months remain open.
 **Estimated Count:** 200-250 PRs (majority of September batch)
 
 **Characteristics:**
+
 - All labeled with "codex" label
 - Created in massive batch (Sep 24-27, 2025)
 - Highly systematic naming
@@ -212,6 +233,7 @@ Very few PRs older than 6 months remain open.
 **Estimated Count:** 40-50 PRs
 
 **Characteristics:**
+
 - Created by google-labs-jules[bot]
 - Many marked as "Draft"
 - Recent (mostly November 2025)
@@ -246,6 +268,7 @@ Based on sampling across multiple pages:
 ### Label Combinations
 
 Common patterns:
+
 - `codex` + `needs-review` + `risk:low` (majority of September batch)
 - `Review effort X/5` alone (recent November PRs)
 - `Draft` (bot PRs)
@@ -288,7 +311,9 @@ Several PRs appear to have the exact same title:
 ### Related PR Series
 
 #### Intelligence Platform Series (Nov 20, 2025)
+
 Multiple PRs building related intelligence platforms:
+
 - #11970: Build Emerging Threats Intelligence Platform
 - #11963: Build Knowledge Graph and Entity Resolution Platform
 - #11962: Build Real-time Stream Processing Platform
@@ -304,6 +329,7 @@ Multiple PRs building related intelligence platforms:
 - #11891: Build Geopolitical Risk Intelligence Platform
 
 #### Platform Infrastructure Series (Nov 20, 2025)
+
 - #11968: Build Advanced Machine Learning Operations Platform
 - #11941: Build ML Model Registry and MLOps Pipeline
 - #11930: Build cloud data platform with lakehouse architecture
@@ -313,7 +339,9 @@ Multiple PRs building related intelligence platforms:
 - #11942: Build trading signal generation system
 
 #### Security & Compliance Series (Nov 20, 2025)
+
 Bot-generated security improvements:
+
 - #11887: Auth Hardening & Step-up Auth V3
 - #11886: API Security Hardening: Unified Auth & Rate Limiting
 - #11860: Harden IntelGraph Domain and API
@@ -322,6 +350,7 @@ Bot-generated security improvements:
 - #11825: feat: Add threat model for the IntelGraph platform
 
 #### Observability & SRE Series (Nov 20, 2025)
+
 - #11915: Implement SLO-driven alerting system for Summit
 - #11912: Implement structured logging with correlation IDs
 - #11857: Instrument Product & Engineering Analytics
@@ -329,13 +358,16 @@ Bot-generated security improvements:
 - #9800: feat(monitoring): Enable error-budget monitoring
 
 #### Documentation Series (Nov 20, 2025)
+
 - #11934: Align documentation with Summit's actual capabilities
 - #11863: docs: add October 2025 Board Pack
 - #11859: docs: refine config and restore reference docs
 - #11906: feat: implement data catalog & governance spine
 
 #### September "Codex" Feature Series
+
 The ~200+ PRs from September 24-27 all appear to be part of a coordinated feature development effort, possibly AI-generated or batch-created:
+
 - Governance, compliance, and privacy features
 - ML/AI operations tooling
 - Data engineering infrastructure
@@ -347,20 +379,25 @@ The ~200+ PRs from September 24-27 all appear to be part of a coordinated featur
 ## 6. Notable Patterns & Insights
 
 ### Temporal Clustering
+
 The repository shows distinct "waves" of PR creation:
+
 1. **November 2025 wave** (~100-120 PRs): Mix of human and bot, platform and features
 2. **October 2025 wave** (~50-70 PRs): Human-created, release and infrastructure focus
 3. **September 2025 MEGA-WAVE** (~200-250 PRs): Massive "codex" batch, systematic feature creation
 4. **Pre-September**: Very few remaining open PRs
 
 ### Review Bottleneck Indicators
+
 - 428 open PRs vs 1,429 closed = 23% still open
 - Most PRs marked "needs-review" or "Awaiting review from code owners"
 - Many from September (2-3 months old) still unreviewed
 - Suggests significant review capacity constraints
 
 ### AI/Automation Footprint
+
 Estimated breakdown:
+
 - **Codex-generated** (likely AI): ~200-250 PRs (47-58%)
 - **Bot-generated** (google-labs-jules): ~40-50 PRs (9-12%)
 - **Claude-generated** (AI assistant): ~5-15 PRs (1-4%)
@@ -371,9 +408,11 @@ Estimated breakdown:
 This suggests heavy use of AI tooling for development, which may contribute to the high volume of unreviewed PRs.
 
 ### Topic Distribution
+
 Based on title analysis:
 
 **Top themes:**
+
 1. **Governance, Privacy & Compliance** (~50-70 PRs): consent, privacy, GDPR, policy, audit
 2. **ML/AI Infrastructure** (~40-60 PRs): training, evaluation, models, inference
 3. **Platform & Infrastructure** (~40-50 PRs): orchestration, services, APIs, databases
@@ -441,17 +480,20 @@ Based on title analysis:
 ## Appendix: Sample Data
 
 ### Page 1 Sample (Most Recent)
+
 ```
 12031, 11985, 11977, 11971, 11970, 11968, 11963, 11962, 11960, 11958, 11957, 11956,
 11946, 11945, 11944, 11943, 11942, 11941, 11938, 11934, 11930, 11929, 11928, 11927, 11915
 ```
 
 ### Page 18 Sample (Oldest)
+
 ```
 1359, 1358, 1330
 ```
 
 ### Branch Name Examples
+
 ```
 claude/test-coverage-gap-analysis-012KPtF66RZec6DeLBtkMekP
 codex/build-djce-pb-library-for-join-cardinality

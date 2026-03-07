@@ -7,12 +7,15 @@ This brief captures the three most consequential architectural insights from SWE
 ## 1) Treat Environment Reconstruction as a First-Class Control Loop
 
 ### Insight
+
 SWE tasks are not only patch-generation problems; they are environment-reconstruction problems. Reproducibility requires deterministic checkout + setup + test harness execution, not just code editing.
 
 ### Why it matters in Summit
+
 A patch agent is downstream of environment readiness. If build/test setup is non-deterministic, patch quality is not measurable and RL/evaluation signals degrade.
 
 ### Summit design directive
+
 - Add an explicit `Environment Planner` stage before any patch proposals.
 - Require task-level checks for:
   - build tool detection
@@ -24,12 +27,15 @@ A patch agent is downstream of environment readiness. If build/test setup is non
 ## 2) Optimize for Behavioral Delta (Fail→Pass), Not Patch Similarity
 
 ### Insight
+
 The core learning/evaluation unit is behavior change measured through test transitions. Diff overlap with reference patches is secondary.
 
 ### Why it matters in Summit
+
 Behavior-first rewards align search and training with software correctness, reduce overfitting to stylistic edits, and support multi-language evaluation.
 
 ### Summit design directive
+
 - Compute reward from test transitions:
   - positive: failing tests that now pass
   - negative: new regressions
@@ -43,12 +49,15 @@ Behavior-first rewards align search and training with software correctness, redu
 ## 3) Scale Requires Validator Agents (Not Just Task Harvesting)
 
 ### Insight
+
 Large task collections include substantial noise; a validation gate is mandatory to remove unsound tasks before training/eval.
 
 ### Why it matters in Summit
+
 Without validation, agents train on contradictory signals (already-passing tasks, flaky suites, broken repos), reducing convergence quality and increasing benchmark noise.
 
 ### Summit design directive
+
 - Introduce a `Task Validator` gate that must prove:
   1. repo/setup is executable,
   2. fail-state is reproducible,

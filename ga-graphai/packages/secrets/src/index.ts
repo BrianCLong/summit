@@ -5,12 +5,12 @@ export type {
   SecretsProvider,
   SecretRef,
   SecretRotationPolicy,
-} from './types.js';
-export { computeRotationStatus, rotationStatusForRef } from './rotation.js';
-export { ZeroTrustSecretsManager } from './manager.js';
+} from "./types.js";
+export { computeRotationStatus, rotationStatusForRef } from "./rotation.js";
+export { ZeroTrustSecretsManager } from "./manager.js";
 export {
   AwsKmsEnvelopeProvider,
   buildEnvelopeCiphertext,
   type KmsLikeClient,
-} from './providers/kms.js';
-export { VaultJwtSecretsProvider } from './providers/vault.js';
+} from "./providers/kms.js";
+export { VaultJwtSecretsProvider } from "./providers/vault.js";

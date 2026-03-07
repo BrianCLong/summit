@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface RunHit {
   runId: string;
@@ -11,16 +11,16 @@ interface RunHit {
 export default function RunSearch() {
   const [hits, setHits] = useState<RunHit[]>([]);
   const [q, setQ] = useState({
-    tenant: '',
-    status: '',
-    stepType: '',
-    since: '',
-    until: '',
+    tenant: "",
+    status: "",
+    stepType: "",
+    since: "",
+    until: "",
   });
   async function search() {
-    const r = await fetch('/graphql', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+    const r = await fetch("/graphql", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         query: `{ searchRuns(q:${JSON.stringify(q)}){ runId status startedAt tenant summary } }`,
       }),

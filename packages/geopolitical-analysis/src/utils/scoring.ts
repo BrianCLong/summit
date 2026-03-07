@@ -3,7 +3,7 @@
  * @module @intelgraph/geopolitical-analysis/utils/scoring
  */
 
-import { RiskLevel, ConfidenceLevel } from '../types/index.js';
+import { RiskLevel, ConfidenceLevel } from "../types/index.js";
 
 /**
  * Convert a numeric score (0-100) to a RiskLevel
@@ -22,22 +22,17 @@ export function scoreToRiskLevel(score: number): RiskLevel {
 /**
  * Calculate weighted average of multiple scores
  */
-export function weightedAverage(
-  scores: Array<{ value: number; weight: number }>
-): number {
+export function weightedAverage(scores: Array<{ value: number; weight: number }>): number {
   if (scores.length === 0) {
-    throw new Error('Cannot calculate weighted average of empty array');
+    throw new Error("Cannot calculate weighted average of empty array");
   }
 
   const totalWeight = scores.reduce((sum, s) => sum + s.weight, 0);
   if (totalWeight === 0) {
-    throw new Error('Total weight cannot be zero');
+    throw new Error("Total weight cannot be zero");
   }
 
-  const weightedSum = scores.reduce(
-    (sum, s) => sum + s.value * s.weight,
-    0
-  );
+  const weightedSum = scores.reduce((sum, s) => sum + s.value * s.weight, 0);
 
   return weightedSum / totalWeight;
 }
@@ -45,12 +40,7 @@ export function weightedAverage(
 /**
  * Normalize a value to 0-100 scale
  */
-export function normalize(
-  value: number,
-  min: number,
-  max: number,
-  inverse = false
-): number {
+export function normalize(value: number, min: number, max: number, inverse = false): number {
   if (min >= max) {
     throw new Error(`min (${min}) must be less than max (${max})`);
   }
@@ -70,8 +60,7 @@ export function calculateConfidence(metrics: {
   dataCompleteness: number; // 0-100
   expertConsensus: number; // 0-100
 }): ConfidenceLevel {
-  const { dataRecency, sourceReliability, dataCompleteness, expertConsensus } =
-    metrics;
+  const { dataRecency, sourceReliability, dataCompleteness, expertConsensus } = metrics;
 
   // Penalize old data
   const recencyScore = normalize(dataRecency, 0, 365, true);
@@ -106,7 +95,7 @@ export function exponentialDecay(
  */
 export function movingAverage(values: number[], window: number): number[] {
   if (window > values.length) {
-    throw new Error('Window size cannot be larger than array length');
+    throw new Error("Window size cannot be larger than array length");
   }
 
   const result: number[] = [];
@@ -134,7 +123,7 @@ export function rateOfChange(current: number, previous: number): number {
  */
 export function zScore(value: number, mean: number, stdDev: number): number {
   if (stdDev === 0) {
-    throw new Error('Standard deviation cannot be zero');
+    throw new Error("Standard deviation cannot be zero");
   }
   return (value - mean) / stdDev;
 }
@@ -144,7 +133,7 @@ export function zScore(value: number, mean: number, stdDev: number): number {
  */
 export function percentileRank(value: number, dataset: number[]): number {
   if (dataset.length === 0) {
-    throw new Error('Dataset cannot be empty');
+    throw new Error("Dataset cannot be empty");
   }
 
   const sorted = [...dataset].sort((a, b) => a - b);
@@ -160,16 +149,12 @@ export function percentileRank(value: number, dataset: number[]): number {
 /**
  * Calculate compound annual growth rate (CAGR)
  */
-export function calculateCAGR(
-  beginValue: number,
-  endValue: number,
-  years: number
-): number {
+export function calculateCAGR(beginValue: number, endValue: number, years: number): number {
   if (beginValue <= 0 || endValue <= 0) {
-    throw new Error('Values must be positive for CAGR calculation');
+    throw new Error("Values must be positive for CAGR calculation");
   }
   if (years <= 0) {
-    throw new Error('Years must be positive');
+    throw new Error("Years must be positive");
   }
 
   return (Math.pow(endValue / beginValue, 1 / years) - 1) * 100;
@@ -178,11 +163,9 @@ export function calculateCAGR(
 /**
  * Detect trend direction
  */
-export function detectTrend(
-  values: number[]
-): 'RISING' | 'STABLE' | 'DECLINING' {
+export function detectTrend(values: number[]): "RISING" | "STABLE" | "DECLINING" {
   if (values.length < 2) {
-    return 'STABLE';
+    return "STABLE";
   }
 
   // Simple linear regression slope
@@ -199,8 +182,8 @@ export function detectTrend(
   const significanceThreshold = avgValue * 0.01; // 1% of average
 
   if (Math.abs(slope) < significanceThreshold) {
-    return 'STABLE';
+    return "STABLE";
   }
 
-  return slope > 0 ? 'RISING' : 'DECLINING';
+  return slope > 0 ? "RISING" : "DECLINING";
 }

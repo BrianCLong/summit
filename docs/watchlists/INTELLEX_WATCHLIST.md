@@ -12,15 +12,15 @@
 
 ## 1. Monitoring Checklist
 
-| Frequency | Source | Signal | Owner | Notes |
-| --- | --- | --- | --- | --- |
-| Daily | intellex.xyz/blog | Product & roadmap announcements | Strategy Analyst | Subscribe via RSS, archive PDFs |
-| Daily | Discord / community | Connector launches, bounty updates | DevRel | Pipe highlights into #competitor-watch |
-| 3x Weekly | LinkedIn & X | Hiring, partnerships, design-partner logos | Marketing Intel | Screenshot + summarise |
-| Weekly | GitHub org(s) | Protocol commits, SDK releases | Platform Intel | Track license changes |
-| Weekly | Web archives | Pricing page, docs revisions | Pricing Ops | Capture diffs via Diffbot |
-| Weekly | Glassdoor / job boards | New roles, comp, focus areas | People Ops | Annotate for hiring signals |
-| Monthly | Conference calendars | Speaking engagements, sponsorships | Events Lead | Evaluate presence & themes |
+| Frequency | Source                 | Signal                                     | Owner            | Notes                                  |
+| --------- | ---------------------- | ------------------------------------------ | ---------------- | -------------------------------------- |
+| Daily     | intellex.xyz/blog      | Product & roadmap announcements            | Strategy Analyst | Subscribe via RSS, archive PDFs        |
+| Daily     | Discord / community    | Connector launches, bounty updates         | DevRel           | Pipe highlights into #competitor-watch |
+| 3x Weekly | LinkedIn & X           | Hiring, partnerships, design-partner logos | Marketing Intel  | Screenshot + summarise                 |
+| Weekly    | GitHub org(s)          | Protocol commits, SDK releases             | Platform Intel   | Track license changes                  |
+| Weekly    | Web archives           | Pricing page, docs revisions               | Pricing Ops      | Capture diffs via Diffbot              |
+| Weekly    | Glassdoor / job boards | New roles, comp, focus areas               | People Ops       | Annotate for hiring signals            |
+| Monthly   | Conference calendars   | Speaking engagements, sponsorships         | Events Lead      | Evaluate presence & themes             |
 
 ---
 
@@ -58,13 +58,13 @@ notes: |
 
 ## 4. Intelligence Backlog (Initial Seeds)
 
-| Item | Description | Status | Owner | Next Review |
-| --- | --- | --- | --- | --- |
-| P0 | Confirm Intellex royalty settlement mechanism & legal framing | Open | Legal Liaison | 2025-10-18 |
-| P0 | Track Intellex starter kit performance metrics if published | Open | Product Analyst | 2025-10-19 |
-| P1 | Monitor for regulated vertical references (Finserv/Healthcare) | Open | GTM Research | 2025-10-21 |
-| P1 | Identify connector roadmap (Slack/Teams parity vs. depth) | Open | Platform Intel | 2025-10-20 |
-| P2 | Assess community growth (Discord MAU, GitHub stars) | Open | DevRel | 2025-10-23 |
+| Item | Description                                                    | Status | Owner           | Next Review |
+| ---- | -------------------------------------------------------------- | ------ | --------------- | ----------- |
+| P0   | Confirm Intellex royalty settlement mechanism & legal framing  | Open   | Legal Liaison   | 2025-10-18  |
+| P0   | Track Intellex starter kit performance metrics if published    | Open   | Product Analyst | 2025-10-19  |
+| P1   | Monitor for regulated vertical references (Finserv/Healthcare) | Open   | GTM Research    | 2025-10-21  |
+| P1   | Identify connector roadmap (Slack/Teams parity vs. depth)      | Open   | Platform Intel  | 2025-10-20  |
+| P2   | Assess community growth (Discord MAU, GitHub stars)            | Open   | DevRel          | 2025-10-23  |
 
 ---
 

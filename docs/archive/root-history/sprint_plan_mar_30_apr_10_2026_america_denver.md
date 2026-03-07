@@ -44,8 +44,8 @@ Enable a new customer to **sign up → create first tenant → ingest first rece
 - **Lifecycle Nudges (3 pts):** Admin-only prompts (“finish setup,” “set quotas,” “export evidence,” “invite auditor”) with per-tenant opt-out.
 - **Partner Distribution Pack v1 (5 pts):** Versioned config bundles with install profiles, region defaults, policy presets, observability defaults, and one-command validation suite + signed evidence.
 - **Upgrade Assistant (3 pts):** Preflight checks + migration notes surfaced in Switchboard; generate “Upgrade Evidence Bundle.”
-- **Enterprise Add-Ons (choose two) (6 pts):** 
-  - **Dedicated compute pool per tenant** (no noisy neighbors).  
+- **Enterprise Add-Ons (choose two) (6 pts):**
+  - **Dedicated compute pool per tenant** (no noisy neighbors).
   - **Audit archive (WORM-like) to customer bucket** with retention enforcement.
 - **Entitlements + Invoice-Ready Reporting (4 pts):** Feature flags/quotas/policy obligations, usage metering, and invoice line items for the selected add-ons.
 
@@ -66,19 +66,19 @@ Enable a new customer to **sign up → create first tenant → ingest first rece
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID      | Title                                         | Owner     | Est | Dependencies | Acceptance Criteria (summary)                                      |
-| ------- | --------------------------------------------- | --------- | --: | ------------ | ------------------------------------------------------------------ |
-| GROW-201| Self-Serve Signup + Tenant Creation           | FE+BE     |   6 | —            | Hosted flow; region/retention; policy profile; verification; receipts |
-| GROW-211| OIDC Quick Connect + SCIM (opt)               | FE+BE     |   4 | GROW-201     | IdP wizard; health checks; prescriptive fixes                      |
-| GROW-221| Activation Checklist & Tracking               | FE        |   5 | GROW-201     | Checklist items; telemetry; completion export                      |
-| GROW-231| Growth Instrumentation & Health Score         | BE        |   4 | GROW-221     | Milestone events; transparent formula; dashboard hook              |
-| GROW-241| Lifecycle Nudges (Admin-only)                 | FE+BE     |   3 | GROW-221     | Prompts; targeting; opt-out per tenant                             |
-| DIST-251| Partner Distribution Pack v1 + Validation     | BE+Ops    |   5 | —            | Versioned bundles; validation suite; signed evidence               |
-| DIST-261| Upgrade Assistant + Evidence Bundle           | FE+BE     |   3 | DIST-251     | Preflight checks; migration notes; evidence bundle                 |
-| ENT-271 | Dedicated Compute Pool Add-On                 | BE+Ops    |   3 | —            | Entitlement + enforcement; metering; invoice line                  |
-| ENT-272 | Audit Archive Add-On (WORM)                   | BE        |   3 | —            | Retention enforcement; export to customer bucket; invoice line     |
-| ENT-281 | Entitlements + Invoice Reporting Framework    | BE        |   4 | ENT-271/272  | Flags/quotas; metering; invoice-ready export                       |
-| RES-291 | Advanced Data Residency Enforcement (Stretch) | BE        |   2 | —            | Region-locked services; deny cross-region; partial metering        |
+| ID       | Title                                         | Owner  | Est | Dependencies | Acceptance Criteria (summary)                                         |
+| -------- | --------------------------------------------- | ------ | --: | ------------ | --------------------------------------------------------------------- |
+| GROW-201 | Self-Serve Signup + Tenant Creation           | FE+BE  |   6 | —            | Hosted flow; region/retention; policy profile; verification; receipts |
+| GROW-211 | OIDC Quick Connect + SCIM (opt)               | FE+BE  |   4 | GROW-201     | IdP wizard; health checks; prescriptive fixes                         |
+| GROW-221 | Activation Checklist & Tracking               | FE     |   5 | GROW-201     | Checklist items; telemetry; completion export                         |
+| GROW-231 | Growth Instrumentation & Health Score         | BE     |   4 | GROW-221     | Milestone events; transparent formula; dashboard hook                 |
+| GROW-241 | Lifecycle Nudges (Admin-only)                 | FE+BE  |   3 | GROW-221     | Prompts; targeting; opt-out per tenant                                |
+| DIST-251 | Partner Distribution Pack v1 + Validation     | BE+Ops |   5 | —            | Versioned bundles; validation suite; signed evidence                  |
+| DIST-261 | Upgrade Assistant + Evidence Bundle           | FE+BE  |   3 | DIST-251     | Preflight checks; migration notes; evidence bundle                    |
+| ENT-271  | Dedicated Compute Pool Add-On                 | BE+Ops |   3 | —            | Entitlement + enforcement; metering; invoice line                     |
+| ENT-272  | Audit Archive Add-On (WORM)                   | BE     |   3 | —            | Retention enforcement; export to customer bucket; invoice line        |
+| ENT-281  | Entitlements + Invoice Reporting Framework    | BE     |   4 | ENT-271/272  | Flags/quotas; metering; invoice-ready export                          |
+| RES-291  | Advanced Data Residency Enforcement (Stretch) | BE     |   2 | —            | Region-locked services; deny cross-region; partial metering           |
 
 > Planned: ~40–42 pts; stretch only if core onboarding/add-ons are stable.
 
@@ -125,13 +125,13 @@ Enable a new customer to **sign up → create first tenant → ingest first rece
 
 ## 11) Risks & Mitigations
 
-| Risk                                                      | Prob. | Impact | Mitigation                                                       |
-| --------------------------------------------------------- | ----- | -----: | ---------------------------------------------------------------- |
-| Onboarding exceeds 15 minutes due to IdP/SCIM delays      | Med   |   High | Cache IdP presets; parallelize health checks; fallback manual link |
-| Activation checklist ignored by admins                    | Med   |   Med  | Inline prompts; email follow-up; highlight progress in header    |
-| Partner bundle validation flakes across regions           | Med   |   Med  | Deterministic fixtures; replayable validation suite; signed evidence |
-| Add-on enforcement gaps (compute/archival)                | Low   |   High | Entitlement gate in control plane + audit logs + denial tests    |
-| Invoice export mismatch with metering                     | Low   |   Med  | Reconcile metering snapshots; nightly sanity check               |
+| Risk                                                 | Prob. | Impact | Mitigation                                                           |
+| ---------------------------------------------------- | ----- | -----: | -------------------------------------------------------------------- |
+| Onboarding exceeds 15 minutes due to IdP/SCIM delays | Med   |   High | Cache IdP presets; parallelize health checks; fallback manual link   |
+| Activation checklist ignored by admins               | Med   |    Med | Inline prompts; email follow-up; highlight progress in header        |
+| Partner bundle validation flakes across regions      | Med   |    Med | Deterministic fixtures; replayable validation suite; signed evidence |
+| Add-on enforcement gaps (compute/archival)           | Low   |   High | Entitlement gate in control plane + audit logs + denial tests        |
+| Invoice export mismatch with metering                | Low   |    Med | Reconcile metering snapshots; nightly sanity check                   |
 
 ---
 

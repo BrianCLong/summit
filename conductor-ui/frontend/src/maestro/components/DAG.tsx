@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
 export interface DagNode {
   id: string;
   label: string;
-  state: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  state: "queued" | "running" | "succeeded" | "failed" | "cancelled";
   retries?: number;
   compensated?: boolean;
 }
@@ -12,18 +12,18 @@ export interface DagEdge {
   to: string;
 }
 
-function stateColor(s: DagNode['state']) {
+function stateColor(s: DagNode["state"]) {
   switch (s) {
-    case 'running':
-      return '#2563eb';
-    case 'succeeded':
-      return '#16a34a';
-    case 'failed':
-      return '#dc2626';
-    case 'cancelled':
-      return '#6b7280';
+    case "running":
+      return "#2563eb";
+    case "succeeded":
+      return "#16a34a";
+    case "failed":
+      return "#dc2626";
+    case "cancelled":
+      return "#6b7280";
     default:
-      return '#f59e0b';
+      return "#f59e0b";
   }
 }
 
@@ -42,9 +42,7 @@ export default function DAG({
   const inputs = new Map<string, number>();
   nodes.forEach((n) => inputs.set(n.id, 0));
   edges.forEach((e) => inputs.set(e.to, (inputs.get(e.to) || 0) + 1));
-  const q: string[] = nodes
-    .filter((n) => (inputs.get(n.id) || 0) === 0)
-    .map((n) => n.id);
+  const q: string[] = nodes.filter((n) => (inputs.get(n.id) || 0) === 0).map((n) => n.id);
   q.forEach((id) => levelMap.set(id, 0));
   while (q.length) {
     const id = q.shift()!;
@@ -122,15 +120,7 @@ export default function DAG({
               </text>
               {n?.retries ? (
                 <g>
-                  <rect
-                    x={100}
-                    y={6}
-                    rx={4}
-                    width={30}
-                    height={16}
-                    fill="#0f172a"
-                    opacity={0.06}
-                  />
+                  <rect x={100} y={6} rx={4} width={30} height={16} fill="#0f172a" opacity={0.06} />
                   <text x={104} y={18} fontSize={11} fill="#334155">
                     r{n.retries}
                   </text>
@@ -138,15 +128,7 @@ export default function DAG({
               ) : null}
               {n?.compensated ? (
                 <g>
-                  <rect
-                    x={70}
-                    y={6}
-                    rx={4}
-                    width={24}
-                    height={16}
-                    fill="#dc2626"
-                    opacity={0.12}
-                  />
+                  <rect x={70} y={6} rx={4} width={24} height={16} fill="#dc2626" opacity={0.12} />
                   <text x={74} y={18} fontSize={11} fill="#b91c1c">
                     C
                   </text>

@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Refusal Matrix & Boundaries
 
 **Mission:** Define explicit non-goals and prohibited uses for Summit capabilities.

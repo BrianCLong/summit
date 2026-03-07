@@ -2,10 +2,10 @@ name: ci/supply-chain-delta
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

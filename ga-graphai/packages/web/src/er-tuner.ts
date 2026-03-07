@@ -14,7 +14,7 @@ export interface ScoredMatch {
 
 export function computeThresholdMetrics(
   scores: ScoredMatch[],
-  threshold: number,
+  threshold: number
 ): ThresholdMetrics {
   let truePositives = 0;
   let falsePositives = 0;
@@ -32,8 +32,10 @@ export function computeThresholdMetrics(
     }
   });
 
-  const precision = truePositives + falsePositives === 0 ? 0 : truePositives / (truePositives + falsePositives);
-  const recall = truePositives + falseNegatives === 0 ? 0 : truePositives / (truePositives + falseNegatives);
+  const precision =
+    truePositives + falsePositives === 0 ? 0 : truePositives / (truePositives + falsePositives);
+  const recall =
+    truePositives + falseNegatives === 0 ? 0 : truePositives / (truePositives + falseNegatives);
 
   return {
     threshold,
@@ -47,7 +49,7 @@ export function computeThresholdMetrics(
 
 export function buildThresholdReport(
   scores: ScoredMatch[],
-  thresholds: number[],
+  thresholds: number[]
 ): ThresholdMetrics[] {
   return thresholds.map((threshold) => computeThresholdMetrics(scores, threshold));
 }

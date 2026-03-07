@@ -30,7 +30,7 @@ curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets | length'
 
 ## Claude Prompt
 
-```
+````
 You are implementing full observability (SLO dashboards, OTEL tracing, Prometheus metrics) for IntelGraph Core GA.
 
 CONTEXT:
@@ -187,40 +187,42 @@ export function setupTracing(serviceName: string) {
     sdk.shutdown().then(() => console.log('Tracing terminated'));
   });
 }
-```
+````
 
 SAMPLE PROMETHEUS METRICS (server/src/telemetry/metrics.ts):
+
 ```typescript
-import { register, Histogram, Gauge, Counter } from 'prom-client';
+import { register, Histogram, Gauge, Counter } from "prom-client";
 
 export const graphQueryDuration = new Histogram({
-  name: 'graph_query_duration_seconds',
-  help: 'Graph query latency in seconds',
-  labelNames: ['query_type', 'tenant_id'],
+  name: "graph_query_duration_seconds",
+  help: "Graph query latency in seconds",
+  labelNames: ["query_type", "tenant_id"],
   buckets: [0.1, 0.5, 1, 2, 5, 10],
 });
 
 export const budgetUsage = new Gauge({
-  name: 'budget_usage_percent',
-  help: 'Current budget usage as percentage',
-  labelNames: ['tenant_id'],
+  name: "budget_usage_percent",
+  help: "Current budget usage as percentage",
+  labelNames: ["tenant_id"],
 });
 
 export const ingestRecords = new Counter({
-  name: 'ingest_records_processed_total',
-  help: 'Total records processed by ingest pipeline',
-  labelNames: ['source_type', 'status'],
+  name: "ingest_records_processed_total",
+  help: "Total records processed by ingest pipeline",
+  labelNames: ["source_type", "status"],
 });
 
 export function setupMetricsEndpoint(app: Express) {
-  app.get('/metrics', async (req, res) => {
-    res.set('Content-Type', register.contentType);
+  app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
   });
 }
 ```
 
 SAMPLE ALERT RULE (observability/prometheus/alerts/slo-alerts.yaml):
+
 ```yaml
 groups:
   - name: slo_alerts
@@ -250,6 +252,7 @@ groups:
 ```
 
 SAMPLE RECORDING RULE (observability/prometheus/recording-rules.yaml):
+
 ```yaml
 groups:
   - name: slo_recording_rules
@@ -280,6 +283,7 @@ Provide:
 (f) Runbooks (Markdown)
 (g) Tests (verify metrics exist, traces created)
 (h) Helm chart updates (if deploying to Kubernetes)
+
 ```
 
 ---
@@ -309,3 +313,4 @@ Provide:
 - OTEL Node SDK: https://opentelemetry.io/docs/instrumentation/js/
 - Prometheus client: https://github.com/siimon/prom-client
 - SLO methodology: https://sre.google/workbook/implementing-slos/
+```

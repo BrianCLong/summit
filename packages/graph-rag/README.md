@@ -11,15 +11,17 @@ This package provides the core primitives for Summit's GraphRAG architecture.
 ## Guarantees
 
 ### Determinism
+
 The `ContextAssembler` ensures that graph results are sorted by ID before serialization. This guarantees that for the same graph state and query, the LLM context remains identical, maximizing prompt cache hits and ensuring reproducible outputs.
 
 ### Traceability
+
 Every node retrieved contains its `evidence_id`. The assembler formats these as explicit citations, allowing the LLM to attribute its findings to specific, auditable records.
 
 ## Usage
 
 ```typescript
-import { ContextAssembler } from '@summit/graph-rag';
+import { ContextAssembler } from "@summit/graph-rag";
 
 // 1. Run Cypher query via Neo4j driver
 const result = await session.run(query, params);

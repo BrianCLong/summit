@@ -4,7 +4,10 @@
   "mappings": {
     "Article 9": {
       "title": "Risk Management System",
-      "internal_controls": ["governance/taxonomy.v1.json#RiskClass", "server/src/governance/execution-trace.ts"]
+      "internal_controls": [
+        "governance/taxonomy.v1.json#RiskClass",
+        "server/src/governance/execution-trace.ts"
+      ]
     },
     "Article 10": {
       "title": "Data and Governance",

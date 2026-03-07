@@ -23,18 +23,18 @@ Until direct HTML extraction is completed, Summit tracks the following claim IDs
 
 ## Module Mapping
 
-| Module | Planned Artifact | Claim |
-| --- | --- | --- |
-| `summit/ux/mobile_score.py` | Mobile compliance evaluator | `ITEM:CLAIM-01` |
-| `summit/perf/page_speed_gate.py` | Load-time CI gate | `ITEM:CLAIM-02` |
-| `summit/ux/nav_complexity.py` | Click-depth + entropy metric | `ITEM:CLAIM-03` |
-| `summit/ux/media_quality.py` | Image resolution + alt-tag validator | `ITEM:CLAIM-04` |
-| `summit/ux/cta_audit.py` | CTA presence + contrast scanner | `ITEM:CLAIM-05` |
-| `summit/trust/signals_detector.py` | Trust signal parser | `ITEM:CLAIM-06` |
-| `summit/checkout/friction_score.py` | Step count + form-field counter | `ITEM:CLAIM-07` |
-| `summit/personalization/feature_flag.py` | Personalization readiness schema | `ITEM:CLAIM-08` |
-| `summit/pricing/transparency_check.py` | Hidden-fee detection | `ITEM:CLAIM-09` |
-| `summit/ux/microinteraction_audit.py` | Interaction-state coverage checker | `ITEM:CLAIM-10` |
+| Module                                   | Planned Artifact                     | Claim           |
+| ---------------------------------------- | ------------------------------------ | --------------- |
+| `summit/ux/mobile_score.py`              | Mobile compliance evaluator          | `ITEM:CLAIM-01` |
+| `summit/perf/page_speed_gate.py`         | Load-time CI gate                    | `ITEM:CLAIM-02` |
+| `summit/ux/nav_complexity.py`            | Click-depth + entropy metric         | `ITEM:CLAIM-03` |
+| `summit/ux/media_quality.py`             | Image resolution + alt-tag validator | `ITEM:CLAIM-04` |
+| `summit/ux/cta_audit.py`                 | CTA presence + contrast scanner      | `ITEM:CLAIM-05` |
+| `summit/trust/signals_detector.py`       | Trust signal parser                  | `ITEM:CLAIM-06` |
+| `summit/checkout/friction_score.py`      | Step count + form-field counter      | `ITEM:CLAIM-07` |
+| `summit/personalization/feature_flag.py` | Personalization readiness schema     | `ITEM:CLAIM-08` |
+| `summit/pricing/transparency_check.py`   | Hidden-fee detection                 | `ITEM:CLAIM-09` |
+| `summit/ux/microinteraction_audit.py`    | Interaction-state coverage checker   | `ITEM:CLAIM-10` |
 
 ## Minimal Winning Slice (MWS)
 
@@ -61,22 +61,22 @@ Generate deterministic `ux_readiness_report.json` for five conversion heuristics
 
 ## Threat-Informed Requirements
 
-| Threat | Mitigation | Gate | Test |
-| --- | --- | --- | --- |
-| Dark-pattern CTA | Contrast + semantic detection | `cta-contrast-check` | `test_dark_pattern_cta.py` |
-| Hidden fees | DOM diff on price surfaces | `pricing-transparency-check` | `test_hidden_fee_flag.py` |
-| Fake trust badge | Badge whitelist | `trust-auth-check` | `test_invalid_badge.py` |
+| Threat           | Mitigation                    | Gate                         | Test                       |
+| ---------------- | ----------------------------- | ---------------------------- | -------------------------- |
+| Dark-pattern CTA | Contrast + semantic detection | `cta-contrast-check`         | `test_dark_pattern_cta.py` |
+| Hidden fees      | DOM diff on price surfaces    | `pricing-transparency-check` | `test_hidden_fee_flag.py`  |
+| Fake trust badge | Badge whitelist               | `trust-auth-check`           | `test_invalid_badge.py`    |
 
 Deny-by-default posture is mandatory.
 
 ## Budgets
 
-| Metric | Budget |
-| --- | --- |
-| Mobile runtime | `<300ms` |
-| Page speed evaluation | `<2s` |
-| Memory | `<100MB` |
-| CI overhead | `<5%` |
+| Metric                | Budget   |
+| --------------------- | -------- |
+| Mobile runtime        | `<300ms` |
+| Page speed evaluation | `<2s`    |
+| Memory                | `<100MB` |
+| CI overhead           | `<5%`    |
 
 ## Operational Outputs
 

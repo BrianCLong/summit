@@ -9,6 +9,7 @@
 We're excited to announce the **Evidence ID Consistency Gate v1.3.0** - a deterministic governance verification tool that ensures all `Evidence-IDs` in your governance documents have corresponding entries in the evidence registry.
 
 This gate helps maintain **traceability and completeness** of governance artifacts by validating that:
+
 - All referenced Evidence-IDs exist in the evidence registry
 - Evidence-IDs follow the correct format (`/^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$/`)
 - Governance documents contain properly structured Evidence-IDs headers
@@ -16,18 +17,21 @@ This gate helps maintain **traceability and completeness** of governance artifac
 ## Key Features
 
 ### 🔐 Enterprise Security
+
 - **PII/Secret redaction**: All sensitive content scrubbed before AI processing
 - **Hash-only audit trail**: No content leakage in `ai_ledger.json`
 - **Replay-only protection**: CI environments locked to cached responses by default
 - **Network isolation**: Prevents unexpected calls to AI providers during verification
 
 ### ⚡ Performance & Reliability
+
 - **Fast execution**: <100ms on average for 200+ governance documents
 - **Deterministic output**: Identical results for identical repo state
 - **Parallel processing**: Efficient batch processing with configurable concurrency
 - **Graceful degradation**: Continues to work when AI services unavailable
 
 ### 🤖 AI-Assisted Analysis (Optional)
+
 - **Qwen integration**: Powered by OpenAI-compatible DashScope endpoints
 - **Patch generation**: Creates RFC-compliant unified diffs for common fixes
 - **Orphan detection**: Identifies evidence IDs in registry that aren't used by any document
@@ -38,6 +42,7 @@ This gate helps maintain **traceability and completeness** of governance artifac
 ### For Existing Repositories
 
 1. **Update your package.json** to use the latest version:
+
 ```bash
 # If using npm
 npm install intelgraph-platform@latest
@@ -47,6 +52,7 @@ pnpm add intelgraph-platform@latest
 ```
 
 2. **Verify the installation**:
+
 ```bash
 npm run ci:evidence-id-consistency -- --sha=upgrade-test
 ```
@@ -56,6 +62,7 @@ npm run ci:evidence-id-consistency -- --sha=upgrade-test
 ### For New Repositories
 
 1. **Add the gate to your CI** by including this script execution in your CI workflow:
+
 ```yaml
 name: Governance / Evidence ID Consistency
 on:
@@ -68,30 +75,32 @@ jobs:
   evidence-id-consistency:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run Evidence ID Consistency Check
-      run: npm run ci:evidence-id-consistency -- --sha=${{ github.sha }}
-      
-    - name: Upload Evidence Artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: evidence-id-consistency-${{ github.sha }}
-        path: artifacts/governance/evidence-id-consistency/${{ github.sha }}/
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Evidence ID Consistency Check
+        run: npm run ci:evidence-id-consistency -- --sha=${{ github.sha }}
+
+      - name: Upload Evidence Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-id-consistency-${{ github.sha }}
+          path: artifacts/governance/evidence-id-consistency/${{ github.sha }}/
 ```
 
 ## Configuration
 
 ### Default Behavior (Non-Blocking)
+
 By default, the gate runs without AI features and reports issues without failing your CI:
+
 - **Status**: Informational warnings only
 - **Failures**: Only on parsing errors or severe issues
 - **AI**: Disabled by default
@@ -100,16 +109,19 @@ By default, the gate runs without AI features and reports issues without failing
 ### Opt-In Advanced Features
 
 To enable AI-assisted analysis:
+
 ```bash
 ENABLE_QWEN_ANALYSIS=true npm run ci:evidence-id-consistency
 ```
 
 To enable AI patch generation:
+
 ```bash
 ENABLE_QWEN_PATCHES=true npm run ci:evidence-id-consistency
 ```
 
 To make high-severity patches fail the build:
+
 ```bash
 QWEN_PATCHES_FAIL_ON_HIGH=true npm run ci:evidence-id-consistency
 ```
@@ -117,6 +129,7 @@ QWEN_PATCHES_FAIL_ON_HIGH=true npm run ci:evidence-id-consistency
 ## Operational Guidance
 
 ### Expected Runtime Behavior
+
 - **Normal execution**: ~55ms for typical repositories
 - **With AI analysis**: ~200-500ms depending on document count
 - **Cache behavior**: Subsequent runs in CI use cached responses, ~10ms execution time
@@ -130,16 +143,19 @@ QWEN_PATCHES_FAIL_ON_HIGH=true npm run ci:evidence-id-consistency
 4. **CI Failures**: Check for file size limits (10MB max) or format issues
 
 ### Emergency Procedures
+
 - **Disable AI analysis instantly**: Set `ENABLE_QWEN_ANALYSIS=false`
-- **Disable patch generation instantly**: Set `ENABLE_QWEN_PATCHES=false`  
+- **Disable patch generation instantly**: Set `ENABLE_QWEN_PATCHES=false`
 - **Rollback to previous behavior**: Remove the gate from CI configuration
 
 ## Integration Points
 
 ### Evidence Registry
+
 - **Location**: `evidence/map.yml` (default) or canonical `docs/ga/evidence_map.yml`
 - **Format**: YAML mapping evidence IDs to their artifact locations
 - **Example**:
+
 ```yaml
 governance-docs-integrity:
   path: "artifacts/governance/docs-integrity/${sha}/stamp.json"
@@ -148,6 +164,7 @@ governance-docs-integrity:
 ```
 
 ### Governance Documents
+
 - **Location**: `docs/governance/**/*.md` files
 - **Header format**: `**Evidence-IDs:** id1,id2,id3` (comma-separated list)
 - **Special case**: Use `**Evidence-IDs:** none` for documents that shouldn't have evidence
@@ -169,6 +186,7 @@ artifacts/governance/evidence-id-consistency/<sha>/
 ## Migration Path
 
 ### From Previous Governance Checks
+
 - **Backward compatible**: Existing governance workflows continue unaffected
 - **New artifacts**: Only additional artifact output in new directory structure
 - **Transition period**: Both old and new systems can run in parallel

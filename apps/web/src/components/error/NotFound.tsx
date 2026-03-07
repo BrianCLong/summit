@@ -1,10 +1,10 @@
-import React from 'react';
-import { Button } from '@/components/ui/Button';
-import { AlertTriangle, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react'
+import { Button } from '@/components/ui/Button'
+import { AlertTriangle, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export const NotFound: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <div className="flex h-full min-h-[60vh] flex-col items-center justify-center text-center px-4">
@@ -21,5 +21,5 @@ export const NotFound: React.FC = () => {
         Go Back
       </Button>
     </div>
-  );
-};
+  )
+}

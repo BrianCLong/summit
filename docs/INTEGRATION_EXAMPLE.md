@@ -9,9 +9,9 @@ This guide shows how to integrate the versioning and deprecation middleware into
 **File:** `server/src/app.ts`
 
 ```typescript
-import express from 'express';
-import { apiVersionMiddleware } from './middleware/api-version';
-import { deprecated, sunset } from './middleware/deprecation';
+import express from "express";
+import { apiVersionMiddleware } from "./middleware/api-version";
+import { deprecated, sunset } from "./middleware/deprecation";
 
 const app = express();
 
@@ -20,11 +20,11 @@ app.use(apiVersionMiddleware);
 
 // Example: Deprecated endpoint
 app.get(
-  '/api/maestro/v1/runs',
+  "/api/maestro/v1/runs",
   deprecated({
-    sunsetDate: '2025-12-31T23:59:59Z',
-    successorUrl: '/api/maestro/v2/runs',
-    message: 'Use v2 for paginated results and improved performance.'
+    sunsetDate: "2025-12-31T23:59:59Z",
+    successorUrl: "/api/maestro/v2/runs",
+    message: "Use v2 for paginated results and improved performance.",
   }),
   async (req, res) => {
     // Your v1 handler code
@@ -34,7 +34,7 @@ app.get(
 );
 
 // Example: New v2 endpoint
-app.get('/api/maestro/v2/runs', async (req, res) => {
+app.get("/api/maestro/v2/runs", async (req, res) => {
   const { page = 1, pageSize = 20 } = req.query;
   const result = await fetchRunsV2Paginated({ page, pageSize });
   res.json(result);
@@ -42,10 +42,10 @@ app.get('/api/maestro/v2/runs', async (req, res) => {
 
 // Example: Sunset endpoint (already removed)
 app.all(
-  '/api/old-endpoint',
+  "/api/old-endpoint",
   sunset({
-    successorUrl: '/api/new-endpoint',
-    message: 'This endpoint was removed on 2024-12-31.'
+    successorUrl: "/api/new-endpoint",
+    message: "This endpoint was removed on 2024-12-31.",
   })
 );
 ```
@@ -55,8 +55,8 @@ app.all(
 **File:** `server/src/index.ts` or `server/src/graphql/server.ts`
 
 ```typescript
-import { ApolloServer } from '@apollo/server';
-import { deprecationTrackingPlugin } from './graphql/plugins/deprecation-plugin';
+import { ApolloServer } from "@apollo/server";
+import { deprecationTrackingPlugin } from "./graphql/plugins/deprecation-plugin";
 
 const server = new ApolloServer({
   typeDefs,
@@ -65,10 +65,10 @@ const server = new ApolloServer({
     // Add deprecation tracking plugin
     deprecationTrackingPlugin({
       logUsage: true,
-      trackMetrics: true
+      trackMetrics: true,
     }),
     // Your other plugins...
-  ]
+  ],
 });
 ```
 
@@ -84,9 +84,7 @@ type Run {
   state: RunState!
 
   # V1: Deprecated field
-  status: String @deprecated(
-    reason: "Use 'state' field instead. Sunset: 2025-12-31"
-  )
+  status: String @deprecated(reason: "Use 'state' field instead. Sunset: 2025-12-31")
 
   # ... other fields
 }
@@ -96,9 +94,8 @@ type Query {
   runs(page: Int, pageSize: Int): RunsConnection!
 
   # V1: Deprecated query
-  allRuns: [Run!]! @deprecated(
-    reason: "Use 'runs' query with pagination instead. Sunset: 2025-12-31"
-  )
+  allRuns: [Run!]!
+    @deprecated(reason: "Use 'runs' query with pagination instead. Sunset: 2025-12-31")
 }
 ```
 
@@ -107,14 +104,14 @@ type Query {
 **File:** `client/src/main.tsx` or `client/src/App.tsx`
 
 ```typescript
-import { getApiClient } from './services/api-client-with-deprecation';
+import { getApiClient } from "./services/api-client-with-deprecation";
 
 // Initialize API client
 const apiClient = getApiClient();
 
 // Use in your components
 async function fetchRuns() {
-  const response = await apiClient.fetch('/api/maestro/v2/runs?page=1&pageSize=20');
+  const response = await apiClient.fetch("/api/maestro/v2/runs?page=1&pageSize=20");
   return response;
 }
 ```
@@ -128,15 +125,15 @@ Your codebase already has Router v2 alongside the old router. Here's how to appl
 **File:** `server/src/conductor/router/router-v1.ts` (if exists) or update the old router
 
 ```typescript
-import { deprecated } from '../../middleware/deprecation';
+import { deprecated } from "../../middleware/deprecation";
 
 // Apply deprecation middleware to old router endpoints
 router.post(
-  '/api/conductor/v1/router/route-legacy',
+  "/api/conductor/v1/router/route-legacy",
   deprecated({
-    sunsetDate: '2026-06-30T23:59:59Z',
-    successorUrl: '/api/conductor/v2/router/route',
-    message: 'Router v1 is deprecated. Migrate to v2 for ML-powered adaptive routing.'
+    sunsetDate: "2026-06-30T23:59:59Z",
+    successorUrl: "/api/conductor/v2/router/route",
+    message: "Router v1 is deprecated. Migrate to v2 for ML-powered adaptive routing.",
   }),
   async (req, res) => {
     // Old router logic
@@ -149,6 +146,7 @@ router.post(
 **File:** `server/src/conductor/router/router-v2.ts`
 
 Your v2 router already supports multiple modes:
+
 - `shadow`: Run v2 alongside v1, compare results
 - `canary`: Gradually roll out v2 to percentage of traffic
 - `full`: Fully migrated to v2
@@ -156,7 +154,7 @@ Your v2 router already supports multiple modes:
 ```typescript
 // Configure learning mode in your env or config
 const routerConfig = {
-  learningMode: process.env.ROUTER_LEARNING_MODE || 'shadow', // Start with shadow
+  learningMode: process.env.ROUTER_LEARNING_MODE || "shadow", // Start with shadow
   canaryPercentage: process.env.ROUTER_CANARY_PCT || 10,
   // ... other config
 };
@@ -167,15 +165,18 @@ const routerConfig = {
 Add monitoring to track which clients are still using v1:
 
 ```typescript
-import { logger } from '../../lib/logger';
+import { logger } from "../../lib/logger";
 
 // In your deprecated endpoint handler
-logger.warn({
-  path: req.path,
-  userId: req.user?.id,
-  tenantId: req.tenantId,
-  userAgent: req.headers['user-agent']
-}, 'Router v1 endpoint accessed');
+logger.warn(
+  {
+    path: req.path,
+    userId: req.user?.id,
+    tenantId: req.tenantId,
+    userAgent: req.headers["user-agent"],
+  },
+  "Router v1 endpoint accessed"
+);
 ```
 
 ### Step 4: Communication Plan
@@ -230,7 +231,7 @@ curl -v http://localhost:4000/api/old-endpoint
 query {
   allRuns {
     id
-    status  # Deprecated
+    status # Deprecated
   }
 }
 
@@ -287,12 +288,14 @@ Set up alerts for:
 When deprecating an endpoint, use this checklist:
 
 ### Planning Phase
+
 - [ ] Document breaking changes
 - [ ] Create migration guide with code examples
 - [ ] Set sunset date (minimum 3-6 months out)
 - [ ] Identify affected clients/teams
 
 ### Implementation Phase
+
 - [ ] Add deprecation middleware to old endpoint
 - [ ] Implement new v2 endpoint
 - [ ] Add tests for both endpoints
@@ -300,24 +303,28 @@ When deprecating an endpoint, use this checklist:
 - [ ] Add monitoring for deprecated usage
 
 ### Communication Phase
+
 - [ ] Send deprecation announcement email (use template)
 - [ ] Post in Slack channels
 - [ ] Update API documentation
 - [ ] Set up support channel (#api-migrations)
 
 ### Migration Phase
+
 - [ ] Monitor usage metrics
 - [ ] Send reminders at 3 months, 1 month, 1 week
 - [ ] Offer migration support/office hours
 - [ ] Track migration progress per team
 
 ### Sunset Phase
+
 - [ ] Send final warning 1 week before
 - [ ] Replace endpoint handler with 410 sunset response
 - [ ] Monitor 410 responses
 - [ ] Archive old code (don't delete)
 
 ### Post-Sunset
+
 - [ ] Send completion announcement
 - [ ] Document lessons learned
 - [ ] Update metrics dashboards
@@ -362,7 +369,7 @@ app.get('/endpoint', handler, deprecated({...}));  // ❌ Wrong order
 ```typescript
 // In app.ts, before route mounting
 app.use(apiVersionMiddleware);
-app.use('/api/maestro/v1', maestroV1Routes);
+app.use("/api/maestro/v1", maestroV1Routes);
 ```
 
 ### Issue: GraphQL deprecation warnings not showing
@@ -372,15 +379,16 @@ app.use('/api/maestro/v1', maestroV1Routes);
 ```typescript
 const server = new ApolloServer({
   plugins: [
-    deprecationTrackingPlugin(),  // Add this
+    deprecationTrackingPlugin(), // Add this
     // ... other plugins
-  ]
+  ],
 });
 ```
 
 ### Issue: Sunset endpoint still being called
 
 **Solution:**
+
 1. Check logs to identify which clients are calling it
 2. Send targeted communication to those teams
 3. Consider temporary rate limiting for sunset endpoints

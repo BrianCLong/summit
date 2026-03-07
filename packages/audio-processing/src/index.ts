@@ -6,13 +6,13 @@
  */
 
 // Export all types
-export * from './types.js';
+export * from "./types.js";
 
 // Export all interfaces
-export * from './interfaces.js';
+export * from "./interfaces.js";
 
 // Export all utilities
-export * from './utils.js';
+export * from "./utils.js";
 
 // Re-export commonly used items for convenience
 export type {
@@ -22,8 +22,8 @@ export type {
   AudioStreamConfig,
   AudioQualityMetrics,
   AudioEnhancementOptions,
-  AudioProcessingJob
-} from './types.js';
+  AudioProcessingJob,
+} from "./types.js";
 
 export type {
   IAudioProcessor,
@@ -35,13 +35,7 @@ export type {
   IAudioFeatureExtractor,
   IAudioStorage,
   IAudioJobQueue,
-  AudioFeatures
-} from './interfaces.js';
+  AudioFeatures,
+} from "./interfaces.js";
 
-export {
-  AudioFormat,
-  AudioCodec,
-  SampleRate,
-  ChannelConfig,
-  JobStatus
-} from './types.js';
+export { AudioFormat, AudioCodec, SampleRate, ChannelConfig, JobStatus } from "./types.js";

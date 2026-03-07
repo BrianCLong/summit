@@ -8,20 +8,21 @@ Nobody ever asks "who owns this?" or "what does this service actually do?"—it'
 
 ## Quick Links
 
-| Document | Purpose |
-|----------|---------|
-| [SERVICE_CATALOG_V0.md](./SERVICE_CATALOG_V0.md) | Catalog overview, vision, and roadmap |
-| [SERVICE_CATALOG_DATA_MODEL.md](./SERVICE_CATALOG_DATA_MODEL.md) | Data model schema and entity definitions |
-| [OWNERSHIP_PATTERNS.md](./OWNERSHIP_PATTERNS.md) | Ownership roles, accountability, and transfers |
-| [SERVICE_ENTRY_TEMPLATE.yaml](./SERVICE_ENTRY_TEMPLATE.yaml) | Template for registering new services |
-| [CATALOG_READY_CHECKLIST.md](./CATALOG_READY_CHECKLIST.md) | Checklist for service readiness by tier |
-| [CAPABILITIES_MAP_UX.md](./CAPABILITIES_MAP_UX.md) | UX specifications for the capabilities map |
+| Document                                                         | Purpose                                        |
+| ---------------------------------------------------------------- | ---------------------------------------------- |
+| [SERVICE_CATALOG_V0.md](./SERVICE_CATALOG_V0.md)                 | Catalog overview, vision, and roadmap          |
+| [SERVICE_CATALOG_DATA_MODEL.md](./SERVICE_CATALOG_DATA_MODEL.md) | Data model schema and entity definitions       |
+| [OWNERSHIP_PATTERNS.md](./OWNERSHIP_PATTERNS.md)                 | Ownership roles, accountability, and transfers |
+| [SERVICE_ENTRY_TEMPLATE.yaml](./SERVICE_ENTRY_TEMPLATE.yaml)     | Template for registering new services          |
+| [CATALOG_READY_CHECKLIST.md](./CATALOG_READY_CHECKLIST.md)       | Checklist for service readiness by tier        |
+| [CAPABILITIES_MAP_UX.md](./CAPABILITIES_MAP_UX.md)               | UX specifications for the capabilities map     |
 
 ---
 
 ## Mission
 
 Build the living map of all services, capabilities, and owners in CompanyOS:
+
 - **Who owns what** → Clear ownership with accountability
 - **What it does** → Service descriptions and capabilities
 - **How it behaves** → SLOs, dependencies, and health status
@@ -31,15 +32,15 @@ Build the living map of all services, capabilities, and owners in CompanyOS:
 
 ## Key Questions This Solves
 
-| Question | Answer In |
-|----------|-----------|
-| "Who owns this service?" | Ownership tab (< 30 seconds) |
-| "What does this service do?" | Description + capabilities |
-| "What depends on this?" | Dependency graph |
-| "What's the blast radius?" | Impact visualization |
-| "Is this service healthy?" | SLO status overlay |
+| Question                     | Answer In                    |
+| ---------------------------- | ---------------------------- |
+| "Who owns this service?"     | Ownership tab (< 30 seconds) |
+| "What does this service do?" | Description + capabilities   |
+| "What depends on this?"      | Dependency graph             |
+| "What's the blast radius?"   | Impact visualization         |
+| "Is this service healthy?"   | SLO status overlay           |
 | "How do I contact the team?" | One-click to Slack/PagerDuty |
-| "Where are the runbooks?" | Linked documentation |
+| "Where are the runbooks?"    | Linked documentation         |
 
 ---
 
@@ -73,12 +74,12 @@ Build the living map of all services, capabilities, and owners in CompanyOS:
 
 ## Service Tiers
 
-| Tier | Count | SLO | On-Call | Requirements |
-|------|-------|-----|---------|--------------|
-| **Critical** | 14 | 99.9%+ | Required | All sections |
-| **High** | 32 | 99.5%+ | Required | Sections 1-9 |
-| **Medium** | 108 | 99%+ | Optional | Sections 1-5 |
-| **Low** | 171 | Best-effort | No | Section 1 only |
+| Tier         | Count | SLO         | On-Call  | Requirements   |
+| ------------ | ----- | ----------- | -------- | -------------- |
+| **Critical** | 14    | 99.9%+      | Required | All sections   |
+| **High**     | 32    | 99.5%+      | Required | Sections 1-9   |
+| **Medium**   | 108   | 99%+        | Optional | Sections 1-5   |
+| **Low**      | 171   | Best-effort | No       | Section 1 only |
 
 ---
 
@@ -125,12 +126,12 @@ summit catalog owner graph-core
 
 ## Implementation Roadmap
 
-| Phase | Duration | Goals |
-|-------|----------|-------|
-| **Phase 1: Foundation** | Weeks 1-4 | Deploy backend, import services, basic UI |
-| **Phase 2: Dependencies** | Weeks 5-8 | Map dependencies, capability taxonomy, visualizations |
-| **Phase 3: Health** | Weeks 9-12 | SLO integration, real-time health, owner dashboards |
-| **Phase 4: Governance** | Weeks 13-16 | Audit automation, transfer workflows, compliance |
+| Phase                     | Duration    | Goals                                                 |
+| ------------------------- | ----------- | ----------------------------------------------------- |
+| **Phase 1: Foundation**   | Weeks 1-4   | Deploy backend, import services, basic UI             |
+| **Phase 2: Dependencies** | Weeks 5-8   | Map dependencies, capability taxonomy, visualizations |
+| **Phase 3: Health**       | Weeks 9-12  | SLO integration, real-time health, owner dashboards   |
+| **Phase 4: Governance**   | Weeks 13-16 | Audit automation, transfer workflows, compliance      |
 
 ---
 

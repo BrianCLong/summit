@@ -3,7 +3,12 @@
  * Deepfake detection, manipulation detection, authenticity verification
  */
 
-import { BaseComputerVisionModel, ModelConfig, IImageForensics, BoundingBox } from '@intelgraph/computer-vision';
+import {
+  BaseComputerVisionModel,
+  ModelConfig,
+  IImageForensics,
+  BoundingBox,
+} from "@intelgraph/computer-vision";
 
 export interface ForensicsAnalysisResult {
   is_authentic: boolean;
@@ -15,7 +20,7 @@ export interface ForensicsAnalysisResult {
 }
 
 export interface Manipulation {
-  manipulation_type: 'copy_move' | 'splicing' | 'inpainting' | 'deepfake' | 'resampling';
+  manipulation_type: "copy_move" | "splicing" | "inpainting" | "deepfake" | "resampling";
   bbox?: BoundingBox;
   confidence: number;
   evidence: string[];
@@ -49,8 +54,8 @@ export interface DeepfakeAnalysis {
 export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImageForensics {
   constructor(config?: Partial<ModelConfig>) {
     super({
-      model_name: 'forensics_analyzer',
-      device: config?.device || 'cuda',
+      model_name: "forensics_analyzer",
+      device: config?.device || "cuda",
       batch_size: config?.batch_size || 1,
       confidence_threshold: config?.confidence_threshold || 0.5,
       nms_threshold: config?.nms_threshold || 0.4,
@@ -69,9 +74,12 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     return this.detectManipulation(imagePath, options);
   }
 
-  async detectManipulation(imagePath: string, options?: {
-    methods?: string[];
-  }): Promise<ForensicsAnalysisResult> {
+  async detectManipulation(
+    imagePath: string,
+    options?: {
+      methods?: string[];
+    }
+  ): Promise<ForensicsAnalysisResult> {
     this.ensureInitialized();
     const startTime = Date.now();
 
@@ -81,7 +89,7 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     const copyMove = await this.detectCopyMove(imagePath);
     if (copyMove.detected) {
       manipulations.push({
-        manipulation_type: 'copy_move',
+        manipulation_type: "copy_move",
         bbox: copyMove.bbox,
         confidence: copyMove.confidence,
         evidence: copyMove.evidence,
@@ -99,11 +107,14 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     };
   }
 
-  async detectDeepfake(imagePath: string, options?: {
-    methods?: string[];
-  }): Promise<DeepfakeAnalysis> {
+  async detectDeepfake(
+    imagePath: string,
+    options?: {
+      methods?: string[];
+    }
+  ): Promise<DeepfakeAnalysis> {
     // Multi-method deepfake detection
-    const methods = options?.methods || ['xception', 'efficientnet', 'capsule'];
+    const methods = options?.methods || ["xception", "efficientnet", "capsule"];
 
     const detectionResults = await Promise.all(
       methods.map(async (method) => ({
@@ -112,7 +123,8 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
       }))
     );
 
-    const avgScore = detectionResults.reduce((sum, r) => sum + r.score, 0) / detectionResults.length;
+    const avgScore =
+      detectionResults.reduce((sum, r) => sum + r.score, 0) / detectionResults.length;
 
     return {
       is_deepfake: avgScore > 0.5,
@@ -150,9 +162,12 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     };
   }
 
-  async analyzeMetadata(imagePath: string, options?: {
-    checkConsistency?: boolean;
-  }): Promise<MetadataAnalysis> {
+  async analyzeMetadata(
+    imagePath: string,
+    options?: {
+      checkConsistency?: boolean;
+    }
+  ): Promise<MetadataAnalysis> {
     // Extract and analyze EXIF metadata
     // Check for metadata inconsistencies
     return {
@@ -169,7 +184,7 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
   }> {
     // Identify camera fingerprint (PRNU - Photo Response Non-Uniformity)
     return {
-      fingerprint: '',
+      fingerprint: "",
       confidence: 0,
     };
   }
@@ -189,18 +204,23 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     };
   }
 
-  async reverseImageSearch(imagePath: string): Promise<Array<{
-    url: string;
-    similarity: number;
-    timestamp?: string;
-  }>> {
+  async reverseImageSearch(imagePath: string): Promise<
+    Array<{
+      url: string;
+      similarity: number;
+      timestamp?: string;
+    }>
+  > {
     // Search for similar images online (provenance tracking)
     return [];
   }
 
-  async verifyAuthenticity(imagePath: string, options?: {
-    checkAll?: boolean;
-  }): Promise<{
+  async verifyAuthenticity(
+    imagePath: string,
+    options?: {
+      checkAll?: boolean;
+    }
+  ): Promise<{
     is_authentic: boolean;
     confidence: number;
     checks_passed: string[];
@@ -209,11 +229,11 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
   }> {
     // Comprehensive authenticity verification
     const checks = [
-      'metadata_consistency',
-      'compression_analysis',
-      'noise_pattern',
-      'lighting_consistency',
-      'perspective_consistency',
+      "metadata_consistency",
+      "compression_analysis",
+      "noise_pattern",
+      "lighting_consistency",
+      "perspective_consistency",
     ];
 
     return {
@@ -229,14 +249,14 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     creation_info: any;
     modification_history: any[];
     authenticity_score: number;
-    trust_level: 'high' | 'medium' | 'low' | 'untrusted';
+    trust_level: "high" | "medium" | "low" | "untrusted";
   }> {
     // Generate comprehensive provenance report
     return {
       creation_info: {},
       modification_history: [],
       authenticity_score: 0.8,
-      trust_level: 'high',
+      trust_level: "high",
     };
   }
 

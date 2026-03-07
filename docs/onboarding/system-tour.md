@@ -3,6 +3,7 @@
 This map highlights the directories and artifacts new engineers should know on day one. Start here when you need to trace where a service, pipeline, or control plane lives.
 
 ## Core Application Surfaces
+
 - **IntelGraph API & App**
   - `apps/intelgraph-api/` — API service surfaces specific to IntelGraph.
   - `server/` — Node/Express + GraphQL backend; health checks, auth, and resolver logic.
@@ -14,6 +15,7 @@ This map highlights the directories and artifacts new engineers should know on d
   - `docs/maestro/` and `docs/maestro-conductor/` — Architecture notes and runbooks for conductor flows.
 
 ## Data & Integration Layers
+
 - **Datastores**
   - `server/db/{migrations,seeds}/postgres` — Relational schema and seeds.
   - `server/db/{migrations,seeds}/neo4j` — Graph schema artifacts.
@@ -23,6 +25,7 @@ This map highlights the directories and artifacts new engineers should know on d
   - `scripts/seed/`, `scripts/devkit/` — Demo data and developer fixtures.
 
 ## Operations & CI/CD
+
 - **Pipelines**
   - `.github/workflows/` — GitHub Actions pipelines for CI, release, and quality gates.
   - `pipelines/`, `scripts/ci/`, `scripts/validate*.{js,ts}` — Supplemental CI scripts and policy checks.
@@ -33,6 +36,7 @@ This map highlights the directories and artifacts new engineers should know on d
   - `release/`, `release_playbook/`, `release-please-config.json` — Templates and automation for versioning and change management.
 
 ## Security & Compliance
+
 - **Policies & Audits**
   - `security/`, `policies/`, `privacy/` — Security baselines, access controls, and privacy policies.
   - `AUDIT_COMPLIANCE_IMPLEMENTATION.md`, `CI_CD_AUDIT_REPORT.md` — Evidence packs and compliance reports.
@@ -41,6 +45,7 @@ This map highlights the directories and artifacts new engineers should know on d
   - `.github/CODEOWNERS`, `.gitleaks.toml` (if present) — Ownership and secret scanning rules.
 
 ## Developer Experience
+
 - **Onboarding & Docs**
   - `docs/onboarding/` — Bootcamp guide, system tour (this file), and fast-start guides.
   - `docs/DEVELOPER_ONBOARDING.md`, `docs/GOLDEN_PATH.md` — Additional workflows and golden paths.

@@ -15,22 +15,12 @@
       "prompts/registry.yaml",
       "agents/examples/EVENING_STANDUP_20260207.json"
     ],
-    "domains": [
-      "documentation",
-      "governance",
-      "standup"
-    ]
+    "domains": ["documentation", "governance", "standup"]
   },
-  "allowed_operations": [
-    "create",
-    "edit"
-  ],
+  "allowed_operations": ["create", "edit"],
   "verification_requirements": {
     "tier": "C",
-    "artifacts": [
-      "docs/standups/2026-02-07-evening-standup.md",
-      "docs/roadmap/STATUS.json"
-    ]
+    "artifacts": ["docs/standups/2026-02-07-evening-standup.md", "docs/roadmap/STATUS.json"]
   },
   "debt_budget": {
     "permitted": 0,

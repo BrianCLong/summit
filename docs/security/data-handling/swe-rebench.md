@@ -10,11 +10,11 @@
 
 ## Never log
 
-* repo tokens
-* docker credentials
-* private repo URLs
+- repo tokens
+- docker credentials
+- private repo URLs
 
 ## Retention
 
-* CI artifacts: 14 days
-* benchmark reports: 90 days
+- CI artifacts: 14 days
+- benchmark reports: 90 days

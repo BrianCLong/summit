@@ -24,10 +24,10 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
       - "Dockerfile*"
       - "docker-compose*"

@@ -7,7 +7,7 @@ contracts are implemented in `server/src/services/identity/OidcScimContracts.ts`
 
 **Request**
 
-```json
+````json
 {
   "tenantId": "tenant-123",
   "issuerUrl": "https://login.example.com",
@@ -70,3 +70,4 @@ contracts are implemented in `server/src/services/identity/OidcScimContracts.ts`
 }
 
 ```text
+````

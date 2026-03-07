@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to rollback'
+        description: "Environment to rollback"
         required: true
         type: choice
         options:
           - staging
           - production
       target_tag:
-        description: 'Target Docker tag/SHA to rollback to'
+        description: "Target Docker tag/SHA to rollback to"
         required: true
   repository_dispatch:
     types:

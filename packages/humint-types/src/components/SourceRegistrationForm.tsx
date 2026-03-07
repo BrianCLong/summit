@@ -5,7 +5,7 @@
  * Form component for registering new HUMINT sources.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import type {
   CreateSourceInput,
   SourceType,
@@ -13,13 +13,13 @@ import type {
   RiskLevel,
   ClassificationLevel,
   ContactMethod,
-} from '../types.js';
+} from "../types.js";
 import {
   SOURCE_TYPES,
   CREDIBILITY_RATINGS,
   RISK_LEVELS,
   CLASSIFICATION_LEVELS,
-} from '../constants.js';
+} from "../constants.js";
 
 export interface SourceRegistrationFormProps {
   onSubmit: (data: CreateSourceInput) => Promise<void>;
@@ -43,30 +43,30 @@ interface FormState {
   motivationFactors: string[];
   classification: ClassificationLevel;
   legalBasis: string;
-  compensationType: 'SALARY' | 'STIPEND' | 'PER_REPORT' | 'EXPENSES_ONLY' | 'NONE';
+  compensationType: "SALARY" | "STIPEND" | "PER_REPORT" | "EXPENSES_ONLY" | "NONE";
   compensationAmount: string;
   compensationCurrency: string;
   notes: string;
 }
 
 const initialFormState: FormState = {
-  cryptonym: '',
-  sourceType: 'ASSET',
-  handlerId: '',
-  alternateHandlerId: '',
-  credibilityRating: 'F',
-  riskLevel: 'MODERATE',
+  cryptonym: "",
+  sourceType: "ASSET",
+  handlerId: "",
+  alternateHandlerId: "",
+  credibilityRating: "F",
+  riskLevel: "MODERATE",
   areaOfOperation: [],
   topicalAccess: [],
-  recruitmentDate: new Date().toISOString().split('T')[0],
+  recruitmentDate: new Date().toISOString().split("T")[0],
   languages: [],
   motivationFactors: [],
-  classification: 'SECRET',
-  legalBasis: '',
-  compensationType: 'NONE',
-  compensationAmount: '',
-  compensationCurrency: 'USD',
-  notes: '',
+  classification: "SECRET",
+  legalBasis: "",
+  compensationType: "NONE",
+  compensationAmount: "",
+  compensationCurrency: "USD",
+  notes: "",
 };
 
 export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
@@ -78,24 +78,24 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
 }) => {
   const [form, setForm] = useState<FormState>(initialFormState);
   const [contactMethods, setContactMethods] = useState<Partial<ContactMethod>[]>([
-    { type: 'IN_PERSON', identifier: '', protocol: 'standard', isActive: true },
+    { type: "IN_PERSON", identifier: "", protocol: "standard", isActive: true },
   ]);
-  const [areaInput, setAreaInput] = useState('');
-  const [topicInput, setTopicInput] = useState('');
-  const [languageInput, setLanguageInput] = useState('');
-  const [motivationInput, setMotivationInput] = useState('');
+  const [areaInput, setAreaInput] = useState("");
+  const [topicInput, setTopicInput] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
+  const [motivationInput, setMotivationInput] = useState("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleChange = useCallback(
-    (field: keyof FormState, value: string | string[]) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-      setValidationErrors((prev) => ({ ...prev, [field]: '' }));
-    },
-    [],
-  );
+  const handleChange = useCallback((field: keyof FormState, value: string | string[]) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+  }, []);
 
   const addArrayItem = useCallback(
-    (field: 'areaOfOperation' | 'topicalAccess' | 'languages' | 'motivationFactors', value: string) => {
+    (
+      field: "areaOfOperation" | "topicalAccess" | "languages" | "motivationFactors",
+      value: string
+    ) => {
       if (value.trim()) {
         setForm((prev) => ({
           ...prev,
@@ -103,33 +103,36 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
         }));
       }
     },
-    [],
+    []
   );
 
   const removeArrayItem = useCallback(
-    (field: 'areaOfOperation' | 'topicalAccess' | 'languages' | 'motivationFactors', index: number) => {
+    (
+      field: "areaOfOperation" | "topicalAccess" | "languages" | "motivationFactors",
+      index: number
+    ) => {
       setForm((prev) => ({
         ...prev,
         [field]: prev[field].filter((_, i) => i !== index),
       }));
     },
-    [],
+    []
   );
 
   const addContactMethod = useCallback(() => {
     setContactMethods((prev) => [
       ...prev,
-      { type: 'IN_PERSON', identifier: '', protocol: 'standard', isActive: true },
+      { type: "IN_PERSON", identifier: "", protocol: "standard", isActive: true },
     ]);
   }, []);
 
   const updateContactMethod = useCallback(
     (index: number, field: keyof ContactMethod, value: unknown) => {
       setContactMethods((prev) =>
-        prev.map((cm, i) => (i === index ? { ...cm, [field]: value } : cm)),
+        prev.map((cm, i) => (i === index ? { ...cm, [field]: value } : cm))
       );
     },
-    [],
+    []
   );
 
   const removeContactMethod = useCallback((index: number) => {
@@ -140,22 +143,22 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
     const errors: Record<string, string> = {};
 
     if (!form.cryptonym || form.cryptonym.length < 3) {
-      errors.cryptonym = 'Cryptonym must be at least 3 characters';
+      errors.cryptonym = "Cryptonym must be at least 3 characters";
     }
     if (!/^[A-Z][A-Z0-9_-]*$/.test(form.cryptonym)) {
-      errors.cryptonym = 'Cryptonym must start with letter and be uppercase';
+      errors.cryptonym = "Cryptonym must start with letter and be uppercase";
     }
     if (!form.handlerId) {
-      errors.handlerId = 'Handler is required';
+      errors.handlerId = "Handler is required";
     }
     if (form.areaOfOperation.length === 0) {
-      errors.areaOfOperation = 'At least one area of operation required';
+      errors.areaOfOperation = "At least one area of operation required";
     }
     if (contactMethods.length === 0 || !contactMethods[0].identifier) {
-      errors.contactMethods = 'At least one contact method required';
+      errors.contactMethods = "At least one contact method required";
     }
     if (!form.legalBasis) {
-      errors.legalBasis = 'Legal basis is required';
+      errors.legalBasis = "Legal basis is required";
     }
 
     setValidationErrors(errors);
@@ -181,9 +184,9 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
         motivationFactors: form.motivationFactors,
         contactMethods: contactMethods.map((cm, i) => ({
           id: `temp-${i}`,
-          type: cm.type as ContactMethod['type'],
-          identifier: cm.identifier || '',
-          protocol: cm.protocol || 'standard',
+          type: cm.type as ContactMethod["type"],
+          identifier: cm.identifier || "",
+          protocol: cm.protocol || "standard",
           isActive: cm.isActive ?? true,
         })),
         compensation: {
@@ -205,7 +208,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
 
       await onSubmit(data);
     },
-    [form, contactMethods, validate, onSubmit],
+    [form, contactMethods, validate, onSubmit]
   );
 
   return (
@@ -230,9 +233,9 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               id="cryptonym"
               type="text"
               value={form.cryptonym}
-              onChange={(e) => handleChange('cryptonym', e.target.value.toUpperCase())}
+              onChange={(e) => handleChange("cryptonym", e.target.value.toUpperCase())}
               placeholder="e.g., FALCON-7"
-              className={validationErrors.cryptonym ? 'error' : ''}
+              className={validationErrors.cryptonym ? "error" : ""}
             />
             {validationErrors.cryptonym && (
               <span className="field-error">{validationErrors.cryptonym}</span>
@@ -244,11 +247,11 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="sourceType"
               value={form.sourceType}
-              onChange={(e) => handleChange('sourceType', e.target.value)}
+              onChange={(e) => handleChange("sourceType", e.target.value)}
             >
               {Object.entries(SOURCE_TYPES).map(([key, value]) => (
                 <option key={key} value={value}>
-                  {key.replace(/_/g, ' ')}
+                  {key.replace(/_/g, " ")}
                 </option>
               ))}
             </select>
@@ -261,8 +264,8 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="handlerId"
               value={form.handlerId}
-              onChange={(e) => handleChange('handlerId', e.target.value)}
-              className={validationErrors.handlerId ? 'error' : ''}
+              onChange={(e) => handleChange("handlerId", e.target.value)}
+              className={validationErrors.handlerId ? "error" : ""}
             >
               <option value="">Select handler...</option>
               {handlers.map((h) => (
@@ -281,7 +284,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="alternateHandlerId"
               value={form.alternateHandlerId}
-              onChange={(e) => handleChange('alternateHandlerId', e.target.value)}
+              onChange={(e) => handleChange("alternateHandlerId", e.target.value)}
             >
               <option value="">Select alternate...</option>
               {handlers
@@ -301,7 +304,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             id="recruitmentDate"
             type="date"
             value={form.recruitmentDate}
-            onChange={(e) => handleChange('recruitmentDate', e.target.value)}
+            onChange={(e) => handleChange("recruitmentDate", e.target.value)}
           />
         </div>
       </fieldset>
@@ -316,7 +319,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="credibilityRating"
               value={form.credibilityRating}
-              onChange={(e) => handleChange('credibilityRating', e.target.value)}
+              onChange={(e) => handleChange("credibilityRating", e.target.value)}
             >
               {Object.entries(CREDIBILITY_RATINGS).map(([key, value]) => (
                 <option key={key} value={key}>
@@ -331,7 +334,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="riskLevel"
               value={form.riskLevel}
-              onChange={(e) => handleChange('riskLevel', e.target.value)}
+              onChange={(e) => handleChange("riskLevel", e.target.value)}
             >
               {Object.entries(RISK_LEVELS).map(([key, value]) => (
                 <option key={key} value={key}>
@@ -355,10 +358,10 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               value={areaInput}
               onChange={(e) => setAreaInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
-                  addArrayItem('areaOfOperation', areaInput);
-                  setAreaInput('');
+                  addArrayItem("areaOfOperation", areaInput);
+                  setAreaInput("");
                 }
               }}
               placeholder="Add area and press Enter"
@@ -367,7 +370,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               {form.areaOfOperation.map((area, i) => (
                 <span key={i} className="tag">
                   {area}
-                  <button type="button" onClick={() => removeArrayItem('areaOfOperation', i)}>
+                  <button type="button" onClick={() => removeArrayItem("areaOfOperation", i)}>
                     ×
                   </button>
                 </span>
@@ -387,10 +390,10 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               value={topicInput}
               onChange={(e) => setTopicInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
-                  addArrayItem('topicalAccess', topicInput);
-                  setTopicInput('');
+                  addArrayItem("topicalAccess", topicInput);
+                  setTopicInput("");
                 }
               }}
               placeholder="Add topic and press Enter"
@@ -399,7 +402,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               {form.topicalAccess.map((topic, i) => (
                 <span key={i} className="tag">
                   {topic}
-                  <button type="button" onClick={() => removeArrayItem('topicalAccess', i)}>
+                  <button type="button" onClick={() => removeArrayItem("topicalAccess", i)}>
                     ×
                   </button>
                 </span>
@@ -416,10 +419,10 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               value={languageInput}
               onChange={(e) => setLanguageInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
-                  addArrayItem('languages', languageInput);
-                  setLanguageInput('');
+                  addArrayItem("languages", languageInput);
+                  setLanguageInput("");
                 }
               }}
               placeholder="Add language and press Enter"
@@ -428,7 +431,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               {form.languages.map((lang, i) => (
                 <span key={i} className="tag">
                   {lang}
-                  <button type="button" onClick={() => removeArrayItem('languages', i)}>
+                  <button type="button" onClick={() => removeArrayItem("languages", i)}>
                     ×
                   </button>
                 </span>
@@ -446,7 +449,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
           <div key={index} className="contact-method-row">
             <select
               value={cm.type}
-              onChange={(e) => updateContactMethod(index, 'type', e.target.value)}
+              onChange={(e) => updateContactMethod(index, "type", e.target.value)}
             >
               <option value="IN_PERSON">In Person</option>
               <option value="SECURE_PHONE">Secure Phone</option>
@@ -458,14 +461,14 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             </select>
             <input
               type="text"
-              value={cm.identifier || ''}
-              onChange={(e) => updateContactMethod(index, 'identifier', e.target.value)}
+              value={cm.identifier || ""}
+              onChange={(e) => updateContactMethod(index, "identifier", e.target.value)}
               placeholder="Identifier/Details"
             />
             <input
               type="text"
-              value={cm.protocol || ''}
-              onChange={(e) => updateContactMethod(index, 'protocol', e.target.value)}
+              value={cm.protocol || ""}
+              onChange={(e) => updateContactMethod(index, "protocol", e.target.value)}
               placeholder="Protocol"
             />
             {contactMethods.length > 1 && (
@@ -499,10 +502,10 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               value={motivationInput}
               onChange={(e) => setMotivationInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
-                  addArrayItem('motivationFactors', motivationInput);
-                  setMotivationInput('');
+                  addArrayItem("motivationFactors", motivationInput);
+                  setMotivationInput("");
                 }
               }}
               placeholder="Add motivation and press Enter"
@@ -511,7 +514,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
               {form.motivationFactors.map((factor, i) => (
                 <span key={i} className="tag">
                   {factor}
-                  <button type="button" onClick={() => removeArrayItem('motivationFactors', i)}>
+                  <button type="button" onClick={() => removeArrayItem("motivationFactors", i)}>
                     ×
                   </button>
                 </span>
@@ -526,7 +529,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="compensationType"
               value={form.compensationType}
-              onChange={(e) => handleChange('compensationType', e.target.value)}
+              onChange={(e) => handleChange("compensationType", e.target.value)}
             >
               <option value="NONE">None</option>
               <option value="SALARY">Salary</option>
@@ -536,7 +539,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             </select>
           </div>
 
-          {form.compensationType !== 'NONE' && (
+          {form.compensationType !== "NONE" && (
             <>
               <div className="form-field">
                 <label htmlFor="compensationAmount">Amount</label>
@@ -544,7 +547,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
                   id="compensationAmount"
                   type="number"
                   value={form.compensationAmount}
-                  onChange={(e) => handleChange('compensationAmount', e.target.value)}
+                  onChange={(e) => handleChange("compensationAmount", e.target.value)}
                 />
               </div>
               <div className="form-field">
@@ -552,7 +555,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
                 <select
                   id="compensationCurrency"
                   value={form.compensationCurrency}
-                  onChange={(e) => handleChange('compensationCurrency', e.target.value)}
+                  onChange={(e) => handleChange("compensationCurrency", e.target.value)}
                 >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
@@ -574,11 +577,11 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             <select
               id="classification"
               value={form.classification}
-              onChange={(e) => handleChange('classification', e.target.value)}
+              onChange={(e) => handleChange("classification", e.target.value)}
             >
               {Object.entries(CLASSIFICATION_LEVELS).map(([key, value]) => (
                 <option key={key} value={value}>
-                  {key.replace(/_/g, ' ')}
+                  {key.replace(/_/g, " ")}
                 </option>
               ))}
             </select>
@@ -591,9 +594,9 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
             id="legalBasis"
             type="text"
             value={form.legalBasis}
-            onChange={(e) => handleChange('legalBasis', e.target.value)}
+            onChange={(e) => handleChange("legalBasis", e.target.value)}
             placeholder="e.g., EO 12333, FISA, etc."
-            className={validationErrors.legalBasis ? 'error' : ''}
+            className={validationErrors.legalBasis ? "error" : ""}
           />
           {validationErrors.legalBasis && (
             <span className="field-error">{validationErrors.legalBasis}</span>
@@ -607,7 +610,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
         <div className="form-field">
           <textarea
             value={form.notes}
-            onChange={(e) => handleChange('notes', e.target.value)}
+            onChange={(e) => handleChange("notes", e.target.value)}
             rows={4}
             placeholder="Any additional information about the source..."
           />
@@ -620,7 +623,7 @@ export const SourceRegistrationForm: React.FC<SourceRegistrationFormProps> = ({
           Cancel
         </button>
         <button type="submit" className="btn-primary" disabled={isLoading}>
-          {isLoading ? 'Registering...' : 'Register Source'}
+          {isLoading ? "Registering..." : "Register Source"}
         </button>
       </div>
     </form>

@@ -12,7 +12,7 @@ This runbook documents the `ig backup` workflow that ships with the monorepo. Th
 
 ### Create an encrypted backup
 
-```bash
+````bash
 IG_BACKUP_PASSPHRASE="$(cat /secure/path/passphrase)" \
 node tools/ig-backup/index.js backup create \
   --db /tmp/ig-db.json \
@@ -62,3 +62,4 @@ node --test tools/ig-backup/index.test.js
 - **Counts match:** restored `cases` and `objects` totals equal the backup (or the subset when `--case` is used).
 - **Hashes match:** the reported `checksum` equals `expectedChecksum` for full restores; per-case hashes and reference hashes are preserved during partial restores.
 - **Secrets remain hidden:** passphrases are read from files or environment variables and never printed to stdout.
+````

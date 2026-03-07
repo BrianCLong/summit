@@ -10,13 +10,13 @@
 
 ## Quick Reference
 
-| Symptom | Severity | Action | Page |
-|---------|----------|--------|------|
-| Queue depth >200 | 🚨 CRITICAL | [Queue Saturation](#queue-saturation) | Below |
+| Symptom               | Severity    | Action                                | Page  |
+| --------------------- | ----------- | ------------------------------------- | ----- |
+| Queue depth >200      | 🚨 CRITICAL | [Queue Saturation](#queue-saturation) | Below |
 | All workflows failing | 🚨 CRITICAL | [Workflow Failure](#workflow-failure) | Below |
-| Slow PR merge times | ⚠️ WARNING | [Capacity Issues](#capacity-issues) | Below |
-| New workflow added | ℹ️ INFO | [Budget Check](#workflow-budget) | Below |
-| Old PR won't merge | ℹ️ INFO | [Migration Guide](#old-pr-migration) | Below |
+| Slow PR merge times   | ⚠️ WARNING  | [Capacity Issues](#capacity-issues)   | Below |
+| New workflow added    | ℹ️ INFO     | [Budget Check](#workflow-budget)      | Below |
+| Old PR won't merge    | ℹ️ INFO     | [Migration Guide](#old-pr-migration)  | Below |
 
 ---
 
@@ -31,6 +31,7 @@
 ## Incident Response: Queue Saturation
 
 ### Symptoms
+
 - Queue depth >200 queued workflows
 - PRs stuck "Waiting to run"
 - Merge train stalled
@@ -51,12 +52,12 @@ bash scripts/ci/monitor-runner-capacity.sh
 
 ### Thresholds
 
-| Queue Depth | Severity | Status |
-|-------------|----------|--------|
-| 0-99 | ✅ HEALTHY | Normal operations |
-| 100-199 | ⚠️ ELEVATED | Monitor closely |
-| 200-299 | 🚨 CRITICAL | Immediate action |
-| 300+ | ❌ GRIDLOCK | Emergency response |
+| Queue Depth | Severity    | Status             |
+| ----------- | ----------- | ------------------ |
+| 0-99        | ✅ HEALTHY  | Normal operations  |
+| 100-199     | ⚠️ ELEVATED | Monitor closely    |
+| 200-299     | 🚨 CRITICAL | Immediate action   |
+| 300+        | ❌ GRIDLOCK | Emergency response |
 
 ### Response: ELEVATED (100-199)
 
@@ -74,16 +75,19 @@ watch -n 300 'bash scripts/ci/monitor-runner-capacity.sh'
 **Immediate Actions**:
 
 1. **Enable MERGE_SURGE mode** (if not already)
+
    ```bash
    gh variable set MERGE_SURGE --body "true" --repo BrianCLong/summit
    ```
 
 2. **Cancel archived workflow runs**
+
    ```bash
    bash scripts/ci/cancel-archived-workflow-runs.sh
    ```
 
 3. **Verify queue reduction**
+
    ```bash
    bash scripts/ci/monitor-runner-capacity.sh
    ```
@@ -101,11 +105,13 @@ watch -n 300 'bash scripts/ci/monitor-runner-capacity.sh'
 **EMERGENCY - All hands required**
 
 1. **Enable MERGE_SURGE mode**
+
    ```bash
    gh variable set MERGE_SURGE --body "true" --repo BrianCLong/summit
    ```
 
 2. **Emergency: Cancel ALL queued runs**
+
    ```bash
    bash scripts/ci/cancel-queued-runs.sh
    ```
@@ -115,6 +121,7 @@ watch -n 300 'bash scripts/ci/monitor-runner-capacity.sh'
    - Pin message
 
 4. **Run saturation policy**
+
    ```bash
    bash scripts/ci/runner-saturation-policy.sh
    ```
@@ -137,12 +144,14 @@ watch -n 300 'bash scripts/ci/monitor-runner-capacity.sh'
 **Required Actions**:
 
 1. **Verify system stable**
+
    ```bash
    bash scripts/ci/monitor-runner-capacity.sh
    # Should show: HEALTHY or ELEVATED
    ```
 
 2. **Review queue composition**
+
    ```bash
    gh run list --status queued --limit 50 --json workflowName,headBranch
    ```
@@ -164,6 +173,7 @@ watch -n 300 'bash scripts/ci/monitor-runner-capacity.sh'
 ## Incident Response: Workflow Failure
 
 ### Symptoms
+
 - All PRs show "gate" check failing
 - Workflows fail immediately
 - Error: "workflow file not found"
@@ -189,6 +199,7 @@ gh run list --limit 10
 **Symptoms**: "workflow file not found" error
 
 **Solution**:
+
 ```bash
 # Restore from git history
 git checkout origin/main -- .github/workflows/pr-gate.yml
@@ -204,6 +215,7 @@ git push origin main
 **Symptoms**: "Invalid workflow file" error
 
 **Solution**:
+
 ```bash
 # Validate workflow syntax
 node scripts/ci/workflow-budget-sentinel.mjs
@@ -217,6 +229,7 @@ gh workflow view pr-gate
 **Symptoms**: PRs blocked even though checks pass
 
 **Solution**:
+
 ```bash
 # Check required checks
 gh api repos/BrianCLong/summit/branches/main/protection --jq '.required_status_checks.contexts'
@@ -230,6 +243,7 @@ gh api repos/BrianCLong/summit/branches/main/protection --jq '.required_status_c
 **Symptoms**: Workflows queue but never start
 
 **Solution**:
+
 - Check GitHub Actions usage: Settings → Billing → Actions
 - If quota exceeded: Contact finance or pause non-critical workflows
 
@@ -238,6 +252,7 @@ gh api repos/BrianCLong/summit/branches/main/protection --jq '.required_status_c
 ## Incident Response: Capacity Issues
 
 ### Symptoms
+
 - PRs take >30 minutes to merge
 - Workflows queue for extended periods
 - Developer complaints about slow CI
@@ -310,6 +325,7 @@ If >12 active workflows, consolidate related workflows:
 **Before adding**:
 
 1. **Check budget**
+
    ```bash
    node scripts/ci/workflow-budget-sentinel.mjs
    ```
@@ -320,6 +336,7 @@ If >12 active workflows, consolidate related workflows:
    - Can it use path filtering?
 
 3. **Add path filtering** (required)
+
    ```yaml
    on:
      pull_request:
@@ -342,6 +359,7 @@ If >12 active workflows, consolidate related workflows:
    - Use workflow matrices
 
 2. **Archive unused workflows**
+
    ```bash
    mv .github/workflows/unused.yml .github/workflows/.archive/
    ```
@@ -360,6 +378,7 @@ If >12 active workflows, consolidate related workflows:
 Old PRs (created before consolidation) trigger archived workflows that fail.
 
 ### Symptoms
+
 - PR shows 50+ failing checks
 - Check names like "CI Core (Primary Gate)" show "workflow not found"
 - Required check "gate" missing
@@ -409,16 +428,19 @@ done
 ### Manual Monitoring
 
 **Every 5 minutes during incident**:
+
 ```bash
 bash scripts/ci/monitor-runner-capacity.sh
 ```
 
 **Queue depth**:
+
 ```bash
 gh run list --status queued --limit 500 --json databaseId | jq 'length'
 ```
 
 **Top queued workflows**:
+
 ```bash
 gh run list --status queued --limit 100 --json workflowName | \
   jq -r '.[] | .workflowName' | sort | uniq -c | sort -rn | head -10
@@ -440,12 +462,12 @@ crontab -e
 
 ### Alert Thresholds
 
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| Queue depth | >100 | >200 |
-| Queue age | >30 min | >60 min |
-| Failed runs | >10% | >25% |
-| Runner utilization | <50% | <25% |
+| Metric             | Warning | Critical |
+| ------------------ | ------- | -------- |
+| Queue depth        | >100    | >200     |
+| Queue age          | >30 min | >60 min  |
+| Failed runs        | >10%    | >25%     |
+| Runner utilization | <50%    | <25%     |
 
 ---
 
@@ -456,11 +478,13 @@ crontab -e
 **If new system causes issues**:
 
 1. **Restore archived workflows**
+
    ```bash
    mv .github/workflows/.archive/*.yml .github/workflows/
    ```
 
 2. **Update branch protection**
+
    ```bash
    # Restore old required checks
    gh api -X PUT repos/BrianCLong/summit/branches/main/protection \
@@ -468,6 +492,7 @@ crontab -e
    ```
 
 3. **Remove path filtering**
+
    ```bash
    # Edit each workflow, remove paths: sections
    # Or restore from git history before consolidation
@@ -516,12 +541,12 @@ Brief description of what happened.
 
 ## Timeline
 
-| Time | Event |
-|------|-------|
-| HH:MM | Incident detected |
+| Time  | Event              |
+| ----- | ------------------ |
+| HH:MM | Incident detected  |
 | HH:MM | Response initiated |
 | HH:MM | Mitigation applied |
-| HH:MM | Incident resolved |
+| HH:MM | Incident resolved  |
 
 ## Impact
 
@@ -576,11 +601,13 @@ bash scripts/ci/monitor-runner-capacity.sh
 **Every Monday**:
 
 1. Check workflow budget:
+
    ```bash
    node scripts/ci/workflow-budget-sentinel.mjs
    ```
 
 2. Review queue metrics:
+
    ```bash
    # Average queue depth last week
    # Peak queue depth last week

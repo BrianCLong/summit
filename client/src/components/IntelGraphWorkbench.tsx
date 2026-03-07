@@ -1,20 +1,14 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { motion } from 'framer-motion';
-import ForceGraph2D from 'react-force-graph-2d';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import ForceGraph2D from "react-force-graph-2d";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import {
   Download,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,22 +34,22 @@ import {
   Share2,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Globe2,
-} from 'lucide-react';
+} from "lucide-react";
 
 // Geospatial & DAG layout libs
-import DeckGL from '@deck.gl/react';
-import { ArcLayer, ScatterplotLayer } from '@deck.gl/layers';
+import DeckGL from "@deck.gl/react";
+import { ArcLayer, ScatterplotLayer } from "@deck.gl/layers";
 // @ts-ignore
-import Map, { NavigationControl } from 'react-map-gl';
+import Map, { NavigationControl } from "react-map-gl";
 // @ts-ignore
-import maplibregl from 'maplibre-gl';
+import maplibregl from "maplibre-gl";
 import {
   FormControl as MuiFormControl,
   InputLabel as MuiInputLabel,
   MenuItem as MuiMenuItem,
   Select as MuiSelect,
-} from '@mui/material';
-import { getGraphqlHttpUrl } from '../config/urls';
+} from "@mui/material";
+import { getGraphqlHttpUrl } from "../config/urls";
 
 // ---- Types ----
 type GraphNode = {
@@ -86,39 +80,37 @@ type GraphLink = {
 };
 
 type GraphData = { nodes: GraphNode[]; links: GraphLink[] };
-type LayoutOption = 'force' | 'dagre' | 'radial';
+type LayoutOption = "force" | "dagre" | "radial";
 
 // ---- Utilities ----
 const palette = [
-  '#2563eb',
-  '#059669',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#14b8a6',
-  '#eab308',
-  '#f97316',
-  '#22c55e',
-  '#06b6d4',
+  "#2563eb",
+  "#059669",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#14b8a6",
+  "#eab308",
+  "#f97316",
+  "#22c55e",
+  "#06b6d4",
 ];
-const groupBy = <T, K extends string | number>(
-  arr: T[],
-  key: (item: T) => K,
-): Record<K, T[]> =>
-  arr.reduce((acc, item) => {
-    const groupKey = key(item);
-    (acc[groupKey] ||= []).push(item);
-    return acc;
-  }, {} as Record<K, T[]>);
+const groupBy = <T, K extends string | number>(arr: T[], key: (item: T) => K): Record<K, T[]> =>
+  arr.reduce(
+    (acc, item) => {
+      const groupKey = key(item);
+      (acc[groupKey] ||= []).push(item);
+      return acc;
+    },
+    {} as Record<K, T[]>
+  );
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const by = <T,>(arr: T[], key: (t: T) => string | number) =>
-  groupBy(arr, key);
+const by = <T,>(arr: T[], key: (t: T) => string | number) => groupBy(arr, key);
 
 function louvainLikeCommunities(data: GraphData): Record<string, string> {
   const parent: Record<string, string> = {};
-  const find = (x: string): string =>
-    parent[x] ? (parent[x] = find(parent[x])) : (parent[x] = x);
+  const find = (x: string): string => (parent[x] ? (parent[x] = find(parent[x])) : (parent[x] = x));
   const union = (a: string, b: string) => {
     a = find(a);
     b = find(b);
@@ -129,8 +121,8 @@ function louvainLikeCommunities(data: GraphData): Record<string, string> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       String((e.source as any).id ?? e.source),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      String((e.target as any).id ?? e.target),
-    ),
+      String((e.target as any).id ?? e.target)
+    )
   );
   const res: Record<string, string> = {};
   data.nodes.forEach((n) => (res[n.id] = find(n.id)));
@@ -142,10 +134,8 @@ function computeDegrees(data: GraphData): Record<string, number> {
   const deg: Record<string, number> = {};
   data.nodes.forEach((node) => (deg[node.id] = 0));
   data.links.forEach((link) => {
-    const sourceId =
-      typeof link.source === 'object' ? link.source.id : link.source;
-    const targetId =
-      typeof link.target === 'object' ? link.target.id : link.target;
+    const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+    const targetId = typeof link.target === "object" ? link.target.id : link.target;
     if (deg[sourceId] !== undefined) deg[sourceId]++;
     if (deg[targetId] !== undefined) deg[targetId]++;
   });
@@ -156,89 +146,89 @@ function computeDegrees(data: GraphData): Record<string, number> {
 const mock: GraphData = {
   nodes: [
     {
-      id: 'node1',
-      label: 'Entity A',
-      type: 'Person',
+      id: "node1",
+      label: "Entity A",
+      type: "Person",
       degree: 2,
       ts: 1678886400000,
-      group: 'g1',
+      group: "g1",
       lat: 34.0522,
       lon: -118.2437,
     },
     {
-      id: 'node2',
-      label: 'Entity B',
-      type: 'Organization',
+      id: "node2",
+      label: "Entity B",
+      type: "Organization",
       degree: 3,
       ts: 1678972800000,
-      group: 'g1',
+      group: "g1",
       lat: 34.0522,
       lon: -118.2437,
     },
     {
-      id: 'node3',
-      label: 'Entity C',
-      type: 'Location',
+      id: "node3",
+      label: "Entity C",
+      type: "Location",
       degree: 1,
       ts: 1679059200000,
-      group: 'g2',
+      group: "g2",
       lat: 34.0522,
       lon: -118.2437,
     },
     {
-      id: 'node4',
-      label: 'Entity D',
-      type: 'Event',
+      id: "node4",
+      label: "Entity D",
+      type: "Event",
       degree: 2,
       ts: 1679145600000,
-      group: 'g1',
+      group: "g1",
       lat: 34.0522,
       lon: -118.2437,
     },
     {
-      id: 'node5',
-      label: 'Entity E',
-      type: 'Person',
+      id: "node5",
+      label: "Entity E",
+      type: "Person",
       degree: 1,
       ts: 1679232000000,
-      group: 'g2',
+      group: "g2",
       lat: 34.0522,
       lon: -118.2437,
     },
   ],
   links: [
     {
-      source: 'node1',
-      target: 'node2',
-      type: 'knows',
+      source: "node1",
+      target: "node2",
+      type: "knows",
       weight: 0.8,
       ts: 1678886400000,
     },
     {
-      source: 'node2',
-      target: 'node3',
-      type: 'located_at',
+      source: "node2",
+      target: "node3",
+      type: "located_at",
       weight: 0.5,
       ts: 1678972800000,
     },
     {
-      source: 'node1',
-      target: 'node4',
-      type: 'attended',
+      source: "node1",
+      target: "node4",
+      type: "attended",
       weight: 0.9,
       ts: 1679059200000,
     },
     {
-      source: 'node4',
-      target: 'node2',
-      type: 'involved_in',
+      source: "node4",
+      target: "node2",
+      type: "involved_in",
       weight: 0.7,
       ts: 1679145600000,
     },
     {
-      source: 'node3',
-      target: 'node5',
-      type: 'related_to',
+      source: "node3",
+      target: "node5",
+      type: "related_to",
       weight: 0.6,
       ts: 1679232000000,
     },
@@ -255,13 +245,13 @@ export function IntelGraphWorkbench() {
   });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedLink, setSelectedLink] = useState<GraphLink | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [minDegree, setMinDegree] = useState<number>(0);
   const [maxDegree, setMaxDegree] = useState<number>(100);
   const [minTimestamp, setMinTimestamp] = useState<number>(0);
   const [maxTimestamp, setMaxTimestamp] = useState<number>(Date.now());
   const [showMap, setShowMap] = useState<boolean>(false);
-  const [layoutType, setLayoutType] = useState<LayoutOption>('force');
+  const [layoutType, setLayoutType] = useState<LayoutOption>("force");
   const [isMockMode, setIsMockMode] = useState<boolean>(true); // Default to mock mode for initial development
   // --- NEW: Loading and Error states for GraphQL fetching ---
   const [loading, setLoading] = useState<boolean>(false);
@@ -305,9 +295,9 @@ export function IntelGraphWorkbench() {
     setError(null);
     try {
       const response = await fetch(getGraphqlHttpUrl(), {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ query: GRAPHQL_QUERY }),
       });
@@ -321,7 +311,7 @@ export function IntelGraphWorkbench() {
       if (result.errors) {
         throw new Error(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result.errors.map((err: any) => err.message).join(', '),
+          result.errors.map((err: any) => err.message).join(", ")
         );
       }
 
@@ -334,8 +324,8 @@ export function IntelGraphWorkbench() {
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      console.error('Error fetching graph data:', e);
-      setError(e.message || 'Failed to fetch graph data.');
+      console.error("Error fetching graph data:", e);
+      setError(e.message || "Failed to fetch graph data.");
       setGraphData({ nodes: [], links: [] }); // Clear graph on error
     } finally {
       setLoading(false);
@@ -365,12 +355,9 @@ export function IntelGraphWorkbench() {
     setSelectedNode(null); // Clear node selection
   }, []);
 
-  const handleSearch = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(event.target.value);
-    },
-    [],
-  );
+  const handleSearch = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  }, []);
 
   const handleDegreeChange = useCallback((value: number[]) => {
     setMinDegree(value[0]);
@@ -385,14 +372,14 @@ export function IntelGraphWorkbench() {
   const applyLayout = useCallback((layout: LayoutOption) => {
     setGraphData((prev) => {
       const count = prev.nodes.length || 1;
-      if (layout === 'force') {
+      if (layout === "force") {
         return {
           ...prev,
           nodes: prev.nodes.map((node) => ({ ...node, fx: undefined, fy: undefined })),
         };
       }
 
-      if (layout === 'radial') {
+      if (layout === "radial") {
         const radius = 200;
         return {
           ...prev,
@@ -423,7 +410,7 @@ export function IntelGraphWorkbench() {
       };
     });
 
-    if (layout === 'force' && fgRef.current) {
+    if (layout === "force" && fgRef.current) {
       fgRef.current.d3ReheatSimulation();
     }
   }, []);
@@ -438,7 +425,7 @@ export function IntelGraphWorkbench() {
       setLayoutType(value);
       applyLayout(value);
     },
-    [applyLayout],
+    [applyLayout]
   );
 
   const handleToggleMap = useCallback(() => {
@@ -449,13 +436,11 @@ export function IntelGraphWorkbench() {
     if (!showMap) setHoverInfo(null);
   }, [showMap]);
 
-  const formatLinkEndpoint = (
-    endpoint: GraphLink['source'] | GraphLink['target'],
-  ) => {
-    if (!endpoint) return 'Unknown';
-    if (typeof endpoint === 'string') return endpoint;
+  const formatLinkEndpoint = (endpoint: GraphLink["source"] | GraphLink["target"]) => {
+    if (!endpoint) return "Unknown";
+    if (typeof endpoint === "string") return endpoint;
     const node = endpoint as GraphNode;
-    return node.label ?? node.id ?? 'Unknown';
+    return node.label ?? node.id ?? "Unknown";
   };
 
   // --- MODIFIED: handleRefresh to re-fetch data if not in mock mode ---
@@ -469,7 +454,7 @@ export function IntelGraphWorkbench() {
 
   const handleDownloadPNG = useCallback(() => {
     if (fgRef.current) {
-      fgRef.current.exportImage('image/png', 'intelgraph-workbench.png');
+      fgRef.current.exportImage("image/png", "intelgraph-workbench.png");
     }
   }, []);
 
@@ -477,47 +462,33 @@ export function IntelGraphWorkbench() {
     const filteredNodes = graphData.nodes.filter((node) => {
       const matchesSearch = searchQuery
         ? node.label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        node.id.toLowerCase().includes(searchQuery.toLowerCase())
+          node.id.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
-      const matchesDegree =
-        (node.degree ?? 0) >= minDegree && (node.degree ?? 0) <= maxDegree;
-      const matchesTimestamp =
-        (node.ts ?? 0) >= minTimestamp && (node.ts ?? 0) <= maxTimestamp;
+      const matchesDegree = (node.degree ?? 0) >= minDegree && (node.degree ?? 0) <= maxDegree;
+      const matchesTimestamp = (node.ts ?? 0) >= minTimestamp && (node.ts ?? 0) <= maxTimestamp;
       return matchesSearch && matchesDegree && matchesTimestamp;
     });
 
     const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
 
     const filteredLinks = graphData.links.filter((link) => {
-      const sourceId =
-        typeof link.source === 'object' ? link.source.id : link.source;
-      const targetId =
-        typeof link.target === 'object' ? link.target.id : link.target;
+      const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+      const targetId = typeof link.target === "object" ? link.target.id : link.target;
       return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
     });
 
     return { nodes: filteredNodes, links: filteredLinks };
-  }, [
-    graphData,
-    searchQuery,
-    minDegree,
-    maxDegree,
-    minTimestamp,
-    maxTimestamp,
-  ]);
+  }, [graphData, searchQuery, minDegree, maxDegree, minTimestamp, maxTimestamp]);
 
   const nodeColors = useMemo(() => {
     const communities = louvainLikeCommunities(filteredGraphData);
     const uniqueGroups = Array.from(new Set(Object.values(communities)));
-    return filteredGraphData.nodes.reduce(
-      (acc: Record<string, string>, node) => {
-        const group = communities[node.id];
-        const colorIndex = uniqueGroups.indexOf(group) % palette.length;
-        acc[node.id] = palette[colorIndex];
-        return acc;
-      },
-      {},
-    );
+    return filteredGraphData.nodes.reduce((acc: Record<string, string>, node) => {
+      const group = communities[node.id];
+      const colorIndex = uniqueGroups.indexOf(group) % palette.length;
+      acc[node.id] = palette[colorIndex];
+      return acc;
+    }, {});
   }, [filteredGraphData]);
 
   // --- NEW: Render loading and error messages ---
@@ -546,12 +517,10 @@ export function IntelGraphWorkbench() {
       <motion.div
         initial={{ x: -300 }}
         animate={{ x: 0 }}
-        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className="w-80 bg-white p-4 shadow-lg flex flex-col z-10"
       >
-        <h1 className="text-2xl font-bold mb-4 text-blue-700">
-          IntelGraph Workbench
-        </h1>
+        <h1 className="text-2xl font-bold mb-4 text-blue-700">IntelGraph Workbench</h1>
 
         <Tabs defaultValue="data" className="flex-grow flex flex-col">
           <TabsList className="grid w-full grid-cols-2">
@@ -559,10 +528,7 @@ export function IntelGraphWorkbench() {
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
-          <TabsContent
-            value="data"
-            className="flex-grow flex flex-col overflow-y-auto pr-2"
-          >
+          <TabsContent value="data" className="flex-grow flex flex-col overflow-y-auto pr-2">
             <div className="mb-4">
               <Label htmlFor="search">Search Nodes</Label>
               <Input
@@ -621,11 +587,7 @@ export function IntelGraphWorkbench() {
 
             <div className="flex items-center justify-between mb-4">
               <Label htmlFor="mock-mode">Mock Data Mode</Label>
-              <Switch
-                id="mock-mode"
-                checked={isMockMode}
-                onCheckedChange={setIsMockMode}
-              />
+              <Switch id="mock-mode" checked={isMockMode} onCheckedChange={setIsMockMode} />
             </div>
 
             <Button onClick={handleRefresh} className="w-full mb-4">
@@ -633,9 +595,7 @@ export function IntelGraphWorkbench() {
             </Button>
 
             <div className="flex-grow overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-2">
-                Selection Inspector
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">Selection Inspector</h3>
               {selectedNode && (
                 <Card className="mb-2 bg-blue-50 border-blue-200">
                   <CardHeader className="p-3 pb-1">
@@ -646,10 +606,8 @@ export function IntelGraphWorkbench() {
                   <CardContent className="p-3 pt-1 text-sm">
                     {Object.entries(selectedNode).map(([key, value]) => (
                       <div key={key}>
-                        <span className="font-medium">{key}:</span>{' '}
-                        {typeof value === 'object'
-                          ? JSON.stringify(value)
-                          : String(value)}
+                        <span className="font-medium">{key}:</span>{" "}
+                        {typeof value === "object" ? JSON.stringify(value) : String(value)}
                       </div>
                     ))}
                   </CardContent>
@@ -659,60 +617,49 @@ export function IntelGraphWorkbench() {
                 <Card className="mb-2 bg-green-50 border-green-200">
                   <CardHeader className="p-3 pb-1">
                     <CardTitle className="text-md text-green-700">
-                      Link: {selectedLink.type || 'Relationship'}
+                      Link: {selectedLink.type || "Relationship"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-1 text-sm">
                     <div>
-                      <span className="font-medium">Source:</span>{' '}
+                      <span className="font-medium">Source:</span>{" "}
                       {formatLinkEndpoint(selectedLink.source)}
                     </div>
                     <div>
-                      <span className="font-medium">Target:</span>{' '}
+                      <span className="font-medium">Target:</span>{" "}
                       {formatLinkEndpoint(selectedLink.target)}
                     </div>
                     {Object.entries(selectedLink).map(
                       ([key, value]) =>
                         // Avoid re-displaying source/target if they are objects
-                        key !== 'source' &&
-                        key !== 'target' && (
+                        key !== "source" &&
+                        key !== "target" && (
                           <div key={key}>
-                            <span className="font-medium">{key}:</span>{' '}
-                            {typeof value === 'object'
-                              ? JSON.stringify(value)
-                              : String(value)}
+                            <span className="font-medium">{key}:</span>{" "}
+                            {typeof value === "object" ? JSON.stringify(value) : String(value)}
                           </div>
-                        ),
+                        )
                     )}
                   </CardContent>
                 </Card>
               )}
               {!selectedNode && !selectedLink && (
-                <p className="text-sm text-gray-500">
-                  Click on a node or link to inspect.
-                </p>
+                <p className="text-sm text-gray-500">Click on a node or link to inspect.</p>
               )}
             </div>
           </TabsContent>
 
-          <TabsContent
-            value="settings"
-            className="flex-grow flex flex-col overflow-y-auto pr-2"
-          >
+          <TabsContent value="settings" className="flex-grow flex flex-col overflow-y-auto pr-2">
             <div className="mb-4">
               <Label htmlFor="layout-type">Graph Layout</Label>
               <MuiFormControl fullWidth size="small" sx={{ mt: 1 }}>
-                <MuiInputLabel id="layout-type-label">
-                  Graph Layout
-                </MuiInputLabel>
+                <MuiInputLabel id="layout-type-label">Graph Layout</MuiInputLabel>
                 <MuiSelect
                   labelId="layout-type-label"
                   id="layout-type"
                   value={layoutType}
                   label="Graph Layout"
-                  onChange={(event) =>
-                    handleLayoutChange(event.target.value as LayoutOption)
-                  }
+                  onChange={(event) => handleLayoutChange(event.target.value as LayoutOption)}
                 >
                   <MuiMenuItem value="force">Force-Directed</MuiMenuItem>
                   <MuiMenuItem value="dagre">DAG (Hierarchical)</MuiMenuItem>
@@ -723,11 +670,7 @@ export function IntelGraphWorkbench() {
 
             <div className="flex items-center justify-between mb-4">
               <Label htmlFor="show-map">Show Geospatial Map</Label>
-              <Switch
-                id="show-map"
-                checked={showMap}
-                onCheckedChange={handleToggleMap}
-              />
+              <Switch id="show-map" checked={showMap} onCheckedChange={handleToggleMap} />
             </div>
 
             <Separator className="my-4" />
@@ -751,7 +694,7 @@ export function IntelGraphWorkbench() {
                 latitude: 40,
                 zoom: 3,
               }}
-              style={{ width: '100%', height: '100%' }}
+              style={{ width: "100%", height: "100%" }}
               mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" // Example map style
             >
               <NavigationControl position="top-left" />
@@ -765,21 +708,20 @@ export function IntelGraphWorkbench() {
                 controller={true}
                 layers={[
                   new ScatterplotLayer({
-                    id: 'nodes-layer',
+                    id: "nodes-layer",
                     data: filteredGraphData.nodes.filter(
-                      (n) => n.lat !== undefined && n.lon !== undefined,
+                      (n) => n.lat !== undefined && n.lon !== undefined
                     ),
-                    getPosition: (d: GraphNode) =>
-                      [d.lon ?? 0, d.lat ?? 0] as [number, number],
+                    getPosition: (d: GraphNode) => [d.lon ?? 0, d.lat ?? 0] as [number, number],
                     getFillColor: (d: GraphNode) => {
                       const color = nodeColors[d.id];
                       return color
                         ? [
-                          parseInt(color.slice(1, 3), 16),
-                          parseInt(color.slice(3, 5), 16),
-                          parseInt(color.slice(5, 7), 16),
-                          200,
-                        ]
+                            parseInt(color.slice(1, 3), 16),
+                            parseInt(color.slice(3, 5), 16),
+                            parseInt(color.slice(5, 7), 16),
+                            200,
+                          ]
                         : [0, 0, 0, 200];
                     },
                     getRadius: 10000, // Adjust radius based on zoom level
@@ -800,7 +742,7 @@ export function IntelGraphWorkbench() {
                       setHoverInfo({
                         x,
                         y,
-                        label: object.label || object.id || 'Node',
+                        label: object.label || object.id || "Node",
                       });
                     },
                     onClick: ({ object }: { object: GraphNode | null }) => {
@@ -808,21 +750,15 @@ export function IntelGraphWorkbench() {
                     },
                   }),
                   new ArcLayer({
-                    id: 'links-layer',
+                    id: "links-layer",
                     data: filteredGraphData.links.filter((link) => {
                       const sourceNode = filteredGraphData.nodes.find(
                         (n) =>
-                          n.id ===
-                          (typeof link.source === 'object'
-                            ? link.source.id
-                            : link.source),
+                          n.id === (typeof link.source === "object" ? link.source.id : link.source)
                       );
                       const targetNode = filteredGraphData.nodes.find(
                         (n) =>
-                          n.id ===
-                          (typeof link.target === 'object'
-                            ? link.target.id
-                            : link.target),
+                          n.id === (typeof link.target === "object" ? link.target.id : link.target)
                       );
                       return (
                         sourceNode?.lat !== undefined &&
@@ -833,11 +769,7 @@ export function IntelGraphWorkbench() {
                     }),
                     getSourcePosition: (d: GraphLink) => {
                       const sourceNode = filteredGraphData.nodes.find(
-                        (n) =>
-                          n.id ===
-                          (typeof d.source === 'object'
-                            ? d.source.id
-                            : d.source),
+                        (n) => n.id === (typeof d.source === "object" ? d.source.id : d.source)
                       );
                       return sourceNode
                         ? ([sourceNode.lon ?? 0, sourceNode.lat ?? 0] as [number, number])
@@ -845,11 +777,7 @@ export function IntelGraphWorkbench() {
                     },
                     getTargetPosition: (d: GraphLink) => {
                       const targetNode = filteredGraphData.nodes.find(
-                        (n) =>
-                          n.id ===
-                          (typeof d.target === 'object'
-                            ? d.target.id
-                            : d.target),
+                        (n) => n.id === (typeof d.target === "object" ? d.target.id : d.target)
                       );
                       return targetNode
                         ? ([targetNode.lon ?? 0, targetNode.lat ?? 0] as [number, number])
@@ -885,16 +813,16 @@ export function IntelGraphWorkbench() {
             {hoverInfo && (
               <div
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   left: hoverInfo.x,
                   top: hoverInfo.y,
-                  transform: 'translate(8px, 8px)',
-                  background: 'rgba(0, 0, 0, 0.75)',
-                  color: '#fff',
-                  padding: '4px 8px',
+                  transform: "translate(8px, 8px)",
+                  background: "rgba(0, 0, 0, 0.75)",
+                  color: "#fff",
+                  padding: "4px 8px",
                   borderRadius: 4,
                   fontSize: 12,
-                  pointerEvents: 'none',
+                  pointerEvents: "none",
                   maxWidth: 240,
                 }}
               >
@@ -904,7 +832,7 @@ export function IntelGraphWorkbench() {
           </div>
         )}
 
-        <div className={showMap ? 'opacity-0 pointer-events-none' : ''}>
+        <div className={showMap ? "opacity-0 pointer-events-none" : ""}>
           <ForceGraph2D
             ref={fgRef}
             graphData={filteredGraphData}
@@ -936,21 +864,19 @@ export function IntelGraphWorkbench() {
               const fontSize = 12 / globalScale;
               ctx.font = `${fontSize}px Sans-Serif`;
               const textWidth = ctx.measureText(label).width;
-              const bckgDimensions = [textWidth, fontSize].map(
-                (n) => n + fontSize * 0.2,
-              ); // some padding
+              const bckgDimensions = [textWidth, fontSize].map((n) => n + fontSize * 0.2); // some padding
 
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
               ctx.fillRect(
                 node.x - bckgDimensions[0] / 2,
                 node.y - bckgDimensions[1] / 2,
                 bckgDimensions[0],
-                bckgDimensions[1],
+                bckgDimensions[1]
               );
 
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillStyle = nodeColors[node.id] || '#000000';
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillStyle = nodeColors[node.id] || "#000000";
               ctx.fillText(label, node.x, node.y);
 
               node.__bckgDimensions = bckgDimensions; // for hit testing
@@ -961,18 +887,17 @@ export function IntelGraphWorkbench() {
               // Draw link as before
               const start = link.source as GraphNode;
               const end = link.target as GraphNode;
-              if (!start || !end || !start.x || !start.y || !end.x || !end.y)
-                return;
+              if (!start || !end || !start.x || !start.y || !end.x || !end.y) return;
 
               ctx.beginPath();
               ctx.moveTo(start.x, start.y);
               ctx.lineTo(end.x, end.y);
-              ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+              ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
               ctx.lineWidth = 1 / globalScale;
               ctx.stroke();
             }}
-            linkCanvasObjectMode={() => 'after'} // Draw links after nodes
-          // Ensure ForceGraph2D is always rendered, but its visual output is conditional
+            linkCanvasObjectMode={() => "after"} // Draw links after nodes
+            // Ensure ForceGraph2D is always rendered, but its visual output is conditional
           />
         </div>
       </div>

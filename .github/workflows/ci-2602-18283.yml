@@ -3,11 +3,11 @@ name: 2602_18283 Reproducibility Gate
 on:
   pull_request:
     paths:
-      - 'summit/evaluators/hf_2602_18283.py'
-      - 'summit/datasets/hf_2602_18283_adapter.py'
-      - 'summit/metrics/hf_2602_18283_metrics.py'
-      - 'scripts/run_2602_18283.py'
-      - 'configs/hf_2602_18283.yaml'
+      - "summit/evaluators/hf_2602_18283.py"
+      - "summit/datasets/hf_2602_18283_adapter.py"
+      - "summit/metrics/hf_2602_18283_metrics.py"
+      - "scripts/run_2602_18283.py"
+      - "configs/hf_2602_18283.yaml"
 
 jobs:
   validate-claim:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install PyYAML
         run: pip install pyyaml

@@ -4,35 +4,35 @@ This document outlines the current state of the IntelGraph ecosystem against the
 
 ## 1. Secrets & Security Hygiene
 
-| Requirement | Status | Findings |
-| :--- | :--- | :--- |
-| **Secrets Committed** | ✅ **Resolved** | `.env` files are correctly ignored in `.gitignore`. |
-| **Dev Passwords** | ⚠️ **Gap** | `docker-compose.dev.yaml` contains hardcoded default passwords (e.g., `ELASTICSEARCH_PASSWORD:-devpassword`). |
-| **Lockfile Consistency** | ✅ **Resolved** | `pnpm-lock.yaml` is enforced. `package-lock.json` and `yarn.lock` are absent/ignored. |
+| Requirement              | Status          | Findings                                                                                                      |
+| :----------------------- | :-------------- | :------------------------------------------------------------------------------------------------------------ |
+| **Secrets Committed**    | ✅ **Resolved** | `.env` files are correctly ignored in `.gitignore`.                                                           |
+| **Dev Passwords**        | ⚠️ **Gap**      | `docker-compose.dev.yaml` contains hardcoded default passwords (e.g., `ELASTICSEARCH_PASSWORD:-devpassword`). |
+| **Lockfile Consistency** | ✅ **Resolved** | `pnpm-lock.yaml` is enforced. `package-lock.json` and `yarn.lock` are absent/ignored.                         |
 
 ## 2. Ledger Durability & Provenance
 
-| Requirement | Status | Findings |
-| :--- | :--- | :--- |
-| **In-Memory Ledger** | ✅ **Resolved** | Ledger is persistent (Postgres/TimescaleDB), not in-memory. |
+| Requirement                    | Status              | Findings                                                                                                                                                                                                                                                     |
+| :----------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **In-Memory Ledger**           | ✅ **Resolved**     | Ledger is persistent (Postgres/TimescaleDB), not in-memory.                                                                                                                                                                                                  |
 | **Implementation Consistency** | ❌ **Critical Gap** | Two competing implementations exist: <br> 1. `server/src/provenance/ledger.ts` (Postgres V2, used by `IntelGraphService`) <br> 2. `server/src/services/provenance-ledger.ts` (TimescaleDB, "GA-Core"). <br> This represents significant architectural drift. |
-| **Type Safety** | ❌ **Critical Gap** | Both ledger files use `@ts-nocheck`, disabling TypeScript validation. |
+| **Type Safety**                | ❌ **Critical Gap** | Both ledger files use `@ts-nocheck`, disabling TypeScript validation.                                                                                                                                                                                        |
 
 ## 3. Schema & Capabilities
 
-| Requirement | Status | Findings |
-| :--- | :--- | :--- |
-| **Time-Awareness** | ❌ **Gap** | The canonical schema (`server/src/graph/schema.ts`) lacks `validFrom` / `validTo` properties on `BaseNode`, contradicting the "Time-Aware" architectural goal. Only `createdAt`/`updatedAt` exist. |
-| **Evidence-First** | ✅ **Ready** | Schema explicitly supports `Claim`, `Evidence`, and `Decision` entities. |
-| **Vector Search** | ⚠️ **Gap** | `findSimilarNodes` in `IntelGraphService.ts` is a basic property match, lacking vector embedding support. |
+| Requirement        | Status       | Findings                                                                                                                                                                                           |
+| :----------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Time-Awareness** | ❌ **Gap**   | The canonical schema (`server/src/graph/schema.ts`) lacks `validFrom` / `validTo` properties on `BaseNode`, contradicting the "Time-Aware" architectural goal. Only `createdAt`/`updatedAt` exist. |
+| **Evidence-First** | ✅ **Ready** | Schema explicitly supports `Claim`, `Evidence`, and `Decision` entities.                                                                                                                           |
+| **Vector Search**  | ⚠️ **Gap**   | `findSimilarNodes` in `IntelGraphService.ts` is a basic property match, lacking vector embedding support.                                                                                          |
 
 ## 4. Code Quality & Testing
 
-| Requirement | Status | Findings |
-| :--- | :--- | :--- |
-| **Type Safety** | ❌ **Critical Gap** | Core service `IntelGraphService.ts` uses `@ts-nocheck`. |
-| **Test Reliability** | ❌ **Gap** | Tests (`IntelGraphService.test.ts`) fail to run due to configuration errors (`ts-jest` preset missing). |
-| **Code Completeness** | ⚠️ **Gap** | `IntelGraphService.ts` contains `// FIX: pass props properly` comments, indicating unfinished refactoring. |
+| Requirement           | Status              | Findings                                                                                                   |
+| :-------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------- |
+| **Type Safety**       | ❌ **Critical Gap** | Core service `IntelGraphService.ts` uses `@ts-nocheck`.                                                    |
+| **Test Reliability**  | ❌ **Gap**          | Tests (`IntelGraphService.test.ts`) fail to run due to configuration errors (`ts-jest` preset missing).    |
+| **Code Completeness** | ⚠️ **Gap**          | `IntelGraphService.ts` contains `// FIX: pass props properly` comments, indicating unfinished refactoring. |
 
 ## Recommendations
 

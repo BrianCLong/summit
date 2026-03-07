@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 type ActionSafetyBannerProps = {
   status: string;
@@ -6,15 +6,9 @@ type ActionSafetyBannerProps = {
   appealUrl?: string;
 };
 
-const ActionSafetyBanner: React.FC<ActionSafetyBannerProps> = ({
-  status,
-  reason,
-  appealUrl,
-}) => {
+const ActionSafetyBanner: React.FC<ActionSafetyBannerProps> = ({ status, reason, appealUrl }) => {
   return (
-    <div
-      style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}
-    >
+    <div style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "5px" }}>
       <h3>Action Safety Status: {status}</h3>
       {reason && <p>Reason: {reason}</p>}
       {appealUrl && (

@@ -4,7 +4,7 @@
  * Core service for feature flag evaluation with caching, analytics, and metrics
  */
 
-import EventEmitter from 'eventemitter3';
+import EventEmitter from "eventemitter3";
 import type {
   FeatureFlagConfig,
   FeatureFlagProvider,
@@ -15,7 +15,7 @@ import type {
   FlagVariation,
   FlagAnalyticsEvent,
   FlagMetrics,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Events emitted by the feature flag service
@@ -34,9 +34,7 @@ export interface FeatureFlagServiceEvents {
 export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   private provider: FeatureFlagProvider;
   private cache?: FlagCache;
-  private config: Required<
-    Omit<FeatureFlagConfig, 'cache' | 'bootstrap' | 'defaultContext'>
-  > & {
+  private config: Required<Omit<FeatureFlagConfig, "cache" | "bootstrap" | "defaultContext">> & {
     cache?: FlagCache;
     defaultContext?: Partial<FlagContext>;
   };
@@ -80,9 +78,9 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
       }
 
       this.isInitialized = true;
-      this.emit('ready');
+      this.emit("ready");
     } catch (error) {
-      this.emit('error', error as Error);
+      this.emit("error", error as Error);
       throw error;
     }
   }
@@ -117,14 +115,9 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   async getBooleanFlag(
     key: string,
     defaultValue: boolean,
-    context?: Partial<FlagContext>,
+    context?: Partial<FlagContext>
   ): Promise<boolean> {
-    const evaluation = await this.evaluateFlag<boolean>(
-      key,
-      defaultValue,
-      context,
-      'boolean',
-    );
+    const evaluation = await this.evaluateFlag<boolean>(key, defaultValue, context, "boolean");
     return evaluation.value;
   }
 
@@ -134,14 +127,9 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   async getStringFlag(
     key: string,
     defaultValue: string,
-    context?: Partial<FlagContext>,
+    context?: Partial<FlagContext>
   ): Promise<string> {
-    const evaluation = await this.evaluateFlag<string>(
-      key,
-      defaultValue,
-      context,
-      'string',
-    );
+    const evaluation = await this.evaluateFlag<string>(key, defaultValue, context, "string");
     return evaluation.value;
   }
 
@@ -151,14 +139,9 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   async getNumberFlag(
     key: string,
     defaultValue: number,
-    context?: Partial<FlagContext>,
+    context?: Partial<FlagContext>
   ): Promise<number> {
-    const evaluation = await this.evaluateFlag<number>(
-      key,
-      defaultValue,
-      context,
-      'number',
-    );
+    const evaluation = await this.evaluateFlag<number>(key, defaultValue, context, "number");
     return evaluation.value;
   }
 
@@ -168,14 +151,9 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   async getJSONFlag<T extends FlagVariation = any>(
     key: string,
     defaultValue: T,
-    context?: Partial<FlagContext>,
+    context?: Partial<FlagContext>
   ): Promise<T> {
-    const evaluation = await this.evaluateFlag<T>(
-      key,
-      defaultValue,
-      context,
-      'json',
-    );
+    const evaluation = await this.evaluateFlag<T>(key, defaultValue, context, "json");
     return evaluation.value;
   }
 
@@ -185,7 +163,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   async getEvaluation<T extends FlagVariation = FlagVariation>(
     key: string,
     defaultValue: T,
-    context?: Partial<FlagContext>,
+    context?: Partial<FlagContext>
   ): Promise<FlagEvaluation<T>> {
     return this.evaluateFlag<T>(key, defaultValue, context);
   }
@@ -193,9 +171,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   /**
    * Get all flag values for context
    */
-  async getAllFlags(
-    context?: Partial<FlagContext>,
-  ): Promise<Record<string, FlagVariation>> {
+  async getAllFlags(context?: Partial<FlagContext>): Promise<Record<string, FlagVariation>> {
     const fullContext = this.buildContext(context);
     const allFlags = await this.provider.getAllFlags(fullContext);
 
@@ -213,7 +189,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   async track(
     eventName: string,
     context?: Partial<FlagContext>,
-    data?: Record<string, any>,
+    data?: Record<string, any>
   ): Promise<void> {
     const fullContext = this.buildContext(context);
 
@@ -223,7 +199,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
     // Record analytics event
     if (this.config.enableAnalytics) {
       this.recordAnalyticsEvent({
-        type: 'track',
+        type: "track",
         flagKey: eventName,
         context: fullContext,
         timestamp: Date.now(),
@@ -267,7 +243,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
     key: string,
     defaultValue: T,
     context?: Partial<FlagContext>,
-    type?: string,
+    type?: string
   ): Promise<FlagEvaluation<T>> {
     const startTime = Date.now();
     const fullContext = this.buildContext(context);
@@ -277,14 +253,14 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
       if (this.config.enableCache && this.cache) {
         const cached = await this.getCachedEvaluation<T>(key, fullContext);
         if (cached) {
-          this.emit('cacheHit', key);
+          this.emit("cacheHit", key);
           if (this.metrics) {
             this.metrics.recordCacheHit(key);
           }
           return cached;
         }
 
-        this.emit('cacheMiss', key);
+        this.emit("cacheMiss", key);
         if (this.metrics) {
           this.metrics.recordCacheMiss(key);
         }
@@ -294,60 +270,52 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
       let evaluation: FlagEvaluation<T>;
 
       switch (type) {
-        case 'boolean':
+        case "boolean":
           evaluation = (await this.provider.getBooleanFlag(
             key,
             defaultValue as boolean,
-            fullContext,
+            fullContext
           )) as FlagEvaluation<T>;
           break;
-        case 'string':
+        case "string":
           evaluation = (await this.provider.getStringFlag(
             key,
             defaultValue as string,
-            fullContext,
+            fullContext
           )) as FlagEvaluation<T>;
           break;
-        case 'number':
+        case "number":
           evaluation = (await this.provider.getNumberFlag(
             key,
             defaultValue as number,
-            fullContext,
+            fullContext
           )) as FlagEvaluation<T>;
           break;
-        case 'json':
-          evaluation = await this.provider.getJSONFlag<T>(
-            key,
-            defaultValue,
-            fullContext,
-          );
+        case "json":
+          evaluation = await this.provider.getJSONFlag<T>(key, defaultValue, fullContext);
           break;
         default:
           // Auto-detect type
-          if (typeof defaultValue === 'boolean') {
+          if (typeof defaultValue === "boolean") {
             evaluation = (await this.provider.getBooleanFlag(
               key,
               defaultValue,
-              fullContext,
+              fullContext
             )) as FlagEvaluation<T>;
-          } else if (typeof defaultValue === 'string') {
+          } else if (typeof defaultValue === "string") {
             evaluation = (await this.provider.getStringFlag(
               key,
               defaultValue,
-              fullContext,
+              fullContext
             )) as FlagEvaluation<T>;
-          } else if (typeof defaultValue === 'number') {
+          } else if (typeof defaultValue === "number") {
             evaluation = (await this.provider.getNumberFlag(
               key,
               defaultValue,
-              fullContext,
+              fullContext
             )) as FlagEvaluation<T>;
           } else {
-            evaluation = await this.provider.getJSONFlag<T>(
-              key,
-              defaultValue,
-              fullContext,
-            );
+            evaluation = await this.provider.getJSONFlag<T>(key, defaultValue, fullContext);
           }
       }
 
@@ -365,7 +333,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
       // Record analytics
       if (this.config.enableAnalytics) {
         this.recordAnalyticsEvent({
-          type: 'evaluation',
+          type: "evaluation",
           flagKey: key,
           value: evaluation.value,
           variation: evaluation.variation,
@@ -376,8 +344,8 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
       }
 
       // Emit event
-      this.emit('evaluation', {
-        type: 'evaluation',
+      this.emit("evaluation", {
+        type: "evaluation",
         flagKey: key,
         value: evaluation.value,
         variation: evaluation.variation,
@@ -392,14 +360,14 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
         this.metrics.recordError(key, error as Error);
       }
 
-      this.emit('error', error as Error);
+      this.emit("error", error as Error);
 
       // Return fallback evaluation
       return {
         key,
         value: defaultValue,
         exists: false,
-        reason: 'ERROR',
+        reason: "ERROR",
         timestamp: Date.now(),
       };
     }
@@ -420,7 +388,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
    */
   private async getCachedEvaluation<T>(
     key: string,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<T> | null> {
     if (!this.cache) {
       return null;
@@ -444,7 +412,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   private async setCachedEvaluation<T>(
     key: string,
     context: FlagContext,
-    evaluation: FlagEvaluation<T>,
+    evaluation: FlagEvaluation<T>
   ): Promise<void> {
     if (!this.cache) {
       return;
@@ -493,7 +461,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
     // In a real implementation, this would send events to an analytics service
     // For now, we just emit them as events
     for (const event of events) {
-      this.emit('evaluation', event);
+      this.emit("evaluation", event);
     }
   }
 }

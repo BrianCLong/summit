@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Merge Train Protocol
 
 **Goal:** Turn the PR firehose into a deterministic merge train.

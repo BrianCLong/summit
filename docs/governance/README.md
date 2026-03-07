@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: deprecated
 
-
 # Governance Library
 
 This directory contains the canonical governance and agent operations framework for the Jules program. Start here for policies, procedures, and ownership expectations.

@@ -22,10 +22,10 @@ spec:
             service: maestro
             team: platform
           annotations:
-            summary: 'Maestro orchestrator service is down'
-            description: 'The Maestro orchestrator service has been down for more than 1 minute. This affects all AI orchestration capabilities.'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro-service-down'
-            dashboard_url: 'https://grafana.intelgraph.ai/d/maestro-overview'
+            summary: "Maestro orchestrator service is down"
+            description: "The Maestro orchestrator service has been down for more than 1 minute. This affects all AI orchestration capabilities."
+            runbook_url: "https://runbooks.intelgraph.ai/maestro-service-down"
+            dashboard_url: "https://grafana.intelgraph.ai/d/maestro-overview"
 
         - alert: Neo4jDatabaseDown
           expr: up{job="neo4j"} == 0
@@ -35,9 +35,9 @@ spec:
             service: neo4j
             team: data
           annotations:
-            summary: 'Neo4j graph database is down'
-            description: 'Neo4j database has been unreachable for {{ $labels.instance }} for more than 2 minutes.'
-            runbook_url: 'https://runbooks.intelgraph.ai/neo4j-down'
+            summary: "Neo4j graph database is down"
+            description: "Neo4j database has been unreachable for {{ $labels.instance }} for more than 2 minutes."
+            runbook_url: "https://runbooks.intelgraph.ai/neo4j-down"
 
         - alert: HighErrorRate
           expr: |
@@ -51,9 +51,9 @@ spec:
             service: maestro
             team: platform
           annotations:
-            summary: 'High error rate detected'
-            description: 'Error rate is {{ $value }}% for endpoint {{ $labels.endpoint }}'
-            runbook_url: 'https://runbooks.intelgraph.ai/high-error-rate'
+            summary: "High error rate detected"
+            description: "Error rate is {{ $value }}% for endpoint {{ $labels.endpoint }}"
+            runbook_url: "https://runbooks.intelgraph.ai/high-error-rate"
 
         - alert: ExtremeLatency
           expr: |
@@ -66,9 +66,9 @@ spec:
             service: maestro
             team: platform
           annotations:
-            summary: 'Extreme latency detected'
-            description: '95th percentile latency is {{ $value }}s for {{ $labels.endpoint }}'
-            runbook_url: 'https://runbooks.intelgraph.ai/extreme-latency'
+            summary: "Extreme latency detected"
+            description: "95th percentile latency is {{ $value }}s for {{ $labels.endpoint }}"
+            runbook_url: "https://runbooks.intelgraph.ai/extreme-latency"
 
         - alert: PodCrashLooping
           expr: |
@@ -79,9 +79,9 @@ spec:
             service: kubernetes
             team: platform
           annotations:
-            summary: 'Pod is crash looping'
-            description: 'Pod {{ $labels.pod }} in {{ $labels.namespace }} is crash looping'
-            runbook_url: 'https://runbooks.intelgraph.ai/pod-crash-loop'
+            summary: "Pod is crash looping"
+            description: "Pod {{ $labels.pod }} in {{ $labels.namespace }} is crash looping"
+            runbook_url: "https://runbooks.intelgraph.ai/pod-crash-loop"
 
     # === HIGH PRIORITY ALERTS ===
     - name: intelgraph.high
@@ -99,9 +99,9 @@ spec:
             service: kubernetes
             team: platform
           annotations:
-            summary: 'High memory usage'
-            description: 'Container {{ $labels.container }} memory usage is {{ $value }}%'
-            runbook_url: 'https://runbooks.intelgraph.ai/high-memory'
+            summary: "High memory usage"
+            description: "Container {{ $labels.container }} memory usage is {{ $value }}%"
+            runbook_url: "https://runbooks.intelgraph.ai/high-memory"
 
         - alert: HighCPUUsage
           expr: |
@@ -115,8 +115,8 @@ spec:
             service: kubernetes
             team: platform
           annotations:
-            summary: 'High CPU usage'
-            description: 'Container {{ $labels.container }} CPU usage is {{ $value }}%'
+            summary: "High CPU usage"
+            description: "Container {{ $labels.container }} CPU usage is {{ $value }}%"
 
         - alert: GraphQueryLatencyHigh
           expr: |
@@ -129,9 +129,9 @@ spec:
             service: neo4j
             team: data
           annotations:
-            summary: 'Graph query latency is high'
-            description: '95th percentile graph query latency is {{ $value }}s'
-            runbook_url: 'https://runbooks.intelgraph.ai/slow-graph-queries'
+            summary: "Graph query latency is high"
+            description: "95th percentile graph query latency is {{ $value }}s"
+            runbook_url: "https://runbooks.intelgraph.ai/slow-graph-queries"
 
         - alert: AIModelLatencyHigh
           expr: |
@@ -144,9 +144,9 @@ spec:
             service: ai-models
             team: ai
           annotations:
-            summary: 'AI model response time is high'
-            description: 'AI model {{ $labels.model }} 95th percentile latency is {{ $value }}s'
-            runbook_url: 'https://runbooks.intelgraph.ai/slow-ai-models'
+            summary: "AI model response time is high"
+            description: "AI model {{ $labels.model }} 95th percentile latency is {{ $value }}s"
+            runbook_url: "https://runbooks.intelgraph.ai/slow-ai-models"
 
         - alert: DiskSpaceLow
           expr: |
@@ -160,8 +160,8 @@ spec:
             service: infrastructure
             team: platform
           annotations:
-            summary: 'Disk space is running low'
-            description: 'Disk space on {{ $labels.instance }} at {{ $labels.mountpoint }} is {{ $value }}%'
+            summary: "Disk space is running low"
+            description: "Disk space on {{ $labels.instance }} at {{ $labels.mountpoint }} is {{ $value }}%"
 
         - alert: PremiumBudgetExhausted
           expr: maestro_premium_budget_utilization_percent > 95
@@ -171,9 +171,9 @@ spec:
             service: premium-routing
             team: ai
           annotations:
-            summary: 'Premium AI model budget nearly exhausted'
-            description: 'Premium budget utilization is {{ $value }}%'
-            runbook_url: 'https://runbooks.intelgraph.ai/budget-exhausted'
+            summary: "Premium AI model budget nearly exhausted"
+            description: "Premium budget utilization is {{ $value }}%"
+            runbook_url: "https://runbooks.intelgraph.ai/budget-exhausted"
 
     # === MEDIUM PRIORITY ALERTS ===
     - name: intelgraph.medium
@@ -190,8 +190,8 @@ spec:
             service: maestro
             team: platform
           annotations:
-            summary: 'Moderate latency increase detected'
-            description: '95th percentile latency is {{ $value }}s for {{ $labels.endpoint }}'
+            summary: "Moderate latency increase detected"
+            description: "95th percentile latency is {{ $value }}s for {{ $labels.endpoint }}"
 
         - alert: ErrorRateElevated
           expr: |
@@ -205,8 +205,8 @@ spec:
             service: maestro
             team: platform
           annotations:
-            summary: 'Error rate is elevated'
-            description: 'Error rate is {{ $value }}% for {{ $labels.endpoint }}'
+            summary: "Error rate is elevated"
+            description: "Error rate is {{ $value }}% for {{ $labels.endpoint }}"
 
         - alert: WebScrapingFailureRate
           expr: |
@@ -220,8 +220,8 @@ spec:
             service: web-scraping
             team: data
           annotations:
-            summary: 'Web scraping failure rate is high'
-            description: 'Web scraping failure rate is {{ $value }}%'
+            summary: "Web scraping failure rate is high"
+            description: "Web scraping failure rate is {{ $value }}%"
 
         - alert: AIModelErrorRateHigh
           expr: |
@@ -235,8 +235,8 @@ spec:
             service: ai-models
             team: ai
           annotations:
-            summary: 'AI model error rate is high'
-            description: 'AI model {{ $labels.model }} error rate is {{ $value }}%'
+            summary: "AI model error rate is high"
+            description: "AI model {{ $labels.model }} error rate is {{ $value }}%"
 
     # === SECURITY ALERTS ===
     - name: intelgraph.security
@@ -251,9 +251,9 @@ spec:
             service: security
             team: security
           annotations:
-            summary: 'Security event spike detected'
-            description: 'Security events of type {{ $labels.event_type }} spiking at {{ $value }} events/sec'
-            runbook_url: 'https://runbooks.intelgraph.ai/security-event-spike'
+            summary: "Security event spike detected"
+            description: "Security events of type {{ $labels.event_type }} spiking at {{ $value }} events/sec"
+            runbook_url: "https://runbooks.intelgraph.ai/security-event-spike"
 
         - alert: FailedAuthenticationSpike
           expr: |
@@ -264,9 +264,9 @@ spec:
             service: authentication
             team: security
           annotations:
-            summary: 'Failed authentication attempts spike'
-            description: 'Failed authentication rate is {{ $value }} attempts/sec'
-            runbook_url: 'https://runbooks.intelgraph.ai/auth-spike'
+            summary: "Failed authentication attempts spike"
+            description: "Failed authentication rate is {{ $value }} attempts/sec"
+            runbook_url: "https://runbooks.intelgraph.ai/auth-spike"
 
         - alert: ComplianceViolation
           expr: |
@@ -277,9 +277,9 @@ spec:
             service: compliance
             team: security
           annotations:
-            summary: 'Compliance violations detected'
-            description: 'Compliance violations for policy {{ $labels.policy }}: {{ $value }} denials'
-            runbook_url: 'https://runbooks.intelgraph.ai/compliance-violation'
+            summary: "Compliance violations detected"
+            description: "Compliance violations for policy {{ $labels.policy }}: {{ $value }} denials"
+            runbook_url: "https://runbooks.intelgraph.ai/compliance-violation"
 
         - alert: UnauthorizedAccessAttempt
           expr: |
@@ -290,8 +290,8 @@ spec:
             service: authorization
             team: security
           annotations:
-            summary: 'Unauthorized access attempts'
-            description: 'Authorization denials at {{ $value }} attempts/sec'
+            summary: "Unauthorized access attempts"
+            description: "Authorization denials at {{ $value }} attempts/sec"
 
     # === BUSINESS METRICS ALERTS ===
     - name: intelgraph.business
@@ -309,7 +309,7 @@ spec:
             service: investigations
             team: product
           annotations:
-            summary: 'Investigation creation rate has dropped significantly'
+            summary: "Investigation creation rate has dropped significantly"
             description: "Investigation creation is 50% below yesterday's rate"
 
         - alert: DataSourcesOffline
@@ -321,8 +321,8 @@ spec:
             service: data-sources
             team: data
           annotations:
-            summary: 'Too few active data sources'
-            description: 'Only {{ $value }} data sources are active'
+            summary: "Too few active data sources"
+            description: "Only {{ $value }} data sources are active"
 
         - alert: AICostSpike
           expr: |
@@ -334,9 +334,9 @@ spec:
             service: ai-cost-optimization
             team: ai
           annotations:
-            summary: 'AI costs are spiking'
-            description: 'AI costs are 2x higher than yesterday'
-            runbook_url: 'https://runbooks.intelgraph.ai/ai-cost-spike'
+            summary: "AI costs are spiking"
+            description: "AI costs are 2x higher than yesterday"
+            runbook_url: "https://runbooks.intelgraph.ai/ai-cost-spike"
 
     # === INFRASTRUCTURE ALERTS ===
     - name: intelgraph.infrastructure
@@ -350,8 +350,8 @@ spec:
             service: kubernetes
             team: platform
           annotations:
-            summary: 'Kubernetes node is not ready'
-            description: 'Node {{ $labels.node }} has been not ready for more than 5 minutes'
+            summary: "Kubernetes node is not ready"
+            description: "Node {{ $labels.node }} has been not ready for more than 5 minutes"
 
         - alert: EtcdClusterUnhealthy
           expr: |
@@ -365,8 +365,8 @@ spec:
             service: etcd
             team: platform
           annotations:
-            summary: 'etcd cluster is unhealthy'
-            description: 'etcd cluster health issue detected on {{ $labels.instance }}'
+            summary: "etcd cluster is unhealthy"
+            description: "etcd cluster health issue detected on {{ $labels.instance }}"
 
         - alert: IngressControllerDown
           expr: up{job="nginx-ingress"} == 0
@@ -376,8 +376,8 @@ spec:
             service: ingress
             team: platform
           annotations:
-            summary: 'Ingress controller is down'
-            description: 'Nginx ingress controller is not responding'
+            summary: "Ingress controller is down"
+            description: "Nginx ingress controller is not responding"
 
         - alert: NetworkPolicyViolation
           expr: |
@@ -388,8 +388,8 @@ spec:
             service: network-policy
             team: security
           annotations:
-            summary: 'High network policy drop rate'
-            description: 'Network policy drops at {{ $value }} drops/sec'
+            summary: "High network policy drop rate"
+            description: "Network policy drops at {{ $value }} drops/sec"
 
     # === PERFORMANCE DEGRADATION ALERTS ===
     - name: intelgraph.performance
@@ -404,8 +404,8 @@ spec:
             service: thompson-sampling
             team: ai
           annotations:
-            summary: 'Thompson sampling performance has dropped'
-            description: 'Model {{ $labels.model }} reward rate is {{ $value }}'
+            summary: "Thompson sampling performance has dropped"
+            description: "Model {{ $labels.model }} reward rate is {{ $value }}"
 
         - alert: GraphTraversalSlowdown
           expr: |
@@ -418,8 +418,8 @@ spec:
             service: graph-traversal
             team: data
           annotations:
-            summary: 'Graph traversal queries are slow'
-            description: '90th percentile graph traversal time is {{ $value }}s'
+            summary: "Graph traversal queries are slow"
+            description: "90th percentile graph traversal time is {{ $value }}s"
 
         - alert: SynthesisLatencyIncrease
           expr: |
@@ -432,5 +432,5 @@ spec:
             service: synthesis
             team: ai
           annotations:
-            summary: 'Data synthesis latency has increased'
-            description: '95th percentile synthesis time is {{ $value }}s'
+            summary: "Data synthesis latency has increased"
+            description: "95th percentile synthesis time is {{ $value }}s"

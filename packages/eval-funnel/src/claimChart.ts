@@ -1,4 +1,4 @@
-import { ClaimChart, ClaimElement } from './types';
+import { ClaimChart, ClaimElement } from "./types";
 
 export class ClaimChartBuilder {
   private charts: ClaimChart[] = [];
@@ -9,7 +9,9 @@ export class ClaimChartBuilder {
   }
 
   addElement(competitor: string, archetype: string, element: ClaimElement): void {
-    const existing = this.charts.find((c) => c.competitor === competitor && c.archetype === archetype);
+    const existing = this.charts.find(
+      (c) => c.competitor === competitor && c.archetype === archetype
+    );
     if (!existing) {
       this.charts.push({ competitor, archetype, elements: [element] });
       return;
@@ -28,12 +30,12 @@ export class ClaimChartBuilder {
 
   private validateChart(chart: ClaimChart): void {
     if (!chart.elements.length) {
-      throw new Error('Claim chart must include at least one element');
+      throw new Error("Claim chart must include at least one element");
     }
     const identifiers = new Set<string>();
     for (const element of chart.elements) {
       if (!element.id || !element.statement || !element.behaviorMapping || !element.evidencePath) {
-        throw new Error('Claim element is missing required fields');
+        throw new Error("Claim element is missing required fields");
       }
       if (identifiers.has(element.id)) {
         throw new Error(`Duplicate claim element id detected: ${element.id}`);

@@ -7,11 +7,13 @@ The LAC-PCA system ensures that all data access and exports within the platform 
 ## 1. Concepts
 
 ### Policies
-*   **Authority**: Legal basis for access (e.g., Warrant, Subpoena).
-*   **License**: contractual constraints on data usage (e.g., "Internal Use Only", "No Export").
-*   **Purpose**: The declared intent for a session or case.
+
+- **Authority**: Legal basis for access (e.g., Warrant, Subpoena).
+- **License**: contractual constraints on data usage (e.g., "Internal Use Only", "No Export").
+- **Purpose**: The declared intent for a session or case.
 
 ### Components
+
 1.  **Policy Compiler**: Deterministically transforms high-level policy documents into a lightweight JSON Intermediate Representation (IR).
 2.  **Runtime Gate**: An Apollo Server plugin that evaluates the IR against every incoming GraphQL operation.
 3.  **Provenance Manifest**: A cryptographically signed JSON document accompanying every export, proving which policies authorized the data release.
@@ -28,6 +30,7 @@ The LAC-PCA system ensures that all data access and exports within the platform 
 ## 3. Usage
 
 ### Verifying an Export
+
 Use the `verify-manifest` tool to validate a downloaded bundle:
 
 ```bash
@@ -35,6 +38,7 @@ Use the `verify-manifest` tool to validate a downloaded bundle:
 ```
 
 ### Adding a Policy
+
 (Future) Use the Policy Management UI or API to upload signed policy documents.
 
 ## 4. Policy IR Spec (v1.0)
@@ -52,6 +56,6 @@ Use the `verify-manifest` tool to validate a downloaded bundle:
 
 ## 5. Troubleshooting "POLICY_BLOCKED"
 
-*   **"Export denied by active license"**: One of the active licenses on the data source revokes the `export` grant. Check `Internal-Research-DP-2025`.
-*   **"Source prohibited"**: An authority (e.g., OFAC) explicitly bans this source.
-*   **"Missing Purpose"**: The client did not provide an `x-purpose` header.
+- **"Export denied by active license"**: One of the active licenses on the data source revokes the `export` grant. Check `Internal-Research-DP-2025`.
+- **"Source prohibited"**: An authority (e.g., OFAC) explicitly bans this source.
+- **"Missing Purpose"**: The client did not provide an `x-purpose` header.

@@ -44,7 +44,8 @@ describe('annotationsSlice', () => {
   it('discards restore candidates', () => {
     const withRestore: AnnotationState = {
       ...baseState,
-      restoreCandidate: reducer(baseState, startDraft({ type: 'note' })).activeDraft!,
+      restoreCandidate: reducer(baseState, startDraft({ type: 'note' }))
+        .activeDraft!,
     }
     const next = reducer(withRestore, discardRestoreCandidate())
     expect(next.restoreCandidate).toBeNull()

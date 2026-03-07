@@ -3,8 +3,8 @@
   "type": "object",
   "required": ["summary", "artifacts"],
   "properties": {
-    "summary": {"type": "string"},
-    "artifacts": {"type": "array", "items": {"type": "object"}}
+    "summary": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "object" } }
   },
   "additionalProperties": false
 }

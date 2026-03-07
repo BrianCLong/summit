@@ -18,7 +18,11 @@ const Kbd = React.forwardRef<HTMLElement, KbdProps>(
     const processChild = (child: React.ReactNode): React.ReactNode => {
       if (typeof child === 'string') {
         const lowerChild = child.toLowerCase()
-        if (lowerChild === 'mod' || lowerChild === 'command' || lowerChild === 'ctrl') {
+        if (
+          lowerChild === 'mod' ||
+          lowerChild === 'command' ||
+          lowerChild === 'ctrl'
+        ) {
           return MODIFIER_KEY
         }
         if (lowerChild === 'shift') {

@@ -1,23 +1,23 @@
-const base = require('../../jest.config.cjs');
+const base = require("../../jest.config.cjs");
 
 module.exports = {
   ...base,
-  displayName: 'workflow-engine',
+  displayName: "workflow-engine",
   rootDir: __dirname,
-  roots: ['<rootDir>/src'],
+  roots: ["<rootDir>/src"],
   setupFilesAfterEnv: [],
-  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  testMatch: ["<rootDir>/src/**/*.test.ts"],
   transform: {
-    '^.+\\.(t|j)sx?$': [
-      'ts-jest',
+    "^.+\\.(t|j)sx?$": [
+      "ts-jest",
       {
         useESM: true,
-        tsconfig: '<rootDir>/tsconfig.json',
+        tsconfig: "<rootDir>/tsconfig.json",
       },
     ],
   },
-  extensionsToTreatAsEsm: ['.ts'],
+  extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 };

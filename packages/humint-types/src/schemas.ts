@@ -4,7 +4,7 @@
  * Type-safe validation for all HUMINT operations.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   SOURCE_TYPES,
   SOURCE_STATUS,
@@ -16,51 +16,37 @@ import {
   HANDLING_CAVEATS,
   DEBRIEF_TYPES,
   DEBRIEF_STATUS,
-} from './constants.js';
+} from "./constants.js";
 
 // ============================================================================
 // Primitive Schemas
 // ============================================================================
 
-export const SourceTypeSchema = z.enum(
-  Object.keys(SOURCE_TYPES) as [string, ...string[]],
-);
+export const SourceTypeSchema = z.enum(Object.keys(SOURCE_TYPES) as [string, ...string[]]);
 
-export const SourceStatusSchema = z.enum(
-  Object.keys(SOURCE_STATUS) as [string, ...string[]],
-);
+export const SourceStatusSchema = z.enum(Object.keys(SOURCE_STATUS) as [string, ...string[]]);
 
 export const CredibilityRatingSchema = z.enum(
-  Object.keys(CREDIBILITY_RATINGS) as [string, ...string[]],
+  Object.keys(CREDIBILITY_RATINGS) as [string, ...string[]]
 );
 
 export const InformationRatingSchema = z.enum(
-  Object.keys(INFORMATION_RATINGS) as [string, ...string[]],
+  Object.keys(INFORMATION_RATINGS) as [string, ...string[]]
 );
 
-export const AccessTypeSchema = z.enum(
-  Object.keys(ACCESS_TYPES) as [string, ...string[]],
-);
+export const AccessTypeSchema = z.enum(Object.keys(ACCESS_TYPES) as [string, ...string[]]);
 
-export const RiskLevelSchema = z.enum(
-  Object.keys(RISK_LEVELS) as [string, ...string[]],
-);
+export const RiskLevelSchema = z.enum(Object.keys(RISK_LEVELS) as [string, ...string[]]);
 
 export const ClassificationLevelSchema = z.enum(
-  Object.keys(CLASSIFICATION_LEVELS) as [string, ...string[]],
+  Object.keys(CLASSIFICATION_LEVELS) as [string, ...string[]]
 );
 
-export const HandlingCaveatSchema = z.enum(
-  Object.keys(HANDLING_CAVEATS) as [string, ...string[]],
-);
+export const HandlingCaveatSchema = z.enum(Object.keys(HANDLING_CAVEATS) as [string, ...string[]]);
 
-export const DebriefTypeSchema = z.enum(
-  Object.keys(DEBRIEF_TYPES) as [string, ...string[]],
-);
+export const DebriefTypeSchema = z.enum(Object.keys(DEBRIEF_TYPES) as [string, ...string[]]);
 
-export const DebriefStatusSchema = z.enum(
-  Object.keys(DEBRIEF_STATUS) as [string, ...string[]],
-);
+export const DebriefStatusSchema = z.enum(Object.keys(DEBRIEF_STATUS) as [string, ...string[]]);
 
 // ============================================================================
 // Composite Schemas
@@ -80,13 +66,13 @@ export const PolicyLabelsSchema = z.object({
 export const ContactMethodSchema = z.object({
   id: z.string().uuid(),
   type: z.enum([
-    'SECURE_PHONE',
-    'DEAD_DROP',
-    'BRUSH_PASS',
-    'SIGNAL',
-    'EMAIL',
-    'IN_PERSON',
-    'VIRTUAL',
+    "SECURE_PHONE",
+    "DEAD_DROP",
+    "BRUSH_PASS",
+    "SIGNAL",
+    "EMAIL",
+    "IN_PERSON",
+    "VIRTUAL",
   ]),
   identifier: z.string().min(1),
   protocol: z.string().min(1),
@@ -115,14 +101,8 @@ export const CoverIdentitySchema = z.object({
 export const AccessCapabilitySchema = z.object({
   type: AccessTypeSchema,
   target: z.string().min(1),
-  targetType: z.enum([
-    'PERSON',
-    'ORGANIZATION',
-    'LOCATION',
-    'SYSTEM',
-    'DOCUMENT',
-  ]),
-  level: z.enum(['FULL', 'PARTIAL', 'LIMITED', 'HISTORICAL']),
+  targetType: z.enum(["PERSON", "ORGANIZATION", "LOCATION", "SYSTEM", "DOCUMENT"]),
+  level: z.enum(["FULL", "PARTIAL", "LIMITED", "HISTORICAL"]),
   validFrom: z.coerce.date(),
   validTo: z.coerce.date().optional(),
   reliability: z.number().min(0).max(100),
@@ -130,18 +110,10 @@ export const AccessCapabilitySchema = z.object({
 });
 
 export const CompensationSchema = z.object({
-  type: z.enum([
-    'SALARY',
-    'STIPEND',
-    'PER_REPORT',
-    'EXPENSES_ONLY',
-    'NONE',
-  ]),
+  type: z.enum(["SALARY", "STIPEND", "PER_REPORT", "EXPENSES_ONLY", "NONE"]),
   amount: z.number().positive().optional(),
   currency: z.string().length(3).optional(),
-  frequency: z
-    .enum(['MONTHLY', 'QUARTERLY', 'PER_MEETING', 'AD_HOC'])
-    .optional(),
+  frequency: z.enum(["MONTHLY", "QUARTERLY", "PER_MEETING", "AD_HOC"]).optional(),
 });
 
 // ============================================================================
@@ -158,13 +130,13 @@ export const CreateSourceSchema = z.object({
     .max(50)
     .regex(
       /^[A-Z][A-Z0-9_-]*$/,
-      'Cryptonym must start with letter and contain only uppercase letters, numbers, hyphens, and underscores',
+      "Cryptonym must start with letter and contain only uppercase letters, numbers, hyphens, and underscores"
     ),
   sourceType: SourceTypeSchema,
   handlerId: z.string().uuid(),
   alternateHandlerId: z.string().uuid().optional(),
-  credibilityRating: CredibilityRatingSchema.default('F'),
-  riskLevel: RiskLevelSchema.default('MODERATE'),
+  credibilityRating: CredibilityRatingSchema.default("F"),
+  riskLevel: RiskLevelSchema.default("MODERATE"),
   areaOfOperation: z.array(z.string().min(1)).min(1),
   topicalAccess: z.array(z.string().min(1)),
   accessCapabilities: z.array(AccessCapabilitySchema).optional().default([]),
@@ -177,7 +149,7 @@ export const CreateSourceSchema = z.object({
   motivationFactors: z.array(z.string().min(1)),
   vulnerabilities: z.array(z.string()).optional().default([]),
   policyLabels: PolicyLabelsSchema,
-  notes: z.string().optional().default(''),
+  notes: z.string().optional().default(""),
 });
 
 /**
@@ -187,9 +159,7 @@ export const UpdateSourceSchema = CreateSourceSchema.partial().extend({
   id: z.string().uuid(),
   status: SourceStatusSchema.optional(),
   credibilityScore: z.number().min(0).max(100).optional(),
-  credibilityTrend: z
-    .enum(['IMPROVING', 'STABLE', 'DECLINING'])
-    .optional(),
+  credibilityTrend: z.enum(["IMPROVING", "STABLE", "DECLINING"]).optional(),
   nextScheduledContact: z.coerce.date().optional(),
   personEntityId: z.string().uuid().optional(),
 });
@@ -215,9 +185,9 @@ export const SourceSearchCriteriaSchema = z.object({
   limit: z.number().int().positive().max(100).default(20),
   offset: z.number().int().nonnegative().default(0),
   sortBy: z
-    .enum(['cryptonym', 'credibilityScore', 'lastContactDate', 'createdAt'])
-    .default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+    .enum(["cryptonym", "credibilityScore", "lastContactDate", "createdAt"])
+    .default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
 // ============================================================================
@@ -248,7 +218,7 @@ export const CreateTaskingSchema = z.object({
   sourceId: z.string().uuid(),
   requirementId: z.string().uuid(),
   taskDescription: z.string().min(10).max(5000),
-  priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  priority: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
   deadline: z.coerce.date().optional(),
   policyLabels: PolicyLabelsSchema,
 });
@@ -256,14 +226,7 @@ export const CreateTaskingSchema = z.object({
 export const UpdateTaskingSchema = z.object({
   id: z.string().uuid(),
   status: z
-    .enum([
-      'ASSIGNED',
-      'ACKNOWLEDGED',
-      'IN_PROGRESS',
-      'COMPLETED',
-      'FAILED',
-      'CANCELLED',
-    ])
+    .enum(["ASSIGNED", "ACKNOWLEDGED", "IN_PROGRESS", "COMPLETED", "FAILED", "CANCELLED"])
     .optional(),
   result: z.string().optional(),
 });
@@ -285,15 +248,13 @@ export function validateCryptonym(cryptonym: string): boolean {
 export function calculateCredibilityScore(
   sourceRating: keyof typeof CREDIBILITY_RATINGS,
   infoRating: keyof typeof INFORMATION_RATINGS,
-  corroborationPercentage: number,
+  corroborationPercentage: number
 ): number {
   const sourceScore = CREDIBILITY_RATINGS[sourceRating].score;
   const infoScore = INFORMATION_RATINGS[infoRating].score;
 
   // Weighted calculation: 40% source reliability, 40% info reliability, 20% corroboration
-  return Math.round(
-    sourceScore * 0.4 + infoScore * 0.4 + corroborationPercentage * 0.2,
-  );
+  return Math.round(sourceScore * 0.4 + infoScore * 0.4 + corroborationPercentage * 0.2);
 }
 
 /**
@@ -301,11 +262,11 @@ export function calculateCredibilityScore(
  */
 export function isContactOverdue(
   lastContactDate: Date | undefined,
-  thresholdDays: number = 30,
+  thresholdDays: number = 30
 ): boolean {
   if (!lastContactDate) return true;
   const daysSinceContact = Math.floor(
-    (Date.now() - lastContactDate.getTime()) / (1000 * 60 * 60 * 24),
+    (Date.now() - lastContactDate.getTime()) / (1000 * 60 * 60 * 24)
   );
   return daysSinceContact > thresholdDays;
 }

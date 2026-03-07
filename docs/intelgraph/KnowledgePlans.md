@@ -5,10 +5,11 @@ CKPs are reusable, declarative plans for executing complex graph traversals and 
 ## Structure
 
 A `KnowledgePlan` consists of a sequence of `PlanStep`s.
-*   `query`: Execute a Cypher query (or DSL) to fetch data.
-*   `filter`: Apply logic to narrow down results.
-*   `risk_check`: Heuristic analysis of data.
-*   `summarize`: (Optional) Call an LLM to generate a summary.
+
+- `query`: Execute a Cypher query (or DSL) to fetch data.
+- `filter`: Apply logic to narrow down results.
+- `risk_check`: Heuristic analysis of data.
+- `summarize`: (Optional) Call an LLM to generate a summary.
 
 ## Execution
 

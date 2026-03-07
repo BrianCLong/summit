@@ -1,13 +1,13 @@
-import { pino, type Logger } from 'pino';
-import type { ModelMetadata } from '../inference/InferenceEngine';
-import { Precision } from '../inference/InferenceEngine';
+import { pino, type Logger } from "pino";
+import type { ModelMetadata } from "../inference/InferenceEngine";
+import { Precision } from "../inference/InferenceEngine";
 
 export enum OptimizationTechnique {
-  QUANTIZATION = 'quantization',
-  PRUNING = 'pruning',
-  KNOWLEDGE_DISTILLATION = 'distillation',
-  LAYER_FUSION = 'layer_fusion',
-  GRAPH_OPTIMIZATION = 'graph_optimization'
+  QUANTIZATION = "quantization",
+  PRUNING = "pruning",
+  KNOWLEDGE_DISTILLATION = "distillation",
+  LAYER_FUSION = "layer_fusion",
+  GRAPH_OPTIMIZATION = "graph_optimization",
 }
 
 export interface OptimizationConfig {
@@ -35,7 +35,7 @@ export class ModelOptimizer {
   private logger: Logger;
 
   constructor(logger?: Logger) {
-    this.logger = logger || pino({ name: 'ModelOptimizer' });
+    this.logger = logger || pino({ name: "ModelOptimizer" });
   }
 
   /**
@@ -48,7 +48,7 @@ export class ModelOptimizer {
   ): Promise<{ optimizedModel: unknown; result: OptimizationResult }> {
     this.logger.info(
       { modelId: metadata.id, techniques: config.techniques },
-      'Starting model optimization'
+      "Starting model optimization"
     );
 
     const originalSize = metadata.size;
@@ -88,7 +88,7 @@ export class ModelOptimizer {
           break;
 
         default:
-          this.logger.warn({ technique }, 'Unknown optimization technique');
+          this.logger.warn({ technique }, "Unknown optimization technique");
       }
     }
 
@@ -103,17 +103,17 @@ export class ModelOptimizer {
       appliedTechniques,
       metadata: {
         targetPrecision: config.targetPrecision,
-        preserveAccuracy: config.preserveAccuracy
-      }
+        preserveAccuracy: config.preserveAccuracy,
+      },
     };
 
     this.logger.info(
       {
         modelId: metadata.id,
         compressionRatio: compressionRatio.toFixed(2),
-        speedup: estimatedSpeedup.toFixed(2)
+        speedup: estimatedSpeedup.toFixed(2),
       },
-      'Model optimization completed'
+      "Model optimization completed"
     );
 
     return { optimizedModel, result };
@@ -129,7 +129,7 @@ export class ModelOptimizer {
   ): Promise<unknown> {
     this.logger.info(
       { modelId: metadata.id, from: metadata.precision, to: targetPrecision },
-      'Applying quantization'
+      "Applying quantization"
     );
 
     // Placeholder for actual quantization logic
@@ -145,7 +145,7 @@ export class ModelOptimizer {
     metadata: ModelMetadata,
     config: OptimizationConfig
   ): Promise<unknown> {
-    this.logger.info({ modelId: metadata.id }, 'Applying pruning');
+    this.logger.info({ modelId: metadata.id }, "Applying pruning");
 
     // Placeholder for actual pruning logic
     // In real implementation, this would:
@@ -159,7 +159,7 @@ export class ModelOptimizer {
    * Apply layer fusion to combine consecutive operations
    */
   private async applyLayerFusion(model: unknown, metadata: ModelMetadata): Promise<unknown> {
-    this.logger.info({ modelId: metadata.id }, 'Applying layer fusion');
+    this.logger.info({ modelId: metadata.id }, "Applying layer fusion");
 
     // Placeholder for layer fusion
     // In real implementation, this would fuse operations like:
@@ -170,11 +170,8 @@ export class ModelOptimizer {
   /**
    * Apply graph optimization
    */
-  private async applyGraphOptimization(
-    model: unknown,
-    metadata: ModelMetadata
-  ): Promise<unknown> {
-    this.logger.info({ modelId: metadata.id }, 'Applying graph optimization');
+  private async applyGraphOptimization(model: unknown, metadata: ModelMetadata): Promise<unknown> {
+    this.logger.info({ modelId: metadata.id }, "Applying graph optimization");
 
     // Placeholder for graph optimization
     // In real implementation, this would:
@@ -192,7 +189,7 @@ export class ModelOptimizer {
       [Precision.FP32]: 1.0,
       [Precision.FP16]: 0.5,
       [Precision.INT8]: 0.25,
-      [Precision.MIXED]: 0.4
+      [Precision.MIXED]: 0.4,
     };
 
     return Math.floor(originalSize * reductionFactors[precision]);
@@ -201,10 +198,7 @@ export class ModelOptimizer {
   /**
    * Estimate speedup from optimizations
    */
-  private estimateSpeedup(
-    techniques: OptimizationTechnique[],
-    compressionRatio: number
-  ): number {
+  private estimateSpeedup(techniques: OptimizationTechnique[], compressionRatio: number): number {
     let speedup = 1.0;
 
     if (techniques.includes(OptimizationTechnique.QUANTIZATION)) {
@@ -243,7 +237,7 @@ export class ModelOptimizer {
     p99Latency: number;
     throughput: number;
   }> {
-    this.logger.info({ modelId: metadata.id }, 'Benchmarking model');
+    this.logger.info({ modelId: metadata.id }, "Benchmarking model");
 
     const latencies: number[] = [];
 
@@ -265,7 +259,7 @@ export class ModelOptimizer {
       p50Latency: sorted[Math.floor(sorted.length * 0.5)],
       p95Latency: sorted[Math.floor(sorted.length * 0.95)],
       p99Latency: sorted[Math.floor(sorted.length * 0.99)],
-      throughput: (latencies.length / sum) * 1000 // inferences per second
+      throughput: (latencies.length / sum) * 1000, // inferences per second
     };
   }
 
@@ -285,7 +279,7 @@ export class ModelOptimizer {
     sourceFormat: string,
     targetFormat: string
   ): Promise<unknown> {
-    this.logger.info({ sourceFormat, targetFormat }, 'Converting model format');
+    this.logger.info({ sourceFormat, targetFormat }, "Converting model format");
 
     // Placeholder for format conversion
     // In real implementation, this would use converters like:
@@ -307,7 +301,7 @@ export class ModelOptimizer {
     optimizedAccuracy: number;
     accuracyDrop: number;
   }> {
-    this.logger.info('Validating model accuracy');
+    this.logger.info("Validating model accuracy");
 
     // Placeholder for accuracy validation
     // In real implementation, this would:
@@ -318,7 +312,7 @@ export class ModelOptimizer {
     return {
       originalAccuracy: 0.95,
       optimizedAccuracy: 0.93,
-      accuracyDrop: 0.02
+      accuracyDrop: 0.02,
     };
   }
 }

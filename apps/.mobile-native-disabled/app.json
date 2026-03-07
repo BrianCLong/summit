@@ -14,9 +14,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#2563eb"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.intelgraph.mobile",

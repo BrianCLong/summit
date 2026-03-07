@@ -47,7 +47,9 @@ export function SearchSessionTabs({
   const [showImport, setShowImport] = useState(false)
 
   const handleExport = () => {
-    if (!activeSession) {return}
+    if (!activeSession) {
+      return
+    }
     const json = onExportSession(activeSession.id)
     setExportPreview(json)
   }
@@ -59,7 +61,9 @@ export function SearchSessionTabs({
       setImportError(null)
       setShowImport(false)
     } else {
-      setImportError('Unable to import session JSON. Please verify the payload.')
+      setImportError(
+        'Unable to import session JSON. Please verify the payload.'
+      )
     }
   }
 
@@ -78,7 +82,8 @@ export function SearchSessionTabs({
                   value={session.id}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 text-xs md:text-sm',
-                    session.stale && 'border border-amber-200 bg-amber-50 text-amber-800'
+                    session.stale &&
+                      'border border-amber-200 bg-amber-50 text-amber-800'
                   )}
                   data-testid="search-session-tab"
                 >
@@ -126,7 +131,9 @@ export function SearchSessionTabs({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => activeSession && onDuplicateSession(activeSession.id)}
+              onClick={() =>
+                activeSession && onDuplicateSession(activeSession.id)
+              }
               disabled={!activeSession}
             >
               <Copy className="mr-2 h-4 w-4" />
@@ -173,7 +180,8 @@ export function SearchSessionTabs({
             <div className="space-y-0.5">
               <p className="text-sm font-medium">Results may have changed</p>
               <p className="text-xs text-amber-700/80">
-                Refresh this session to ensure filters and selections reflect the latest data.
+                Refresh this session to ensure filters and selections reflect
+                the latest data.
               </p>
             </div>
           </div>

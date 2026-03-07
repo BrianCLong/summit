@@ -2,13 +2,7 @@
  * Network Context
  * Provides network status awareness across the app
  */
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { NetworkStatus } from '@/types';
 import { syncEngine } from '@/lib/syncEngine';
 
@@ -40,9 +34,7 @@ interface NavigatorWithConnection extends Navigator {
 }
 
 export function NetworkProvider({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<NetworkStatus>(
-    navigator.onLine ? 'online' : 'offline'
-  );
+  const [status, setStatus] = useState<NetworkStatus>(navigator.onLine ? 'online' : 'offline');
   const [effectiveType, setEffectiveType] = useState<string | null>(null);
   const [downlink, setDownlink] = useState<number | null>(null);
   const [rtt, setRtt] = useState<number | null>(null);
@@ -143,9 +135,7 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
     checkConnection,
   };
 
-  return (
-    <NetworkContext.Provider value={value}>{children}</NetworkContext.Provider>
-  );
+  return <NetworkContext.Provider value={value}>{children}</NetworkContext.Provider>;
 }
 
 export function useNetwork() {

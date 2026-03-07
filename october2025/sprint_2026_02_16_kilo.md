@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Event-first reliability: outbox pattern + CDC for ingest; exactly-once semantics at-least-once delivery.'
-  - 'Tenant data protection: field-level encryption (FLE) with per-tenant keys + key-rotation runbook.'
-  - 'Multi-cloud posture (control-plane): portable backups, artifact mirroring, and image promotion parity.'
-  - 'Self-serve platform: golden `svc-template` generator, paved-road Helm chart, and one-command preview.'
-  - 'Traffic mgmt v2: per-tenant weighted routing and surge shedding without SLO breach.'
-  - 'Observability depth v2: RED+Saturation SLOs per tenant, query sampling guards, and usage analytics.'
+  - "Event-first reliability: outbox pattern + CDC for ingest; exactly-once semantics at-least-once delivery."
+  - "Tenant data protection: field-level encryption (FLE) with per-tenant keys + key-rotation runbook."
+  - "Multi-cloud posture (control-plane): portable backups, artifact mirroring, and image promotion parity."
+  - "Self-serve platform: golden `svc-template` generator, paved-road Helm chart, and one-command preview."
+  - "Traffic mgmt v2: per-tenant weighted routing and surge shedding without SLO breach."
+  - "Observability depth v2: RED+Saturation SLOs per tenant, query sampling guards, and usage analytics."
 ---
 
 # Sprint 33 Plan — Event-First Reliability, Tenant FLE, and Self‑Serve Platform
@@ -169,8 +169,8 @@ const BATCH = 200;
 const SLEEP = 200;
 while (true) {
   const rows = await db.query(
-    'SELECT * FROM outbox WHERE dequeued_at IS NULL ORDER BY id ASC LIMIT $1',
-    [BATCH],
+    "SELECT * FROM outbox WHERE dequeued_at IS NULL ORDER BY id ASC LIMIT $1",
+    [BATCH]
   );
   if (!rows.rowCount) {
     await sleep(SLEEP);
@@ -180,8 +180,7 @@ while (true) {
     const ok = await bus.publish(r.kind, r.payload, {
       idempotencyKey: r.fingerprint,
     });
-    if (ok)
-      await db.query('UPDATE outbox SET dequeued_at=now() WHERE id=$1', [r.id]);
+    if (ok) await db.query("UPDATE outbox SET dequeued_at=now() WHERE id=$1", [r.id]);
   }
 }
 ```
@@ -205,20 +204,20 @@ while (true) {
 **Path:** `libs/crypto/envelope.ts`
 
 ```ts
-import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import { randomBytes, createCipheriv, createDecipheriv } from "crypto";
 export function encryptField(tenantKek: Buffer, plaintext: Buffer) {
   const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', tenantKek, iv);
+  const cipher = createCipheriv("aes-256-gcm", tenantKek, iv);
   const ct = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
-  return Buffer.concat([Buffer.from([1]), iv, tag, ct]).toString('base64');
+  return Buffer.concat([Buffer.from([1]), iv, tag, ct]).toString("base64");
 }
 export function decryptField(tenantKek: Buffer, blob: string) {
-  const b = Buffer.from(blob, 'base64');
+  const b = Buffer.from(blob, "base64");
   const iv = b.subarray(1, 13);
   const tag = b.subarray(13, 29);
   const ct = b.subarray(29);
-  const d = createDecipheriv('aes-256-gcm', tenantKek, iv);
+  const d = createDecipheriv("aes-256-gcm", tenantKek, iv);
   d.setAuthTag(tag);
   return Buffer.concat([d.update(ct), d.final()]);
 }
@@ -229,9 +228,9 @@ export function decryptField(tenantKek: Buffer, blob: string) {
 **Path:** `libs/crypto/deterministic.ts`
 
 ```ts
-import { createHmac } from 'crypto';
+import { createHmac } from "crypto";
 export function detToken(tenantKek: Buffer, value: string) {
-  return createHmac('sha256', tenantKek).update(value).digest('base64url');
+  return createHmac("sha256", tenantKek).update(value).digest("base64url");
 }
 ```
 
@@ -285,14 +284,14 @@ pg_dump --format=custom $DATABASE_URL | \
 
 ```js
 module.exports = function (plop) {
-  plop.setGenerator('service', {
-    description: 'Scaffold paved-road service',
-    prompts: [{ type: 'input', name: 'name', message: 'Service name' }],
+  plop.setGenerator("service", {
+    description: "Scaffold paved-road service",
+    prompts: [{ type: "input", name: "name", message: "Service name" }],
     actions: [
       {
-        type: 'addMany',
-        destination: 'services/{{name}}',
-        base: 'tools/svc-template/base',
+        type: "addMany",
+        destination: "services/{{name}}",
+        base: "tools/svc-template/base",
       },
     ],
   });

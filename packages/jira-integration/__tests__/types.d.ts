@@ -1,6 +1,6 @@
 // Type declarations for test files
 
-declare module '@jest/globals' {
+declare module "@jest/globals" {
   export const jest: any;
   export const describe: any;
   export const it: any;

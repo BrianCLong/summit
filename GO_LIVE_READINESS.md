@@ -112,11 +112,11 @@ JAEGER_ENDPOINT=http://jaeger-collector:14268/api/traces
 
 ## 3. Health Check Endpoints
 
-| Endpoint | Purpose | Expected Response |
-|----------|---------|-------------------|
-| `GET /health` | Application health | `{"status": "ok"}` |
-| `GET /healthz` | Liveness probe | `200 OK` |
-| `GET /readyz` | Readiness probe | `200 OK` |
+| Endpoint       | Purpose            | Expected Response  |
+| -------------- | ------------------ | ------------------ |
+| `GET /health`  | Application health | `{"status": "ok"}` |
+| `GET /healthz` | Liveness probe     | `200 OK`           |
+| `GET /readyz`  | Readiness probe    | `200 OK`           |
 
 ### Health Check Configuration
 
@@ -246,12 +246,12 @@ pnpm db:migrate:status
 
 ## 6. CI Status
 
-| Check | Status | Command |
-|-------|--------|---------|
-| TypeScript | PASS | `pnpm typecheck` |
-| Tests (GA Verify) | PASS (21/21) | `GA_VERIFY_MODE=true pnpm test` |
-| Lint | WARN (warnings only) | `pnpm lint` |
-| Build | PASS | `pnpm build` |
+| Check             | Status               | Command                         |
+| ----------------- | -------------------- | ------------------------------- |
+| TypeScript        | PASS                 | `pnpm typecheck`                |
+| Tests (GA Verify) | PASS (21/21)         | `GA_VERIFY_MODE=true pnpm test` |
+| Lint              | WARN (warnings only) | `pnpm lint`                     |
+| Build             | PASS                 | `pnpm build`                    |
 
 ---
 
@@ -387,11 +387,11 @@ helm template summit deploy/helm/intelgraph \
 
 The Helm charts are configured with the following probes:
 
-| Chart | Liveness Probe | Readiness Probe |
-|-------|----------------|-----------------|
-| `intelgraph` | `/healthz` | `/readyz` |
-| `summit` | `/healthz` | `/readyz` |
-| `summit-intel-evo` | `/health` | `/ready` |
+| Chart              | Liveness Probe | Readiness Probe |
+| ------------------ | -------------- | --------------- |
+| `intelgraph`       | `/healthz`     | `/readyz`       |
+| `summit`           | `/healthz`     | `/readyz`       |
+| `summit-intel-evo` | `/health`      | `/ready`        |
 
 These probes align with the application's health endpoints.
 
@@ -425,6 +425,7 @@ The evidence bundle provides an auditable, machine-readable proof of go-live rea
 ### What is an Evidence Bundle?
 
 An evidence bundle is a signed artifact containing:
+
 - Git commit SHA, branch, and dirty status
 - Toolchain versions (Node.js, pnpm)
 - Results of all verification checks (lint, build, test, smoke)
@@ -456,6 +457,7 @@ pnpm evidence:go-live:verify artifacts/evidence/go-live/<sha>
 ### CI Artifact Location
 
 Evidence bundles are uploaded as CI artifacts:
+
 - **Artifact Name:** `go-live-evidence-<sha>`
 - **Retention:** 90 days
 - **Location:** GitHub Actions > Workflow Run > Artifacts
@@ -498,6 +500,7 @@ artifacts/evidence/go-live/<sha>/
 ### Schema Location
 
 The evidence schema is defined at:
+
 - `docs/evidence/schema/go_live_evidence.schema.json`
 
 ---
@@ -550,6 +553,7 @@ artifacts/evidence/go-live/<sha>/
 ### Provenance Attestation
 
 The provenance file follows SLSA v0.2 format and includes:
+
 - Subject digests for all evidence files
 - Build configuration (commands, environment)
 - Materials (source repository, npm registry)
@@ -558,6 +562,7 @@ The provenance file follows SLSA v0.2 format and includes:
 ### SBOM Contents
 
 The SBOM uses CycloneDX 1.5 format and includes:
+
 - All npm dependencies
 - Package URLs (purls) for each component
 - Generated timestamp and tool info
@@ -597,6 +602,7 @@ pnpm release:go-live:github
 ### Release Artifacts
 
 Each GitHub release includes:
+
 - `evidence.json` - Machine-readable evidence
 - `evidence.md` - Human-readable summary
 - `checksums.txt` - SHA-256 integrity hashes
@@ -624,13 +630,13 @@ pnpm release:go-live:preflight --ci
 
 ### What Pre-Flight Validates
 
-| Category | Checks |
-|----------|--------|
-| **Git State** | Clean working tree, on release branch, no unpushed commits |
-| **Tooling** | Node >= 18, pnpm, GitHub CLI, authentication |
-| **Project** | package.json, required scripts, evidence schema |
-| **Dependencies** | node_modules, pnpm-lock.yaml |
-| **Previous** | Existing evidence, tag availability |
+| Category         | Checks                                                     |
+| ---------------- | ---------------------------------------------------------- |
+| **Git State**    | Clean working tree, on release branch, no unpushed commits |
+| **Tooling**      | Node >= 18, pnpm, GitHub CLI, authentication               |
+| **Project**      | package.json, required scripts, evidence schema            |
+| **Dependencies** | node_modules, pnpm-lock.yaml                               |
+| **Previous**     | Existing evidence, tag availability                        |
 
 ### Sample Output
 
@@ -668,11 +674,11 @@ Sign evidence bundles for cryptographic proof of integrity.
 
 ### Signing Methods
 
-| Method | Use Case | Requirements |
-|--------|----------|--------------|
+| Method               | Use Case     | Requirements                   |
+| -------------------- | ------------ | ------------------------------ |
 | **Cosign (Keyless)** | CI with OIDC | GitHub Actions with OIDC token |
-| **Cosign (Keyed)** | Local/CI | `cosign.key` file |
-| **GPG** | Local | GPG key configured |
+| **Cosign (Keyed)**   | Local/CI     | `cosign.key` file              |
+| **GPG**              | Local        | GPG key configured             |
 
 ### Signing Commands
 
@@ -700,18 +706,19 @@ For GitHub Actions with OIDC:
 
 ```yaml
 permissions:
-  id-token: write  # Required for keyless signing
+  id-token: write # Required for keyless signing
 
 steps:
   - name: Sign Evidence
     run: pnpm release:go-live:sign
     env:
-      COSIGN_EXPERIMENTAL: '1'
+      COSIGN_EXPERIMENTAL: "1"
 ```
 
 ### Generated Files
 
 After signing, the evidence directory includes:
+
 - `*.sig` - Detached signature files
 - `*.bundle` - Cosign bundle (includes certificate chain)
 - `MANIFEST.txt` - File manifest with hashes
@@ -773,20 +780,20 @@ pnpm release:go-live:github
 
 ### All Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm evidence:go-live:gen` | Generate evidence bundle |
-| `pnpm evidence:go-live:verify` | Verify evidence bundle |
-| `pnpm release:go-live:sbom` | Generate SBOM |
-| `pnpm release:go-live:provenance` | Generate provenance attestation |
-| `pnpm release:go-live:notes` | Generate release notes |
-| `pnpm release:go-live:tag` | Create git tag |
-| `pnpm release:go-live:github` | Create GitHub release |
-| `pnpm release:go-live:sign` | Sign evidence bundle |
-| `pnpm release:go-live:preflight` | Pre-flight checklist |
-| `pnpm release:go-live:full` | Full release (gen + sbom + prov + notes) |
-| `pnpm test:go-live-pipeline` | Integration tests |
-| `pnpm test:evidence-schema` | Schema validation tests |
+| Script                            | Description                              |
+| --------------------------------- | ---------------------------------------- |
+| `pnpm evidence:go-live:gen`       | Generate evidence bundle                 |
+| `pnpm evidence:go-live:verify`    | Verify evidence bundle                   |
+| `pnpm release:go-live:sbom`       | Generate SBOM                            |
+| `pnpm release:go-live:provenance` | Generate provenance attestation          |
+| `pnpm release:go-live:notes`      | Generate release notes                   |
+| `pnpm release:go-live:tag`        | Create git tag                           |
+| `pnpm release:go-live:github`     | Create GitHub release                    |
+| `pnpm release:go-live:sign`       | Sign evidence bundle                     |
+| `pnpm release:go-live:preflight`  | Pre-flight checklist                     |
+| `pnpm release:go-live:full`       | Full release (gen + sbom + prov + notes) |
+| `pnpm test:go-live-pipeline`      | Integration tests                        |
+| `pnpm test:evidence-schema`       | Schema validation tests                  |
 
 ---
 

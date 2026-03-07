@@ -7,6 +7,7 @@ This document outlines the process for generating SLSA provenance and SBOMs for 
 A "real artifact" in this repository is a file that is produced as a result of the canonical build process (`pnpm build`). These artifacts are the distributable assets that are deployed to our environments. The `scripts/release/build-artifacts.ts` script is responsible for orchestrating the build, collecting these artifacts, and creating a manifest that describes them.
 
 The output of this script is a `dist/` directory containing:
+
 - The build artifacts.
 - A `manifest.json` file with artifact checksums and build metadata.
 - A `checksums.txt` file for easy verification.
@@ -49,5 +50,5 @@ The `slsa-provenance` workflow includes a `verify` job that runs after the prove
 
 ### Common Failure Modes
 
--   **Checksum Mismatch**: This indicates that an artifact was modified after it was built and checksummed.
--   **Invalid SLSA Attestation**: This can happen if the provenance was tampered with or if there is a mismatch between the expected and actual build process.
+- **Checksum Mismatch**: This indicates that an artifact was modified after it was built and checksummed.
+- **Invalid SLSA Attestation**: This can happen if the provenance was tampered with or if there is a mismatch between the expected and actual build process.

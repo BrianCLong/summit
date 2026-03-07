@@ -296,7 +296,7 @@ level: high
 
 detection:
   selection:
-    operationName|contains: ['listEntities', 'search', 'export']
+    operationName|contains: ["listEntities", "search", "export"]
   filter:
     tenantId_mismatch: true # derived field from gateway
   timeframe: 5m
@@ -319,8 +319,8 @@ level: high
 
 detection:
   selection:
-    export.approval.status: 'none'
-    export.bytes: '> 1MB'
+    export.approval.status: "none"
+    export.bytes: "> 1MB"
   condition: selection
 ```
 

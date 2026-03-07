@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # CONTROLLED DEVIATIONS LEDGER
 
 **Status:** ACTIVE

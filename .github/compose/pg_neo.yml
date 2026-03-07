@@ -26,7 +26,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "cypher-shell -a bolt://localhost:7687 -u neo4j -p test1234 'RETURN 1' >/dev/null 2>&1 || exit 1"
+          "cypher-shell -a bolt://localhost:7687 -u neo4j -p test1234 'RETURN 1' >/dev/null 2>&1 || exit 1",
         ]
       interval: 10s
       timeout: 5s

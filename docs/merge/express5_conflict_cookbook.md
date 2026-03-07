@@ -21,7 +21,7 @@ router.post("/api/x", async (req,res,next)=>{try{...}catch(e){next(e)}})
 **After**
 
 ```ts
-router.post('/api/x', async (req, res) => {
+router.post("/api/x", async (req, res) => {
   const r = await svc.create(req.body);
   return res.status(201).json(r);
 });
@@ -32,7 +32,7 @@ router.post('/api/x', async (req, res) => {
 ```ts
 throw Object.assign(new Error("Missing 'type'"), {
   statusCode: 400,
-  code: 'BAD_REQUEST',
+  code: "BAD_REQUEST",
 });
 ```
 
@@ -41,11 +41,11 @@ Global error handler maps `{ statusCode, code }` → JSON.
 ### C) 404 + Error order
 
 ```ts
-app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
+app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
 app.use((err, _req, res, _next) => {
   const s = err.statusCode || 500;
-  const c = err.code || 'INTERNAL_ERROR';
-  const m = process.env.NODE_ENV === 'production' ? 'Internal error' : err.message || String(err);
+  const c = err.code || "INTERNAL_ERROR";
+  const m = process.env.NODE_ENV === "production" ? "Internal error" : err.message || String(err);
   res.status(s).json({ error: { code: c, message: m } });
 });
 ```
@@ -53,10 +53,10 @@ app.use((err, _req, res, _next) => {
 ### D) Streaming
 
 ```ts
-import { pipeline } from 'node:stream/promises';
-router.get('/export/:id', async (req, res) => {
+import { pipeline } from "node:stream/promises";
+router.get("/export/:id", async (req, res) => {
   const s = await svc.exportStream(req.params.id);
-  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader("Content-Type", "application/octet-stream");
   await pipeline(s, res);
 });
 ```

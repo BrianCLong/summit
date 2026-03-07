@@ -15,6 +15,7 @@ Merge batch size: 1
 ```
 
 **Result**:
+
 - Processes 1 PR at a time
 - Each PR waits for full CI before next starts
 - Throughput: ~3-4 PRs/hour (with 20-min pr-gate)
@@ -45,6 +46,7 @@ Status check timeout: 30 minutes
 **Recommended**: 5 (conservative) to 10 (aggressive)
 
 **Impact**:
+
 ```
 Concurrency 1: Tests 1 PR at a time
 Concurrency 5: Tests 5 PRs in parallel
@@ -52,6 +54,7 @@ Concurrency 10: Tests 10 PRs in parallel
 ```
 
 **Throughput increase**:
+
 ```
 Concurrency 1: ~3 PRs/hour
 Concurrency 5: ~15 PRs/hour (5× increase)
@@ -59,6 +62,7 @@ Concurrency 10: ~30 PRs/hour (10× increase)
 ```
 
 **Why this works with our architecture**:
+
 - pr-gate completes in <20 min
 - Lightweight gate allows parallel testing
 - GitHub Actions has 60 concurrent runner limit (plenty of capacity)
@@ -71,18 +75,21 @@ Concurrency 10: ~30 PRs/hour (10× increase)
 **Recommended**: 5
 
 **Impact**:
+
 ```
 Batch 1: Each PR creates separate merge commit
 Batch 5: 5 PRs grouped, tested together, merged as one
 ```
 
 **Throughput increase**:
+
 ```
 Batch 1: 1 merge/cycle
 Batch 5: 5 merges/cycle (5× fewer cycles)
 ```
 
 **Why this works**:
+
 - pr-gate is deterministic (low flake rate)
 - If batch fails, queue automatically bisects to find culprit
 - Reduces total CI time significantly
@@ -119,11 +126,13 @@ Batch 5: 5 merges/cycle (5× fewer cycles)
 ### Via GitHub UI
 
 1. Navigate to:
+
    ```
    Settings → Merge Queue → main
    ```
 
 2. Set values:
+
    ```
    Merge method: Squash
    Build concurrency: 5
@@ -155,6 +164,7 @@ gh api repos/BrianCLong/summit/merge-queue \
 ### Scenario: 100 PRs in Queue
 
 #### Before Optimization
+
 ```
 Config:
   - Concurrency: 1
@@ -169,6 +179,7 @@ Throughput: 3 PRs/hour
 ```
 
 #### After Optimization
+
 ```
 Config:
   - Concurrency: 5
@@ -187,11 +198,13 @@ Throughput: 15 PRs/hour
 ### Scenario: 500 PRs in Surge
 
 #### Before Optimization
+
 ```
 500 PRs × 20 min = 10,000 min = 167 hours = 7 days
 ```
 
 #### After Optimization
+
 ```
 With concurrency 10, batch 10:
 (500 PRs ÷ 10 per batch) × 20 min = 1,000 min = 16.7 hours
@@ -205,12 +218,14 @@ With concurrency 5, batch 5:
 ## Trade-offs
 
 ### Advantages
+
 - ✅ 3-10× faster merge throughput
 - ✅ Handles surges (100+ PRs) gracefully
 - ✅ Reduces total CI time
 - ✅ Maintains safety (failed batches bisect automatically)
 
 ### Considerations
+
 - ⚠️ Failed batch affects multiple PRs
   - **Mitigation**: Queue auto-bisects to find culprit
 - ⚠️ Requires deterministic pr-gate
@@ -221,6 +236,7 @@ With concurrency 5, batch 5:
 ## Recommendations by Repository State
 
 ### Conservative (Recommended Start)
+
 ```
 Build concurrency: 5
 Merge batch size: 3
@@ -232,6 +248,7 @@ Maximum batch size: 5
 **Throughput**: ~3-5× improvement
 
 ### Balanced (Recommended After 1 Week)
+
 ```
 Build concurrency: 5
 Merge batch size: 5
@@ -243,6 +260,7 @@ Maximum batch size: 10
 **Throughput**: ~5× improvement
 
 ### Aggressive (For PR Surges)
+
 ```
 Build concurrency: 10
 Merge batch size: 10
@@ -286,6 +304,7 @@ gh run list --workflow="Merge Queue" --limit 50 --json conclusion \
 ### Alerts
 
 Set up alerts for:
+
 - Queue depth >50 for >2 hours
 - Batch failure rate >10%
 - Merge rate <10 PRs/hour (below target)
@@ -297,6 +316,7 @@ Set up alerts for:
 1. Batch of 5 PRs tested together
 2. One PR has failing test
 3. **Automatic bisection**:
+
    ```
    Queue splits batch: [PR1, PR2] + [PR3, PR4, PR5]
    Tests both groups
@@ -355,23 +375,27 @@ Reverts to sequential processing (safe but slow).
 ## Real-World Examples
 
 ### Stripe (Public)
+
 - ~1000 engineers
 - Hundreds of PRs/day
 - Uses merge queue with batching
 - Configuration: Concurrency 10, Batch 10
 
 ### Shopify (Public)
+
 - ~2000 engineers
 - Large monorepo
 - Merge queue + deterministic gate
 - Configuration: Concurrency 8, Batch 5
 
 ### Vercel (Public)
+
 - Fast-moving monorepo
 - Merge queue essential
 - Configuration: Concurrency 5, Batch 5
 
 All use similar patterns:
+
 1. Fast deterministic gate (<20 min)
 2. Aggressive merge queue batching
 3. Post-merge comprehensive validation
@@ -381,6 +405,7 @@ All use similar patterns:
 ### After 4-PR Stack Merges
 
 1. **Week 1**: Deploy with conservative settings
+
    ```
    Concurrency: 5
    Batch: 3
@@ -402,6 +427,7 @@ All use similar patterns:
 If queue >100 PRs:
 
 1. **Immediately**: Increase to aggressive settings
+
    ```
    Concurrency: 10
    Batch: 10

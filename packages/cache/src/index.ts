@@ -1,8 +1,8 @@
-import Redis from 'ioredis';
-import { Counter, Registry, collectDefaultMetrics, register as defaultRegistry } from 'prom-client';
+import Redis from "ioredis";
+import { Counter, Registry, collectDefaultMetrics, register as defaultRegistry } from "prom-client";
 
-export type CacheClass = 'critical_path' | 'best_effort' | 'static_metadata';
-export type Consistency = 'stale-OK' | 'stale-unacceptable';
+export type CacheClass = "critical_path" | "best_effort" | "static_metadata";
+export type Consistency = "stale-OK" | "stale-unacceptable";
 
 const DEFAULT_TTLS: Record<CacheClass, number> = {
   critical_path: 120,
@@ -32,7 +32,7 @@ export interface CacheClientConfig {
   env?: string;
   fallbackToMemory?: boolean;
   devTtlCapSeconds?: number;
-  logger?: Pick<typeof console, 'warn' | 'error' | 'debug'>;
+  logger?: Pick<typeof console, "warn" | "error" | "debug">;
 }
 
 interface CacheBackend {
@@ -41,7 +41,7 @@ interface CacheBackend {
     key: string,
     value: unknown,
     ttlSeconds?: number,
-    metadata?: { namespace: string; cacheClass: CacheClass },
+    metadata?: { namespace: string; cacheClass: CacheClass }
   ): Promise<void>;
   delete(key: string): Promise<void>;
   close?(): Promise<void>;
@@ -59,7 +59,7 @@ class MemoryCacheBackend implements CacheBackend {
   private store = new Map<string, MemoryEntry>();
 
   constructor(
-    private readonly onEvict?: (metadata?: { namespace: string; cacheClass: CacheClass }) => void,
+    private readonly onEvict?: (metadata?: { namespace: string; cacheClass: CacheClass }) => void
   ) {}
 
   async get<T>(key: string): Promise<T | null> {
@@ -79,7 +79,7 @@ class MemoryCacheBackend implements CacheBackend {
     key: string,
     value: unknown,
     ttlSeconds?: number,
-    metadata?: { namespace: string; cacheClass: CacheClass },
+    metadata?: { namespace: string; cacheClass: CacheClass }
   ): Promise<void> {
     const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined;
     this.store.set(key, { value, expiresAt, metadata });
@@ -107,7 +107,7 @@ class RedisCacheBackend implements CacheBackend {
     // Simple hash-based partitioning
     let hash = 0;
     for (let i = 0; i < key.length; i++) {
-      hash = ((hash << 5) - hash) + key.charCodeAt(i);
+      hash = (hash << 5) - hash + key.charCodeAt(i);
       hash |= 0; // Convert to 32bit int
     }
     const index = Math.abs(hash) % this.clients.length;
@@ -130,10 +130,10 @@ class RedisCacheBackend implements CacheBackend {
     key: string,
     value: unknown,
     ttlSeconds?: number,
-    _metadata?: { namespace: string; cacheClass: CacheClass },
+    _metadata?: { namespace: string; cacheClass: CacheClass }
   ): Promise<void> {
     const client = this.getClient(key);
-    const payload = typeof value === 'string' ? value : JSON.stringify(value);
+    const payload = typeof value === "string" ? value : JSON.stringify(value);
     if (ttlSeconds) {
       await client.setex(key, ttlSeconds, payload);
     } else {
@@ -147,30 +147,26 @@ class RedisCacheBackend implements CacheBackend {
   }
 
   async close(): Promise<void> {
-    await Promise.all(this.clients.map(client => client.quit()));
+    await Promise.all(this.clients.map((client) => client.quit()));
   }
 
   async ping(): Promise<void> {
-    await Promise.all(this.clients.map(client => client.ping()));
+    await Promise.all(this.clients.map((client) => client.ping()));
   }
 
   isConnected(): boolean {
-    return this.clients.every(client => client.status === 'ready');
+    return this.clients.every((client) => client.status === "ready");
   }
 }
 
-function getOrCreateCounter(
-  registry: Registry,
-  name: string,
-  help: string,
-): Counter<string> {
+function getOrCreateCounter(registry: Registry, name: string, help: string): Counter<string> {
   const existing = registry.getSingleMetric(name) as Counter<string> | undefined;
   if (existing) return existing;
 
   return new Counter({
     name,
     help,
-    labelNames: ['namespace', 'class'],
+    labelNames: ["namespace", "class"],
     registers: [registry],
   });
 }
@@ -190,13 +186,13 @@ export class CacheClient {
   private readonly fallbackToMemory: boolean;
   private readonly devTtlCapSeconds: number;
   private readonly env: string;
-  private readonly logger: Pick<typeof console, 'warn' | 'error' | 'debug'>;
+  private readonly logger: Pick<typeof console, "warn" | "error" | "debug">;
 
   constructor(private readonly config: CacheClientConfig = {}) {
-    this.env = config.env ?? process.env.NODE_ENV ?? 'development';
-    this.disableEnvKey = config.disableEnvKey ?? 'CACHE_DISABLED';
-    this.defaultNamespace = config.namespace ?? 'global';
-    this.defaultClass = config.cacheClass ?? 'best_effort';
+    this.env = config.env ?? process.env.NODE_ENV ?? "development";
+    this.disableEnvKey = config.disableEnvKey ?? "CACHE_DISABLED";
+    this.defaultNamespace = config.namespace ?? "global";
+    this.defaultClass = config.cacheClass ?? "best_effort";
     this.defaultTTLSeconds = config.defaultTTLSeconds;
     this.fallbackToMemory = config.fallbackToMemory ?? true;
     this.devTtlCapSeconds = config.devTtlCapSeconds ?? 300;
@@ -216,18 +212,18 @@ export class CacheClient {
 
     this.hitsCounter = getOrCreateCounter(
       this.registry,
-      'cache_hits_total',
-      'Total cache hits by namespace and class',
+      "cache_hits_total",
+      "Total cache hits by namespace and class"
     );
     this.missesCounter = getOrCreateCounter(
       this.registry,
-      'cache_misses_total',
-      'Total cache misses by namespace and class',
+      "cache_misses_total",
+      "Total cache misses by namespace and class"
     );
     this.evictionsCounter = getOrCreateCounter(
       this.registry,
-      'cache_evictions_total',
-      'Total cache evictions by namespace and class',
+      "cache_evictions_total",
+      "Total cache evictions by namespace and class"
     );
 
     this.memoryBackend = new MemoryCacheBackend((metadata) => {
@@ -236,17 +232,20 @@ export class CacheClient {
     });
 
     if (config.redis || config.redisUrl) {
-      const redisUrls = config.redisUrl ? config.redisUrl.split(',') : [];
+      const redisUrls = config.redisUrl ? config.redisUrl.split(",") : [];
       let redisClients: Redis[] = [];
 
       if (config.redis) {
         redisClients = Array.isArray(config.redis) ? config.redis : [config.redis];
       } else if (redisUrls.length > 0) {
-        redisClients = redisUrls.map(url => new Redis(url, {
-          lazyConnect: true,
-          maxRetriesPerRequest: 2,
-          enableOfflineQueue: false,
-        }));
+        redisClients = redisUrls.map(
+          (url) =>
+            new Redis(url, {
+              lazyConnect: true,
+              maxRetriesPerRequest: 2,
+              enableOfflineQueue: false,
+            })
+        );
       }
 
       if (redisClients.length > 0) {
@@ -256,7 +255,7 @@ export class CacheClient {
   }
 
   private get disabled(): boolean {
-    return process.env[this.disableEnvKey] === 'true';
+    return process.env[this.disableEnvKey] === "true";
   }
 
   private namespacedKey(namespace: string, key: string): string {
@@ -267,7 +266,7 @@ export class CacheClient {
     const baseTtl =
       override ?? this.defaultTTLSeconds ?? DEFAULT_TTLS[cacheClass] ?? DEFAULT_TTLS.best_effort;
 
-    if (this.env !== 'production' && baseTtl) {
+    if (this.env !== "production" && baseTtl) {
       return Math.min(baseTtl, this.devTtlCapSeconds);
     }
 
@@ -276,7 +275,7 @@ export class CacheClient {
 
   private async useBackend<T>(
     backend: CacheBackend,
-    operation: (target: CacheBackend) => Promise<T>,
+    operation: (target: CacheBackend) => Promise<T>
   ): Promise<T> {
     if (backend === this.memoryBackend) {
       return operation(backend);
@@ -285,7 +284,7 @@ export class CacheClient {
     try {
       return await operation(backend);
     } catch (error) {
-      this.logger.warn?.({ error }, 'Cache backend failed, using memory fallback');
+      this.logger.warn?.({ error }, "Cache backend failed, using memory fallback");
       if (this.fallbackToMemory) {
         return operation(this.memoryBackend);
       }
@@ -314,9 +313,7 @@ export class CacheClient {
 
     const backend = this.redisBackend ?? this.memoryBackend;
 
-    const result = await this.useBackend(backend, async (target) =>
-      target.get<T>(namespacedKey),
-    );
+    const result = await this.useBackend(backend, async (target) => target.get<T>(namespacedKey));
 
     if (result === null) {
       this.missesCounter.inc({ namespace, class: cacheClass });
@@ -327,11 +324,7 @@ export class CacheClient {
     return result;
   }
 
-  async set(
-    key: string,
-    value: unknown,
-    options?: CacheSetOptions,
-  ): Promise<void> {
+  async set(key: string, value: unknown, options?: CacheSetOptions): Promise<void> {
     const { namespace, cacheClass } = this.normalizeOptions(options);
     const ttlSeconds = this.resolveTTL(cacheClass, options?.ttlSeconds);
     const namespacedKey = this.namespacedKey(namespace, key);
@@ -340,7 +333,7 @@ export class CacheClient {
 
     const backend = this.redisBackend ?? this.memoryBackend;
     await this.useBackend(backend, async (target) =>
-      target.set(namespacedKey, value, ttlSeconds, { namespace, cacheClass }),
+      target.set(namespacedKey, value, ttlSeconds, { namespace, cacheClass })
     );
   }
 
@@ -366,7 +359,7 @@ export class CacheClient {
       await this.redisBackend.ping?.();
       return true;
     } catch (error) {
-      this.logger.warn?.({ error }, 'Cache ping failed');
+      this.logger.warn?.({ error }, "Cache ping failed");
       return false;
     }
   }

@@ -120,13 +120,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -196,13 +195,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -270,13 +268,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

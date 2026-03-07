@@ -1,4 +1,4 @@
-import type { BehaviorEvent, BehaviorInsight } from './types';
+import type { BehaviorEvent, BehaviorInsight } from "./types";
 
 interface BehaviorStat {
   count: number;
@@ -78,7 +78,7 @@ export class BehavioralModel {
       return undefined;
     }
 
-    const trend = zScore > 0 ? 'spike' : 'drop';
+    const trend = zScore > 0 ? "spike" : "drop";
     return {
       entityId: event.entityId,
       action: event.action,

@@ -1,16 +1,16 @@
-import fs from 'node:fs';
+import fs from "node:fs";
 
-const UNSAFE_KEYS = ['disable_audit', 'weaken_auth', 'bypass_policy'];
+const UNSAFE_KEYS = ["disable_audit", "weaken_auth", "bypass_policy"];
 
 export class LaneManager {
   constructor(options = {}) {
-    this.basePath = options.basePath ?? 'lanes';
+    this.basePath = options.basePath ?? "lanes";
     this.auditLog = options.auditLog ?? [];
   }
 
   loadConfig(lane) {
     const path = `${this.basePath}/${lane}/config.json`;
-    const raw = fs.readFileSync(path, 'utf8');
+    const raw = fs.readFileSync(path, "utf8");
     return JSON.parse(raw);
   }
 
@@ -21,7 +21,7 @@ export class LaneManager {
       }
     }
     if (!config.canary || config.canary.weight == null) {
-      throw new Error('CANARY_REQUIRED');
+      throw new Error("CANARY_REQUIRED");
     }
     return true;
   }

@@ -70,8 +70,8 @@ alert: MaestroOrchestrationFailureRateHigh
 expr: rate(maestro_orchestration_error[5m]) > 0.1
 for: 2m
 severity: critical
-description: 'Maestro orchestration failure rate is above 10% for 2 minutes'
-runbook: 'https://docs.intelgraph.ai/runbooks/orchestration-failures'
+description: "Maestro orchestration failure rate is above 10% for 2 minutes"
+runbook: "https://docs.intelgraph.ai/runbooks/orchestration-failures"
 ```
 
 **Premium Router Unavailable**
@@ -81,8 +81,8 @@ alert: MaestroPremiumRouterDown
 expr: up{job="maestro-premium-router"} == 0
 for: 1m
 severity: critical
-description: 'Premium model router is unavailable'
-runbook: 'https://docs.intelgraph.ai/runbooks/premium-router-down'
+description: "Premium model router is unavailable"
+runbook: "https://docs.intelgraph.ai/runbooks/premium-router-down"
 ```
 
 **Compliance Gate Failures**
@@ -92,8 +92,8 @@ alert: MaestroComplianceGateFailures
 expr: rate(maestro_compliance_validation_failures[5m]) > 0.05
 for: 3m
 severity: critical
-description: 'Compliance gate validation failures above 5% for 3 minutes'
-runbook: 'https://docs.intelgraph.ai/runbooks/compliance-failures'
+description: "Compliance gate validation failures above 5% for 3 minutes"
+runbook: "https://docs.intelgraph.ai/runbooks/compliance-failures"
 ```
 
 #### Warning Alerts
@@ -105,8 +105,8 @@ alert: MaestroHighLatency
 expr: histogram_quantile(0.95, maestro_orchestration_latency_bucket) > 30000
 for: 5m
 severity: warning
-description: '95th percentile orchestration latency above 30 seconds'
-runbook: 'https://docs.intelgraph.ai/runbooks/performance-degradation'
+description: "95th percentile orchestration latency above 30 seconds"
+runbook: "https://docs.intelgraph.ai/runbooks/performance-degradation"
 ```
 
 **Budget Overrun Risk**
@@ -116,8 +116,8 @@ alert: MaestroBudgetOverrunRisk
 expr: maestro_daily_cost_burn_rate > maestro_daily_budget_limit * 0.8
 for: 10m
 severity: warning
-description: 'Daily cost burn rate approaching budget limit'
-runbook: 'https://docs.intelgraph.ai/runbooks/budget-management'
+description: "Daily cost burn rate approaching budget limit"
+runbook: "https://docs.intelgraph.ai/runbooks/budget-management"
 ```
 
 ## Operational Procedures
@@ -528,12 +528,12 @@ metadata:
   name: maestro-operator
   namespace: intelgraph-maestro
 rules:
-  - apiGroups: ['']
-    resources: ['configmaps', 'secrets']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments']
-    verbs: ['get', 'list', 'patch']
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "patch"]
 ```
 
 ### Audit Logging

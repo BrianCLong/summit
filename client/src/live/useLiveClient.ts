@@ -1,5 +1,5 @@
-import io from 'socket.io-client';
-import $ from 'jquery';
+import io from "socket.io-client";
+import $ from "jquery";
 
 /**
  * useLiveClient sets up a Socket.IO client for the "/live" namespace and
@@ -8,29 +8,19 @@ import $ from 'jquery';
  * events without directly depending on the socket instance.
  */
 export function useLiveClient(workspaceId: string, token: string) {
-  const socket = io('/live', { auth: { workspaceId, token } });
+  const socket = io("/live", { auth: { workspaceId, token } });
 
   // outbound events
-  $(document).on('ig:presence:update', (_e: any, data: any) =>
-    socket.emit('presence:update', data),
+  $(document).on("ig:presence:update", (_e: any, data: any) =>
+    socket.emit("presence:update", data)
   );
-  $(document).on('ig:graph:ops', (_e: any, batch: any) =>
-    socket.emit('graph:ops', batch),
-  );
-  $(document).on('ig:comment:add', (_e: any, payload: any) =>
-    socket.emit('comment:add', payload),
-  );
+  $(document).on("ig:graph:ops", (_e: any, batch: any) => socket.emit("graph:ops", batch));
+  $(document).on("ig:comment:add", (_e: any, payload: any) => socket.emit("comment:add", payload));
 
   // inbound events
-  socket.on('presence:update', (p) =>
-    $(document).trigger('ig:presence:inbound', [p]),
-  );
-  socket.on('graph:commit', (ops) =>
-    $(document).trigger('ig:graph:commit', [ops]),
-  );
-  socket.on('comment:new', (c) =>
-    $(document).trigger('ig:comment:inbound', [c]),
-  );
+  socket.on("presence:update", (p) => $(document).trigger("ig:presence:inbound", [p]));
+  socket.on("graph:commit", (ops) => $(document).trigger("ig:graph:commit", [ops]));
+  socket.on("comment:new", (c) => $(document).trigger("ig:comment:inbound", [c]));
 
   return socket;
 }

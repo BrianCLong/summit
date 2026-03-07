@@ -7,31 +7,31 @@ import {
   randomBytes,
   sign as signPayload,
   verify as verifyPayload,
-} from 'node:crypto';
-import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from 'common-types';
-import { augmentEvidenceBundle, buildExecutionAttestation } from './bundle-utils.js';
+} from "node:crypto";
+import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from "common-types";
+import { augmentEvidenceBundle, buildExecutionAttestation } from "./bundle-utils.js";
 
 const LAMPORT_KEY_COUNT = 256;
 const LAMPORT_SECRET_BYTES = 32;
 const RFC3526_GROUP14_PRIME =
-  '0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1' +
-  '29024E088A67CC74020BBEA63B139B22514A08798E3404DD' +
-  'EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245' +
-  'E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED' +
-  'EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381' +
-  'FFFFFFFFFFFFFFFF';
+  "0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
+  "29024E088A67CC74020BBEA63B139B22514A08798E3404DD" +
+  "EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" +
+  "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" +
+  "EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381" +
+  "FFFFFFFFFFFFFFFF";
 const RFC3526_GROUP14_GENERATOR = 2n;
 
 function sha256(buffer: Buffer | string): Buffer {
-  return createHash('sha256').update(buffer).digest();
+  return createHash("sha256").update(buffer).digest();
 }
 
 function sha256Hex(buffer: Buffer | string): string {
-  return sha256(buffer).toString('hex');
+  return sha256(buffer).toString("hex");
 }
 
 function bigIntFromHex(hex: string): bigint {
-  return BigInt(hex.startsWith('0x') ? hex : `0x${hex}`);
+  return BigInt(hex.startsWith("0x") ? hex : `0x${hex}`);
 }
 
 function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
@@ -54,7 +54,7 @@ function randomScalar(modulus: bigint): bigint {
   let scalar = 0n;
   while (scalar === 0n) {
     const bytes = randomBytes(byteLength);
-    scalar = BigInt(`0x${bytes.toString('hex')}`) % (modulus - 1n);
+    scalar = BigInt(`0x${bytes.toString("hex")}`) % (modulus - 1n);
   }
   return scalar;
 }
@@ -62,10 +62,10 @@ function randomScalar(modulus: bigint): bigint {
 export function computeLedgerHash(
   fact: LedgerFactInput,
   timestamp: string,
-  previousHash?: string,
+  previousHash?: string
 ): string {
   return sha256Hex(
-    `${fact.id}|${fact.category}|${fact.actor}|${fact.action}|${fact.resource}|${JSON.stringify(fact.payload)}|${timestamp}|${previousHash ?? ''}`,
+    `${fact.id}|${fact.category}|${fact.actor}|${fact.action}|${fact.resource}|${JSON.stringify(fact.payload)}|${timestamp}|${previousHash ?? ""}`
   );
 }
 
@@ -78,7 +78,7 @@ export interface LamportKeyPair {
 }
 
 export interface LamportSignature {
-  algorithm: 'lamport-ots-sha256';
+  algorithm: "lamport-ots-sha256";
   signature: readonly string[];
 }
 
@@ -89,8 +89,8 @@ export function generateLamportKeyPair(): LamportKeyPair {
   for (let i = 0; i < LAMPORT_KEY_COUNT; i += 1) {
     const left = randomBytes(LAMPORT_SECRET_BYTES);
     const right = randomBytes(LAMPORT_SECRET_BYTES);
-    privateKey.push([left.toString('base64'), right.toString('base64')]);
-    publicKey.push([sha256(left).toString('base64'), sha256(right).toString('base64')]);
+    privateKey.push([left.toString("base64"), right.toString("base64")]);
+    publicKey.push([sha256(left).toString("base64"), sha256(right).toString("base64")]);
   }
 
   return { publicKey, privateKey };
@@ -98,9 +98,9 @@ export function generateLamportKeyPair(): LamportKeyPair {
 
 export function signWithLamport(
   message: Buffer | string,
-  keyPair: LamportKeyPair,
+  keyPair: LamportKeyPair
 ): LamportSignature {
-  const digest = sha256(typeof message === 'string' ? Buffer.from(message) : message);
+  const digest = sha256(typeof message === "string" ? Buffer.from(message) : message);
   const signature: string[] = [];
 
   digest.forEach((byte, digestIndex) => {
@@ -115,19 +115,19 @@ export function signWithLamport(
     }
   });
 
-  return { algorithm: 'lamport-ots-sha256', signature };
+  return { algorithm: "lamport-ots-sha256", signature };
 }
 
 export function verifyLamportSignature(
   message: Buffer | string,
   signature: LamportSignature,
-  publicKey: LamportPublicKey,
+  publicKey: LamportPublicKey
 ): boolean {
   if (signature.signature.length !== LAMPORT_KEY_COUNT) {
     return false;
   }
 
-  const digest = sha256(typeof message === 'string' ? Buffer.from(message) : message);
+  const digest = sha256(typeof message === "string" ? Buffer.from(message) : message);
 
   let cursor = 0;
   for (let digestIndex = 0; digestIndex < digest.length; digestIndex += 1) {
@@ -140,7 +140,7 @@ export function verifyLamportSignature(
       if (!expected || !revealed) {
         return false;
       }
-      if (sha256(Buffer.from(revealed, 'base64')).toString('base64') !== expected) {
+      if (sha256(Buffer.from(revealed, "base64")).toString("base64") !== expected) {
         return false;
       }
       cursor += 1;
@@ -157,7 +157,7 @@ export interface HybridKeyPair {
 }
 
 export interface HybridSignature {
-  algorithm: 'hybrid-ed25519-lamport';
+  algorithm: "hybrid-ed25519-lamport";
   lamport: LamportSignature;
   lamportPublicKey: LamportPublicKey;
   ed25519Signature: string;
@@ -165,23 +165,23 @@ export interface HybridSignature {
 }
 
 export function generateHybridKeyPair(): HybridKeyPair {
-  const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
   const lamport = generateLamportKeyPair();
 
   return {
     lamport,
-    ed25519PublicKey: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
-    ed25519PrivateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+    ed25519PublicKey: publicKey.export({ type: "spki", format: "pem" }).toString(),
+    ed25519PrivateKey: privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   };
 }
 
 export function signHybrid(message: Buffer | string, keyPair: HybridKeyPair): HybridSignature {
-  const payload = typeof message === 'string' ? Buffer.from(message) : message;
+  const payload = typeof message === "string" ? Buffer.from(message) : message;
   const lamport = signWithLamport(payload, keyPair.lamport);
-  const ed25519Signature = signPayload(null, payload, keyPair.ed25519PrivateKey).toString('base64');
+  const ed25519Signature = signPayload(null, payload, keyPair.ed25519PrivateKey).toString("base64");
 
   return {
-    algorithm: 'hybrid-ed25519-lamport',
+    algorithm: "hybrid-ed25519-lamport",
     lamport,
     lamportPublicKey: keyPair.lamport.publicKey,
     ed25519Signature,
@@ -191,20 +191,25 @@ export function signHybrid(message: Buffer | string, keyPair: HybridKeyPair): Hy
 
 export function verifyHybridSignature(
   message: Buffer | string,
-  signature: HybridSignature,
+  signature: HybridSignature
 ): boolean {
-  if (signature.algorithm !== 'hybrid-ed25519-lamport') {
+  if (signature.algorithm !== "hybrid-ed25519-lamport") {
     return false;
   }
 
-  const payload = typeof message === 'string' ? Buffer.from(message) : message;
+  const payload = typeof message === "string" ? Buffer.from(message) : message;
   const lamportOk = verifyLamportSignature(payload, signature.lamport, signature.lamportPublicKey);
   if (!lamportOk) {
     return false;
   }
 
   const publicKey = createPublicKey(signature.ed25519PublicKey);
-  const ed25519Ok = verifyPayload(null, payload, publicKey, Buffer.from(signature.ed25519Signature, 'base64'));
+  const ed25519Ok = verifyPayload(
+    null,
+    payload,
+    publicKey,
+    Buffer.from(signature.ed25519Signature, "base64")
+  );
   return ed25519Ok;
 }
 
@@ -230,14 +235,14 @@ export function generateSchnorrKeyPair(): SchnorrKeyPair {
 }
 
 function deriveSchnorrChallenge(commitment: bigint, message: string): bigint {
-  const digest = sha256(`${commitment.toString(16)}:${message}`).toString('hex');
+  const digest = sha256(`${commitment.toString(16)}:${message}`).toString("hex");
   return BigInt(`0x${digest}`) % SCHNORR_ORDER;
 }
 
 export function createSchnorrProof(
   keyPair: SchnorrKeyPair,
   message: string,
-  randomNonce?: bigint,
+  randomNonce?: bigint
 ): SchnorrProof {
   const nonce = randomNonce ?? randomScalar(SCHNORR_MODULUS);
   const commitment = modPow(SCHNORR_GENERATOR, nonce, SCHNORR_MODULUS);
@@ -254,7 +259,7 @@ export function createSchnorrProof(
 export function verifySchnorrProof(
   publicKey: bigint,
   message: string,
-  proof: SchnorrProof,
+  proof: SchnorrProof
 ): boolean {
   const commitment = bigIntFromHex(proof.commitment);
   const challenge = bigIntFromHex(proof.challenge);
@@ -297,8 +302,8 @@ export class AccessTokenService {
     const issuedAt = this.now().toISOString();
     const expiresAt = new Date(this.now().getTime() + this.ttlMs).toISOString();
     const payload: AccessTokenPayload = { actor, scope, issuedAt, expiresAt };
-    const payloadBase64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
-    const signature = createHmac('sha256', this.secret).update(payloadBase64).digest('base64url');
+    const payloadBase64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
+    const signature = createHmac("sha256", this.secret).update(payloadBase64).digest("base64url");
     return { token: `${payloadBase64}.${signature}`, payload };
   }
 
@@ -306,21 +311,23 @@ export class AccessTokenService {
     token: string,
     expectedActor?: string,
     expectedScope?: string,
-    options: { allowExpired?: boolean } = {},
+    options: { allowExpired?: boolean } = {}
   ): AccessTokenPayload | null {
-    const [payloadBase64, signature] = token.split('.');
+    const [payloadBase64, signature] = token.split(".");
     if (!payloadBase64 || !signature) {
       return null;
     }
 
-    const expectedSignature = createHmac('sha256', this.secret)
+    const expectedSignature = createHmac("sha256", this.secret)
       .update(payloadBase64)
-      .digest('base64url');
+      .digest("base64url");
     if (expectedSignature !== signature) {
       return null;
     }
 
-    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString()) as AccessTokenPayload;
+    const payload = JSON.parse(
+      Buffer.from(payloadBase64, "base64url").toString()
+    ) as AccessTokenPayload;
     const now = this.now();
     if (!options.allowExpired && new Date(payload.expiresAt).getTime() < now.getTime()) {
       return null;
@@ -354,7 +361,10 @@ export class QuantumSafeLedger {
   private readonly now: () => Date;
   private readonly identityPublicKey?: bigint;
 
-  constructor(private readonly tokenService: AccessTokenService, options: QuantumLedgerOptions = {}) {
+  constructor(
+    private readonly tokenService: AccessTokenService,
+    options: QuantumLedgerOptions = {}
+  ) {
     this.now = options.now ?? (() => new Date());
     this.identityPublicKey = options.identityPublicKey;
   }
@@ -363,7 +373,7 @@ export class QuantumSafeLedger {
     fact: LedgerFactInput,
     signature: HybridSignature,
     accessToken: string,
-    zkProof?: SchnorrProof,
+    zkProof?: SchnorrProof
   ): QuantumLedgerEntry {
     const timestamp = fact.timestamp ?? this.now().toISOString();
     const previous = this.entries.at(-1);
@@ -371,30 +381,30 @@ export class QuantumSafeLedger {
       ...fact,
       timestamp,
       previousHash: previous?.hash,
-      hash: '',
+      hash: "",
     };
     entry.hash = computeLedgerHash(entry, timestamp, entry.previousHash);
 
     const access = this.tokenService.verify(accessToken, entry.actor, fact.category);
     if (!access) {
-      throw new Error('Access token is invalid or expired for actor/category');
+      throw new Error("Access token is invalid or expired for actor/category");
     }
 
     if (!verifyHybridSignature(entry.hash, signature)) {
-      throw new Error('Signature verification failed');
+      throw new Error("Signature verification failed");
     }
 
     if (this.identityPublicKey) {
       if (!zkProof) {
-        throw new Error('Zero-knowledge proof is required when an identity key is configured');
+        throw new Error("Zero-knowledge proof is required when an identity key is configured");
       }
       const proofOk = verifySchnorrProof(this.identityPublicKey, entry.hash, zkProof);
       if (!proofOk) {
-        throw new Error('Zero-knowledge proof verification failed');
+        throw new Error("Zero-knowledge proof verification failed");
       }
     }
 
-    const chainSource = `${previous?.chainHash ?? ''}|${entry.hash}|${signature.ed25519Signature}`;
+    const chainSource = `${previous?.chainHash ?? ""}|${entry.hash}|${signature.ed25519Signature}`;
     const chainHash = sha256Hex(chainSource);
 
     const recorded: QuantumLedgerEntry = {
@@ -429,14 +439,21 @@ export class QuantumSafeLedger {
       }
 
       const prior = index === 0 ? undefined : this.entries[index - 1];
-      const expectedChain = sha256Hex(`${prior?.chainHash ?? ''}|${entry.hash}|${entry.signature.ed25519Signature}`);
+      const expectedChain = sha256Hex(
+        `${prior?.chainHash ?? ""}|${entry.hash}|${entry.signature.ed25519Signature}`
+      );
       if (entry.chainHash !== expectedChain) {
         return false;
       }
 
-      const tokenPayload = this.tokenService.verify(entry.accessToken, entry.actor, entry.category, {
-        allowExpired: true,
-      });
+      const tokenPayload = this.tokenService.verify(
+        entry.accessToken,
+        entry.actor,
+        entry.category,
+        {
+          allowExpired: true,
+        }
+      );
       if (!tokenPayload) {
         return false;
       }
@@ -463,7 +480,7 @@ export class QuantumSafeLedger {
     };
     const signer = entries.at(-1)?.signature;
     const augmented = augmentEvidenceBundle(baseBundle, entries, {
-      signer: 'quantum-safe-ledger',
+      signer: "quantum-safe-ledger",
       publicKey: signer?.ed25519PublicKey,
       signature: signer?.ed25519Signature,
       issuedAt: this.now(),
@@ -471,10 +488,10 @@ export class QuantumSafeLedger {
 
     const executionAttestation = this.identityPublicKey
       ? buildExecutionAttestation(
-          'QuantumSafeLedger chain integrity verified',
+          "QuantumSafeLedger chain integrity verified",
           this.verifyChain(),
           this.now(),
-          'quantum-safe-ledger',
+          "quantum-safe-ledger"
         )
       : undefined;
 

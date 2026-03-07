@@ -189,7 +189,7 @@
 name: Evidence Gate
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 jobs:
   verify-evidence:
     runs-on: ubuntu-latest
@@ -217,17 +217,17 @@ print(json.dumps(redacted, indent=2))
 ### 4) Conductor — Search API (Express) `services/conductor/api.js`
 
 ```javascript
-import express from 'express';
-import { searchDecisions, feedByTag } from './store.js';
+import express from "express";
+import { searchDecisions, feedByTag } from "./store.js";
 const app = express();
-app.get('/conductor/search', async (req, res) => {
+app.get("/conductor/search", async (req, res) => {
   const { q, service, since } = req.query;
   const out = await searchDecisions({ q, service, since });
   res.json({ results: out, took_ms: out.took });
 });
-app.get('/conductor/feed/:tag.rss', async (req, res) => {
+app.get("/conductor/feed/:tag.rss", async (req, res) => {
   const xml = await feedByTag(req.params.tag);
-  res.set('content-type', 'application/rss+xml').send(xml);
+  res.set("content-type", "application/rss+xml").send(xml);
 });
 export default app;
 ```

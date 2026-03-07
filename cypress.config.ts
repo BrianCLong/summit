@@ -1,11 +1,11 @@
-import { defineConfig } from 'cypress';
+import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:3000', // Assuming standard dev port
-    specPattern: 'e2e/tests/**/*.cy.ts',
-    supportFile: 'e2e/support/e2e.ts',
-    fixturesFolder: 'e2e/fixtures',
+    baseUrl: "http://localhost:3000", // Assuming standard dev port
+    specPattern: "e2e/tests/**/*.cy.ts",
+    supportFile: "e2e/support/e2e.ts",
+    fixturesFolder: "e2e/fixtures",
     video: false,
     screenshotOnRunFailure: true,
     defaultCommandTimeout: 10000,

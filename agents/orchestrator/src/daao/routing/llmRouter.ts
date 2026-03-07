@@ -1,5 +1,5 @@
-import { DifficultySignal } from '../difficulty/difficulty.js';
-import { ModelCatalog, ModelSpec } from './modelCatalog.js';
+import { DifficultySignal } from "../difficulty/difficulty.js";
+import { ModelCatalog, ModelSpec } from "./modelCatalog.js";
 
 export interface RoutingDecision {
   modelId: string;
@@ -20,19 +20,22 @@ export class CostAwareLLMRouter {
     private config: RouterConfig = { fallbackModelId: "gpt-4o-mini" }
   ) {}
 
-  async route(difficulty: DifficultySignal, context?: { budget?: number }): Promise<RoutingDecision> {
+  async route(
+    difficulty: DifficultySignal,
+    context?: { budget?: number }
+  ): Promise<RoutingDecision> {
     const models = await this.catalog.getModels();
     const budget = context?.budget ?? this.config.maxBudget ?? 1.0; // Default budget if undefined
 
     // Filter by allowed providers
     let candidates = models;
     if (this.config.allowedProviders) {
-      candidates = candidates.filter(m => this.config.allowedProviders!.includes(m.provider));
+      candidates = candidates.filter((m) => this.config.allowedProviders!.includes(m.provider));
     }
 
     // Filter by capabilities based on difficulty
-    if (difficulty.band === 'hard') {
-      candidates = candidates.filter(m => m.capabilities.reasoning);
+    if (difficulty.band === "hard") {
+      candidates = candidates.filter((m) => m.capabilities.reasoning);
     }
 
     // Sort by cost (ascending) to find cheapest viable
@@ -50,25 +53,28 @@ export class CostAwareLLMRouter {
     // If medium -> pick cheapest with some capability or balanced.
     // If hard -> pick most capable that fits budget.
 
-    if (difficulty.band === 'easy') {
+    if (difficulty.band === "easy") {
       // Pick cheapest that fits budget
-      selectedModel = candidates.find(m => m.costPer1kTokens * EST_TOKENS_K <= budget);
+      selectedModel = candidates.find((m) => m.costPer1kTokens * EST_TOKENS_K <= budget);
       if (selectedModel) reasons.push("Selected cheapest model for easy task");
-    } else if (difficulty.band === 'medium') {
+    } else if (difficulty.band === "medium") {
       // Pick cheapest capable (already filtered/sorted), but maybe prefer 'reasoning' if possible
       // Since we didn't strictly filter reasoning for medium, let's prioritize it if budget allows
-      const reasoningModels = candidates.filter(m => m.capabilities.reasoning);
-      const affordableReasoning = reasoningModels.find(m => m.costPer1kTokens * EST_TOKENS_K <= budget);
+      const reasoningModels = candidates.filter((m) => m.capabilities.reasoning);
+      const affordableReasoning = reasoningModels.find(
+        (m) => m.costPer1kTokens * EST_TOKENS_K <= budget
+      );
 
       if (affordableReasoning) {
         selectedModel = affordableReasoning;
         reasons.push("Selected affordable reasoning model for medium task");
       } else {
         // Fallback to any affordable
-        selectedModel = candidates.find(m => m.costPer1kTokens * EST_TOKENS_K <= budget);
+        selectedModel = candidates.find((m) => m.costPer1kTokens * EST_TOKENS_K <= budget);
         if (selectedModel) reasons.push("Budget constrained: selected cheapest viable model");
       }
-    } else { // Hard
+    } else {
+      // Hard
       // Pick BEST model that fits budget (highest cost that is <= budget, assuming cost ~ capability)
       // Candidates are sorted asc by cost. So reverse to find most expensive (capable) under budget.
       for (let i = candidates.length - 1; i >= 0; i--) {
@@ -90,7 +96,7 @@ export class CostAwareLLMRouter {
       modelId: selectedModel.id,
       provider: selectedModel.provider,
       estimatedWorstCaseCost: selectedModel.costPer1kTokens * EST_TOKENS_K,
-      reasons: [...reasons, ...difficulty.reasons]
+      reasons: [...reasons, ...difficulty.reasons],
     };
   }
 }

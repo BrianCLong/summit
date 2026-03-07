@@ -12,11 +12,7 @@
   "category": "analyzer",
   "main": "./dist/index.js",
   "engineVersion": "^1.0.0",
-  "permissions": [
-    "read:data",
-    "access:graph",
-    "analytics:access"
-  ],
+  "permissions": ["read:data", "access:graph", "analytics:access"],
   "resources": {
     "maxMemoryMB": 512,
     "maxCpuPercent": 50,

@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { generateKeypair, sign, verify } from '../src/lib/ed25519.js';
+import { describe, it, expect } from "vitest";
+import { generateKeypair, sign, verify } from "../src/lib/ed25519.js";
 
-describe('Ed25519', () => {
-  it('should sign and verify', () => {
+describe("Ed25519", () => {
+  it("should sign and verify", () => {
     const keys = generateKeypair();
     const msg = "hello world";
     const sig = sign(msg, keys);
@@ -15,7 +15,7 @@ describe('Ed25519', () => {
     expect(verify("wrong message", sig, keys.publicKeyHex)).toBe(false);
   });
 
-  it('should fail with wrong key', () => {
+  it("should fail with wrong key", () => {
     const keys1 = generateKeypair();
     const keys2 = generateKeypair();
     const msg = "hello world";

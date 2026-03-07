@@ -1,7 +1,4 @@
-import {
-  StructuredEventEmitter,
-  buildRunId,
-} from '@ga-graphai/common-types';
+import { StructuredEventEmitter, buildRunId } from "@ga-graphai/common-types";
 import type {
   CloudProviderDescriptor,
   ExecutionOutcome,
@@ -30,13 +27,13 @@ import type {
   UrgencyLevel,
   CostSensitivity,
   GovernanceEvent,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 import {
   buildReplayEnvironment,
   createReplayDescriptor,
   persistReplayDescriptor,
   sanitizePayload,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 import {
   OrchestrationKnowledgeGraph,
   type CostSignalRecord,
@@ -46,7 +43,7 @@ import {
   type PipelineRecord,
   type PipelineStageRecord,
   type ServiceRecord,
-} from '@ga-graphai/knowledge-graph';
+} from "@ga-graphai/knowledge-graph";
 
 export interface PricingFeed {
   getPricingSignals(): Promise<PricingSignal[]>;
@@ -70,7 +67,7 @@ export interface StageExecutionRequest {
 }
 
 export interface StageExecutionResult {
-  status: 'success' | 'failure';
+  status: "success" | "failure";
   throughputPerMinute: number;
   cost: number;
   errorRate: number;
@@ -88,7 +85,7 @@ export interface ExecutionAdapter {
 export interface AuditEntry {
   id: string;
   timestamp: string;
-  category: 'plan' | 'execution' | 'fallback' | 'reward-update';
+  category: "plan" | "execution" | "fallback" | "reward-update";
   summary: string;
   data: Record<string, unknown>;
 }
@@ -120,7 +117,7 @@ interface FeatureFlagConfig {
   deterministicLogging: boolean;
 }
 
-type ExecutionMode = 'deterministic' | 'production';
+type ExecutionMode = "deterministic" | "production";
 
 export interface MetaOrchestratorOptions {
   pipelineId: string;
@@ -175,7 +172,7 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlagConfig = {
 const DEFAULT_SELF_HEALING: SelfHealingPolicy = {
   maxRetries: 2,
   backoffSeconds: 5,
-  triggers: ['execution-failure', 'latency-breach', 'cost-spike'],
+  triggers: ["execution-failure", "latency-breach", "cost-spike"],
 };
 
 function createSeededRandom(seed: number): () => number {
@@ -191,7 +188,7 @@ function createSeededRandom(seed: number): () => number {
 
 function mergeResilience(
   base: ResiliencePolicy,
-  overrides: Partial<ResiliencePolicy>,
+  overrides: Partial<ResiliencePolicy>
 ): ResiliencePolicy {
   return {
     maxRetries: overrides.maxRetries ?? base.maxRetries,
@@ -199,10 +196,8 @@ function mergeResilience(
     timeoutMs: overrides.timeoutMs ?? base.timeoutMs,
     circuitBreaker: {
       failureThreshold:
-        overrides.circuitBreaker?.failureThreshold ??
-        base.circuitBreaker.failureThreshold,
-      cooldownMs:
-        overrides.circuitBreaker?.cooldownMs ?? base.circuitBreaker.cooldownMs,
+        overrides.circuitBreaker?.failureThreshold ?? base.circuitBreaker.failureThreshold,
+      cooldownMs: overrides.circuitBreaker?.cooldownMs ?? base.circuitBreaker.cooldownMs,
     },
   };
 }
@@ -230,19 +225,17 @@ function matchPricing(
   pricing: PricingSignal[],
   provider: string,
   region: string,
-  capability: string,
+  capability: string
 ): PricingSignal | undefined {
   return pricing.find(
     (signal) =>
-      signal.provider === provider &&
-      signal.region === region &&
-      signal.service === capability,
+      signal.provider === provider && signal.region === region && signal.service === capability
   );
 }
 
 function complianceScore(
   provider: CloudProviderDescriptor,
-  stage: PipelineStageDefinition,
+  stage: PipelineStageDefinition
 ): number {
   if (!stage.complianceTags.length) {
     return 1;
@@ -255,18 +248,16 @@ function complianceScore(
 export class TemplateReasoningModel implements ReasoningModel {
   generateNarrative(input: ReasoningInput): string {
     const fallbackNames = input.fallbacks.map(
-      (fallback) => `${fallback.provider}/${fallback.region}`,
+      (fallback) => `${fallback.provider}/${fallback.region}`
     );
-    const fallbackText =
-      fallbackNames.length > 0 ? fallbackNames.join(', ') : 'none required';
+    const fallbackText = fallbackNames.length > 0 ? fallbackNames.join(", ") : "none required";
     const dominantFactor =
-      Object.entries(input.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      'balanced';
+      Object.entries(input.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "balanced";
     return [
       `Selected ${input.primary.provider}/${input.primary.region} for stage ${input.stage.name}.`,
       `Dominant factor: ${dominantFactor}.`,
       `Fallback path: ${fallbackText}.`,
-    ].join(' ');
+    ].join(" ");
   }
 }
 
@@ -292,16 +283,14 @@ class CapabilityMatrixEvaluator {
     if (!this.matrix) {
       return null;
     }
-    const candidates = this.matrix.entries.filter(
-      (entry) => entry.capability === capability,
-    );
+    const candidates = this.matrix.entries.filter((entry) => entry.capability === capability);
     if (candidates.length === 0) {
       return null;
     }
     const matched =
-      candidates.find(
-        (entry) => entry.provider === provider && entry.region === region,
-      ) ?? candidates.find((entry) => entry.provider === provider) ?? candidates[0];
+      candidates.find((entry) => entry.provider === provider && entry.region === region) ??
+      candidates.find((entry) => entry.provider === provider) ??
+      candidates[0];
     const throughputMax = Math.max(...candidates.map((entry) => entry.throughputPerMinute));
     const latencyMin = Math.min(...candidates.map((entry) => entry.latencyMs));
     const costMin = Math.min(...candidates.map((entry) => entry.costPerUnit));
@@ -347,8 +336,8 @@ class DecisionTreePolicyEngine {
     capability?: string;
   }): PolicyDecision | null {
     const matches = this.policies
-      .filter((policy) =>
-        policy.dataTypes.includes(context.dataType) || policy.dataTypes.includes('*'),
+      .filter(
+        (policy) => policy.dataTypes.includes(context.dataType) || policy.dataTypes.includes("*")
       )
       .filter((policy) => policy.urgencies.includes(context.urgency))
       .filter((policy) => policy.costSensitivity === context.costSensitivity);
@@ -357,7 +346,7 @@ class DecisionTreePolicyEngine {
     }
     const preferred = matches[0];
     const module = preferred.preferredModules[0];
-    const reason = preferred.rationale ?? 'policy matched on data profile';
+    const reason = preferred.rationale ?? "policy matched on data profile";
     return {
       module,
       reason,
@@ -385,9 +374,8 @@ class FairnessMonitor {
     dominanceRatio: number;
     compliant: boolean;
   } {
-    const diversity = this.counts.size === 0 || totalStages === 0
-      ? 0
-      : this.counts.size / totalStages;
+    const diversity =
+      this.counts.size === 0 || totalStages === 0 ? 0 : this.counts.size / totalStages;
     const maxShare = Math.max(...Array.from(this.counts.values()), 0);
     const dominanceRatio = totalStages === 0 ? 0 : maxShare / totalStages;
     const required = this.policy?.minDiversityRatio ?? 0;
@@ -404,10 +392,10 @@ class FairnessMonitor {
     }
     let adjusted = score;
     for (const mitigation of this.policy.mitigations) {
-      if (mitigation.signal === 'diversity' && (this.counts.get(provider) ?? 0) > 0) {
+      if (mitigation.signal === "diversity" && (this.counts.get(provider) ?? 0) > 0) {
         adjusted *= 0.98;
       }
-      if (mitigation.signal === 'cost' && mitigation.correctiveAction === 'penalize') {
+      if (mitigation.signal === "cost" && mitigation.correctiveAction === "penalize") {
         adjusted *= 0.99;
       }
     }
@@ -418,7 +406,9 @@ class FairnessMonitor {
 class GovernanceTrail {
   private readonly events: GovernanceEvent[] = [];
 
-  record(event: Omit<GovernanceEvent, 'id' | 'timestamp'> & { id?: string; timestamp?: string }): GovernanceEvent {
+  record(
+    event: Omit<GovernanceEvent, "id" | "timestamp"> & { id?: string; timestamp?: string }
+  ): GovernanceEvent {
     const normalized: GovernanceEvent = {
       ...event,
       id: event.id ?? randomUUID(),
@@ -449,15 +439,15 @@ class SessionArchiver {
   }): Promise<SessionArchiveDescriptor> {
     const environment = buildReplayEnvironment();
     const descriptor = createReplayDescriptor({
-      service: 'maestro-conductor',
-      flow: 'meta-orchestrator',
+      service: "maestro-conductor",
+      flow: "meta-orchestrator",
       request: {
-        path: 'meta-orchestrator',
-        method: 'EXECUTE',
+        path: "meta-orchestrator",
+        method: "EXECUTE",
         metadata: sanitizePayload({ plan: options.plan, outcome: options.outcome }),
       },
       environment,
-      classification: 'meta-routing',
+      classification: "meta-routing",
     });
     const archive: SessionArchiveDescriptor = {
       id: descriptor.id,
@@ -481,13 +471,13 @@ class PluginManager {
 
   async run<K extends keyof MetaOrchestratorPlugin>(
     hook: K,
-    context: MetaOrchestratorPluginContext,
+    context: MetaOrchestratorPluginContext
   ): Promise<void> {
     for (const plugin of this.plugins) {
       const candidate = plugin[hook];
-      if (typeof candidate === 'function') {
+      if (typeof candidate === "function") {
         await (candidate as (context: MetaOrchestratorPluginContext) => Promise<void> | void)(
-          context,
+          context
         );
       }
     }
@@ -505,10 +495,7 @@ class ActiveRewardShaper {
     return { ...this.weights };
   }
 
-  update(
-    signals: PlannerRewardSignal[],
-    stages: PipelineStageDefinition[],
-  ): PlannerRewardWeights {
+  update(signals: PlannerRewardSignal[], stages: PipelineStageDefinition[]): PlannerRewardWeights {
     if (signals.length === 0) {
       return this.getWeights();
     }
@@ -519,32 +506,19 @@ class ActiveRewardShaper {
         continue;
       }
       if (signal.observedErrorRate > (stage.guardrail?.maxErrorRate ?? 0.05)) {
-        this.weights.reliability = clamp(
-          this.weights.reliability + 0.05,
-          0.1,
-          0.6,
-        );
+        this.weights.reliability = clamp(this.weights.reliability + 0.05, 0.1, 0.6);
       }
       if (signal.observedThroughput < stage.minThroughputPerMinute) {
-        this.weights.throughput = clamp(
-          this.weights.throughput + 0.05,
-          0.1,
-          0.6,
-        );
+        this.weights.throughput = clamp(this.weights.throughput + 0.05, 0.1, 0.6);
       }
       if (signal.observedCost > 0) {
-        const unitCost =
-          signal.observedCost / Math.max(signal.observedThroughput, 1);
+        const unitCost = signal.observedCost / Math.max(signal.observedThroughput, 1);
         if (unitCost > 1) {
           this.weights.cost = clamp(this.weights.cost + 0.05, 0.1, 0.6);
         }
       }
       if (signal.recovered) {
-        this.weights.reliability = clamp(
-          this.weights.reliability + 0.02,
-          0.1,
-          0.6,
-        );
+        this.weights.reliability = clamp(this.weights.reliability + 0.02, 0.1, 0.6);
       }
     }
     return this.getWeights();
@@ -578,7 +552,7 @@ export class HybridSymbolicLLMPlanner {
       decisionEngine?: DecisionTreePolicyEngine;
       fairnessMonitor?: FairnessMonitor;
       governance?: GovernanceTrail;
-    },
+    }
   ) {
     this.providers = providers;
     this.reasoningModel = options?.reasoningModel ?? new TemplateReasoningModel();
@@ -592,38 +566,36 @@ export class HybridSymbolicLLMPlanner {
     pipelineId: string,
     stages: PipelineStageDefinition[],
     observation: PlannerObservation,
-    weights: PlannerRewardWeights,
+    weights: PlannerRewardWeights
   ): Promise<ExplainablePlan> {
     const steps: ExplainablePlanStep[] = [];
     for (const stage of stages) {
       const policyDecision = this.decisionEngine?.evaluate({
-        dataType: stage.dataType ?? 'generic',
-        urgency: stage.urgency ?? 'medium',
-        costSensitivity: stage.costSensitivity ?? 'medium',
+        dataType: stage.dataType ?? "generic",
+        urgency: stage.urgency ?? "medium",
+        costSensitivity: stage.costSensitivity ?? "medium",
         capability: stage.requiredCapabilities[0],
       });
       const candidates = this.scoreCandidates(
         stage,
         observation.pricing,
         weights,
-        policyDecision ?? undefined,
+        policyDecision ?? undefined
       );
       if (candidates.length === 0) {
         throw new Error(`no feasible providers for stage ${stage.id}`);
       }
-      const [primary, ...fallbacks] = candidates.sort(
-        (a, b) => b.score - a.score,
-      );
+      const [primary, ...fallbacks] = candidates.sort((a, b) => b.score - a.score);
       const explanation = await this.buildExplanation(
         stage,
         primary,
         fallbacks,
-        policyDecision ?? undefined,
+        policyDecision ?? undefined
       );
       this.fairnessMonitor?.record(primary.decision.provider);
       if (policyDecision) {
         this.governance?.record({
-          kind: 'selection',
+          kind: "selection",
           summary: `Applied decision-tree policy ${policyDecision.policyId}`,
           details: {
             stageId: stage.id,
@@ -634,8 +606,8 @@ export class HybridSymbolicLLMPlanner {
       }
       if (primary.capabilityScore) {
         this.governance?.record({
-          kind: 'explanation',
-          summary: 'Capability matrix influenced selection',
+          kind: "explanation",
+          summary: "Capability matrix influenced selection",
           details: {
             stageId: stage.id,
             capability: primary.capabilityScore.capability,
@@ -653,7 +625,7 @@ export class HybridSymbolicLLMPlanner {
     }
     const aggregateScore = steps.reduce(
       (acc, step) => acc + (step.explanation.scoreBreakdown.aggregate ?? 0),
-      0,
+      0
     );
     return {
       pipelineId,
@@ -668,31 +640,22 @@ export class HybridSymbolicLLMPlanner {
     stage: PipelineStageDefinition,
     pricing: PricingSignal[],
     weights: PlannerRewardWeights,
-    policyDecision?: PolicyDecision,
+    policyDecision?: PolicyDecision
   ): CandidateScore[] {
     const capabilities = stage.requiredCapabilities;
     const normalizedThroughput = normalize(
-      this.providers.map((provider) => provider.maxThroughputPerMinute),
+      this.providers.map((provider) => provider.maxThroughputPerMinute)
     );
     const normalizedReliability = normalize(
-      this.providers.map((provider) => provider.reliabilityScore),
+      this.providers.map((provider) => provider.reliabilityScore)
     );
     return this.providers.flatMap((provider, index) => {
-      if (
-        !capabilities.every((capability) =>
-          provider.services.includes(capability),
-        )
-      ) {
+      if (!capabilities.every((capability) => provider.services.includes(capability))) {
         return [] as CandidateScore[];
       }
       const region = provider.regions[0];
       const capability = capabilities[0];
-      const priceSignal = matchPricing(
-        pricing,
-        provider.name,
-        region,
-        capability,
-      );
+      const priceSignal = matchPricing(pricing, provider.name, region, capability);
       const price = priceSignal?.pricePerUnit ?? 1.5;
       const compliance = complianceScore(provider, stage);
       if (compliance === 0) {
@@ -729,10 +692,7 @@ export class HybridSymbolicLLMPlanner {
         provider: provider.name,
         region,
         expectedCost: price * stage.minThroughputPerMinute,
-        expectedThroughput: Math.min(
-          provider.maxThroughputPerMinute,
-          stage.minThroughputPerMinute,
-        ),
+        expectedThroughput: Math.min(provider.maxThroughputPerMinute, stage.minThroughputPerMinute),
         expectedLatency: provider.baseLatencyMs,
       };
       return [
@@ -754,7 +714,7 @@ export class HybridSymbolicLLMPlanner {
     stage: PipelineStageDefinition,
     primary: CandidateScore,
     fallbacks: CandidateScore[],
-    policyDecision?: PolicyDecision,
+    policyDecision?: PolicyDecision
   ): Promise<PlannerExplanation> {
     const narrative = await this.reasoningModel.generateNarrative({
       stage,
@@ -762,18 +722,18 @@ export class HybridSymbolicLLMPlanner {
       fallbacks: fallbacks.map((fallback) => fallback.decision),
       breakdown: primary.breakdown,
     });
-    const constraints = [`requires ${stage.requiredCapabilities.join(', ')}`];
+    const constraints = [`requires ${stage.requiredCapabilities.join(", ")}`];
     if (stage.complianceTags.length > 0) {
-      constraints.push(`compliance tags ${stage.complianceTags.join(', ')}`);
+      constraints.push(`compliance tags ${stage.complianceTags.join(", ")}`);
     }
     if (stage.guardrail) {
       constraints.push(
-        `error rate <= ${stage.guardrail.maxErrorRate} with recovery ${stage.guardrail.recoveryTimeoutSeconds}s`,
+        `error rate <= ${stage.guardrail.maxErrorRate} with recovery ${stage.guardrail.recoveryTimeoutSeconds}s`
       );
     }
     if (primary.capabilityScore) {
       constraints.push(
-        `capability matrix composite ${(primary.capabilityScore.composite * 100).toFixed(1)}%`,
+        `capability matrix composite ${(primary.capabilityScore.composite * 100).toFixed(1)}%`
       );
     }
     if (policyDecision) {
@@ -827,7 +787,7 @@ export class MetaOrchestrator {
     this.sessionArchiver = options.sessionArchive
       ? new SessionArchiver(options.sessionArchive.persist)
       : undefined;
-    this.archiveOwner = options.sessionArchive?.owner ?? 'maestro';
+    this.archiveOwner = options.sessionArchive?.owner ?? "maestro";
     this.archiveScope = options.sessionArchive?.scope ?? options.pipelineId;
     this.sessionArchiveLabels = options.sessionArchive?.labels;
     this.planner = new HybridSymbolicLLMPlanner(options.providers, {
@@ -837,39 +797,31 @@ export class MetaOrchestrator {
       fairnessMonitor: this.fairnessMonitor,
       governance: this.governance,
     });
-    this.rewardShaper = new ActiveRewardShaper(
-      options.rewardWeights ?? DEFAULT_WEIGHTS,
-    );
+    this.rewardShaper = new ActiveRewardShaper(options.rewardWeights ?? DEFAULT_WEIGHTS);
     this.selfHealing = options.selfHealing ?? DEFAULT_SELF_HEALING;
     this.events = options.events ?? new StructuredEventEmitter();
-    this.resilience = mergeResilience(
-      DEFAULT_RESILIENCE,
-      options.resilience ?? {},
-    );
+    this.resilience = mergeResilience(DEFAULT_RESILIENCE, options.resilience ?? {});
     this.featureFlags = {
       ...DEFAULT_FEATURE_FLAGS,
       ...(options.featureFlags ?? {}),
     };
-    this.mode = options.mode ?? 'production';
+    this.mode = options.mode ?? "production";
     this.deterministicSeed =
-      this.mode === 'deterministic'
-        ? options.deterministicSeed ?? Date.now()
-        : undefined;
+      this.mode === "deterministic" ? (options.deterministicSeed ?? Date.now()) : undefined;
     this.random =
-      this.mode === 'deterministic'
+      this.mode === "deterministic"
         ? createSeededRandom(this.deterministicSeed ?? Date.now())
         : Math.random;
   }
 
   async createPlan(
     stages: PipelineStageDefinition[],
-    observation?: PlannerObservation,
+    observation?: PlannerObservation
   ): Promise<ExplainablePlan> {
-    const pricing =
-      observation?.pricing ?? (await this.pricingFeed.getPricingSignals());
+    const pricing = observation?.pricing ?? (await this.pricingFeed.getPricingSignals());
     const rewardSignals = observation?.rewards ?? [];
     const weights = this.rewardShaper.update(rewardSignals, stages);
-    await this.pluginManager.run('beforePlan', {
+    await this.pluginManager.run("beforePlan", {
       pipelineId: this.pipelineId,
       metadata: { stages },
     });
@@ -877,7 +829,7 @@ export class MetaOrchestrator {
       this.pipelineId,
       stages,
       { pricing, rewards: rewardSignals },
-      weights,
+      weights
     );
     plan.metadata.executionMode = this.mode;
     if (this.deterministicSeed !== undefined) {
@@ -889,16 +841,16 @@ export class MetaOrchestrator {
     await this.auditSink.record({
       id: `${this.pipelineId}:${Date.now()}:plan`,
       timestamp: nowIso(),
-      category: 'plan',
-      summary: 'Hybrid planner generated explainable plan',
+      category: "plan",
+      summary: "Hybrid planner generated explainable plan",
       data: { plan, fairness },
     });
     this.governance.record({
-      kind: 'fairness',
-      summary: 'Recorded fairness snapshot for plan',
+      kind: "fairness",
+      summary: "Recorded fairness snapshot for plan",
       details: fairness,
     });
-    await this.pluginManager.run('afterPlan', {
+    await this.pluginManager.run("afterPlan", {
       pipelineId: this.pipelineId,
       plan,
       metadata: { fairness },
@@ -908,7 +860,7 @@ export class MetaOrchestrator {
 
   async executePlan(
     stages: PipelineStageDefinition[],
-    planMetadata: Record<string, unknown> = {},
+    planMetadata: Record<string, unknown> = {}
   ): Promise<ExecutionOutcome> {
     const startedAt = Date.now();
     const correlationId = planMetadata.correlationId as string | undefined;
@@ -917,8 +869,7 @@ export class MetaOrchestrator {
 
     try {
       const plan = await this.createPlan(stages);
-      runId = (planMetadata.runId as string | undefined) ??
-        buildRunId(plan, `${startedAt}`);
+      runId = (planMetadata.runId as string | undefined) ?? buildRunId(plan, `${startedAt}`);
 
       const outcomeSummary = this.events.summarizeOutcome({
         plan,
@@ -927,25 +878,25 @@ export class MetaOrchestrator {
       });
 
       this.events.emitEvent(
-        'summit.maestro.run.created',
+        "summit.maestro.run.created",
         {
           runId,
           pipelineId: this.pipelineId,
           stageIds: outcomeSummary.stageIds,
           metadata: plan.metadata,
         },
-        { correlationId, traceId },
+        { correlationId, traceId }
       );
 
       this.events.emitEvent(
-        'summit.maestro.run.started',
+        "summit.maestro.run.started",
         {
           runId,
           pipelineId: this.pipelineId,
           stageCount: plan.steps.length,
           planScore: plan.aggregateScore,
         },
-        { correlationId, traceId },
+        { correlationId, traceId }
       );
 
       const trace: ExecutionTraceEntry[] = [];
@@ -956,7 +907,7 @@ export class MetaOrchestrator {
         if (!stage) {
           throw new Error(`unknown stage ${step.stageId}`);
         }
-        await this.pluginManager.run('beforeStage', {
+        await this.pluginManager.run("beforeStage", {
           pipelineId: this.pipelineId,
           stage,
           plan,
@@ -965,7 +916,7 @@ export class MetaOrchestrator {
         const executionResult = await this.runStage(stage, step, planMetadata);
         trace.push(executionResult.traceEntry);
         rewards.push(executionResult.rewardSignal);
-        await this.pluginManager.run('afterStage', {
+        await this.pluginManager.run("afterStage", {
           pipelineId: this.pipelineId,
           stage,
           plan,
@@ -977,59 +928,59 @@ export class MetaOrchestrator {
       await this.auditSink.record({
         id: `${this.pipelineId}:${Date.now()}:reward`,
         timestamp: nowIso(),
-        category: 'reward-update',
-        summary: 'Updated reward weights after execution',
+        category: "reward-update",
+        summary: "Updated reward weights after execution",
         data: { rewards, weights: updatedWeights },
       });
 
       const durationMs = Date.now() - startedAt;
       const outcome: ExecutionOutcome = { plan, trace, rewards };
       const { successCount, recoveredCount } = this.events.summarizeOutcome(outcome);
-      const hasFailures = trace.some((entry) => entry.status === 'failed');
+      const hasFailures = trace.some((entry) => entry.status === "failed");
       if (hasFailures) {
-        const failedStage = trace.find((entry) => entry.status === 'failed');
+        const failedStage = trace.find((entry) => entry.status === "failed");
         this.events.emitEvent(
-          'summit.maestro.run.failed',
+          "summit.maestro.run.failed",
           {
             runId,
             pipelineId: this.pipelineId,
-            reason: 'one or more stages failed',
+            reason: "one or more stages failed",
             failedStageId: failedStage?.stageId,
           },
-          { correlationId, traceId },
+          { correlationId, traceId }
         );
       }
 
       this.events.emitEvent(
-        'summit.maestro.run.completed',
+        "summit.maestro.run.completed",
         {
           runId,
           pipelineId: this.pipelineId,
-          status: hasFailures ? 'degraded' : 'success',
+          status: hasFailures ? "degraded" : "success",
           traceLength: trace.length,
           successCount,
           recoveredCount,
           durationMs,
         },
-        { correlationId, traceId },
+        { correlationId, traceId }
       );
 
       if (this.sessionArchiver) {
         const archive = await this.sessionArchiver.archive({
           plan,
           outcome,
-          owner: this.archiveOwner ?? 'maestro',
+          owner: this.archiveOwner ?? "maestro",
           scope: this.archiveScope ?? this.pipelineId,
           labels: this.sessionArchiveLabels,
         });
         this.governance.record({
-          kind: 'archive',
-          summary: 'Archived orchestrator session for replay',
+          kind: "archive",
+          summary: "Archived orchestrator session for replay",
           details: archive,
         });
       }
 
-      await this.pluginManager.run('afterExecution', {
+      await this.pluginManager.run("afterExecution", {
         pipelineId: this.pipelineId,
         plan,
         outcome,
@@ -1039,22 +990,22 @@ export class MetaOrchestrator {
       await this.auditSink.record({
         id: `${this.pipelineId}:${Date.now()}:governance`,
         timestamp: nowIso(),
-        category: 'plan',
-        summary: 'Governance snapshot recorded',
+        category: "plan",
+        summary: "Governance snapshot recorded",
         data: { events: this.governance.flush() },
       });
 
       return outcome;
     } catch (error) {
       this.events.emitEvent(
-        'summit.maestro.run.failed',
+        "summit.maestro.run.failed",
         {
           runId: runId ?? `${this.pipelineId}:${startedAt}`,
           pipelineId: this.pipelineId,
-          reason: error instanceof Error ? error.message : 'unknown error',
+          reason: error instanceof Error ? error.message : "unknown error",
           fatal: true,
         },
-        { correlationId, traceId },
+        { correlationId, traceId }
       );
       throw error;
     }
@@ -1074,17 +1025,16 @@ export class MetaOrchestrator {
   private async executeWithResilience(
     stage: PipelineStageDefinition,
     decision: PlannerDecision,
-    metadata: Record<string, unknown>,
+    metadata: Record<string, unknown>
   ): Promise<StageExecutionResult> {
     const circuitKey = `${stage.id}:${decision.provider}`;
     const existing = this.circuitStates.get(circuitKey) ?? { failures: 0 };
     const now = Date.now();
     const circuitCoolingDown =
-      existing.openedAt &&
-      now - existing.openedAt < this.resilience.circuitBreaker.cooldownMs;
+      existing.openedAt && now - existing.openedAt < this.resilience.circuitBreaker.cooldownMs;
     if (this.featureFlags.enableCircuitBreaker && circuitCoolingDown) {
       return {
-        status: this.featureFlags.gracefulDegradation ? 'success' : 'failure',
+        status: this.featureFlags.gracefulDegradation ? "success" : "failure",
         throughputPerMinute: this.featureFlags.gracefulDegradation
           ? Math.max(1, stage.minThroughputPerMinute * 0.1)
           : 0,
@@ -1093,14 +1043,11 @@ export class MetaOrchestrator {
         logs: [`circuit open for ${circuitKey}`],
         degraded: this.featureFlags.gracefulDegradation,
         attempts: 0,
-        featureFlags: ['circuit-breaker'],
+        featureFlags: ["circuit-breaker"],
       };
     }
 
-    if (
-      existing.openedAt &&
-      now - existing.openedAt >= this.resilience.circuitBreaker.cooldownMs
-    ) {
+    if (existing.openedAt && now - existing.openedAt >= this.resilience.circuitBreaker.cooldownMs) {
       existing.failures = 0;
       existing.openedAt = undefined;
     }
@@ -1122,41 +1069,31 @@ export class MetaOrchestrator {
           new Promise<StageExecutionResult>((_, reject) => {
             timeoutHandle = setTimeout(
               () => reject(new Error(`timeout after ${this.resilience.timeoutMs}ms`)),
-              this.resilience.timeoutMs,
+              this.resilience.timeoutMs
             );
           }),
         ]);
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
         }
-        if (
-          this.mode === 'deterministic' &&
-          this.featureFlags.deterministicLogging
-        ) {
-          result.logs = [
-            `[deterministic seed=${this.deterministicSeed}]`,
-            ...result.logs,
-          ];
-          result.featureFlags = [
-            ...(result.featureFlags ?? []),
-            'deterministic',
-          ];
+        if (this.mode === "deterministic" && this.featureFlags.deterministicLogging) {
+          result.logs = [`[deterministic seed=${this.deterministicSeed}]`, ...result.logs];
+          result.featureFlags = [...(result.featureFlags ?? []), "deterministic"];
         }
-        if (result.status === 'success') {
+        if (result.status === "success") {
           this.circuitStates.set(circuitKey, { failures: 0 });
           result.attempts = attempts;
           result.timedOut = timedOut;
           return result;
         }
         lastLogs = result.logs;
-        lastError = 'execution-failure';
+        lastError = "execution-failure";
       } catch (error) {
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
         }
-        lastError =
-          error instanceof Error ? error.message : 'execution timed out';
-        timedOut ||= lastError.includes('timeout');
+        lastError = error instanceof Error ? error.message : "execution timed out";
+        timedOut ||= lastError.includes("timeout");
         lastLogs = [`${lastError}`];
       }
       existing.failures += 1;
@@ -1174,23 +1111,19 @@ export class MetaOrchestrator {
     this.circuitStates.set(circuitKey, existing);
     const degraded = this.featureFlags.gracefulDegradation;
     return {
-      status: degraded ? 'success' : 'failure',
-      throughputPerMinute: degraded
-        ? Math.max(1, stage.minThroughputPerMinute * 0.1)
-        : 0,
+      status: degraded ? "success" : "failure",
+      throughputPerMinute: degraded ? Math.max(1, stage.minThroughputPerMinute * 0.1) : 0,
       cost: 0,
       errorRate: 1,
-      logs: degraded
-        ? ['graceful-degradation enabled', ...lastLogs]
-        : lastLogs,
+      logs: degraded ? ["graceful-degradation enabled", ...lastLogs] : lastLogs,
       degraded,
       attempts,
-      timedOut: timedOut || (lastError?.includes('timeout') ?? false),
+      timedOut: timedOut || (lastError?.includes("timeout") ?? false),
       featureFlags: [
-        ...(degraded ? ['graceful-degradation'] : []),
-        ...(existing.openedAt ? ['circuit-breaker'] : []),
-        ...(this.mode === 'deterministic' && this.featureFlags.deterministicLogging
-          ? ['deterministic']
+        ...(degraded ? ["graceful-degradation"] : []),
+        ...(existing.openedAt ? ["circuit-breaker"] : []),
+        ...(this.mode === "deterministic" && this.featureFlags.deterministicLogging
+          ? ["deterministic"]
           : []),
       ],
     };
@@ -1199,30 +1132,26 @@ export class MetaOrchestrator {
   private async runStage(
     stage: PipelineStageDefinition,
     step: ExplainablePlanStep,
-    metadata: Record<string, unknown>,
+    metadata: Record<string, unknown>
   ): Promise<{
     traceEntry: ExecutionTraceEntry;
     rewardSignal: PlannerRewardSignal;
   }> {
     const startedAt = nowIso();
-    const primaryResult = await this.executeWithResilience(
-      stage,
-      step.primary,
-      metadata,
-    );
-    if (primaryResult.status === 'success') {
+    const primaryResult = await this.executeWithResilience(stage, step.primary, metadata);
+    if (primaryResult.status === "success") {
       const finishedAt = nowIso();
       const traceEntry: ExecutionTraceEntry = {
         stageId: stage.id,
         provider: step.primary.provider,
-        status: 'success',
+        status: "success",
         startedAt,
         finishedAt,
         logs: primaryResult.logs,
         fallbackTriggered: primaryResult.degraded
-          ? 'graceful-degradation'
+          ? "graceful-degradation"
           : primaryResult.timedOut
-            ? 'timeout'
+            ? "timeout"
             : undefined,
         degraded: primaryResult.degraded,
         featureFlags: primaryResult.featureFlags,
@@ -1240,25 +1169,23 @@ export class MetaOrchestrator {
       await this.auditSink.record({
         id: `${stage.id}:${Date.now()}:execution`,
         timestamp: finishedAt,
-        category: 'execution',
+        category: "execution",
         summary: `Stage ${stage.name} completed on ${step.primary.provider}`,
         data: { result: primaryResult, decision: step.primary },
       });
       return { traceEntry, rewardSignal };
     }
 
-    if (!this.selfHealing.triggers.includes('execution-failure')) {
+    if (!this.selfHealing.triggers.includes("execution-failure")) {
       const finishedAt = nowIso();
       const traceEntry: ExecutionTraceEntry = {
         stageId: stage.id,
         provider: step.primary.provider,
-        status: 'failed',
+        status: "failed",
         startedAt,
         finishedAt,
         logs: primaryResult.logs,
-        fallbackTriggered: primaryResult.timedOut
-          ? 'timeout'
-          : 'execution-failure',
+        fallbackTriggered: primaryResult.timedOut ? "timeout" : "execution-failure",
         featureFlags: primaryResult.featureFlags,
       };
       const rewardSignal: PlannerRewardSignal = {
@@ -1276,7 +1203,7 @@ export class MetaOrchestrator {
       step,
       metadata,
       primaryResult.logs,
-      startedAt,
+      startedAt
     );
     return fallbackResult;
   }
@@ -1286,7 +1213,7 @@ export class MetaOrchestrator {
     step: ExplainablePlanStep,
     metadata: Record<string, unknown>,
     accumulatedLogs: string[],
-    initialStartedAt: string,
+    initialStartedAt: string
   ): Promise<{
     traceEntry: ExecutionTraceEntry;
     rewardSignal: PlannerRewardSignal;
@@ -1301,7 +1228,7 @@ export class MetaOrchestrator {
         break;
       }
       const fallbackPolicy = fallbacks.find(
-        (strategy) => strategy.provider === fallbackDecision.provider,
+        (strategy) => strategy.provider === fallbackDecision.provider
       );
       if (!fallbackPolicy) {
         continue;
@@ -1309,40 +1236,36 @@ export class MetaOrchestrator {
       if (!this.selfHealing.triggers.includes(fallbackPolicy.trigger)) {
         continue;
       }
-      if (fallbackPolicy.trigger !== 'execution-failure') {
+      if (fallbackPolicy.trigger !== "execution-failure") {
         continue;
       }
-      if (!this.selfHealing.triggers.includes('execution-failure')) {
+      if (!this.selfHealing.triggers.includes("execution-failure")) {
         continue;
       }
       await this.auditSink.record({
         id: `${stage.id}:${Date.now()}:fallback`,
         timestamp: nowIso(),
-        category: 'fallback',
+        category: "fallback",
         summary: `Triggering fallback ${fallbackDecision.provider} for stage ${stage.name}`,
         data: { fallbackDecision, stage },
       });
       const fallbackStartedAt = nowIso();
-      const result = await this.executeWithResilience(
-        stage,
-        fallbackDecision,
-        metadata,
-      );
+      const result = await this.executeWithResilience(stage, fallbackDecision, metadata);
       lastStartedAt = fallbackStartedAt;
-      if (result.status === 'success') {
+      if (result.status === "success") {
         const finishedAt = nowIso();
         const traceEntry: ExecutionTraceEntry = {
           stageId: stage.id,
           provider: fallbackDecision.provider,
-          status: 'recovered',
+          status: "recovered",
           startedAt: fallbackStartedAt,
           finishedAt,
           logs: [...accumulatedLogs, ...result.logs],
           fallbackTriggered: result.degraded
-            ? 'graceful-degradation'
+            ? "graceful-degradation"
             : result.timedOut
-              ? 'timeout'
-              : 'execution-failure',
+              ? "timeout"
+              : "execution-failure",
           degraded: result.degraded,
           featureFlags: result.featureFlags,
         };
@@ -1352,7 +1275,7 @@ export class MetaOrchestrator {
           observedCost: result.cost,
           observedErrorRate: Math.min(
             result.errorRate,
-            guardrail?.maxErrorRate ?? result.errorRate,
+            guardrail?.maxErrorRate ?? result.errorRate
           ),
           recovered: true,
         };
@@ -1364,11 +1287,11 @@ export class MetaOrchestrator {
     const traceEntry: ExecutionTraceEntry = {
       stageId: stage.id,
       provider: step.primary.provider,
-      status: 'failed',
+      status: "failed",
       startedAt: lastStartedAt,
       finishedAt,
       logs: accumulatedLogs,
-      fallbackTriggered: 'execution-failure',
+      fallbackTriggered: "execution-failure",
     };
     const rewardSignal: PlannerRewardSignal = {
       stageId: stage.id,
@@ -1381,24 +1304,14 @@ export class MetaOrchestrator {
   }
 
   deriveTelemetry(outcome: ExecutionOutcome): MetaOrchestratorTelemetry {
-    const throughput = outcome.rewards.reduce(
-      (acc, reward) => acc + reward.observedThroughput,
-      0,
-    );
-    const cost = outcome.rewards.reduce(
-      (acc, reward) => acc + reward.observedCost,
-      0,
-    );
+    const throughput = outcome.rewards.reduce((acc, reward) => acc + reward.observedThroughput, 0);
+    const cost = outcome.rewards.reduce((acc, reward) => acc + reward.observedCost, 0);
     const successes = outcome.trace.filter(
-      (entry) => entry.status === 'success' || entry.status === 'recovered',
+      (entry) => entry.status === "success" || entry.status === "recovered"
     ).length;
-    const auditCompleteness =
-      outcome.trace.length > 0 ? successes / outcome.trace.length : 0;
-    const selfHealing = outcome.trace.filter(
-      (entry) => entry.status === 'recovered',
-    ).length;
-    const selfHealingRate =
-      outcome.trace.length > 0 ? selfHealing / outcome.trace.length : 0;
+    const auditCompleteness = outcome.trace.length > 0 ? successes / outcome.trace.length : 0;
+    const selfHealing = outcome.trace.filter((entry) => entry.status === "recovered").length;
+    const selfHealingRate = outcome.trace.length > 0 ? selfHealing / outcome.trace.length : 0;
     return {
       throughputPerMinute: throughput,
       costPerThroughputUnit: throughput === 0 ? cost : cost / throughput,
@@ -1448,11 +1361,11 @@ function captureMaestroReplay(options: {
   classification: string;
 }): void {
   const descriptor = createReplayDescriptor({
-    service: 'maestro-conductor',
-    flow: 'maestro-reference-workflow',
+    service: "maestro-conductor",
+    flow: "maestro-reference-workflow",
     request: {
-      path: 'reference-workflow',
-      method: 'EXECUTE',
+      path: "reference-workflow",
+      method: "EXECUTE",
       payload: sanitizePayload({
         pipeline: options.input.pipeline,
         services: options.input.services,
@@ -1468,17 +1381,16 @@ function captureMaestroReplay(options: {
       }),
     },
     context: {
-      tenantId: 'reference',
-      purpose: 'maestro-e2e',
+      tenantId: "reference",
+      purpose: "maestro-e2e",
       traceId: options.outcome?.trace?.[0]?.stageId,
       featureFlags:
-        (options.input.metadata?.featureFlags as
-          | Record<string, boolean | string>
-          | undefined) ?? undefined,
+        (options.input.metadata?.featureFlags as Record<string, boolean | string> | undefined) ??
+        undefined,
     },
-    environment: buildReplayEnvironment({ env: { MAESTRO_ENV: 'test' } }),
+    environment: buildReplayEnvironment({ env: { MAESTRO_ENV: "test" } }),
     outcome: {
-      status: options.error ? 'error' : 'success',
+      status: options.error ? "error" : "success",
       message:
         options.error instanceof Error
           ? options.error.message
@@ -1488,8 +1400,8 @@ function captureMaestroReplay(options: {
       classification: options.classification,
     },
     originalResponse: options.outcome ?? { auditTrail: options.auditTrail },
-    privacy: { notes: ['Auto-captured from reference workflow run.'] },
-    tags: ['auto-captured'],
+    privacy: { notes: ["Auto-captured from reference workflow run."] },
+    tags: ["auto-captured"],
   });
   persistReplayDescriptor(descriptor);
 }
@@ -1516,11 +1428,11 @@ class ReferenceExecutionAdapter implements ExecutionAdapter {
     const planned = this.script.get(request.decision.provider);
     if (!planned || planned.length === 0) {
       return {
-        status: 'success',
+        status: "success",
         throughputPerMinute: Math.max(request.stage.minThroughputPerMinute, 1),
         cost: request.decision.expectedCost,
         errorRate: 0.01,
-        logs: ['reference-default-success'],
+        logs: ["reference-default-success"],
       } satisfies StageExecutionResult;
     }
     const [result, ...remaining] = planned;
@@ -1531,10 +1443,10 @@ class ReferenceExecutionAdapter implements ExecutionAdapter {
 
 function stageDefinitionsFromGraph(
   snapshot: GraphSnapshot,
-  overlays: Record<string, ReferenceStageOverlay>,
+  overlays: Record<string, ReferenceStageOverlay>
 ): PipelineStageDefinition[] {
   return snapshot.nodes
-    .filter((node) => node.type === 'stage')
+    .filter((node) => node.type === "stage")
     .map((node) => {
       const stage = node.data as PipelineStageRecord;
       const overlay = overlays[stage.id];
@@ -1555,7 +1467,7 @@ function stageDefinitionsFromGraph(
 }
 
 async function runReferenceWorkflow(
-  input: ReferenceWorkflowInput,
+  input: ReferenceWorkflowInput
 ): Promise<ReferenceWorkflowResult> {
   const graph = new OrchestrationKnowledgeGraph();
   graph.registerPipelineConnector({
@@ -1607,16 +1519,16 @@ async function runReferenceWorkflow(
       input,
       auditTrail,
       error,
-      classification: 'plan-execution-throw',
+      classification: "plan-execution-throw",
     });
     throw error;
   }
-  if (outcome.trace.some((entry) => entry.status === 'failed')) {
+  if (outcome.trace.some((entry) => entry.status === "failed")) {
     captureMaestroReplay({
       input,
       auditTrail,
       outcome,
-      classification: 'stage-failure',
+      classification: "stage-failure",
     });
   }
   const telemetry = orchestrator.deriveTelemetry(outcome);
@@ -1633,17 +1545,17 @@ async function runReferenceWorkflow(
 
 export async function runHelloWorldWorkflow(): Promise<ReferenceWorkflowResult> {
   const pipeline: PipelineRecord = {
-    id: 'hello-world-pipeline',
-    name: 'Hello World Reference Pipeline',
+    id: "hello-world-pipeline",
+    name: "Hello World Reference Pipeline",
     stages: [
       {
-        id: 'hello-world-stage',
-        name: 'Hello World Build',
-        pipelineId: 'hello-world-pipeline',
-        serviceId: 'service-hello-world',
-        environmentId: 'env-ref-dev',
-        capability: 'compute',
-        complianceTags: ['fedramp'],
+        id: "hello-world-stage",
+        name: "Hello World Build",
+        pipelineId: "hello-world-pipeline",
+        serviceId: "service-hello-world",
+        environmentId: "env-ref-dev",
+        capability: "compute",
+        complianceTags: ["fedramp"],
       },
     ],
   };
@@ -1652,44 +1564,44 @@ export async function runHelloWorldWorkflow(): Promise<ReferenceWorkflowResult> 
     pipeline,
     services: [
       {
-        id: 'service-hello-world',
-        name: 'Hello World API',
-        owningTeam: 'demo',
-        tier: 'tier-1',
-        dependencies: ['service-hello-world-db'],
+        id: "service-hello-world",
+        name: "Hello World API",
+        owningTeam: "demo",
+        tier: "tier-1",
+        dependencies: ["service-hello-world-db"],
       },
       {
-        id: 'service-hello-world-db',
-        name: 'Hello World DB',
-        tier: 'tier-2',
+        id: "service-hello-world-db",
+        name: "Hello World DB",
+        tier: "tier-2",
       },
     ],
     environments: [
       {
-        id: 'env-ref-dev',
-        name: 'Reference Dev',
-        stage: 'dev',
-        region: 'us-east-1',
-        deploymentMechanism: 'containers',
-        complianceTags: ['fedramp'],
+        id: "env-ref-dev",
+        name: "Reference Dev",
+        stage: "dev",
+        region: "us-east-1",
+        deploymentMechanism: "containers",
+        complianceTags: ["fedramp"],
       },
     ],
     policies: [
       {
-        id: 'policy-ref-fedramp',
-        description: 'Reference FedRAMP policy',
-        effect: 'allow',
-        actions: ['deploy'],
-        resources: ['service:service-hello-world'],
+        id: "policy-ref-fedramp",
+        description: "Reference FedRAMP policy",
+        effect: "allow",
+        actions: ["deploy"],
+        resources: ["service:service-hello-world"],
         conditions: [],
         obligations: [],
-        tags: ['reference'],
+        tags: ["reference"],
       },
     ],
     stageOverlays: {
-      'hello-world-stage': {
-        requiredCapabilities: ['compute'],
-        complianceTags: ['fedramp'],
+      "hello-world-stage": {
+        requiredCapabilities: ["compute"],
+        complianceTags: ["fedramp"],
         minThroughputPerMinute: 90,
         slaSeconds: 900,
         guardrail: { maxErrorRate: 0.05, recoveryTimeoutSeconds: 120 },
@@ -1697,74 +1609,74 @@ export async function runHelloWorldWorkflow(): Promise<ReferenceWorkflowResult> 
     },
     providers: [
       {
-        name: 'azure',
-        regions: ['eastus'],
-        services: ['compute', 'ml'],
+        name: "azure",
+        regions: ["eastus"],
+        services: ["compute", "ml"],
         reliabilityScore: 0.96,
         sustainabilityScore: 0.62,
-        securityCertifications: ['fedramp'],
+        securityCertifications: ["fedramp"],
         maxThroughputPerMinute: 150,
         baseLatencyMs: 65,
-        policyTags: ['fedramp'],
+        policyTags: ["fedramp"],
       },
       {
-        name: 'aws',
-        regions: ['us-east-1'],
-        services: ['compute', 'ml'],
+        name: "aws",
+        regions: ["us-east-1"],
+        services: ["compute", "ml"],
         reliabilityScore: 0.94,
         sustainabilityScore: 0.55,
-        securityCertifications: ['fedramp'],
+        securityCertifications: ["fedramp"],
         maxThroughputPerMinute: 140,
         baseLatencyMs: 70,
-        policyTags: ['fedramp'],
+        policyTags: ["fedramp"],
       },
     ],
     pricing: [
       {
-        provider: 'azure',
-        region: 'eastus',
-        service: 'compute',
+        provider: "azure",
+        region: "eastus",
+        service: "compute",
         pricePerUnit: 0.8,
-        currency: 'USD',
-        unit: 'per-minute',
+        currency: "USD",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'aws',
-        region: 'us-east-1',
-        service: 'compute',
+        provider: "aws",
+        region: "us-east-1",
+        service: "compute",
         pricePerUnit: 1.1,
-        currency: 'USD',
-        unit: 'per-minute',
+        currency: "USD",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
     ],
     executionScripts: {
       azure: {
-        status: 'success',
+        status: "success",
         throughputPerMinute: 120,
         cost: 96,
         errorRate: 0.01,
-        logs: ['hello-world-primary'],
+        logs: ["hello-world-primary"],
       },
     },
-    metadata: { release: 'hello-world' },
+    metadata: { release: "hello-world" },
   });
 }
 
 export async function runHelloCaseWorkflow(): Promise<ReferenceWorkflowResult> {
   const pipeline: PipelineRecord = {
-    id: 'hello-case-pipeline',
-    name: 'Hello Case Reference Pipeline',
+    id: "hello-case-pipeline",
+    name: "Hello Case Reference Pipeline",
     stages: [
       {
-        id: 'hello-case-triage',
-        name: 'Hello Case Triage',
-        pipelineId: 'hello-case-pipeline',
-        serviceId: 'service-hello-case',
-        environmentId: 'env-ref-staging',
-        capability: 'ml',
-        complianceTags: ['hipaa', 'pci'],
+        id: "hello-case-triage",
+        name: "Hello Case Triage",
+        pipelineId: "hello-case-pipeline",
+        serviceId: "service-hello-case",
+        environmentId: "env-ref-staging",
+        capability: "ml",
+        complianceTags: ["hipaa", "pci"],
       },
     ],
   };
@@ -1773,49 +1685,49 @@ export async function runHelloCaseWorkflow(): Promise<ReferenceWorkflowResult> {
     pipeline,
     services: [
       {
-        id: 'service-hello-case',
-        name: 'Hello Case API',
-        tier: 'tier-0',
-        dependencies: ['service-hello-world'],
+        id: "service-hello-case",
+        name: "Hello Case API",
+        tier: "tier-0",
+        dependencies: ["service-hello-world"],
         soxCritical: true,
       },
     ],
     environments: [
       {
-        id: 'env-ref-staging',
-        name: 'Reference Staging',
-        stage: 'staging',
-        region: 'us-west-2',
+        id: "env-ref-staging",
+        name: "Reference Staging",
+        stage: "staging",
+        region: "us-west-2",
         zeroTrustTier: 2,
-        complianceTags: ['hipaa', 'pci'],
+        complianceTags: ["hipaa", "pci"],
       },
     ],
     incidents: [
       {
-        id: 'case-incident-1',
-        serviceId: 'service-hello-case',
-        environmentId: 'env-ref-staging',
-        severity: 'high',
+        id: "case-incident-1",
+        serviceId: "service-hello-case",
+        environmentId: "env-ref-staging",
+        severity: "high",
         occurredAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-        status: 'open',
-        rootCauseCategory: 'dependency',
+        status: "open",
+        rootCauseCategory: "dependency",
       },
     ],
     policies: [
       {
-        id: 'policy-hello-case',
-        description: 'Hello Case compliance envelope',
-        effect: 'allow',
-        actions: ['deploy', 'execute'],
-        resources: ['service:service-hello-case'],
+        id: "policy-hello-case",
+        description: "Hello Case compliance envelope",
+        effect: "allow",
+        actions: ["deploy", "execute"],
+        resources: ["service:service-hello-case"],
         conditions: [],
         obligations: [],
-        tags: ['high-risk'],
+        tags: ["high-risk"],
       },
     ],
     costSignals: [
       {
-        serviceId: 'service-hello-case',
+        serviceId: "service-hello-case",
         timeBucket: new Date().toISOString().slice(0, 13),
         saturation: 0.8,
         budgetBreaches: 1,
@@ -1824,116 +1736,116 @@ export async function runHelloCaseWorkflow(): Promise<ReferenceWorkflowResult> {
       },
     ],
     stageOverlays: {
-      'hello-case-triage': {
-        requiredCapabilities: ['ml'],
-        complianceTags: ['hipaa', 'pci'],
+      "hello-case-triage": {
+        requiredCapabilities: ["ml"],
+        complianceTags: ["hipaa", "pci"],
         minThroughputPerMinute: 140,
         slaSeconds: 600,
         guardrail: { maxErrorRate: 0.05, recoveryTimeoutSeconds: 60 },
         fallbackStrategies: [
-          { provider: 'aws', region: 'us-west-2', trigger: 'execution-failure' },
+          { provider: "aws", region: "us-west-2", trigger: "execution-failure" },
         ],
       },
     },
     providers: [
       {
-        name: 'azure',
-        regions: ['eastus'],
-        services: ['compute', 'ml'],
+        name: "azure",
+        regions: ["eastus"],
+        services: ["compute", "ml"],
         reliabilityScore: 0.93,
         sustainabilityScore: 0.7,
-        securityCertifications: ['fedramp', 'hipaa', 'pci'],
+        securityCertifications: ["fedramp", "hipaa", "pci"],
         maxThroughputPerMinute: 110,
         baseLatencyMs: 60,
-        policyTags: ['hipaa', 'pci'],
+        policyTags: ["hipaa", "pci"],
       },
       {
-        name: 'aws',
-        regions: ['us-west-2'],
-        services: ['compute', 'ml'],
+        name: "aws",
+        regions: ["us-west-2"],
+        services: ["compute", "ml"],
         reliabilityScore: 0.97,
         sustainabilityScore: 0.6,
-        securityCertifications: ['fedramp', 'hipaa', 'pci'],
+        securityCertifications: ["fedramp", "hipaa", "pci"],
         maxThroughputPerMinute: 150,
         baseLatencyMs: 72,
-        policyTags: ['hipaa', 'pci'],
+        policyTags: ["hipaa", "pci"],
       },
     ],
     pricing: [
       {
-        provider: 'azure',
-        region: 'eastus',
-        service: 'ml',
+        provider: "azure",
+        region: "eastus",
+        service: "ml",
         pricePerUnit: 0.9,
-        currency: 'USD',
-        unit: 'per-minute',
+        currency: "USD",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'aws',
-        region: 'us-west-2',
-        service: 'ml',
+        provider: "aws",
+        region: "us-west-2",
+        service: "ml",
         pricePerUnit: 1.05,
-        currency: 'USD',
-        unit: 'per-minute',
+        currency: "USD",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
     ],
     executionScripts: {
       azure: [
         {
-          status: 'failure',
+          status: "failure",
           throughputPerMinute: 80,
           cost: 140,
           errorRate: 0.18,
-          logs: ['hello-case-primary-failure'],
+          logs: ["hello-case-primary-failure"],
         },
       ],
       aws: [
         {
-          status: 'success',
+          status: "success",
           throughputPerMinute: 165,
           cost: 125,
           errorRate: 0.01,
-          logs: ['hello-case-fallback-success'],
+          logs: ["hello-case-fallback-success"],
         },
       ],
     },
-    metadata: { caseId: 'HELLO-CASE-001' },
+    metadata: { caseId: "HELLO-CASE-001" },
   });
 }
 
 export async function runPaymentsAndCreditWorkflow(): Promise<ReferenceWorkflowResult> {
   const pipeline: PipelineRecord = {
-    id: 'payments-credit-pipeline',
-    name: 'Payments and Credit Orchestration',
+    id: "payments-credit-pipeline",
+    name: "Payments and Credit Orchestration",
     stages: [
       {
-        id: 'pci-ingest',
-        name: 'PCI-Safe Ingest',
-        pipelineId: 'payments-credit-pipeline',
-        serviceId: 'service-ingest',
-        environmentId: 'env-eu-active',
-        capability: 'ingest',
-        complianceTags: ['pci', 'aml', 'gdpr'],
+        id: "pci-ingest",
+        name: "PCI-Safe Ingest",
+        pipelineId: "payments-credit-pipeline",
+        serviceId: "service-ingest",
+        environmentId: "env-eu-active",
+        capability: "ingest",
+        complianceTags: ["pci", "aml", "gdpr"],
       },
       {
-        id: 'fraud-decision',
-        name: 'Fraud and Credit Decisioning',
-        pipelineId: 'payments-credit-pipeline',
-        serviceId: 'service-decision',
-        environmentId: 'env-eu-active',
-        capability: 'ml',
-        complianceTags: ['pci', 'psd2', 'sca'],
+        id: "fraud-decision",
+        name: "Fraud and Credit Decisioning",
+        pipelineId: "payments-credit-pipeline",
+        serviceId: "service-decision",
+        environmentId: "env-eu-active",
+        capability: "ml",
+        complianceTags: ["pci", "psd2", "sca"],
       },
       {
-        id: 'audit-ledger',
-        name: 'Immutable Audit and Provenance',
-        pipelineId: 'payments-credit-pipeline',
-        serviceId: 'service-ledger',
-        environmentId: 'env-eu-active',
-        capability: 'audit',
-        complianceTags: ['pci', 'sox'],
+        id: "audit-ledger",
+        name: "Immutable Audit and Provenance",
+        pipelineId: "payments-credit-pipeline",
+        serviceId: "service-ledger",
+        environmentId: "env-eu-active",
+        capability: "audit",
+        complianceTags: ["pci", "sox"],
       },
     ],
   };
@@ -1942,66 +1854,62 @@ export async function runPaymentsAndCreditWorkflow(): Promise<ReferenceWorkflowR
     pipeline,
     services: [
       {
-        id: 'service-ingest',
-        name: 'EU Payments Ingest',
-        tier: 'tier-0',
-        owningTeam: 'payments-edge',
-        dependencies: ['service-ledger'],
+        id: "service-ingest",
+        name: "EU Payments Ingest",
+        tier: "tier-0",
+        owningTeam: "payments-edge",
+        dependencies: ["service-ledger"],
         soxCritical: true,
       },
       {
-        id: 'service-decision',
-        name: 'Fraud and Credit Brain',
-        tier: 'tier-0',
-        owningTeam: 'risk-brain',
-        dependencies: ['service-ledger'],
+        id: "service-decision",
+        name: "Fraud and Credit Brain",
+        tier: "tier-0",
+        owningTeam: "risk-brain",
+        dependencies: ["service-ledger"],
         soxCritical: true,
       },
       {
-        id: 'service-ledger',
-        name: 'Provenance Ledger',
-        tier: 'tier-1',
-        owningTeam: 'controls',
+        id: "service-ledger",
+        name: "Provenance Ledger",
+        tier: "tier-1",
+        owningTeam: "controls",
       },
     ],
     environments: [
       {
-        id: 'env-eu-active',
-        name: 'EU Active',
-        stage: 'prod',
-        region: 'eu-west-1',
-        deploymentMechanism: 'kubernetes',
+        id: "env-eu-active",
+        name: "EU Active",
+        stage: "prod",
+        region: "eu-west-1",
+        deploymentMechanism: "kubernetes",
         zeroTrustTier: 1,
-        complianceTags: ['pci', 'psd2', 'sca', 'aml', 'gdpr'],
+        complianceTags: ["pci", "psd2", "sca", "aml", "gdpr"],
       },
     ],
     policies: [
       {
-        id: 'policy-pci-boundary',
-        description: 'PCI and PSD2 enforcement with deny-by-default',
-        effect: 'allow',
-        actions: ['ingest', 'execute', 'persist'],
-        resources: [
-          'service:service-ingest',
-          'service:service-decision',
-          'service:service-ledger',
-        ],
+        id: "policy-pci-boundary",
+        description: "PCI and PSD2 enforcement with deny-by-default",
+        effect: "allow",
+        actions: ["ingest", "execute", "persist"],
+        resources: ["service:service-ingest", "service:service-decision", "service:service-ledger"],
         conditions: [
-          { key: 'purpose', operator: 'equals', values: ['fraud', 'credit'] },
-          { key: 'geo', operator: 'equals', values: ['eu'] },
-          { key: 'data-sensitivity', operator: 'in', values: ['pci', 'pii'] },
+          { key: "purpose", operator: "equals", values: ["fraud", "credit"] },
+          { key: "geo", operator: "equals", values: ["eu"] },
+          { key: "data-sensitivity", operator: "in", values: ["pci", "pii"] },
         ],
         obligations: [
-          { key: 'encryption', value: 'field-level' },
-          { key: 'tokenization', value: 'pan' },
-          { key: 'residency', value: 'eu-only' },
+          { key: "encryption", value: "field-level" },
+          { key: "tokenization", value: "pan" },
+          { key: "residency", value: "eu-only" },
         ],
-        tags: ['pci', 'aml', 'psd2'],
+        tags: ["pci", "aml", "psd2"],
       },
     ],
     costSignals: [
       {
-        serviceId: 'service-ingest',
+        serviceId: "service-ingest",
         timeBucket: new Date().toISOString().slice(0, 13),
         saturation: 0.6,
         budgetBreaches: 0,
@@ -2009,7 +1917,7 @@ export async function runPaymentsAndCreditWorkflow(): Promise<ReferenceWorkflowR
         slowQueryCount: 0,
       },
       {
-        serviceId: 'service-decision',
+        serviceId: "service-decision",
         timeBucket: new Date().toISOString().slice(0, 13),
         saturation: 0.7,
         budgetBreaches: 0,
@@ -2018,29 +1926,29 @@ export async function runPaymentsAndCreditWorkflow(): Promise<ReferenceWorkflowR
       },
     ],
     stageOverlays: {
-      'pci-ingest': {
-        requiredCapabilities: ['ingest'],
-        complianceTags: ['pci', 'aml', 'gdpr'],
+      "pci-ingest": {
+        requiredCapabilities: ["ingest"],
+        complianceTags: ["pci", "aml", "gdpr"],
         minThroughputPerMinute: 1200,
         slaSeconds: 1,
         guardrail: { maxErrorRate: 0.01, recoveryTimeoutSeconds: 30 },
         fallbackStrategies: [
-          { provider: 'eu-backup', region: 'eu-west-2', trigger: 'execution-failure' },
+          { provider: "eu-backup", region: "eu-west-2", trigger: "execution-failure" },
         ],
       },
-      'fraud-decision': {
-        requiredCapabilities: ['ml', 'graph'],
-        complianceTags: ['pci', 'psd2', 'sca', 'aml'],
+      "fraud-decision": {
+        requiredCapabilities: ["ml", "graph"],
+        complianceTags: ["pci", "psd2", "sca", "aml"],
         minThroughputPerMinute: 720,
         slaSeconds: 1,
         guardrail: { maxErrorRate: 0.02, recoveryTimeoutSeconds: 20 },
         fallbackStrategies: [
-          { provider: 'eu-backup', region: 'eu-west-2', trigger: 'execution-failure' },
+          { provider: "eu-backup", region: "eu-west-2", trigger: "execution-failure" },
         ],
       },
-      'audit-ledger': {
-        requiredCapabilities: ['audit', 'ledger'],
-        complianceTags: ['pci', 'sox'],
+      "audit-ledger": {
+        requiredCapabilities: ["audit", "ledger"],
+        complianceTags: ["pci", "sox"],
         minThroughputPerMinute: 480,
         slaSeconds: 2,
         guardrail: { maxErrorRate: 0.005, recoveryTimeoutSeconds: 10 },
@@ -2048,172 +1956,172 @@ export async function runPaymentsAndCreditWorkflow(): Promise<ReferenceWorkflowR
     },
     providers: [
       {
-        name: 'eu-trust',
-        regions: ['eu-west-1'],
-        services: ['ingest', 'ml', 'graph', 'audit', 'ledger'],
+        name: "eu-trust",
+        regions: ["eu-west-1"],
+        services: ["ingest", "ml", "graph", "audit", "ledger"],
         reliabilityScore: 0.97,
         sustainabilityScore: 0.64,
-        securityCertifications: ['pci', 'psd2', 'sca', 'gdpr', 'aml'],
+        securityCertifications: ["pci", "psd2", "sca", "gdpr", "aml"],
         maxThroughputPerMinute: 1500,
         baseLatencyMs: 60,
-        policyTags: ['pci', 'psd2', 'sca', 'aml', 'gdpr', 'sox'],
+        policyTags: ["pci", "psd2", "sca", "aml", "gdpr", "sox"],
       },
       {
-        name: 'eu-backup',
-        regions: ['eu-west-2'],
-        services: ['ingest', 'ml', 'graph', 'audit', 'ledger'],
+        name: "eu-backup",
+        regions: ["eu-west-2"],
+        services: ["ingest", "ml", "graph", "audit", "ledger"],
         reliabilityScore: 0.94,
         sustainabilityScore: 0.58,
-        securityCertifications: ['pci', 'psd2', 'sca', 'gdpr', 'aml'],
+        securityCertifications: ["pci", "psd2", "sca", "gdpr", "aml"],
         maxThroughputPerMinute: 1200,
         baseLatencyMs: 68,
-        policyTags: ['pci', 'psd2', 'sca', 'aml', 'gdpr', 'sox'],
+        policyTags: ["pci", "psd2", "sca", "aml", "gdpr", "sox"],
       },
     ],
     pricing: [
       {
-        provider: 'eu-trust',
-        region: 'eu-west-1',
-        service: 'ingest',
+        provider: "eu-trust",
+        region: "eu-west-1",
+        service: "ingest",
         pricePerUnit: 0.08,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-backup',
-        region: 'eu-west-2',
-        service: 'ingest',
+        provider: "eu-backup",
+        region: "eu-west-2",
+        service: "ingest",
         pricePerUnit: 0.06,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-trust',
-        region: 'eu-west-1',
-        service: 'ml',
+        provider: "eu-trust",
+        region: "eu-west-1",
+        service: "ml",
         pricePerUnit: 0.09,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-backup',
-        region: 'eu-west-2',
-        service: 'ml',
+        provider: "eu-backup",
+        region: "eu-west-2",
+        service: "ml",
         pricePerUnit: 0.07,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-trust',
-        region: 'eu-west-1',
-        service: 'audit',
+        provider: "eu-trust",
+        region: "eu-west-1",
+        service: "audit",
         pricePerUnit: 0.02,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-backup',
-        region: 'eu-west-2',
-        service: 'audit',
+        provider: "eu-backup",
+        region: "eu-west-2",
+        service: "audit",
         pricePerUnit: 0.025,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-trust',
-        region: 'eu-west-1',
-        service: 'ledger',
+        provider: "eu-trust",
+        region: "eu-west-1",
+        service: "ledger",
         pricePerUnit: 0.03,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-backup',
-        region: 'eu-west-2',
-        service: 'ledger',
+        provider: "eu-backup",
+        region: "eu-west-2",
+        service: "ledger",
         pricePerUnit: 0.035,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-trust',
-        region: 'eu-west-1',
-        service: 'graph',
+        provider: "eu-trust",
+        region: "eu-west-1",
+        service: "graph",
         pricePerUnit: 0.05,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'eu-backup',
-        region: 'eu-west-2',
-        service: 'graph',
+        provider: "eu-backup",
+        region: "eu-west-2",
+        service: "graph",
         pricePerUnit: 0.055,
-        currency: 'EUR',
-        unit: 'per-minute',
+        currency: "EUR",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
     ],
     executionScripts: {
-      'eu-trust': [
+      "eu-trust": [
         {
-          status: 'success',
+          status: "success",
           throughputPerMinute: 1300,
           cost: 104,
           errorRate: 0.004,
-          logs: ['tokenized ingest ok', 'residency eu enforced'],
+          logs: ["tokenized ingest ok", "residency eu enforced"],
         },
         {
-          status: 'failure',
+          status: "failure",
           throughputPerMinute: 0,
           cost: 0,
           errorRate: 0.08,
-          logs: ['model throttle', 'triggering fallback'],
+          logs: ["model throttle", "triggering fallback"],
         },
         {
-          status: 'success',
+          status: "success",
           throughputPerMinute: 520,
           cost: 15,
           errorRate: 0.002,
-          logs: ['audit signed'],
+          logs: ["audit signed"],
         },
       ],
-      'eu-backup': [
+      "eu-backup": [
         {
-          status: 'success',
+          status: "success",
           throughputPerMinute: 740,
           cost: 48,
           errorRate: 0.009,
-          logs: ['fraud decision fallback success'],
+          logs: ["fraud decision fallback success"],
         },
         {
-          status: 'success',
+          status: "success",
           throughputPerMinute: 1250,
           cost: 90,
           errorRate: 0.006,
-          logs: ['ingest backup path'],
+          logs: ["ingest backup path"],
         },
         {
-          status: 'success',
+          status: "success",
           throughputPerMinute: 500,
           cost: 18,
           errorRate: 0.003,
-          logs: ['ledger sealed'],
+          logs: ["ledger sealed"],
         },
       ],
     },
     metadata: {
-      release: 'pci-payments-v14',
-      correlationId: 'payments-credit-ref',
-      traceId: 'payments-trace-001',
+      release: "pci-payments-v14",
+      correlationId: "payments-credit-ref",
+      traceId: "payments-trace-001",
     },
   });
 }
@@ -2248,8 +2156,8 @@ export {
   type ContextAwareDecompositionOptions,
   type ContextSegment,
   type DecomposedContext,
-  type SalientSegment
-} from './prompt/contextDecomposer.js';
+  type SalientSegment,
+} from "./prompt/contextDecomposer.js";
 export {
   CollaborativeContextBroker,
   CollaborativeWorkspace,
@@ -2258,28 +2166,28 @@ export {
   type CollaborativeWorkspaceOptions,
   type ContextDiff,
   type ContextState,
-} from './prompt/collaboration.js';
+} from "./prompt/collaboration.js";
 export {
   HierarchicalSummarizer,
   type HierarchicalSummarizerOptions,
   type HierarchicalSummaryResult,
-  type SummarizationLayer
-} from './prompt/summarizer.js';
+  type SummarizationLayer,
+} from "./prompt/summarizer.js";
 export {
   MetaPromptPlanner,
   type PlannedPrompt,
   type PlannerFeedback,
   type PlannerOptions,
   type PromptModule,
-  type PromptModuleContext
-} from './prompt/planner.js';
+  type PromptModuleContext,
+} from "./prompt/planner.js";
 export {
   RecursiveSelfImprovementEngine,
   type QualityAspect,
   type RSIPIterationLog,
   type RSIPOptions,
-  type RSIPRunResult
-} from './prompt/rsip.js';
+  type RSIPRunResult,
+} from "./prompt/rsip.js";
 export {
   AutonomousEvolutionOrchestrator,
   type AutonomousEvolutionOptions,
@@ -2289,31 +2197,41 @@ export {
   type EthicalBoundaryRule,
   type EvolutionCycleReport,
   type EvolutionOutcome,
-  type EvolutionStopReason
-} from './prompt/autonomousEvolution.js';
+  type EvolutionStopReason,
+} from "./prompt/autonomousEvolution.js";
 export {
   SelfConsensusEngine,
   type CandidateGenerationOptions,
   type ConsensusCluster,
-  type ConsensusResult
-} from './prompt/consensus.js';
+  type ConsensusResult,
+} from "./prompt/consensus.js";
 export {
   TokenAwareRetriever,
   type RetrievedContext,
   type RetrievableDocument,
   type TokenAwareRetrievalOptions,
-  type RetrievedDocument
-} from './prompt/retriever.js';
-export { type SimilarityFunction } from './prompt/types.js';
-export { clampValue, cosineSimilarity, defaultTokenEstimator, type TokenEstimator } from './prompt/utils.js';
-export { PromptEngineeringToolkit, type PromptEngineeringToolkitOptions, type PromptOptimizationInput, type PromptOptimizationReport } from './prompt/toolkit.js';
+  type RetrievedDocument,
+} from "./prompt/retriever.js";
+export { type SimilarityFunction } from "./prompt/types.js";
+export {
+  clampValue,
+  cosineSimilarity,
+  defaultTokenEstimator,
+  type TokenEstimator,
+} from "./prompt/utils.js";
+export {
+  PromptEngineeringToolkit,
+  type PromptEngineeringToolkitOptions,
+  type PromptOptimizationInput,
+  type PromptOptimizationReport,
+} from "./prompt/toolkit.js";
 export {
   GenerativeActionTranslator,
   type ActionPlan,
   type ActionStep,
   type GenerativeActionTranslatorOptions,
   type OrchestrationIntent,
-} from './gen-actions/intentTranslator.js';
+} from "./gen-actions/intentTranslator.js";
 export {
   MetaContextOrchestrator,
   type ContextAffordance,
@@ -2323,7 +2241,7 @@ export {
   type ContextLayer,
   type ContextNode,
   type ContextPacket,
-} from './metaContextOrchestrator.js';
+} from "./metaContextOrchestrator.js";
 export {
   TrustSafetyOrchestrator,
   TRUST_SAFETY_DEFAULTS,
@@ -2342,4 +2260,4 @@ export {
   type RiskTierConfig,
   type StageLatencyBudget,
   type TrustSafetyConfig,
-} from './trustSafetyOrchestrator.js';
+} from "./trustSafetyOrchestrator.js";

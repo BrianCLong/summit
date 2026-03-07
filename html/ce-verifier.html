@@ -27,13 +27,11 @@
     </div>
     <script>
       function sha256(s) {
-        return crypto.subtle
-          .digest('SHA-256', new TextEncoder().encode(s))
-          .then((b) =>
-            Array.from(new Uint8Array(b))
-              .map((x) => x.toString(16).padStart(2, '0'))
-              .join(''),
-          );
+        return crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)).then((b) =>
+          Array.from(new Uint8Array(b))
+            .map((x) => x.toString(16).padStart(2, "0"))
+            .join("")
+        );
       }
       async function fold(h, sibs) {
         let cur = h;
@@ -42,12 +40,12 @@
         }
         return cur;
       }
-      $('#verify').on('click', async function () {
-        const leaf = $('#leaf').val();
-        const sibs = $('#path').val().split(',');
-        const root = $('#root').val();
+      $("#verify").on("click", async function () {
+        const leaf = $("#leaf").val();
+        const sibs = $("#path").val().split(",");
+        const root = $("#root").val();
         const got = await fold(leaf, sibs);
-        $('#out').text(got === root ? 'OK' : 'FAIL');
+        $("#out").text(got === root ? "OK" : "FAIL");
       });
     </script>
   </body>

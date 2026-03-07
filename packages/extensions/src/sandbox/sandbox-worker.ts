@@ -1,5 +1,5 @@
-import { parentPort, workerData } from 'worker_threads';
-import { pathToFileURL } from 'url';
+import { parentPort, workerData } from "worker_threads";
+import { pathToFileURL } from "url";
 
 async function run() {
   const { manifest, modulePath, exportName, context, timeoutMs } = workerData as {
@@ -24,13 +24,13 @@ async function run() {
 
     parentPort?.postMessage({
       exports: activation?.exports,
-      hasDispose: typeof activation?.dispose === 'function',
+      hasDispose: typeof activation?.dispose === "function",
     });
 
-    parentPort?.on('message', async (message: any) => {
-      if (message?.type === 'dispose' && typeof activation?.dispose === 'function') {
+    parentPort?.on("message", async (message: any) => {
+      if (message?.type === "dispose" && typeof activation?.dispose === "function") {
         await activation.dispose();
-        parentPort?.postMessage({ status: 'disposed' });
+        parentPort?.postMessage({ status: "disposed" });
       }
     });
   } catch (err) {
@@ -42,27 +42,27 @@ async function run() {
 }
 
 async function invoke(exported: any, context: any) {
-  if (typeof exported === 'function') {
+  if (typeof exported === "function") {
     if (exported.prototype && exported.prototype.constructor === exported) {
       const instance = new exported();
-      if (typeof instance.activate === 'function') {
+      if (typeof instance.activate === "function") {
         return instance.activate(context);
       }
     }
     return exported(context);
   }
 
-  if (typeof exported.activate === 'function') {
+  if (typeof exported.activate === "function") {
     return exported.activate(context);
   }
 
-  throw new Error('Unsupported extension entrypoint type');
+  throw new Error("Unsupported extension entrypoint type");
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
   let timeoutHandle: NodeJS.Timeout;
   const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutHandle = setTimeout(() => reject(new Error('Extension activation timed out')), timeout);
+    timeoutHandle = setTimeout(() => reject(new Error("Extension activation timed out")), timeout);
   });
 
   const result = await Promise.race([promise, timeoutPromise]);

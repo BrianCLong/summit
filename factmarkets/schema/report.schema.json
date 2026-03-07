@@ -6,7 +6,15 @@
   "properties": {
     "provenance": {
       "type": "object",
-      "required": ["validator_cert_id", "policy_version", "supervision_state", "review_trace_hash", "audit", "trust_center", "temporal"],
+      "required": [
+        "validator_cert_id",
+        "policy_version",
+        "supervision_state",
+        "review_trace_hash",
+        "audit",
+        "trust_center",
+        "temporal"
+      ],
       "properties": {
         "validator_cert_id": { "type": "string" },
         "policy_version": { "type": "string" },
@@ -26,7 +34,10 @@
           "required": ["assurance_level", "compliance_status", "certification_bundle_uri"],
           "properties": {
             "assurance_level": { "type": "string" },
-            "compliance_status": { "type": "string", "enum": ["COMPLIANT", "NON_COMPLIANT", "PARTIAL"] },
+            "compliance_status": {
+              "type": "string",
+              "enum": ["COMPLIANT", "NON_COMPLIANT", "PARTIAL"]
+            },
             "certification_bundle_uri": { "type": "string" }
           }
         },
@@ -59,7 +70,10 @@
         "properties": {
           "claim_id": { "type": "string" },
           "text": { "type": "string" },
-          "status": { "type": "string", "enum": ["VERIFIED", "INCONSISTENT", "UNVERIFIABLE", "NEEDS_REVIEW"] },
+          "status": {
+            "type": "string",
+            "enum": ["VERIFIED", "INCONSISTENT", "UNVERIFIABLE", "NEEDS_REVIEW"]
+          },
           "reconciliation": {
             "type": "object",
             "properties": {

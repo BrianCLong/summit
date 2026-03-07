@@ -33,9 +33,5 @@
     "Deterministic and rubric graders emit schema-constrained results",
     "CI workflow gates eval skills on PRs and nightly suite"
   ],
-  "stop_conditions": [
-    "CI failure in main",
-    "Sandbox violation alert",
-    "Detected PII in output"
-  ]
+  "stop_conditions": ["CI failure in main", "Sandbox violation alert", "Detected PII in output"]
 }

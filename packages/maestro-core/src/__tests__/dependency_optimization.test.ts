@@ -1,7 +1,7 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { MaestroEngine, StateStore, ArtifactStore, PolicyEngine } from '../engine';
+import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import { MaestroEngine, StateStore, ArtifactStore, PolicyEngine } from "../engine";
 
-describe('MaestroEngine Dependency Optimization', () => {
+describe("MaestroEngine Dependency Optimization", () => {
   let engine: MaestroEngine;
   let mockStateStore: jest.Mocked<StateStore>;
   let mockArtifactStore: jest.Mocked<ArtifactStore>;
@@ -32,23 +32,23 @@ describe('MaestroEngine Dependency Optimization', () => {
     engine = new MaestroEngine(mockStateStore, mockArtifactStore, mockPolicyEngine);
   });
 
-  it('should check all dependencies in parallel', async () => {
-    const runId = 'test-run';
+  it("should check all dependencies in parallel", async () => {
+    const runId = "test-run";
     const step = {
-      id: 'step-3',
-      name: 'Step 3',
-      plugin: 'test',
+      id: "step-3",
+      name: "Step 3",
+      plugin: "test",
       config: {},
-      depends_on: ['step-1', 'step-2']
+      depends_on: ["step-1", "step-2"],
     };
 
     // Setup mock to return succeeded steps
     mockStateStore.getStepExecution.mockResolvedValue({
-      step_id: 'mock',
+      step_id: "mock",
       run_id: runId,
-      status: 'succeeded',
+      status: "succeeded",
       attempt: 1,
-      metadata: {}
+      metadata: {},
     } as any);
 
     // @ts-expect-error - Accessing private method (renamed)
@@ -56,23 +56,23 @@ describe('MaestroEngine Dependency Optimization', () => {
 
     expect(result).toBe(true);
     expect(mockStateStore.getStepExecution).toHaveBeenCalledTimes(2);
-    expect(mockStateStore.getStepExecution).toHaveBeenCalledWith(runId, 'step-1');
-    expect(mockStateStore.getStepExecution).toHaveBeenCalledWith(runId, 'step-2');
+    expect(mockStateStore.getStepExecution).toHaveBeenCalledWith(runId, "step-1");
+    expect(mockStateStore.getStepExecution).toHaveBeenCalledWith(runId, "step-2");
   });
 
-  it('should return false if any dependency is not satisfied', async () => {
-    const runId = 'test-run-fail';
+  it("should return false if any dependency is not satisfied", async () => {
+    const runId = "test-run-fail";
     const step = {
-      id: 'step-3',
-      name: 'Step 3',
-      plugin: 'test',
+      id: "step-3",
+      name: "Step 3",
+      plugin: "test",
       config: {},
-      depends_on: ['step-1', 'step-2']
+      depends_on: ["step-1", "step-2"],
     };
 
     mockStateStore.getStepExecution.mockImplementation(async (runId, stepId) => {
-      if (stepId === 'step-1') return { status: 'succeeded' } as any;
-      if (stepId === 'step-2') return { status: 'failed' } as any;
+      if (stepId === "step-1") return { status: "succeeded" } as any;
+      if (stepId === "step-2") return { status: "failed" } as any;
       return null;
     });
 

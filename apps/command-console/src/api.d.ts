@@ -1,2 +1,2 @@
-import { CommandConsoleSnapshot } from './types';
+import { CommandConsoleSnapshot } from "./types";
 export declare function fetchSnapshot(): Promise<CommandConsoleSnapshot>;

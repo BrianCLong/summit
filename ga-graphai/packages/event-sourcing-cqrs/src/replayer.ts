@@ -1,7 +1,7 @@
-import type { EventStore } from './eventStore.js';
-import type { SnapshotStore } from './snapshotStore.js';
-import type { Projection } from './queryModel.js';
-import type { EventEnvelope } from './types.js';
+import type { EventStore } from "./eventStore.js";
+import type { SnapshotStore } from "./snapshotStore.js";
+import type { Projection } from "./queryModel.js";
+import type { EventEnvelope } from "./types.js";
 
 export interface ReplayOptions {
   streamId: string;
@@ -18,19 +18,16 @@ export class EventReplayer {
 
     if (snapshot) {
       projection.apply({
-        id: 'snapshot',
+        id: "snapshot",
         streamId,
         version: snapshot.version,
         timestamp: snapshot.takenAt,
-        event: { type: 'snapshot', payload: snapshot.state },
+        event: { type: "snapshot", payload: snapshot.state },
       });
       fromVersion = snapshot.version + 1;
     }
 
-    const events: EventEnvelope[] = await this.eventStore.loadStream(
-      streamId,
-      fromVersion,
-    );
+    const events: EventEnvelope[] = await this.eventStore.loadStream(streamId, fromVersion);
     for (const event of events) {
       projection.apply(event);
     }

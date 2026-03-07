@@ -23,13 +23,13 @@ npm install @intelgraph/api-framework
 ## Quick Start
 
 ```typescript
-import { createSummitAPI } from '@intelgraph/api-framework';
+import { createSummitAPI } from "@intelgraph/api-framework";
 
 const api = createSummitAPI({
   rest: {
-    version: '1.0.0',
-    title: 'My API',
-    basePath: '/api/v1',
+    version: "1.0.0",
+    title: "My API",
+    basePath: "/api/v1",
   },
   streaming: {
     websocket: { enabled: true },
@@ -37,18 +37,18 @@ const api = createSummitAPI({
   },
   queryLanguage: {
     enabled: true,
-    endpoint: '/query',
+    endpoint: "/query",
   },
 });
 
 // Define REST routes
-api.rest.router.get('/entities', async (req, res) => {
+api.rest.router.get("/entities", async (req, res) => {
   const entities = await db.entities.find();
   res.success(entities);
 });
 
 // Handle streaming events
-api.websocket?.on('subscribe', ({ connectionId, topic }) => {
+api.websocket?.on("subscribe", ({ connectionId, topic }) => {
   console.log(`${connectionId} subscribed to ${topic}`);
 });
 

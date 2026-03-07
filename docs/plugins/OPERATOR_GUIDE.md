@@ -52,6 +52,7 @@ SELECT * FROM plugin_audit_log WHERE status = 'FAILURE' ORDER BY timestamp DESC 
 ### Resource Exhaustion
 
 If a plugin consistently hits timeout or memory limits:
+
 1.  Check the plugin's `resources` in `plugin.json`.
 2.  Review the `plugin_metrics` to see actual usage.
 3.  Increase limits via policy override (if safe) or contact plugin author.

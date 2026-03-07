@@ -35,6 +35,7 @@ summit doctor --fix           # Attempt auto-fixes
 ```
 
 **Checks:**
+
 - Docker running and version >= 4.x
 - Node.js >= 18.18
 - pnpm >= 9.12.0
@@ -44,6 +45,7 @@ summit doctor --fix           # Attempt auto-fixes
 - Required ports available (3000, 4000, 5432, 6379, 7474, 7687, 9200)
 
 **Output Example:**
+
 ```
 summit doctor
 
@@ -76,6 +78,7 @@ summit bootstrap --clean      # Remove existing .env, node_modules
 ```
 
 **Steps:**
+
 1. Run `summit doctor`
 2. Create `.env` from `.env.example`
 3. Install Node dependencies (`pnpm install`)
@@ -109,6 +112,7 @@ summit up --build             # Force rebuild images
 | `full` | Everything |
 
 **Output Example:**
+
 ```
 summit up
 
@@ -172,6 +176,7 @@ summit status --resources     # CPU/memory usage
 ```
 
 **Output Example:**
+
 ```
 summit status
 
@@ -319,12 +324,12 @@ summit clean --cache          # Build caches only
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SUMMIT_PROFILE` | `core` | Default docker profile |
-| `SUMMIT_LOG_LEVEL` | `info` | CLI log verbosity |
-| `SUMMIT_COLOR` | `auto` | Color output (auto/always/never) |
-| `SUMMIT_TELEMETRY` | `off` | Usage telemetry |
+| Variable           | Default | Description                      |
+| ------------------ | ------- | -------------------------------- |
+| `SUMMIT_PROFILE`   | `core`  | Default docker profile           |
+| `SUMMIT_LOG_LEVEL` | `info`  | CLI log verbosity                |
+| `SUMMIT_COLOR`     | `auto`  | Color output (auto/always/never) |
+| `SUMMIT_TELEMETRY` | `off`   | Usage telemetry                  |
 
 ### Config File
 
@@ -347,49 +352,53 @@ Optional `.summitrc.json` in project root:
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | General error |
-| 2 | Invalid arguments |
-| 3 | Prerequisites not met |
-| 4 | Service health check failed |
-| 5 | Test failure |
+| Code | Meaning                     |
+| ---- | --------------------------- |
+| 0    | Success                     |
+| 1    | General error               |
+| 2    | Invalid arguments           |
+| 3    | Prerequisites not met       |
+| 4    | Service health check failed |
+| 5    | Test failure                |
 
 ---
 
 ## Implementation Notes
 
 ### Phase 1 (Core)
+
 - `doctor`, `bootstrap`, `up`, `down`, `logs`, `status`, `smoke`
 
 ### Phase 2 (Developer Workflow)
+
 - `test`, `lint`, `build`, `db`
 
 ### Phase 3 (Generation & Collaboration)
+
 - `new`, `secrets`, `pr`, `clean`
 
 ---
 
 ## Comparison to Current State
 
-| Current | New |
-|---------|-----|
-| `make bootstrap` | `summit bootstrap` |
-| `make up` | `summit up` |
-| `make up-ai` | `summit up --profile ai` |
-| `make smoke` | `summit smoke` |
-| `make down` | `summit down` |
-| `pnpm test` | `summit test` |
-| `pnpm lint` | `summit lint` |
-| `docker-compose logs api` | `summit logs api` |
-| `node companyos/scripts/companyos-cli.mjs new-service` | `summit new service` |
+| Current                                                | New                      |
+| ------------------------------------------------------ | ------------------------ |
+| `make bootstrap`                                       | `summit bootstrap`       |
+| `make up`                                              | `summit up`              |
+| `make up-ai`                                           | `summit up --profile ai` |
+| `make smoke`                                           | `summit smoke`           |
+| `make down`                                            | `summit down`            |
+| `pnpm test`                                            | `summit test`            |
+| `pnpm lint`                                            | `summit lint`            |
+| `docker-compose logs api`                              | `summit logs api`        |
+| `node companyos/scripts/companyos-cli.mjs new-service` | `summit new service`     |
 
 ---
 
 ## Metrics
 
 Track improvements via:
+
 - **Time to first smoke**: Time from clone to passing `summit smoke`
 - **Command success rate**: % of CLI invocations that succeed
 - **Developer NPS**: Quarterly survey on tooling satisfaction

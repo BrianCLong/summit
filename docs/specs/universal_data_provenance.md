@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-The **Universal Data Provenance (UDP)** system is the foundation of truth for the Summit platform. Unlike traditional lineage systems (e.g., OpenLineage) which track *where* data came from, UDP tracks *who* authorized it, *why* it was mutated, and *cryptographically proves* its integrity.
+The **Universal Data Provenance (UDP)** system is the foundation of truth for the Summit platform. Unlike traditional lineage systems (e.g., OpenLineage) which track _where_ data came from, UDP tracks _who_ authorized it, _why_ it was mutated, and _cryptographically proves_ its integrity.
 
 UDP transforms every data mutation into a **signed legal receipt**.
 
@@ -70,7 +70,10 @@ The UEF is the canonical schema for all data mutations. It exceeds the OpenLinea
   "properties": {
     "id": { "type": "string", "description": "Unique Event ID (ULID)" },
     "sequenceNumber": { "type": "integer", "description": "Monotonic sequence for ordering" },
-    "previousHash": { "type": "string", "description": "SHA-256 of the previous entry (Merkle Chain)" },
+    "previousHash": {
+      "type": "string",
+      "description": "SHA-256 of the previous entry (Merkle Chain)"
+    },
     "currentHash": { "type": "string", "description": "SHA-256 of this entry" },
     "timestamp": { "type": "string", "format": "date-time" },
     "actor": {
@@ -107,13 +110,13 @@ The UEF is the canonical schema for all data mutations. It exceeds the OpenLinea
 
 ## 4. Competitive Exceedance: UDP vs. OpenLineage
 
-| Feature | OpenLineage (Debezium 3.4) | Summit UDP |
-| :--- | :--- | :--- |
-| **Trust Model** | "The emitter says this happened." | "The Ledger proves this was authorized." |
-| **Integrity** | None (Mutable Logs) | Merkle Chain (Tamper-Evident) |
-| **Identity** | Service Name (e.g., "spark-job-1") | Agent Identity + Policy Decision ID |
-| **Replay** | Not Native | Deterministic via Ledger Replay |
-| **Scope** | Data Movement | Data Movement + Policy + Authorization |
+| Feature         | OpenLineage (Debezium 3.4)         | Summit UDP                               |
+| :-------------- | :--------------------------------- | :--------------------------------------- |
+| **Trust Model** | "The emitter says this happened."  | "The Ledger proves this was authorized." |
+| **Integrity**   | None (Mutable Logs)                | Merkle Chain (Tamper-Evident)            |
+| **Identity**    | Service Name (e.g., "spark-job-1") | Agent Identity + Policy Decision ID      |
+| **Replay**      | Not Native                         | Deterministic via Ledger Replay          |
+| **Scope**       | Data Movement                      | Data Movement + Policy + Authorization   |
 
 ## 5. Invariant Guarantees
 
@@ -124,6 +127,7 @@ The UEF is the canonical schema for all data mutations. It exceeds the OpenLinea
 ## 6. Implementation Strategy
 
 To absorb Debezium 3.4:
+
 1.  **Wrap Debezium:** Run Debezium as a "dumb pipe".
 2.  **Intercept Events:** An `IngestAgent` listens to the Debezium stream.
 3.  **Enrich & Sign:** The Agent requests policy approval, constructs the UEF entry, and signs it.

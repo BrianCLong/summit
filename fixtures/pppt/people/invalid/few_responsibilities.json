@@ -1,9 +1,7 @@
 {
   "role": "Fractional CMO",
   "type": "fractional",
-  "responsibilities": [
-    "Do marketing"
-  ],
+  "responsibilities": ["Do marketing"],
   "outcomes": [
     {
       "metric": "Qualified Leads",

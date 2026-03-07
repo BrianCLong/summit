@@ -27,21 +27,23 @@ Deployed 4-PR stabilization stack in 30 minutes:
 
 **Workflow Consolidation**: 260 → 8 workflows (97% reduction)
 
-| Before | After |
-|--------|-------|
-| 260 active workflows | 8 active workflows |
-| 260 workflows per PR | 3-4 workflows per PR |
-| No path filtering | Path-filtered triggers |
-| No budget enforcement | 12-workflow budget limit |
-| No anti-regression controls | 6 automated guardrails |
+| Before                      | After                    |
+| --------------------------- | ------------------------ |
+| 260 active workflows        | 8 active workflows       |
+| 260 workflows per PR        | 3-4 workflows per PR     |
+| No path filtering           | Path-filtered triggers   |
+| No budget enforcement       | 12-workflow budget limit |
+| No anti-regression controls | 6 automated guardrails   |
 
 **PRs Merged**:
+
 - #19069: Minimal deterministic PR gate
 - #19070: Path-filtered workflows
 - #19071: Workflow cleanup + main validation
 - #19072: Workflow drift sentinel
 
 **Immediate Impact**:
+
 - ✅ CI gridlock broken
 - ✅ Runners operational (0 → 14 active)
 - ✅ Queue clearing naturally
@@ -89,23 +91,23 @@ Added 6 anti-regression controls in 1 hour:
 
 ### Cost Savings
 
-| Metric | Annual Savings |
-|--------|----------------|
-| CI Infrastructure | $73,872 |
-| Developer Productivity | $420,000 |
-| **Total Annual Savings** | **$493,872** |
+| Metric                   | Annual Savings |
+| ------------------------ | -------------- |
+| CI Infrastructure        | $73,872        |
+| Developer Productivity   | $420,000       |
+| **Total Annual Savings** | **$493,872**   |
 
 **ROI**: 61,634% after 1 year, **payback in 0.58 days**
 
 ### Operational Improvements
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Workflows per PR | 260 | 3-4 | 98.5% reduction |
-| Avg CI wait time | 45 min | 10 min | 77.8% reduction |
-| Queue depth | 200+ | 100 | 50% reduction |
-| Workflow runs/day | 5,200 | 70 | 98.7% reduction |
-| CO2 emissions | baseline | -923kg/year | ~44 trees equivalent |
+| Metric            | Before   | After       | Improvement          |
+| ----------------- | -------- | ----------- | -------------------- |
+| Workflows per PR  | 260      | 3-4         | 98.5% reduction      |
+| Avg CI wait time  | 45 min   | 10 min      | 77.8% reduction      |
+| Queue depth       | 200+     | 100         | 50% reduction        |
+| Workflow runs/day | 5,200    | 70          | 98.7% reduction      |
+| CO2 emissions     | baseline | -923kg/year | ~44 trees equivalent |
 
 ### Developer Productivity
 
@@ -132,13 +134,13 @@ Added 6 anti-regression controls in 1 hour:
 
 ### System Health: ⚠️ WARNING → ✅ GREEN
 
-| Indicator | Status | Trend |
-|-----------|--------|-------|
-| Queue depth | 100 queued | ↓ Decreasing |
-| Active runners | 17 running | ↑ Healthy |
-| MERGE_SURGE | Enabled | Stable |
-| New PRs | Using 8-workflow system | ✅ Optimal |
-| Old PRs | Failing archived workflows | Natural cleanup |
+| Indicator      | Status                     | Trend           |
+| -------------- | -------------------------- | --------------- |
+| Queue depth    | 100 queued                 | ↓ Decreasing    |
+| Active runners | 17 running                 | ↑ Healthy       |
+| MERGE_SURGE    | Enabled                    | Stable          |
+| New PRs        | Using 8-workflow system    | ✅ Optimal      |
+| Old PRs        | Failing archived workflows | Natural cleanup |
 
 **Assessment**: System stable and recovering naturally. No intervention required.
 
@@ -163,7 +165,7 @@ Added 6 anti-regression controls in 1 hour:
    - Early warning system
    - Exit code 1 blocks merge
 
-### Automated Recovery (Cron: */5 minutes)
+### Automated Recovery (Cron: \*/5 minutes)
 
 4. **Runner Saturation Policy**
    - Monitors queue depth
@@ -230,18 +232,18 @@ Added 6 anti-regression controls in 1 hour:
 
 ## Timeline
 
-| Time | Event | Queue Status |
-|------|-------|--------------|
-| 11:00 | **GRIDLOCK DETECTED** | 200+ queued, 0 running |
-| 11:15 | Emergency deployment initiated | 200+ queued |
-| 11:30 | 4 PRs merged to main | 200+ queued |
-| 11:45 | Branch protection restored | 200+ queued |
-| 12:00 | Selective cancellation run | 300 queued |
-| 12:15 | Saturation policy deployed | 500 queued |
-| 12:20 | Emergency cancellation | 100 queued |
-| 12:30 | Validation PR created | 100 queued |
-| 12:40 | Documentation completed | 100 queued |
-| **12:50** | **STABLE** | **100 queued, 17 running** |
+| Time      | Event                          | Queue Status               |
+| --------- | ------------------------------ | -------------------------- |
+| 11:00     | **GRIDLOCK DETECTED**          | 200+ queued, 0 running     |
+| 11:15     | Emergency deployment initiated | 200+ queued                |
+| 11:30     | 4 PRs merged to main           | 200+ queued                |
+| 11:45     | Branch protection restored     | 200+ queued                |
+| 12:00     | Selective cancellation run     | 300 queued                 |
+| 12:15     | Saturation policy deployed     | 500 queued                 |
+| 12:20     | Emergency cancellation         | 100 queued                 |
+| 12:30     | Validation PR created          | 100 queued                 |
+| 12:40     | Documentation completed        | 100 queued                 |
+| **12:50** | **STABLE**                     | **100 queued, 17 running** |
 
 **Total Recovery Time**: 1 hour 50 minutes
 
@@ -387,4 +389,4 @@ Successfully recovered from **complete CI gridlock** in under 2 hours with:
 
 ---
 
-*For questions or issues, see `docs/ci/emergency-runbook.md` or contact #platform-eng*
+_For questions or issues, see `docs/ci/emergency-runbook.md` or contact #platform-eng_

@@ -3,18 +3,18 @@ name: Environment Specific Tests
 on:
   pull_request:
     paths:
-      - '.github/workflows/environment-specific-tests.yml'
-      - 'docker-compose.env-tests.yml'
-      - 'scripts/tests/**'
-      - 'docs/ci/**'
+      - ".github/workflows/environment-specific-tests.yml"
+      - "docker-compose.env-tests.yml"
+      - "scripts/tests/**"
+      - "docs/ci/**"
   push:
     branches:
       - main
     paths:
-      - '.github/workflows/environment-specific-tests.yml'
-      - 'docker-compose.env-tests.yml'
-      - 'scripts/tests/**'
-      - 'docs/ci/**'
+      - ".github/workflows/environment-specific-tests.yml"
+      - "docker-compose.env-tests.yml"
+      - "scripts/tests/**"
+      - "docs/ci/**"
 
 jobs:
   environment-tests:

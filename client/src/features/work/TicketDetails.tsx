@@ -1,11 +1,11 @@
 // @ts-nocheck - React 18/19 type compatibility with react-router-dom
-import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
 type RunRef = { id: string };
 type DeploymentRef = { id: string };
 type Ticket = {
-  provider: 'github' | 'jira';
+  provider: "github" | "jira";
   external_id: string;
   title: string;
   assignee?: string | null;
@@ -17,7 +17,7 @@ type Ticket = {
 };
 
 export default function TicketDetails() {
-  const { provider = '', externalId = '' } = useParams();
+  const { provider = "", externalId = "" } = useParams();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,9 +30,9 @@ export default function TicketDetails() {
           runs{ id } deployments{ id }
         }
       }`;
-      const r = await fetch('/graphql', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+      const r = await fetch("/graphql", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           query: q,
           variables: { provider, id: externalId },
@@ -50,9 +50,9 @@ export default function TicketDetails() {
   const title = encodeURIComponent(`[${ticket.provider}] ${ticket.title}`);
   const body = encodeURIComponent(
     `Linked Ticket: ${ticket.provider}:${ticket.external_id}\n` +
-      `Assignee: ${ticket.assignee ?? '-'}\n` +
-      `Runs: ${(ticket.runs || []).map((r) => r.id).join(', ') || '-'}\n` +
-      `Deployments: ${(ticket.deployments || []).map((d) => d.id).join(', ') || '-'}\n`,
+      `Assignee: ${ticket.assignee ?? "-"}\n` +
+      `Runs: ${(ticket.runs || []).map((r) => r.id).join(", ") || "-"}\n` +
+      `Deployments: ${(ticket.deployments || []).map((d) => d.id).join(", ") || "-"}\n`
   );
 
   const githubNewIssueUrl = ticket.repo
@@ -60,7 +60,7 @@ export default function TicketDetails() {
     : null;
 
   const jiraCreateUrl = ticket.project
-    ? `${(import.meta as any).env.VITE_JIRA_BROWSE_URL || ''}/secure/CreateIssueDetails!init.jspa?pid=${ticket.project}&summary=${title}&description=${body}`
+    ? `${(import.meta as any).env.VITE_JIRA_BROWSE_URL || ""}/secure/CreateIssueDetails!init.jspa?pid=${ticket.project}&summary=${title}&description=${body}`
     : null;
 
   return (
@@ -75,7 +75,7 @@ export default function TicketDetails() {
           </div>
           <div className="flex items-center gap-3">
             <span className="font-mono">Ext ID:</span> {ticket.external_id}
-            {ticket.provider === 'github' && ticket.repo && (
+            {ticket.provider === "github" && ticket.repo && (
               <a
                 className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
                 href={`https://github.com/${ticket.repo}/issues/${ticket.external_id}`}
@@ -85,7 +85,7 @@ export default function TicketDetails() {
                 Open Issue/PR
               </a>
             )}
-            {ticket.provider === 'jira' && ticket.project && (
+            {ticket.provider === "jira" && ticket.project && (
               <a
                 className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                 href={`${(import.meta as any).env.VITE_JIRA_BROWSE_URL}/browse/${ticket.external_id}`}
@@ -97,12 +97,10 @@ export default function TicketDetails() {
             )}
           </div>
           <div>
-            <span className="font-mono">Assignee:</span>{' '}
-            {ticket.assignee ?? '—'}
+            <span className="font-mono">Assignee:</span> {ticket.assignee ?? "—"}
           </div>
           <div>
-            <span className="font-mono">Labels:</span>{' '}
-            {(ticket.labels || []).join(', ') || '—'}
+            <span className="font-mono">Labels:</span> {(ticket.labels || []).join(", ") || "—"}
           </div>
         </div>
       </section>
@@ -114,10 +112,7 @@ export default function TicketDetails() {
         ) : (
           <ul className="space-y-2">
             {(ticket.runs || []).map((r) => (
-              <li
-                key={r.id}
-                className="flex items-center gap-3 p-2 border rounded"
-              >
+              <li key={r.id} className="flex items-center gap-3 p-2 border rounded">
                 <span className="font-mono text-sm">{r.id}</span>
                 <div className="flex gap-2">
                   <Link
@@ -140,10 +135,7 @@ export default function TicketDetails() {
         ) : (
           <ul className="space-y-2">
             {(ticket.deployments || []).map((d) => (
-              <li
-                key={d.id}
-                className="flex items-center gap-3 p-2 border rounded"
-              >
+              <li key={d.id} className="flex items-center gap-3 p-2 border rounded">
                 <span className="font-mono text-sm">{d.id}</span>
                 <div className="flex gap-2">
                   <Link

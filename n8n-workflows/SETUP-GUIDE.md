@@ -25,6 +25,7 @@ This guide will get your n8n automation workflows operational in under 5 minutes
 7. **COPY THE TOKEN** (you won't see it again)
 
 #### Add to n8n:
+
 1. Go to: https://topicality.app.n8n.cloud
 2. Click your profile → Credentials
 3. Click "Add Credential"
@@ -43,6 +44,7 @@ This guide will get your n8n automation workflows operational in under 5 minutes
 5. **COPY THE API KEY**
 
 #### Add to n8n:
+
 1. Go to: https://topicality.app.n8n.cloud
 2. Click your profile → Credentials
 3. Click "Add Credential"
@@ -86,12 +88,14 @@ This guide will get your n8n automation workflows operational in under 5 minutes
 1. Go to: https://github.com/TopicalityLLC/Summit/issues/new
 2. Title: `[TEST] Fix typo in README`
 3. Body:
+
 ```
 There's a typo in the README.md file on line 5.
 The word "developement" should be "development".
 
 Please fix this typo.
 ```
+
 4. Click "Submit new issue"
 5. Watch the workflow execute in n8n: https://topicality.app.n8n.cloud/executions
 6. Check if the AI responds with a solution
@@ -111,9 +115,11 @@ The PR Review Swarm workflow foundation is created. To complete it:
 2. Add these nodes after the GitHub "Get pull requests" node:
 
 #### Architecture Reviewer:
+
 - Node: **Groq Chat Model**
 - Model: `llama-3.1-70b-versatile`
 - System Prompt:
+
 ```
 You are an expert software architect. Review this PR for:
 - Architecture patterns and design decisions
@@ -126,9 +132,11 @@ Provide specific, actionable feedback.
 ```
 
 #### Security Reviewer:
+
 - Node: **Groq Chat Model**
 - Model: `llama-3.1-70b-versatile`
 - System Prompt:
+
 ```
 You are a security expert. Review this PR for:
 - Security vulnerabilities
@@ -141,9 +149,11 @@ Provide CVE references where applicable.
 ```
 
 #### Performance Reviewer:
+
 - Node: **Groq Chat Model**
 - Model: `llama-3.1-70b-versatile`
 - System Prompt:
+
 ```
 You are a performance optimization expert. Review this PR for:
 - Performance bottlenecks
@@ -164,6 +174,7 @@ Provide benchmarking suggestions.
 ### Step 5: Monitor & Optimize (Ongoing)
 
 #### View Execution Logs:
+
 - Dashboard: https://topicality.app.n8n.cloud/executions
 - Filter by workflow
 - Check success/failure rates
@@ -172,18 +183,21 @@ Provide benchmarking suggestions.
 #### Key Metrics to Track:
 
 **Development Velocity:**
+
 - Issues resolved automatically
 - PR review time reduction
 - Code quality improvements
 - Time saved per developer
 
 **Workflow Health:**
+
 - Execution success rate
 - Average execution time
 - Error frequency
 - API rate limit usage
 
 **AI Performance:**
+
 - Groq API response times
 - Model accuracy rates
 - Copilot acceptance rates
@@ -192,12 +206,14 @@ Provide benchmarking suggestions.
 ## 🎯 Next Steps After Setup
 
 ### Week 1:
+
 - ✅ Monitor workflow executions daily
 - ✅ Fine-tune AI prompts based on output quality
 - ✅ Document any issues or improvements
 - ✅ Train team on creating AI-friendly issue descriptions
 
 ### Week 2:
+
 - 🏗️ Build remaining workflows:
   - Issue Intelligence
   - Deploy Orchestrator
@@ -207,6 +223,7 @@ Provide benchmarking suggestions.
 - 🎓 Team training sessions
 
 ### Week 3:
+
 - 🏗️ Complete additional workflows:
   - Dependency Manager
   - Test Multiplier
@@ -216,6 +233,7 @@ Provide benchmarking suggestions.
 - 📝 Document ROI for business case
 
 ### Week 4:
+
 - 📊 Compile final metrics
 - 📈 Calculate productivity multiplier
 - 💼 Prepare business case presentation
@@ -224,23 +242,27 @@ Provide benchmarking suggestions.
 ## 🆘 Troubleshooting
 
 ### Workflow Not Triggering:
+
 - Check webhook is active in GitHub
 - Verify webhook URL matches n8n webhook URL
 - Check webhook delivery in GitHub (Settings → Webhooks → Recent Deliveries)
 - Ensure workflow is "Active" in n8n
 
 ### API Rate Limits:
+
 - GitHub: 5,000 requests/hour (authenticated)
 - Groq: Check your plan limits
 - Solution: Add error handling and retry logic
 
 ### Credentials Not Working:
+
 - Re-generate tokens
 - Check token scopes/permissions
 - Ensure tokens haven't expired
 - Test with n8n's credential test function
 
 ### Workflow Errors:
+
 - Check execution logs in n8n
 - Look for error messages in nodes
 - Verify data format matches expected input

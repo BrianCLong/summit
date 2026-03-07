@@ -25,6 +25,7 @@ This PR adds `tenant_id` column to all legacy PostgreSQL tables that don't have 
 ## Tables Updated
 
 ### Core Application Tables
+
 - ✅ `user_sessions` - Auth session isolation
 - ✅ `token_blacklist` - Token revocation isolation
 - ✅ `investigations` - Case/investigation data
@@ -39,6 +40,7 @@ This PR adds `tenant_id` column to all legacy PostgreSQL tables that don't have 
 - ✅ `backfill_jobs` - Data backfill jobs
 
 ### Canonical Entities (if present)
+
 - ✅ `canonical_person`
 - ✅ `canonical_organization`
 - ✅ `canonical_location`
@@ -49,6 +51,7 @@ This PR adds `tenant_id` column to all legacy PostgreSQL tables that don't have 
 - ✅ `canonical_claim`
 
 ### Already Tenant-Aware (from previous migrations)
+
 - ✅ `tenants` - Core tenant table
 - ✅ `user_tenants` - User-tenant memberships
 - ✅ `roles` - Tenant-scoped roles
@@ -192,11 +195,13 @@ SELECT COUNT(*) FROM user_sessions WHERE tenant_id IS NULL;
 If you have SQL queries that don't use the `BaseTenantRepository`:
 
 **Before (Unsafe)**:
+
 ```sql
 SELECT * FROM investigations WHERE id = $1;
 ```
 
 **After (Safe)**:
+
 ```sql
 SELECT * FROM investigations WHERE id = $1 AND tenant_id = $2;
 ```
@@ -212,12 +217,14 @@ If you're using the `BaseTenantRepository` from PR-1, no changes needed - tenant
 ### Query Performance
 
 **Before Migration**:
+
 ```sql
 EXPLAIN SELECT * FROM user_sessions WHERE user_id = '<uuid>';
 -- Seq Scan on user_sessions (cost=0.00..xxx rows=yyy)
 ```
 
 **After Migration**:
+
 ```sql
 EXPLAIN SELECT * FROM user_sessions WHERE tenant_id = 'acme' AND user_id = '<uuid>';
 -- Index Scan using idx_user_sessions_tenant_id (cost=0.29..xxx rows=1)
@@ -232,6 +239,7 @@ EXPLAIN SELECT * FROM user_sessions WHERE tenant_id = 'acme' AND user_id = '<uui
 - **Total**: Expect 40-50% increase in table storage
 
 **Example**:
+
 - 1M rows × 24 bytes/tenant_id = ~24MB
 - Index overhead: ~8MB
 - **Total**: ~32MB per 1M rows
@@ -271,6 +279,7 @@ EOF
 **Cause**: Existing rows have tenant_id values that don't exist in `tenants` table
 
 **Solution**:
+
 ```sql
 -- Find orphaned rows
 SELECT DISTINCT tenant_id
@@ -290,6 +299,7 @@ WHERE tenant_id NOT IN (SELECT id FROM tenants);
 **Cause**: Trigger logic is too strict
 
 **Solution**:
+
 ```sql
 -- Temporarily disable trigger for batch updates
 ALTER TABLE user_sessions DISABLE TRIGGER trg_prevent_tenant_id_update;
@@ -306,6 +316,7 @@ ALTER TABLE user_sessions ENABLE TRIGGER trg_prevent_tenant_id_update;
 **Symptom**: Migration takes too long, locks table
 
 **Solution**:
+
 ```sql
 -- Add tenant_id without NOT NULL first
 ALTER TABLE large_table ADD COLUMN tenant_id TEXT;
@@ -397,6 +408,7 @@ artillery run load-test-tenant-queries.yml
 After deployment, monitor:
 
 1. **Query Performance**:
+
    ```sql
    SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read
    FROM pg_stat_user_indexes
@@ -405,6 +417,7 @@ After deployment, monitor:
    ```
 
 2. **Table Sizes**:
+
    ```sql
    SELECT
      tablename,
@@ -415,6 +428,7 @@ After deployment, monitor:
    ```
 
 3. **Foreign Key Violations** (should be zero):
+
    ```bash
    tail -f /var/log/postgresql/postgresql.log | grep "foreign key"
    ```
@@ -450,6 +464,7 @@ After deployment, monitor:
 **Q: Can I manually change a row's tenant_id in an emergency?**
 
 A: Disable the trigger temporarily:
+
 ```sql
 ALTER TABLE <table> DISABLE TRIGGER trg_prevent_tenant_id_update;
 UPDATE <table> SET tenant_id = '<new-tenant>' WHERE id = '<row-id>';

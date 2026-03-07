@@ -1,6 +1,7 @@
 # Digital Twin Cognition Platform – Leapfrog Blueprint
 
 ## High-level summary & 7th+ order implications
+
 - **Thesis:** Elevate digital twins from static telemetry mirrors to a **continually learning, multi-modal, multi-agent cognition layer** that safely closes the loop from sensing to policy deployment across asset → facility → portfolio scales.
 - **7th+ order implications:**
   1. **Organizational operating model shift:** Ops teams evolve into supervisors of autonomous agents; governance and policy-as-code become daily workflows.
@@ -12,7 +13,9 @@
   7. **Interoperability moat:** Open graph schemas, twin-as-code, and plug-in runtimes make switching costs high while keeping ecosystems open.
 
 ## Full architecture
+
 ### Logical layers
+
 1. **Data ingestion & normalization**: Multi-modal pipelines (time-series, vision, audio, text, docs) into a **versioned feature store** with late-binding schemas.
 2. **Graph-native twin fabric**: Dynamic typed property graph representing assets, procedures, people, contracts, and regulations; change-data-capture keeps topology live.
 3. **Hybrid modeling stack**: Physics + ML + PINNs surrogates with uncertainty quantification; auto-calibration routines to anchor against high-fidelity runs.
@@ -23,6 +26,7 @@
 8. **Experience/UX**: Flight-deck UI with explainability, counterfactuals, and one-click acceptance; APIs (gRPC/GraphQL) for partner plug-ins.
 
 ### Reference component map
+
 - **Ingestors**: OPC-UA/Modbus/BACnet connectors, vision (RTSP/drones), audio (vibration mics), text/log parsers, document ETL with embeddings.
 - **Feature Store**: Versioned across modalities; supports **time-travel queries** and on-device delta sync for edge fine-tuning.
 - **Twin Graph**: Backed by scalable graph DB (e.g., Neo4j/Neptune) + columnar TSDB (e.g., DuckDB/Parquet) + object storage for blobs.
@@ -34,14 +38,17 @@
 - **Security**: mTLS for all control paths, signed artifacts, isolated plug-ins, data minimization; integrated secrets management.
 
 ### Data model highlights
+
 - **Graph types**: `Asset`, `Component`, `Sensor`, `Site`, `Person`, `Procedure`, `Contract`, `Regulation`, `MarketSignal`, `SimulationRun` with typed edges (`feeds`, `depends_on`, `regulated_by`, `owns`, `electrically_connected_to`, `supplied_by`).
 - **Temporal binding**: Every node/edge versioned with effective/observed intervals to support retroactive fixes and counterfactual replay.
 - **Uncertainty first-class**: Each measurement/model output carries `mean`, `variance`, `confidence`, provenance pointer, and validation stamp.
 
 ## Implementation blueprint (code & runtime slices)
+
 > Focused on production-ready scaffolding rather than placeholder code.
 
 ### Twin-as-code repository layout
+
 ```
 /twin
   /ingest           # connectors, schemas, validation
@@ -58,6 +65,7 @@
 ```
 
 ### Key implementation patterns
+
 - **Continual learning loop**: Drift detectors trigger edge fine-tuning; deltas promoted to foundation twin after sandbox evaluation.
 - **Hybrid simulators**: Physics kernel with ML surrogate fallback; periodic anchoring via high-fidelity runs scheduled by uncertainty thresholds.
 - **Intent compiler**: Translates goals into constraints and objective vectors; feeds MPC/RL planner with scenario sampling for robustness.
@@ -66,7 +74,9 @@
 - **Market/economic layer**: Live tariff/carbon feeds + contract SLAs integrated into objective functions; scenario war-gaming utilities.
 
 ### Interfaces (sample contracts)
+
 - **Action proposal**:
+
 ```json
 {
   "actor": "optimization-agent",
@@ -75,11 +85,13 @@
   "proposed_policy": { "setpoint": 0.87, "valid_for": "PT2H" },
   "confidence": 0.93,
   "risk": { "prob_violate_temp": 0.01, "prob_sla_breach": 0.0 },
-  "sandbox_results": { "kpi_delta": {"energy_cost": -0.12, "throughput": -0.01} },
+  "sandbox_results": { "kpi_delta": { "energy_cost": -0.12, "throughput": -0.01 } },
   "rollback": { "revert_to": "policy://baseline/2025-11-01T00:00Z", "ttl": "PT15M" }
 }
 ```
+
 - **Provenance manifest (SBOM-style)**:
+
 ```yaml
 model: pinm-compressor-v12
 hash: sha256:...
@@ -96,11 +108,13 @@ attestations:
 ```
 
 ### Edge/Cloud topology
+
 - **Edge nodes**: Run local collectors, feature-store shard, on-device fine-tuning; periodic sync with **foundation twin**; safety envelopes enforced locally.
 - **Cloud/core**: Heavy training, global policy optimization, cross-site portfolio models, long-horizon simulations, registry/provenance store.
 - **Control bus**: mTLS + service mesh; policy updates streamed via signed channels; audit events mirrored to tamper-evident ledger.
 
 ## Tests
+
 - **Unit**: Drift detectors, intent compiler, constraint merger, policy scoring functions, provenance validators.
 - **Property-based**: Safety constraints invariant under stochastic inputs; graph topology validators reject cycles violating feed rules.
 - **Integration**: Edge fine-tune → sandbox → canary promotion; plug-in WASM sandbox capabilities; MPC planner with tariff feed.
@@ -108,12 +122,14 @@ attestations:
 - **Performance**: Latency SLAs for control proposals; throughput of ingest/graph updates; GPU/TPU utilization for LMM vision inference.
 
 ## Documentation set
+
 - **Developer guide**: Twin-as-code workflow, ontology evolution, agent authoring, plug-in capabilities.
 - **Ops guide**: Runbooks for drift, rollback, sandbox promotion, model signing, secrets rotation.
 - **API docs**: GraphQL/gRPC contracts for querying state, submitting actions, running simulations, retrieving provenance.
 - **Governance playbook**: Policy patterns, audit report templates, regulator-ready evidence bundles.
 
 ## CI/CD
+
 - **Pipelines**:
   - Lint/format/type-check, unit + property tests, integration on services touched.
   - Secure supply chain: SLSA-style provenance, signature verification, SBOM diff checks.
@@ -122,6 +138,7 @@ attestations:
 - **Observability gates**: Regression budgets on latency/error; drift alert thresholds; decision fingerprint coverage.
 
 ## PR package (for this blueprint)
+
 - **What**: Blueprint for a continually learning, multi-scale, multi-agent digital twin cognition platform with safety, governance, and interoperability baked in.
 - **Why**: Leapfrog incumbents by transforming twins into autonomous, explainable policy engines operating across asset → portfolio → market scopes.
 - **How**: Graph-native core, hybrid modeling, sandboxed agents, intent-based control, provenance-first supply chain, open APIs/plug-ins.
@@ -129,6 +146,7 @@ attestations:
 - **Rollback plan**: Treat blueprint as non-invasive; adoption can be staged by enabling layers incrementally (ingest → graph → sandbox → closed-loop control).
 
 ## Future roadmap (forward-leaning enhancements)
+
 1. **Neuro-symbolic constraint fusion**: Combine causal graphs with differentiable solvers for faster, safer policy search.
 2. **Adaptive safety envelopes**: Learn context-aware limits that tighten/loosen based on live uncertainty and asset health.
 3. **Economics-native RL**: Directly optimize NPV / real options for maintenance and energy decisions under stochastic markets.

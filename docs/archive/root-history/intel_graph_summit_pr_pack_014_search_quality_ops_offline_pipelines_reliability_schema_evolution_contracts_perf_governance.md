@@ -13,46 +13,30 @@ Twelve PRs to lock in search/result quality, make offline pipelines rock‑solid
 **`server/search/telemetry.ts`**
 
 ```ts
-import { Counter, Histogram } from 'prom-client';
+import { Counter, Histogram } from "prom-client";
 export const impressions = new Counter({
-  name: 'search_impressions_total',
-  help: 'impressions',
-  labelNames: ['tenant', 'qhash', 'rank', 'doc'],
+  name: "search_impressions_total",
+  help: "impressions",
+  labelNames: ["tenant", "qhash", "rank", "doc"],
 });
 export const clicks = new Counter({
-  name: 'search_clicks_total',
-  help: 'clicks',
-  labelNames: ['tenant', 'qhash', 'rank', 'doc'],
+  name: "search_clicks_total",
+  help: "clicks",
+  labelNames: ["tenant", "qhash", "rank", "doc"],
 });
 export const dwell = new Histogram({
-  name: 'search_dwell_seconds',
-  help: 'dwell',
-  labelNames: ['tenant', 'qhash', 'rank', 'doc'],
+  name: "search_dwell_seconds",
+  help: "dwell",
+  labelNames: ["tenant", "qhash", "rank", "doc"],
   buckets: [1, 3, 5, 10, 30, 60, 120],
 });
-export function logImpression(
-  tenant: string,
-  qhash: string,
-  rank: number,
-  doc: string,
-) {
+export function logImpression(tenant: string, qhash: string, rank: number, doc: string) {
   impressions.inc({ tenant, qhash, rank, doc });
 }
-export function logClick(
-  tenant: string,
-  qhash: string,
-  rank: number,
-  doc: string,
-) {
+export function logClick(tenant: string, qhash: string, rank: number, doc: string) {
   clicks.inc({ tenant, qhash, rank, doc });
 }
-export function logDwell(
-  tenant: string,
-  qhash: string,
-  rank: number,
-  doc: string,
-  sec: number,
-) {
+export function logDwell(tenant: string, qhash: string, rank: number, doc: string, sec: number) {
   dwell.observe({ tenant, qhash, rank, doc }, sec);
 }
 ```
@@ -77,17 +61,17 @@ export function logDwell(
 
 ```ts
 export function normalize(q: string) {
-  return q.trim().toLowerCase().replace(/\s+/g, ' ').normalize('NFKC');
+  return q.trim().toLowerCase().replace(/\s+/g, " ").normalize("NFKC");
 }
 ```
 
 **`search/config/synonyms.yaml`**
 
 ```yaml
-- from: ['k8s', 'kubernetes']
-  to: 'kubernetes'
-- from: ['pg', 'postgres', 'postgresql']
-  to: 'postgres'
+- from: ["k8s", "kubernetes"]
+  to: "kubernetes"
+- from: ["pg", "postgres", "postgresql"]
+  to: "postgres"
 ```
 
 **`feature-flags/flags.yaml`** (append)
@@ -182,9 +166,8 @@ build >> promote
 ```yaml
 expectations:
   - expect_table_row_count_to_be_between: { min_value: 100000 }
-  - expect_column_values_to_not_be_null: { column: 'doc_id' }
-  - expect_column_values_to_be_between:
-      { column: 'score', min_value: 0, max_value: 1 }
+  - expect_column_values_to_not_be_null: { column: "doc_id" }
+  - expect_column_values_to_be_between: { column: "score", min_value: 0, max_value: 1 }
 ```
 
 **`.github/workflows/data-quality.yml`**
@@ -215,7 +198,7 @@ jobs:
 
 ```yaml
 fields: [query, doc_id, label]
-labels: { 0: 'bad', 1: 'okay', 2: 'good' }
+labels: { 0: "bad", 1: "okay", 2: "good" }
 ```
 
 **`mlops/judgments/validate.ts`**
@@ -297,11 +280,7 @@ models:
     config: { contract: true }
 sources:
   - name: raw
-    freshness:
-      {
-        warn_after: { count: 2, period: hour },
-        error_after: { count: 4, period: hour },
-      }
+    freshness: { warn_after: { count: 2, period: hour }, error_after: { count: 4, period: hour } }
 ```
 
 **`.github/workflows/dbt.yml`** — run `dbt build --select state:modified+`.

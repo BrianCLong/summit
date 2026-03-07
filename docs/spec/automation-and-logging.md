@@ -10,18 +10,18 @@ Automation is key to ensuring that the access review process is scalable and eff
 
 The system will proactively identify and suggest access revocations based on the following signals:
 
--   **Unused Access**: The system will monitor user activity and identify entitlements that have not been used within a configurable period (e.g., 90 days).
--   **Policy Mismatches**: The system will compare a user's current access with the policies defined in the Entitlement Object Model. If a user has access that is not aligned with their role or team, it will be flagged for review.
--   **Peer Group Analysis**: The system will analyze the access patterns of users with similar roles and responsibilities. If a user has entitlements that are outliers compared to their peer group, it will be flagged for review.
+- **Unused Access**: The system will monitor user activity and identify entitlements that have not been used within a configurable period (e.g., 90 days).
+- **Policy Mismatches**: The system will compare a user's current access with the policies defined in the Entitlement Object Model. If a user has access that is not aligned with their role or team, it will be flagged for review.
+- **Peer Group Analysis**: The system will analyze the access patterns of users with similar roles and responsibilities. If a user has entitlements that are outliers compared to their peer group, it will be flagged for review.
 
 ### 1.2. Integration with Identity and Policy Fabric
 
 The access review system will be tightly integrated with the CompanyOS's existing identity and policy infrastructure.
 
--   **OPA/ABAC Integration**: The system will leverage the existing Open Policy Agent (OPA) and Attribute-Based Access Control (ABAC) infrastructure to make access decisions.
-    -   When access is reviewed and approved, the system will generate or update the corresponding OPA policies.
-    -   When access is revoked, the system will remove or disable the relevant policies.
--   **Identity Provider (IdP) Integration**: The system will integrate with the organization's IdP (e.g., Okta, Azure AD) to automate the provisioning and de-provisioning of user access.
+- **OPA/ABAC Integration**: The system will leverage the existing Open Policy Agent (OPA) and Attribute-Based Access Control (ABAC) infrastructure to make access decisions.
+  - When access is reviewed and approved, the system will generate or update the corresponding OPA policies.
+  - When access is revoked, the system will remove or disable the relevant policies.
+- **Identity Provider (IdP) Integration**: The system will integrate with the organization's IdP (e.g., Okta, Azure AD) to automate the provisioning and de-provisioning of user access.
 
 ## 2. Logging and Auditing
 
@@ -31,38 +31,38 @@ A comprehensive audit trail is essential for compliance and security.
 
 The system will log the following events:
 
--   **Access Review Lifecycle**:
-    -   Creation of an access review.
-    -   Assignment of a review to a reviewer.
-    -   Completion of a review.
-    -   Escalation of an overdue review.
--   **Access Decisions**:
-    -   Approval of an entitlement, including the justification.
-    -   Revocation of an entitlement.
--   **Revocation Workflow**:
-    -   Automated revocation attempts (success or failure).
-    -   Creation of a manual revocation ticket.
-    -   Confirmation of manual revocation.
--   **System Events**:
-    -   Changes to the access review configuration (e.g., review cadence).
-    -   Errors and exceptions.
+- **Access Review Lifecycle**:
+  - Creation of an access review.
+  - Assignment of a review to a reviewer.
+  - Completion of a review.
+  - Escalation of an overdue review.
+- **Access Decisions**:
+  - Approval of an entitlement, including the justification.
+  - Revocation of an entitlement.
+- **Revocation Workflow**:
+  - Automated revocation attempts (success or failure).
+  - Creation of a manual revocation ticket.
+  - Confirmation of manual revocation.
+- **System Events**:
+  - Changes to the access review configuration (e.g., review cadence).
+  - Errors and exceptions.
 
 ### 2.2. Log Format and Storage
 
--   **Format**: Logs will be in a structured format, such as JSON, to facilitate searching and analysis.
--   **Content**: Each log entry will include:
-    -   A timestamp.
-    -   The ID of the user or service that performed the action.
-    -   The type of event.
-    -   Detailed information about the event.
--   **Storage**: Logs will be stored in a secure and tamper-evident manner. The specific storage solution will be determined based on the organization's existing logging infrastructure (e.g., Elasticsearch, Splunk).
+- **Format**: Logs will be in a structured format, such as JSON, to facilitate searching and analysis.
+- **Content**: Each log entry will include:
+  - A timestamp.
+  - The ID of the user or service that performed the action.
+  - The type of event.
+  - Detailed information about the event.
+- **Storage**: Logs will be stored in a secure and tamper-evident manner. The specific storage solution will be determined based on the organization's existing logging infrastructure (e.g., Elasticsearch, Splunk).
 
 ## 3. Proving Compliance
 
 The detailed logs and reports generated by the system will be used to demonstrate compliance with various regulatory and security frameworks.
 
--   **Reports**: The system will be able to generate reports on:
-    -   The status of all active access reviews.
-    -   The history of a user's access.
-    -   The access to a specific resource.
--   **Evidence**: The audit trail will serve as evidence that access reviews are being conducted regularly and that all access decisions are properly documented and justified.
+- **Reports**: The system will be able to generate reports on:
+  - The status of all active access reviews.
+  - The history of a user's access.
+  - The access to a specific resource.
+- **Evidence**: The audit trail will serve as evidence that access reviews are being conducted regularly and that all access decisions are properly documented and justified.

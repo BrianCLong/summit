@@ -4,7 +4,7 @@ declare global {
       gatewayBase?: string;
       grafanaBase?: string;
       grafanaDashboards?: Record<string, string>;
-      a11y?: 'on' | 'off';
+      a11y?: "on" | "off";
     };
   }
 }

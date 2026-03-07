@@ -91,25 +91,22 @@
 **ETL** `services/billing/etl.mjs`
 
 ```js
-import fs from 'fs';
-const usage = JSON.parse(fs.readFileSync('usage.json', 'utf8'));
+import fs from "fs";
+const usage = JSON.parse(fs.readFileSync("usage.json", "utf8"));
 const rows = usage.map((u) => ({
   ts: u.ts,
   tenant: u.tenant,
   event: u.event,
   amount: u.units * u.price,
-  currency: 'USD',
+  currency: "USD",
   evidence: u.evidence,
 }));
 fs.writeFileSync(
-  'revenue-report.csv',
-  'ts,tenant,event,amount,currency\n' +
+  "revenue-report.csv",
+  "ts,tenant,event,amount,currency\n" +
     rows
-      .map(
-        (r) =>
-          `${r.ts},${r.tenant},${r.event},${r.amount.toFixed(2)},${r.currency}`,
-      )
-      .join('\n'),
+      .map((r) => `${r.ts},${r.tenant},${r.event},${r.amount.toFixed(2)},${r.currency}`)
+      .join("\n")
 );
 ```
 
@@ -159,16 +156,13 @@ fs.writeFileSync(
 **Gate** `tools/supplychain/gate.mjs`
 
 ```js
-import fs from 'fs';
-const diff = JSON.parse(fs.readFileSync('sbom.diff.json', 'utf8'));
-const al = JSON.parse(
-  fs.readFileSync('policies/sbom_allowlist.json', 'utf8'),
-).allowed_changes;
-const isAllowed = (k) =>
-  al.some((p) => new RegExp('^' + p.replace('*', '.*') + '$').test(k));
+import fs from "fs";
+const diff = JSON.parse(fs.readFileSync("sbom.diff.json", "utf8"));
+const al = JSON.parse(fs.readFileSync("policies/sbom_allowlist.json", "utf8")).allowed_changes;
+const isAllowed = (k) => al.some((p) => new RegExp("^" + p.replace("*", ".*") + "$").test(k));
 const flagged = diff.added.concat(diff.changed).filter((k) => !isAllowed(k));
 if (diff.risk_score > 55 && flagged.length) {
-  console.error('risk too high', flagged);
+  console.error("risk too high", flagged);
   process.exit(1);
 }
 ```
@@ -192,12 +186,12 @@ credit(percent) = p {
 **CLI** `tools/sla/credit.mjs`
 
 ```js
-import fs from 'fs';
-const m = JSON.parse(fs.readFileSync('metrics/slo.json', 'utf8'));
+import fs from "fs";
+const m = JSON.parse(fs.readFileSync("metrics/slo.json", "utf8"));
 const percent = m.uptime < 99.95 ? 10 : m.p95 > 300 ? 5 : 0;
 fs.writeFileSync(
-  'invoices/credit_note.json',
-  JSON.stringify({ percent, reason: percent ? 'SLA breach' : 'none' }, null, 2),
+  "invoices/credit_note.json",
+  JSON.stringify({ percent, reason: percent ? "SLA breach" : "none" }, null, 2)
 );
 ```
 
@@ -208,16 +202,12 @@ fs.writeFileSync(
 **Finance view** `tools/trust-portal/pages/finance.tsx`
 
 ```tsx
-export default function Finance({
-  report,
-}: {
-  report: { rows: any[]; total: number };
-}) {
+export default function Finance({ report }: { report: { rows: any[]; total: number } }) {
   return (
     <div className="grid gap-4">
       <h1>Finance</h1>
       <div>
-        Total (month): ${'{'}report.total.toFixed(2){'}'}
+        Total (month): ${"{"}report.total.toFixed(2){"}"}
       </div>
     </div>
   );

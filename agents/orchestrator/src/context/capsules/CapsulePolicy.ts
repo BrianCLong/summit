@@ -6,12 +6,7 @@
  * @see docs/adr/ADR-010_invariant_carrying_context_capsules.md
  */
 
-import {
-  ContextCapsule,
-  Agent,
-  AcceptanceDecision,
-  CapsuleForwarding
-} from './types.js';
+import { ContextCapsule, Agent, AcceptanceDecision, CapsuleForwarding } from "./types.js";
 
 /**
  * CapsulePolicy
@@ -44,14 +39,14 @@ export class CapsulePolicy {
     if (!receivingAgent) {
       return {
         accepted: false,
-        reason: `Receiving agent not registered: ${receivingAgentId}`
+        reason: `Receiving agent not registered: ${receivingAgentId}`,
       };
     }
 
     if (!sendingAgent) {
       return {
         accepted: false,
-        reason: `Sending agent not registered: ${sendingAgentId}`
+        reason: `Sending agent not registered: ${sendingAgentId}`,
       };
     }
 
@@ -59,15 +54,17 @@ export class CapsulePolicy {
     if (sendingAgent.trustTier < receivingAgent.requiredTrustTier) {
       return {
         accepted: false,
-        reason: `Trust tier mismatch: sender=${sendingAgent.trustTier}, required=${receivingAgent.requiredTrustTier}`
+        reason: `Trust tier mismatch: sender=${sendingAgent.trustTier}, required=${receivingAgent.requiredTrustTier}`,
       };
     }
 
     // Rule 2: Policy domain compatibility
-    if (!this.arePolicyDomainsCompatible(capsule.metadata.policyDomain, receivingAgent.policyDomain)) {
+    if (
+      !this.arePolicyDomainsCompatible(capsule.metadata.policyDomain, receivingAgent.policyDomain)
+    ) {
       return {
         accepted: false,
-        reason: `Policy domain incompatible: capsule=${capsule.metadata.policyDomain}, agent=${receivingAgent.policyDomain}`
+        reason: `Policy domain incompatible: capsule=${capsule.metadata.policyDomain}, agent=${receivingAgent.policyDomain}`,
       };
     }
 
@@ -75,7 +72,7 @@ export class CapsulePolicy {
     if (receivingAgent.requireSignedCapsules && !capsule.signature) {
       return {
         accepted: false,
-        reason: 'Agent requires signed capsules, but capsule is unsigned'
+        reason: "Agent requires signed capsules, but capsule is unsigned",
       };
     }
 
@@ -83,26 +80,27 @@ export class CapsulePolicy {
     if (capsule.metadata.validUntil && new Date() > capsule.metadata.validUntil) {
       return {
         accepted: false,
-        reason: `Capsule expired at ${capsule.metadata.validUntil.toISOString()}`
+        reason: `Capsule expired at ${capsule.metadata.validUntil.toISOString()}`,
       };
     }
 
     // Rule 5: Authority scope compatibility
-    const requiredTransformations: ('redact' | 'strip_signature' | 'downgrade_tier')[] = [];
+    const requiredTransformations: ("redact" | "strip_signature" | "downgrade_tier")[] = [];
 
     // If receiving agent has more restrictive authority, flag for review
     const capsuleScopes = new Set(capsule.metadata.authorityScope);
-    const hasWrite = capsuleScopes.has('write') || capsuleScopes.has('execute');
-    const receiverIsReadOnly = !receivingAgent.policyDomain.includes('write');
+    const hasWrite = capsuleScopes.has("write") || capsuleScopes.has("execute");
+    const receiverIsReadOnly = !receivingAgent.policyDomain.includes("write");
 
     if (hasWrite && receiverIsReadOnly) {
-      requiredTransformations.push('downgrade_tier');
+      requiredTransformations.push("downgrade_tier");
     }
 
     return {
       accepted: true,
-      reason: 'Capsule accepted',
-      requiredTransformations: requiredTransformations.length > 0 ? requiredTransformations : undefined
+      reason: "Capsule accepted",
+      requiredTransformations:
+        requiredTransformations.length > 0 ? requiredTransformations : undefined,
     };
   }
 
@@ -125,7 +123,7 @@ export class CapsulePolicy {
       originalCreator: capsule.metadata.createdBy,
       forwardingChain,
       currentHolder: toAgentId,
-      lastForwardedAt: new Date()
+      lastForwardedAt: new Date(),
     };
 
     this.forwardingRecords.set(capsule.id, record);
@@ -149,12 +147,12 @@ export class CapsulePolicy {
     }
 
     // Allow subdomain access (e.g., "finance.reporting" can access "finance")
-    if (capsuleDomain.startsWith(agentDomain + '.')) {
+    if (capsuleDomain.startsWith(agentDomain + ".")) {
       return true;
     }
 
     // Wildcard domains
-    if (agentDomain === '*' || capsuleDomain === '*') {
+    if (agentDomain === "*" || capsuleDomain === "*") {
       return true;
     }
 
@@ -164,10 +162,7 @@ export class CapsulePolicy {
   /**
    * Compute effective authority scope after cross-agent transfer
    */
-  computeEffectiveAuthority(
-    capsule: ContextCapsule,
-    receivingAgent: Agent
-  ): string[] {
+  computeEffectiveAuthority(capsule: ContextCapsule, receivingAgent: Agent): string[] {
     const capsuleScopes = new Set(capsule.metadata.authorityScope);
 
     // Intersection of capsule authority and agent capabilities
@@ -175,16 +170,16 @@ export class CapsulePolicy {
 
     const effectiveScopes: string[] = [];
 
-    if (capsuleScopes.has('read')) {
-      effectiveScopes.push('read');
+    if (capsuleScopes.has("read")) {
+      effectiveScopes.push("read");
     }
 
-    if (capsuleScopes.has('write') && !receivingAgent.policyDomain.includes('readonly')) {
-      effectiveScopes.push('write');
+    if (capsuleScopes.has("write") && !receivingAgent.policyDomain.includes("readonly")) {
+      effectiveScopes.push("write");
     }
 
-    if (capsuleScopes.has('execute') && receivingAgent.policyDomain.includes('execution')) {
-      effectiveScopes.push('execute');
+    if (capsuleScopes.has("execute") && receivingAgent.policyDomain.includes("execution")) {
+      effectiveScopes.push("execute");
     }
 
     return effectiveScopes;
@@ -213,7 +208,7 @@ export class CapsulePolicy {
       if (!agent) continue;
 
       if (agent.trustTier < previousTrust) {
-        console.error('Trust escalation detected in forwarding chain');
+        console.error("Trust escalation detected in forwarding chain");
         return false;
       }
 
@@ -226,7 +221,9 @@ export class CapsulePolicy {
   /**
    * Create a quarantine policy (deny all capsules from specific agents)
    */
-  createQuarantinePolicy(quarantinedAgentIds: string[]): (capsule: ContextCapsule) => AcceptanceDecision {
+  createQuarantinePolicy(
+    quarantinedAgentIds: string[]
+  ): (capsule: ContextCapsule) => AcceptanceDecision {
     const quarantinedSet = new Set(quarantinedAgentIds);
 
     return (capsule: ContextCapsule) => {
@@ -234,7 +231,7 @@ export class CapsulePolicy {
       if (quarantinedSet.has(capsule.metadata.createdBy)) {
         return {
           accepted: false,
-          reason: `Capsule originated from quarantined agent: ${capsule.metadata.createdBy}`
+          reason: `Capsule originated from quarantined agent: ${capsule.metadata.createdBy}`,
         };
       }
 
@@ -244,14 +241,14 @@ export class CapsulePolicy {
         if (quarantinedSet.has(agentId)) {
           return {
             accepted: false,
-            reason: `Capsule forwarded through quarantined agent: ${agentId}`
+            reason: `Capsule forwarded through quarantined agent: ${agentId}`,
           };
         }
       }
 
       return {
         accepted: true,
-        reason: 'Capsule passed quarantine check'
+        reason: "Capsule passed quarantine check",
       };
     };
   }
@@ -262,7 +259,7 @@ export class CapsulePolicy {
   toJSON(): object {
     return {
       agents: Array.from(this.agents.values()),
-      forwardingRecords: Array.from(this.forwardingRecords.values())
+      forwardingRecords: Array.from(this.forwardingRecords.values()),
     };
   }
 }
@@ -274,7 +271,7 @@ export const DEFAULT_TRUST_TIERS = {
   SYSTEM: 0,
   VERIFIED: 1,
   USER: 2,
-  EXTERNAL: 3
+  EXTERNAL: 3,
 };
 
 /**
@@ -296,6 +293,6 @@ export function createAgent(
     requiredTrustTier: options?.requiredTrustTier ?? trustTier,
     policyDomain,
     requireSignedCapsules: options?.requireSignedCapsules ?? false,
-    publicKey: options?.publicKey
+    publicKey: options?.publicKey,
   };
 }

@@ -7,5 +7,4 @@ livenessProbe: { httpGet: { path: /livez, port: http } }
 resources:
   requests: { cpu: 100m, memory: 256Mi }
   limits: { cpu: 500m, memory: 512Mi }
-podSecurityContext:
-  { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }

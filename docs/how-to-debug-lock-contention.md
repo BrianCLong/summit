@@ -10,7 +10,7 @@ When a Postgres incident hits, use the DB Observability v2 tools to capture the 
 
 ## 2) Capture a snapshot (API)
 
-```text
+````text
 POST /api/admin/db-observability/snapshot
 Authorization: Bearer <admin token>
 
@@ -65,3 +65,4 @@ Both the endpoint and CLI emit structured `db_observability` audit events that c
 - Add an index for repetitive slow statements if missing and safe to deploy.
 - If locks involve migrations, ensure no concurrent writers and rerun in a maintenance window.
 - Consider temporarily lowering client concurrency or enabling statement timeouts to stop new blockers.
+````

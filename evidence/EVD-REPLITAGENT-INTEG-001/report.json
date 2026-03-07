@@ -1,9 +1,7 @@
 {
   "evidence_id": "EVD-REPLITAGENT-INTEG-001",
   "item_slug": "replit-agent-integrations",
-  "claims": [
-    "Integration registry records specs and supports lookup."
-  ],
+  "claims": ["Integration registry records specs and supports lookup."],
   "decisions": [
     {
       "decision": "registry_stub",

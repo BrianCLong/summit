@@ -97,11 +97,7 @@ const App: React.FC = () => {
         <ApolloProvider client={apolloClient}>
           <QueryClientProvider client={queryClient}>
             <ToastProvider>
-              <StatusBar
-                barStyle="light-content"
-                backgroundColor="#0a0a0b"
-                translucent
-              />
+              <StatusBar barStyle="light-content" backgroundColor="#0a0a0b" translucent />
               <RootNavigator />
             </ToastProvider>
           </QueryClientProvider>

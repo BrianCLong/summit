@@ -3,6 +3,7 @@
 These epics extend the MVP-3 GA roadmap with deeper analytics, richer integrations, higher assurance, and cost discipline. Each epic lists the operational objective, core tasks, and acceptance evidence so teams can thread them into planning tools or orchestration prompts.
 
 ## Epic 13 – Analytics, Reporting & Insights
+
 - **Objective:** Provide unified, permission-aware insight into OSINT ingestion, AI usage, and narrative simulation effectiveness to drive feature and GTM decisions.
 - **Tasks:**
   1. Finalize analytical KPIs (e.g., OSINT sources ingested, query success rates, AI module utilization, alert MTTR, dashboard adoption).
@@ -15,6 +16,7 @@ These epics extend the MVP-3 GA roadmap with deeper analytics, richer integratio
 - **Acceptance:** KPIs reviewed monthly, dashboards land in Grafana with latency/error budgets, exports audited with decision logs, and automated reports delivered to distro lists without PII leakage.
 
 ## Epic 14 – Integration & API Ecosystem Expansion
+
 - **Objective:** Make public APIs consistent, observable, and partner-friendly with SDKs, webhooks, and documented evolution paths.
 - **Tasks:**
   1. Review and refactor REST/GraphQL endpoints for consistent shapes, pagination, and structured error envelopes; document per-resource SLOs.
@@ -27,6 +29,7 @@ These epics extend the MVP-3 GA roadmap with deeper analytics, richer integratio
 - **Acceptance:** OpenAPI/GraphQL schemas lint clean, SDKs published to internal registries, webhook deliveries signed and observable, rate-limit headers validated in CI, and versioning/deprecation policy posted in API docs.
 
 ## Epic 15 – Quality Assurance & User Acceptance
+
 - **Objective:** Institutionalize UAT and upgrade confidence for the mission workflows before every release.
 - **Tasks:**
   1. Establish a UAT cycle gating each release with entry/exit criteria and evidence capture.
@@ -39,6 +42,7 @@ These epics extend the MVP-3 GA roadmap with deeper analytics, richer integratio
 - **Acceptance:** Each release shows signed UAT evidence, beta feedback closure SLAs met, upgrade smoke tests part of CI gates, and accessibility/cross-browser defects burn down to agreed thresholds.
 
 ## Epic 16 – Cloud Cost Optimization & Sustainability
+
 - **Objective:** Reduce waste and align workloads to energy- and cost-efficient execution without compromising mission reliability.
 - **Tasks:**
   1. Instrument services with cost metrics (CPU/memory, storage, egress) and tag workloads by tenant/feature for showback.
@@ -51,9 +55,11 @@ These epics extend the MVP-3 GA roadmap with deeper analytics, richer integratio
 - **Acceptance:** Cost dashboards show week-over-week reductions, anomaly alerts exercised in drills, archival/offloading jobs verifiably reduce hot storage, and sustainability checks appear in release and ops checklists.
 
 ## Integration Notes
+
 - Thread these epics into the existing MVP-3 orchestration by adding analytics/log aggregation hooks to release evidence, enforcing API rate/contract checks in CI, gating releases on UAT and upgrade smoke evidence, and wiring cost guardrails into canary budgets.
 - Dependency highlights: Epics 13 & 14 depend on observability/log pipelines; Epic 15 relies on feature-flagged environments and seeded data; Epic 16 depends on metrics exports and budget policy wiring.
 
 ## Forward-Leaning Enhancements
+
 - Add carbon-aware workload shifting (region or time-based) to Epics 13 & 16 using cloud provider emissions data.
 - Explore differential privacy for analytics exports to maintain insight quality while safeguarding sensitive intelligence patterns.

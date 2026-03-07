@@ -1,9 +1,9 @@
 module.exports = {
-  extends: ['../../.eslintrc.cjs'],
+  extends: ["../../.eslintrc.cjs"],
   rules: {
-    'no-useless-escape': 'warn',
-    'import/no-unresolved': 'off',
-    'import/order': 'off',
-    '@typescript-eslint/no-unused-vars': 'warn',
+    "no-useless-escape": "warn",
+    "import/no-unresolved": "off",
+    "import/order": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
   },
 };

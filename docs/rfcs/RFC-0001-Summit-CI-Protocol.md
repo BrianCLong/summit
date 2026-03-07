@@ -16,27 +16,29 @@ The CI protocol defines standard phases and artifact expectations for any Summit
 
 Every governed CI pipeline must map to the following canonical phases:
 
-*   **`checkout`**: Source code retrieval and environment preparation.
-*   **`build`**: Compilation, asset bundling, and image creation.
-*   **`test`**: Unit, integration, and policy testing (including governance linting).
-*   **`package`**: Artifact preparation and SBOM generation.
-*   **`publish`**: Artifact signing, provenance generation, and deployment.
+- **`checkout`**: Source code retrieval and environment preparation.
+- **`build`**: Compilation, asset bundling, and image creation.
+- **`test`**: Unit, integration, and policy testing (including governance linting).
+- **`package`**: Artifact preparation and SBOM generation.
+- **`publish`**: Artifact signing, provenance generation, and deployment.
 
 ### 3.2 Required Artifacts
 
 To support the trust graph and compliance attestations, pipelines must produce:
 
-*   **`sbom`**: Software Bill of Materials (e.g., CycloneDX or SPDX) for all production artifacts.
-*   **`provenance`**: SLSA provenance attestations.
-*   **`signatures`**: Cryptographic signatures (e.g., via cosign) verifying artifact integrity.
+- **`sbom`**: Software Bill of Materials (e.g., CycloneDX or SPDX) for all production artifacts.
+- **`provenance`**: SLSA provenance attestations.
+- **`signatures`**: Cryptographic signatures (e.g., via cosign) verifying artifact integrity.
 
 ## 4. Rationale and Implications
 
 By standardizing these phases and artifacts:
-*   **Automation**: Summit agents can programmatically reason about, debug, and generate CI configurations.
-*   **Governance**: The Governance Linter can hook into well-defined phases to enforce policy before `publish`.
-*   **Execution Symmetry**: Agents can run local equivalents of CI phases to pre-verify work.
+
+- **Automation**: Summit agents can programmatically reason about, debug, and generate CI configurations.
+- **Governance**: The Governance Linter can hook into well-defined phases to enforce policy before `publish`.
+- **Execution Symmetry**: Agents can run local equivalents of CI phases to pre-verify work.
 
 ## 5. Next Steps
-*   Implement `docs/ci/linter/` policies.
-*   Map current GitHub Actions to these abstract phases.
+
+- Implement `docs/ci/linter/` policies.
+- Map current GitHub Actions to these abstract phases.

@@ -1,5 +1,5 @@
-import { Driver, Session, Integer, int, isInt } from 'neo4j-driver';
-import { Selector } from '../types.js';
+import { Driver, Session, Integer, int, isInt } from "neo4j-driver";
+import { Selector } from "../types.js";
 
 export class Neo4jLoader {
   constructor(private driver: Driver) {}
@@ -17,7 +17,11 @@ export class Neo4jLoader {
 
         if (lastId !== null) {
           query += ` WHERE n.${selector.pk.asId} > $lastId`;
-          params.lastId = isInt(lastId) ? lastId : (typeof lastId === 'number' ? int(lastId) : lastId);
+          params.lastId = isInt(lastId)
+            ? lastId
+            : typeof lastId === "number"
+              ? int(lastId)
+              : lastId;
         }
 
         query += `
@@ -30,16 +34,16 @@ export class Neo4jLoader {
 
         if (result.records.length === 0) break;
 
-        const rows = result.records.map(r => {
-            const node = r.get('n');
-            const props = { ...node.properties };
-            // Normalize Integers to JS numbers for consistency
-            for (const key in props) {
-                if (isInt(props[key])) {
-                    props[key] = props[key].toNumber();
-                }
+        const rows = result.records.map((r) => {
+          const node = r.get("n");
+          const props = { ...node.properties };
+          // Normalize Integers to JS numbers for consistency
+          for (const key in props) {
+            if (isInt(props[key])) {
+              props[key] = props[key].toNumber();
             }
-            return props;
+          }
+          return props;
         });
 
         yield rows;

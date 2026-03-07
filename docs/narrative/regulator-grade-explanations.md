@@ -9,10 +9,11 @@ Summit explanations are not UX niceties; they are **designed to survive hostile 
 ### The Scrutiny Test
 
 Imagine a Summit-powered decision is challenged in court, or by a federal regulator. The system must answer:
+
 1.  **Why was this decision made?** (The causal chain)
 2.  **Why was another option rejected?** (The counterfactual)
 3.  **What rules applied?** (The legal context)
-4.  **What evidence existed *at the time*?** (The epistemic context)
+4.  **What evidence existed _at the time_?** (The epistemic context)
 
 ## Narrative Framing: "Explanations That Hold Up in Court"
 
@@ -23,6 +24,7 @@ An explanation is only useful if it is **forensically sound**. It must be a dete
 Summit generates a **Decision Replay Transcript** for consequential actions. This is not a log file; it is a structured narrative of the decision process.
 
 **Structure of a Transcript:**
+
 1.  **Context Snapshot:** The state of the world at T=0 (inputs, sensor data, market prices).
 2.  **Constraint Check:** The active policies and charters that bounded the solution space.
 3.  **Reasoning Trace:** The agent's internal monologue or logic path (e.g., "Option A rejected due to cost risk; Option B selected for compliance").
@@ -33,8 +35,8 @@ Summit generates a **Decision Replay Transcript** for consequential actions. Thi
 
 This reframes the AI from a "black box" to an **auditable actor**. We may not understand every neuron in the model, but we can verify the **governance wrapper** around it.
 
-*   Did it follow policy? **Yes.**
-*   Did it consider the required data? **Yes.**
-*   Did it violate any constraints? **No.**
+- Did it follow policy? **Yes.**
+- Did it consider the required data? **Yes.**
+- Did it violate any constraints? **No.**
 
 This is the standard of "Regulator-Grade."

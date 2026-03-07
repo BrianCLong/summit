@@ -14,7 +14,7 @@ groups:
           category: cost
         annotations:
           summary: "Daily compute spend at 80% of budget"
-          description: "Current daily compute spend: ${{ $value | printf \"%.2f\" }} (budget: $500)"
+          description: 'Current daily compute spend: ${{ $value | printf "%.2f" }} (budget: $500)'
           runbook_url: "https://runbooks.intelgraph.com/cost-spike"
 
       # Daily compute budget exceeded
@@ -27,7 +27,7 @@ groups:
           category: cost
         annotations:
           summary: "Daily compute budget exceeded"
-          description: "Current daily compute spend: ${{ $value | printf \"%.2f\" }} (budget: $500)"
+          description: 'Current daily compute spend: ${{ $value | printf "%.2f" }} (budget: $500)'
           runbook_url: "https://runbooks.intelgraph.com/cost-spike"
 
       # Storage cost spike
@@ -69,7 +69,7 @@ groups:
           category: cost
         annotations:
           summary: "Monthly cost projection exceeds 80% of budget"
-          description: "Projected monthly cost: ${{ $value | printf \"%.0f\" }} (budget: $15,000)"
+          description: 'Projected monthly cost: ${{ $value | printf "%.0f" }} (budget: $15,000)'
 
   - name: slow-query-killer
     rules:
@@ -115,7 +115,7 @@ groups:
           severity: warning
         annotations:
           summary: "Unusually high query rate"
-          description: "{{ $value | printf \"%.0f\" }} queries/second - potential runaway client"
+          description: '{{ $value | printf "%.0f" }} queries/second - potential runaway client'
 
   - name: resource-utilization
     rules:

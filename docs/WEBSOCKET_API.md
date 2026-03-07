@@ -11,8 +11,8 @@ import { io } from "socket.io-client";
 
 const socket = io("https://api.summit.com/realtime", {
   auth: {
-    token: "YOUR_JWT_TOKEN"
-  }
+    token: "YOUR_JWT_TOKEN",
+  },
 });
 ```
 
@@ -35,6 +35,7 @@ Listen for progress and state changes for a specific run.
 
 **Event**: `maestro:run_update`
 **Payload**:
+
 ```json
 {
   "runId": "string",
@@ -53,6 +54,7 @@ Stream live logs from an agent execution.
 
 **Event**: `maestro:log`
 **Payload**:
+
 ```json
 {
   "runId": "string",
@@ -74,6 +76,7 @@ Receive status updates for all visible runs (e.g., for a dashboard view).
 
 **Event**: `maestro:status_update`
 **Payload**:
+
 ```json
 {
   "runId": "string",
@@ -97,6 +100,7 @@ Errors are emitted via standard `error` event or specific namespaced error event
 
 **Event**: `maestro:error`
 **Payload**:
+
 ```json
 {
   "code": "SUBSCRIPTION_FAILED",

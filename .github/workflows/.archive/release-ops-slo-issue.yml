@@ -11,11 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 on:
   # Monthly on the 1st at 09:00 UTC
   schedule:
-    - cron: '0 9 1 * *'
+    - cron: "0 9 1 * *"
 
   # Manual trigger for testing
   workflow_dispatch:

@@ -1,11 +1,11 @@
 // src/pages/MaestroRunConsolePage.tsx
 
-import * as React from 'react';
-import { MaestroRunConsole } from '@/components/MaestroRunConsole';
+import * as React from 'react'
+import { MaestroRunConsole } from '@/components/MaestroRunConsole'
 
 export default function MaestroRunConsolePage() {
   // You can replace this with actual user context
-  const userId = 'ui-demo-user';
+  const userId = 'ui-demo-user'
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-50">
@@ -23,5 +23,5 @@ export default function MaestroRunConsolePage() {
         <MaestroRunConsole userId={userId} />
       </div>
     </main>
-  );
+  )
 }

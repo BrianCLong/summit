@@ -2,7 +2,7 @@
  * BackcastingEngine - Backcasting from Desired Futures
  */
 
-import { BackcastingAnalysis, BackcastingPathway, BackcastingMilestone } from './types.js';
+import { BackcastingAnalysis, BackcastingPathway, BackcastingMilestone } from "./types.js";
 
 export class BackcastingEngine {
   private analyses: Map<string, BackcastingAnalysis> = new Map();
@@ -50,7 +50,10 @@ export class BackcastingEngine {
     return [];
   }
 
-  private defineMilestones(pathways: BackcastingPathway[], targetYear: number): BackcastingMilestone[] {
+  private defineMilestones(
+    pathways: BackcastingPathway[],
+    targetYear: number
+  ): BackcastingMilestone[] {
     // TODO: Define critical milestones
     return [];
   }

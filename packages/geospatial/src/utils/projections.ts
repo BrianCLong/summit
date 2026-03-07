@@ -1,8 +1,8 @@
-import type { GeoPoint } from '../types/geospatial.js';
+import type { GeoPoint } from "../types/geospatial.js";
 
 export interface UTMCoordinate {
   zone: number;
-  hemisphere: 'N' | 'S';
+  hemisphere: "N" | "S";
   easting: number;
   northing: number;
 }
@@ -15,9 +15,9 @@ export interface MGRSCoordinate {
   northing: number;
 }
 
-const LATITUDE_BANDS = 'CDEFGHJKLMNPQRSTUVWXX';
-const ROW_LETTERS = 'ABCDEFGHJKLMNPQRSTUV';
-const COLUMN_SETS = ['ABCDEFGH', 'JKLMNPQR', 'STUVWXYZ'];
+const LATITUDE_BANDS = "CDEFGHJKLMNPQRSTUVWXX";
+const ROW_LETTERS = "ABCDEFGHJKLMNPQRSTUV";
+const COLUMN_SETS = ["ABCDEFGH", "JKLMNPQR", "STUVWXYZ"];
 
 const WGS84_A = 6378137.0;
 const WGS84_F = 1 / 298.257223563;
@@ -37,9 +37,9 @@ const centralMeridian = (zone: number): number => -183 + zone * 6;
 
 export const toUTM = (point: GeoPoint): UTMCoordinate => {
   const latitude = clampLatitude(point.latitude);
-  const longitude = ((point.longitude + 180) % 360 + 360) % 360 - 180;
+  const longitude = ((((point.longitude + 180) % 360) + 360) % 360) - 180;
   const zone = Math.floor((longitude + 180) / 6) + 1;
-  const hemisphere: 'N' | 'S' = latitude >= 0 ? 'N' : 'S';
+  const hemisphere: "N" | "S" = latitude >= 0 ? "N" : "S";
 
   const latRad = toRadians(latitude);
   const lonRad = toRadians(longitude);
@@ -53,8 +53,9 @@ export const toUTM = (point: GeoPoint): UTMCoordinate => {
 
   const M =
     WGS84_A *
-    ((1 - WGS84_E * WGS84_E / 4 - (3 * WGS84_E ** 4) / 64 - (5 * WGS84_E ** 6) / 256) * latRad -
-      ((3 * WGS84_E * WGS84_E) / 8 + (3 * WGS84_E ** 4) / 32 + (45 * WGS84_E ** 6) / 1024) * Math.sin(2 * latRad) +
+    ((1 - (WGS84_E * WGS84_E) / 4 - (3 * WGS84_E ** 4) / 64 - (5 * WGS84_E ** 6) / 256) * latRad -
+      ((3 * WGS84_E * WGS84_E) / 8 + (3 * WGS84_E ** 4) / 32 + (45 * WGS84_E ** 6) / 1024) *
+        Math.sin(2 * latRad) +
       ((15 * WGS84_E ** 4) / 256 + (45 * WGS84_E ** 6) / 1024) * Math.sin(4 * latRad) -
       ((35 * WGS84_E ** 6) / 3072) * Math.sin(6 * latRad));
 
@@ -71,7 +72,9 @@ export const toUTM = (point: GeoPoint): UTMCoordinate => {
     (M +
       N *
         Math.tan(latRad) *
-        (A ** 2 / 2 + ((5 - T + 9 * C + 4 * C ** 2) * A ** 4) / 24 + ((61 - 58 * T + T ** 2 + 600 * C - 330 * ePrimeSq) * A ** 6) / 720));
+        (A ** 2 / 2 +
+          ((5 - T + 9 * C + 4 * C ** 2) * A ** 4) / 24 +
+          ((61 - 58 * T + T ** 2 + 600 * C - 330 * ePrimeSq) * A ** 6) / 720));
 
   if (latitude < 0) {
     northing += 10000000;
@@ -84,13 +87,14 @@ export const utmToLatLon = (utm: UTMCoordinate): GeoPoint => {
   const ePrimeSq = (WGS84_E * WGS84_E) / (1 - WGS84_E * WGS84_E);
   const x = utm.easting - 500000;
   let y = utm.northing;
-  if (utm.hemisphere === 'S') {
+  if (utm.hemisphere === "S") {
     y -= 10000000;
   }
 
   const lonOrigin = toRadians(centralMeridian(utm.zone));
   const M = y / K0;
-  const mu = M / (WGS84_A * (1 - WGS84_E ** 2 / 4 - (3 * WGS84_E ** 4) / 64 - (5 * WGS84_E ** 6) / 256));
+  const mu =
+    M / (WGS84_A * (1 - WGS84_E ** 2 / 4 - (3 * WGS84_E ** 4) / 64 - (5 * WGS84_E ** 6) / 256));
 
   const e1 = (1 - Math.sqrt(1 - WGS84_E ** 2)) / (1 + Math.sqrt(1 - WGS84_E ** 2));
   const J1 = (3 * e1) / 2 - (27 * e1 ** 3) / 32;
@@ -124,7 +128,9 @@ export const utmToLatLon = (utm: UTMCoordinate): GeoPoint => {
 
   const lon =
     lonOrigin +
-    (D - ((1 + 2 * T1 + C1) * D ** 3) / 6 + ((5 - 2 * C1 + 28 * T1 - 3 * C1 ** 2 + 8 * ePrimeSq + 24 * T1 ** 2) * D ** 5) / 120) /
+    (D -
+      ((1 + 2 * T1 + C1) * D ** 3) / 6 +
+      ((5 - 2 * C1 + 28 * T1 - 3 * C1 ** 2 + 8 * ePrimeSq + 24 * T1 ** 2) * D ** 5) / 120) /
       cosFp;
 
   return { latitude: toDegrees(lat), longitude: toDegrees(lon) };
@@ -166,31 +172,31 @@ const bandBaseNorthing = (band: string, zone: number): number => {
   const bandIndex = LATITUDE_BANDS.indexOf(band.toUpperCase());
   if (bandIndex < 0) return 0;
   const latitude = bandIndex * 8 - 80;
-  const hemisphere: 'N' | 'S' = band >= 'N' ? 'N' : 'S';
+  const hemisphere: "N" | "S" = band >= "N" ? "N" : "S";
   const utm = toUTM({ latitude, longitude: centralMeridian(zone) });
-  return hemisphere === 'S' ? utm.northing + 10000000 : utm.northing;
+  return hemisphere === "S" ? utm.northing + 10000000 : utm.northing;
 };
 
 export const mgrsToPoint = (mgrs: string): GeoPoint => {
-  const match = mgrs.replace(/\s+/g, '').match(/^(\d{1,2})([C-X])([A-Z]{2})(\d{2,10})$/i);
+  const match = mgrs.replace(/\s+/g, "").match(/^(\d{1,2})([C-X])([A-Z]{2})(\d{2,10})$/i);
   if (!match) {
-    throw new Error('Invalid MGRS string');
+    throw new Error("Invalid MGRS string");
   }
 
   const [, zoneStr, band, grid, remainder] = match;
   const zone = Number(zoneStr);
-  const hemisphere: 'N' | 'S' = band.toUpperCase() >= 'N' ? 'N' : 'S';
+  const hemisphere: "N" | "S" = band.toUpperCase() >= "N" ? "N" : "S";
   const columnSet = COLUMN_SETS[(zone - 1) % 3];
   const columnIndex = columnSet.indexOf(grid[0].toUpperCase());
   const rowIndex = ROW_LETTERS.indexOf(grid[1].toUpperCase());
 
   if (columnIndex < 0 || rowIndex < 0) {
-    throw new Error('Invalid MGRS grid letters');
+    throw new Error("Invalid MGRS grid letters");
   }
 
   const precision = remainder.length / 2;
-  const easting = Number(remainder.slice(0, precision).padEnd(5, '0'));
-  const northing = Number(remainder.slice(precision).padEnd(5, '0'));
+  const easting = Number(remainder.slice(0, precision).padEnd(5, "0"));
+  const northing = Number(remainder.slice(precision).padEnd(5, "0"));
 
   let utmNorthing = rowIndex * 100000 + northing;
   const northingBase = bandBaseNorthing(band, zone);
@@ -209,11 +215,11 @@ export const mgrsToPoint = (mgrs: string): GeoPoint => {
 };
 
 export const convertProjection = (point: GeoPoint, toCrs: string): GeoPoint => {
-  if (toCrs === 'EPSG:4326') return normalizePoint(point);
-  if (toCrs.toLowerCase().startsWith('utm')) {
-    const [, zoneStr, hemisphereRaw] = toCrs.split(':');
+  if (toCrs === "EPSG:4326") return normalizePoint(point);
+  if (toCrs.toLowerCase().startsWith("utm")) {
+    const [, zoneStr, hemisphereRaw] = toCrs.split(":");
     const zone = Number(zoneStr);
-    const hemisphere = hemisphereRaw?.toUpperCase() === 'S' ? 'S' : 'N';
+    const hemisphere = hemisphereRaw?.toUpperCase() === "S" ? "S" : "N";
     const utm = toUTM(point);
     return utmToLatLon({ ...utm, zone: zone || utm.zone, hemisphere });
   }
@@ -222,7 +228,7 @@ export const convertProjection = (point: GeoPoint, toCrs: string): GeoPoint => {
 
 export const normalizePoint = (point: GeoPoint): GeoPoint => ({
   latitude: clampLatitude(point.latitude),
-  longitude: ((point.longitude + 180) % 360 + 360) % 360 - 180,
+  longitude: ((((point.longitude + 180) % 360) + 360) % 360) - 180,
   elevation: point.elevation,
   timestamp: point.timestamp,
   accuracy: point.accuracy,

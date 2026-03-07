@@ -19,6 +19,7 @@ Multiple **GA-blocking security TODOs** are explicitly documented in the SOC2 Al
 ### Risk Level: 🔴 EXTREME
 
 **18 Critical (P0) TODOs identified** that individually or collectively represent:
+
 - OWASP Top 10 vulnerabilities (#1 Injection, #2 Broken Authentication, #3 Sensitive Data Exposure)
 - SOC 2 Type II compliance blockers
 - Multi-tenant isolation failures
@@ -38,10 +39,11 @@ Multiple **GA-blocking security TODOs** are explicitly documented in the SOC2 Al
 **TODO Text:** `TODO: Add proper RBAC here`
 
 **Full Context:**
+
 ```typescript
-router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
-    // TODO: Add proper RBAC here
-    res.json({ status: 'triggered', job_id: 'job-' + Date.now() });
+router.post("/v1/search/admin/reindex", async (req: Request, res: Response) => {
+  // TODO: Add proper RBAC here
+  res.json({ status: "triggered", job_id: "job-" + Date.now() });
 });
 ```
 
@@ -49,6 +51,7 @@ router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Admin reindex endpoint has **ZERO authorization checks**
 - Any authenticated user (regardless of role/tenant) can trigger reindexing operations
 - **Tenant isolation violation:** User from Tenant A can trigger reindex affecting all tenants
@@ -56,6 +59,7 @@ router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
 - **Data integrity risk:** Reindex operations may corrupt or lose data if triggered inappropriately
 
 **What Breaks if Ignored:**
+
 - Multi-tenant security model collapses
 - SOC 2 CC6.1 (Logical Access Controls) failure
 - OWASP A01:2021 - Broken Access Control
@@ -72,6 +76,7 @@ router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
 **TODO Text:** `TODO: Implement SCIM sync using your IdP API`
 
 **Full Context:**
+
 ```typescript
 export async function syncScimUsers() {
   // TODO: Implement SCIM sync using your IdP API.
@@ -84,6 +89,7 @@ export async function syncScimUsers() {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - SCIM sync is **stub code only** - always returns success without performing any sync
 - User/group provisioning from IdP is **completely non-functional**
 - SSO integration is incomplete and misleading (appears to work but doesn't sync)
@@ -91,6 +97,7 @@ export async function syncScimUsers() {
 - **Orphaned accounts** when users are deprovisioned in IdP but remain active in Summit
 
 **What Breaks if Ignored:**
+
 - SSO promises are unfulfillable
 - Cannot enforce IdP-driven access policies
 - Violates principle of single source of truth for identity
@@ -111,6 +118,7 @@ export async function syncScimUsers() {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Graph DB and Agent Executor services **lack JWT authentication entirely**
 - Services are accessible without any authentication if network access is gained
 - **Bypasses API Gateway controls** - direct service access has no auth
@@ -118,6 +126,7 @@ export async function syncScimUsers() {
 - Once network is compromised (VPN, misconfigured firewall, SSRF), services are wide open
 
 **What Breaks if Ignored:**
+
 - Defense in depth violation (single point of failure)
 - Lateral movement after initial compromise is trivial
 - Cannot enforce tenant isolation at service level
@@ -138,6 +147,7 @@ export async function syncScimUsers() {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Policy engine may be configured to run in **dry-run mode** in production
 - Dry-run mode **logs policy violations but does NOT enforce them**
 - All authorization decisions may be "allow by default" with logging only
@@ -145,6 +155,7 @@ export async function syncScimUsers() {
 - **Complete authorization bypass** if this is the case
 
 **What Breaks if Ignored:**
+
 - All RBAC/ABAC policies are advisory, not enforced
 - Tenant isolation is logged but not prevented
 - Compliance controls are illusory
@@ -166,6 +177,7 @@ export async function syncScimUsers() {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Graph DB queries likely use **string concatenation** instead of parameterized queries
 - **Cypher injection vulnerability** allows attackers to:
   - Exfiltrate entire graph database
@@ -175,6 +187,7 @@ export async function syncScimUsers() {
 - Equivalent severity to SQL injection (OWASP #1)
 
 **What Breaks if Ignored:**
+
 - OWASP A03:2021 - Injection
 - Complete data breach scenario
 - Data integrity cannot be guaranteed
@@ -184,6 +197,7 @@ export async function syncScimUsers() {
 **System Surface Affected:** Graph Database, All Query Operations, Tenant Data
 
 **Example Attack:**
+
 ```
 // Vulnerable code (likely pattern):
 query = `MATCH (n:Entity {tenant: '${tenantId}'}) WHERE n.name = '${userInput}' RETURN n`
@@ -206,6 +220,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Graph DB exposes a `/clear` or similar endpoint that can **wipe entire database**
 - Endpoint may be unauthenticated or weakly protected
 - **Single API call can destroy all production data**
@@ -213,6 +228,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 - Likely intended for testing/development only but deployed to production
 
 **What Breaks if Ignored:**
+
 - Single mistake or malicious action destroys all customer data
 - Violates data durability guarantees
 - Recovery requires full restore from backup (hours of downtime)
@@ -235,6 +251,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Graph DB lacks query timeouts
 - **Malicious or accidental expensive queries can DoS the entire platform**
 - Single tenant can impact all tenants (noisy neighbor problem)
@@ -245,6 +262,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 - No circuit breaker or resource governor
 
 **What Breaks if Ignored:**
+
 - Platform-wide outages from single bad query
 - Cannot guarantee SLA/SLO for any tenant
 - Trivial to DoS (no authentication required if C-003 is also present)
@@ -266,6 +284,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Critical API paths **lack input validation**
 - Enables multiple attack vectors:
   - **Injection attacks** (SQL, Cypher, Command, LDAP)
@@ -276,6 +295,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 - Malformed data can corrupt database, crash services, or bypass business logic
 
 **What Breaks if Ignored:**
+
 - OWASP A03:2021 - Injection
 - OWASP A07:2021 - Identification and Authentication Failures
 - Data integrity cannot be guaranteed
@@ -285,6 +305,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **System Surface Affected:** All API Endpoints, All Services
 
 **Required Validations:**
+
 - Length limits
 - Character whitelisting
 - Format validation (email, URL, UUID, etc.)
@@ -304,6 +325,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - **Zero rate limiting** on any API endpoint
 - Trivial to DoS via request flooding
 - No abuse prevention mechanisms
@@ -312,6 +334,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 - Credential stuffing attacks are unlimited (enables brute force)
 
 **What Breaks if Ignored:**
+
 - Trivial platform DoS (send unlimited requests)
 - Runaway costs from API abuse
 - Cannot meet SLA for legitimate users during attack
@@ -321,6 +344,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **System Surface Affected:** All API Endpoints, Platform Availability, Operating Costs
 
 **Recommended Thresholds:**
+
 - Per-tenant: 1000 req/min
 - Per-user: 100 req/min
 - Per-IP: 60 req/min
@@ -338,6 +362,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Missing security headers exposes application to browser-based attacks:
   - **No Content-Security-Policy (CSP):** XSS attacks are easier
   - **No X-Frame-Options:** Clickjacking attacks possible
@@ -347,6 +372,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 - Helmet middleware provides all these headers with secure defaults
 
 **What Breaks if Ignored:**
+
 - OWASP A05:2021 - Security Misconfiguration
 - Browser-based attacks are significantly easier
 - Fails automated security scans (Qualys, Tenable, etc.)
@@ -366,6 +392,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - CORS misconfiguration likely allows **any origin** to make authenticated requests
 - Common misconfigurations:
   - `Access-Control-Allow-Origin: *` with credentials
@@ -377,6 +404,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
   - **Session hijacking** via XSS + CORS
 
 **What Breaks if Ignored:**
+
 - Malicious websites can make authenticated API calls on behalf of users
 - Session tokens/cookies can be stolen
 - CSRF protections are bypassed
@@ -400,6 +428,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - **No audit logging** for sensitive operations:
   - Authentication attempts (success/failure)
   - Authorization decisions (allow/deny)
@@ -412,6 +441,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 - Cannot prove compliance with data access policies
 
 **What Breaks if Ignored:**
+
 - SOC 2 audit will fail (hard requirement)
 - ISO 27001 A.12.4.1 failure (event logging)
 - GDPR Article 30 violation (records of processing activities)
@@ -422,6 +452,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **System Surface Affected:** All Services, All Compliance Programs
 
 **Required Events to Log:**
+
 - Authentication (success, failure, logout)
 - Authorization (policy decisions, access denials)
 - Data access (read, create, update, delete)
@@ -438,6 +469,7 @@ userInput = "' OR 1=1 }) MATCH (n) RETURN n //"
 **TODO Text:** `TODO: implement checks against your metrics endpoint / health dashboard`
 
 **Full Context:**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -450,6 +482,7 @@ exit 0
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Provenance verification script is a **no-op placeholder** (always exits 0)
 - Cannot verify artifact provenance before release
 - Cannot enforce SLSA compliance
@@ -457,6 +490,7 @@ exit 0
 - **Release gate is fake** - always passes regardless of actual state
 
 **What Breaks if Ignored:**
+
 - Supply chain attacks are not detected
 - Compromised builds can be released
 - SLSA Level 2+ compliance is impossible
@@ -474,6 +508,7 @@ exit 0
 **TODO Text:** `TODO: call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml`
 
 **Full Context:**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -485,6 +520,7 @@ exit 0
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Golden path verification is **non-functional** (always exits 0)
 - SLO gate cannot enforce performance/availability requirements
 - Degraded builds can be released to production
@@ -496,6 +532,7 @@ exit 0
 - **Quality gate is fake** - always passes
 
 **What Breaks if Ignored:**
+
 - Production releases without performance verification
 - Cannot enforce SLA/SLO commitments
 - Degraded performance can be deployed
@@ -515,10 +552,11 @@ exit 0
 **TODO Text:** `encryptionKey: 'your-encryption-key-here', // TODO: Generate secure key`
 
 **Full Context:**
+
 ```typescript
 export const storage = new MMKV({
-  id: 'intelgraph-storage',
-  encryptionKey: 'your-encryption-key-here', // TODO: Generate secure key
+  id: "intelgraph-storage",
+  encryptionKey: "your-encryption-key-here", // TODO: Generate secure key
 });
 ```
 
@@ -526,6 +564,7 @@ export const storage = new MMKV({
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Mobile app database encryption uses **hardcoded placeholder key**
 - Key is **embedded in source code** and visible in:
   - Git history
@@ -535,6 +574,7 @@ export const storage = new MMKV({
 - Any attacker with device access OR reverse engineering can decrypt all data
 
 **What Breaks if Ignored:**
+
 - All mobile PII/PHI/sensitive data is readable by attackers
 - GDPR Article 32 violation (appropriate security measures)
 - HIPAA Security Rule violation if health data is stored
@@ -544,6 +584,7 @@ export const storage = new MMKV({
 **System Surface Affected:** Mobile App, All Mobile User Data, All Mobile Devices
 
 **Data at Risk:**
+
 - User credentials
 - Authentication tokens
 - Cached sensitive data
@@ -563,10 +604,11 @@ export const storage = new MMKV({
 **TODO Text:** `TODO: call Typesense search; for now, return empty`
 
 **Full Context:**
+
 ```javascript
 export default async (req, res) => {
-  const url = new URL(req.url, 'http://x');
-  const q = url.searchParams.get('q') || '';
+  const url = new URL(req.url, "http://x");
+  const q = url.searchParams.get("q") || "";
   if (!q) return res.status(200).json([]);
   // TODO: call Typesense search; for now, return empty
   return res.status(200).json([]);
@@ -577,12 +619,14 @@ export default async (req, res) => {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Search API **always returns empty results** regardless of query
 - Feature is **completely non-functional** in production
 - Users will immediately discover search does not work
 - Likely a core product feature based on file location
 
 **What Breaks if Ignored:**
+
 - Core product feature does not work
 - Customer-facing failure on day 1
 - Cannot GA with non-functional search
@@ -602,6 +646,7 @@ export default async (req, res) => {
 **TODO Text:** `records_failed: 0, // TODO: Track failures`
 
 **Full Context:**
+
 ```typescript
 const metrics: ProcessingMetrics = {
   records_processed: recordCount,
@@ -615,6 +660,7 @@ const metrics: ProcessingMetrics = {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - Ingest pipeline **does not track failed records**
 - **Silent data loss** with no alerting or recovery mechanism
 - Failures are not counted, logged, or surfaced
@@ -626,6 +672,7 @@ const metrics: ProcessingMetrics = {
 - No way to retry or recover failed records
 
 **What Breaks if Ignored:**
+
 - Silent data loss in production
 - Cannot guarantee data integrity
 - Cannot meet data SLA commitments
@@ -636,6 +683,7 @@ const metrics: ProcessingMetrics = {
 **System Surface Affected:** Ingest Pipeline, Data Integrity, Operational Visibility
 
 **Required Metrics:**
+
 - Failed record count
 - Failed record IDs (for replay)
 - Failure reasons (categorized)
@@ -654,6 +702,7 @@ const metrics: ProcessingMetrics = {
 **Severity:** P0 - Critical
 
 **Why Release-Critical:**
+
 - No byte-level metrics for ingestion
 - Cannot monitor ingestion performance or throughput
 - Cannot detect throughput degradation
@@ -661,6 +710,7 @@ const metrics: ProcessingMetrics = {
 - Cannot enforce quotas or fair use
 
 **What Breaks if Ignored:**
+
 - Cannot detect performance regressions
 - Cannot alert on slow ingest
 - Cannot enforce SLO on ingest latency/throughput
@@ -670,6 +720,7 @@ const metrics: ProcessingMetrics = {
 **System Surface Affected:** Ingest Pipeline, Performance Monitoring, Capacity Planning
 
 **Required Metrics:**
+
 - Bytes processed (total, per connector, per tenant)
 - Throughput (bytes/sec, records/sec)
 - Latency (p50, p95, p99)
@@ -692,12 +743,14 @@ const metrics: ProcessingMetrics = {
 **Severity:** High
 
 **Why Must Resolve:**
+
 - Tenant isolation tests exist but are **disabled** (test.todo or TODO comments)
 - Cannot verify multi-tenant security is working
 - Tenant boundary violations may exist but are untested
 - CI passes but tenant isolation may be broken
 
 **What Breaks if Ignored:**
+
 - Tenant data leakage in production
 - Cannot certify tenant isolation for compliance
 - Security promises are untested
@@ -711,6 +764,7 @@ const metrics: ProcessingMetrics = {
 **File:** `TODO.md`
 **Lines:** 54-59
 **TODO Items:**
+
 - WebAuthn: Implement WebAuthn step-up authentication
 - Performance: Add performance optimizations to findDuplicateCandidates method
 - UX: Add notifications when merge fails
@@ -722,12 +776,14 @@ const metrics: ProcessingMetrics = {
 **Severity:** High
 
 **Why Must Resolve:**
+
 - Core deduplication feature has incomplete UX
 - Performance issues noted (findDuplicateCandidates)
 - Error handling is missing (no notifications on failure)
 - WebAuthn for sensitive operations is incomplete
 
 **What Breaks if Ignored:**
+
 - Poor user experience
 - Performance problems at scale
 - Security gap (no step-up auth for sensitive merges)
@@ -748,12 +804,14 @@ const metrics: ProcessingMetrics = {
 **Severity:** High
 
 **Why Must Resolve:**
+
 - jQuery is deprecated and a security risk
 - Mixing jQuery and React creates bugs and performance issues
 - Event bridging code is commented out (feature may be broken)
 - Increases bundle size unnecessarily
 
 **What Breaks if Ignored:**
+
 - Security vulnerabilities in jQuery (CVEs)
 - Performance degradation
 - Maintenance burden
@@ -772,6 +830,7 @@ const metrics: ProcessingMetrics = {
 **Severity:** High
 
 **Why Must Resolve:**
+
 - Multiple components have GraphQL queries disabled
 - Schema appears to be incomplete or changing
 - Features are degraded or non-functional:
@@ -781,6 +840,7 @@ const metrics: ProcessingMetrics = {
 - Suggests GraphQL layer is not production-ready
 
 **What Breaks if Ignored:**
+
 - Multiple features are non-functional
 - Real-time features (subscriptions) are disabled
 - Performance optimizations (prefetch) are disabled
@@ -795,6 +855,7 @@ const metrics: ProcessingMetrics = {
 
 **File:** Various planning documents
 **Examples:**
+
 - `EXECUTION_SATURATION_PLAN.md`
 - `GA_PROMOTION_PLAN.md`
 - `project_management/companyos/`
@@ -803,11 +864,13 @@ const metrics: ProcessingMetrics = {
 **Severity:** High
 
 **Why Must Resolve:**
+
 - Execution plans contain TODO placeholders
 - Suggests planning is incomplete
 - Unclear which tasks are in progress vs. not started
 
 **What Breaks if Ignored:**
+
 - Incomplete execution
 - Tasks fall through the cracks
 - Cannot track progress to GA
@@ -821,6 +884,7 @@ const metrics: ProcessingMetrics = {
 ### 3.1 Medium Priority (100+ items)
 
 **Categories:**
+
 - Storybook autodocs tags (cosmetic)
 - Test improvements (coverage gaps but not critical paths)
 - UI polish (notifications, loading states)
@@ -834,6 +898,7 @@ const metrics: ProcessingMetrics = {
 ### 3.2 Low Priority (70+ items)
 
 **Categories:**
+
 - Code comments referencing TODO/FIXME (meta-references)
 - Example/demo code TODOs
 - Temp file/directory references (infrastructure)
@@ -848,40 +913,40 @@ const metrics: ProcessingMetrics = {
 
 ### 4.1 TODO Count by Severity
 
-| Severity | Count | Status | GA Impact |
-|----------|-------|--------|-----------|
-| **Critical (P0)** | **18** | 🔴 All unresolved | **Blocks GA** |
-| **High (P1)** | **5** | 🟡 Partially tracked | **Must resolve or explicitly gate** |
-| **Medium (P2)** | **~100** | 🟢 Tracked | Acceptable post-GA |
-| **Low (P3)** | **~70** | 🟢 Known | Future work |
+| Severity          | Count    | Status               | GA Impact                           |
+| ----------------- | -------- | -------------------- | ----------------------------------- |
+| **Critical (P0)** | **18**   | 🔴 All unresolved    | **Blocks GA**                       |
+| **High (P1)**     | **5**    | 🟡 Partially tracked | **Must resolve or explicitly gate** |
+| **Medium (P2)**   | **~100** | 🟢 Tracked           | Acceptable post-GA                  |
+| **Low (P3)**      | **~70**  | 🟢 Known             | Future work                         |
 
 ---
 
 ### 4.2 Critical TODOs by Category
 
-| Category | Count | GA Impact | Compliance Impact |
-|----------|-------|-----------|-------------------|
-| **Security (AuthN/AuthZ)** | 4 | 🔴 Blocks GA | SOC 2 failure |
-| **Security (Injection/Validation)** | 3 | 🔴 Blocks GA | OWASP Top 10 |
-| **Security (Rate Limiting/Headers)** | 4 | 🔴 Blocks GA | PCI-DSS failure |
-| **Compliance (Audit/Logging)** | 3 | 🔴 Blocks GA | SOC 2 hard fail |
-| **Encryption/Secrets** | 1 | 🔴 Blocks GA | GDPR Article 32 |
-| **Feature Completeness** | 1 | 🔴 Blocks GA | Customer-facing |
-| **Observability** | 2 | 🔴 Blocks GA | Operational blind spots |
+| Category                             | Count | GA Impact    | Compliance Impact       |
+| ------------------------------------ | ----- | ------------ | ----------------------- |
+| **Security (AuthN/AuthZ)**           | 4     | 🔴 Blocks GA | SOC 2 failure           |
+| **Security (Injection/Validation)**  | 3     | 🔴 Blocks GA | OWASP Top 10            |
+| **Security (Rate Limiting/Headers)** | 4     | 🔴 Blocks GA | PCI-DSS failure         |
+| **Compliance (Audit/Logging)**       | 3     | 🔴 Blocks GA | SOC 2 hard fail         |
+| **Encryption/Secrets**               | 1     | 🔴 Blocks GA | GDPR Article 32         |
+| **Feature Completeness**             | 1     | 🔴 Blocks GA | Customer-facing         |
+| **Observability**                    | 2     | 🔴 Blocks GA | Operational blind spots |
 
 ---
 
 ### 4.3 Affected Subsystems
 
-| Subsystem | Critical TODOs | Specific Issues |
-|-----------|---------------|-----------------|
-| **API Gateway** | 3 | RBAC missing, SCIM stub, rate limiting absent |
-| **Graph Database** | 3 | Cypher injection, clear endpoint, no timeouts |
-| **Mobile App** | 1 | Hardcoded encryption key |
-| **Search API** | 1 | Always returns empty (non-functional) |
-| **Ingest Pipeline** | 2 | No failure tracking, no throughput metrics |
-| **CI/CD** | 2 | Verification scripts are placeholders |
-| **All Services** | 6 | SOC2 W1 blockers (headers, CORS, auth, logging) |
+| Subsystem           | Critical TODOs | Specific Issues                                 |
+| ------------------- | -------------- | ----------------------------------------------- |
+| **API Gateway**     | 3              | RBAC missing, SCIM stub, rate limiting absent   |
+| **Graph Database**  | 3              | Cypher injection, clear endpoint, no timeouts   |
+| **Mobile App**      | 1              | Hardcoded encryption key                        |
+| **Search API**      | 1              | Always returns empty (non-functional)           |
+| **Ingest Pipeline** | 2              | No failure tracking, no throughput metrics      |
+| **CI/CD**           | 2              | Verification scripts are placeholders           |
+| **All Services**    | 6              | SOC2 W1 blockers (headers, CORS, auth, logging) |
 
 ---
 
@@ -889,21 +954,23 @@ const metrics: ProcessingMetrics = {
 
 ### 5.1 GA Launch Risk Without Remediation
 
-| Risk Domain | Likelihood | Impact | Combined Risk |
-|-------------|-----------|--------|---------------|
-| **Security Breach** | High | Critical | 🔴 **EXTREME** |
-| **SOC 2 Audit Failure** | Very High | Critical | 🔴 **EXTREME** |
-| **Data Loss** | Medium | Critical | 🔴 **HIGH** |
-| **Service Outage** | High | High | 🔴 **HIGH** |
-| **Compliance Violation** | Very High | High | 🔴 **HIGH** |
-| **Customer Trust Loss** | High | Critical | 🔴 **EXTREME** |
+| Risk Domain              | Likelihood | Impact   | Combined Risk  |
+| ------------------------ | ---------- | -------- | -------------- |
+| **Security Breach**      | High       | Critical | 🔴 **EXTREME** |
+| **SOC 2 Audit Failure**  | Very High  | Critical | 🔴 **EXTREME** |
+| **Data Loss**            | Medium     | Critical | 🔴 **HIGH**    |
+| **Service Outage**       | High       | High     | 🔴 **HIGH**    |
+| **Compliance Violation** | Very High  | High     | 🔴 **HIGH**    |
+| **Customer Trust Loss**  | High       | Critical | 🔴 **EXTREME** |
 
 ---
 
 ### 5.2 Specific Threat Scenarios
 
 #### Scenario 1: Multi-Tenant Data Breach
+
 **Attack Chain:** C-005 (Cypher Injection) + C-003 (No JWT Auth) + C-012 (No Audit Logging)
+
 1. Attacker discovers Graph DB service endpoint (port scan, DNS enumeration)
 2. Connects directly without authentication (C-003)
 3. Crafts Cypher injection payload (C-005)
@@ -915,7 +982,9 @@ const metrics: ProcessingMetrics = {
 ---
 
 #### Scenario 2: Platform-Wide DoS
+
 **Attack Chain:** C-009 (No Rate Limiting) + C-007 (No Query Timeouts)
+
 1. Attacker sends unlimited expensive queries
 2. Queries run forever (no timeout)
 3. All resources are consumed
@@ -926,7 +995,9 @@ const metrics: ProcessingMetrics = {
 ---
 
 #### Scenario 3: Mobile Data Compromise
+
 **Attack Chain:** C-015 (Hardcoded Encryption Key)
+
 1. Attacker reverse engineers mobile app
 2. Extracts hardcoded encryption key
 3. Accesses user device (physical access, malware, backup extraction)
@@ -937,7 +1008,9 @@ const metrics: ProcessingMetrics = {
 ---
 
 #### Scenario 4: Authorization Bypass
+
 **Attack Chain:** C-004 (Policy Dry-Run) + C-001 (Missing RBAC)
+
 1. Attacker discovers policies are in dry-run mode
 2. All authorization checks are logged but not enforced
 3. Attacker accesses admin endpoints (C-001)
@@ -949,13 +1022,13 @@ const metrics: ProcessingMetrics = {
 
 ### 5.3 Regulatory Compliance Risk
 
-| Regulation | Violated Controls | Potential Penalties |
-|------------|-------------------|---------------------|
-| **SOC 2 Type II** | CC6.1 (Access Controls), CC6.8 (Audit Logging), CC7.2 (System Monitoring) | Audit failure, customer contract violations |
-| **GDPR** | Article 32 (Security Measures), Article 30 (Records), Article 5(1)(f) (Integrity) | Up to 4% global revenue OR €20M |
-| **HIPAA** | Security Rule § 164.312 (Technical Safeguards) | Up to $1.5M per violation category |
-| **PCI-DSS** | 6.5 (Secure Development), 8.2 (Authentication) | Loss of payment processing ability |
-| **ISO 27001** | A.12.4.1 (Event Logging), A.9.4.1 (Access Restriction) | Certification failure |
+| Regulation        | Violated Controls                                                                 | Potential Penalties                         |
+| ----------------- | --------------------------------------------------------------------------------- | ------------------------------------------- |
+| **SOC 2 Type II** | CC6.1 (Access Controls), CC6.8 (Audit Logging), CC7.2 (System Monitoring)         | Audit failure, customer contract violations |
+| **GDPR**          | Article 32 (Security Measures), Article 30 (Records), Article 5(1)(f) (Integrity) | Up to 4% global revenue OR €20M             |
+| **HIPAA**         | Security Rule § 164.312 (Technical Safeguards)                                    | Up to $1.5M per violation category          |
+| **PCI-DSS**       | 6.5 (Secure Development), 8.2 (Authentication)                                    | Loss of payment processing ability          |
+| **ISO 27001**     | A.12.4.1 (Event Logging), A.9.4.1 (Access Restriction)                            | Certification failure                       |
 
 ---
 
@@ -1005,18 +1078,21 @@ Based on the scan, the following areas may harbor **implicit TODOs** not explici
 ### 6.2 Recommended Deep-Dive Areas
 
 **Priority 1 (Immediate):**
+
 - Graph DB query construction (Cypher injection verification)
 - Policy Engine runtime configuration (dry-run mode check)
 - Mobile encryption key management audit
 - CI/CD verification script functionality
 
 **Priority 2 (Pre-Audit):**
+
 - Tenant isolation comprehensive testing
 - Authentication flow completeness
 - Input validation coverage
 - Rate limiting enforcement
 
 **Priority 3 (Pre-GA):**
+
 - All service-to-service authentication
 - Complete OWASP Top 10 coverage review
 - Error handling and resilience patterns
@@ -1123,15 +1199,15 @@ This report is part of a comprehensive TODO remediation package:
 
 ## APPENDIX A: OWASP TOP 10 (2021) MAPPING
 
-| OWASP Category | Critical TODOs | Status |
-|----------------|---------------|--------|
-| **A01 - Broken Access Control** | C-001, C-002, C-004 | 🔴 Multiple violations |
-| **A02 - Cryptographic Failures** | C-015 | 🔴 Hardcoded key |
-| **A03 - Injection** | C-005, C-008 | 🔴 Cypher injection, validation missing |
-| **A04 - Insecure Design** | C-006, C-007 | 🔴 Dangerous endpoint, no timeouts |
-| **A05 - Security Misconfiguration** | C-010, C-011 | 🔴 Missing headers, CORS |
-| **A07 - Identification/Authentication Failures** | C-003 | 🔴 No JWT on services |
-| **A09 - Security Logging Failures** | C-012 | 🔴 No audit logging |
+| OWASP Category                                   | Critical TODOs      | Status                                  |
+| ------------------------------------------------ | ------------------- | --------------------------------------- |
+| **A01 - Broken Access Control**                  | C-001, C-002, C-004 | 🔴 Multiple violations                  |
+| **A02 - Cryptographic Failures**                 | C-015               | 🔴 Hardcoded key                        |
+| **A03 - Injection**                              | C-005, C-008        | 🔴 Cypher injection, validation missing |
+| **A04 - Insecure Design**                        | C-006, C-007        | 🔴 Dangerous endpoint, no timeouts      |
+| **A05 - Security Misconfiguration**              | C-010, C-011        | 🔴 Missing headers, CORS                |
+| **A07 - Identification/Authentication Failures** | C-003               | 🔴 No JWT on services                   |
+| **A09 - Security Logging Failures**              | C-012               | 🔴 No audit logging                     |
 
 **Result:** **7 of 10 OWASP Top 10 categories have active violations**
 
@@ -1139,14 +1215,14 @@ This report is part of a comprehensive TODO remediation package:
 
 ## APPENDIX B: SOC 2 TRUST SERVICE CRITERIA MAPPING
 
-| TSC | Criteria | Critical TODOs | Impact |
-|-----|----------|---------------|--------|
-| **CC6.1** | Logical Access Controls | C-001, C-002, C-003, C-004 | 🔴 Failure |
-| **CC6.6** | Logical Access - Authentication | C-003 | 🔴 Failure |
-| **CC6.7** | Logical Access - Authorization | C-001, C-004 | 🔴 Failure |
-| **CC6.8** | Audit Logging | C-012 | 🔴 Failure |
-| **CC7.2** | System Monitoring | C-017, C-018 | 🔴 Failure |
-| **CC7.3** | Evaluation/Remediation | C-013, C-014 | 🔴 Failure |
+| TSC       | Criteria                        | Critical TODOs             | Impact     |
+| --------- | ------------------------------- | -------------------------- | ---------- |
+| **CC6.1** | Logical Access Controls         | C-001, C-002, C-003, C-004 | 🔴 Failure |
+| **CC6.6** | Logical Access - Authentication | C-003                      | 🔴 Failure |
+| **CC6.7** | Logical Access - Authorization  | C-001, C-004               | 🔴 Failure |
+| **CC6.8** | Audit Logging                   | C-012                      | 🔴 Failure |
+| **CC7.2** | System Monitoring               | C-017, C-018               | 🔴 Failure |
+| **CC7.3** | Evaluation/Remediation          | C-013, C-014               | 🔴 Failure |
 
 **Result:** **6 SOC 2 Trust Service Criteria have active failures**
 
@@ -1155,6 +1231,7 @@ This report is part of a comprehensive TODO remediation package:
 ## APPENDIX C: SEARCH PATTERNS USED
 
 Exhaustive grep search for the following patterns:
+
 - `TODO` (case-insensitive)
 - `FIXME` (case-insensitive)
 - `XXX` (word boundary)
@@ -1163,6 +1240,7 @@ Exhaustive grep search for the following patterns:
 - `NOTE` (word boundary)
 
 Plus manual analysis of:
+
 - SOC2 Alignment Matrix
 - Release checklists
 - Planning documents

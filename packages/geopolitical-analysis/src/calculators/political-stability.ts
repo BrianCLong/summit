@@ -3,9 +3,9 @@
  * @module @intelgraph/geopolitical-analysis/calculators/political-stability
  */
 
-import { PoliticalStabilityIndicator } from '../types/index.js';
-import { BaseCalculator, IndicatorInput } from './base.js';
-import { weightedAverage } from '../utils/scoring.js';
+import { PoliticalStabilityIndicator } from "../types/index.js";
+import { BaseCalculator, IndicatorInput } from "./base.js";
+import { weightedAverage } from "../utils/scoring.js";
 
 /**
  * Input for political stability calculation
@@ -33,10 +33,10 @@ export class PoliticalStabilityCalculator extends BaseCalculator<PoliticalStabil
     // Calculate overall stability score (inverse of risk)
     const riskScore = weightedAverage([
       { value: 100 - input.eliteCohesion, weight: 0.25 },
-      { value: 100 - input.governmentEffectiveness, weight: 0.20 },
+      { value: 100 - input.governmentEffectiveness, weight: 0.2 },
       { value: input.politicalViolenceRisk, weight: 0.25 },
       { value: 100 - input.institutionalStrength, weight: 0.15 },
-      { value: input.protestActivity, weight: 0.10 },
+      { value: input.protestActivity, weight: 0.1 },
       { value: input.electionRisk, weight: 0.05 },
     ]);
 
@@ -44,14 +44,14 @@ export class PoliticalStabilityCalculator extends BaseCalculator<PoliticalStabil
     const stabilityScore = 100 - riskScore;
 
     const base = this.createBase(input, stabilityScore, {
-      source: 'political-stability-calculator',
+      source: "political-stability-calculator",
       dataRecencyDays: 30,
       sourceReliability: 75,
     });
 
     return {
       ...base,
-      type: 'POLITICAL_STABILITY',
+      type: "POLITICAL_STABILITY",
       eliteCohesion: input.eliteCohesion,
       governmentEffectiveness: input.governmentEffectiveness,
       politicalViolenceRisk: input.politicalViolenceRisk,
@@ -66,12 +66,12 @@ export class PoliticalStabilityCalculator extends BaseCalculator<PoliticalStabil
    */
   private validatePoliticalInput(input: PoliticalStabilityInput): void {
     const fields = [
-      'eliteCohesion',
-      'governmentEffectiveness',
-      'politicalViolenceRisk',
-      'institutionalStrength',
-      'protestActivity',
-      'electionRisk',
+      "eliteCohesion",
+      "governmentEffectiveness",
+      "politicalViolenceRisk",
+      "institutionalStrength",
+      "protestActivity",
+      "electionRisk",
     ];
 
     for (const field of fields) {
@@ -84,12 +84,12 @@ export class PoliticalStabilityCalculator extends BaseCalculator<PoliticalStabil
 
   protected getRequiredFields(): string[] {
     return [
-      'eliteCohesion',
-      'governmentEffectiveness',
-      'politicalViolenceRisk',
-      'institutionalStrength',
-      'protestActivity',
-      'electionRisk',
+      "eliteCohesion",
+      "governmentEffectiveness",
+      "politicalViolenceRisk",
+      "institutionalStrength",
+      "protestActivity",
+      "electionRisk",
     ];
   }
 }

@@ -5,7 +5,7 @@
  * headers, logging warnings and notifying developers about upcoming changes.
  */
 
-import { getApiBaseUrl } from '../config/urls';
+import { getApiBaseUrl } from "../config/urls";
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -30,8 +30,8 @@ export class ApiClient {
 
   constructor(config: ApiClientConfig) {
     this.config = {
-      apiVersion: 'v2.0.0',
-      ...config
+      apiVersion: "v2.0.0",
+      ...config,
     };
   }
 
@@ -40,14 +40,14 @@ export class ApiClient {
 
     // Add API version header
     const headers = {
-      'Content-Type': 'application/json',
-      'API-Version': this.config.apiVersion!,
-      ...options.headers
+      "Content-Type": "application/json",
+      "API-Version": this.config.apiVersion!,
+      ...options.headers,
     };
 
     const response = await fetch(url, {
       ...options,
-      headers
+      headers,
     });
 
     // Check for deprecation headers
@@ -58,7 +58,7 @@ export class ApiClient {
       const errorData = await response.json();
       throw new Error(
         `Endpoint ${endpoint} has been removed. ${errorData.message} ` +
-        `Migrate to: ${errorData.successorUrl}`
+          `Migrate to: ${errorData.successorUrl}`
       );
     }
 
@@ -70,12 +70,12 @@ export class ApiClient {
   }
 
   private handleDeprecationHeaders(endpoint: string, response: Response) {
-    const deprecationHeader = response.headers.get('Deprecation');
+    const deprecationHeader = response.headers.get("Deprecation");
 
-    if (deprecationHeader === 'true') {
-      const sunsetDate = response.headers.get('Sunset');
-      const warningHeader = response.headers.get('Warning');
-      const linkHeader = response.headers.get('Link');
+    if (deprecationHeader === "true") {
+      const sunsetDate = response.headers.get("Sunset");
+      const warningHeader = response.headers.get("Warning");
+      const linkHeader = response.headers.get("Link");
 
       // Calculate days until sunset
       let daysUntilSunset: number | null = null;
@@ -95,7 +95,7 @@ export class ApiClient {
       }
 
       // Extract warning message
-      let message = 'This endpoint is deprecated';
+      let message = "This endpoint is deprecated";
       if (warningHeader) {
         const warningMatch = warningHeader.match(/299\s*-\s*"([^"]+)"/);
         if (warningMatch) {
@@ -108,7 +108,7 @@ export class ApiClient {
         sunsetDate,
         message,
         successorUrl,
-        daysUntilSunset
+        daysUntilSunset,
       };
 
       // Only show console warning once per endpoint per session
@@ -116,20 +116,20 @@ export class ApiClient {
         this.deprecationWarnings.set(endpoint, warning);
 
         // Determine console style based on urgency
-        let style = 'color: orange; font-weight: bold; font-size: 14px;';
+        let style = "color: orange; font-weight: bold; font-size: 14px;";
         if (daysUntilSunset !== null && daysUntilSunset <= 7) {
-          style = 'color: red; font-weight: bold; font-size: 16px;';
+          style = "color: red; font-weight: bold; font-size: 16px;";
         }
 
         console.warn(
           `%c⚠️ API DEPRECATION WARNING`,
           style,
           `\nEndpoint: ${endpoint}`,
-          sunsetDate ? `\nSunset Date: ${sunsetDate}` : '',
-          daysUntilSunset !== null ? `\nDays Until Removal: ${daysUntilSunset}` : '',
+          sunsetDate ? `\nSunset Date: ${sunsetDate}` : "",
+          daysUntilSunset !== null ? `\nDays Until Removal: ${daysUntilSunset}` : "",
           `\n${message}`,
-          successorUrl ? `\nMigrate to: ${successorUrl}` : '',
-          '\n\nThis warning will only be shown once per session.'
+          successorUrl ? `\nMigrate to: ${successorUrl}` : "",
+          "\n\nThis warning will only be shown once per session."
         );
       }
 
@@ -159,25 +159,25 @@ export class ApiClient {
 export function createApiClient(): ApiClient {
   return new ApiClient({
     baseUrl: getApiBaseUrl(),
-    apiVersion: 'v2.0.0',
+    apiVersion: "v2.0.0",
     onDeprecationWarning: (warning) => {
       // Send to error tracking service (e.g., Sentry)
-      if (typeof window !== 'undefined' && (window as any).Sentry) {
-        (window as any).Sentry.captureMessage('API Deprecation Warning', {
-          level: 'warning',
-          extra: warning
+      if (typeof window !== "undefined" && (window as any).Sentry) {
+        (window as any).Sentry.captureMessage("API Deprecation Warning", {
+          level: "warning",
+          extra: warning,
         });
       }
 
       // Log to analytics
-      if (typeof window !== 'undefined' && (window as any).analytics) {
-        (window as any).analytics.track('API Deprecation Warning', {
+      if (typeof window !== "undefined" && (window as any).analytics) {
+        (window as any).analytics.track("API Deprecation Warning", {
           endpoint: warning.endpoint,
           daysUntilSunset: warning.daysUntilSunset,
-          successorUrl: warning.successorUrl
+          successorUrl: warning.successorUrl,
         });
       }
-    }
+    },
   });
 }
 

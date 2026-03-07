@@ -3,8 +3,8 @@
  * Normalized dimension tables with hierarchies
  */
 
-import { Pool } from 'pg';
-import { DimensionTable } from './star-schema';
+import { Pool } from "pg";
+import { DimensionTable } from "./star-schema";
 
 export interface DimensionHierarchy {
   name: string;
@@ -21,12 +21,12 @@ export class SnowflakeSchema {
 
   async createNormalizedDimension(
     dimension: DimensionTable,
-    hierarchy: DimensionHierarchy,
+    hierarchy: DimensionHierarchy
   ): Promise<void> {
     for (const level of hierarchy.levels) {
       const parentRef = level.parentKey
         ? `, ${level.parentKey} BIGINT REFERENCES ${level.name}_parent(id)`
-        : '';
+        : "";
 
       await this.pool.query(`
         CREATE TABLE ${level.table} (
@@ -42,21 +42,23 @@ export class SnowflakeSchema {
   async querySnowflakeSchema(
     factTable: string,
     hierarchy: DimensionHierarchy,
-    measures: string[],
+    measures: string[]
   ): Promise<any[]> {
-    const joins = hierarchy.levels.map((level, idx) => {
-      if (idx === 0) {
-        return `LEFT JOIN ${level.table} ON ${factTable}.${hierarchy.name}_key = ${level.table}.${level.key}`;
-      } else {
-        const parent = hierarchy.levels[idx - 1];
-        return `LEFT JOIN ${level.table} ON ${parent.table}.${level.parentKey} = ${level.table}.${level.key}`;
-      }
-    }).join('\n');
+    const joins = hierarchy.levels
+      .map((level, idx) => {
+        if (idx === 0) {
+          return `LEFT JOIN ${level.table} ON ${factTable}.${hierarchy.name}_key = ${level.table}.${level.key}`;
+        } else {
+          const parent = hierarchy.levels[idx - 1];
+          return `LEFT JOIN ${level.table} ON ${parent.table}.${level.parentKey} = ${level.table}.${level.key}`;
+        }
+      })
+      .join("\n");
 
     const selectCols = [
       ...hierarchy.levels.map((l) => `${l.table}.*`),
       ...measures.map((m) => `${factTable}.${m}`),
-    ].join(', ');
+    ].join(", ");
 
     const query = `
       SELECT ${selectCols}

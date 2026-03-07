@@ -2,17 +2,17 @@ name: GraphCI Determinism
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'ci/graphci/**'
+      - "ci/graphci/**"
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
-      - 'ci/graphci/**'
+      - "ci/graphci/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,8 +27,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |

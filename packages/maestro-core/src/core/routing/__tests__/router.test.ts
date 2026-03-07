@@ -19,7 +19,7 @@ describe("CostAwareRouter", () => {
     const r = new CostAwareRouter(defaultCatalog(), {
       easyMax: 0.3,
       mediumMax: 0.7,
-      domainOverrides: { legal: { preferModelIds: ["strong"] } }
+      domainOverrides: { legal: { preferModelIds: ["strong"] } },
     });
     const d = r.selectModel({ difficulty: 0.1, domain: "legal" });
     expect(d.model.id).toBe("strong");

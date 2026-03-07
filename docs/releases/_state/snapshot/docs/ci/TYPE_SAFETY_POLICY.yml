@@ -114,7 +114,7 @@ gates:
 schedule:
   # Regular scheduled scans
   enabled: true
-  cron: "0 7 * * *"  # Daily at 7 AM UTC
+  cron: "0 7 * * *" # Daily at 7 AM UTC
 
   # Scan on PRs
   on_pull_request: true

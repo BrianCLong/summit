@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Ethical Shutdown & Sunset Playbook
 
 **Mission:** Design safe shutdown paths to ensure Summit ends without chaos or capture.

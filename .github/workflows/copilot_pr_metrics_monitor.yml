@@ -2,7 +2,7 @@ name: copilot-pr-metrics-monitor
 
 on:
   schedule:
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -12,6 +12,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Run drift detector
         run: python scripts/monitoring/copilot_pr_metrics_drift.py

@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export type EvidenceResult = "pass" | "fail";
 
@@ -25,7 +25,7 @@ export function emitEvidence(
   violations: Array<{ code: string; message: string; path?: string }> = [],
   counters: Record<string, number> = {}
 ): void {
-  const baseDir = path.join(process.cwd(), 'evidence', category);
+  const baseDir = path.join(process.cwd(), "evidence", category);
   fs.mkdirSync(baseDir, { recursive: true });
 
   const report: EvidenceReport = {
@@ -42,16 +42,16 @@ export function emitEvidence(
     generated_at: new Date().toISOString(),
   };
 
-  fs.writeFileSync(path.join(baseDir, 'report.json'), JSON.stringify(report, null, 2));
-  fs.writeFileSync(path.join(baseDir, 'metrics.json'), JSON.stringify(metrics, null, 2));
-  fs.writeFileSync(path.join(baseDir, 'stamp.json'), JSON.stringify(stamp, null, 2));
+  fs.writeFileSync(path.join(baseDir, "report.json"), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.join(baseDir, "metrics.json"), JSON.stringify(metrics, null, 2));
+  fs.writeFileSync(path.join(baseDir, "stamp.json"), JSON.stringify(stamp, null, 2));
 
   // Update index.json
-  const indexFile = path.join(process.cwd(), 'evidence', 'index.json');
+  const indexFile = path.join(process.cwd(), "evidence", "index.json");
   let indexData: any = { version: 1, evidence: {} };
   if (fs.existsSync(indexFile)) {
     try {
-      indexData = JSON.parse(fs.readFileSync(indexFile, 'utf8'));
+      indexData = JSON.parse(fs.readFileSync(indexFile, "utf8"));
       if (!indexData.evidence) indexData.evidence = {};
     } catch (e) {
       // Ignore
@@ -63,8 +63,8 @@ export function emitEvidence(
     files: {
       report: `evidence/${category}/report.json`,
       metrics: `evidence/${category}/metrics.json`,
-      stamp: `evidence/${category}/stamp.json`
-    }
+      stamp: `evidence/${category}/stamp.json`,
+    },
   };
 
   fs.writeFileSync(indexFile, JSON.stringify(indexData, null, 2));

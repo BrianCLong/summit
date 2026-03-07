@@ -3,8 +3,8 @@ name: Reports CI
 on:
   push:
     paths:
-      - 'services/reporting/**'
-      - 'reports/**'
+      - "services/reporting/**"
+      - "reports/**"
 
 jobs:
   test:

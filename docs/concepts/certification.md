@@ -167,20 +167,20 @@ done
 ```yaml
 trust_policy:
   public:
-    allowed_cas: ['IntelGraph Root CA', 'DigiCert']
+    allowed_cas: ["IntelGraph Root CA", "DigiCert"]
     min_key_size: 2048
-    max_validity: '1y'
+    max_validity: "1y"
 
   confidential:
-    allowed_cas: ['IntelGraph Root CA']
+    allowed_cas: ["IntelGraph Root CA"]
     min_key_size: 4096
-    max_validity: '6M'
+    max_validity: "6M"
     require_timestamp: true
 
   secret:
-    allowed_cas: ['Government CA']
+    allowed_cas: ["Government CA"]
     require_hsm: true
-    max_validity: '3M'
+    max_validity: "3M"
     require_clearance_validation: true
 ```
 

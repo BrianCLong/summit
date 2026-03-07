@@ -2,7 +2,7 @@
  * Event Detail Panel - Slide-out panel showing full event details
  */
 
-import React from 'react';
+import React from 'react'
 import {
   Drawer,
   Box,
@@ -17,7 +17,7 @@ import {
   ListItemText,
   useTheme,
   CircularProgress,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Close as CloseIcon,
   ArrowBack as BackIcon,
@@ -29,20 +29,21 @@ import {
   Lightbulb as SuggestionIcon,
   Security as GovernanceIcon,
   History as HistoryIcon,
-} from '@mui/icons-material';
-import { useDemoMode } from '../common/DemoIndicator';
+} from '@mui/icons-material'
+import { useDemoMode } from '../common/DemoIndicator'
 
 export interface EventDetailPanelProps {
-  eventId: string | null;
-  open: boolean;
-  onClose: () => void;
+  eventId: string | null
+  open: boolean
+  onClose: () => void
 }
 
 // Mock data for demo
 const mockEventData = {
   id: '1',
   title: 'Payment webhook failures detected',
-  description: 'Stripe webhook endpoint returning 500 errors for checkout events',
+  description:
+    'Stripe webhook endpoint returning 500 errors for checkout events',
   severity: 'CRITICAL',
   status: 'INVESTIGATING',
   category: 'PAYMENT',
@@ -64,8 +65,18 @@ const mockEventData = {
   },
   relatedEntities: [
     { id: '1', type: 'System', name: 'Stripe', relationshipType: 'SOURCE' },
-    { id: '2', type: 'Customer', name: '12 Customers', relationshipType: 'AFFECTED' },
-    { id: '3', type: 'Ticket', name: 'Support Tickets', relationshipType: 'DOWNSTREAM' },
+    {
+      id: '2',
+      type: 'Customer',
+      name: '12 Customers',
+      relationshipType: 'AFFECTED',
+    },
+    {
+      id: '3',
+      type: 'Ticket',
+      name: 'Support Tickets',
+      relationshipType: 'DOWNSTREAM',
+    },
   ],
   suggestions: [
     {
@@ -105,48 +116,48 @@ const mockEventData = {
     retentionClass: '90 days',
     policyLabels: ['ops-events-standard'],
   },
-};
+}
 
 export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
   eventId,
   open,
   onClose,
 }) => {
-  const theme = useTheme();
-  const isDemoMode = useDemoMode();
+  const theme = useTheme()
+  const isDemoMode = useDemoMode()
 
   // In real implementation, fetch event data based on eventId
-  const event = eventId && isDemoMode ? mockEventData : null;
-  const isLoading = false;
+  const event = eventId && isDemoMode ? mockEventData : null
+  const isLoading = false
 
   const getSeverityColor = (severity: string): string => {
     switch (severity) {
       case 'CRITICAL':
-        return theme.palette.error.main;
+        return theme.palette.error.main
       case 'WARNING':
-        return theme.palette.warning.main;
+        return theme.palette.warning.main
       case 'INFO':
-        return theme.palette.info.main;
+        return theme.palette.info.main
       case 'SUCCESS':
-        return theme.palette.success.main;
+        return theme.palette.success.main
       default:
-        return theme.palette.grey[500];
+        return theme.palette.grey[500]
     }
-  };
+  }
 
   const getSeverityIcon = (severity: string) => {
-    const sx = { fontSize: 24 };
+    const sx = { fontSize: 24 }
     switch (severity) {
       case 'CRITICAL':
-        return <ErrorIcon sx={{ ...sx, color: theme.palette.error.main }} />;
+        return <ErrorIcon sx={{ ...sx, color: theme.palette.error.main }} />
       case 'WARNING':
-        return <WarningIcon sx={{ ...sx, color: theme.palette.warning.main }} />;
+        return <WarningIcon sx={{ ...sx, color: theme.palette.warning.main }} />
       case 'SUCCESS':
-        return <SuccessIcon sx={{ ...sx, color: theme.palette.success.main }} />;
+        return <SuccessIcon sx={{ ...sx, color: theme.palette.success.main }} />
       default:
-        return <InfoIcon sx={{ ...sx, color: theme.palette.info.main }} />;
+        return <InfoIcon sx={{ ...sx, color: theme.palette.info.main }} />
     }
-  };
+  }
 
   const formatTime = (date: Date): string => {
     return new Date(date).toLocaleString('en-US', {
@@ -156,14 +167,14 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-    });
-  };
+    })
+  }
 
   const formatDuration = (startDate: Date): string => {
-    const diffMs = Date.now() - new Date(startDate).getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    return `${diffMins} minutes (ongoing)`;
-  };
+    const diffMs = Date.now() - new Date(startDate).getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    return `${diffMins} minutes (ongoing)`
+  }
 
   return (
     <Drawer
@@ -175,7 +186,12 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
       }}
     >
       {isLoading ? (
-        <Box display="flex" alignItems="center" justifyContent="center" height="100%">
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          height="100%"
+        >
           <CircularProgress />
         </Box>
       ) : event ? (
@@ -236,23 +252,49 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
 
               {/* Status Cards */}
               <Box display="flex" gap={2}>
-                <Box flex={1} textAlign="center" p={1} bgcolor={theme.palette.grey[50]} borderRadius={1}>
+                <Box
+                  flex={1}
+                  textAlign="center"
+                  p={1}
+                  bgcolor={theme.palette.grey[50]}
+                  borderRadius={1}
+                >
                   <Typography variant="caption" color="textSecondary">
                     SEVERITY
                   </Typography>
-                  <Typography variant="body2" fontWeight={600} color={getSeverityColor(event.severity)}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    color={getSeverityColor(event.severity)}
+                  >
                     {event.severity}
                   </Typography>
                 </Box>
-                <Box flex={1} textAlign="center" p={1} bgcolor={theme.palette.grey[50]} borderRadius={1}>
+                <Box
+                  flex={1}
+                  textAlign="center"
+                  p={1}
+                  bgcolor={theme.palette.grey[50]}
+                  borderRadius={1}
+                >
                   <Typography variant="caption" color="textSecondary">
                     IMPACT
                   </Typography>
                   <Typography variant="body2" fontWeight={600}>
-                    ${(event.metadata.impactEstimate.revenueAtRisk / 1000).toFixed(1)}K
+                    $
+                    {(
+                      event.metadata.impactEstimate.revenueAtRisk / 1000
+                    ).toFixed(1)}
+                    K
                   </Typography>
                 </Box>
-                <Box flex={1} textAlign="center" p={1} bgcolor={theme.palette.grey[50]} borderRadius={1}>
+                <Box
+                  flex={1}
+                  textAlign="center"
+                  p={1}
+                  bgcolor={theme.palette.grey[50]}
+                  borderRadius={1}
+                >
                   <Typography variant="caption" color="textSecondary">
                     STATUS
                   </Typography>
@@ -283,7 +325,8 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
                 Count: {event.metadata.errorDetails.count} failed transactions
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Error Rate: {event.metadata.errorDetails.errorRate}% (normal: &lt;0.1%)
+                Error Rate: {event.metadata.errorDetails.errorRate}% (normal:
+                &lt;0.1%)
               </Typography>
             </Paper>
 
@@ -304,7 +347,7 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
                 </Typography>
               </Box>
               <Box display="flex" flexWrap="wrap" gap={1}>
-                {event.relatedEntities.map((entity) => (
+                {event.relatedEntities.map(entity => (
                   <Chip
                     key={entity.id}
                     label={`${entity.type}: ${entity.name}`}
@@ -370,10 +413,16 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
                     <ListItemText
                       primary={
                         <Box display="flex" gap={1}>
-                          <Typography variant="caption" color="textSecondary" sx={{ minWidth: 60 }}>
+                          <Typography
+                            variant="caption"
+                            color="textSecondary"
+                            sx={{ minWidth: 60 }}
+                          >
                             {entry.time}
                           </Typography>
-                          <Typography variant="body2">{entry.description}</Typography>
+                          <Typography variant="body2">
+                            {entry.description}
+                          </Typography>
                         </Box>
                       }
                     />
@@ -435,8 +484,15 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
           </Box>
         </Box>
       ) : (
-        <Box display="flex" alignItems="center" justifyContent="center" height="100%">
-          <Typography color="textSecondary">Select an event to view details</Typography>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          height="100%"
+        >
+          <Typography color="textSecondary">
+            Select an event to view details
+          </Typography>
         </Box>
       )}
       {isDemoMode ? null : (
@@ -450,7 +506,7 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
         </Box>
       )}
     </Drawer>
-  );
-};
+  )
+}
 
-export default EventDetailPanel;
+export default EventDetailPanel

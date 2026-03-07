@@ -1,20 +1,20 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   message?: string;
   className?: string;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = 'md',
-  message = 'Loading...',
-  className = '',
+  size = "md",
+  message = "Loading...",
+  className = "",
 }) => {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
   };
 
   return (

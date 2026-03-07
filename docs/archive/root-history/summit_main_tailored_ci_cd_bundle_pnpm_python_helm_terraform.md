@@ -50,9 +50,9 @@ name: wf-reuse-build-node
 on:
   workflow_call:
     inputs:
-      node-version: { type: string, default: '22.x' }
-      working-directory: { type: string, default: '.' }
-      cache-key: { type: string, default: 'pnpm' }
+      node-version: { type: string, default: "22.x" }
+      working-directory: { type: string, default: "." }
+      cache-key: { type: string, default: "pnpm" }
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -490,8 +490,7 @@ livenessProbe: { httpGet: { path: /livez, port: http } }
 resources:
   requests: { cpu: 100m, memory: 256Mi }
   limits: { cpu: 500m, memory: 512Mi }
-podSecurityContext:
-  { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
 ```
 
 ---

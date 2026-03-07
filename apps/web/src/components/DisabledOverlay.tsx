@@ -1,5 +1,10 @@
 import React from 'react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { cn } from '@/lib/utils'
 
 interface DisabledOverlayProps {
@@ -9,9 +14,9 @@ interface DisabledOverlayProps {
 }
 
 export function DisabledOverlay({
-  message = "Upgrade to perform this action",
+  message = 'Upgrade to perform this action',
   className,
-  children
+  children,
 }: DisabledOverlayProps) {
   // If children are provided, wrap them in a tooltip and make them look disabled
   if (children) {
@@ -19,10 +24,13 @@ export function DisabledOverlay({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className={cn("relative inline-block cursor-not-allowed opacity-50", className)}>
-              <div className="pointer-events-none">
-                {children}
-              </div>
+            <div
+              className={cn(
+                'relative inline-block cursor-not-allowed opacity-50',
+                className
+              )}
+            >
+              <div className="pointer-events-none">{children}</div>
             </div>
           </TooltipTrigger>
           <TooltipContent>
@@ -35,10 +43,12 @@ export function DisabledOverlay({
 
   // If no children, show a standalone banner/overlay
   return (
-    <div className={cn(
-      "flex items-center justify-center p-4 bg-muted/50 border-2 border-dashed border-muted rounded-lg text-sm text-muted-foreground",
-      className
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-center p-4 bg-muted/50 border-2 border-dashed border-muted rounded-lg text-sm text-muted-foreground',
+        className
+      )}
+    >
       <span>{message}</span>
     </div>
   )

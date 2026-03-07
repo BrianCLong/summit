@@ -25,37 +25,38 @@ npm install @intelgraph/data-warehouse @intelgraph/dimensional-modeling @intelgr
 ### Basic Usage
 
 ```typescript
-import { WarehouseManager } from '@intelgraph/data-warehouse';
-import { Pool } from 'pg';
+import { WarehouseManager } from "@intelgraph/data-warehouse";
+import { Pool } from "pg";
 
 const pool = new Pool({
-  host: 'localhost',
-  database: 'warehouse',
-  user: 'postgres',
-  password: 'password'
+  host: "localhost",
+  database: "warehouse",
+  user: "postgres",
+  password: "password",
 });
 
 const warehouse = new WarehouseManager({ pools: [pool] });
 
 // Create a table with columnar storage
 await warehouse.createTable({
-  name: 'sales_facts',
+  name: "sales_facts",
   columns: [
-    { name: 'date', type: 'DATE' },
-    { name: 'product_id', type: 'INTEGER' },
-    { name: 'quantity', type: 'INTEGER' },
-    { name: 'revenue', type: 'NUMERIC' }
+    { name: "date", type: "DATE" },
+    { name: "product_id", type: "INTEGER" },
+    { name: "quantity", type: "INTEGER" },
+    { name: "revenue", type: "NUMERIC" },
   ],
-  partitionKey: 'date',
-  sortKeys: ['date', 'product_id']
+  partitionKey: "date",
+  sortKeys: ["date", "product_id"],
 });
 
 // Load data
-await warehouse.insertData('sales_facts',
-  ['date', 'product_id', 'quantity', 'revenue'],
+await warehouse.insertData(
+  "sales_facts",
+  ["date", "product_id", "quantity", "revenue"],
   [
-    ['2024-01-01', 1, 100, 1000.00],
-    ['2024-01-02', 2, 150, 1500.00]
+    ["2024-01-01", 1, 100, 1000.0],
+    ["2024-01-02", 2, 150, 1500.0],
   ]
 );
 
@@ -83,12 +84,12 @@ Summit uses a proprietary columnar storage engine that:
 **Example: Custom Compression**
 
 ```typescript
-import { ColumnarStorageEngine } from '@intelgraph/data-warehouse';
+import { ColumnarStorageEngine } from "@intelgraph/data-warehouse";
 
 const storage = new ColumnarStorageEngine(pool);
 
 // Get storage statistics
-const stats = await storage.getStorageStats('sales_facts');
+const stats = await storage.getStorageStats("sales_facts");
 console.log(`Compression ratio: ${stats.compressionRatio}x`);
 console.log(`Storage saved: ${stats.uncompressedSize - stats.compressedSize} bytes`);
 ```
@@ -106,9 +107,9 @@ Queries are automatically parallelized across multiple workers:
 
 ```typescript
 const plan = await warehouse.queryPlanner.plan({
-  sql: 'SELECT * FROM large_table WHERE date > $1',
-  parameters: ['2024-01-01'],
-  options: { maxParallelism: 32 }
+  sql: "SELECT * FROM large_table WHERE date > $1",
+  parameters: ["2024-01-01"],
+  options: { maxParallelism: 32 },
 });
 
 // Execute with automatic parallelization
@@ -123,32 +124,32 @@ Full support for dimensional modeling with SCD types 1-6:
 **Star Schema Example**
 
 ```typescript
-import { ModelingManager } from '@intelgraph/dimensional-modeling';
+import { ModelingManager } from "@intelgraph/dimensional-modeling";
 
 const modeling = new ModelingManager(pool);
 
 // Create dimension table
 await modeling.starSchema.createDimensionTable({
-  name: 'dim_product',
+  name: "dim_product",
   columns: [
-    { name: 'product_id', type: 'BIGSERIAL', isPrimaryKey: true },
-    { name: 'product_name', type: 'VARCHAR(255)' },
-    { name: 'category', type: 'VARCHAR(100)' },
-    { name: 'price', type: 'NUMERIC' }
+    { name: "product_id", type: "BIGSERIAL", isPrimaryKey: true },
+    { name: "product_name", type: "VARCHAR(255)" },
+    { name: "category", type: "VARCHAR(100)" },
+    { name: "price", type: "NUMERIC" },
   ],
-  surrogateKey: 'product_id',
-  naturalKey: ['product_name']
+  surrogateKey: "product_id",
+  naturalKey: ["product_name"],
 });
 
 // Create fact table
 await modeling.starSchema.createFactTable({
-  name: 'fact_sales',
+  name: "fact_sales",
   measures: [
-    { name: 'quantity', type: 'INTEGER', aggregation: 'SUM' },
-    { name: 'revenue', type: 'NUMERIC', aggregation: 'SUM' }
+    { name: "quantity", type: "INTEGER", aggregation: "SUM" },
+    { name: "revenue", type: "NUMERIC", aggregation: "SUM" },
   ],
-  dimensions: ['dim_date', 'dim_product', 'dim_customer'],
-  grain: 'transaction'
+  dimensions: ["dim_date", "dim_product", "dim_customer"],
+  grain: "transaction",
 });
 ```
 
@@ -156,21 +157,17 @@ await modeling.starSchema.createFactTable({
 
 ```typescript
 // Handle slowly changing dimension
-await modeling.scdHandler.handleType2(
-  'dim_product',
-  ['product_name'],
-  {
-    product_name: 'Widget A',
-    category: 'Electronics',
-    price: 99.99
-  }
-);
+await modeling.scdHandler.handleType2("dim_product", ["product_name"], {
+  product_name: "Widget A",
+  category: "Electronics",
+  price: 99.99,
+});
 
 // Query as of specific date
 const historicalData = await modeling.scdHandler.queryAsOfDate(
-  'dim_product',
-  new Date('2024-01-01'),
-  { product_name: 'Widget A' }
+  "dim_product",
+  new Date("2024-01-01"),
+  { product_name: "Widget A" }
 );
 ```
 
@@ -179,37 +176,37 @@ const historicalData = await modeling.scdHandler.queryAsOfDate(
 Create and query multidimensional cubes:
 
 ```typescript
-import { CubeManager } from '@intelgraph/olap-engine';
+import { CubeManager } from "@intelgraph/olap-engine";
 
 const olap = new CubeManager(pool);
 
 // Create OLAP cube
 await olap.createCube({
-  name: 'sales_cube',
-  measures: ['revenue', 'quantity'],
-  dimensions: ['date', 'product', 'region'],
+  name: "sales_cube",
+  measures: ["revenue", "quantity"],
+  dimensions: ["date", "product", "region"],
   aggregations: [
-    { function: 'SUM', measure: 'revenue' },
-    { function: 'AVG', measure: 'quantity' }
-  ]
+    { function: "SUM", measure: "revenue" },
+    { function: "AVG", measure: "quantity" },
+  ],
 });
 
 // Build cube from fact table
-await olap.buildCube('sales_cube', 'fact_sales', cubeDefinition);
+await olap.buildCube("sales_cube", "fact_sales", cubeDefinition);
 
 // Drill-down operation
-const drillDown = await olap.drillDown('sales_cube', 'region', 'city');
+const drillDown = await olap.drillDown("sales_cube", "region", "city");
 
 // Roll-up operation
-const rollUp = await olap.rollUp('sales_cube', ['region'], ['revenue']);
+const rollUp = await olap.rollUp("sales_cube", ["region"], ["revenue"]);
 
 // Slice operation
-const slice = await olap.slice('sales_cube', 'region', 'North America');
+const slice = await olap.slice("sales_cube", "region", "North America");
 
 // Dice operation
-const dice = await olap.dice('sales_cube', {
-  region: 'North America',
-  date: '2024-Q1'
+const dice = await olap.dice("sales_cube", {
+  region: "North America",
+  date: "2024-Q1",
 });
 ```
 
@@ -218,30 +215,25 @@ const dice = await olap.dice('sales_cube', {
 Efficient data loading with bulk and incremental strategies:
 
 ```typescript
-import { PipelineManager } from '@intelgraph/etl-pipelines';
+import { PipelineManager } from "@intelgraph/etl-pipelines";
 
 const pipeline = new PipelineManager(pool);
 
 // Bulk load
-const bulkResult = await pipeline.bulkLoader.load(
-  'target_table',
-  data,
-  ['col1', 'col2', 'col3'],
-  {
-    batchSize: 10000,
-    parallelism: 4,
-    truncateFirst: true
-  }
-);
+const bulkResult = await pipeline.bulkLoader.load("target_table", data, ["col1", "col2", "col3"], {
+  batchSize: 10000,
+  parallelism: 4,
+  truncateFirst: true,
+});
 
 // Incremental load with CDC
 const incrementalResult = await pipeline.incrementalLoader.loadIncremental(
-  'target_table',
-  'source_table',
-  ['id'],
+  "target_table",
+  "source_table",
+  ["id"],
   {
-    timestampColumn: 'updated_at',
-    deleteFlagColumn: 'is_deleted'
+    timestampColumn: "updated_at",
+    deleteFlagColumn: "is_deleted",
   },
   lastLoadTime
 );
@@ -254,13 +246,13 @@ console.log(`Inserted: ${incrementalResult.inserted}, Updated: ${incrementalResu
 Advanced cost-based query optimization:
 
 ```typescript
-import { OptimizerManager } from '@intelgraph/query-optimizer';
+import { OptimizerManager } from "@intelgraph/query-optimizer";
 
 const optimizer = new OptimizerManager(pool);
 
 // Create materialized view for frequently used query
 await optimizer.mvManager.createMaterializedView({
-  name: 'mv_monthly_sales',
+  name: "mv_monthly_sales",
   query: `
     SELECT
       DATE_TRUNC('month', date) as month,
@@ -269,16 +261,16 @@ await optimizer.mvManager.createMaterializedView({
     FROM sales_facts
     GROUP BY month, product_id
   `,
-  refreshStrategy: 'scheduled',
+  refreshStrategy: "scheduled",
   refreshInterval: 3600000, // 1 hour
-  indexes: ['month', 'product_id']
+  indexes: ["month", "product_id"],
 });
 
 // Refresh materialized view
-await optimizer.mvManager.refreshMaterializedView('mv_monthly_sales', true);
+await optimizer.mvManager.refreshMaterializedView("mv_monthly_sales", true);
 
 // Get MV info
-const mvInfo = await optimizer.mvManager.getMaterializedViewInfo('mv_monthly_sales');
+const mvInfo = await optimizer.mvManager.getMaterializedViewInfo("mv_monthly_sales");
 console.log(`MV size: ${mvInfo.size} bytes, rows: ${mvInfo.rowCount}`);
 ```
 
@@ -313,7 +305,7 @@ await warehouse.createTable({
 Monitor and optimize compression:
 
 ```typescript
-const stats = await warehouse.getStorageStats('my_table');
+const stats = await warehouse.getStorageStats("my_table");
 
 for (const colStat of stats.columnStats) {
   console.log(`Column: ${colStat.column}`);
@@ -340,7 +332,7 @@ console.log(`Compression ratio: ${cacheStats.compressionRatio}x`);
 Control query prioritization and concurrency:
 
 ```typescript
-import { QueryPriority } from '@intelgraph/data-warehouse';
+import { QueryPriority } from "@intelgraph/data-warehouse";
 
 // Execute high-priority query
 const results = await warehouse.query(sql, QueryPriority.HIGH);
@@ -354,7 +346,7 @@ const batchResults = await warehouse.query(batchSql, QueryPriority.BATCH);
 ### Storage Metrics
 
 ```typescript
-const storageStats = await warehouse.getStorageStats('sales_facts');
+const storageStats = await warehouse.getStorageStats("sales_facts");
 
 console.log(`Total rows: ${storageStats.totalRows}`);
 console.log(`Total blocks: ${storageStats.totalBlocks}`);
@@ -366,13 +358,13 @@ console.log(`Compression ratio: ${storageStats.compressionRatio}x`);
 
 ```typescript
 // Listen to query events
-warehouse.queryExecutor.on('query:completed', (event) => {
+warehouse.queryExecutor.on("query:completed", (event) => {
   console.log(`Query ${event.queryId} completed in ${event.metrics.totalDurationMs}ms`);
   console.log(`Rows processed: ${event.metrics.rowsProcessed}`);
   console.log(`Workers used: ${event.metrics.workersUsed}`);
 });
 
-warehouse.queryExecutor.on('stage:completed', (event) => {
+warehouse.queryExecutor.on("stage:completed", (event) => {
   console.log(`Stage ${event.stageId} completed in ${event.durationMs}ms`);
 });
 ```
@@ -397,8 +389,8 @@ Query data as it existed at a specific point in time:
 ```typescript
 // Query historical state
 const historicalData = await modeling.scdHandler.queryAsOfDate(
-  'dim_product',
-  new Date('2024-01-01')
+  "dim_product",
+  new Date("2024-01-01")
 );
 ```
 
@@ -407,7 +399,7 @@ const historicalData = await modeling.scdHandler.queryAsOfDate(
 Automatic compute scaling based on workload:
 
 ```typescript
-import { ComputeScaler } from '@intelgraph/data-warehouse';
+import { ComputeScaler } from "@intelgraph/data-warehouse";
 
 const scaler = new ComputeScaler();
 
@@ -417,7 +409,7 @@ const newNodeCount = await scaler.scale({
   queuedQueries: 50,
   avgQueryTime: 5000,
   cpuUtilization: 0.9,
-  memoryUtilization: 0.8
+  memoryUtilization: 0.8,
 });
 
 console.log(`Scaled to ${newNodeCount} nodes`);

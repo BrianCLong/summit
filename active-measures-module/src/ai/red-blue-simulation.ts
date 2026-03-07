@@ -35,7 +35,7 @@ export interface SimulationScorecard {
  */
 export function runRedBlueSimulation(
   actions: RedAction[],
-  controls: BlueControl[],
+  controls: BlueControl[]
 ): SimulationScorecard {
   if (actions.length === 0) {
     return { timeToDetect: -1, lateralSpread: 0, containmentTime: -1 };

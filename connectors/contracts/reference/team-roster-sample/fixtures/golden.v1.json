@@ -67,7 +67,10 @@
       "sourceConnector": "team-roster-sample",
       "source": "./fixtures/roster.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json"
+        },
         { "stage": "mapping", "hint": "roster-row" }
       ]
     },
@@ -76,7 +79,10 @@
       "sourceConnector": "team-roster-sample",
       "source": "./fixtures/roster.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json"
+        },
         { "stage": "mapping", "hint": "team-dimension" }
       ]
     },
@@ -85,7 +91,10 @@
       "sourceConnector": "team-roster-sample",
       "source": "./fixtures/roster.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json"
+        },
         { "stage": "mapping", "hint": "roster-row" }
       ]
     },
@@ -94,7 +103,10 @@
       "sourceConnector": "team-roster-sample",
       "source": "./fixtures/roster.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json"
+        },
         { "stage": "mapping", "hint": "team-dimension" }
       ]
     }

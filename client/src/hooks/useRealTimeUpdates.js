@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useSubscription, gql } from '@apollo/client';
+import { useState, useEffect } from "react";
+import { useSubscription, gql } from "@apollo/client";
 
 // GraphQL Subscriptions for real-time updates
 const LIVE_GRAPH_UPDATES = gql`
@@ -81,19 +81,17 @@ export function useRealTimeGraph() {
       if (Math.random() > 0.7) {
         const newUpdate = {
           id: Date.now(),
-          type: 'ENTITY_ADDED',
+          type: "ENTITY_ADDED",
           entity: {
             id: `entity_${Date.now()}`,
             label: `Person ${Math.floor(Math.random() * 1000)}`,
-            type: 'person',
+            type: "person",
             confidence: (Math.random() * 40 + 60).toFixed(0),
             timestamp: new Date(),
           },
           user: {
-            name: ['Alice Chen', 'Bob Rodriguez', 'Carol Kim'][
-              Math.floor(Math.random() * 3)
-            ],
-            action: 'discovered',
+            name: ["Alice Chen", "Bob Rodriguez", "Carol Kim"][Math.floor(Math.random() * 3)],
+            action: "discovered",
           },
         };
         setLiveUpdates((prev) => [newUpdate, ...prev.slice(0, 9)]);
@@ -103,17 +101,17 @@ export function useRealTimeGraph() {
       if (Math.random() > 0.8) {
         const connectionUpdate = {
           id: Date.now(),
-          type: 'RELATIONSHIP_UPDATED',
+          type: "RELATIONSHIP_UPDATED",
           relationship: {
-            from: 'person1',
-            to: 'org1',
-            type: 'works_at',
+            from: "person1",
+            to: "org1",
+            type: "works_at",
             strength: Math.random(),
             confidence: (Math.random() * 30 + 70).toFixed(0),
           },
           user: {
-            name: 'AI Assistant',
-            action: 'analyzed',
+            name: "AI Assistant",
+            action: "analyzed",
           },
         };
         setLiveUpdates((prev) => [connectionUpdate, ...prev.slice(0, 9)]);
@@ -125,31 +123,31 @@ export function useRealTimeGraph() {
       const users = [
         {
           id: 1,
-          name: 'Alice Chen',
+          name: "Alice Chen",
           isOnline: true,
-          role: 'Senior Analyst',
-          lastActivity: 'Graph Explorer',
+          role: "Senior Analyst",
+          lastActivity: "Graph Explorer",
         },
         {
           id: 2,
-          name: 'Bob Rodriguez',
+          name: "Bob Rodriguez",
           isOnline: Math.random() > 0.3,
-          role: 'Lead Investigator',
-          lastActivity: 'AI Copilot',
+          role: "Lead Investigator",
+          lastActivity: "AI Copilot",
         },
         {
           id: 3,
-          name: 'Carol Kim',
+          name: "Carol Kim",
           isOnline: Math.random() > 0.5,
-          role: 'Intelligence Officer',
-          lastActivity: 'Dashboard',
+          role: "Intelligence Officer",
+          lastActivity: "Dashboard",
         },
         {
           id: 4,
-          name: 'David Park',
+          name: "David Park",
           isOnline: Math.random() > 0.7,
-          role: 'Data Analyst',
-          lastActivity: 'Reports',
+          role: "Data Analyst",
+          lastActivity: "Reports",
         },
       ];
       setConnectedUsers(users);
@@ -177,41 +175,39 @@ export function useAIInsights() {
       if (Math.random() > 0.6) {
         const aiInsights = [
           {
-            type: 'PATTERN_DETECTED',
+            type: "PATTERN_DETECTED",
             confidence: 85,
-            message:
-              'Unusual communication pattern detected between financial entities',
-            icon: '🔍',
-            priority: 'high',
+            message: "Unusual communication pattern detected between financial entities",
+            icon: "🔍",
+            priority: "high",
           },
           {
-            type: 'ANOMALY_FOUND',
+            type: "ANOMALY_FOUND",
             confidence: 72,
-            message: 'Geographic clustering suggests coordinated activity',
-            icon: '📍',
-            priority: 'medium',
+            message: "Geographic clustering suggests coordinated activity",
+            icon: "📍",
+            priority: "medium",
           },
           {
-            type: 'PREDICTION',
+            type: "PREDICTION",
             confidence: 91,
-            message:
-              'High probability of new connections forming within 48 hours',
-            icon: '🔮',
-            priority: 'high',
+            message: "High probability of new connections forming within 48 hours",
+            icon: "🔮",
+            priority: "high",
           },
           {
-            type: 'THREAT_ASSESSMENT',
+            type: "THREAT_ASSESSMENT",
             confidence: 78,
-            message: 'Risk level elevated due to recent behavioral changes',
-            icon: '⚠️',
-            priority: 'high',
+            message: "Risk level elevated due to recent behavioral changes",
+            icon: "⚠️",
+            priority: "high",
           },
           {
-            type: 'RECOMMENDATION',
+            type: "RECOMMENDATION",
             confidence: 94,
-            message: 'Suggest cross-referencing with Case #2847B',
-            icon: '💡',
-            priority: 'medium',
+            message: "Suggest cross-referencing with Case #2847B",
+            icon: "💡",
+            priority: "medium",
           },
         ];
 
@@ -240,22 +236,17 @@ export function useInvestigationCollab(investigationId) {
   useEffect(() => {
     const interval = setInterval(() => {
       const activities = [
-        'Added new entity to graph',
-        'Updated relationship strength',
-        'Generated threat assessment',
-        'Added evidence document',
-        'Created timeline marker',
-        'Shared insight with team',
-        'Flagged suspicious activity',
-        'Cross-referenced database',
+        "Added new entity to graph",
+        "Updated relationship strength",
+        "Generated threat assessment",
+        "Added evidence document",
+        "Created timeline marker",
+        "Shared insight with team",
+        "Flagged suspicious activity",
+        "Cross-referenced database",
       ];
 
-      const users = [
-        'Alice Chen',
-        'Bob Rodriguez',
-        'Carol Kim',
-        'AI Assistant',
-      ];
+      const users = ["Alice Chen", "Bob Rodriguez", "Carol Kim", "AI Assistant"];
 
       const newActivity = {
         id: Date.now(),

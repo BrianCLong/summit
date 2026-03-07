@@ -7,66 +7,66 @@
  * @see https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf
  */
 
-import { EventEmitter } from 'events';
-import { createHash, createHmac, randomBytes } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { createHash, createHmac, randomBytes } from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import {
   CampaignSignal,
   CampaignCluster,
   FederatedAlert,
   EvaluationMetrics,
   IncidentMetrics,
-} from '../core/types';
+} from "../core/types";
 
 /**
  * Audit entry types
  */
 export enum AuditEventType {
   // Signal events
-  SIGNAL_RECEIVED = 'SIGNAL_RECEIVED',
-  SIGNAL_NORMALIZED = 'SIGNAL_NORMALIZED',
-  SIGNAL_FEDERATED = 'SIGNAL_FEDERATED',
-  SIGNAL_REJECTED = 'SIGNAL_REJECTED',
+  SIGNAL_RECEIVED = "SIGNAL_RECEIVED",
+  SIGNAL_NORMALIZED = "SIGNAL_NORMALIZED",
+  SIGNAL_FEDERATED = "SIGNAL_FEDERATED",
+  SIGNAL_REJECTED = "SIGNAL_REJECTED",
 
   // Clustering events
-  CLUSTERING_STARTED = 'CLUSTERING_STARTED',
-  CLUSTERING_COMPLETED = 'CLUSTERING_COMPLETED',
-  CLUSTER_CREATED = 'CLUSTER_CREATED',
-  CLUSTER_UPDATED = 'CLUSTER_UPDATED',
-  CLUSTER_MERGED = 'CLUSTER_MERGED',
+  CLUSTERING_STARTED = "CLUSTERING_STARTED",
+  CLUSTERING_COMPLETED = "CLUSTERING_COMPLETED",
+  CLUSTER_CREATED = "CLUSTER_CREATED",
+  CLUSTER_UPDATED = "CLUSTER_UPDATED",
+  CLUSTER_MERGED = "CLUSTER_MERGED",
 
   // Alert events
-  ALERT_GENERATED = 'ALERT_GENERATED',
-  ALERT_ACKNOWLEDGED = 'ALERT_ACKNOWLEDGED',
-  ALERT_ESCALATED = 'ALERT_ESCALATED',
-  ALERT_RESOLVED = 'ALERT_RESOLVED',
-  ALERT_FALSE_POSITIVE = 'ALERT_FALSE_POSITIVE',
+  ALERT_GENERATED = "ALERT_GENERATED",
+  ALERT_ACKNOWLEDGED = "ALERT_ACKNOWLEDGED",
+  ALERT_ESCALATED = "ALERT_ESCALATED",
+  ALERT_RESOLVED = "ALERT_RESOLVED",
+  ALERT_FALSE_POSITIVE = "ALERT_FALSE_POSITIVE",
 
   // Federation events
-  PARTICIPANT_JOINED = 'PARTICIPANT_JOINED',
-  PARTICIPANT_LEFT = 'PARTICIPANT_LEFT',
-  AGREEMENT_CREATED = 'AGREEMENT_CREATED',
-  AGREEMENT_TERMINATED = 'AGREEMENT_TERMINATED',
-  PRIVACY_BUDGET_CONSUMED = 'PRIVACY_BUDGET_CONSUMED',
-  PRIVACY_BUDGET_EXHAUSTED = 'PRIVACY_BUDGET_EXHAUSTED',
+  PARTICIPANT_JOINED = "PARTICIPANT_JOINED",
+  PARTICIPANT_LEFT = "PARTICIPANT_LEFT",
+  AGREEMENT_CREATED = "AGREEMENT_CREATED",
+  AGREEMENT_TERMINATED = "AGREEMENT_TERMINATED",
+  PRIVACY_BUDGET_CONSUMED = "PRIVACY_BUDGET_CONSUMED",
+  PRIVACY_BUDGET_EXHAUSTED = "PRIVACY_BUDGET_EXHAUSTED",
 
   // Access events
-  DATA_ACCESS = 'DATA_ACCESS',
-  QUERY_EXECUTED = 'QUERY_EXECUTED',
-  EXPORT_REQUESTED = 'EXPORT_REQUESTED',
-  EXPORT_COMPLETED = 'EXPORT_COMPLETED',
+  DATA_ACCESS = "DATA_ACCESS",
+  QUERY_EXECUTED = "QUERY_EXECUTED",
+  EXPORT_REQUESTED = "EXPORT_REQUESTED",
+  EXPORT_COMPLETED = "EXPORT_COMPLETED",
 
   // Compliance events
-  POLICY_EVALUATED = 'POLICY_EVALUATED',
-  POLICY_VIOLATION = 'POLICY_VIOLATION',
-  RETENTION_ENFORCED = 'RETENTION_ENFORCED',
-  DATA_DELETED = 'DATA_DELETED',
+  POLICY_EVALUATED = "POLICY_EVALUATED",
+  POLICY_VIOLATION = "POLICY_VIOLATION",
+  RETENTION_ENFORCED = "RETENTION_ENFORCED",
+  DATA_DELETED = "DATA_DELETED",
 
   // Security events
-  AUTHENTICATION = 'AUTHENTICATION',
-  AUTHORIZATION_DENIED = 'AUTHORIZATION_DENIED',
-  ENCRYPTION_APPLIED = 'ENCRYPTION_APPLIED',
-  INTEGRITY_CHECK = 'INTEGRITY_CHECK',
+  AUTHENTICATION = "AUTHENTICATION",
+  AUTHORIZATION_DENIED = "AUTHORIZATION_DENIED",
+  ENCRYPTION_APPLIED = "ENCRYPTION_APPLIED",
+  INTEGRITY_CHECK = "INTEGRITY_CHECK",
 }
 
 /**
@@ -79,7 +79,7 @@ export interface AuditEntry {
   actor: AuditActor;
   resource: AuditResource;
   action: string;
-  outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL';
+  outcome: "SUCCESS" | "FAILURE" | "PARTIAL";
   details: Record<string, unknown>;
   privacyImpact?: PrivacyImpactAssessment;
   riskClassification: RiskClassification;
@@ -90,7 +90,7 @@ export interface AuditEntry {
 
 export interface AuditActor {
   actorId: string;
-  actorType: 'SYSTEM' | 'HUMAN' | 'AUTOMATED' | 'EXTERNAL';
+  actorType: "SYSTEM" | "HUMAN" | "AUTOMATED" | "EXTERNAL";
   organizationId: string;
   role?: string;
   ipAddress?: string;
@@ -98,7 +98,7 @@ export interface AuditActor {
 }
 
 export interface AuditResource {
-  resourceType: 'SIGNAL' | 'CLUSTER' | 'ALERT' | 'PARTICIPANT' | 'AGREEMENT' | 'BUDGET';
+  resourceType: "SIGNAL" | "CLUSTER" | "ALERT" | "PARTICIPANT" | "AGREEMENT" | "BUDGET";
   resourceId: string;
   resourceHash?: string;
   classification?: string;
@@ -114,10 +114,10 @@ export interface PrivacyImpactAssessment {
 }
 
 export enum RiskClassification {
-  LOW = 'LOW',
-  MODERATE = 'MODERATE',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
+  LOW = "LOW",
+  MODERATE = "MODERATE",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 export interface CryptographicProof {
@@ -134,7 +134,7 @@ export interface GovernanceControlStatus {
   controlId: string;
   controlName: string;
   category: GovernanceControlCategory;
-  status: 'IMPLEMENTED' | 'PARTIAL' | 'PLANNED' | 'NOT_APPLICABLE';
+  status: "IMPLEMENTED" | "PARTIAL" | "PLANNED" | "NOT_APPLICABLE";
   effectiveness: number; // 0-1
   lastAssessed: Date;
   findings: ControlFinding[];
@@ -142,22 +142,22 @@ export interface GovernanceControlStatus {
 }
 
 export enum GovernanceControlCategory {
-  GOVERNANCE = 'GOVERNANCE',
-  DATA_MANAGEMENT = 'DATA_MANAGEMENT',
-  PRIVACY = 'PRIVACY',
-  SECURITY = 'SECURITY',
-  MODEL_MANAGEMENT = 'MODEL_MANAGEMENT',
-  HUMAN_OVERSIGHT = 'HUMAN_OVERSIGHT',
-  TRANSPARENCY = 'TRANSPARENCY',
-  ACCOUNTABILITY = 'ACCOUNTABILITY',
+  GOVERNANCE = "GOVERNANCE",
+  DATA_MANAGEMENT = "DATA_MANAGEMENT",
+  PRIVACY = "PRIVACY",
+  SECURITY = "SECURITY",
+  MODEL_MANAGEMENT = "MODEL_MANAGEMENT",
+  HUMAN_OVERSIGHT = "HUMAN_OVERSIGHT",
+  TRANSPARENCY = "TRANSPARENCY",
+  ACCOUNTABILITY = "ACCOUNTABILITY",
 }
 
 export interface ControlFinding {
   findingId: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   description: string;
   recommendation: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'ACCEPTED';
+  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "ACCEPTED";
   dueDate?: Date;
 }
 
@@ -176,8 +176,8 @@ export interface IncidentRecord {
   incidentId: string;
   createdAt: Date;
   updatedAt: Date;
-  status: 'OPEN' | 'INVESTIGATING' | 'MITIGATING' | 'RESOLVED' | 'CLOSED';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  status: "OPEN" | "INVESTIGATING" | "MITIGATING" | "RESOLVED" | "CLOSED";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   category: string;
   title: string;
   description: string;
@@ -211,7 +211,7 @@ export interface AuditConfig {
   signingKeyId?: string;
 
   // Export
-  exportFormats: ('JSON' | 'CSV' | 'SIEM')[];
+  exportFormats: ("JSON" | "CSV" | "SIEM")[];
   siemEndpoint?: string;
 
   // Alerting
@@ -225,7 +225,7 @@ export interface AuditConfig {
 export class AuditService extends EventEmitter {
   private config: AuditConfig;
   private entries: AuditEntry[] = [];
-  private hashChain: string = '';
+  private hashChain: string = "";
   private controls: Map<string, GovernanceControlStatus> = new Map();
   private incidents: Map<string, IncidentRecord> = new Map();
   private metrics: EvaluationMetrics;
@@ -250,13 +250,13 @@ export class AuditService extends EventEmitter {
     actor: AuditActor,
     resource: AuditResource,
     action: string,
-    outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL',
+    outcome: "SUCCESS" | "FAILURE" | "PARTIAL",
     details: Record<string, unknown>,
     options?: {
       privacyImpact?: PrivacyImpactAssessment;
       correlationId?: string;
       parentEntryId?: string;
-    },
+    }
   ): Promise<AuditEntry> {
     const entry: AuditEntry = {
       entryId: uuidv4(),
@@ -277,7 +277,7 @@ export class AuditService extends EventEmitter {
         resource,
         action,
         outcome,
-        details,
+        details
       ),
     };
 
@@ -295,7 +295,7 @@ export class AuditService extends EventEmitter {
       this.handleSecurityEvent(entry);
     }
 
-    this.emit('auditEvent', entry);
+    this.emit("auditEvent", entry);
     return entry;
   }
 
@@ -306,14 +306,14 @@ export class AuditService extends EventEmitter {
     signal: CampaignSignal,
     eventType: AuditEventType,
     actor: AuditActor,
-    outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL',
-    details?: Record<string, unknown>,
+    outcome: "SUCCESS" | "FAILURE" | "PARTIAL",
+    details?: Record<string, unknown>
   ): Promise<AuditEntry> {
     return this.logEvent(
       eventType,
       actor,
       {
-        resourceType: 'SIGNAL',
+        resourceType: "SIGNAL",
         resourceId: signal.id,
         resourceHash: signal.hashedContent,
         classification: signal.privacyLevel,
@@ -328,16 +328,14 @@ export class AuditService extends EventEmitter {
       },
       {
         privacyImpact: {
-          dataCategories: ['campaign_signals'],
-          processingPurpose: 'threat_detection',
-          legalBasis: 'legitimate_interest',
+          dataCategories: ["campaign_signals"],
+          processingPurpose: "threat_detection",
+          legalBasis: "legitimate_interest",
           privacyBudgetImpact: signal.federationMetadata.privacyBudgetUsed,
-          crossBorderTransfer:
-            signal.federationMetadata.propagationPath.length > 1,
-          retentionPeriod:
-            signal.federationMetadata.retentionPolicy.maxRetentionDays,
+          crossBorderTransfer: signal.federationMetadata.propagationPath.length > 1,
+          retentionPeriod: signal.federationMetadata.retentionPolicy.maxRetentionDays,
         },
-      },
+      }
     );
   }
 
@@ -348,14 +346,14 @@ export class AuditService extends EventEmitter {
     cluster: CampaignCluster,
     eventType: AuditEventType,
     actor: AuditActor,
-    outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL',
-    details?: Record<string, unknown>,
+    outcome: "SUCCESS" | "FAILURE" | "PARTIAL",
+    details?: Record<string, unknown>
   ): Promise<AuditEntry> {
     return this.logEvent(
       eventType,
       actor,
       {
-        resourceType: 'CLUSTER',
+        resourceType: "CLUSTER",
         resourceId: cluster.clusterId,
         classification: cluster.threatLevel,
       },
@@ -367,7 +365,7 @@ export class AuditService extends EventEmitter {
         threatLevel: cluster.threatLevel,
         status: cluster.status,
         ...details,
-      },
+      }
     );
   }
 
@@ -378,14 +376,14 @@ export class AuditService extends EventEmitter {
     alert: FederatedAlert,
     eventType: AuditEventType,
     actor: AuditActor,
-    outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL',
-    details?: Record<string, unknown>,
+    outcome: "SUCCESS" | "FAILURE" | "PARTIAL",
+    details?: Record<string, unknown>
   ): Promise<AuditEntry> {
     return this.logEvent(
       eventType,
       actor,
       {
-        resourceType: 'ALERT',
+        resourceType: "ALERT",
         resourceId: alert.alertId,
         classification: alert.severity,
       },
@@ -397,7 +395,7 @@ export class AuditService extends EventEmitter {
         priority: alert.priority,
         crossTenantSignal: alert.crossTenantSignal,
         ...details,
-      },
+      }
     );
   }
 
@@ -422,9 +420,7 @@ export class AuditService extends EventEmitter {
   /**
    * Get controls by category
    */
-  getControlsByCategory(
-    category: GovernanceControlCategory,
-  ): GovernanceControlStatus[] {
+  getControlsByCategory(category: GovernanceControlCategory): GovernanceControlStatus[] {
     return this.getAllControls().filter((c) => c.category === category);
   }
 
@@ -433,7 +429,7 @@ export class AuditService extends EventEmitter {
    */
   updateControlStatus(
     controlId: string,
-    updates: Partial<GovernanceControlStatus>,
+    updates: Partial<GovernanceControlStatus>
   ): GovernanceControlStatus | undefined {
     const control = this.controls.get(controlId);
     if (!control) return undefined;
@@ -441,7 +437,7 @@ export class AuditService extends EventEmitter {
     const updated = { ...control, ...updates, lastAssessed: new Date() };
     this.controls.set(controlId, updated);
 
-    this.emit('controlUpdated', updated);
+    this.emit("controlUpdated", updated);
     return updated;
   }
 
@@ -450,7 +446,7 @@ export class AuditService extends EventEmitter {
    */
   addControlFinding(
     controlId: string,
-    finding: Omit<ControlFinding, 'findingId'>,
+    finding: Omit<ControlFinding, "findingId">
   ): ControlFinding | undefined {
     const control = this.controls.get(controlId);
     if (!control) return undefined;
@@ -461,7 +457,7 @@ export class AuditService extends EventEmitter {
     };
 
     control.findings.push(newFinding);
-    this.emit('findingAdded', { controlId, finding: newFinding });
+    this.emit("findingAdded", { controlId, finding: newFinding });
 
     return newFinding;
   }
@@ -489,18 +485,17 @@ export class AuditService extends EventEmitter {
     for (const category of categories) {
       const categoryControls = controls.filter((c) => c.category === category);
       const categoryScore =
-        categoryControls.reduce((sum, c) => sum + c.effectiveness, 0) /
-        categoryControls.length;
+        categoryControls.reduce((sum, c) => sum + c.effectiveness, 0) / categoryControls.length;
       byCategory[category] = categoryScore;
     }
 
     // Count findings
     const allFindings = controls.flatMap((c) => c.findings);
     const openFindings = allFindings.filter(
-      (f) => f.status === 'OPEN' || f.status === 'IN_PROGRESS',
+      (f) => f.status === "OPEN" || f.status === "IN_PROGRESS"
     ).length;
     const criticalFindings = allFindings.filter(
-      (f) => f.severity === 'CRITICAL' && f.status !== 'RESOLVED',
+      (f) => f.severity === "CRITICAL" && f.status !== "RESOLVED"
     ).length;
 
     return {
@@ -521,16 +516,16 @@ export class AuditService extends EventEmitter {
   createIncident(
     title: string,
     description: string,
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
     category: string,
-    affectedResources: string[],
+    affectedResources: string[]
   ): IncidentRecord {
     const now = new Date();
     const incident: IncidentRecord = {
       incidentId: uuidv4(),
       createdAt: now,
       updatedAt: now,
-      status: 'OPEN',
+      status: "OPEN",
       severity,
       category,
       title,
@@ -539,13 +534,13 @@ export class AuditService extends EventEmitter {
       timeline: [
         {
           timestamp: now,
-          action: 'CREATED',
-          actor: 'system',
-          details: 'Incident created',
+          action: "CREATED",
+          actor: "system",
+          details: "Incident created",
         },
       ],
       metrics: {
-        incidentId: '',
+        incidentId: "",
         detectionTime: now,
         alertTime: now,
         timeToDetect: 0,
@@ -556,7 +551,7 @@ export class AuditService extends EventEmitter {
     incident.metrics.incidentId = incident.incidentId;
     this.incidents.set(incident.incidentId, incident);
 
-    this.emit('incidentCreated', incident);
+    this.emit("incidentCreated", incident);
     return incident;
   }
 
@@ -565,9 +560,9 @@ export class AuditService extends EventEmitter {
    */
   updateIncidentStatus(
     incidentId: string,
-    status: IncidentRecord['status'],
+    status: IncidentRecord["status"],
     actor: string,
-    details: string,
+    details: string
   ): IncidentRecord | undefined {
     const incident = this.incidents.get(incidentId);
     if (!incident) return undefined;
@@ -583,41 +578,29 @@ export class AuditService extends EventEmitter {
     });
 
     // Update metrics
-    if (status === 'INVESTIGATING' && !incident.metrics.acknowledgmentTime) {
+    if (status === "INVESTIGATING" && !incident.metrics.acknowledgmentTime) {
       incident.metrics.acknowledgmentTime = now;
-      incident.metrics.timeToAcknowledge =
-        now.getTime() - incident.metrics.alertTime.getTime();
-    } else if (status === 'MITIGATING' && !incident.metrics.mitigationStartTime) {
+      incident.metrics.timeToAcknowledge = now.getTime() - incident.metrics.alertTime.getTime();
+    } else if (status === "MITIGATING" && !incident.metrics.mitigationStartTime) {
       incident.metrics.mitigationStartTime = now;
-      incident.metrics.timeToMitigate =
-        now.getTime() - incident.metrics.alertTime.getTime();
-    } else if (
-      (status === 'RESOLVED' || status === 'CLOSED') &&
-      !incident.metrics.resolutionTime
-    ) {
+      incident.metrics.timeToMitigate = now.getTime() - incident.metrics.alertTime.getTime();
+    } else if ((status === "RESOLVED" || status === "CLOSED") && !incident.metrics.resolutionTime) {
       incident.metrics.resolutionTime = now;
-      incident.metrics.timeToResolve =
-        now.getTime() - incident.metrics.alertTime.getTime();
+      incident.metrics.timeToResolve = now.getTime() - incident.metrics.alertTime.getTime();
     }
 
-    this.emit('incidentUpdated', incident);
+    this.emit("incidentUpdated", incident);
     return incident;
   }
 
   /**
    * Add lessons learned to incident
    */
-  addLessonsLearned(
-    incidentId: string,
-    lessons: string[],
-  ): IncidentRecord | undefined {
+  addLessonsLearned(incidentId: string, lessons: string[]): IncidentRecord | undefined {
     const incident = this.incidents.get(incidentId);
     if (!incident) return undefined;
 
-    incident.lessonsLearned = [
-      ...(incident.lessonsLearned || []),
-      ...lessons,
-    ];
+    incident.lessonsLearned = [...(incident.lessonsLearned || []), ...lessons];
     incident.updatedAt = new Date();
 
     return incident;
@@ -634,8 +617,8 @@ export class AuditService extends EventEmitter {
    * Get all incidents
    */
   getIncidents(filters?: {
-    status?: IncidentRecord['status'][];
-    severity?: IncidentRecord['severity'][];
+    status?: IncidentRecord["status"][];
+    severity?: IncidentRecord["severity"][];
   }): IncidentRecord[] {
     let incidents = Array.from(this.incidents.values());
 
@@ -643,9 +626,7 @@ export class AuditService extends EventEmitter {
       incidents = incidents.filter((i) => filters.status!.includes(i.status));
     }
     if (filters?.severity) {
-      incidents = incidents.filter((i) =>
-        filters.severity!.includes(i.severity),
-      );
+      incidents = incidents.filter((i) => filters.severity!.includes(i.severity));
     }
 
     return incidents;
@@ -675,9 +656,7 @@ export class AuditService extends EventEmitter {
     // Update containment delta if available
     if (incident.metrics.containmentEffectiveness) {
       this.metrics.containmentDelta =
-        (this.metrics.containmentDelta +
-          incident.metrics.containmentEffectiveness) /
-        2;
+        (this.metrics.containmentDelta + incident.metrics.containmentEffectiveness) / 2;
     }
   }
 
@@ -685,12 +664,12 @@ export class AuditService extends EventEmitter {
    * Export audit log
    */
   async exportAuditLog(
-    format: 'JSON' | 'CSV' | 'SIEM',
+    format: "JSON" | "CSV" | "SIEM",
     options?: {
       startDate?: Date;
       endDate?: Date;
       eventTypes?: AuditEventType[];
-    },
+    }
   ): Promise<string> {
     let entries = [...this.entries];
 
@@ -706,13 +685,13 @@ export class AuditService extends EventEmitter {
     }
 
     switch (format) {
-      case 'JSON':
+      case "JSON":
         return JSON.stringify(entries, null, 2);
 
-      case 'CSV':
+      case "CSV":
         return this.toCSV(entries);
 
-      case 'SIEM':
+      case "SIEM":
         return this.toSIEMFormat(entries);
 
       default:
@@ -729,14 +708,14 @@ export class AuditService extends EventEmitter {
     lastVerifiedEntry: string;
   } {
     const errors: string[] = [];
-    let previousHash = '';
-    let lastVerifiedEntry = '';
+    let previousHash = "";
+    let lastVerifiedEntry = "";
 
     for (const entry of this.entries) {
       // Verify hash chain
       if (entry.cryptographicProof.previousHash !== previousHash) {
         errors.push(
-          `Hash chain broken at entry ${entry.entryId}: expected ${previousHash}, got ${entry.cryptographicProof.previousHash}`,
+          `Hash chain broken at entry ${entry.entryId}: expected ${previousHash}, got ${entry.cryptographicProof.previousHash}`
         );
       }
 
@@ -744,7 +723,7 @@ export class AuditService extends EventEmitter {
       const expectedHash = this.computeEntryHash(entry);
       if (entry.cryptographicProof.hashChain !== expectedHash) {
         errors.push(
-          `Entry hash mismatch for ${entry.entryId}: computed ${expectedHash}, stored ${entry.cryptographicProof.hashChain}`,
+          `Entry hash mismatch for ${entry.entryId}: computed ${expectedHash}, stored ${entry.cryptographicProof.hashChain}`
         );
       }
 
@@ -764,99 +743,99 @@ export class AuditService extends EventEmitter {
   // ============================================================================
 
   private initializeHashChain(): void {
-    this.hashChain = createHash('sha256')
-      .update(`genesis:${Date.now()}:${randomBytes(32).toString('hex')}`)
-      .digest('hex');
+    this.hashChain = createHash("sha256")
+      .update(`genesis:${Date.now()}:${randomBytes(32).toString("hex")}`)
+      .digest("hex");
   }
 
   private initializeControls(): void {
     // Initialize NIST AI RMF aligned controls
     const controls: GovernanceControlStatus[] = [
       {
-        controlId: 'GOV-001',
-        controlName: 'AI Governance Framework',
+        controlId: "GOV-001",
+        controlName: "AI Governance Framework",
         category: GovernanceControlCategory.GOVERNANCE,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.85,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'DM-001',
-        controlName: 'Data Quality Management',
+        controlId: "DM-001",
+        controlName: "Data Quality Management",
         category: GovernanceControlCategory.DATA_MANAGEMENT,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.9,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'PRIV-001',
-        controlName: 'Privacy Impact Assessment',
+        controlId: "PRIV-001",
+        controlName: "Privacy Impact Assessment",
         category: GovernanceControlCategory.PRIVACY,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.88,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'PRIV-002',
-        controlName: 'Differential Privacy Controls',
+        controlId: "PRIV-002",
+        controlName: "Differential Privacy Controls",
         category: GovernanceControlCategory.PRIVACY,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.92,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'SEC-001',
-        controlName: 'Access Control',
+        controlId: "SEC-001",
+        controlName: "Access Control",
         category: GovernanceControlCategory.SECURITY,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.95,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'SEC-002',
-        controlName: 'Cryptographic Controls',
+        controlId: "SEC-002",
+        controlName: "Cryptographic Controls",
         category: GovernanceControlCategory.SECURITY,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.93,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'HO-001',
-        controlName: 'Human Oversight',
+        controlId: "HO-001",
+        controlName: "Human Oversight",
         category: GovernanceControlCategory.HUMAN_OVERSIGHT,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.8,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'TRANS-001',
-        controlName: 'Algorithmic Transparency',
+        controlId: "TRANS-001",
+        controlName: "Algorithmic Transparency",
         category: GovernanceControlCategory.TRANSPARENCY,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.75,
         lastAssessed: new Date(),
         findings: [],
         evidence: [],
       },
       {
-        controlId: 'ACC-001',
-        controlName: 'Audit Trail',
+        controlId: "ACC-001",
+        controlName: "Audit Trail",
         category: GovernanceControlCategory.ACCOUNTABILITY,
-        status: 'IMPLEMENTED',
+        status: "IMPLEMENTED",
         effectiveness: 0.95,
         lastAssessed: new Date(),
         findings: [],
@@ -894,7 +873,7 @@ export class AuditService extends EventEmitter {
 
   private classifyRisk(
     eventType: AuditEventType,
-    outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL',
+    outcome: "SUCCESS" | "FAILURE" | "PARTIAL"
   ): RiskClassification {
     // High-risk events
     const highRiskEvents = [
@@ -909,7 +888,7 @@ export class AuditService extends EventEmitter {
 
     // Critical if failure on important events
     if (
-      outcome === 'FAILURE' &&
+      outcome === "FAILURE" &&
       [
         AuditEventType.ALERT_GENERATED,
         AuditEventType.SIGNAL_FEDERATED,
@@ -920,7 +899,7 @@ export class AuditService extends EventEmitter {
     }
 
     // Moderate for most federation events
-    if (eventType.startsWith('PARTICIPANT_') || eventType.startsWith('AGREEMENT_')) {
+    if (eventType.startsWith("PARTICIPANT_") || eventType.startsWith("AGREEMENT_")) {
       return RiskClassification.MODERATE;
     }
 
@@ -933,7 +912,7 @@ export class AuditService extends EventEmitter {
     resource: AuditResource,
     action: string,
     outcome: string,
-    details: Record<string, unknown>,
+    details: Record<string, unknown>
   ): CryptographicProof {
     const entryData = JSON.stringify({
       eventType,
@@ -945,14 +924,10 @@ export class AuditService extends EventEmitter {
       timestamp: Date.now(),
     });
 
-    const hashChain = createHash('sha256')
-      .update(`${this.hashChain}:${entryData}`)
-      .digest('hex');
+    const hashChain = createHash("sha256").update(`${this.hashChain}:${entryData}`).digest("hex");
 
     // In production, would sign with actual key
-    const signature = createHmac('sha256', 'audit-signing-key')
-      .update(hashChain)
-      .digest('hex');
+    const signature = createHmac("sha256", "audit-signing-key").update(hashChain).digest("hex");
 
     return {
       hashChain,
@@ -975,9 +950,9 @@ export class AuditService extends EventEmitter {
       details: entry.details,
     });
 
-    return createHash('sha256')
+    return createHash("sha256")
       .update(`${entry.cryptographicProof.previousHash}:${entryData}`)
-      .digest('hex');
+      .digest("hex");
   }
 
   private isPolicyViolation(entry: AuditEntry): boolean {
@@ -991,45 +966,43 @@ export class AuditService extends EventEmitter {
     return (
       entry.eventType === AuditEventType.AUTHORIZATION_DENIED ||
       entry.eventType === AuditEventType.AUTHENTICATION ||
-      entry.outcome === 'FAILURE'
+      entry.outcome === "FAILURE"
     );
   }
 
   private handlePolicyViolation(entry: AuditEntry): void {
     if (this.config.alertOnPolicyViolation) {
-      this.emit('policyViolation', entry);
+      this.emit("policyViolation", entry);
     }
 
     // Create incident
     this.createIncident(
       `Policy Violation: ${entry.action}`,
       `Policy violation detected for ${entry.resource.resourceType} ${entry.resource.resourceId}`,
-      entry.riskClassification === RiskClassification.CRITICAL
-        ? 'CRITICAL'
-        : 'HIGH',
-      'POLICY_VIOLATION',
-      [entry.resource.resourceId],
+      entry.riskClassification === RiskClassification.CRITICAL ? "CRITICAL" : "HIGH",
+      "POLICY_VIOLATION",
+      [entry.resource.resourceId]
     );
   }
 
   private handleSecurityEvent(entry: AuditEntry): void {
     if (this.config.alertOnSecurityEvent) {
-      this.emit('securityEvent', entry);
+      this.emit("securityEvent", entry);
     }
   }
 
   private toCSV(entries: AuditEntry[]): string {
     const headers = [
-      'entryId',
-      'timestamp',
-      'eventType',
-      'actorId',
-      'actorType',
-      'resourceType',
-      'resourceId',
-      'action',
-      'outcome',
-      'riskClassification',
+      "entryId",
+      "timestamp",
+      "eventType",
+      "actorId",
+      "actorType",
+      "resourceType",
+      "resourceId",
+      "action",
+      "outcome",
+      "riskClassification",
     ];
 
     const rows = entries.map((e) => [
@@ -1045,7 +1018,7 @@ export class AuditService extends EventEmitter {
       e.riskClassification,
     ]);
 
-    return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    return [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
   }
 
   private toSIEMFormat(entries: AuditEntry[]): string {
@@ -1055,7 +1028,7 @@ export class AuditService extends EventEmitter {
         const severity = this.mapRiskToSeverity(e.riskClassification);
         return `CEF:0|FederatedCampaignRadar|AuditLog|1.0|${e.eventType}|${e.action}|${severity}|actor=${e.actor.actorId} actorType=${e.actor.actorType} resourceType=${e.resource.resourceType} resourceId=${e.resource.resourceId} outcome=${e.outcome} rt=${e.timestamp.getTime()}`;
       })
-      .join('\n');
+      .join("\n");
   }
 
   private mapRiskToSeverity(risk: RiskClassification): number {
@@ -1075,16 +1048,14 @@ export class AuditService extends EventEmitter {
    * Cleanup old entries based on retention policy
    */
   enforceRetention(): number {
-    const cutoff = new Date(
-      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000,
-    );
+    const cutoff = new Date(Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000);
     const originalLength = this.entries.length;
 
     this.entries = this.entries.filter((e) => e.timestamp >= cutoff);
 
     const deleted = originalLength - this.entries.length;
     if (deleted > 0) {
-      this.emit('retentionEnforced', { deleted, cutoff });
+      this.emit("retentionEnforced", { deleted, cutoff });
     }
 
     return deleted;

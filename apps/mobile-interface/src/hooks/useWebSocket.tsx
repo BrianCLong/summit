@@ -1,5 +1,13 @@
 // @ts-nocheck
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+  useRef,
+} from "react";
 
 interface WebSocketContextType {
   isConnected: boolean;
@@ -15,7 +23,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   const subscribersRef = useRef<Map<string, Set<(data: unknown) => void>>>(new Map());
 
   useEffect(() => {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4000/ws';
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:4000/ws";
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -27,10 +35,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         const { type, data } = JSON.parse(event.data);
         const callbacks = subscribersRef.current.get(type);
         if (callbacks) {
-          callbacks.forEach(cb => cb(data));
+          callbacks.forEach((cb) => cb(data));
         }
       } catch (e) {
-        console.error('WebSocket message parse error:', e);
+        console.error("WebSocket message parse error:", e);
       }
     };
 
@@ -66,7 +74,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 export function useWebSocket() {
   const context = useContext(WebSocketContext);
   if (context === undefined) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
+    throw new Error("useWebSocket must be used within a WebSocketProvider");
   }
   return context;
 }

@@ -15,15 +15,18 @@ structured files for interoperability.
 ## Import/Export Matrix
 
 **Import**
+
 - `docs/specs/*.md` (Summit SDD spec format)
 
 **Export**
+
 - `artifacts/sdd/<slug>/tasks.json`
 - `artifacts/sdd/<slug>/report.json`
 - `artifacts/sdd/<slug>/metrics.json`
 - `artifacts/sdd/<slug>/stamp.json`
 
 **Optional Export**
+
 - `.claude/tasks/<list-id>/task-*.json` (Claude task interop)
 
 ## Determinism Requirements

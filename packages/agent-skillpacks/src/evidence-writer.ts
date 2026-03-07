@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { ToolLoadingReport } from './types.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { ToolLoadingReport } from "./types.js";
 
 const stableSortTools = (report: ToolLoadingReport): ToolLoadingReport => ({
   ...report,
@@ -9,9 +9,9 @@ const stableSortTools = (report: ToolLoadingReport): ToolLoadingReport => ({
   ),
 });
 
-const formatToolLine = (tool: ToolLoadingReport['tools'][number]): string => {
-  const status = tool.decision.allowed ? 'allowed' : 'blocked';
-  const waiver = tool.decision.waiverId ? ` (waiver ${tool.decision.waiverId})` : '';
+const formatToolLine = (tool: ToolLoadingReport["tools"][number]): string => {
+  const status = tool.decision.allowed ? "allowed" : "blocked";
+  const waiver = tool.decision.waiverId ? ` (waiver ${tool.decision.waiverId})` : "";
   return `- ${tool.serverName}:${tool.toolName} → ${status}${waiver} · ${tool.tokenEstimate} tokens`;
 };
 
@@ -19,9 +19,9 @@ export const writeToolLoadingEvidence = async (options: {
   report: ToolLoadingReport;
   outputDir?: string;
 }): Promise<{ jsonPath: string; markdownPath: string }> => {
-  const outputDir = options.outputDir ?? 'artifacts';
-  const jsonPath = path.join(outputDir, 'tool-loading-report.json');
-  const markdownPath = path.join(outputDir, 'tool-loading-report.md');
+  const outputDir = options.outputDir ?? "artifacts";
+  const jsonPath = path.join(outputDir, "tool-loading-report.json");
+  const markdownPath = path.join(outputDir, "tool-loading-report.md");
   const report = stableSortTools(options.report);
 
   await fs.mkdir(outputDir, { recursive: true });
@@ -47,10 +47,10 @@ export const writeToolLoadingEvidence = async (options: {
     `- Estimated tokens: ${report.totals.estimatedTokens}`,
     ``,
     `## Policy`,
-    `- Break-glass used: ${report.policy.breakGlassUsed ? 'yes' : 'no'}`,
+    `- Break-glass used: ${report.policy.breakGlassUsed ? "yes" : "no"}`,
   ];
 
-  await fs.writeFile(markdownPath, `${lines.join('\n')}\n`);
+  await fs.writeFile(markdownPath, `${lines.join("\n")}\n`);
 
   return { jsonPath, markdownPath };
 };

@@ -141,9 +141,7 @@
   <body>
     <div class="wrap">
       <h1>🎼 IntelGraph Orchestra</h1>
-      <div class="subtitle">
-        Conductor Dashboard • Real-time Symphony Status
-      </div>
+      <div class="subtitle">Conductor Dashboard • Real-time Symphony Status</div>
 
       <div class="row">
         <button onclick="refresh()">🔄 Refresh</button>
@@ -201,24 +199,23 @@
     <script>
       async function load() {
         try {
-          const r = await fetch('status.json?ts=' + Date.now());
+          const r = await fetch("status.json?ts=" + Date.now());
           const j = await r.json();
 
           // Update timestamp
-          document.getElementById('when').textContent =
-            'Updated ' + new Date(j.time).toLocaleString();
+          document.getElementById("when").textContent =
+            "Updated " + new Date(j.time).toLocaleString();
 
           // Environment badges
           const env = j.environment || {};
-          document.getElementById('env-badges').innerHTML =
-            `<span class="env-badge">Profile: ${env.profile || 'dev'}</span> ` +
+          document.getElementById("env-badges").innerHTML =
+            `<span class="env-badge">Profile: ${env.profile || "dev"}</span> ` +
             `<span class="env-badge">LOA: ${env.autonomy || 1}</span> ` +
             `<span class="env-badge">RAG-K: ${env.rag_topk || 5}</span>`;
 
           // Services status
           const svc = j.services || {};
-          const statusIcon = (b) =>
-            b === true ? '🟢' : b === false ? '🔴' : '🟡';
+          const statusIcon = (b) => (b === true ? "🟢" : b === false ? "🔴" : "🟡");
           const statusText = (b) =>
             b === true
               ? '<span class="ok">Online</span>'
@@ -226,7 +223,7 @@
                 ? '<span class="bad">Offline</span>'
                 : '<span class="warn">Unknown</span>';
 
-          document.getElementById('svc').innerHTML = `<div class="status-item">
+          document.getElementById("svc").innerHTML = `<div class="status-item">
         <span>${statusIcon(svc.ollama)} Ollama :11434</span>
         ${statusText(svc.ollama)}
       </div>
@@ -241,30 +238,25 @@
 
           // Models
           const models = j.models || {};
-          document.getElementById('models').innerHTML = `<div class="metric">
-        <div class="metric-value">${models.count ?? '–'}</div>
+          document.getElementById("models").innerHTML = `<div class="metric">
+        <div class="metric-value">${models.count ?? "–"}</div>
         <div class="metric-label">Available</div>
       </div>
       <div class="model-list">
-        ${(models.models || []).map((m) => `<div class="model-item">${m}</div>`).join('')}
+        ${(models.models || []).map((m) => `<div class="model-item">${m}</div>`).join("")}
       </div>`;
 
           // RAG stats
           const rag = j.rag || {};
-          document.getElementById('rag-rows').textContent = rag.rows ?? '–';
-          document.getElementById('rag-files').textContent = rag.files ?? '–';
+          document.getElementById("rag-rows").textContent = rag.rows ?? "–";
+          document.getElementById("rag-files").textContent = rag.files ?? "–";
 
           // Raw data
-          document.getElementById('raw').textContent = JSON.stringify(
-            j,
-            null,
-            2,
-          );
+          document.getElementById("raw").textContent = JSON.stringify(j, null, 2);
         } catch (e) {
-          document.getElementById('when').textContent =
+          document.getElementById("when").textContent =
             'No status.json yet. Run "just dash-refresh".';
-          document.getElementById('raw').textContent =
-            (e && e.message) || String(e);
+          document.getElementById("raw").textContent = (e && e.message) || String(e);
         }
       }
 
@@ -275,18 +267,18 @@
       async function runAction(action) {
         try {
           const actionMap = {
-            smoke: 'just%20--justfile%20Justfile.orchestra%20orchestra-smoke',
-            status: 'python3%20tools/status_json.py',
-            health: 'just%20--justfile%20Justfile.orchestra%20orchestra-fast',
-            backup: 'just%20--justfile%20Justfile.orchestra%20backup',
+            smoke: "just%20--justfile%20Justfile.orchestra%20orchestra-smoke",
+            status: "python3%20tools/status_json.py",
+            health: "just%20--justfile%20Justfile.orchestra%20orchestra-fast",
+            backup: "just%20--justfile%20Justfile.orchestra%20backup",
           };
 
           const cmd = actionMap[action];
           if (!cmd) return;
 
-          window.open(`http://127.0.0.1:4381/api/run?cmd=${cmd}`, '_blank');
+          window.open(`http://127.0.0.1:4381/api/run?cmd=${cmd}`, "_blank");
         } catch (e) {
-          alert('Action requires local proxy. Run: node tools/proxy.js');
+          alert("Action requires local proxy. Run: node tools/proxy.js");
         }
       }
 

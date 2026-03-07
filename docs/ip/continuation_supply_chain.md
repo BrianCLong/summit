@@ -17,7 +17,7 @@ The following dependent claims are selected for this family:
 - **C105–C120** (Supply-chain and Red-team clusters from CRM family)
 - **S107–S120** (Supply-chain and Robustness clusters from Simulation Apparatus family)
 - **C83–C86** (Placeholders for core supply-chain claims)
-  - *C83: Cryptographic signing of policy bundles.*
-  - *C84: Verifying bundle integrity using Merkle tree roots.*
-  - *C85: Automated dependency-delta analysis for tool updates.*
-  - *C86: Enforcing least-privilege permissions for new tool versions.*
+  - _C83: Cryptographic signing of policy bundles._
+  - _C84: Verifying bundle integrity using Merkle tree roots._
+  - _C85: Automated dependency-delta analysis for tool updates._
+  - _C86: Enforcing least-privilege permissions for new tool versions._

@@ -110,11 +110,7 @@
           "category": "political_manipulation",
           "manipulation_type": "deepfake_video",
           "confidence": 0.87,
-          "manipulation_markers": [
-            "face_swap",
-            "audio_synthesis",
-            "temporal_artifacts"
-          ]
+          "manipulation_markers": ["face_swap", "audio_synthesis", "temporal_artifacts"]
         }
       },
       "analysis": {
@@ -131,11 +127,7 @@
           "video": {
             "is_deepfake": true,
             "confidence": 0.87,
-            "manipulation_markers": [
-              "face_swap",
-              "audio_synthesis",
-              "temporal_artifacts"
-            ]
+            "manipulation_markers": ["face_swap", "audio_synthesis", "temporal_artifacts"]
           }
         },
         "overall_score": 0.0,
@@ -147,11 +139,7 @@
             "title": "Deepfake Video Detected",
             "description": "Found 3 manipulation markers: face_swap, audio_synthesis, temporal_artifacts. These forensic indicators suggest synthetic or manipulated video content.",
             "severity": "critical",
-            "indicators": [
-              "face_swap",
-              "audio_synthesis",
-              "temporal_artifacts"
-            ]
+            "indicators": ["face_swap", "audio_synthesis", "temporal_artifacts"]
           }
         ],
         "processing_time_ms": 0.013828277587890625
@@ -209,9 +197,7 @@
             "title": "Image Manipulation Detected",
             "description": "Manipulation type: context_removal. The image has been altered in a way that could mislead viewers.",
             "severity": "high",
-            "indicators": [
-              "context_removal"
-            ]
+            "indicators": ["context_removal"]
           }
         ],
         "processing_time_ms": 0.011205673217773438
@@ -385,12 +371,7 @@
           "category": "health_scam",
           "manipulation_type": "fraudulent_product",
           "confidence": 0.96,
-          "red_flags": [
-            "miracle_cure",
-            "conspiracy",
-            "commercial_intent",
-            "urgency_tactics"
-          ]
+          "red_flags": ["miracle_cure", "conspiracy", "commercial_intent", "urgency_tactics"]
         }
       },
       "analysis": {
@@ -401,12 +382,7 @@
             "is_misinfo": true,
             "confidence": 0.96,
             "category": "health_scam",
-            "red_flags": [
-              "miracle_cure",
-              "conspiracy",
-              "commercial_intent",
-              "urgency_tactics"
-            ],
+            "red_flags": ["miracle_cure", "conspiracy", "commercial_intent", "urgency_tactics"],
             "manipulation_type": "fraudulent_product"
           }
         },
@@ -419,12 +395,7 @@
             "title": "Suspicious Language Patterns Detected",
             "description": "Found 4 red flags: miracle_cure, conspiracy, commercial_intent, urgency_tactics. These patterns are commonly associated with health_scam.",
             "severity": "critical",
-            "indicators": [
-              "miracle_cure",
-              "conspiracy",
-              "commercial_intent",
-              "urgency_tactics"
-            ]
+            "indicators": ["miracle_cure", "conspiracy", "commercial_intent", "urgency_tactics"]
           }
         ],
         "processing_time_ms": 0.011920928955078125

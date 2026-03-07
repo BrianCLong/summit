@@ -1,21 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 export function useFocusTrap(containerRef, isOpen, onClose) {
   useEffect(() => {
     if (!isOpen) return;
     const container = containerRef.current;
     if (!container) return;
     const focusable = container.querySelectorAll(
-      'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])',
+      'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
     );
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
     const prevActive = document.activeElement;
     if (first) first.focus();
     function onKey(e) {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose?.();
       }
-      if (e.key !== 'Tab') return;
+      if (e.key !== "Tab") return;
       if (focusable.length === 0) return;
       if (e.shiftKey) {
         if (document.activeElement === first) {
@@ -29,9 +29,9 @@ export function useFocusTrap(containerRef, isOpen, onClose) {
         }
       }
     }
-    container.addEventListener('keydown', onKey);
+    container.addEventListener("keydown", onKey);
     return () => {
-      container.removeEventListener('keydown', onKey);
+      container.removeEventListener("keydown", onKey);
       if (prevActive) prevActive.focus();
     };
   }, [containerRef, isOpen, onClose]);

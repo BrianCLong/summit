@@ -44,11 +44,11 @@ Close the loop: Maestro **explains** every decision, **tunes** itself with safe 
 
 ```ts
 // services/policy/mutate.ts
-import { opaEval } from './opa';
+import { opaEval } from "./opa";
 const tweaks = [
-  (p: string) => p.replace(/startswith\(/g, 'contains('),
-  (p: string) => p.replace(/>=/g, '>'),
-  (p: string) => p.replace(/budget\s*>/g, 'budget >= '),
+  (p: string) => p.replace(/startswith\(/g, "contains("),
+  (p: string) => p.replace(/>=/g, ">"),
+  (p: string) => p.replace(/budget\s*>/g, "budget >= "),
 ];
 export async function mutateAndTest(policy: string, inputs: any[]) {
   const variants = tweaks.map((t) => t(policy));
@@ -59,7 +59,7 @@ export async function mutateAndTest(policy: string, inputs: any[]) {
       const r = await opaEval({ policy: v, input: inp });
       ok = ok && (r.denies > 0 || inp.safe === true);
     }
-    results.push({ variant: 'hash:' + hash(v), survives: ok });
+    results.push({ variant: "hash:" + hash(v), survives: ok });
   }
   return results;
 }
@@ -132,11 +132,7 @@ function total() {
 
 ```ts
 // services/speclive/cep.ts
-export function detect(
-  seq: string[],
-  events: { t: number; k: string }[],
-  windowMs: number,
-) {
+export function detect(seq: string[], events: { t: number; k: string }[], windowMs: number) {
   let i = 0,
     start = events[0]?.t || 0;
   for (const e of events) {
@@ -169,11 +165,7 @@ export function detect(
 
 ```ts
 // services/hypergraph/path.ts
-export function score(
-  file: string,
-  test: string,
-  edges: Record<string, string[]>,
-) {
+export function score(file: string, test: string, edges: Record<string, string[]>) {
   // simple BFS depth<=3
   const q = [file];
   const seen = new Set([file]);
@@ -210,7 +202,7 @@ export function score(
 
 ```ts
 // services/evidence/merkle.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function merkleRoot(files: { name: string; buf: Buffer }[]) {
   let layer = files.map((f) => sha(f.buf));
   while (layer.length > 1) {
@@ -223,7 +215,7 @@ export function merkleRoot(files: { name: string; buf: Buffer }[]) {
   return layer[0];
 }
 function sha(b: Buffer) {
-  return crypto.createHash('sha256').update(b).digest('hex');
+  return crypto.createHash("sha256").update(b).digest("hex");
 }
 ```
 
@@ -331,13 +323,13 @@ export function shapley(gains: number[], k = 100) {
     </div>
     <script>
       $(function () {
-        $('#dcv').text('arm impl@small · eval 0.956 · $0.19');
-        $('#duel').text('A: planner_v5 / B: planner_v6');
-        $('#cep').text('save→retry≤3→success (1.2s) OK');
-        $('#path').text('server/a.ts → func X → test T1');
-        $('#merkle').text('root: 3f9a…c1');
-        $('#voteA').on('click', () => $.post('/api/duel', { winner: 'A' }));
-        $('#voteB').on('click', () => $.post('/api/duel', { winner: 'B' }));
+        $("#dcv").text("arm impl@small · eval 0.956 · $0.19");
+        $("#duel").text("A: planner_v5 / B: planner_v6");
+        $("#cep").text("save→retry≤3→success (1.2s) OK");
+        $("#path").text("server/a.ts → func X → test T1");
+        $("#merkle").text("root: 3f9a…c1");
+        $("#voteA").on("click", () => $.post("/api/duel", { winner: "A" }));
+        $("#voteB").on("click", () => $.post("/api/duel", { winner: "B" }));
       });
     </script>
   </body>

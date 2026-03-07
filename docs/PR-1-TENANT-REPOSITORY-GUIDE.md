@@ -34,15 +34,15 @@ This PR implements **defense-in-depth tenant isolation** at the repository/data 
 ### Creating a New Tenant-Safe Repository
 
 ```typescript
-import { BaseTenantRepository, TenantEntity } from '../repositories/base-tenant-repository.js';
-import { TenantContext } from '../security/tenant-context.js';
+import { BaseTenantRepository, TenantEntity } from "../repositories/base-tenant-repository.js";
+import { TenantContext } from "../security/tenant-context.js";
 
 // 1. Define your entity interface (must extend TenantEntity)
 interface Investigation extends TenantEntity {
   id: string;
   tenant_id: string;
   title: string;
-  status: 'open' | 'closed';
+  status: "open" | "closed";
   assigned_to?: string;
   created_at: Date;
   updated_at: Date;
@@ -51,14 +51,11 @@ interface Investigation extends TenantEntity {
 // 2. Extend BaseTenantRepository
 class InvestigationRepository extends BaseTenantRepository<Investigation> {
   constructor() {
-    super('investigations'); // table name
+    super("investigations"); // table name
   }
 
   // 3. Add custom methods (always require TenantContext!)
-  async findByStatus(
-    context: TenantContext,
-    status: 'open' | 'closed'
-  ): Promise<Investigation[]> {
+  async findByStatus(context: TenantContext, status: "open" | "closed"): Promise<Investigation[]> {
     const result = await this.executeQuery<Investigation>(
       context,
       `SELECT * FROM investigations WHERE tenant_id = $1 AND status = $2`,
@@ -82,7 +79,7 @@ class InvestigationRepository extends BaseTenantRepository<Investigation> {
 ### Using the Repository in Application Code
 
 ```typescript
-import { TenantContext } from '../security/tenant-context.js';
+import { TenantContext } from "../security/tenant-context.js";
 
 // Extract tenant context from request (middleware provides this)
 async function handler(req: AuthenticatedRequest, res: Response) {
@@ -94,8 +91,8 @@ async function handler(req: AuthenticatedRequest, res: Response) {
   const investigations = await repo.findAll(context);
 
   const newInvestigation = await repo.create(context, {
-    title: 'Suspicious Activity Investigation',
-    status: 'open',
+    title: "Suspicious Activity Investigation",
+    status: "open",
   });
 
   // Cross-tenant access is automatically prevented
@@ -115,17 +112,14 @@ class OldInvestigationRepo {
 
   async findById(id: string) {
     // ❌ NO TENANT FILTERING!
-    const { rows } = await this.pool.query(
-      'SELECT * FROM investigations WHERE id = $1',
-      [id]
-    );
+    const { rows } = await this.pool.query("SELECT * FROM investigations WHERE id = $1", [id]);
     return rows[0];
   }
 
   async create(data: any) {
     // ❌ NO TENANT ID INJECTION!
     const { rows } = await this.pool.query(
-      'INSERT INTO investigations (title, status) VALUES ($1, $2) RETURNING *',
+      "INSERT INTO investigations (title, status) VALUES ($1, $2) RETURNING *",
       [data.title, data.status]
     );
     return rows[0];
@@ -138,7 +132,7 @@ class OldInvestigationRepo {
 ```typescript
 class InvestigationRepository extends BaseTenantRepository<Investigation> {
   constructor() {
-    super('investigations');
+    super("investigations");
   }
 
   // ✅ Tenant context required, automatic filtering
@@ -146,10 +140,7 @@ class InvestigationRepository extends BaseTenantRepository<Investigation> {
   // All automatically enforce tenant boundaries
 
   // Custom methods also require tenant context
-  async findByStatus(
-    context: TenantContext,
-    status: string
-  ): Promise<Investigation[]> {
+  async findByStatus(context: TenantContext, status: string): Promise<Investigation[]> {
     // ✅ Tenant filtering enforced by executeQuery
     const result = await this.executeQuery<Investigation>(
       context,
@@ -168,9 +159,9 @@ class InvestigationRepository extends BaseTenantRepository<Investigation> {
 ### Unit Tests (with Mock Context)
 
 ```typescript
-import { createTestTenantContext, TEST_TENANTS } from '../test/helpers/tenant-context-helpers.js';
+import { createTestTenantContext, TEST_TENANTS } from "../test/helpers/tenant-context-helpers.js";
 
-describe('InvestigationRepository', () => {
+describe("InvestigationRepository", () => {
   let repo: InvestigationRepository;
   let tenantAContext: TenantContext;
 
@@ -181,10 +172,10 @@ describe('InvestigationRepository', () => {
     });
   });
 
-  it('should create investigation in tenant scope', async () => {
+  it("should create investigation in tenant scope", async () => {
     const investigation = await repo.create(tenantAContext, {
-      title: 'Test Investigation',
-      status: 'open',
+      title: "Test Investigation",
+      status: "open",
     });
 
     expect(investigation.tenant_id).toBe(TEST_TENANTS.TENANT_A);
@@ -195,10 +186,10 @@ describe('InvestigationRepository', () => {
 ### Integration Tests (Cross-Tenant Isolation)
 
 ```typescript
-import { createMultiTenantContexts, TEST_TENANTS } from '../test/helpers/tenant-context-helpers.js';
+import { createMultiTenantContexts, TEST_TENANTS } from "../test/helpers/tenant-context-helpers.js";
 
-describe('Cross-Tenant Isolation', () => {
-  it('should prevent cross-tenant reads', async () => {
+describe("Cross-Tenant Isolation", () => {
+  it("should prevent cross-tenant reads", async () => {
     const [tenantA, tenantB] = createMultiTenantContexts([
       TEST_TENANTS.TENANT_A,
       TEST_TENANTS.TENANT_B,
@@ -206,8 +197,8 @@ describe('Cross-Tenant Isolation', () => {
 
     // Create investigation in tenant A
     const investigation = await repo.create(tenantA, {
-      title: 'Tenant A Secret',
-      status: 'open',
+      title: "Tenant A Secret",
+      status: "open",
     });
 
     // Attempt to read from tenant B
@@ -259,10 +250,10 @@ describe('Cross-Tenant Isolation', () => {
 ### Service Account Context (Background Jobs)
 
 ```typescript
-import { createServiceAccountContext } from '../test/helpers/tenant-context-helpers.js';
+import { createServiceAccountContext } from "../test/helpers/tenant-context-helpers.js";
 
 async function backgroundJob(tenantId: string) {
-  const context = createServiceAccountContext(tenantId, 'background-processor');
+  const context = createServiceAccountContext(tenantId, "background-processor");
 
   const repo = new InvestigationRepository();
   await repo.findAll(context); // Scoped to tenant
@@ -272,7 +263,7 @@ async function backgroundJob(tenantId: string) {
 ### API Key Authentication
 
 ```typescript
-import { createApiKeyContext } from '../test/helpers/tenant-context-helpers.js';
+import { createApiKeyContext } from "../test/helpers/tenant-context-helpers.js";
 
 async function apiKeyHandler(apiKey: ApiKey) {
   const context = createApiKeyContext(apiKey.tenantId, apiKey.label);
@@ -313,7 +304,7 @@ try {
 } catch (error) {
   if (error instanceof TenantContextError) {
     // Missing tenant_id, requestId, etc.
-    return res.status(401).json({ error: 'Authentication required' });
+    return res.status(401).json({ error: "Authentication required" });
   }
 }
 ```
@@ -328,7 +319,7 @@ try {
 } catch (error) {
   if (error instanceof CrossTenantAccessError) {
     // Attempted cross-tenant access
-    return res.status(403).json({ error: 'Access denied' });
+    return res.status(403).json({ error: "Access denied" });
   }
 }
 ```
@@ -395,6 +386,7 @@ const cacheKey = `investigations:${context.tenantId}:${investigationId}`;
 ## Questions / Support
 
 For questions about this PR or tenant isolation:
+
 - **Architecture**: Check `/docs/AUTHZ_MAP.md`
 - **Code Examples**: See `/server/src/test/integration/tenant-isolation.test.ts`
 - **Migration Help**: Reach out to Security Team

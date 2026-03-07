@@ -19,6 +19,7 @@
 ### Step 1: Open Branch Protection Settings
 
 **Click this link**:
+
 ```
 https://github.com/BrianCLong/summit/settings/branch_protection_rules
 ```
@@ -31,6 +32,7 @@ https://github.com/BrianCLong/summit/settings/branch_protection_rules
 ### Step 3: Reduce Required Status Checks
 
 **Current required checks** (10 total):
+
 ```
 ✓ meta-gate
 ✓ CI Core Gate ✅
@@ -45,6 +47,7 @@ https://github.com/BrianCLong/summit/settings/branch_protection_rules
 ```
 
 **CHANGE TO** (3 total) - Click **X** to remove others:
+
 ```
 ✓ gate
 ✓ CI Core Gate ✅
@@ -52,6 +55,7 @@ https://github.com/BrianCLong/summit/settings/branch_protection_rules
 ```
 
 **Remove these 7 checks** (click X on each):
+
 ```
 ✗ meta-gate
 ✗ Release Readiness Gate
@@ -69,17 +73,15 @@ Click **"Save changes"** button at bottom of page
 ### Step 5: Verify
 
 Run this command to confirm:
+
 ```bash
 gh api repos/BrianCLong/summit/branches/main --jq '.protection.required_status_checks.contexts'
 ```
 
 **Expected output**:
+
 ```json
-[
-  "gate",
-  "CI Core Gate ✅",
-  "Unit Tests"
-]
+["gate", "CI Core Gate ✅", "Unit Tests"]
 ```
 
 ---
@@ -89,11 +91,13 @@ gh api repos/BrianCLong/summit/branches/main --jq '.protection.required_status_c
 ### Immediately After Your Update
 
 **Stabilization PRs** (19069-19072) will:
+
 1. Re-trigger with only 3 required checks (vs 10 before)
 2. Complete checks in 20-40 minutes
 3. Merge to main
 
 **Timeline**:
+
 ```
 [NOW] You update branch protection (5 min)
   ↓
@@ -109,6 +113,7 @@ gh api repos/BrianCLong/summit/branches/main --jq '.protection.required_status_c
 ### After Stabilization PRs Merge
 
 **I will guide you through**:
+
 1. Final branch protection update (require ONLY `pr-gate`)
 2. Workflow registry cleanup
 3. Verification testing
@@ -119,6 +124,7 @@ gh api repos/BrianCLong/summit/branches/main --jq '.protection.required_status_c
 ## Why This Is Critical
 
 ### Current State
+
 ```
 Required checks: 10
 Total workflows running: 153 per PR
@@ -127,6 +133,7 @@ Result: DEADLOCK - nothing can merge
 ```
 
 ### After Your Update
+
 ```
 Required checks: 3
 Total workflows running: Still 153 (but only 3 block merge)
@@ -135,6 +142,7 @@ Result: Stabilization PRs can merge
 ```
 
 ### After Stabilization Activates
+
 ```
 Required checks: 1 (pr-gate)
 Total workflows running: 6-8 per PR
@@ -146,24 +154,26 @@ Result: OPERATIONAL - 15-30 PRs/hour
 
 ## Current Metrics
 
-| Metric | Current | After Your Update | After Stabilization |
-|--------|---------|-------------------|---------------------|
-| **Required checks** | 10 | 3 | 1 |
-| **Total workflows** | 153 | 153 | 6-8 |
-| **Queue depth** | 300+ | 300+ → 50 | <25 |
-| **Throughput** | 0 PRs/hr | 0 → 3 PRs/hr | 15-30 PRs/hr |
-| **Time to merge** | Infinite | 2-4 hours | <30 min |
+| Metric              | Current  | After Your Update | After Stabilization |
+| ------------------- | -------- | ----------------- | ------------------- |
+| **Required checks** | 10       | 3                 | 1                   |
+| **Total workflows** | 153      | 153               | 6-8                 |
+| **Queue depth**     | 300+     | 300+ → 50         | <25                 |
+| **Throughput**      | 0 PRs/hr | 0 → 3 PRs/hr      | 15-30 PRs/hr        |
+| **Time to merge**   | Infinite | 2-4 hours         | <30 min             |
 
 ---
 
 ## Why I Can't Do This For You
 
 **Attempted automated update**:
+
 ```bash
 gh api repos/BrianCLong/summit/branches/main/protection --method PUT ...
 ```
 
 **Result**:
+
 ```
 Error: HTTP 404 Not Found
 Reason: Insufficient permissions (requires admin access)
@@ -179,6 +189,7 @@ Reason: Insufficient permissions (requires admin access)
 ## After You Complete This
 
 **Post here or run**:
+
 ```bash
 node scripts/ci/ci_metrics.mjs
 ```
@@ -194,6 +205,7 @@ And I'll monitor the recovery progress and guide you through the final activatio
 **Cause**: You don't have admin access
 
 **Solution**: Ask repository owner to:
+
 1. Make you an admin temporarily
 2. Or make the changes themselves following this guide
 
@@ -202,6 +214,7 @@ And I'll monitor the recovery progress and guide you through the final activatio
 **Cause**: Conflicting settings or validation error
 
 **Solution**:
+
 1. Try removing checks one at a time
 2. Ensure at least one check is selected
 3. Refresh page and try again
@@ -209,6 +222,7 @@ And I'll monitor the recovery progress and guide you through the final activatio
 ### "How do I know it worked?"
 
 **Verification**:
+
 ```bash
 gh api repos/BrianCLong/summit/branches/main \
   --jq '.protection.required_status_checks.contexts | length'

@@ -36,7 +36,7 @@ export interface CacheManifest {
 }
 
 export interface CacheHitProof {
-  type: 'hit';
+  type: "hit";
   key: string;
   artifactDigest: string;
   manifestDigest: string;
@@ -47,16 +47,16 @@ export interface CacheHitProof {
 }
 
 export interface EvictionProof {
-  type: 'eviction';
-  algorithm: 'LRU';
+  type: "eviction";
+  algorithm: "LRU";
   timestamp: string;
   victim: CacheManifestEntry;
-  survivors: Array<Pick<CacheManifestEntry, 'key' | 'accessCounter'>>;
+  survivors: Array<Pick<CacheManifestEntry, "key" | "accessCounter">>;
   eventDigest: string;
 }
 
 export interface MissFillTrace {
-  type: 'miss-fill';
+  type: "miss-fill";
   key: string;
   canonicalKey: string;
   input: CacheKeyComponents;
@@ -68,14 +68,14 @@ export interface MissFillTrace {
 }
 
 export interface CacheHitResult {
-  type: 'hit';
+  type: "hit";
   artifact: Buffer;
   proof: CacheHitProof;
   entry: CacheManifestEntry;
 }
 
 export interface CacheMissResult {
-  type: 'miss';
+  type: "miss";
   artifact: Buffer;
   trace: MissFillTrace;
   entry: CacheManifestEntry;

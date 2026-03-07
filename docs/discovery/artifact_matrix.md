@@ -1,9 +1,11 @@
 # Artifact Matrix (Top Ecosystems)
 
 ## Summit Readiness Assertion
+
 This matrix aligns with `docs/SUMMIT_READINESS_ASSERTION.md`.
 
 ## Artifact Classes (Intentionally constrained to primary formats)
+
 1. **OCI Images**
    - Digest: `sha256` from registry manifest.
    - Metadata: attach SBOM + provenance in evidence bundle.
@@ -15,5 +17,6 @@ This matrix aligns with `docs/SUMMIT_READINESS_ASSERTION.md`.
    - Metadata: attach SBOM + provenance in evidence bundle.
 
 ## Next Actions
+
 - Confirm publishing endpoints and storage registries for each class.
 - Record authoritative digest calculation procedures per pipeline.

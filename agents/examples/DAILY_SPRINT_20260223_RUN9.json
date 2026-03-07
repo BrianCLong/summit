@@ -20,10 +20,7 @@
   "allowed_operations": ["create", "edit"],
   "verification_requirements": {
     "tier": "C",
-    "artifacts": [
-      "docs/ops/DAILY_SPRINT_2026-02-23.md",
-      "docs/roadmap/STATUS.json"
-    ]
+    "artifacts": ["docs/ops/DAILY_SPRINT_2026-02-23.md", "docs/roadmap/STATUS.json"]
   },
   "debt_budget": {
     "permitted": 0,

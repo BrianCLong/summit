@@ -1,4 +1,4 @@
-import { Relationship, RelationshipType, SocialPost } from './types.js';
+import { Relationship, RelationshipType, SocialPost } from "./types.js";
 
 const mentionRegex = /@([a-zA-Z0-9_\-]+)/g;
 
@@ -15,18 +15,18 @@ export class RelationshipDetector {
         relationships.push({
           from: primary,
           to: target,
-          type: 'mention',
+          type: "mention",
           weight: 1,
-          metadata: { source: 'text' },
+          metadata: { source: "text" },
         });
       }
       return relationships;
     }
 
     const patterns: Array<{ regex: RegExp; type: RelationshipType }> = [
-      { regex: /(\w+)\s+mentions\s+(\w+)/gi, type: 'mention' },
-      { regex: /(\w+)\s+replies\s+to\s+(\w+)/gi, type: 'reply' },
-      { regex: /(\w+)\s+shares\s+(\w+)/gi, type: 'share' },
+      { regex: /(\w+)\s+mentions\s+(\w+)/gi, type: "mention" },
+      { regex: /(\w+)\s+replies\s+to\s+(\w+)/gi, type: "reply" },
+      { regex: /(\w+)\s+shares\s+(\w+)/gi, type: "share" },
     ];
 
     for (const { regex, type } of patterns) {
@@ -38,7 +38,7 @@ export class RelationshipDetector {
           to: to.toLowerCase(),
           type,
           weight: 1,
-          metadata: { source: 'text-pattern' },
+          metadata: { source: "text-pattern" },
         });
         match = regex.exec(text);
       }
@@ -56,9 +56,7 @@ export class RelationshipDetector {
 
       const mentions =
         post.mentions ??
-        [...post.text.matchAll(mentionRegex)].map((match) =>
-          match[1].toLowerCase(),
-        );
+        [...post.text.matchAll(mentionRegex)].map((match) => match[1].toLowerCase());
       for (const mention of mentions) {
         if (mention === author) {
           continue;
@@ -66,7 +64,7 @@ export class RelationshipDetector {
         relationships.push({
           from: author,
           to: mention,
-          type: 'mention',
+          type: "mention",
           weight: 1,
           metadata: { postId: post.id, timestamp },
         });
@@ -76,7 +74,7 @@ export class RelationshipDetector {
         relationships.push({
           from: author,
           to: post.inReplyTo.toLowerCase(),
-          type: 'reply',
+          type: "reply",
           weight: 1,
           metadata: { postId: post.id, timestamp },
         });
@@ -86,7 +84,7 @@ export class RelationshipDetector {
         relationships.push({
           from: author,
           to: post.sharedFrom.toLowerCase(),
-          type: 'share',
+          type: "share",
           weight: 1,
           metadata: { postId: post.id, timestamp },
         });
@@ -105,13 +103,10 @@ export class RelationshipDetector {
       if (existing) {
         existing.weight += rel.weight;
         existing.metadata = {
-          occurrences:
-            ((existing.metadata?.occurrences as number | undefined) ?? 1) + 1,
+          occurrences: ((existing.metadata?.occurrences as number | undefined) ?? 1) + 1,
           sources: [
             ...((existing.metadata?.sources as string[] | undefined) ?? []),
-            rel.metadata?.postId
-              ? `post:${rel.metadata.postId}`
-              : rel.metadata?.source,
+            rel.metadata?.postId ? `post:${rel.metadata.postId}` : rel.metadata?.source,
           ].filter(Boolean),
         };
         merged.set(key, existing);

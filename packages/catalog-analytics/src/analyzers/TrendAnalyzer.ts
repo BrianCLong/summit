@@ -11,7 +11,7 @@ import {
   InsightSeverity,
   TimePeriod,
   AssetUsageMetrics,
-} from '@intelgraph/data-catalog';
+} from "@intelgraph/data-catalog";
 
 export interface ITrendStore {
   getAssetMetrics(assetId: string, period: TimePeriod): Promise<AssetUsageMetrics[]>;
@@ -24,7 +24,10 @@ export class TrendAnalyzer {
   /**
    * Analyze asset popularity trends
    */
-  async analyzePopularityTrends(assetId: string, period: TimePeriod = TimePeriod.MONTH): Promise<TrendDirection> {
+  async analyzePopularityTrends(
+    assetId: string,
+    period: TimePeriod = TimePeriod.MONTH
+  ): Promise<TrendDirection> {
     const metrics = await this.store.getAssetMetrics(assetId, period);
 
     if (metrics.length < 2) {
@@ -51,7 +54,10 @@ export class TrendAnalyzer {
   /**
    * Get top trending assets
    */
-  async getTrendingAssets(limit: number = 10, period: TimePeriod = TimePeriod.WEEK): Promise<PopularAsset[]> {
+  async getTrendingAssets(
+    limit: number = 10,
+    period: TimePeriod = TimePeriod.WEEK
+  ): Promise<PopularAsset[]> {
     const popularAssets = await this.store.getPopularAssets(limit * 2, period);
 
     // Analyze trends for each asset
@@ -83,13 +89,13 @@ export class TrendAnalyzer {
     if (trending.length > 0) {
       insights.push({
         type: InsightType.USAGE_SPIKE,
-        title: 'Trending Assets Detected',
+        title: "Trending Assets Detected",
         description: `${trending.length} assets are experiencing increased usage`,
         severity: InsightSeverity.INFO,
         actionable: false,
         recommendations: [
-          'Review trending assets for quality and documentation',
-          'Consider promoting these assets to other teams',
+          "Review trending assets for quality and documentation",
+          "Consider promoting these assets to other teams",
         ],
       });
     }
@@ -100,14 +106,14 @@ export class TrendAnalyzer {
     if (declining.length > 0) {
       insights.push({
         type: InsightType.USAGE_DROP,
-        title: 'Assets with Declining Usage',
+        title: "Assets with Declining Usage",
         description: `${declining.length} assets are experiencing decreased usage`,
         severity: InsightSeverity.MEDIUM,
         actionable: true,
         recommendations: [
-          'Investigate reasons for declining usage',
-          'Check if assets are deprecated or replaced',
-          'Update documentation to improve discoverability',
+          "Investigate reasons for declining usage",
+          "Check if assets are deprecated or replaced",
+          "Update documentation to improve discoverability",
         ],
       });
     }
@@ -118,7 +124,10 @@ export class TrendAnalyzer {
   /**
    * Get assets with declining usage
    */
-  async getDecliningAssets(limit: number = 10, period: TimePeriod = TimePeriod.WEEK): Promise<PopularAsset[]> {
+  async getDecliningAssets(
+    limit: number = 10,
+    period: TimePeriod = TimePeriod.WEEK
+  ): Promise<PopularAsset[]> {
     const popularAssets = await this.store.getPopularAssets(limit * 2, period);
 
     const assetsWithTrends = await Promise.all(
@@ -152,7 +161,10 @@ export class TrendAnalyzer {
   /**
    * Detect anomalies in usage patterns
    */
-  async detectAnomalies(assetId: string, period: TimePeriod = TimePeriod.MONTH): Promise<Insight[]> {
+  async detectAnomalies(
+    assetId: string,
+    period: TimePeriod = TimePeriod.MONTH
+  ): Promise<Insight[]> {
     const metrics = await this.store.getAssetMetrics(assetId, period);
     const insights: Insight[] = [];
 
@@ -162,7 +174,9 @@ export class TrendAnalyzer {
 
     const scores = metrics.map((m) => this.calculateTrendScore(m));
     const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    const stdDev = Math.sqrt(scores.reduce((sum, s) => sum + Math.pow(s - avg, 2), 0) / scores.length);
+    const stdDev = Math.sqrt(
+      scores.reduce((sum, s) => sum + Math.pow(s - avg, 2), 0) / scores.length
+    );
 
     const latest = scores[scores.length - 1];
 
@@ -170,13 +184,13 @@ export class TrendAnalyzer {
     if (latest > avg + 2 * stdDev) {
       insights.push({
         type: InsightType.USAGE_SPIKE,
-        title: 'Unusual Activity Spike',
-        description: 'Asset is experiencing significantly higher usage than normal',
+        title: "Unusual Activity Spike",
+        description: "Asset is experiencing significantly higher usage than normal",
         severity: InsightSeverity.INFO,
         actionable: true,
         recommendations: [
-          'Monitor asset performance and availability',
-          'Ensure documentation is up to date',
+          "Monitor asset performance and availability",
+          "Ensure documentation is up to date",
         ],
       });
     }
@@ -185,14 +199,14 @@ export class TrendAnalyzer {
     if (latest < avg - 2 * stdDev) {
       insights.push({
         type: InsightType.USAGE_DROP,
-        title: 'Unusual Activity Drop',
-        description: 'Asset is experiencing significantly lower usage than normal',
+        title: "Unusual Activity Drop",
+        description: "Asset is experiencing significantly lower usage than normal",
         severity: InsightSeverity.MEDIUM,
         actionable: true,
         recommendations: [
-          'Check if asset is still accessible',
-          'Review if asset has been deprecated',
-          'Investigate alternative data sources',
+          "Check if asset is still accessible",
+          "Review if asset has been deprecated",
+          "Investigate alternative data sources",
         ],
       });
     }

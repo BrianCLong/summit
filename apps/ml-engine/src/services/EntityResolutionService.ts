@@ -1,10 +1,10 @@
-import { config } from '../config.js';
-import { logger } from '../utils/logger.js';
+import { config } from "../config.js";
+import { logger } from "../utils/logger.js";
 import {
   TrainingPipeline,
   TrainingExample,
   TrainingMetrics,
-} from '../training/TrainingPipeline.js';
+} from "../training/TrainingPipeline.js";
 import {
   ModelBenchmarkingService,
   ABTestingManager,
@@ -17,7 +17,7 @@ import {
   ModelRegistry,
   RealtimeMetricSnapshot,
   RetrainingOrchestrator,
-} from '../benchmarking/index.js';
+} from "../benchmarking/index.js";
 
 /**
  * Represents a potential match between entities with similarity metrics.
@@ -81,7 +81,7 @@ export interface FeedbackRecord {
 }
 
 export interface BatchStatus {
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   progress: number;
   total: number;
   results?: any[];
@@ -112,7 +112,7 @@ export interface EngineInferencePayload {
   modelType: string;
   latencyMs: number;
   success: boolean;
-  inputType: 'graph' | 'image' | 'audio' | 'text' | 'video' | 'multimodal';
+  inputType: "graph" | "image" | "audio" | "text" | "video" | "multimodal";
   metadata?: Record<string, any>;
   metrics?: Partial<PerformanceMetrics>;
 }
@@ -141,7 +141,7 @@ export class EntityResolutionService {
     private readonly abTestingManager: ABTestingManager,
     private readonly hyperparameterOptimizer: HyperparameterOptimizer,
     private readonly modelRegistry: ModelRegistry,
-    private readonly retrainingOrchestrator: RetrainingOrchestrator,
+    private readonly retrainingOrchestrator: RetrainingOrchestrator
   ) {}
 
   /**
@@ -160,16 +160,15 @@ export class EntityResolutionService {
     await this.benchmarkingService.initialize();
     await this.abTestingManager.initialize();
 
-    this.retrainingOrchestrator.registerModelType('entity-resolution', {
-      degradationThreshold:
-        config.ml.autoTuning.performanceDegradationThreshold,
+    this.retrainingOrchestrator.registerModelType("entity-resolution", {
+      degradationThreshold: config.ml.autoTuning.performanceDegradationThreshold,
       evaluationWindow: config.ml.autoTuning.evaluationWindow,
       minEvaluations: config.ml.autoTuning.minEvaluations,
       cooldownMs: config.ml.autoTuning.cooldownMs,
     });
 
     this.initialized = true;
-    logger.info('EntityResolutionService initialized with benchmarking and auto-tuning');
+    logger.info("EntityResolutionService initialized with benchmarking and auto-tuning");
   }
 
   /**
@@ -184,7 +183,7 @@ export class EntityResolutionService {
   async findDuplicates(
     entityId: string,
     limit: number = 10,
-    threshold: number = 0.8,
+    threshold: number = 0.8
   ): Promise<EntityMatch[]> {
     const start = process.hrtime.bigint();
 
@@ -196,7 +195,7 @@ export class EntityResolutionService {
       .filter((match) => match.similarity >= threshold)
       .slice(0, limit);
 
-    await this.recordEntityResolutionInference('findDuplicates', entityId, start);
+    await this.recordEntityResolutionInference("findDuplicates", entityId, start);
     return matches;
   }
 
@@ -212,7 +211,7 @@ export class EntityResolutionService {
   async bulkResolution(
     entityIds: string[],
     threshold: number = 0.8,
-    maxClusters: number = 100,
+    maxClusters: number = 100
   ): Promise<string[][]> {
     const start = process.hrtime.bigint();
 
@@ -221,7 +220,7 @@ export class EntityResolutionService {
       clusters.push(entityIds.slice(i, Math.min(i + 3, entityIds.length)));
     }
 
-    await this.recordEntityResolutionInference('bulkResolution', entityIds.join(','), start);
+    await this.recordEntityResolutionInference("bulkResolution", entityIds.join(","), start);
     return clusters.slice(0, maxClusters);
   }
 
@@ -235,7 +234,7 @@ export class EntityResolutionService {
    */
   async trainFromFeedback(
     positiveExamples: any[],
-    negativeExamples: any[],
+    negativeExamples: any[]
   ): Promise<TrainingResult> {
     const normalizedExamples = [
       ...this.normalizeFeedbackExamples(positiveExamples, true),
@@ -243,22 +242,22 @@ export class EntityResolutionService {
     ];
 
     const historical = await this.trainingPipeline.collectTrainingData(
-      Math.max(100, normalizedExamples.length),
+      Math.max(100, normalizedExamples.length)
     );
     const allExamples = [...historical, ...normalizedExamples];
 
     const optimization = await this.hyperparameterOptimizer.optimize(allExamples, {
-      modelType: 'random_forest',
+      modelType: "random_forest",
       nTrials: 30,
     });
 
     const modelVersion = await this.trainingPipeline.trainModel(
       allExamples,
-      'random_forest',
-      optimization.bestHyperparameters,
+      "random_forest",
+      optimization.bestHyperparameters
     );
 
-    await this.modelRegistry.ensureRegistered('entity-resolution', modelVersion.version, {
+    await this.modelRegistry.ensureRegistered("entity-resolution", modelVersion.version, {
       metrics: modelVersion.metrics,
       hyperparameters: modelVersion.hyperparameters,
       modelPath: modelVersion.modelPath,
@@ -273,13 +272,14 @@ export class EntityResolutionService {
     };
   }
 
-  async calculateSimilarity(
-    entity1Id: string,
-    entity2Id: string,
-  ): Promise<number> {
+  async calculateSimilarity(entity1Id: string, entity2Id: string): Promise<number> {
     const start = process.hrtime.bigint();
     const similarity = Math.random();
-    await this.recordEntityResolutionInference('calculateSimilarity', `${entity1Id}:${entity2Id}`, start);
+    await this.recordEntityResolutionInference(
+      "calculateSimilarity",
+      `${entity1Id}:${entity2Id}`,
+      start
+    );
     return similarity;
   }
 
@@ -289,7 +289,7 @@ export class EntityResolutionService {
    * @returns PerformanceMetrics object with accuracy, precision, recall, F1 score, and processing time
    */
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
-    const activeModel = await this.modelRegistry.getActiveModel('entity-resolution');
+    const activeModel = await this.modelRegistry.getActiveModel("entity-resolution");
     if (!activeModel) {
       return {
         accuracy: 0,
@@ -304,7 +304,7 @@ export class EntityResolutionService {
   }
 
   async recordFeedback(feedback: FeedbackRecord): Promise<void> {
-    logger.debug('Feedback recorded for entity resolution', feedback);
+    logger.debug("Feedback recorded for entity resolution", feedback);
   }
 
   /**
@@ -317,26 +317,26 @@ export class EntityResolutionService {
    */
   async getSemanticEmbeddings(
     texts: string[],
-    modelName: string = 'all-MiniLM-L6-v2',
+    modelName: string = "all-MiniLM-L6-v2"
   ): Promise<number[][]> {
-    const model = await this.modelRegistry.ensureRegistered('nlp/spacy', modelName, {
-      modelPath: 'external',
+    const model = await this.modelRegistry.ensureRegistered("nlp/spacy", modelName, {
+      modelPath: "external",
     });
 
     const start = process.hrtime.bigint();
     const embeddings = texts.map(() =>
       Array(384)
         .fill(0)
-        .map(() => Math.random()),
+        .map(() => Math.random())
     );
 
     await this.benchmarkingService.recordInference({
       modelVersionId: model.id,
-      modelType: 'nlp/spacy',
+      modelType: "nlp/spacy",
       latencyMs: this.calculateLatency(start),
       success: true,
-      inputType: 'text',
-      metadata: { operation: 'embedding', count: texts.length, modelName },
+      inputType: "text",
+      metadata: { operation: "embedding", count: texts.length, modelName },
     });
 
     return embeddings;
@@ -345,48 +345,44 @@ export class EntityResolutionService {
   async calculateSemanticSimilarity(
     text1: string,
     text2: string,
-    modelName: string = 'all-MiniLM-L6-v2',
+    modelName: string = "all-MiniLM-L6-v2"
   ): Promise<number> {
-    const model = await this.modelRegistry.ensureRegistered('nlp/spacy', modelName, {
-      modelPath: 'external',
+    const model = await this.modelRegistry.ensureRegistered("nlp/spacy", modelName, {
+      modelPath: "external",
     });
     const start = process.hrtime.bigint();
     const similarity = Math.random();
 
     await this.benchmarkingService.recordInference({
       modelVersionId: model.id,
-      modelType: 'nlp/spacy',
+      modelType: "nlp/spacy",
       latencyMs: this.calculateLatency(start),
       success: true,
-      inputType: 'text',
-      metadata: { operation: 'semantic_similarity' },
+      inputType: "text",
+      metadata: { operation: "semantic_similarity" },
     });
 
     return similarity;
   }
 
-  async processBatch(
-    batchId: string,
-    entities: any[],
-    config?: any,
-  ): Promise<void> {
+  async processBatch(batchId: string, entities: any[], config?: any): Promise<void> {
     const start = process.hrtime.bigint();
     this.batches.set(batchId, {
-      status: 'processing',
+      status: "processing",
       progress: 0,
       total: entities.length,
     });
 
     setTimeout(() => {
       this.batches.set(batchId, {
-        status: 'completed',
+        status: "completed",
         progress: entities.length,
         total: entities.length,
         results: entities.map((entity) => ({ ...entity, processed: true })),
       });
     }, 1000);
 
-    await this.recordEntityResolutionInference('processBatch', batchId, start, {
+    await this.recordEntityResolutionInference("processBatch", batchId, start, {
       batchSize: entities.length,
       config,
     });
@@ -395,7 +391,7 @@ export class EntityResolutionService {
   async getBatchStatus(batchId: string): Promise<BatchStatus> {
     return (
       this.batches.get(batchId) || {
-        status: 'pending',
+        status: "pending",
         progress: 0,
         total: 0,
       }
@@ -408,16 +404,14 @@ export class EntityResolutionService {
    * @returns Array of ModelInfo objects with version, metrics, and metadata
    */
   async getAvailableModels(): Promise<ModelInfo[]> {
-    const versions = await this.modelRegistry.listVersions('entity-resolution', 25);
+    const versions = await this.modelRegistry.listVersions("entity-resolution", 25);
     return versions.map((version) => ({
       id: version.id,
       name: version.modelType,
       version: version.version,
       loaded: version.isActive,
       type: version.modelType,
-      metrics: this.mapTrainingMetricsToPerformance(
-        version.metrics as TrainingMetrics,
-      ),
+      metrics: this.mapTrainingMetricsToPerformance(version.metrics as TrainingMetrics),
       hyperparameters: version.hyperparameters,
       createdAt: version.createdAt,
     }));
@@ -431,7 +425,7 @@ export class EntityResolutionService {
 
     await this.trainingPipeline.activateModel(model.id);
     this.loadedModels.add(model.id);
-    logger.info('Model activated', { modelVersionId: model.id });
+    logger.info("Model activated", { modelVersionId: model.id });
   }
 
   /**
@@ -443,10 +437,7 @@ export class EntityResolutionService {
     await this.abTestingManager.createOrUpdateExperiment(config);
   }
 
-  async assignToABTest(
-    experimentName: string,
-    subjectId: string,
-  ): Promise<ABTestAssignment> {
+  async assignToABTest(experimentName: string, subjectId: string): Promise<ABTestAssignment> {
     return this.abTestingManager.assignVariant(experimentName, subjectId);
   }
 
@@ -459,16 +450,20 @@ export class EntityResolutionService {
   }
 
   async optimizeHyperparameters(
-    request: HyperparameterOptimizationRequest,
+    request: HyperparameterOptimizationRequest
   ): Promise<HyperparameterOptimizationResult> {
     const trainingData = await this.trainingPipeline.collectTrainingData();
     return this.hyperparameterOptimizer.optimize(trainingData, request);
   }
 
   async recordExternalEngineBenchmark(payload: EngineBenchmarkPayload): Promise<void> {
-    const model = await this.modelRegistry.ensureRegistered(payload.modelType, payload.modelVersion, {
-      modelPath: 'external',
-    });
+    const model = await this.modelRegistry.ensureRegistered(
+      payload.modelType,
+      payload.modelVersion,
+      {
+        modelPath: "external",
+      }
+    );
 
     await this.benchmarkingService.recordPerformance({
       modelVersionId: model.id,
@@ -477,22 +472,24 @@ export class EntityResolutionService {
       precision: payload.metrics.precision,
       recall: payload.metrics.recall,
       f1Score: payload.metrics.f1Score,
-      testSetSize: payload.context?.testSetSize
-        ? Number(payload.context.testSetSize)
-        : undefined,
+      testSetSize: payload.context?.testSetSize ? Number(payload.context.testSetSize) : undefined,
       evaluationDate: new Date(),
       evaluationContext: {
         dataset: payload.dataset,
         context: payload.context,
-        stage: 'external-benchmark',
+        stage: "external-benchmark",
       },
     });
   }
 
   async recordExternalInference(payload: EngineInferencePayload): Promise<void> {
-    const model = await this.modelRegistry.ensureRegistered(payload.modelType, payload.modelVersion, {
-      modelPath: 'external',
-    });
+    const model = await this.modelRegistry.ensureRegistered(
+      payload.modelType,
+      payload.modelVersion,
+      {
+        modelPath: "external",
+      }
+    );
 
     await this.benchmarkingService.recordInference({
       modelVersionId: model.id,
@@ -542,10 +539,7 @@ export class EntityResolutionService {
     };
   }
 
-  private normalizeFeedbackExamples(
-    examples: any[],
-    isMatch: boolean,
-  ): TrainingExample[] {
+  private normalizeFeedbackExamples(examples: any[], isMatch: boolean): TrainingExample[] {
     return (examples || []).map((example) => ({
       entity1: example.entity1 ?? example[0] ?? {},
       entity2: example.entity2 ?? example[1] ?? {},
@@ -560,19 +554,19 @@ export class EntityResolutionService {
     operation: string,
     reference: string,
     start: bigint,
-    metadata: Record<string, any> = {},
+    metadata: Record<string, any> = {}
   ): Promise<void> {
-    const activeModel = await this.modelRegistry.getActiveModel('entity-resolution');
+    const activeModel = await this.modelRegistry.getActiveModel("entity-resolution");
     if (!activeModel) {
       return;
     }
 
     await this.benchmarkingService.recordInference({
       modelVersionId: activeModel.id,
-      modelType: 'entity-resolution',
+      modelType: "entity-resolution",
       latencyMs: this.calculateLatency(start),
       success: true,
-      inputType: 'graph',
+      inputType: "graph",
       metadata: {
         operation,
         reference,

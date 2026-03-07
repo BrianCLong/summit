@@ -1,6 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-import { ActionProposal, Constraint, SimulationOutcome } from '../core/types.js';
-import { SimulationSandbox } from './sandbox.js';
+import { v4 as uuidv4 } from "uuid";
+import { ActionProposal, Constraint, SimulationOutcome } from "../core/types.js";
+import { SimulationSandbox } from "./sandbox.js";
 
 export interface PolicyEngineConfig {
   objectiveWeights: Record<string, number>;
@@ -9,13 +9,20 @@ export interface PolicyEngineConfig {
 }
 
 export class PolicyEngine {
-  constructor(private readonly sandbox: SimulationSandbox, private readonly config: PolicyEngineConfig) {}
+  constructor(
+    private readonly sandbox: SimulationSandbox,
+    private readonly config: PolicyEngineConfig
+  ) {}
 
   rankCandidates(
     assetId: string,
     candidatePayloads: Record<string, unknown>[],
     state: Record<string, number>
-  ): { proposal: ActionProposal; outcome: SimulationOutcome; constraintViolations: Constraint[] }[] {
+  ): {
+    proposal: ActionProposal;
+    outcome: SimulationOutcome;
+    constraintViolations: Constraint[];
+  }[] {
     const baseProposals = candidatePayloads.map<ActionProposal>((payload) => ({
       id: uuidv4(),
       assetId,
@@ -34,7 +41,10 @@ export class PolicyEngine {
         const violations = this.evaluateConstraints(withScores);
         return { proposal: withScores, outcome, constraintViolations: violations };
       })
-      .filter(({ proposal, constraintViolations }) => proposal.riskScore <= this.config.riskTolerance || constraintViolations.length === 0)
+      .filter(
+        ({ proposal, constraintViolations }) =>
+          proposal.riskScore <= this.config.riskTolerance || constraintViolations.length === 0
+      )
       .sort((a, b) => b.proposal.objectiveScore - a.proposal.objectiveScore);
   }
 

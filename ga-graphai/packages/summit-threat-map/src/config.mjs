@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync } from "node:fs";
 
 const defaultConfig = {
   weights: {
@@ -16,22 +16,25 @@ function parseScalar(v) {
 }
 
 function parseSimpleYaml(raw) {
-  const lines = raw.split('\n');
+  const lines = raw.split("\n");
   const out = { weights: {} };
   let section = null;
   for (const line of lines) {
-    if (!line.trim() || line.trim().startsWith('#')) {
+    if (!line.trim() || line.trim().startsWith("#")) {
       continue;
     }
-    if (!line.startsWith(' ') && line.trim().endsWith(':')) {
-      section = line.replace(':', '').trim();
+    if (!line.startsWith(" ") && line.trim().endsWith(":")) {
+      section = line.replace(":", "").trim();
       continue;
     }
-    const [k, v] = line.trim().split(':').map((x) => x.trim());
+    const [k, v] = line
+      .trim()
+      .split(":")
+      .map((x) => x.trim());
     if (!k || v === undefined) {
       continue;
     }
-    if (section === 'weights') {
+    if (section === "weights") {
       out.weights[k] = parseScalar(v);
     } else {
       out[k] = parseScalar(v);
@@ -40,9 +43,9 @@ function parseSimpleYaml(raw) {
   return out;
 }
 
-export function loadScoringConfig(path = 'scoring.yaml') {
+export function loadScoringConfig(path = "scoring.yaml") {
   try {
-    const raw = readFileSync(path, 'utf-8');
+    const raw = readFileSync(path, "utf-8");
     const parsed = parseSimpleYaml(raw);
     return {
       weights: {

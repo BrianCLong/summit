@@ -23,6 +23,6 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
-    - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
   revisionHistoryLimit: 5

@@ -7,6 +7,7 @@ This document traces the **Path-Native Evidence** flow from query to explanation
 ---
 
 ## 1. The Query (User Intent)
+
 **Input:** "Why is Payment Gateway high risk?"
 **Intent:** Causal explanation of risk attribution.
 
@@ -28,9 +29,9 @@ The system retrieves ordered paths. Note the preservation of direction and struc
 ```markdown
 [Path 1]
 (ThreatActor: "Lazarus Group")
-  --[EXPLOITS {method: "Zero-Day"}]-->
+--[EXPLOITS {method: "Zero-Day"}]-->
 (Vulnerability: "Log4Shell")
-  --[AFFECTS {severity: "CRITICAL"}]-->
+--[AFFECTS {severity: "CRITICAL"}]-->
 (Asset: "Payment Gateway")
 ```
 
@@ -38,12 +39,14 @@ The system retrieves ordered paths. Note the preservation of direction and struc
 
 ```markdown
 ## GRAPH CONTEXT
+
 The following evidence consists of validated traversal paths...
 
 [Path 1] (Confidence: 0.99)
 (ThreatActor: "Lazarus Group") --[EXPLOITS {method: "Zero-Day"}]--> (Vulnerability: "Log4Shell") --[AFFECTS {severity: "CRITICAL"}]--> (Asset: "Payment Gateway")
 
 ## INSTRUCTION
+
 Explain why the asset is high risk using the provided paths. Cite your sources.
 ```
 
@@ -53,8 +56,8 @@ Explain why the asset is high risk using the provided paths. Cite your sources.
 
 ## 6. The Explanation (Traceability)
 
-*   **Assertion:** "Affected by Log4Shell" -> **Evidence:** Path 1, Segment 2 (`AFFECTS`).
-*   **Assertion:** "Exploited by Lazarus Group" -> **Evidence:** Path 1, Segment 1 (`EXPLOITS`).
+- **Assertion:** "Affected by Log4Shell" -> **Evidence:** Path 1, Segment 2 (`AFFECTS`).
+- **Assertion:** "Exploited by Lazarus Group" -> **Evidence:** Path 1, Segment 1 (`EXPLOITS`).
 
 ---
 

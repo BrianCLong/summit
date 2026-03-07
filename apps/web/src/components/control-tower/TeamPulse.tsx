@@ -2,7 +2,7 @@
  * Team Pulse - Shows team members' current status and assignments
  */
 
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Paper,
@@ -11,57 +11,60 @@ import {
   Chip,
   Skeleton,
   useTheme,
-} from '@mui/material';
+} from '@mui/material'
 
 export interface TeamMember {
   user: {
-    id: string;
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  };
+    id: string
+    name: string
+    email: string
+    avatarUrl?: string
+  }
   status: {
-    online: boolean;
-    statusMessage?: string;
-    availableForAssignment: boolean;
-  };
-  currentAssignment?: string;
-  activeSituationsCount: number;
-  eventsAssignedToday: number;
+    online: boolean
+    statusMessage?: string
+    availableForAssignment: boolean
+  }
+  currentAssignment?: string
+  activeSituationsCount: number
+  eventsAssignedToday: number
 }
 
 export interface TeamPulseProps {
-  members: TeamMember[];
-  isLoading?: boolean;
+  members: TeamMember[]
+  isLoading?: boolean
 }
 
 export const TeamPulse: React.FC<TeamPulseProps> = ({
   members,
   isLoading = false,
 }) => {
-  const theme = useTheme();
+  const theme = useTheme()
 
   const getInitials = (name: string): string => {
     return name
       .split(' ')
-      .map((n) => n[0])
+      .map(n => n[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2);
-  };
+      .slice(0, 2)
+  }
 
   if (isLoading) {
     return (
-      <Paper elevation={0} sx={{ p: 2, border: `1px solid ${theme.palette.divider}` }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 2, border: `1px solid ${theme.palette.divider}` }}
+      >
         <Skeleton variant="text" width="30%" height={24} />
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <Box key={i} display="flex" alignItems="center" gap={2} mt={2}>
             <Skeleton variant="circular" width={32} height={32} />
             <Skeleton variant="text" width="60%" />
           </Box>
         ))}
       </Paper>
-    );
+    )
   }
 
   return (
@@ -73,7 +76,12 @@ export const TeamPulse: React.FC<TeamPulseProps> = ({
         borderRadius: 2,
       }}
     >
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
         <Typography variant="h6" fontWeight={600}>
           👥 Team Pulse
         </Typography>
@@ -87,7 +95,7 @@ export const TeamPulse: React.FC<TeamPulseProps> = ({
       </Box>
 
       <Box display="flex" flexDirection="column" gap={1.5}>
-        {members.map((member) => (
+        {members.map(member => (
           <Box
             key={member.user.id}
             display="flex"
@@ -120,8 +128,8 @@ export const TeamPulse: React.FC<TeamPulseProps> = ({
                   bgcolor: member.status.availableForAssignment
                     ? theme.palette.success.main
                     : member.status.online
-                    ? theme.palette.warning.main
-                    : theme.palette.grey[400],
+                      ? theme.palette.warning.main
+                      : theme.palette.grey[400],
                   border: `2px solid ${theme.palette.background.paper}`,
                 }}
               />
@@ -136,8 +144,8 @@ export const TeamPulse: React.FC<TeamPulseProps> = ({
                 {member.status.availableForAssignment
                   ? 'Available'
                   : member.currentAssignment
-                  ? `Working on: ${member.currentAssignment}`
-                  : member.status.statusMessage || 'Busy'}
+                    ? `Working on: ${member.currentAssignment}`
+                    : member.status.statusMessage || 'Busy'}
               </Typography>
             </Box>
 
@@ -175,7 +183,7 @@ export const TeamPulse: React.FC<TeamPulseProps> = ({
         </Typography>
       </Box>
     </Paper>
-  );
-};
+  )
+}
 
-export default TeamPulse;
+export default TeamPulse

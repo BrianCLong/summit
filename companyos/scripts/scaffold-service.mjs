@@ -46,10 +46,7 @@ fs.writeFileSync(path.join(svcDir, "service.yaml"), serviceYaml);
 // 2) basic Node template (you can reuse the api-svc template or a smaller one)
 fs.mkdirSync(path.join(svcDir, "src"));
 fs.mkdirSync(path.join(svcDir, "tests"));
-fs.writeFileSync(
-  path.join(svcDir, "src", "index.ts"),
-  `console.log("${svc} starting...");\n`
-);
+fs.writeFileSync(path.join(svcDir, "src", "index.ts"), `console.log("${svc} starting...");\n`);
 
 // 3) TODO: copy shared package.json/tsconfig template (or link to existing)
 console.log(`✅ Created skeleton for service ${svc} in ${svcDir}`);

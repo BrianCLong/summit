@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Agent Operations Specification (AgentOps)
 
 **Status**: Authoritative

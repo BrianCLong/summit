@@ -18,10 +18,7 @@
   "allowed_operations": ["create", "edit"],
   "verification_requirements": {
     "tier": "C",
-    "artifacts": [
-      "docs/runbooks/agent-readiness-plus.md",
-      "docs/roadmap/STATUS.json"
-    ]
+    "artifacts": ["docs/runbooks/agent-readiness-plus.md", "docs/roadmap/STATUS.json"]
   },
   "debt_budget": {
     "permitted": 0,

@@ -7,13 +7,13 @@ export interface QueueJob {
 
 export interface EnqueueReceipt {
   jobId: string;
-  status: 'enqueued' | 'failed';
+  status: "enqueued" | "failed";
   enqueuedAt: number;
 }
 
 export interface JobStatus {
   jobId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   attempts: number;
 }
 

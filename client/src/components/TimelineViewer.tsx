@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Button } from '@mui/material';
-import { gql, useQuery } from '@apollo/client';
-import { DataSet, Timeline } from 'vis-timeline/standalone';
-import 'vis-timeline/dist/vis-timeline-graph2d.min.css';
+import React, { useEffect, useRef } from "react";
+import { Box, Button } from "@mui/material";
+import { gql, useQuery } from "@apollo/client";
+import { DataSet, Timeline } from "vis-timeline/standalone";
+import "vis-timeline/dist/vis-timeline-graph2d.min.css";
 
 const EVENTS_QUERY = gql`
   query TimelineEvents($investigationId: ID!) {
@@ -36,7 +36,7 @@ type TimelineDataItem = {
   start: string;
   group?: string;
   data?: {
-    kind: 'entity' | 'relationship';
+    kind: "entity" | "relationship";
     entity?: InvestigationEntity;
     relationship?: InvestigationEntity;
   };
@@ -51,7 +51,7 @@ type TimelineItems = {
 };
 
 type TimelineInstance = {
-  on: (event: 'select', callback: (props: TimelineSelectEvent) => void) => void;
+  on: (event: "select", callback: (props: TimelineSelectEvent) => void) => void;
   setItems: (items: unknown) => void;
   setWindow: (start: Date, end: Date) => void;
 };
@@ -67,10 +67,7 @@ interface TimelineViewerProps {
   onSelect?: (item: TimelineDataItem) => void;
 }
 
-const TimelineViewer: React.FC<TimelineViewerProps> = ({
-  investigationId,
-  onSelect,
-}) => {
+const TimelineViewer: React.FC<TimelineViewerProps> = ({ investigationId, onSelect }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<TimelineInstance | null>(null);
 
@@ -83,12 +80,8 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
       const items = new DataSet([]) as unknown as TimelineItems;
       const options = { zoomable: true };
       const TimelineCtor = Timeline as unknown as TimelineConstructor;
-      timelineRef.current = new TimelineCtor(
-        containerRef.current,
-        items,
-        options,
-      );
-      timelineRef.current.on('select', (props: TimelineSelectEvent) => {
+      timelineRef.current = new TimelineCtor(containerRef.current, items, options);
+      timelineRef.current.on("select", (props: TimelineSelectEvent) => {
         const [selectedId] = props.items;
         if (selectedId === undefined || selectedId === null || !onSelect) return;
         const item = items.get(selectedId);
@@ -102,30 +95,30 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
           id: `entity-${e.id}`,
           content: `🧩 ${e.type}`,
           start: e.createdAt,
-          group: 'Entities',
-          data: { kind: 'entity', entity: e },
+          group: "Entities",
+          data: { kind: "entity", entity: e },
         })),
         ...(data.relationships || []).map((r) => ({
           id: `rel-${r.id}`,
           content: `🔗 ${r.type}`,
           start: r.createdAt,
-          group: 'Relationships',
-          data: { kind: 'relationship', relationship: r },
+          group: "Relationships",
+          data: { kind: "relationship", relationship: r },
         })),
       ]);
       timelineRef.current.setItems(items);
     }
   }, [data, onSelect]);
 
-  const setRange = (range: 'hour' | 'day' | 'week') => {
+  const setRange = (range: "hour" | "day" | "week") => {
     if (!timelineRef.current) return;
     const end = new Date();
     let start: Date;
     switch (range) {
-      case 'hour':
+      case "hour":
         start = new Date(end.getTime() - 60 * 60 * 1000);
         break;
-      case 'day':
+      case "day":
         start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
         break;
       default:
@@ -137,13 +130,13 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   return (
     <Box>
       <Box sx={{ mb: 1 }}>
-        <Button size="small" onClick={() => setRange('hour')}>
+        <Button size="small" onClick={() => setRange("hour")}>
           Hour
         </Button>
-        <Button size="small" onClick={() => setRange('day')}>
+        <Button size="small" onClick={() => setRange("day")}>
           Day
         </Button>
-        <Button size="small" onClick={() => setRange('week')}>
+        <Button size="small" onClick={() => setRange("week")}>
           Week
         </Button>
       </Box>

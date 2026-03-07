@@ -2,17 +2,17 @@
  * ID generation utilities for decision graph objects
  */
 
-import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 
 // Namespace UUIDs for deterministic ID generation
 const NAMESPACES = {
-  entity: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
-  claim: '6ba7b811-9dad-11d1-80b4-00c04fd430c8',
-  evidence: '6ba7b812-9dad-11d1-80b4-00c04fd430c8',
-  decision: '6ba7b813-9dad-11d1-80b4-00c04fd430c8',
-  provenance: '6ba7b814-9dad-11d1-80b4-00c04fd430c8',
-  relationship: '6ba7b815-9dad-11d1-80b4-00c04fd430c8',
-  disclosure: '6ba7b816-9dad-11d1-80b4-00c04fd430c8',
+  entity: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  claim: "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+  evidence: "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+  decision: "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
+  provenance: "6ba7b814-9dad-11d1-80b4-00c04fd430c8",
+  relationship: "6ba7b815-9dad-11d1-80b4-00c04fd430c8",
+  disclosure: "6ba7b816-9dad-11d1-80b4-00c04fd430c8",
 } as const;
 
 type ObjectType = keyof typeof NAMESPACES;
@@ -28,10 +28,7 @@ export function generateId(type: ObjectType): string {
  * Generate a deterministic UUID based on content
  * Useful for deduplication and idempotent operations
  */
-export function generateDeterministicId(
-  type: ObjectType,
-  content: string,
-): string {
+export function generateDeterministicId(type: ObjectType, content: string): string {
   const namespace = NAMESPACES[type];
   return `${type}_${uuidv5(content, namespace)}`;
 }
@@ -76,16 +73,16 @@ export function generateVersion(major: number = 0, minor: number = 1, patch: num
  */
 export function incrementVersion(
   version: string,
-  type: 'major' | 'minor' | 'patch' = 'patch',
+  type: "major" | "minor" | "patch" = "patch"
 ): string {
-  const [major, minor, patch] = version.split('.').map(Number);
+  const [major, minor, patch] = version.split(".").map(Number);
 
   switch (type) {
-    case 'major':
+    case "major":
       return `${major + 1}.0.0`;
-    case 'minor':
+    case "minor":
       return `${major}.${minor + 1}.0`;
-    case 'patch':
+    case "patch":
     default:
       return `${major}.${minor}.${patch + 1}`;
   }

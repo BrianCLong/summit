@@ -3,18 +3,18 @@ name: Policy Auto-Tuning CI
 on:
   push:
     paths:
-      - 'server/src/policy-engine/**'
-      - 'server/src/scripts/policy-propose.ts'
-      - '.github/workflows/policy-auto-tuning-ci.yml'
+      - "server/src/policy-engine/**"
+      - "server/src/scripts/policy-propose.ts"
+      - ".github/workflows/policy-auto-tuning-ci.yml"
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
-      - 'server/src/policy-engine/**'
-      - 'server/src/scripts/policy-propose.ts'
+      - "server/src/policy-engine/**"
+      - "server/src/scripts/policy-propose.ts"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install -g pnpm && pnpm install --frozen-lockfile

@@ -3,8 +3,8 @@
  * Extensible connector system for integrating with external services
  */
 
-import { EventEmitter } from 'events';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { EventEmitter } from "events";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
 export interface ConnectorConfig {
   id: string;
@@ -30,13 +30,7 @@ export interface ConnectorConfig {
 }
 
 export interface AuthenticationConfig {
-  type:
-    | 'none'
-    | 'api_key'
-    | 'basic'
-    | 'bearer'
-    | 'oauth2'
-    | 'custom';
+  type: "none" | "api_key" | "basic" | "bearer" | "oauth2" | "custom";
   credentials?: {
     apiKey?: string;
     username?: string;
@@ -52,20 +46,20 @@ export interface AuthenticationConfig {
 export interface ConnectorOperation {
   id: string;
   name: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   endpoint: string;
   description?: string;
   parameters?: OperationParameter[];
   requestSchema?: any;
   responseSchema?: any;
   capabilities?: string[];
-  stability?: 'experimental' | 'beta' | 'ga';
+  stability?: "experimental" | "beta" | "ga";
 }
 
 export interface OperationParameter {
   name: string;
-  type: 'path' | 'query' | 'header' | 'body';
-  dataType: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  type: "path" | "query" | "header" | "body";
+  dataType: "string" | "number" | "boolean" | "object" | "array";
   required: boolean;
   default?: any;
   description?: string;
@@ -75,7 +69,7 @@ export interface DiscoveryFilter {
   type?: string;
   capabilities?: string[];
   tags?: string[];
-  authTypes?: AuthenticationConfig['type'][];
+  authTypes?: AuthenticationConfig["type"][];
 }
 
 export interface ConnectorDescriptor {
@@ -83,14 +77,14 @@ export interface ConnectorDescriptor {
   name: string;
   type: string;
   description?: string;
-  authentication: AuthenticationConfig['type'];
+  authentication: AuthenticationConfig["type"];
   capabilities: string[];
   tags: string[];
   reliabilityScore?: number;
   operations: Array<{
     id: string;
     name: string;
-    method: ConnectorOperation['method'];
+    method: ConnectorOperation["method"];
     endpoint: string;
     parameters: OperationParameter[];
     requestSchema?: any;
@@ -103,7 +97,7 @@ export interface ConnectorDescriptor {
 export interface CapabilityNegotiationRequest {
   required: string[];
   preferred?: string[];
-  authTypes?: AuthenticationConfig['type'][];
+  authTypes?: AuthenticationConfig["type"][];
 }
 
 export interface CapabilityMatch {
@@ -116,13 +110,13 @@ export interface CapabilityMatch {
 export interface OperationSchemaIntrospection {
   id: string;
   name: string;
-  method: ConnectorOperation['method'];
+  method: ConnectorOperation["method"];
   endpoint: string;
   parameters: OperationParameter[];
   requestSchema?: any;
   responseSchema?: any;
   capabilities: string[];
-  stability?: ConnectorOperation['stability'];
+  stability?: ConnectorOperation["stability"];
 }
 
 export interface SchemaIntrospectionResult {
@@ -179,26 +173,26 @@ export abstract class BaseConnector extends EventEmitter {
     // Add request interceptor for authentication
     instance.interceptors.request.use(
       (config) => {
-        this.emit('request.start', { url: config.url, method: config.method });
+        this.emit("request.start", { url: config.url, method: config.method });
         return config;
       },
       (error) => {
-        this.emit('request.error', error);
+        this.emit("request.error", error);
         return Promise.reject(error);
-      },
+      }
     );
 
     // Add response interceptor for error handling
     instance.interceptors.response.use(
       (response) => {
-        this.emit('request.success', {
+        this.emit("request.success", {
           url: response.config.url,
           status: response.status,
         });
         return response;
       },
       async (error) => {
-        this.emit('request.error', error);
+        this.emit("request.error", error);
 
         // Handle retries
         if (this.config.retryConfig && !error.config.__retryCount) {
@@ -212,8 +206,7 @@ export abstract class BaseConnector extends EventEmitter {
           error.config.__retryCount++;
 
           const delay = this.config.retryConfig.exponentialBackoff
-            ? this.config.retryConfig.retryDelay *
-              Math.pow(2, error.config.__retryCount - 1)
+            ? this.config.retryConfig.retryDelay * Math.pow(2, error.config.__retryCount - 1)
             : this.config.retryConfig.retryDelay;
 
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -222,7 +215,7 @@ export abstract class BaseConnector extends EventEmitter {
         }
 
         return Promise.reject(error);
-      },
+      }
     );
 
     return instance;
@@ -235,28 +228,27 @@ export abstract class BaseConnector extends EventEmitter {
     const headers: Record<string, string> = {};
 
     switch (this.config.authentication.type) {
-      case 'api_key':
+      case "api_key":
         if (this.config.authentication.credentials?.apiKey) {
-          headers['X-API-Key'] = this.config.authentication.credentials.apiKey;
+          headers["X-API-Key"] = this.config.authentication.credentials.apiKey;
         }
         break;
 
-      case 'bearer':
+      case "bearer":
         if (this.config.authentication.credentials?.token) {
-          headers['Authorization'] =
-            `Bearer ${this.config.authentication.credentials.token}`;
+          headers["Authorization"] = `Bearer ${this.config.authentication.credentials.token}`;
         }
         break;
 
-      case 'basic':
+      case "basic":
         if (
           this.config.authentication.credentials?.username &&
           this.config.authentication.credentials?.password
         ) {
           const credentials = Buffer.from(
-            `${this.config.authentication.credentials.username}:${this.config.authentication.credentials.password}`,
-          ).toString('base64');
-          headers['Authorization'] = `Basic ${credentials}`;
+            `${this.config.authentication.credentials.username}:${this.config.authentication.credentials.password}`
+          ).toString("base64");
+          headers["Authorization"] = `Basic ${credentials}`;
         }
         break;
     }
@@ -269,7 +261,7 @@ export abstract class BaseConnector extends EventEmitter {
    */
   async execute(
     operation: string,
-    params: Record<string, any> = {},
+    params: Record<string, any> = {}
   ): Promise<ConnectorExecutionResult> {
     const startTime = Date.now();
     const retries = 0;
@@ -295,7 +287,7 @@ export abstract class BaseConnector extends EventEmitter {
       return {
         success: false,
         error: {
-          code: error.code || 'EXECUTION_ERROR',
+          code: error.code || "EXECUTION_ERROR",
           message: error.message,
           details: error.response?.data,
         },
@@ -327,17 +319,14 @@ export abstract class BaseConnector extends EventEmitter {
   /**
    * Execute specific operation (must be implemented by subclasses)
    */
-  protected abstract executeOperation(
-    operation: string,
-    params: Record<string, any>,
-  ): Promise<any>;
+  protected abstract executeOperation(operation: string, params: Record<string, any>): Promise<any>;
 
   /**
    * Validate configuration (can be overridden by subclasses)
    */
   validate(): boolean {
     if (!this.config.id || !this.config.name || !this.config.type) {
-      throw new Error('Invalid connector configuration');
+      throw new Error("Invalid connector configuration");
     }
     return true;
   }
@@ -366,17 +355,14 @@ export abstract class BaseConnector extends EventEmitter {
 export class RestAPIConnector extends BaseConnector {
   private operations: Map<string, ConnectorOperation> = new Map();
 
-  constructor(
-    config: ConnectorConfig,
-    operations: ConnectorOperation[] = [],
-  ) {
+  constructor(config: ConnectorConfig, operations: ConnectorOperation[] = []) {
     super(config);
     operations.forEach((op) => this.operations.set(op.name, op));
   }
 
   protected async executeOperation(
     operationName: string,
-    params: Record<string, any>,
+    params: Record<string, any>
   ): Promise<any> {
     const operation = this.operations.get(operationName);
     if (!operation) {
@@ -409,12 +395,12 @@ export class RestAPIConnector extends BaseConnector {
 
   private buildHeaders(
     operation: ConnectorOperation,
-    params: Record<string, any>,
+    params: Record<string, any>
   ): Record<string, string> {
     const headers: Record<string, string> = {};
 
     operation.parameters
-      ?.filter((p) => p.type === 'header')
+      ?.filter((p) => p.type === "header")
       .forEach((param) => {
         if (params[param.name] !== undefined) {
           headers[param.name] = String(params[param.name]);
@@ -426,12 +412,12 @@ export class RestAPIConnector extends BaseConnector {
 
   private buildQueryParams(
     operation: ConnectorOperation,
-    params: Record<string, any>,
+    params: Record<string, any>
   ): Record<string, any> {
     const queryParams: Record<string, any> = {};
 
     operation.parameters
-      ?.filter((p) => p.type === 'query')
+      ?.filter((p) => p.type === "query")
       .forEach((param) => {
         if (params[param.name] !== undefined) {
           queryParams[param.name] = params[param.name];
@@ -441,11 +427,8 @@ export class RestAPIConnector extends BaseConnector {
     return queryParams;
   }
 
-  private buildBody(
-    operation: ConnectorOperation,
-    params: Record<string, any>,
-  ): any {
-    const bodyParams = operation.parameters?.filter((p) => p.type === 'body');
+  private buildBody(operation: ConnectorOperation, params: Record<string, any>): any {
+    const bodyParams = operation.parameters?.filter((p) => p.type === "body");
 
     if (!bodyParams || bodyParams.length === 0) {
       return undefined;
@@ -468,7 +451,7 @@ export class RestAPIConnector extends BaseConnector {
   async testConnection(): Promise<boolean> {
     try {
       // Try a simple GET request to base URL or health endpoint
-      await this.httpClient.get('/health');
+      await this.httpClient.get("/health");
       return true;
     } catch {
       return false;
@@ -488,14 +471,11 @@ export class RestAPIConnector extends BaseConnector {
  * Database Connector
  */
 export class DatabaseConnector extends BaseConnector {
-  protected async executeOperation(
-    _operation: string,
-    _params: Record<string, any>,
-  ): Promise<any> {
+  protected async executeOperation(_operation: string, _params: Record<string, any>): Promise<any> {
     // Database operation execution
     // Would use pg, mysql2, mongodb, etc. based on database type
     await Promise.resolve();
-    throw new Error('Database connector not fully implemented');
+    throw new Error("Database connector not fully implemented");
   }
 
   async testConnection(): Promise<boolean> {
@@ -507,25 +487,25 @@ export class DatabaseConnector extends BaseConnector {
   getOperations(): ConnectorOperation[] {
     return [
       {
-        id: 'query',
-        name: 'query',
-        method: 'POST',
-        endpoint: '/query',
-        description: 'Execute a database query',
+        id: "query",
+        name: "query",
+        method: "POST",
+        endpoint: "/query",
+        description: "Execute a database query",
         parameters: [
           {
-            name: 'sql',
-            type: 'body',
-            dataType: 'string',
+            name: "sql",
+            type: "body",
+            dataType: "string",
             required: true,
-            description: 'SQL query to execute',
+            description: "SQL query to execute",
           },
           {
-            name: 'params',
-            type: 'body',
-            dataType: 'array',
+            name: "params",
+            type: "body",
+            dataType: "array",
             required: false,
-            description: 'Query parameters',
+            description: "Query parameters",
           },
         ],
       },
@@ -538,10 +518,7 @@ export class DatabaseConnector extends BaseConnector {
  */
 export class ConnectorRegistry extends EventEmitter {
   private connectors = new Map<string, BaseConnector>();
-  private connectorTypes = new Map<
-    string,
-    new (config: ConnectorConfig) => BaseConnector
-  >();
+  private connectorTypes = new Map<string, new (config: ConnectorConfig) => BaseConnector>();
 
   constructor() {
     super();
@@ -550,21 +527,21 @@ export class ConnectorRegistry extends EventEmitter {
 
   private registerBuiltInConnectors(): void {
     // Register built-in connector types
-    this.registerConnectorType('rest_api', RestAPIConnector as any);
-    this.registerConnectorType('database', DatabaseConnector as any);
+    this.registerConnectorType("rest_api", RestAPIConnector as any);
+    this.registerConnectorType("database", DatabaseConnector as any);
   }
 
   registerConnectorType(
     type: string,
-    connectorClass: new (config: ConnectorConfig) => BaseConnector,
+    connectorClass: new (config: ConnectorConfig) => BaseConnector
   ): void {
     this.connectorTypes.set(type, connectorClass);
-    this.emit('connector_type.registered', type);
+    this.emit("connector_type.registered", type);
   }
 
   registerConnector(
     config: ConnectorConfig,
-    options: { operations?: ConnectorOperation[] } = {},
+    options: { operations?: ConnectorOperation[] } = {}
   ): BaseConnector {
     const ConnectorClass = this.connectorTypes.get(config.type);
     if (!ConnectorClass) {
@@ -573,12 +550,12 @@ export class ConnectorRegistry extends EventEmitter {
 
     const connector = new ConnectorClass(config);
     connector.validate();
-    if ('addOperation' in connector && typeof connector.addOperation === 'function') {
+    if ("addOperation" in connector && typeof connector.addOperation === "function") {
       (options.operations ?? []).forEach((operation) => (connector as any).addOperation(operation));
     }
 
     this.connectors.set(config.id, connector);
-    this.emit('connector.registered', config);
+    this.emit("connector.registered", config);
 
     return connector;
   }
@@ -587,7 +564,7 @@ export class ConnectorRegistry extends EventEmitter {
     const config = connector.getConfig();
     connector.validate();
     this.connectors.set(config.id, connector);
-    this.emit('connector.registered', config);
+    this.emit("connector.registered", config);
     return connector;
   }
 
@@ -601,12 +578,10 @@ export class ConnectorRegistry extends EventEmitter {
 
   removeConnector(id: string): void {
     this.connectors.delete(id);
-    this.emit('connector.removed', id);
+    this.emit("connector.removed", id);
   }
 
-  async testAllConnections(): Promise<
-    Record<string, { success: boolean; error?: string }>
-  > {
+  async testAllConnections(): Promise<Record<string, { success: boolean; error?: string }>> {
     const results: Record<string, { success: boolean; error?: string }> = {};
 
     for (const [id, connector] of this.connectors) {
@@ -627,25 +602,18 @@ function uniqueStrings(values: Array<string | undefined | null>): string[] {
 }
 
 function resolveTags(config: ConnectorConfig): string[] {
-  const metadataTags = Array.isArray(config.metadata?.tags)
-    ? config.metadata?.tags
-    : [];
+  const metadataTags = Array.isArray(config.metadata?.tags) ? config.metadata?.tags : [];
   return uniqueStrings([...(config.tags ?? []), ...metadataTags]);
 }
 
-function resolveCapabilities(
-  connector: BaseConnector,
-  operations: ConnectorOperation[],
-): string[] {
+function resolveCapabilities(connector: BaseConnector, operations: ConnectorOperation[]): string[] {
   const config = connector.getConfig();
-  const configCaps = Array.isArray(config.capabilities)
-    ? config.capabilities
-    : [];
+  const configCaps = Array.isArray(config.capabilities) ? config.capabilities : [];
   const metadataCaps = Array.isArray(config.metadata?.capabilities)
     ? config.metadata?.capabilities
     : [];
   const operationCaps = operations.flatMap((operation) =>
-    operation.capabilities?.length ? operation.capabilities : [operation.name],
+    operation.capabilities?.length ? operation.capabilities : [operation.name]
   );
   return uniqueStrings([...configCaps, ...metadataCaps, ...operationCaps]);
 }
@@ -660,9 +628,7 @@ function describeConnector(connector: BaseConnector): ConnectorDescriptor {
     parameters: operation.parameters ?? [],
     requestSchema: operation.requestSchema,
     responseSchema: operation.responseSchema,
-    capabilities: operation.capabilities?.length
-      ? operation.capabilities
-      : [operation.name],
+    capabilities: operation.capabilities?.length ? operation.capabilities : [operation.name],
   }));
 
   return {
@@ -703,40 +669,29 @@ export class ConnectorDiscoveryApi {
         ) {
           return false;
         }
-        if (
-          filter.authTypes &&
-          !filter.authTypes.includes(descriptor.authentication)
-        ) {
+        if (filter.authTypes && !filter.authTypes.includes(descriptor.authentication)) {
           return false;
         }
         return true;
       })
-      .sort(
-        (a, b) => (b.reliabilityScore ?? 0) - (a.reliabilityScore ?? 0),
-      );
+      .sort((a, b) => (b.reliabilityScore ?? 0) - (a.reliabilityScore ?? 0));
   }
 
-  negotiateCapabilities(
-    request: CapabilityNegotiationRequest,
-  ): CapabilityMatch[] {
+  negotiateCapabilities(request: CapabilityNegotiationRequest): CapabilityMatch[] {
     const candidates = this.discover({ authTypes: request.authTypes });
     const required = request.required ?? [];
     const matches: CapabilityMatch[] = [];
 
     for (const connector of candidates) {
-      const matched = required.filter((cap) =>
-        connector.capabilities.includes(cap),
-      );
+      const matched = required.filter((cap) => connector.capabilities.includes(cap));
       const missing = required.filter((cap) => !connector.capabilities.includes(cap));
       if (missing.length > 0) {
         continue;
       }
       const preferredMatches = (request.preferred ?? []).filter((cap) =>
-        connector.capabilities.includes(cap),
+        connector.capabilities.includes(cap)
       );
-      const authBonus = request.authTypes?.includes(connector.authentication)
-        ? 0.25
-        : 0;
+      const authBonus = request.authTypes?.includes(connector.authentication) ? 0.25 : 0;
       const score =
         matched.length * 2 +
         preferredMatches.length +
@@ -754,41 +709,28 @@ export class ConnectorDiscoveryApi {
       throw new Error(`Connector ${connectorId} not found`);
     }
     const descriptor = describeConnector(connector);
-    const operations: OperationSchemaIntrospection[] = descriptor.operations.map(
-      (operation) => ({
-        ...operation,
-        stability: connector
-          .getOperations()
-          .find((candidate) => candidate.name === operation.name)?.stability,
-      }),
-    );
+    const operations: OperationSchemaIntrospection[] = descriptor.operations.map((operation) => ({
+      ...operation,
+      stability: connector.getOperations().find((candidate) => candidate.name === operation.name)
+        ?.stability,
+    }));
     return { connector: descriptor, operations };
   }
 
-  generateAdapter(
-    connectorId: string,
-    operationName: string,
-  ): GeneratedAdapter {
+  generateAdapter(connectorId: string, operationName: string): GeneratedAdapter {
     const connector = this.registry.getConnector(connectorId);
     if (!connector) {
       throw new Error(`Connector ${connectorId} not found`);
     }
     const operation = connector
       .getOperations()
-      .find(
-        (candidate) =>
-          candidate.name === operationName || candidate.id === operationName,
-      );
+      .find((candidate) => candidate.name === operationName || candidate.id === operationName);
     if (!operation) {
       throw new Error(`Operation ${operationName} not found on connector ${connectorId}`);
     }
     const parameters = operation.parameters ?? [];
-    const requiredParams = parameters
-      .filter((param) => param.required)
-      .map((param) => param.name);
-    const optionalParams = parameters
-      .filter((param) => !param.required)
-      .map((param) => param.name);
+    const requiredParams = parameters.filter((param) => param.required).map((param) => param.name);
+    const optionalParams = parameters.filter((param) => !param.required).map((param) => param.name);
 
     return {
       connectorId,
@@ -799,7 +741,7 @@ export class ConnectorDiscoveryApi {
       invoke: async (params = {}) => {
         const missing = requiredParams.filter((param) => params[param] === undefined);
         if (missing.length > 0) {
-          throw new Error(`Missing required parameters: ${missing.join(', ')}`);
+          throw new Error(`Missing required parameters: ${missing.join(", ")}`);
         }
         const response = await connector.execute(operation.name, params);
         return response;
@@ -808,6 +750,6 @@ export class ConnectorDiscoveryApi {
   }
 }
 
-export * from './conformance/index';
+export * from "./conformance/index";
 
 export default ConnectorRegistry;

@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["run_id", "metrics"],
   "properties": {
-    "run_id": {"type": "string"},
-    "metrics": {"type": "object"}
+    "run_id": { "type": "string" },
+    "metrics": { "type": "object" }
   },
   "additionalProperties": false
 }

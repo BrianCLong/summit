@@ -4,10 +4,10 @@ The Trust Fabric is the architectural layer of the Autonomous Research Foundry t
 
 ## 1. Core Principles
 
-*   **Verifiability:** Every piece of data, every line of code, and every experimental result can be independently verified by its cryptographic hash.
-*   **Immutability:** The history of the Foundry is immutable. Once an event is recorded in the ledger, it cannot be altered or deleted without breaking the cryptographic chain.
-*   **Reproducibility:** Every experiment is perfectly reproducible. The ledger stores a complete, content-addressed manifest of all inputs, ensuring that an experiment can be re-run at any point in the future to produce the exact same result.
-*   **Decentralized Trust:** The ledger is designed to be verifiable in a decentralized manner, allowing different Foundry instances or external auditors to confirm the integrity of a research project without relying on a central authority.
+- **Verifiability:** Every piece of data, every line of code, and every experimental result can be independently verified by its cryptographic hash.
+- **Immutability:** The history of the Foundry is immutable. Once an event is recorded in the ledger, it cannot be altered or deleted without breaking the cryptographic chain.
+- **Reproducibility:** Every experiment is perfectly reproducible. The ledger stores a complete, content-addressed manifest of all inputs, ensuring that an experiment can be re-run at any point in the future to produce the exact same result.
+- **Decentralized Trust:** The ledger is designed to be verifiable in a decentralized manner, allowing different Foundry instances or external auditors to confirm the integrity of a research project without relying on a central authority.
 
 ## 2. Ledger Architecture
 
@@ -16,6 +16,7 @@ The ledger is not a traditional database but a hash-chained log of `LedgerEvent`
 ### Content-Addressed Storage (CAS)
 
 All artifacts (datasets, model weights, source code, container images) are not stored by name but by the cryptographic hash of their content (e.g., `sha256:deadbeef...`). This has two key benefits:
+
 1.  **Integrity:** Any change to an artifact results in a new hash, automatically versioning it and preventing silent corruption.
 2.  **Deduplication:** The same artifact stored multiple times only takes up space once.
 

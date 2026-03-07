@@ -7,4 +7,4 @@ groups:
         expr: redis:evictions_per_s:rate1m > 10
         for: 10m
         labels: { severity: warning }
-        annotations: { summary: 'Redis evictions elevated' }
+        annotations: { summary: "Redis evictions elevated" }

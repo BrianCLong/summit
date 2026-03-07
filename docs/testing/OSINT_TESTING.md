@@ -4,14 +4,14 @@ This directory contains End-to-End (E2E) tests for the Open Source Intelligence 
 
 ## Test Suite Structure
 
-*   **`e2e/osint/reports.spec.ts`**: Main test suite covering:
-    *   OSINT Report Generation (HTML).
-    *   Visual Regression Testing (Snapshots).
-    *   Performance Benchmarking (Response time).
-    *   Concurrent/Parallel Execution.
-*   **`e2e/fixtures/osint-fixtures.ts`**: Reusable Playwright fixtures for:
-    *   Mocking external APIs (Wikipedia, RSS feeds).
-    *   Helper functions for Entity creation.
+- **`e2e/osint/reports.spec.ts`**: Main test suite covering:
+  - OSINT Report Generation (HTML).
+  - Visual Regression Testing (Snapshots).
+  - Performance Benchmarking (Response time).
+  - Concurrent/Parallel Execution.
+- **`e2e/fixtures/osint-fixtures.ts`**: Reusable Playwright fixtures for:
+  - Mocking external APIs (Wikipedia, RSS feeds).
+  - Helper functions for Entity creation.
 
 ## Running Tests
 

@@ -1,11 +1,9 @@
-import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import PerformanceMonitor, {
-  usePerformanceTracking,
-} from '../PerformanceMonitor';
+import React from "react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import PerformanceMonitor, { usePerformanceTracking } from "../PerformanceMonitor";
 
 // Mock performance.memory
-Object.defineProperty(performance, 'memory', {
+Object.defineProperty(performance, "memory", {
   writable: true,
   value: {
     usedJSHeapSize: 50 * 1024 * 1024, // 50MB
@@ -17,14 +15,14 @@ Object.defineProperty(performance, 'memory', {
 // Mock performance entries
 const mockResourceEntries: PerformanceResourceTiming[] = [
   {
-    name: 'test-resource-1',
-    entryType: 'resource',
+    name: "test-resource-1",
+    entryType: "resource",
     startTime: 100,
     duration: 50,
   } as PerformanceResourceTiming,
   {
-    name: 'test-resource-2',
-    entryType: 'resource',
+    name: "test-resource-2",
+    entryType: "resource",
     startTime: 200,
     duration: 30,
   } as PerformanceResourceTiming,
@@ -32,8 +30,8 @@ const mockResourceEntries: PerformanceResourceTiming[] = [
 
 const mockMeasureEntries: PerformanceMeasure[] = [
   {
-    name: 'test-measure',
-    entryType: 'measure',
+    name: "test-measure",
+    entryType: "measure",
     startTime: 0,
     duration: 25,
   } as PerformanceMeasure,
@@ -42,12 +40,12 @@ const mockMeasureEntries: PerformanceMeasure[] = [
 // Mock performance.getEntriesByType
 const originalGetEntriesByType = performance.getEntriesByType;
 performance.getEntriesByType = jest.fn((type: string) => {
-  if (type === 'resource') return mockResourceEntries;
-  if (type === 'measure') return mockMeasureEntries;
+  if (type === "resource") return mockResourceEntries;
+  if (type === "measure") return mockMeasureEntries;
   return [];
 });
 
-describe('PerformanceMonitor', () => {
+describe("PerformanceMonitor", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     // Reset performance error counter
@@ -60,41 +58,37 @@ describe('PerformanceMonitor', () => {
     jest.clearAllMocks();
   });
 
-  test('renders performance indicator when enabled', () => {
+  test("renders performance indicator when enabled", () => {
     render(<PerformanceMonitor enabled={true} />);
 
     // Should show memory usage indicator
     expect(screen.getByText(/\d+MB/)).toBeInTheDocument();
   });
 
-  test('does not render when disabled', () => {
+  test("does not render when disabled", () => {
     render(<PerformanceMonitor enabled={false} />);
 
     expect(screen.queryByText(/MB/)).not.toBeInTheDocument();
   });
 
-  test('shows performance details when clicked', () => {
+  test("shows performance details when clicked", () => {
     render(<PerformanceMonitor enabled={true} />);
 
     // Click the performance indicator
     const indicator = screen.getByText(/\d+MB/);
     fireEvent.click(indicator);
 
-    expect(screen.getByText('Performance Monitor')).toBeInTheDocument();
-    expect(screen.getByText('Memory Usage')).toBeInTheDocument();
-    expect(screen.getByText('Render Time')).toBeInTheDocument();
-    expect(screen.getByText('Network Requests')).toBeInTheDocument();
+    expect(screen.getByText("Performance Monitor")).toBeInTheDocument();
+    expect(screen.getByText("Memory Usage")).toBeInTheDocument();
+    expect(screen.getByText("Render Time")).toBeInTheDocument();
+    expect(screen.getByText("Network Requests")).toBeInTheDocument();
   });
 
-  test('collects metrics at specified intervals', async () => {
+  test("collects metrics at specified intervals", async () => {
     const onMetricsUpdate = jest.fn();
 
     render(
-      <PerformanceMonitor
-        enabled={true}
-        sampleInterval={1000}
-        onMetricsUpdate={onMetricsUpdate}
-      />,
+      <PerformanceMonitor enabled={true} sampleInterval={1000} onMetricsUpdate={onMetricsUpdate} />
     );
 
     // Initial metrics should be collected
@@ -109,14 +103,14 @@ describe('PerformanceMonitor', () => {
 
     // Check metrics structure
     const metrics = onMetricsUpdate.mock.calls[0][0];
-    expect(metrics).toHaveProperty('memoryUsage');
-    expect(metrics).toHaveProperty('renderTime');
-    expect(metrics).toHaveProperty('networkRequests');
-    expect(metrics).toHaveProperty('errorCount');
-    expect(metrics).toHaveProperty('timestamp');
+    expect(metrics).toHaveProperty("memoryUsage");
+    expect(metrics).toHaveProperty("renderTime");
+    expect(metrics).toHaveProperty("networkRequests");
+    expect(metrics).toHaveProperty("errorCount");
+    expect(metrics).toHaveProperty("timestamp");
   });
 
-  test('respects maxSamples limit', () => {
+  test("respects maxSamples limit", () => {
     const onMetricsUpdate = jest.fn();
 
     render(
@@ -125,7 +119,7 @@ describe('PerformanceMonitor', () => {
         sampleInterval={100}
         maxSamples={3}
         onMetricsUpdate={onMetricsUpdate}
-      />,
+      />
     );
 
     // Advance time to collect 5 samples
@@ -140,13 +134,13 @@ describe('PerformanceMonitor', () => {
     fireEvent.click(screen.getByText(/\d+MB/));
 
     // The mini chart should only show recent samples
-    const svg = screen.getByRole('img', { hidden: true });
+    const svg = screen.getByRole("img", { hidden: true });
     expect(svg).toBeInTheDocument();
   });
 
-  test('shows color indicators based on memory usage', () => {
+  test("shows color indicators based on memory usage", () => {
     // Test high memory usage
-    Object.defineProperty(performance, 'memory', {
+    Object.defineProperty(performance, "memory", {
       writable: true,
       value: {
         usedJSHeapSize: 180 * 1024 * 1024, // 180MB (high)
@@ -156,10 +150,10 @@ describe('PerformanceMonitor', () => {
     const { rerender } = render(<PerformanceMonitor enabled={true} />);
 
     let indicator = screen.getByText(/\d+MB/).previousElementSibling;
-    expect(indicator).toHaveClass('bg-red-400');
+    expect(indicator).toHaveClass("bg-red-400");
 
     // Test medium memory usage
-    Object.defineProperty(performance, 'memory', {
+    Object.defineProperty(performance, "memory", {
       writable: true,
       value: {
         usedJSHeapSize: 120 * 1024 * 1024, // 120MB (medium)
@@ -173,32 +167,28 @@ describe('PerformanceMonitor', () => {
     });
 
     indicator = screen.getByText(/\d+MB/).previousElementSibling;
-    expect(indicator).toHaveClass('bg-yellow-400');
+    expect(indicator).toHaveClass("bg-yellow-400");
   });
 
-  test('closes detailed panel when close button clicked', () => {
+  test("closes detailed panel when close button clicked", () => {
     render(<PerformanceMonitor enabled={true} />);
 
     // Open details
     fireEvent.click(screen.getByText(/\d+MB/));
-    expect(screen.getByText('Performance Monitor')).toBeInTheDocument();
+    expect(screen.getByText("Performance Monitor")).toBeInTheDocument();
 
     // Close details
-    const closeButton = screen.getByText('×');
+    const closeButton = screen.getByText("×");
     fireEvent.click(closeButton);
 
-    expect(screen.queryByText('Performance Monitor')).not.toBeInTheDocument();
+    expect(screen.queryByText("Performance Monitor")).not.toBeInTheDocument();
   });
 
-  test('shows average metrics when available', () => {
+  test("shows average metrics when available", () => {
     const onMetricsUpdate = jest.fn();
 
     render(
-      <PerformanceMonitor
-        enabled={true}
-        sampleInterval={100}
-        onMetricsUpdate={onMetricsUpdate}
-      />,
+      <PerformanceMonitor enabled={true} sampleInterval={100} onMetricsUpdate={onMetricsUpdate} />
     );
 
     // Collect a few samples
@@ -213,7 +203,7 @@ describe('PerformanceMonitor', () => {
     expect(screen.getByText(/avg:/)).toBeInTheDocument();
   });
 
-  test('handles missing performance.memory gracefully', () => {
+  test("handles missing performance.memory gracefully", () => {
     // Remove memory property
     const originalMemory = (performance as any).memory;
     delete (performance as any).memory;
@@ -221,7 +211,7 @@ describe('PerformanceMonitor', () => {
     render(<PerformanceMonitor enabled={true} />);
 
     // Should still render with 0MB
-    expect(screen.getByText('0MB')).toBeInTheDocument();
+    expect(screen.getByText("0MB")).toBeInTheDocument();
 
     // Restore memory
     (performance as any).memory = originalMemory;
@@ -229,13 +219,13 @@ describe('PerformanceMonitor', () => {
 });
 
 // Test the usePerformanceTracking hook
-describe('usePerformanceTracking', () => {
-  test('trackRender creates performance marks and measures', () => {
+describe("usePerformanceTracking", () => {
+  test("trackRender creates performance marks and measures", () => {
     const TestComponent = () => {
       const { trackRender } = usePerformanceTracking();
 
       React.useEffect(() => {
-        const endTracking = trackRender('TestComponent');
+        const endTracking = trackRender("TestComponent");
 
         // Simulate some work
         setTimeout(() => {
@@ -248,22 +238,22 @@ describe('usePerformanceTracking', () => {
 
     render(<TestComponent />);
 
-    expect(performance.mark).toHaveBeenCalledWith('TestComponent-start');
+    expect(performance.mark).toHaveBeenCalledWith("TestComponent-start");
 
     // Advance time to trigger the timeout
     act(() => {
       jest.advanceTimersByTime(10);
     });
 
-    expect(performance.mark).toHaveBeenCalledWith('TestComponent-end');
+    expect(performance.mark).toHaveBeenCalledWith("TestComponent-end");
     expect(performance.measure).toHaveBeenCalledWith(
-      'TestComponent-render',
-      'TestComponent-start',
-      'TestComponent-end',
+      "TestComponent-render",
+      "TestComponent-start",
+      "TestComponent-end"
     );
   });
 
-  test('trackError increments error counter and logs', () => {
+  test("trackError increments error counter and logs", () => {
     const originalLog = console.error;
     console.error = jest.fn();
 
@@ -271,7 +261,7 @@ describe('usePerformanceTracking', () => {
       const { trackError } = usePerformanceTracking();
 
       React.useEffect(() => {
-        const error = new Error('Test error');
+        const error = new Error("Test error");
         trackError(error);
       }, [trackError]);
 
@@ -281,46 +271,39 @@ describe('usePerformanceTracking', () => {
     render(<TestComponent />);
 
     expect((window as any).__performanceErrors).toBe(1);
-    expect(console.error).toHaveBeenCalledWith(
-      '[Performance] Error tracked:',
-      expect.any(Error),
-    );
+    expect(console.error).toHaveBeenCalledWith("[Performance] Error tracked:", expect.any(Error));
 
     console.error = originalLog;
   });
 });
 
 // Integration tests
-describe('PerformanceMonitor Integration', () => {
-  test('works with real performance data', () => {
+describe("PerformanceMonitor Integration", () => {
+  test("works with real performance data", () => {
     // Set up real performance entries
     performance.getEntriesByType = originalGetEntriesByType;
 
     // Add some real performance marks
-    performance.mark('test-start');
-    performance.mark('test-end');
-    performance.measure('test-duration', 'test-start', 'test-end');
+    performance.mark("test-start");
+    performance.mark("test-end");
+    performance.measure("test-duration", "test-start", "test-end");
 
     const onMetricsUpdate = jest.fn();
 
     render(
-      <PerformanceMonitor
-        enabled={true}
-        sampleInterval={100}
-        onMetricsUpdate={onMetricsUpdate}
-      />,
+      <PerformanceMonitor enabled={true} sampleInterval={100} onMetricsUpdate={onMetricsUpdate} />
     );
 
     expect(onMetricsUpdate).toHaveBeenCalled();
 
     const metrics = onMetricsUpdate.mock.calls[0][0];
-    expect(typeof metrics.renderTime).toBe('number');
-    expect(typeof metrics.memoryUsage).toBe('number');
-    expect(typeof metrics.networkRequests).toBe('number');
-    expect(typeof metrics.timestamp).toBe('number');
+    expect(typeof metrics.renderTime).toBe("number");
+    expect(typeof metrics.memoryUsage).toBe("number");
+    expect(typeof metrics.networkRequests).toBe("number");
+    expect(typeof metrics.timestamp).toBe("number");
   });
 
-  test('handles performance API not available', () => {
+  test("handles performance API not available", () => {
     // Mock missing performance methods
     const originalMark = performance.mark;
     const originalMeasure = performance.measure;
@@ -342,8 +325,8 @@ describe('PerformanceMonitor Integration', () => {
 });
 
 // Performance tests
-describe('PerformanceMonitor Performance', () => {
-  test('does not cause memory leaks with many samples', () => {
+describe("PerformanceMonitor Performance", () => {
+  test("does not cause memory leaks with many samples", () => {
     const onMetricsUpdate = jest.fn();
 
     render(
@@ -352,7 +335,7 @@ describe('PerformanceMonitor Performance', () => {
         sampleInterval={1}
         maxSamples={1000}
         onMetricsUpdate={onMetricsUpdate}
-      />,
+      />
     );
 
     // Collect many samples rapidly
@@ -365,7 +348,7 @@ describe('PerformanceMonitor Performance', () => {
     expect(onMetricsUpdate.mock.calls.length).toBeGreaterThan(100);
   });
 
-  test('cleans up interval on unmount', () => {
+  test("cleans up interval on unmount", () => {
     const { unmount } = render(<PerformanceMonitor enabled={true} />);
 
     unmount();

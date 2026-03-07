@@ -206,16 +206,16 @@ Examples:
 
 ```yaml
 no_compression:
-  - '*.jpg'
-  - '*.png'
-  - '*.zip'
-  - '*.gz'
+  - "*.jpg"
+  - "*.png"
+  - "*.zip"
+  - "*.gz"
 
 max_compression:
-  - '*.json'
-  - '*.xml'
-  - '*.txt'
-  - '*.md'
+  - "*.json"
+  - "*.xml"
+  - "*.txt"
+  - "*.md"
 ```
 
 ## Validation Rules
@@ -234,7 +234,7 @@ max_compression:
 // Pseudocode validation logic
 function validateExport(archive) {
   // Extract and validate manifest
-  const manifest = JSON.parse(archive.readFile('manifest.json'));
+  const manifest = JSON.parse(archive.readFile("manifest.json"));
   validateSchema(manifest, manifestSchema);
 
   // Verify all listed files exist
@@ -246,16 +246,16 @@ function validateExport(archive) {
     // Verify file checksum
     const content = archive.readFile(file.path);
     const actualHash = sha256(content);
-    if (actualHash !== file.checksum.replace('sha256:', '')) {
+    if (actualHash !== file.checksum.replace("sha256:", "")) {
       throw new Error(`Checksum mismatch: ${file.path}`);
     }
   }
 
   // Verify signatures
-  const cert = archive.readFile('certificates/signing-cert.pem');
-  const manifestSig = archive.readFile('signatures/manifest.sig');
+  const cert = archive.readFile("certificates/signing-cert.pem");
+  const manifestSig = archive.readFile("signatures/manifest.sig");
   if (!verifySignature(manifest, manifestSig, cert)) {
-    throw new Error('Manifest signature verification failed');
+    throw new Error("Manifest signature verification failed");
   }
 
   return { valid: true, level: manifest.certification_level };
@@ -311,25 +311,25 @@ intelgraph export validate --input v1-export.zip --strict
 ### Creating Compliant Export (Node.js)
 
 ```javascript
-const fs = require('fs');
-const crypto = require('crypto');
-const forge = require('node-forge');
+const fs = require("fs");
+const crypto = require("crypto");
+const forge = require("node-forge");
 
 async function createCompliantExport(files, options) {
-  const exportId = crypto.randomBytes(16).toString('hex');
+  const exportId = crypto.randomBytes(16).toString("hex");
   const timestamp = new Date().toISOString();
 
   // Calculate file checksums
   const fileEntries = files.map((file) => ({
     path: file.path,
     size: file.content.length,
-    checksum: `sha256:${crypto.createHash('sha256').update(file.content).digest('hex')}`,
+    checksum: `sha256:${crypto.createHash("sha256").update(file.content).digest("hex")}`,
     mime_type: file.mimeType,
   }));
 
   // Create manifest
   const manifest = {
-    version: '1.0',
+    version: "1.0",
     export_id: exportId,
     timestamp: timestamp,
     requester: options.requester,
@@ -344,7 +344,7 @@ async function createCompliantExport(files, options) {
 
   // Create ZIP archive
   const archive = new JSZip();
-  archive.file('manifest.json', JSON.stringify(manifest, null, 2));
+  archive.file("manifest.json", JSON.stringify(manifest, null, 2));
 
   // Add files
   files.forEach((file) => {
@@ -352,12 +352,12 @@ async function createCompliantExport(files, options) {
   });
 
   // Add certificates and signatures
-  archive.file('certificates/signing-cert.pem', options.certificate);
-  archive.file('certificates/ca-chain.pem', options.caChain);
-  archive.file('signatures/manifest.sig', signatures.manifest_signature);
-  archive.file('signatures/content.sig', signatures.content_signature);
+  archive.file("certificates/signing-cert.pem", options.certificate);
+  archive.file("certificates/ca-chain.pem", options.caChain);
+  archive.file("signatures/manifest.sig", signatures.manifest_signature);
+  archive.file("signatures/content.sig", signatures.content_signature);
 
-  return archive.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+  return archive.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
 }
 ```
 

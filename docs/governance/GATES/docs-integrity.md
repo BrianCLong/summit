@@ -3,7 +3,6 @@
 > Evidence-IDs: governance-docs-integrity
 > Status: active
 
-
 # Docs Integrity Gate
 
 **Job:** Governance / Docs Integrity  

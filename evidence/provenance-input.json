@@ -22,16 +22,16 @@
   "sbom": {
     "spdxVersion": "SPDX-2.3",
     "packages": [
-      {"name": "pkg1", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg2", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg3", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg4", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg5", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg6", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg7", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg8", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg9", "downloadLocation": "NOASSERTION"},
-      {"name": "pkg10", "downloadLocation": "NOASSERTION"}
+      { "name": "pkg1", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg2", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg3", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg4", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg5", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg6", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg7", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg8", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg9", "downloadLocation": "NOASSERTION" },
+      { "name": "pkg10", "downloadLocation": "NOASSERTION" }
     ]
   },
   "signature": {

@@ -45,20 +45,20 @@ export interface Document {
  * Document Format
  */
 export enum DocumentFormat {
-  MARKDOWN = 'MARKDOWN',
-  HTML = 'HTML',
-  RICH_TEXT = 'RICH_TEXT',
-  PLAIN_TEXT = 'PLAIN_TEXT',
+  MARKDOWN = "MARKDOWN",
+  HTML = "HTML",
+  RICH_TEXT = "RICH_TEXT",
+  PLAIN_TEXT = "PLAIN_TEXT",
 }
 
 /**
  * Document Status
  */
 export enum DocumentStatus {
-  DRAFT = 'DRAFT',
-  REVIEW = 'REVIEW',
-  PUBLISHED = 'PUBLISHED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  REVIEW = "REVIEW",
+  PUBLISHED = "PUBLISHED",
+  ARCHIVED = "ARCHIVED",
 }
 
 /**
@@ -117,12 +117,12 @@ export interface Reaction {
  * Reaction Types
  */
 export enum ReactionType {
-  LIKE = 'LIKE',
-  LOVE = 'LOVE',
-  THUMBS_UP = 'THUMBS_UP',
-  THUMBS_DOWN = 'THUMBS_DOWN',
-  CELEBRATE = 'CELEBRATE',
-  INSIGHTFUL = 'INSIGHTFUL',
+  LIKE = "LIKE",
+  LOVE = "LOVE",
+  THUMBS_UP = "THUMBS_UP",
+  THUMBS_DOWN = "THUMBS_DOWN",
+  CELEBRATE = "CELEBRATE",
+  INSIGHTFUL = "INSIGHTFUL",
 }
 
 /**
@@ -202,8 +202,8 @@ export interface EditOperation {
  * Edit Operation Type
  */
 export enum EditOperationType {
-  INSERT = 'INSERT',
-  DELETE = 'DELETE',
-  REPLACE = 'REPLACE',
-  FORMAT = 'FORMAT',
+  INSERT = "INSERT",
+  DELETE = "DELETE",
+  REPLACE = "REPLACE",
+  FORMAT = "FORMAT",
 }

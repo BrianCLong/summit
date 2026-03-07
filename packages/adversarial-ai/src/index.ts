@@ -12,20 +12,20 @@
  */
 
 // Types
-export * from './types.js';
+export * from "./types.js";
 
 // Attack implementations
-export { FGSMAttack } from './attacks/fgsm.js';
-export { PGDAttack } from './attacks/pgd.js';
-export { CarliniWagnerAttack } from './attacks/cw.js';
-export { DeepFoolAttack } from './attacks/deepfool.js';
-export { UniversalPerturbationAttack } from './attacks/universal.js';
-export { BlackBoxAttack } from './attacks/black-box.js';
+export { FGSMAttack } from "./attacks/fgsm.js";
+export { PGDAttack } from "./attacks/pgd.js";
+export { CarliniWagnerAttack } from "./attacks/cw.js";
+export { DeepFoolAttack } from "./attacks/deepfool.js";
+export { UniversalPerturbationAttack } from "./attacks/universal.js";
+export { BlackBoxAttack } from "./attacks/black-box.js";
 export {
   ModelInversionAttack,
   MembershipInferenceAttack,
-  ModelExtractionAttack
-} from './attacks/model-inversion.js';
+  ModelExtractionAttack,
+} from "./attacks/model-inversion.js";
 
 // Robustness testing
-export { RobustnessTester } from './robustness/robustness-tester.js';
+export { RobustnessTester } from "./robustness/robustness-tester.js";

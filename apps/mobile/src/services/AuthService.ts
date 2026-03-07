@@ -28,11 +28,9 @@ export interface AuthTokens {
 // ============================================
 
 export const saveAuthTokens = async (tokens: AuthTokens): Promise<void> => {
-  await Keychain.setGenericPassword(
-    'auth_tokens',
-    JSON.stringify(tokens),
-    { service: 'intelgraph_auth' },
-  );
+  await Keychain.setGenericPassword('auth_tokens', JSON.stringify(tokens), {
+    service: 'intelgraph_auth',
+  });
   storage.set('token_expiry', tokens.expiresAt);
 };
 
@@ -84,7 +82,7 @@ export const refreshAuthToken = async (): Promise<string | null> => {
     const newTokens: AuthTokens = {
       accessToken: data.accessToken,
       refreshToken: data.refreshToken || tokens.refreshToken,
-      expiresAt: Date.now() + (data.expiresIn * 1000),
+      expiresAt: Date.now() + data.expiresIn * 1000,
     };
 
     await saveAuthTokens(newTokens);
@@ -151,7 +149,7 @@ export const login = async (credentials: LoginCredentials): Promise<User> => {
   await saveAuthTokens({
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
-    expiresAt: Date.now() + (data.expiresIn * 1000),
+    expiresAt: Date.now() + data.expiresIn * 1000,
   });
 
   // Save user

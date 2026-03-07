@@ -16,9 +16,9 @@ groups:
           severity: critical
           component: api
         annotations:
-          summary: 'Service High Error Rate ({{ $labels.job }})'
-          description: 'Service {{ $labels.job }} is experiencing a high error rate ({{ $value | humanizePercentage }}).'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/service-errors'
+          summary: "Service High Error Rate ({{ $labels.job }})"
+          description: "Service {{ $labels.job }} is experiencing a high error rate ({{ $value | humanizePercentage }})."
+          runbook_url: "https://docs.intelgraph.com/runbooks/service-errors"
 
       - alert: ServiceLatencyHigh
         expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 1.0
@@ -27,9 +27,9 @@ groups:
           severity: warning
           component: api
         annotations:
-          summary: 'Service P95 Latency > 1s ({{ $labels.job }})'
-          description: '95th percentile latency for {{ $labels.job }} is {{ $value }}s, exceeding the 1s threshold.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/service-latency'
+          summary: "Service P95 Latency > 1s ({{ $labels.job }})"
+          description: "95th percentile latency for {{ $labels.job }} is {{ $value }}s, exceeding the 1s threshold."
+          runbook_url: "https://docs.intelgraph.com/runbooks/service-latency"
 
   # GraphQL Specific (Node.js Server)
   - name: summit.graphql
@@ -46,9 +46,9 @@ groups:
           service: server
           component: golden-path
         annotations:
-          summary: 'Golden Path Success < 95%'
-          description: 'Golden Path operations success rate is {{ $value | humanizePercentage }}.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/golden-path-failure'
+          summary: "Golden Path Success < 95%"
+          description: "Golden Path operations success rate is {{ $value | humanizePercentage }}."
+          runbook_url: "https://docs.intelgraph.com/runbooks/golden-path-failure"
 
       - alert: GoldenPathDegraded
         expr: |
@@ -62,8 +62,8 @@ groups:
           service: server
           component: golden-path
         annotations:
-          summary: 'Golden Path Success < 98%'
-          description: 'Golden Path operations success rate is {{ $value | humanizePercentage }}.'
+          summary: "Golden Path Success < 98%"
+          description: "Golden Path operations success rate is {{ $value | humanizePercentage }}."
 
       - alert: GraphQLHighLatency
         expr: histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le)) > 2000
@@ -73,9 +73,9 @@ groups:
           service: server
           component: graphql
         annotations:
-          summary: 'GraphQL P95 Latency > 2s'
-          description: '95th percentile GraphQL latency is {{ $value }}ms.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/graphql-high-latency'
+          summary: "GraphQL P95 Latency > 2s"
+          description: "95th percentile GraphQL latency is {{ $value }}ms."
+          runbook_url: "https://docs.intelgraph.com/runbooks/graphql-high-latency"
 
       - alert: GraphQLModerateLatency
         expr: histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[10m])) by (le)) > 1000
@@ -85,8 +85,8 @@ groups:
           service: server
           component: graphql
         annotations:
-          summary: 'GraphQL P95 Latency > 1s'
-          description: '95th percentile GraphQL latency is {{ $value }}ms.'
+          summary: "GraphQL P95 Latency > 1s"
+          description: "95th percentile GraphQL latency is {{ $value }}ms."
 
       - alert: GraphQLHighErrorRate
         expr: |
@@ -100,9 +100,9 @@ groups:
           service: server
           component: graphql
         annotations:
-          summary: 'GraphQL Error Rate > 5%'
-          description: 'GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/graphql-high-error-rate'
+          summary: "GraphQL Error Rate > 5%"
+          description: "GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}."
+          runbook_url: "https://docs.intelgraph.com/runbooks/graphql-high-error-rate"
 
       - alert: GraphQLModerateErrorRate
         expr: |
@@ -116,8 +116,8 @@ groups:
           service: server
           component: graphql
         annotations:
-          summary: 'GraphQL Error Rate > 2%'
-          description: 'GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}.'
+          summary: "GraphQL Error Rate > 2%"
+          description: "GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}."
 
       - alert: GraphQLGatewayDown
         expr: up{job="gateway"} == 0
@@ -127,9 +127,9 @@ groups:
           service: gateway
           component: graphql
         annotations:
-          summary: 'GraphQL Gateway Down'
-          description: 'GraphQL Gateway service is unreachable.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/service-down'
+          summary: "GraphQL Gateway Down"
+          description: "GraphQL Gateway service is unreachable."
+          runbook_url: "https://docs.intelgraph.com/runbooks/service-down"
 
   # Database Health
   - name: summit.database
@@ -142,9 +142,9 @@ groups:
           service: server
           component: database
         annotations:
-          summary: 'Postgres Connection Pool Saturated'
-          description: 'Active Postgres connections are at {{ $value }}, nearing the limit.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/db-pool-saturation'
+          summary: "Postgres Connection Pool Saturated"
+          description: "Active Postgres connections are at {{ $value }}, nearing the limit."
+          runbook_url: "https://docs.intelgraph.com/runbooks/db-pool-saturation"
 
       - alert: Neo4jQueryLatencyHigh
         expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{database="neo4j"}[5m])) by (le)) > 0.5
@@ -154,9 +154,9 @@ groups:
           service: server
           component: database
         annotations:
-          summary: 'Neo4j Query P95 Latency > 500ms'
-          description: 'Graph database queries are slow ({{ $value }}s).'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/neo4j-latency'
+          summary: "Neo4j Query P95 Latency > 500ms"
+          description: "Graph database queries are slow ({{ $value }}s)."
+          runbook_url: "https://docs.intelgraph.com/runbooks/neo4j-latency"
 
   # Redis / Cache
   - name: summit.cache
@@ -169,9 +169,9 @@ groups:
           service: redis
           component: redis
         annotations:
-          summary: 'Redis is down'
-          description: 'Redis instance is unreachable.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/redis-down'
+          summary: "Redis is down"
+          description: "Redis instance is unreachable."
+          runbook_url: "https://docs.intelgraph.com/runbooks/redis-down"
 
   # System Resources
   - name: summit.resources
@@ -183,6 +183,6 @@ groups:
           severity: warning
           component: system
         annotations:
-          summary: 'High Memory Usage ({{ $labels.job }})'
-          description: 'Memory usage for {{ $labels.job }} is {{ $value }}MB, exceeding 1.5GB.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'
+          summary: "High Memory Usage ({{ $labels.job }})"
+          description: "Memory usage for {{ $labels.job }} is {{ $value }}MB, exceeding 1.5GB."
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-memory"

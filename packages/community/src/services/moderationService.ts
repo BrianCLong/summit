@@ -1,8 +1,8 @@
-import { CommunityStore } from '../store.js';
-import type { DiscussionThread, ModerationAction, Post } from '../types.js';
-import { ActivityFeedService } from './activityFeedService.js';
-import { NotificationService } from './notificationService.js';
-import { createId } from '../utils.js';
+import { CommunityStore } from "../store.js";
+import type { DiscussionThread, ModerationAction, Post } from "../types.js";
+import { ActivityFeedService } from "./activityFeedService.js";
+import { NotificationService } from "./notificationService.js";
+import { createId } from "../utils.js";
 
 export interface FlagPostInput {
   readonly postId: string;
@@ -13,14 +13,14 @@ export interface FlagPostInput {
 export interface ModeratePostInput {
   readonly postId: string;
   readonly moderatorId: string;
-  readonly action: 'remove' | 'restore';
+  readonly action: "remove" | "restore";
   readonly reason: string;
 }
 
 export interface ThreadModerationInput {
   readonly threadId: string;
   readonly moderatorId: string;
-  readonly action: 'lock' | 'unlock';
+  readonly action: "lock" | "unlock";
   readonly reason: string;
 }
 
@@ -28,7 +28,7 @@ export class ModerationService {
   public constructor(
     private readonly store: CommunityStore,
     private readonly activity: ActivityFeedService,
-    private readonly notifications: NotificationService,
+    private readonly notifications: NotificationService
   ) {}
 
   public flagPost(input: FlagPostInput): Post {
@@ -47,8 +47,8 @@ export class ModerationService {
     this.store.upsertPost(updated);
     this.activity.record({
       userId: input.userId,
-      type: 'moderation_event',
-      summary: 'Content flagged for review',
+      type: "moderation_event",
+      summary: "Content flagged for review",
       metadata: { postId: post.id, reason: input.reason },
     });
     return updated;
@@ -61,34 +61,31 @@ export class ModerationService {
     }
     const updated: Post = {
       ...post,
-      isRemoved: input.action === 'remove',
-      moderationNotes: [
-        ...post.moderationNotes,
-        `${input.action}: ${input.reason}`,
-      ],
+      isRemoved: input.action === "remove",
+      moderationNotes: [...post.moderationNotes, `${input.action}: ${input.reason}`],
     };
     this.store.upsertPost(updated);
 
     const record: ModerationAction = {
-      id: createId('mod'),
+      id: createId("mod"),
       moderatorId: input.moderatorId,
       targetPostId: post.id,
-      action: input.action === 'remove' ? 'remove' : 'restore',
+      action: input.action === "remove" ? "remove" : "restore",
       reason: input.reason,
       createdAt: new Date(),
     };
     this.store.recordModeration(record);
     this.activity.record({
       userId: input.moderatorId,
-      type: 'moderation_event',
-      summary: `Post ${input.action === 'remove' ? 'removed' : 'restored'}`,
+      type: "moderation_event",
+      summary: `Post ${input.action === "remove" ? "removed" : "restored"}`,
       metadata: { postId: post.id, reason: input.reason },
     });
 
     if (post.authorId !== input.moderatorId) {
       this.notifications.notify({
         userId: post.authorId,
-        message: `Your post was ${input.action === 'remove' ? 'removed' : 'restored'} by moderation`,
+        message: `Your post was ${input.action === "remove" ? "removed" : "restored"} by moderation`,
         metadata: { postId: post.id, action: input.action },
       });
     }
@@ -103,24 +100,24 @@ export class ModerationService {
     }
 
     const updated: DiscussionThread =
-      input.action === 'lock'
+      input.action === "lock"
         ? { ...thread, isLocked: true, updatedAt: new Date() }
         : { ...thread, isLocked: false, updatedAt: new Date() };
 
     this.store.upsertThread(updated);
     const record: ModerationAction = {
-      id: createId('mod'),
+      id: createId("mod"),
       moderatorId: input.moderatorId,
-      targetPostId: '',
-      action: input.action === 'lock' ? 'lock-thread' : 'unlock-thread',
+      targetPostId: "",
+      action: input.action === "lock" ? "lock-thread" : "unlock-thread",
       reason: input.reason,
       createdAt: new Date(),
     };
     this.store.recordModeration(record);
     this.activity.record({
       userId: input.moderatorId,
-      type: input.action === 'lock' ? 'thread_locked' : 'thread_unlocked',
-      summary: `Thread ${input.action === 'lock' ? 'locked' : 'unlocked'}: ${thread.title}`,
+      type: input.action === "lock" ? "thread_locked" : "thread_unlocked",
+      summary: `Thread ${input.action === "lock" ? "locked" : "unlocked"}: ${thread.title}`,
       metadata: { threadId: thread.id, reason: input.reason },
     });
 

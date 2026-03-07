@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Institutional Memory & Knowledge Preservation
 
 **Mission**: Ensure absorbed knowledge **compounds**, and nothing is lost during convergence.

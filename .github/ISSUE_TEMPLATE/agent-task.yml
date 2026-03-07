@@ -1,7 +1,7 @@
 name: Agent Task
 description: Execution contract for Jules -> Codex -> Observer delivery
-title: '[Agent Task] '
-labels: ['agent-task', 'triage:needed']
+title: "[Agent Task] "
+labels: ["agent-task", "triage:needed"]
 body:
   - type: markdown
     attributes:

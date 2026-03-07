@@ -120,41 +120,41 @@ curl -X POST http://localhost:4040/exports/check \
 
 ```typescript
 // packages/connector-sdk/src/connectors/my-connector.ts
-import { PullConnector } from '../base-connector';
+import { PullConnector } from "../base-connector";
 import type {
   ConnectorManifest,
   ConnectorConfig,
   ConnectorContext,
   ConnectorResult,
-} from '../types';
+} from "../types";
 
 export class MyConnector extends PullConnector {
   readonly manifest: ConnectorManifest = {
-    id: 'my-connector',
-    name: 'My Custom Connector',
-    version: '1.0.0',
-    description: 'Custom connector description',
-    status: 'stable',
-    category: 'custom',
-    capabilities: ['pull'],
-    entityTypes: ['GenericRecord'],
+    id: "my-connector",
+    name: "My Custom Connector",
+    version: "1.0.0",
+    description: "Custom connector description",
+    status: "stable",
+    category: "custom",
+    capabilities: ["pull"],
+    entityTypes: ["GenericRecord"],
     relationshipTypes: [],
-    authentication: ['api-key'],
-    requiredSecrets: ['apiKey'],
-    license: 'MIT',
-    maintainer: 'Your Name',
+    authentication: ["api-key"],
+    requiredSecrets: ["apiKey"],
+    license: "MIT",
+    maintainer: "Your Name",
     configSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        apiUrl: { type: 'string' },
+        apiUrl: { type: "string" },
       },
-      required: ['apiUrl'],
+      required: ["apiUrl"],
     },
   };
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
     // Test connectivity
-    return { success: true, message: 'Connected' };
+    return { success: true, message: "Connected" };
   }
 
   async pull(context: ConnectorContext): Promise<ConnectorResult> {
@@ -170,8 +170,8 @@ export class MyConnector extends PullConnector {
         await context.rateLimiter.acquire();
 
         const entity = {
-          type: 'GenericRecord',
-          externalId: this.generateExternalId('my-source', record.id),
+          type: "GenericRecord",
+          externalId: this.generateExternalId("my-source", record.id),
           props: record,
           confidence: 1.0,
           observedAt: new Date(),
@@ -183,18 +183,9 @@ export class MyConnector extends PullConnector {
 
       await context.emitter.flush();
 
-      return this.successResult(
-        entitiesProcessed,
-        0,
-        Date.now() - startTime
-      );
+      return this.successResult(entitiesProcessed, 0, Date.now() - startTime);
     } catch (error) {
-      return this.failureResult(
-        error as Error,
-        entitiesProcessed,
-        0,
-        Date.now() - startTime
-      );
+      return this.failureResult(error as Error, entitiesProcessed, 0, Date.now() - startTime);
     }
   }
 
@@ -209,24 +200,24 @@ export class MyConnector extends PullConnector {
 
 ```typescript
 // packages/connector-sdk/src/connectors/index.ts
-export { MyConnector } from './my-connector';
+export { MyConnector } from "./my-connector";
 ```
 
 3. **Use Your Connector**
 
 ```typescript
-import { MyConnector } from '@intelgraph/connector-sdk/connectors';
+import { MyConnector } from "@intelgraph/connector-sdk/connectors";
 
 const connector = new MyConnector();
 
 await connector.initialize({
   config: {
-    apiUrl: 'https://api.example.com',
+    apiUrl: "https://api.example.com",
   },
   secrets: {
-    apiKey: 'your-api-key',
+    apiKey: "your-api-key",
   },
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
 });
 
 const result = await connector.pull(context);
@@ -239,20 +230,20 @@ const result = await connector.pull(context);
 ### Schema Inference
 
 ```typescript
-import { SchemaInference } from '@intelgraph/etl-assistant';
+import { SchemaInference } from "@intelgraph/etl-assistant";
 
 const inference = new SchemaInference();
 
 const samples = [
-  { name: 'John Doe', email: 'john@example.com', age: 30 },
-  { name: 'Jane Smith', email: 'jane@example.com', age: 28 },
+  { name: "John Doe", email: "john@example.com", age: 30 },
+  { name: "Jane Smith", email: "jane@example.com", age: 28 },
 ];
 
-const result = inference.inferSchema(samples, 'person');
+const result = inference.inferSchema(samples, "person");
 
-console.log('Entity Type:', result.entityType); // "Person"
-console.log('Confidence:', result.confidence); // 0.95
-console.log('Field Mappings:', result.fieldMappings);
+console.log("Entity Type:", result.entityType); // "Person"
+console.log("Confidence:", result.confidence); // 0.95
+console.log("Field Mappings:", result.fieldMappings);
 /*
 [
   {
@@ -269,18 +260,16 @@ console.log('Field Mappings:', result.fieldMappings);
 ### PII Detection
 
 ```typescript
-import { PIIDetection } from '@intelgraph/etl-assistant';
+import { PIIDetection } from "@intelgraph/etl-assistant";
 
 const detection = new PIIDetection();
 
-const samples = [
-  { name: 'John Doe', email: 'john@example.com', ssn: '123-45-6789' },
-];
+const samples = [{ name: "John Doe", email: "john@example.com", ssn: "123-45-6789" }];
 
 const result = detection.detectPII(samples);
 
-console.log('Risk Level:', result.riskLevel); // "critical"
-console.log('PII Fields:', result.piiFields);
+console.log("Risk Level:", result.riskLevel); // "critical"
+console.log("PII Fields:", result.piiFields);
 /*
 [
   {
@@ -299,7 +288,7 @@ console.log('PII Fields:', result.piiFields);
 */
 
 // Apply redaction
-const redacted = PIIDetection.redact('john@example.com', 'MASK');
+const redacted = PIIDetection.redact("john@example.com", "MASK");
 console.log(redacted); // "j***@e***.com"
 ```
 
@@ -356,18 +345,16 @@ console.log(canonical);
 ### Unified ETL Assistant
 
 ```typescript
-import { ETLAssistant } from '@intelgraph/etl-assistant';
+import { ETLAssistant } from "@intelgraph/etl-assistant";
 
 const assistant = new ETLAssistant();
 
-const samples = [
-  { name: 'John Doe', email: 'john@example.com', ssn: '123-45-6789' },
-];
+const samples = [{ name: "John Doe", email: "john@example.com", ssn: "123-45-6789" }];
 
-const analysis = assistant.analyze(samples, 'person');
+const analysis = assistant.analyze(samples, "person");
 
-console.log('Schema:', analysis.schema);
-console.log('PII:', analysis.pii);
+console.log("Schema:", analysis.schema);
+console.log("PII:", analysis.pii);
 ```
 
 ---
@@ -393,21 +380,21 @@ curl -X POST http://localhost:4030/licenses \
 Or use the Policy Engine directly:
 
 ```typescript
-import { PolicyEngine } from '@intelgraph/license-registry/policy-engine';
-import { Pool } from 'pg';
+import { PolicyEngine } from "@intelgraph/license-registry/policy-engine";
+import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const policyEngine = new PolicyEngine(pool);
 
 const decision = await policyEngine.evaluate({
-  operation: 'EXPORT',
-  licenseId: 'open-data-cc-by',
-  audience: 'external',
-  jurisdiction: 'US',
+  operation: "EXPORT",
+  licenseId: "open-data-cc-by",
+  audience: "external",
+  jurisdiction: "US",
 });
 
-console.log('Allow:', decision.allow);
-console.log('Reason:', decision.reason);
+console.log("Allow:", decision.allow);
+console.log("Reason:", decision.reason);
 ```
 
 ### License Templates
@@ -441,6 +428,7 @@ Pre-configured templates:
 Analyze sample records and return schema inference + PII detection results.
 
 **Request:**
+
 ```json
 {
   "samples": [{ "field": "value" }],
@@ -450,6 +438,7 @@ Analyze sample records and return schema inference + PII detection results.
 ```
 
 **Response:**
+
 ```json
 {
   "sourceId": "string",
@@ -464,6 +453,7 @@ Analyze sample records and return schema inference + PII detection results.
 Register a data source with connector config and mappings.
 
 **Request:**
+
 ```json
 {
   "connectorType": "csv-file | rest-pull | s3-bucket",
@@ -476,6 +466,7 @@ Register a data source with connector config and mappings.
 ```
 
 **Response:**
+
 ```json
 {
   "sourceId": "string",
@@ -490,6 +481,7 @@ Register a data source with connector config and mappings.
 Check if an export operation is allowed under license policy.
 
 **Request:**
+
 ```json
 {
   "licenseId": "string",
@@ -501,6 +493,7 @@ Check if an export operation is allowed under license policy.
 ```
 
 **Response:**
+
 ```json
 {
   "allow": true/false,
@@ -518,32 +511,32 @@ Check if an export operation is allowed under license policy.
 ### Example 1: CSV Ingestion with PII Redaction
 
 ```typescript
-import { CsvFileConnector } from '@intelgraph/connector-sdk/connectors';
-import { ETLAssistant } from '@intelgraph/etl-assistant';
-import { readFileSync } from 'fs';
-import { parse } from 'csv-parse/sync';
+import { CsvFileConnector } from "@intelgraph/connector-sdk/connectors";
+import { ETLAssistant } from "@intelgraph/etl-assistant";
+import { readFileSync } from "fs";
+import { parse } from "csv-parse/sync";
 
 // 1. Read CSV samples
-const csvContent = readFileSync('./data/users.csv', 'utf-8');
+const csvContent = readFileSync("./data/users.csv", "utf-8");
 const samples = parse(csvContent, { columns: true });
 
 // 2. Analyze with ETL Assistant
 const etl = new ETLAssistant();
 const analysis = etl.analyze(samples.slice(0, 100)); // Analyze first 100 records
 
-console.log('Entity Type:', analysis.schema.entityType);
-console.log('PII Risk:', analysis.pii.riskLevel);
+console.log("Entity Type:", analysis.schema.entityType);
+console.log("PII Risk:", analysis.pii.riskLevel);
 
 // 3. Register source via API
-const response = await fetch('http://localhost:4040/ingest/sources/users-csv/register', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:4040/ingest/sources/users-csv/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    connectorType: 'csv-file',
+    connectorType: "csv-file",
     connectorConfig: {
-      filePath: './data/users.csv',
+      filePath: "./data/users.csv",
     },
-    licenseId: 'open-data-cc-by',
+    licenseId: "open-data-cc-by",
     entityType: analysis.schema.entityType,
     fieldMappings: analysis.schema.fieldMappings,
     redactionRules: analysis.pii.recommendations.reduce((acc, rec) => {
@@ -553,65 +546,65 @@ const response = await fetch('http://localhost:4040/ingest/sources/users-csv/reg
   }),
 });
 
-console.log('Registration:', await response.json());
+console.log("Registration:", await response.json());
 ```
 
 ### Example 2: REST API Polling
 
 ```typescript
-import { RestPullConnector } from '@intelgraph/connector-sdk/connectors';
+import { RestPullConnector } from "@intelgraph/connector-sdk/connectors";
 
 const connector = new RestPullConnector();
 
 await connector.initialize({
   config: {
-    baseUrl: 'https://api.example.com',
-    path: '/users',
-    method: 'GET',
+    baseUrl: "https://api.example.com",
+    path: "/users",
+    method: "GET",
     pagination: {
-      type: 'offset',
+      type: "offset",
       pageSize: 100,
-      limitParam: 'limit',
-      offsetParam: 'offset',
+      limitParam: "limit",
+      offsetParam: "offset",
       maxPages: 10,
     },
-    responseDataPath: 'data',
+    responseDataPath: "data",
   },
   secrets: {
     apiKey: process.env.API_KEY,
   },
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
 });
 
 const result = await connector.pull(context);
-console.log('Ingested:', result.entitiesProcessed, 'entities');
+console.log("Ingested:", result.entitiesProcessed, "entities");
 ```
 
 ### Example 3: S3 Bucket Ingestion
 
 ```typescript
-import { S3BucketConnector } from '@intelgraph/connector-sdk/connectors';
+import { S3BucketConnector } from "@intelgraph/connector-sdk/connectors";
 
 const connector = new S3BucketConnector();
 
 await connector.initialize({
   config: {
-    bucket: 'my-data-bucket',
-    prefix: 'ingestion/',
-    filePattern: '.*\\.json$',
+    bucket: "my-data-bucket",
+    prefix: "ingestion/",
+    filePattern: ".*\\.json$",
     parseJson: true,
-    entityType: 'Document',
+    entityType: "Document",
   },
   secrets: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
 });
 
 const result = await connector.pull(context);
-console.log('Files processed:', result.metadata.filesProcessed);
-console.log('Entities processed:', result.entitiesProcessed);
+console.log("Files processed:", result.metadata.filesProcessed);
+console.log("Entities processed:", result.entitiesProcessed);
 ```
 
 ---
@@ -621,14 +614,17 @@ console.log('Entities processed:', result.entitiesProcessed);
 ### Common Issues
 
 **License Registry not accessible:**
+
 - Ensure License Registry is running on port 4030
 - Set `LICENSE_REGISTRY_URL` environment variable if using different port
 
 **Policy check fails:**
+
 - Verify license exists in registry
 - Check that required headers are included (`x-authority-id`, `x-reason-for-access`)
 
 **CSV connector fails:**
+
 - Verify file path is absolute
 - Check file encoding (default: utf-8)
 - Ensure file has proper CSV format

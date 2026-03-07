@@ -3,9 +3,10 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-  }
 }
-```
+}
+
+````
 
 3. **Create your evidence registry** at `evidence/map.yml`:
 ```yaml
@@ -24,11 +25,12 @@ dependency-scan:
   path: "artifacts/security/dependency-scan/${sha}/results.json"
   description: "Dependency vulnerability scan results"
   generator: "dependency-scanner"
-```
+````
 
 ### Adding to CI Pipeline
 
 #### GitHub Actions
+
 ```yaml
 name: Governance / Evidence ID Consistency
 on:
@@ -41,42 +43,43 @@ jobs:
   evidence-check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Required for git-based file discovery
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for git-based file discovery
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run Evidence ID Consistency Check
-      run: npm run ci:evidence-id-consistency -- --sha=${{ github.sha }}
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Upload Evidence Artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: evidence-id-consistency-${{ github.sha }}
-        path: artifacts/governance/evidence-id-consistency/${{ github.sha }}/
-        retention-days: 30
+      - name: Run Evidence ID Consistency Check
+        run: npm run ci:evidence-id-consistency -- --sha=${{ github.sha }}
+
+      - name: Upload Evidence Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-id-consistency-${{ github.sha }}
+          path: artifacts/governance/evidence-id-consistency/${{ github.sha }}/
+          retention-days: 30
 ```
 
 #### Jenkins Pipeline
+
 ```groovy
 stage('Evidence ID Consistency') {
   steps {
     script {
       def nodeVersion = '18'
       def sha = env.GIT_COMMIT ?: 'manual'
-      
+
       sh """
         npm run ci:evidence-id-consistency -- --sha=${sha}
       """
@@ -108,7 +111,7 @@ governance-docs-integrity:
 
 branch-protection-drift:
   path: "artifacts/governance/branch-protection-drift/stamp.json"
-  description: "Branch protection drift detection results" 
+  description: "Branch protection drift detection results"
   generator: "branch_protection_checker"
   created_at: "2026-01-14"
   last_validated: "2026-01-14"
@@ -136,6 +139,7 @@ Each governance document must include these headers in the first 30 lines:
 **Status:** active
 
 ## Content
+
 ...
 ```
 
@@ -144,11 +148,13 @@ Each governance document must include these headers in the first 30 lines:
 Evidence-IDs must follow the format: `^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$`
 
 **Valid Examples:**
+
 - `governance-docs-integrity`
-- `branch-protection.drift.monitoring`  
+- `branch-protection.drift.monitoring`
 - `soc-compliance.report.v1`
 
 **Invalid Examples:**
+
 - `Evidence with Spaces` (no spaces)
 - `evidence@invalid` (special chars except dash/underscore/dot)
 - `123-invalid-start` (shouldn't start with numbers, per convention)
@@ -168,6 +174,7 @@ The gate includes these security measures:
 ### Compliance Checks
 
 The gate addresses these compliance requirements:
+
 - **SOX**: Evidence traceability for regulatory compliance
 - **SOC2**: Continuous monitoring of evidence integrity
 - **ISO27001**: Systematic evidence management
@@ -185,6 +192,7 @@ The gate addresses these compliance requirements:
 ### Monitoring Setup
 
 #### Health Checks
+
 ```bash
 # Verify gate is responding
 curl -s http://localhost:3000/health | jq '.gates["evidence-id-consistency"].status'
@@ -194,7 +202,9 @@ cat artifacts/governance/evidence-id-consistency/latest/stamp.json
 ```
 
 #### Metrics Collection
+
 The gate outputs these metrics:
+
 - `evidence_id_gate_duration_seconds` - Execution time
 - `evidence_id_gate_documents_total` - Docs processed
 - `evidence_id_gate_violations_total` - Violations found
@@ -202,6 +212,7 @@ The gate outputs these metrics:
 - `evidence_id_gate_warnings_total` - Processing warnings
 
 #### Performance Tuning
+
 ```bash
 # Adjust for large repos
 MAX_CONCURRENT_FILES=20 npm run ci:evidence-id-consistency
@@ -213,20 +224,26 @@ MAX_CONCURRENT_FILES=5 npm run ci:evidence-id-consistency
 ### Caching Strategy
 
 #### Cache Location
+
 By default, cache is stored at `.qwen-cache/` but can be overridden:
+
 ```bash
 QWEN_CACHE_DIR=/shared/cache/qwen npm run ci:evidence-id-consistency
 ```
 
 #### Cache Warming
+
 Pre-populate cache for new environments:
+
 ```bash
 # Record mode (generates cache entries)
 ALLOW_QWEN_RECORD_IN_CI=true npm run ci:evidence-id-consistency
 ```
 
 #### Cache Maintenance
+
 Regular cleanup jobs:
+
 ```bash
 # Clean old cache entries (older than 30 days)
 find .qwen-cache/ -name "*.json" -mtime +30 -delete
@@ -237,25 +254,32 @@ find .qwen-cache/ -name "*.json" -mtime +30 -delete
 ### Prompt Management
 
 #### Versioning Policy
+
 - Prompts use semantic versioning: `prompt-name-v1.2.3`
 - Breaking changes increment major version
 - New features increment minor version
 - Bug fixes increment patch version
 
 #### Custom Prompt Templates
-Create custom prompts in `scripts/ci/ai-providers/prompts/`:
-```handlebars
-{{!-- custom-evidence-check-v1.0.prompt.hbs --}}
-You are a compliance expert verifying Evidence-IDs in documents.
-Validate that each Evidence-ID exists in the registry: {{registry}}
 
-Document Content: {{document}}
-Analysis Task: {{task}}
+Create custom prompts in `scripts/ci/ai-providers/prompts/`:
+
+```handlebars
+{{! custom-evidence-check-v1.0.prompt.hbs }}
+You are a compliance expert verifying Evidence-IDs in documents. Validate that each Evidence-ID
+exists in the registry:
+{{registry}}
+
+Document Content:
+{{document}}
+Analysis Task:
+{{task}}
 
 Return results in JSON format: { "issues": [] }
 ```
 
 #### AI Provider Configuration
+
 ```bash
 # Switch to different provider
 QWEN_BASE_URL=https://your-own-endpoint.com/compatible-mode/v1
@@ -266,18 +290,21 @@ DASHSCOPE_API_KEY=your-key-here
 ## Best Practices
 
 ### For Document Authors
+
 - Use consistent Evidence-ID naming conventions
 - Reference only registered Evidence-IDs
 - Include `Evidence-IDs: none` for docs that don't need evidence
 - Update `Last-Reviewed` date regularly
 
 ### For Governance Maintainers
-- Keep evidence registry current with active artifacts  
+
+- Keep evidence registry current with active artifacts
 - Use semantic versioning for breaking changes
 - Review orphaned Evidence-IDs regularly
 - Document the purpose of each Evidence-ID
 
 ### For Platform Engineers
+
 - Monitor cache hit rates (>95% ideal)
 - Track performance metrics over time
 - Validate determinism regularly in CI
@@ -286,18 +313,21 @@ DASHSCOPE_API_KEY=your-key-here
 ## Common Workflows
 
 ### Adding New Evidence
+
 1. Create the evidence artifact at its specified path
-2. Add entry to `evidence/map.yml` 
+2. Add entry to `evidence/map.yml`
 3. Update any governance documents that should reference it
 4. Run the gate to verify consistency
 
 ### Deprecating Evidence
+
 1. Update governance documents to remove references
 2. Remove entry from `evidence/map.yml`
 3. Optionally add deprecation notice to registry
 4. Run orphaned ID checks to confirm removal
 
 ### Troubleshooting Drift
+
 1. Run gate locally with `--debug` flag
 2. Check `report.json` for detailed violations
 3. Examine `stamp.json` for runtime metadata
@@ -306,12 +336,14 @@ DASHSCOPE_API_KEY=your-key-here
 ## Migration Strategies
 
 ### From Manual Checks
+
 1. Run both manual and automated checks in parallel
 2. Compare results to ensure coverage parity
 3. Gradually phase out manual processes
 4. Retain manual checks for complex scenarios
 
 ### From Other Systems
+
 1. Export existing evidence registry to YAML format
 2. Map to the gate's schema requirements
 3. Run gate in reporting mode first

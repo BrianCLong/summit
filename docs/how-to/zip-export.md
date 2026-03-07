@@ -13,7 +13,7 @@ ZIP Export & Certification provides a secure way to bundle IntelGraph data, repo
 
 ### Archive Structure
 
-```text
+````text
 export-2025-09-08-abc123.zip
 ├── manifest.json          # Signed manifest with metadata
 ├── data/                  # Exported data files
@@ -299,3 +299,4 @@ flowchart TD
   E -->|No| G[Reject + report]
 
 ```text
+````

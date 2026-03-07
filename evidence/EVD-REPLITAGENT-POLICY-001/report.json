@@ -1,9 +1,7 @@
 {
   "evidence_id": "EVD-REPLITAGENT-POLICY-001",
   "item_slug": "replit-agent-policy",
-  "claims": [
-    "Policy engine enforces deny-by-default with explicit allowlist and classification."
-  ],
+  "claims": ["Policy engine enforces deny-by-default with explicit allowlist and classification."],
   "decisions": [
     {
       "decision": "deny_by_default",

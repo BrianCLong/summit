@@ -2,13 +2,13 @@
 
 Here’s why:
 
-* You already know the positioning.
-* You already know the wedge.
-* You already know the target (Tier-1 FS).
-* The biggest risk now is overbuilding parity before locking lighthouse intent.
+- You already know the positioning.
+- You already know the wedge.
+- You already know the target (Tier-1 FS).
+- The biggest risk now is overbuilding parity before locking lighthouse intent.
 
 A 90-day capture plan only works if the MVP is surgically defined.
-A parity matrix only matters after you know what *must* exist to enter the room.
+A parity matrix only matters after you know what _must_ exist to enter the room.
 
 So we define the **irreducible enterprise-grade Proof Moat stack**.
 
@@ -55,24 +55,24 @@ This is the smallest stack that still wins the room.
 
 ### Required:
 
-* Artifact entity model:
+- Artifact entity model:
+  - source
+  - capture timestamp
+  - raw artifact hash
+  - parser version
+  - extracted features
 
-  * source
-  * capture timestamp
-  * raw artifact hash
-  * parser version
-  * extracted features
-* Immutable audit log
-* Deterministic ID scheme
-* Bundle hash generation (hash-stable outputs)
-* Re-run pipeline = identical bundle hash
+- Immutable audit log
+- Deterministic ID scheme
+- Bundle hash generation (hash-stable outputs)
+- Re-run pipeline = identical bundle hash
 
 ### What you do NOT need yet:
 
-* Massive collection coverage
-* Exotic dark web sources
-* AI narrative generation
-* Complex clustering models
+- Massive collection coverage
+- Exotic dark web sources
+- AI narrative generation
+- Complex clustering models
 
 The demo must prove:
 
@@ -84,18 +84,18 @@ The demo must prove:
 
 ### Required:
 
-* Risk score object
-* Feature list with contributions
-* Policy definition file (JSON/YAML)
-* Policy versioning
-* Alert referencing exact policy version
-* Feature contribution breakdown UI
+- Risk score object
+- Feature list with contributions
+- Policy definition file (JSON/YAML)
+- Policy versioning
+- Alert referencing exact policy version
+- Feature contribution breakdown UI
 
 ### Not required yet:
 
-* Advanced ML
-* Cross-campaign attribution
-* Industry benchmarking at scale
+- Advanced ML
+- Cross-campaign attribution
+- Industry benchmarking at scale
 
 This can be rule-based initially.
 
@@ -109,17 +109,17 @@ The key is:
 
 You need exactly three example overlays:
 
-* Regulatory Exposure Modifier
-* Peer Targeting Multiplier
-* Revenue-impact Asset Mapping
+- Regulatory Exposure Modifier
+- Peer Targeting Multiplier
+- Revenue-impact Asset Mapping
 
 Even if mocked with small sample data.
 
 What matters:
 
-* Editable
-* Version-controlled
-* Linked to alerts
+- Editable
+- Version-controlled
+- Linked to alerts
 
 ---
 
@@ -127,15 +127,15 @@ What matters:
 
 ### Required:
 
-* “Export Case” button
-* Produces:
+- “Export Case” button
+- Produces:
+  - Evidence bundle
+  - Policy version
+  - Artifact lineage
+  - Score breakdown
+  - Bundle hash
 
-  * Evidence bundle
-  * Policy version
-  * Artifact lineage
-  * Score breakdown
-  * Bundle hash
-* Optional signing with demo keypair
+- Optional signing with demo keypair
 
 This is the courtroom moment in the demo.
 
@@ -151,9 +151,9 @@ Pick:
 
 Support:
 
-* IOC enrichment
-* Alert callback
-* Watchlist feed
+- IOC enrichment
+- Alert callback
+- Watchlist feed
 
 That’s enough to show workflow realism.
 
@@ -163,9 +163,9 @@ That’s enough to show workflow realism.
 
 You need:
 
-* Containerized deployment
-* Option to run locally
-* Clear “no raw telemetry leaves environment” explanation
+- Containerized deployment
+- Option to run locally
+- Clear “no raw telemetry leaves environment” explanation
 
 You do not need full air-gap support yet — just architecture readiness.
 
@@ -173,13 +173,13 @@ You do not need full air-gap support yet — just architecture readiness.
 
 # 🚫 What NOT to Build Before First Enterprise Pitch
 
-* Massive OSINT collection network
-* Brand intelligence
-* Fraud monitoring
-* 100+ integrations
-* AI auto-reporting
-* Full campaign graph
-* Peer exposure scoring engine
+- Massive OSINT collection network
+- Brand intelligence
+- Fraud monitoring
+- 100+ integrations
+- AI auto-reporting
+- Full campaign graph
+- Peer exposure scoring engine
 
 All of those are Phase 2.
 
@@ -222,10 +222,10 @@ Parallelizable → ~10–14 weeks total.
 
 You are ready when:
 
-* A demo feels like a regulator walkthrough.
-* The CISO asks about pricing before integrations.
-* The GRC lead starts taking notes.
-* No one asks about “how many feeds do you have?”
+- A demo feels like a regulator walkthrough.
+- The CISO asks about pricing before integrations.
+- The GRC lead starts taking notes.
+- No one asks about “how many feeds do you have?”
 
 That’s the signal your wedge is landing.
 

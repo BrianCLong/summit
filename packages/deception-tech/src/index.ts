@@ -4,15 +4,22 @@
  * Advanced honeypots, decoys, breadcrumbs, and adversary engagement
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export const DecoyAssetSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   type: z.enum([
-    'HONEYPOT_SERVER', 'HONEYPOT_WORKSTATION', 'HONEYPOT_DATABASE',
-    'HONEY_TOKEN', 'HONEY_FILE', 'HONEY_CREDENTIAL', 'HONEY_NETWORK',
-    'DECOY_APPLICATION', 'DECOY_SERVICE', 'BREADCRUMB'
+    "HONEYPOT_SERVER",
+    "HONEYPOT_WORKSTATION",
+    "HONEYPOT_DATABASE",
+    "HONEY_TOKEN",
+    "HONEY_FILE",
+    "HONEY_CREDENTIAL",
+    "HONEY_NETWORK",
+    "DECOY_APPLICATION",
+    "DECOY_SERVICE",
+    "BREADCRUMB",
   ]),
   subtype: z.string(),
   deployment: z.object({
@@ -21,32 +28,38 @@ export const DecoyAssetSchema = z.object({
     ipAddress: z.string().optional(),
     hostname: z.string().optional(),
     deployedAt: z.date(),
-    lastHeartbeat: z.date()
+    lastHeartbeat: z.date(),
   }),
   configuration: z.object({
-    interactionLevel: z.enum(['LOW', 'MEDIUM', 'HIGH', 'FULL']),
+    interactionLevel: z.enum(["LOW", "MEDIUM", "HIGH", "FULL"]),
     services: z.array(z.object({ name: z.string(), port: z.number(), version: z.string() })),
-    credentials: z.array(z.object({ username: z.string(), password: z.string(), purpose: z.string() })),
-    dataSeeds: z.array(z.object({ type: z.string(), description: z.string(), trackingId: z.string() })),
-    vulnerabilities: z.array(z.object({ cve: z.string(), exploitable: z.boolean() }))
+    credentials: z.array(
+      z.object({ username: z.string(), password: z.string(), purpose: z.string() })
+    ),
+    dataSeeds: z.array(
+      z.object({ type: z.string(), description: z.string(), trackingId: z.string() })
+    ),
+    vulnerabilities: z.array(z.object({ cve: z.string(), exploitable: z.boolean() })),
   }),
-  status: z.enum(['ACTIVE', 'TRIGGERED', 'COMPROMISED', 'OFFLINE', 'MAINTENANCE']),
-  interactions: z.array(z.object({
-    id: z.string(),
-    timestamp: z.date(),
-    sourceIp: z.string(),
-    sourcePort: z.number(),
-    action: z.string(),
-    details: z.record(z.any()),
-    threatLevel: z.enum(['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    analyzed: z.boolean()
-  })),
+  status: z.enum(["ACTIVE", "TRIGGERED", "COMPROMISED", "OFFLINE", "MAINTENANCE"]),
+  interactions: z.array(
+    z.object({
+      id: z.string(),
+      timestamp: z.date(),
+      sourceIp: z.string(),
+      sourcePort: z.number(),
+      action: z.string(),
+      details: z.record(z.any()),
+      threatLevel: z.enum(["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      analyzed: z.boolean(),
+    })
+  ),
   intelligence: z.object({
     ttpsObserved: z.array(z.string()),
     toolsIdentified: z.array(z.string()),
     attackerProfile: z.string().optional(),
-    campaignLink: z.string().optional()
-  })
+    campaignLink: z.string().optional(),
+  }),
 });
 
 export type DecoyAsset = z.infer<typeof DecoyAssetSchema>;
@@ -54,8 +67,8 @@ export type DecoyAsset = z.infer<typeof DecoyAssetSchema>;
 export interface DeceptionCampaign {
   id: string;
   name: string;
-  objective: 'DETECTION' | 'INTELLIGENCE' | 'ATTRIBUTION' | 'DELAY' | 'MISDIRECTION';
-  status: 'PLANNING' | 'ACTIVE' | 'PAUSED' | 'COMPLETED';
+  objective: "DETECTION" | "INTELLIGENCE" | "ATTRIBUTION" | "DELAY" | "MISDIRECTION";
+  status: "PLANNING" | "ACTIVE" | "PAUSED" | "COMPLETED";
   targetedThreats: string[];
   assets: string[];
   rules: DeceptionRule[];
@@ -92,7 +105,7 @@ export interface AdversaryEngagement {
     sourceIPs: string[];
     userAgents: string[];
     tools: string[];
-    sophistication: 'LOW' | 'MEDIUM' | 'HIGH' | 'ADVANCED';
+    sophistication: "LOW" | "MEDIUM" | "HIGH" | "ADVANCED";
   };
   timeline: Array<{
     timestamp: Date;
@@ -118,10 +131,10 @@ export class DeceptionOrchestrator {
    * Deploy deception asset
    */
   async deployAsset(config: {
-    type: DecoyAsset['type'];
+    type: DecoyAsset["type"];
     location: string;
     network: string;
-    interactionLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'FULL';
+    interactionLevel: "LOW" | "MEDIUM" | "HIGH" | "FULL";
     services: Array<{ name: string; port: number; version: string }>;
     dataSeeds?: Array<{ type: string; description: string }>;
   }): Promise<DecoyAsset> {
@@ -129,33 +142,33 @@ export class DeceptionOrchestrator {
       id: crypto.randomUUID(),
       name: `${config.type}_${Date.now()}`,
       type: config.type,
-      subtype: config.services[0]?.name || 'generic',
+      subtype: config.services[0]?.name || "generic",
       deployment: {
         location: config.location,
         network: config.network,
         ipAddress: this.allocateIP(config.network),
         hostname: this.generateHostname(config.type),
         deployedAt: new Date(),
-        lastHeartbeat: new Date()
+        lastHeartbeat: new Date(),
       },
       configuration: {
         interactionLevel: config.interactionLevel,
         services: config.services,
         credentials: this.generateHoneyCredentials(config.type),
-        dataSeeds: (config.dataSeeds || []).map(seed => ({
+        dataSeeds: (config.dataSeeds || []).map((seed) => ({
           ...seed,
-          trackingId: crypto.randomUUID()
+          trackingId: crypto.randomUUID(),
         })),
-        vulnerabilities: this.selectVulnerabilities(config.services)
+        vulnerabilities: this.selectVulnerabilities(config.services),
       },
-      status: 'ACTIVE',
+      status: "ACTIVE",
       interactions: [],
       intelligence: {
         ttpsObserved: [],
         toolsIdentified: [],
         attackerProfile: undefined,
-        campaignLink: undefined
-      }
+        campaignLink: undefined,
+      },
     };
 
     this.assets.set(asset.id, asset);
@@ -168,21 +181,23 @@ export class DeceptionOrchestrator {
    */
   createCampaign(config: {
     name: string;
-    objective: DeceptionCampaign['objective'];
+    objective: DeceptionCampaign["objective"];
     targetedThreats: string[];
-    assetTypes: DecoyAsset['type'][];
+    assetTypes: DecoyAsset["type"][];
     duration?: number;
   }): DeceptionCampaign {
     const campaign: DeceptionCampaign = {
       id: crypto.randomUUID(),
       name: config.name,
       objective: config.objective,
-      status: 'PLANNING',
+      status: "PLANNING",
       targetedThreats: config.targetedThreats,
       assets: [],
       rules: this.generateCampaignRules(config.objective),
       startDate: new Date(),
-      endDate: config.duration ? new Date(Date.now() + config.duration * 24 * 60 * 60 * 1000) : undefined,
+      endDate: config.duration
+        ? new Date(Date.now() + config.duration * 24 * 60 * 60 * 1000)
+        : undefined,
       metrics: {
         totalInteractions: 0,
         uniqueAttackers: 0,
@@ -190,8 +205,8 @@ export class DeceptionOrchestrator {
         ttpsCollected: 0,
         alertsGenerated: 0,
         falsePositives: 0,
-        intelligenceValue: 0
-      }
+        intelligenceValue: 0,
+      },
     };
 
     this.campaigns.set(campaign.id, campaign);
@@ -227,7 +242,7 @@ export class DeceptionOrchestrator {
       timestamp: new Date(),
       ...interaction,
       threatLevel,
-      analyzed: false
+      analyzed: false,
     };
     asset.interactions.push(interactionRecord);
 
@@ -253,7 +268,7 @@ export class DeceptionOrchestrator {
       response,
       alertGenerated,
       engagementStarted: shouldEngage,
-      intelligenceCollected: intelligence
+      intelligenceCollected: intelligence,
     };
   }
 
@@ -263,8 +278,8 @@ export class DeceptionOrchestrator {
   async deployBreadcrumbTrail(config: {
     startLocation: string;
     targetAsset: string;
-    breadcrumbTypes: Array<'CREDENTIAL' | 'FILE' | 'REGISTRY' | 'NETWORK' | 'DOCUMENT'>;
-    complexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX';
+    breadcrumbTypes: Array<"CREDENTIAL" | "FILE" | "REGISTRY" | "NETWORK" | "DOCUMENT">;
+    complexity: "SIMPLE" | "MODERATE" | "COMPLEX";
   }): Promise<{
     trailId: string;
     breadcrumbs: Array<{ id: string; type: string; location: string; content: string }>;
@@ -272,7 +287,8 @@ export class DeceptionOrchestrator {
     const trailId = crypto.randomUUID();
     const breadcrumbs: Array<{ id: string; type: string; location: string; content: string }> = [];
 
-    const pathLength = config.complexity === 'SIMPLE' ? 3 : config.complexity === 'MODERATE' ? 5 : 8;
+    const pathLength =
+      config.complexity === "SIMPLE" ? 3 : config.complexity === "MODERATE" ? 5 : 8;
 
     for (let i = 0; i < pathLength; i++) {
       const type = config.breadcrumbTypes[i % config.breadcrumbTypes.length];
@@ -280,7 +296,7 @@ export class DeceptionOrchestrator {
         id: crypto.randomUUID(),
         type,
         location: this.generateBreadcrumbLocation(config.startLocation, i),
-        content: this.generateBreadcrumbContent(type, config.targetAsset, i === pathLength - 1)
+        content: this.generateBreadcrumbContent(type, config.targetAsset, i === pathLength - 1),
       };
       breadcrumbs.push(breadcrumb);
     }
@@ -292,7 +308,7 @@ export class DeceptionOrchestrator {
    * Analyze adversary engagement
    */
   async analyzeEngagement(engagementId: string): Promise<{
-    sophistication: 'LOW' | 'MEDIUM' | 'HIGH' | 'ADVANCED';
+    sophistication: "LOW" | "MEDIUM" | "HIGH" | "ADVANCED";
     ttps: Array<{ mitreId: string; confidence: number }>;
     tools: string[];
     objectives: string[];
@@ -323,7 +339,7 @@ export class DeceptionOrchestrator {
       tools,
       objectives,
       attribution,
-      recommendations: this.generateEngagementRecommendations(sophistication, ttps)
+      recommendations: this.generateEngagementRecommendations(sophistication, ttps),
     };
   }
 
@@ -341,7 +357,9 @@ export class DeceptionOrchestrator {
     const campaign = this.campaigns.get(campaignId);
     if (!campaign) throw new Error(`Campaign ${campaignId} not found`);
 
-    const campaignAssets = campaign.assets.map(id => this.assets.get(id)).filter(Boolean) as DecoyAsset[];
+    const campaignAssets = campaign.assets
+      .map((id) => this.assets.get(id))
+      .filter(Boolean) as DecoyAsset[];
 
     // Aggregate TTPs
     const ttpsObserved = this.aggregateTTPs(campaignAssets);
@@ -361,64 +379,120 @@ export class DeceptionOrchestrator {
       attackerProfiles,
       timeline,
       recommendations: this.generateCampaignRecommendations(campaign, ttpsObserved),
-      iocs
+      iocs,
     };
   }
 
   // Private helper methods
-  private allocateIP(network: string): string { return `10.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`; }
-  private generateHostname(type: string): string { return `${type.toLowerCase().replace('_', '-')}-${Math.random().toString(36).substring(7)}`; }
-  private generateHoneyCredentials(type: string): DecoyAsset['configuration']['credentials'] {
+  private allocateIP(network: string): string {
+    return `10.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+  }
+  private generateHostname(type: string): string {
+    return `${type.toLowerCase().replace("_", "-")}-${Math.random().toString(36).substring(7)}`;
+  }
+  private generateHoneyCredentials(type: string): DecoyAsset["configuration"]["credentials"] {
     return [
-      { username: 'admin', password: 'P@ssw0rd123!', purpose: 'SSH/RDP access' },
-      { username: 'svc_backup', password: 'Backup2024!', purpose: 'Service account' }
+      { username: "admin", password: "P@ssw0rd123!", purpose: "SSH/RDP access" },
+      { username: "svc_backup", password: "Backup2024!", purpose: "Service account" },
     ];
   }
-  private selectVulnerabilities(services: any[]): DecoyAsset['configuration']['vulnerabilities'] {
-    return [{ cve: 'CVE-2021-44228', exploitable: true }];
+  private selectVulnerabilities(services: any[]): DecoyAsset["configuration"]["vulnerabilities"] {
+    return [{ cve: "CVE-2021-44228", exploitable: true }];
   }
-  private async activateAsset(asset: DecoyAsset): Promise<void> { /* Deploy to infrastructure */ }
+  private async activateAsset(asset: DecoyAsset): Promise<void> {
+    /* Deploy to infrastructure */
+  }
   private generateCampaignRules(objective: string): DeceptionRule[] {
-    return [{
-      id: crypto.randomUUID(),
-      trigger: { type: 'INTERACTION', condition: 'any' },
-      actions: [{ action: 'ALERT', parameters: { severity: 'HIGH' } }],
-      priority: 1,
-      enabled: true
-    }];
+    return [
+      {
+        id: crypto.randomUUID(),
+        trigger: { type: "INTERACTION", condition: "any" },
+        actions: [{ action: "ALERT", parameters: { severity: "HIGH" } }],
+        priority: 1,
+        enabled: true,
+      },
+    ];
   }
-  private assessThreatLevel(interaction: any): DecoyAsset['interactions'][0]['threatLevel'] {
-    if (interaction.action.includes('exploit')) return 'CRITICAL';
-    if (interaction.action.includes('scan')) return 'MEDIUM';
-    return 'LOW';
+  private assessThreatLevel(interaction: any): DecoyAsset["interactions"][0]["threatLevel"] {
+    if (interaction.action.includes("exploit")) return "CRITICAL";
+    if (interaction.action.includes("scan")) return "MEDIUM";
+    return "LOW";
   }
   private shouldEngageAdversary(asset: DecoyAsset, interaction: any): boolean {
-    return interaction.threatLevel === 'HIGH' || interaction.threatLevel === 'CRITICAL';
+    return interaction.threatLevel === "HIGH" || interaction.threatLevel === "CRITICAL";
   }
-  private extractIntelligence(interaction: any): string[] { return []; }
-  private generateResponse(asset: DecoyAsset, interaction: any): string { return 'OK'; }
-  private async evaluateRules(asset: DecoyAsset, interaction: any): Promise<boolean> { return true; }
-  private updateCampaignMetrics(asset: DecoyAsset): void { }
-  private generateBreadcrumbLocation(start: string, index: number): string { return `${start}/path${index}`; }
-  private generateBreadcrumbContent(type: string, target: string, isFinal: boolean): string { return isFinal ? target : `hint_${type}`; }
-  private analyzeTTPs(timeline: any[]): Array<{ mitreId: string; confidence: number }> { return []; }
-  private identifyTools(timeline: any[]): string[] { return []; }
-  private inferObjectives(engagement: AdversaryEngagement): string[] { return ['reconnaissance']; }
-  private calculateSophistication(ttps: any[], tools: string[], timeline: any[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'ADVANCED' { return 'MEDIUM'; }
-  private async attemptAttribution(engagement: AdversaryEngagement): Promise<{ actor: string; confidence: number }> { return { actor: 'Unknown', confidence: 0 }; }
-  private generateEngagementRecommendations(soph: string, ttps: any[]): string[] { return ['Continue monitoring']; }
-  private aggregateTTPs(assets: DecoyAsset[]): any[] { return []; }
-  private buildAttackerProfiles(assets: DecoyAsset[]): any[] { return []; }
-  private buildCampaignTimeline(assets: DecoyAsset[]): any[] { return []; }
-  private extractIOCs(assets: DecoyAsset[]): any[] { return []; }
-  private generateExecutiveSummary(campaign: DeceptionCampaign, assets: DecoyAsset[]): string { return `Campaign ${campaign.name} summary`; }
-  private generateCampaignRecommendations(campaign: DeceptionCampaign, ttps: any[]): string[] { return []; }
+  private extractIntelligence(interaction: any): string[] {
+    return [];
+  }
+  private generateResponse(asset: DecoyAsset, interaction: any): string {
+    return "OK";
+  }
+  private async evaluateRules(asset: DecoyAsset, interaction: any): Promise<boolean> {
+    return true;
+  }
+  private updateCampaignMetrics(asset: DecoyAsset): void {}
+  private generateBreadcrumbLocation(start: string, index: number): string {
+    return `${start}/path${index}`;
+  }
+  private generateBreadcrumbContent(type: string, target: string, isFinal: boolean): string {
+    return isFinal ? target : `hint_${type}`;
+  }
+  private analyzeTTPs(timeline: any[]): Array<{ mitreId: string; confidence: number }> {
+    return [];
+  }
+  private identifyTools(timeline: any[]): string[] {
+    return [];
+  }
+  private inferObjectives(engagement: AdversaryEngagement): string[] {
+    return ["reconnaissance"];
+  }
+  private calculateSophistication(
+    ttps: any[],
+    tools: string[],
+    timeline: any[]
+  ): "LOW" | "MEDIUM" | "HIGH" | "ADVANCED" {
+    return "MEDIUM";
+  }
+  private async attemptAttribution(
+    engagement: AdversaryEngagement
+  ): Promise<{ actor: string; confidence: number }> {
+    return { actor: "Unknown", confidence: 0 };
+  }
+  private generateEngagementRecommendations(soph: string, ttps: any[]): string[] {
+    return ["Continue monitoring"];
+  }
+  private aggregateTTPs(assets: DecoyAsset[]): any[] {
+    return [];
+  }
+  private buildAttackerProfiles(assets: DecoyAsset[]): any[] {
+    return [];
+  }
+  private buildCampaignTimeline(assets: DecoyAsset[]): any[] {
+    return [];
+  }
+  private extractIOCs(assets: DecoyAsset[]): any[] {
+    return [];
+  }
+  private generateExecutiveSummary(campaign: DeceptionCampaign, assets: DecoyAsset[]): string {
+    return `Campaign ${campaign.name} summary`;
+  }
+  private generateCampaignRecommendations(campaign: DeceptionCampaign, ttps: any[]): string[] {
+    return [];
+  }
 
   // Public API
-  getAsset(id: string): DecoyAsset | undefined { return this.assets.get(id); }
-  getAllAssets(): DecoyAsset[] { return Array.from(this.assets.values()); }
-  getCampaign(id: string): DeceptionCampaign | undefined { return this.campaigns.get(id); }
-  getAllCampaigns(): DeceptionCampaign[] { return Array.from(this.campaigns.values()); }
+  getAsset(id: string): DecoyAsset | undefined {
+    return this.assets.get(id);
+  }
+  getAllAssets(): DecoyAsset[] {
+    return Array.from(this.assets.values());
+  }
+  getCampaign(id: string): DeceptionCampaign | undefined {
+    return this.campaigns.get(id);
+  }
+  getAllCampaigns(): DeceptionCampaign[] {
+    return Array.from(this.campaigns.values());
+  }
 }
 
 export { DeceptionOrchestrator };

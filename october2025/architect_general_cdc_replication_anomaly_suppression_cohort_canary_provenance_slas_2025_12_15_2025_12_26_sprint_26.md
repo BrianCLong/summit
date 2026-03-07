@@ -218,14 +218,14 @@ cohorts:
 **Scoring Gate (`ops/gates/cohort-score.js`)**
 
 ```js
-const fs = require('fs');
-const cfg = JSON.parse(fs.readFileSync('probe.results.json', 'utf8'));
+const fs = require("fs");
+const cfg = JSON.parse(fs.readFileSync("probe.results.json", "utf8"));
 let fail = [];
 for (const c of Object.keys(cfg)) {
   if (cfg[c].score < 90) fail.push(c);
 }
 if (fail.length) {
-  console.error('cohort gate fail:', fail.join(','));
+  console.error("cohort gate fail:", fail.join(","));
   process.exit(1);
 }
 ```

@@ -43,8 +43,8 @@ defaultTenant: default
 tenants:
   <tenant-id>:
     monthlyCost:
-      soft: <usd>   # warning + downgrade when exceeded
-      hard: <usd>   # hard block when exceeded
+      soft: <usd> # warning + downgrade when exceeded
+      hard: <usd> # hard block when exceeded
     maxRequestsPerMinute: <int>
     promptLimit: <chars>
     abuse:

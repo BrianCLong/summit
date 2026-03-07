@@ -6,12 +6,7 @@ import {
   FileText,
   BarChart3,
 } from 'lucide-react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
@@ -174,8 +169,11 @@ export default function HomePage() {
           data={kpiMetrics}
           loading={loading}
           onSelect={metric => {
-            if (metric.id === 'threats') {navigate('/alerts')}
-            else if (metric.id === 'investigations') {navigate('/explore')}
+            if (metric.id === 'threats') {
+              navigate('/alerts')
+            } else if (metric.id === 'investigations') {
+              navigate('/explore')
+            }
           }}
         />
         {!loading && kpiMetrics.length === 0 && (
@@ -201,10 +199,10 @@ export default function HomePage() {
                 className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 onClick={() => navigate(action.href)}
                 tabIndex={0}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(action.href);
+                    e.preventDefault()
+                    navigate(action.href)
                   }
                 }}
                 role="button"
@@ -347,9 +345,7 @@ export default function HomePage() {
                     aria-label={`View alert: ${alert.title}`}
                     className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() => navigate(`/alerts/${alert.id}`)}
-                    onKeyDown={e =>
-                      handleItemKeyDown(e, `/alerts/${alert.id}`)
-                    }
+                    onKeyDown={e => handleItemKeyDown(e, `/alerts/${alert.id}`)}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{alert.title}</div>
@@ -417,9 +413,7 @@ export default function HomePage() {
                     aria-label={`View case: ${case_.title}`}
                     className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() => navigate(`/cases/${case_.id}`)}
-                    onKeyDown={e =>
-                      handleItemKeyDown(e, `/cases/${case_.id}`)
-                    }
+                    onKeyDown={e => handleItemKeyDown(e, `/cases/${case_.id}`)}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{case_.title}</div>

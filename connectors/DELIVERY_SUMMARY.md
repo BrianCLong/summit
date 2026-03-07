@@ -11,6 +11,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 **Location:** `connectors/sdk/`
 
 **Components:**
+
 - `SDK_MANIFEST_SCHEMA.yaml` - Canonical manifest schema for all connectors
 - `base.py` - Base connector class with full pipeline integration
 - `rate_limiter.py` - Token bucket rate limiter with exponential backoff
@@ -19,6 +20,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 - `validator.py` - Manifest validation against SDK schema
 
 **Features:**
+
 - Automatic PII detection (emails, phones, SSNs, credit cards, names, IPs)
 - Configurable redaction policies (allow, redact, block, prompt)
 - Rate limiting with burst control and backoff strategies
@@ -29,6 +31,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 ### 2. Sample Connectors (3) ✅
 
 #### CSV Connector (`connectors/csv_connector/`)
+
 - **Manifest:** Fully SDK-compliant with rate limits, PII flags, license rules
 - **Implementation:** `connector.py` extends BaseConnector
 - **Features:**
@@ -39,6 +42,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
   - Lineage tracking enabled
 
 #### RSS Connector (`connectors/rss_news_connector/`)
+
 - **Manifest:** Streaming connector with 60 req/hour limit
 - **Features:**
   - Preconfigured threat intel feeds (Krebs, SANS, Threatpost)
@@ -47,6 +51,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
   - Author/journalist name PII handling
 
 #### STIX/TAXII Connector (`connectors/stix_taxii_connector/`)
+
 - **Manifest:** Conservative rate limiting (2 req/min)
 - **Features:**
   - STIX 2.1 compliant
@@ -59,6 +64,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 **Location:** `ingestion/wizard.py`
 
 **Features:**
+
 - Interactive connector selection
 - Automatic manifest validation
 - Field mapping proposals based on sample data
@@ -73,6 +79,7 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 - Summary report with TX IDs
 
 **User Flow:**
+
 1. Select connector from list
 2. Validate manifest
 3. Review proposed field mappings
@@ -86,11 +93,13 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 **Location:** `connectors/__tests__/`
 
 **Test Files:**
+
 - `test_csv_connector.py` - Basic CSV ingestion tests
 - `test_csv_edge_cases.py` - Edge cases (empty files, PII redaction, blocked fields, unicode, malformed data)
 - `test_stix_parsing.py` - STIX object parsing tests (indicators, malware, bundles, TLP markings)
 
 **Coverage:**
+
 - Entity mapping correctness
 - PII detection and redaction
 - License field blocking
@@ -101,12 +110,14 @@ Complete implementation of a normalized connector SDK with 3 sample connectors, 
 ### 5. Lineage Integration ✅
 
 **Implementation:**
+
 - Integrated with existing `python/intelgraph_py/provenance/fabric_client.py`
 - Automatic provenance receipt generation
 - Immutable TX ID for each ingestion batch
 - Metadata includes: connector, version, timestamp, source system, classification
 
 **Usage:**
+
 ```python
 # Lineage automatically recorded during ingestion
 receipt = submit_receipt(data_hash, lineage_metadata)
@@ -118,36 +129,46 @@ receipt = submit_receipt(data_hash, lineage_metadata)
 **Test:** `connectors/ACCEPTANCE_TEST.py`
 
 ### ✅ Criterion 1: Map CSV→entities in ≤10 minutes
+
 **Result:** **0.001 seconds** (6000x faster than required)
+
 - 3 records processed
 - 3 succeeded, 0 failed
 - Well under 10-minute threshold
 
 ### ✅ Criterion 2: PII flags visible
+
 **Result:** 4 PII fields configured and displayed
+
 - name (medium severity, prompt policy)
 - email (high severity, redact policy)
 - phone (high severity, redact policy)
 - ssn (critical severity, block policy)
 
 All flags visible in:
+
 - Manifest documentation
 - Wizard interactive display
 - Acceptance test output
 
 ### ✅ Criterion 3: Blocked fields show license reason
+
 **Result:** 1 blocked field with full documentation
+
 - Field: `credit_card`
 - Reason: "Payment card data prohibited by PCI-DSS compliance"
 - Alternative: "Use tokenized payment references instead"
 
 Displayed in:
+
 - Manifest license section
 - Wizard license review
 - License violation reports
 
 ### ✅ Criterion 4: Lineage recorded
+
 **Result:** Lineage fully integrated and working
+
 - Enabled in manifest (lineage.enabled: true)
 - Recorded for each ingestion batch
 - Sample TX ID: `tx_7ebb6d625d1c171d`
@@ -220,30 +241,35 @@ summit/
 ## Usage Examples
 
 ### Run Acceptance Test
+
 ```bash
 cd connectors
 python ACCEPTANCE_TEST.py
 ```
 
 ### Use Ingestion Wizard
+
 ```bash
 cd ingestion
 python wizard.py
 ```
 
 ### Use CSV Connector Directly
+
 ```bash
 cd connectors/csv_connector
 python connector.py
 ```
 
 ### Run Tests
+
 ```bash
 cd connectors
 python -m pytest __tests__/ -v
 ```
 
 ### Validate a Manifest
+
 ```python
 from sdk.validator import validate_manifest
 report = validate_manifest("path/to/manifest.yaml")
@@ -293,6 +319,7 @@ print(report)
 ## Future Enhancements (Optional)
 
 While all acceptance criteria are met, potential enhancements:
+
 - GUI wizard (currently CLI)
 - Real-time TAXII connector implementation
 - Machine learning for field mapping suggestions

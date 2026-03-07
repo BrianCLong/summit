@@ -3,14 +3,14 @@ name: AgentPlace Policy Gates
 on:
   pull_request:
     paths:
-      - 'modules/agentplace/**'
-      - 'agents/manifests/**'
+      - "modules/agentplace/**"
+      - "agents/manifests/**"
   push:
     branches:
       - main
     paths:
-      - 'modules/agentplace/**'
-      - 'agents/manifests/**'
+      - "modules/agentplace/**"
+      - "agents/manifests/**"
 
 jobs:
   agentplace-policy-check:
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: pip install PyYAML jsonschema
       - name: Run Policy Check
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: pip install PyYAML jsonschema
       - name: Run Scope Check
@@ -60,7 +60,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: pip install PyYAML jsonschema psutil
       - name: Run Performance Profiling

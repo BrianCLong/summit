@@ -3,7 +3,7 @@ name: Golden Path Build (Image & Sign)
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ["v*"]
   workflow_run:
     workflows: ["Golden Path CI (Build & Scan)"]
     types: [completed]

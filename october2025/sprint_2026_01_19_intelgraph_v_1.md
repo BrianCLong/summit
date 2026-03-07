@@ -104,14 +104,8 @@
 
 ```ts
 // server/src/explain/paths.ts
-import neo4j from 'neo4j-driver';
-export async function kPaths(
-  driver: neo4j.Driver,
-  a: string,
-  b: string,
-  k = 5,
-  maxLen = 6,
-) {
+import neo4j from "neo4j-driver";
+export async function kPaths(driver: neo4j.Driver, a: string, b: string, k = 5, maxLen = 6) {
   const cy = `MATCH (a {id:$a}),(b {id:$b})
     CALL gds.shortestPath.yens.stream({
       nodeProjection:'Entity', relationshipProjection:'RELATED', sourceNode:a, targetNode:b, k:$k
@@ -120,12 +114,12 @@ export async function kPaths(
     WHERE length(path) <= $maxLen
     RETURN index AS i, [n IN nodes(path) | n.id] AS nodes, reduce(w=0, r IN rels | w + coalesce(r.weight,1)) AS weight
     ORDER BY weight ASC LIMIT $k`;
-  const s = driver.session({ defaultAccessMode: 'READ' });
+  const s = driver.session({ defaultAccessMode: "READ" });
   try {
     return (await s.run(cy, { a, b, k, maxLen })).records.map((r) => ({
-      i: r.get('i'),
-      nodes: r.get('nodes'),
-      weight: r.get('weight'),
+      i: r.get("i"),
+      nodes: r.get("nodes"),
+      weight: r.get("weight"),
     }));
   } finally {
     await s.close();
@@ -142,9 +136,9 @@ export function minimalEdgeToggle(paths: any[], decision: number) {
   // naive: remove lowest‑contrib edge on top path or add bridge edge between top communities
   const top = paths[0];
   return {
-    action: 'remove',
+    action: "remove",
     edge: [top.nodes[1], top.nodes[2]],
-    rationale: 'Edge contributes most to weight toward decision',
+    rationale: "Edge contributes most to weight toward decision",
   };
 }
 ```
@@ -207,18 +201,9 @@ export function sigmaSpike(series: number[]) {
 
 ```ts
 // server/src/risk/score.ts
-export function riskScore(sample: {
-  modelProb: number;
-  anomaly: number;
-  license: string;
-}) {
+export function riskScore(sample: { modelProb: number; anomaly: number; license: string }) {
   const base = 0.6 * sample.modelProb + 0.4 * sample.anomaly;
-  const cap =
-    sample.license === 'CONSENTED'
-      ? 1.0
-      : sample.license === 'CC-BY'
-        ? 0.9
-        : 0.7;
+  const cap = sample.license === "CONSENTED" ? 1.0 : sample.license === "CC-BY" ? 0.9 : 0.7;
   return Math.min(base, cap);
 }
 ```
@@ -227,10 +212,10 @@ export function riskScore(sample: {
 
 ```ts
 // server/src/graphql/resolvers/guard.ts
-import { riskScore } from '../../risk/score';
+import { riskScore } from "../../risk/score";
 export function enforceRisk(ctx: any, sample: any) {
   const r = riskScore(sample);
-  if (r > (ctx.org?.riskThreshold || 0.85)) throw new Error('HighRiskBlocked');
+  if (r > (ctx.org?.riskThreshold || 0.85)) throw new Error("HighRiskBlocked");
 }
 ```
 
@@ -239,12 +224,12 @@ export function enforceRisk(ctx: any, sample: any) {
 ```js
 // apps/web/src/features/explain/jquery-explain.js
 $(function () {
-  $(document).on('click', '.btn-explain', function () {
-    const id = $(this).data('id');
+  $(document).on("click", ".btn-explain", function () {
+    const id = $(this).data("id");
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `{ explain(id:"${id}"){ paths{ nodes weight } shap{ idx contrib } counterfactual{ action edge rationale } } }`,
       }),
@@ -256,17 +241,17 @@ $(function () {
 ### 4.9 k6 — Explainer Latency
 
 ```js
-import http from 'k6/http';
+import http from "k6/http";
 export const options = {
   vus: 40,
-  duration: '3m',
-  thresholds: { http_req_duration: ['p(95)<1400'] },
+  duration: "3m",
+  thresholds: { http_req_duration: ["p(95)<1400"] },
 };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({ query: '{ explain(id:"sugg-1"){ paths{nodes } } }' }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

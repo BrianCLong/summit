@@ -85,11 +85,6 @@
       "keyword": "graph"
     }
   ],
-  "impacted_policies": [
-    "EG-001",
-    "EG-002"
-  ],
-  "ownership": [
-    "platform-architecture"
-  ]
+  "impacted_policies": ["EG-001", "EG-002"],
+  "ownership": ["platform-architecture"]
 }

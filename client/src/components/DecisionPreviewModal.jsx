@@ -1,4 +1,4 @@
-import { useEffect, useState, forwardRef } from 'react';
+import { useEffect, useState, forwardRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,8 +13,8 @@ import {
   Alert,
   Stack,
   CircularProgress,
-} from '@mui/material';
-import Slide from '@mui/material/Slide';
+} from "@mui/material";
+import Slide from "@mui/material/Slide";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -31,38 +31,36 @@ export default function DecisionPreviewModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [diff, setDiff] = useState(null);
-  const [policy, setPolicy] = useState({ allow: false, reason: '' });
+  const [policy, setPolicy] = useState({ allow: false, reason: "" });
   const [dryRun, setDryRun] = useState(true);
 
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    fetch('/v1/decisions/diff', {
-      method: 'POST',
+    fetch("/v1/decisions/diff", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-roles': 'Exec,Presenter',
+        "Content-Type": "application/json",
+        "x-roles": "Exec,Presenter",
       },
       body: JSON.stringify({ intent, scope, proposal }),
     })
       .then((r) => r.json())
       .then((d) => {
         setDiff(d);
-        setPolicy(d.policy || { allow: false, reason: 'n/a' });
+        setPolicy(d.policy || { allow: false, reason: "n/a" });
       })
-      .catch(() =>
-        setDiff({ changes: [], warnings: ['Failed to compute diff'] }),
-      )
+      .catch(() => setDiff({ changes: [], warnings: ["Failed to compute diff"] }))
       .finally(() => setLoading(false));
   }, [open, intent, scope, proposal]);
 
   const apply = () => {
     setLoading(true);
-    fetch(`/v1/decisions/apply?dry=${dryRun ? '1' : '0'}`, {
-      method: 'POST',
+    fetch(`/v1/decisions/apply?dry=${dryRun ? "1" : "0"}`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-roles': 'Exec,Presenter',
+        "Content-Type": "application/json",
+        "x-roles": "Exec,Presenter",
       },
       body: JSON.stringify({ intent, scope, diff: diff?.changes, proposal }),
     })
@@ -72,13 +70,7 @@ export default function DecisionPreviewModal({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="md"
-      TransitionComponent={Transition}
-    >
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" TransitionComponent={Transition}>
       <DialogTitle>Preview &amp; Commit — {intent}</DialogTitle>
       <DialogContent dividers>
         {loading && (
@@ -91,18 +83,18 @@ export default function DecisionPreviewModal({
           <>
             {!policy.allow && (
               <Alert severity="warning" sx={{ mb: 2 }}>
-                Blocked by policy: {policy.reason || 'not allowed'}
+                Blocked by policy: {policy.reason || "not allowed"}
               </Alert>
             )}
             {diff?.warnings?.length > 0 && (
               <Alert severity="info" sx={{ mb: 2 }}>
-                {diff.warnings.join(' • ')}
+                {diff.warnings.join(" • ")}
               </Alert>
             )}
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Scope
             </Typography>
-            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
+            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
               {(scope?.accounts || []).map((a) => (
                 <Chip key={a} size="small" label={`acct:${a}`} />
               ))}
@@ -117,7 +109,7 @@ export default function DecisionPreviewModal({
                 <ListItem key={i}>
                   <ListItemText
                     primary={`${c.path}  ${c.op.toUpperCase()}  →  ${JSON.stringify(c.to)}`}
-                    secondary={c.reason || ''}
+                    secondary={c.reason || ""}
                   />
                 </ListItem>
               ))}
@@ -133,9 +125,9 @@ export default function DecisionPreviewModal({
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
         <Chip
-          label={dryRun ? 'Dry-run' : 'Apply for real'}
+          label={dryRun ? "Dry-run" : "Apply for real"}
           onClick={() => setDryRun((v) => !v)}
-          color={dryRun ? 'default' : 'warning'}
+          color={dryRun ? "default" : "warning"}
           variant="outlined"
         />
         <Button
@@ -143,7 +135,7 @@ export default function DecisionPreviewModal({
           variant="contained"
           onClick={apply}
         >
-          {dryRun ? 'Run Dry-Run' : 'Apply Changes'}
+          {dryRun ? "Run Dry-Run" : "Apply Changes"}
         </Button>
       </DialogActions>
     </Dialog>

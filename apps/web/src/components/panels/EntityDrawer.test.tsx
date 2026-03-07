@@ -47,8 +47,14 @@ describe('EntityDrawer', () => {
     )
 
     // These tests are EXPECTED TO FAIL initially until we add aria-labels
-    expect(screen.getByRole('button', { name: /Edit entity/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Delete entity/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Export entity/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Edit entity/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Delete entity/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Export entity/i })
+    ).toBeInTheDocument()
   })
 })

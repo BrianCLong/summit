@@ -3,6 +3,7 @@
 This project follows WCAG 2.1 AA fundamentals to keep the web client keyboard- and screen-reader-friendly.
 
 ## Standards to Follow
+
 - Provide a single, clearly labeled `<main>` landmark per page (e.g., `aria-label="Sign in"`).
 - Ensure primary actions remain reachable through a logical tab order without requiring a mouse.
 - Supply meaningful accessible names for interactive controls (e.g., password visibility toggles).
@@ -27,8 +28,10 @@ From the repository root:
    ```
 
 ## CI Coverage
+
 - `.github/workflows/web-accessibility.yml` installs `apps/web` dependencies, runs the JSX a11y lint, and executes the keyboard landmark smoke test on pull requests that touch the web app or accessibility docs.
 
 ## Non-goals / Out of Scope
+
 - Automated color-contrast auditing and full axe rule coverage are not included in this baseline.
 - End-to-end browser flows are limited to the smoke test above; comprehensive journeys remain future work.

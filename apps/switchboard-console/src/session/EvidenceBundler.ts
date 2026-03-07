@@ -1,5 +1,5 @@
-import { copyFile, mkdir, readdir, stat, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+import { copyFile, mkdir, readdir, stat, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 interface EvidenceBundle {
   sessionId: string;
@@ -11,8 +11,8 @@ export class EvidenceBundler {
   constructor(private readonly sessionDir: string) {}
 
   async createBundle(): Promise<string> {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const bundleDir = path.join(this.sessionDir, 'evidence', timestamp);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const bundleDir = path.join(this.sessionDir, "evidence", timestamp);
     await mkdir(bundleDir, { recursive: true });
 
     const files = await this.collectFiles(this.sessionDir);
@@ -32,7 +32,7 @@ export class EvidenceBundler {
       files: copiedFiles,
     };
 
-    const manifestPath = path.join(bundleDir, 'manifest.json');
+    const manifestPath = path.join(bundleDir, "manifest.json");
     await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
     return bundleDir;
@@ -43,7 +43,7 @@ export class EvidenceBundler {
     const files: string[] = [];
 
     for (const entry of entries) {
-      if (entry === 'evidence') {
+      if (entry === "evidence") {
         continue;
       }
       const fullPath = path.join(dir, entry);

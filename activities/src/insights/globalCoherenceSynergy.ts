@@ -1,5 +1,5 @@
-import networkx from 'networkx';
-import qutip from 'qutip';
+import networkx from "networkx";
+import qutip from "qutip";
 
 export function globalCoherenceSynergy(config) {
   const synergy = networkx.vortex({

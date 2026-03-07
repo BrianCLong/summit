@@ -1,4 +1,4 @@
-export type AgentHealthState = 'healthy' | 'warning' | 'critical' | 'offline';
+export type AgentHealthState = "healthy" | "warning" | "critical" | "offline";
 
 export interface AgentRegistration {
   agentId: string;
@@ -15,7 +15,7 @@ export interface AgentRegistration {
 export interface AgentHeartbeatEvent {
   agentId: string;
   timestamp: number;
-  status?: Exclude<AgentHealthState, 'offline'>;
+  status?: Exclude<AgentHealthState, "offline">;
   currentLoad?: number;
   activeTasks?: number;
   queueDepth?: number;
@@ -34,7 +34,7 @@ export interface AgentTaskEvent {
 export interface AgentAlertEvent {
   agentId: string;
   timestamp: number;
-  level: 'warning' | 'critical';
+  level: "warning" | "critical";
   message: string;
   source?: string;
 }
@@ -64,7 +64,7 @@ export interface AgentStatusSnapshot {
   metrics: AgentPerformanceSnapshot;
   alerts: AgentAlertEvent[];
   lastUpdatedAt: number;
-  lastHeartbeatStatus: Exclude<AgentHealthState, 'offline'>;
+  lastHeartbeatStatus: Exclude<AgentHealthState, "offline">;
 }
 
 export interface AgentIncident extends AgentAlertEvent {
@@ -116,7 +116,7 @@ interface TaskSample {
 interface AgentRuntimeState {
   registration: AgentRegistration;
   lastHeartbeatAt: number | null;
-  lastHeartbeatStatus: Exclude<AgentHealthState, 'offline'>;
+  lastHeartbeatStatus: Exclude<AgentHealthState, "offline">;
   currentLoad: number;
   activeTasks: number;
   queueDepth: number;
@@ -176,15 +176,14 @@ export class McHealthMonitor {
     const state = this.ensureAgent(event.agentId);
     const ts = event.timestamp;
     state.lastHeartbeatAt = ts;
-    state.lastHeartbeatStatus =
-      event.status ?? state.lastHeartbeatStatus ?? 'healthy';
-    if (typeof event.currentLoad === 'number') {
+    state.lastHeartbeatStatus = event.status ?? state.lastHeartbeatStatus ?? "healthy";
+    if (typeof event.currentLoad === "number") {
       state.currentLoad = clamp(event.currentLoad, 0, 2);
     }
-    if (typeof event.activeTasks === 'number') {
+    if (typeof event.activeTasks === "number") {
       state.activeTasks = Math.max(0, event.activeTasks);
     }
-    if (typeof event.queueDepth === 'number') {
+    if (typeof event.queueDepth === "number") {
       state.queueDepth = Math.max(0, event.queueDepth);
     }
     state.lastUpdatedAt = Math.max(state.lastUpdatedAt, ts);
@@ -221,12 +220,8 @@ export class McHealthMonitor {
   }
 
   getDashboard(now: number = Date.now()): McHealthDashboardData {
-    const agents = [...this.agents.values()].map((state) =>
-      this.buildSnapshot(state, now),
-    );
-    agents.sort((a, b) =>
-      a.registration.displayName.localeCompare(b.registration.displayName),
-    );
+    const agents = [...this.agents.values()].map((state) => this.buildSnapshot(state, now));
+    agents.sort((a, b) => a.registration.displayName.localeCompare(b.registration.displayName));
 
     const counts: Record<AgentHealthState, number> = {
       healthy: 0,
@@ -266,9 +261,7 @@ export class McHealthMonitor {
       topByLatency: [],
     };
 
-    const agentsWithData = agents.filter(
-      (agent) => agent.metrics.totalTasks > 0,
-    );
+    const agentsWithData = agents.filter((agent) => agent.metrics.totalTasks > 0);
     summary.topByThroughput = agentsWithData
       .slice()
       .sort((a, b) => {
@@ -276,9 +269,7 @@ export class McHealthMonitor {
         if (Math.abs(diff) > 0) {
           return diff;
         }
-        return a.registration.displayName.localeCompare(
-          b.registration.displayName,
-        );
+        return a.registration.displayName.localeCompare(b.registration.displayName);
       })
       .slice(0, 3)
       .map((agent) => ({
@@ -353,7 +344,7 @@ export class McHealthMonitor {
     existing = {
       registration,
       lastHeartbeatAt: null,
-      lastHeartbeatStatus: 'healthy',
+      lastHeartbeatStatus: "healthy",
       currentLoad: 0,
       activeTasks: 0,
       queueDepth: 0,
@@ -370,26 +361,17 @@ export class McHealthMonitor {
   private prune(state: AgentRuntimeState, now: number): void {
     const windowStart = now - this.metricsWindowMs;
     if (state.samples.length > 0) {
-      state.samples = state.samples.filter(
-        (sample) => sample.timestamp >= windowStart,
-      );
+      state.samples = state.samples.filter((sample) => sample.timestamp >= windowStart);
     }
     if (state.alerts.length > 0) {
-      state.alerts = state.alerts.filter(
-        (alert) => alert.timestamp >= windowStart,
-      );
+      state.alerts = state.alerts.filter((alert) => alert.timestamp >= windowStart);
     }
   }
 
-  private buildSnapshot(
-    state: AgentRuntimeState,
-    now: number,
-  ): AgentStatusSnapshot {
+  private buildSnapshot(state: AgentRuntimeState, now: number): AgentStatusSnapshot {
     this.prune(state, now);
     const metrics = this.computeMetrics(state);
-    const heartbeatMsAgo = state.lastHeartbeatAt
-      ? Math.max(0, now - state.lastHeartbeatAt)
-      : null;
+    const heartbeatMsAgo = state.lastHeartbeatAt ? Math.max(0, now - state.lastHeartbeatAt) : null;
     const status = this.deriveStatus(state, metrics, now);
     return {
       registration: { ...state.registration },
@@ -446,53 +428,46 @@ export class McHealthMonitor {
   private deriveStatus(
     state: AgentRuntimeState,
     metrics: AgentPerformanceSnapshot,
-    now: number,
+    now: number
   ): AgentHealthState {
-    if (
-      !state.lastHeartbeatAt ||
-      now - state.lastHeartbeatAt > this.staleHeartbeatMs
-    ) {
-      return 'offline';
+    if (!state.lastHeartbeatAt || now - state.lastHeartbeatAt > this.staleHeartbeatMs) {
+      return "offline";
     }
 
     const recentCritical = state.alerts.find(
-      (alert) =>
-        alert.level === 'critical' &&
-        now - alert.timestamp <= this.metricsWindowMs,
+      (alert) => alert.level === "critical" && now - alert.timestamp <= this.metricsWindowMs
     );
     if (recentCritical) {
-      return 'critical';
+      return "critical";
     }
 
     let status: AgentHealthState = state.lastHeartbeatStatus;
 
     const recentWarning = state.alerts.find(
-      (alert) =>
-        alert.level === 'warning' &&
-        now - alert.timestamp <= this.metricsWindowMs,
+      (alert) => alert.level === "warning" && now - alert.timestamp <= this.metricsWindowMs
     );
-    if (recentWarning && status === 'healthy') {
-      status = 'warning';
+    if (recentWarning && status === "healthy") {
+      status = "warning";
     }
 
     if (state.currentLoad >= 1.2) {
-      status = 'critical';
-    } else if (state.currentLoad >= 0.95 && status === 'healthy') {
-      status = 'warning';
+      status = "critical";
+    } else if (state.currentLoad >= 0.95 && status === "healthy") {
+      status = "warning";
     }
 
     if (metrics.totalTasks >= 5) {
       if (metrics.successRate < 0.7) {
-        status = 'critical';
-      } else if (metrics.successRate < 0.9 && status === 'healthy') {
-        status = 'warning';
+        status = "critical";
+      } else if (metrics.successRate < 0.9 && status === "healthy") {
+        status = "warning";
       }
     }
 
     if (metrics.avgLatencyMs > 10_000) {
-      status = 'critical';
-    } else if (metrics.avgLatencyMs > 5_000 && status === 'healthy') {
-      status = 'warning';
+      status = "critical";
+    } else if (metrics.avgLatencyMs > 5_000 && status === "healthy") {
+      status = "warning";
     }
 
     return status;

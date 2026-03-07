@@ -1,7 +1,7 @@
-import type { Request, Response, NextFunction } from 'express';
-import type { Subject } from './types.js';
+import type { Request, Response, NextFunction } from "express";
+import type { Subject } from "./types.js";
 
-declare module 'express-serve-static-core' {
+declare module "express-serve-static-core" {
   interface Request {
     cookies?: Record<string, string>;
     subject?: Subject;
@@ -9,23 +9,23 @@ declare module 'express-serve-static-core' {
 }
 
 export function stubIdentity(req: Request, _res: Response, next: NextFunction) {
-  const tenantId = req.header('x-tenant-id') ?? 'tenant_demo';
-  const userId = req.header('x-user-id') ?? 'user_demo';
-  const region = req.header('x-region') ?? 'us';
+  const tenantId = req.header("x-tenant-id") ?? "tenant_demo";
+  const userId = req.header("x-user-id") ?? "user_demo";
+  const region = req.header("x-region") ?? "us";
 
-  const cookieMfa = req.cookies?.companyos_mfa === '1';
-  const headerMfa = req.header('x-mfa-verified') === 'true';
+  const cookieMfa = req.cookies?.companyos_mfa === "1";
+  const headerMfa = req.header("x-mfa-verified") === "true";
 
   const mfaVerified = cookieMfa || headerMfa;
 
   req.subject = {
     id: userId,
-    type: 'human',
+    type: "human",
     tenant_id: tenantId,
-    roles: (req.header('x-roles') ?? 'compliance_lead').split(','),
+    roles: (req.header("x-roles") ?? "compliance_lead").split(","),
     groups: [],
     attributes: {
-      clearance: 'internal',
+      clearance: "internal",
       region,
       mfa_verified: mfaVerified,
     },

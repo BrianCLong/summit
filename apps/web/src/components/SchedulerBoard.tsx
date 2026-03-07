@@ -32,7 +32,8 @@ export default function SchedulerBoard() {
     const v = filter.toLowerCase()
     return q.filter(r => {
       // Reconstruct the text content to match previous behavior (search across all columns)
-      const text = `${r.id}${r.tenant}${r.eta}${r.pool}$${r.cost.toFixed(2)}${r.preemptSuggestion ? '✅' : '—'}`.toLowerCase()
+      const text =
+        `${r.id}${r.tenant}${r.eta}${r.pool}$${r.cost.toFixed(2)}${r.preemptSuggestion ? '✅' : '—'}`.toLowerCase()
       return text.includes(v)
     })
   }, [q, filter])

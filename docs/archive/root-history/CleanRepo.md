@@ -248,7 +248,7 @@ make k6-gate         # go/no-go perf test pre-promotion
 | Lint/Format   | eslint/prettier/ruff/shellcheck/actionlint | Req  |
 | Types         | TS/mypy                                    | Req  |
 | Unit          | All services                               | Req  |
-| Integration   | Gateway↔Neo4j, Ingest, Export, MC         | Req  |
+| Integration   | Gateway↔Neo4j, Ingest, Export, MC          | Req  |
 | E2E           | NL→Cypher read-only + step-up mutation     | Req  |
 | Security      | OPA ABAC + DLP + secret scan               | Req  |
 | Supply Chain  | SBOM + dep-review + provenance verify      | Req  |

@@ -63,7 +63,7 @@ export function createRAGAuthorityHook(config: AuthorityFilterConfig): RAGHook {
 
       return documents.filter((doc) => {
         // Check classification
-        const docClassification = doc.classification || 'UNCLASSIFIED';
+        const docClassification = doc.classification || "UNCLASSIFIED";
         const docLevel = clearanceLevels[docClassification] || 0;
 
         if (docLevel > userClearanceLevel) {
@@ -132,9 +132,10 @@ export function createRAGResultLimitHook(config: ResultLimitConfig): RAGHook {
         .slice(0, config.maxDocuments)
         .map((doc) => ({
           ...doc,
-          content: doc.content.length > config.maxContentLength
-            ? `${doc.content.substring(0, config.maxContentLength)  }...`
-            : doc.content,
+          content:
+            doc.content.length > config.maxContentLength
+              ? `${doc.content.substring(0, config.maxContentLength)}...`
+              : doc.content,
         }));
     },
   };
@@ -149,7 +150,7 @@ export interface RAGAuditLogger {
 }
 
 export interface RAGAuditEvent {
-  eventType: 'rag_query' | 'rag_retrieval';
+  eventType: "rag_query" | "rag_retrieval";
   userId: string;
   tenantId: string;
   investigationId?: string;
@@ -163,7 +164,7 @@ export function createRAGAuditHook(logger: RAGAuditLogger): RAGHook {
   return {
     async afterRetrieval(query: RAGQuery, documents: RAGDocument[]) {
       await logger.log({
-        eventType: 'rag_retrieval',
+        eventType: "rag_retrieval",
         userId: query.userId,
         tenantId: query.tenantId,
         investigationId: query.investigationId,

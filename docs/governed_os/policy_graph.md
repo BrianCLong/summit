@@ -1,6 +1,7 @@
 # Policy Graph
 
 ## Definition
+
 The Policy Graph is the authoritative governance fabric for Summit. It expresses policy as
 first-class, graph-native objects that are compiled into enforceable policy-as-code. The Policy
 Graph is the single source of truth for scoped capabilities, approvals, and export gates.
@@ -43,6 +44,7 @@ Graph is the single source of truth for scoped capabilities, approvals, and expo
 ## Determinism & Evidence
 
 Policy decisions are deterministic when executed against a fixed tuple of:
+
 - Policy graph version
 - Capability scope and execution identity
 - Policy-as-code version

@@ -7,9 +7,9 @@ rollout:
   strategy: canary
   steps:
     - 25
-    - pause: {duration: 10m}
+    - pause: { duration: 10m }
     - 50
-    - pause: {duration: 10m}
+    - pause: { duration: 10m }
     - 100
   analysis:
     templates:

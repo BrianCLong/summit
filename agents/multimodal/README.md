@@ -55,7 +55,7 @@ pnpm add @intelgraph/multimodal-fusion
 ## Quick Start
 
 ```typescript
-import { createOSINTFusionPipeline } from '@intelgraph/multimodal-fusion';
+import { createOSINTFusionPipeline } from "@intelgraph/multimodal-fusion";
 
 // Create pipeline
 const pipeline = createOSINTFusionPipeline({
@@ -68,18 +68,18 @@ await pipeline.initialize();
 
 // Process multimodal sources
 const fusedEmbedding = await pipeline.processJob(
-  'investigation-123',
+  "investigation-123",
   [
-    { type: 'text', uri: 'Intelligence report content...' },
-    { type: 'image', uri: '/path/to/satellite-image.jpg' },
-    { type: 'video', uri: '/path/to/surveillance.mp4' },
+    { type: "text", uri: "Intelligence report content..." },
+    { type: "image", uri: "/path/to/satellite-image.jpg" },
+    { type: "video", uri: "/path/to/surveillance.mp4" },
   ],
-  'entity-suspect-001'
+  "entity-suspect-001"
 );
 
-console.log('Fused embedding dimension:', fusedEmbedding.fusedDimension);
-console.log('Cross-modal score:', fusedEmbedding.crossModalScore);
-console.log('Hallucination score:', fusedEmbedding.hallucinationScore);
+console.log("Fused embedding dimension:", fusedEmbedding.fusedDimension);
+console.log("Cross-modal score:", fusedEmbedding.crossModalScore);
+console.log("Hallucination score:", fusedEmbedding.hallucinationScore);
 ```
 
 ## API Reference
@@ -90,9 +90,9 @@ Main orchestration class for multimodal fusion.
 
 ```typescript
 const orchestrator = new FusionOrchestrator({
-  clipModel: 'clip-vit-large-patch14',
-  textModel: 'text-embedding-3-small',
-  fusionMethod: 'weighted_average',
+  clipModel: "clip-vit-large-patch14",
+  textModel: "text-embedding-3-small",
+  fusionMethod: "weighted_average",
   targetDimension: 768,
   hallucinationThreshold: 0.7,
   crossModalThreshold: 0.6,
@@ -119,16 +119,13 @@ Vision embedding using CLIP models.
 
 ```typescript
 const clipPipeline = new CLIPPipeline({
-  model: 'clip-vit-large-patch14',
+  model: "clip-vit-large-patch14",
   enableObjectDetection: true,
   enableFaceDetection: true,
   enableOCR: false,
 });
 
-const imageEmbedding = await clipPipeline.embedImage(
-  '/path/to/image.jpg',
-  'investigation-123'
-);
+const imageEmbedding = await clipPipeline.embedImage("/path/to/image.jpg", "investigation-123");
 ```
 
 ### TextPipeline
@@ -137,14 +134,14 @@ Text embedding with entity extraction.
 
 ```typescript
 const textPipeline = new TextPipeline({
-  model: 'text-embedding-3-small',
+  model: "text-embedding-3-small",
   enableEntityExtraction: true,
   enableSentimentAnalysis: false,
 });
 
 const textEmbedding = await textPipeline.embedText(
-  'Intelligence report content...',
-  'investigation-123'
+  "Intelligence report content...",
+  "investigation-123"
 );
 
 // Extract entities
@@ -158,15 +155,12 @@ Video analysis with key frame extraction.
 
 ```typescript
 const videoPipeline = new VideoPipeline({
-  frameExtractionMode: 'scene_change',
+  frameExtractionMode: "scene_change",
   maxFrames: 100,
   enableObjectTracking: true,
 });
 
-const videoEmbedding = await videoPipeline.embedVideo(
-  '/path/to/video.mp4',
-  'investigation-123'
-);
+const videoEmbedding = await videoPipeline.embedVideo("/path/to/video.mp4", "investigation-123");
 ```
 
 ### HallucinationGuard
@@ -182,7 +176,7 @@ const guard = new HallucinationGuard({
 const result = await guard.validate(fusedEmbedding, sourceEmbeddings);
 
 if (result.isHallucination) {
-  console.log('Hallucination detected:', result.reasons);
+  console.log("Hallucination detected:", result.reasons);
   // [{ type: 'cross_modal_mismatch', description: '...', severity: 'high' }]
 }
 ```
@@ -193,10 +187,10 @@ High-performance vector storage.
 
 ```typescript
 const store = new PgVectorStore({
-  tableName: 'multimodal_embeddings',
+  tableName: "multimodal_embeddings",
   dimension: 768,
-  indexType: 'hnsw',
-  distanceMetric: 'cosine',
+  indexType: "hnsw",
+  distanceMetric: "cosine",
 });
 
 await store.initialize();
@@ -205,7 +199,7 @@ await store.store(fusedEmbedding);
 const similar = await store.search(queryVector, {
   topK: 10,
   threshold: 0.7,
-  investigationId: 'inv-123',
+  investigationId: "inv-123",
 });
 ```
 
@@ -215,7 +209,7 @@ Graph-aware embeddings.
 
 ```typescript
 const neo4j = new Neo4jEmbeddings({
-  algorithm: 'node2vec',
+  algorithm: "node2vec",
   dimensions: 128,
   walkLength: 80,
   numWalks: 10,
@@ -223,21 +217,18 @@ const neo4j = new Neo4jEmbeddings({
 
 await neo4j.initialize();
 
-const graphEmbedding = await neo4j.embedNode(
-  'entity-123',
-  'investigation-123'
-);
+const graphEmbedding = await neo4j.embedNode("entity-123", "investigation-123");
 ```
 
 ## Fusion Methods
 
-| Method | Description | Best For |
-|--------|-------------|----------|
-| `concatenation` | Concatenate all modality vectors | Maximum information retention |
-| `average` | Simple average of vectors | Equal modality importance |
-| `weighted_average` | Confidence-weighted average | Variable quality sources |
-| `attention` | Cross-modal attention weights | Complex multimodal fusion |
-| `cross_modal_transformer` | Transformer-based fusion | State-of-the-art accuracy |
+| Method                    | Description                      | Best For                      |
+| ------------------------- | -------------------------------- | ----------------------------- |
+| `concatenation`           | Concatenate all modality vectors | Maximum information retention |
+| `average`                 | Simple average of vectors        | Equal modality importance     |
+| `weighted_average`        | Confidence-weighted average      | Variable quality sources      |
+| `attention`               | Cross-modal attention weights    | Complex multimodal fusion     |
+| `cross_modal_transformer` | Transformer-based fusion         | State-of-the-art accuracy     |
 
 ## Events
 
@@ -245,18 +236,18 @@ The orchestrator emits events for monitoring:
 
 ```typescript
 orchestrator.onEvent({
-  onJobStarted: (jobId) => console.log('Started:', jobId),
+  onJobStarted: (jobId) => console.log("Started:", jobId),
   onModalityProcessed: (jobId, modality, sourceId) => {
     console.log(`Processed ${modality}:`, sourceId);
   },
   onFusionCompleted: (jobId, entityId, embeddingId) => {
-    console.log('Fusion complete:', entityId);
+    console.log("Fusion complete:", entityId);
   },
   onHallucinationDetected: (jobId, sourceId, score) => {
-    console.warn('Hallucination detected:', score);
+    console.warn("Hallucination detected:", score);
   },
-  onJobCompleted: (jobId, total) => console.log('Done:', total),
-  onJobFailed: (jobId, error) => console.error('Failed:', error),
+  onJobCompleted: (jobId, total) => console.log("Done:", total),
+  onJobFailed: (jobId, error) => console.error("Failed:", error),
 });
 ```
 
@@ -264,13 +255,13 @@ orchestrator.onEvent({
 
 ### Benchmarks
 
-| Operation | Latency (p50) | Throughput |
-|-----------|---------------|------------|
-| Text embedding | 50ms | 20/sec |
-| Image embedding (CLIP) | 150ms | 7/sec |
-| Video embedding (100 frames) | 5s | 0.2/sec |
-| Fusion (3 modalities) | 200ms | 5/sec |
-| Vector search (HNSW) | 5ms | 200/sec |
+| Operation                    | Latency (p50) | Throughput |
+| ---------------------------- | ------------- | ---------- |
+| Text embedding               | 50ms          | 20/sec     |
+| Image embedding (CLIP)       | 150ms         | 7/sec      |
+| Video embedding (100 frames) | 5s            | 0.2/sec    |
+| Fusion (3 modalities)        | 200ms         | 5/sec      |
+| Vector search (HNSW)         | 5ms           | 200/sec    |
 
 ### Optimization Tips
 

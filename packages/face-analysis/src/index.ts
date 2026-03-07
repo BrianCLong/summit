@@ -1,1 +1,1 @@
-export * from './face-analyzer.js';
+export * from "./face-analyzer.js";

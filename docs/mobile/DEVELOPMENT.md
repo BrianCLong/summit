@@ -29,6 +29,7 @@ IntelGraph's mobile strategy consists of three main platforms:
 ### Shared Components
 
 All platforms share common functionality through:
+
 - **@intelgraph/mobile-sdk**: Shared utilities, offline sync, auth
 - **GraphQL API**: Common data layer
 - **Design System**: Consistent UI/UX
@@ -36,6 +37,7 @@ All platforms share common functionality through:
 ### Technology Stack
 
 **React Native:**
+
 - React 19.2+ with hooks
 - TypeScript 5.9+
 - React Navigation 7+
@@ -44,12 +46,14 @@ All platforms share common functionality through:
 - Zustand for state management
 
 **PWA:**
+
 - Next.js 16+ with App Router
 - Service Workers with Workbox
 - IndexedDB for offline storage
 - Web APIs (geolocation, camera, etc.)
 
 **Electron:**
+
 - Electron 34+
 - Vite for bundling
 - Electron Store for persistence
@@ -146,18 +150,20 @@ const Drawer = createDrawerNavigator();
 #### State Management
 
 **Global State (Zustand):**
+
 ```typescript
-import create from 'zustand';
+import create from "zustand";
 
 export const useStore = create((set) => ({
   user: null,
-  setUser: (user) => set({user}),
+  setUser: (user) => set({ user }),
 }));
 ```
 
 **Server State (Apollo Client):**
+
 ```typescript
-const {data, loading, error} = useQuery(GET_ENTITIES);
+const { data, loading, error } = useQuery(GET_ENTITIES);
 ```
 
 #### Offline-First
@@ -165,10 +171,10 @@ const {data, loading, error} = useQuery(GET_ENTITIES);
 All mutations are queued and synced:
 
 ```typescript
-import {queueMutation} from './services/OfflineSync';
+import { queueMutation } from "./services/OfflineSync";
 
 // Queue mutation when offline
-await queueMutation('createEntity', {input});
+await queueMutation("createEntity", { input });
 
 // Automatically syncs when online
 ```
@@ -176,7 +182,7 @@ await queueMutation('createEntity', {input});
 ### Platform-Specific Code
 
 ```typescript
-import {Platform} from 'react-native';
+import { Platform } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -195,19 +201,19 @@ Access native features through bridges:
 
 ```typescript
 // Biometric authentication
-import ReactNativeBiometrics from 'react-native-biometrics';
+import ReactNativeBiometrics from "react-native-biometrics";
 
-const {success} = await rnBiometrics.simplePrompt({
-  promptMessage: 'Authenticate',
+const { success } = await rnBiometrics.simplePrompt({
+  promptMessage: "Authenticate",
 });
 
 // Location tracking
-import Geolocation from 'react-native-geolocation-service';
+import Geolocation from "react-native-geolocation-service";
 
 Geolocation.getCurrentPosition(
   (position) => console.log(position),
   (error) => console.error(error),
-  {enableHighAccuracy: true}
+  { enableHighAccuracy: true }
 );
 ```
 
@@ -222,7 +228,7 @@ We use Workbox for advanced caching:
 workbox.routing.registerRoute(
   /\.(png|jpg|jpeg|svg|gif)$/,
   new workbox.strategies.CacheFirst({
-    cacheName: 'images',
+    cacheName: "images",
     plugins: [
       new workbox.expiration.ExpirationPlugin({
         maxEntries: 100,
@@ -236,7 +242,7 @@ workbox.routing.registerRoute(
 workbox.routing.registerRoute(
   /\/api\/.*/,
   new workbox.strategies.NetworkFirst({
-    cacheName: 'api',
+    cacheName: "api",
     networkTimeoutSeconds: 10,
   })
 );
@@ -248,19 +254,16 @@ Queue failed requests for retry:
 
 ```javascript
 // Register background sync
-const bgSyncPlugin = new workbox.backgroundSync.BackgroundSyncPlugin(
-  'apiQueue',
-  {
-    maxRetentionTime: 24 * 60, // 24 hours
-  }
-);
+const bgSyncPlugin = new workbox.backgroundSync.BackgroundSyncPlugin("apiQueue", {
+  maxRetentionTime: 24 * 60, // 24 hours
+});
 
 workbox.routing.registerRoute(
   /\/api\/.*/,
   new workbox.strategies.NetworkOnly({
     plugins: [bgSyncPlugin],
   }),
-  'POST'
+  "POST"
 );
 ```
 
@@ -269,19 +272,19 @@ workbox.routing.registerRoute(
 Use our mobile SDK for storage:
 
 ```typescript
-import {storeData, getData} from '@intelgraph/mobile-sdk/storage';
+import { storeData, getData } from "@intelgraph/mobile-sdk/storage";
 
 // Store entity
-await storeData('entities', entityId, entityData, ttl);
+await storeData("entities", entityId, entityData, ttl);
 
 // Retrieve entity
-const entity = await getData('entities', entityId);
+const entity = await getData("entities", entityId);
 ```
 
 ### Installability
 
 ```typescript
-import {initializeBeforeInstallPrompt, showInstallPrompt} from '../lib/pwa-utils';
+import { initializeBeforeInstallPrompt, showInstallPrompt } from "../lib/pwa-utils";
 
 // Initialize
 initializeBeforeInstallPrompt();
@@ -303,18 +306,20 @@ const accepted = await showInstallPrompt();
 ### Implementation
 
 **Queue Mutations:**
-```typescript
-import {queueMutation} from '@intelgraph/mobile-sdk/offline';
 
-await queueMutation('createEntity', {
-  name: 'New Entity',
-  type: 'person',
+```typescript
+import { queueMutation } from "@intelgraph/mobile-sdk/offline";
+
+await queueMutation("createEntity", {
+  name: "New Entity",
+  type: "person",
 });
 ```
 
 **Sync Queue:**
+
 ```typescript
-import {syncMutations} from '@intelgraph/mobile-sdk/offline';
+import { syncMutations } from "@intelgraph/mobile-sdk/offline";
 
 await syncMutations(async (operation, variables) => {
   return await apolloClient.mutate({
@@ -325,16 +330,17 @@ await syncMutations(async (operation, variables) => {
 ```
 
 **Optimistic Updates:**
+
 ```typescript
 const [createEntity] = useMutation(CREATE_ENTITY, {
   optimisticResponse: {
     createEntity: {
-      __typename: 'Entity',
-      id: 'temp-id',
+      __typename: "Entity",
+      id: "temp-id",
       ...input,
     },
   },
-  update(cache, {data}) {
+  update(cache, { data }) {
     // Update cache optimistically
   },
 });
@@ -343,16 +349,18 @@ const [createEntity] = useMutation(CREATE_ENTITY, {
 ### Data Synchronization
 
 **Sync Status:**
+
 ```typescript
-import {getSyncQueueStatus} from '@intelgraph/mobile-sdk/offline';
+import { getSyncQueueStatus } from "@intelgraph/mobile-sdk/offline";
 
 const status = await getSyncQueueStatus();
 // {pending: 5, lastSync: timestamp, status: 'syncing'}
 ```
 
 **Auto-sync:**
+
 ```typescript
-import {enableAutoSync} from '@intelgraph/mobile-sdk/offline';
+import { enableAutoSync } from "@intelgraph/mobile-sdk/offline";
 
 const cleanup = enableAutoSync(
   async (operation, variables) => {
@@ -373,11 +381,12 @@ return cleanup;
 ### Biometric Authentication
 
 **iOS (Face ID / Touch ID):**
-```typescript
-import ReactNativeBiometrics from 'react-native-biometrics';
 
-const {success} = await rnBiometrics.simplePrompt({
-  promptMessage: 'Authenticate with biometrics',
+```typescript
+import ReactNativeBiometrics from "react-native-biometrics";
+
+const { success } = await rnBiometrics.simplePrompt({
+  promptMessage: "Authenticate with biometrics",
 });
 
 if (success) {
@@ -386,43 +395,38 @@ if (success) {
 ```
 
 **Android (Fingerprint):**
+
 ```typescript
 // Same API works on Android
-const {success} = await rnBiometrics.simplePrompt({
-  promptMessage: 'Scan fingerprint',
+const { success } = await rnBiometrics.simplePrompt({
+  promptMessage: "Scan fingerprint",
 });
 ```
 
 ### Secure Storage
 
 **React Native:**
+
 ```typescript
-import * as Keychain from 'react-native-keychain';
+import * as Keychain from "react-native-keychain";
 
 // Store credentials
-await Keychain.setGenericPassword(
-  username,
-  password,
-  {service: 'intelgraph.auth'}
-);
+await Keychain.setGenericPassword(username, password, { service: "intelgraph.auth" });
 
 // Retrieve credentials
 const credentials = await Keychain.getGenericPassword({
-  service: 'intelgraph.auth',
+  service: "intelgraph.auth",
 });
 ```
 
 **Web (PWA):**
+
 ```typescript
 // Use Web Crypto API for encryption
-const encrypted = await crypto.subtle.encrypt(
-  {name: 'AES-GCM', iv},
-  key,
-  data
-);
+const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
 
 // Store in IndexedDB
-await storeData('secure', 'token', encrypted);
+await storeData("secure", "token", encrypted);
 ```
 
 ### Token Management
@@ -433,7 +437,7 @@ import {
   setAccessToken,
   isTokenExpired,
   refreshAuthToken,
-} from '@intelgraph/mobile-sdk/auth';
+} from "@intelgraph/mobile-sdk/auth";
 
 // Check and refresh token
 const token = await getAccessToken();
@@ -449,19 +453,21 @@ if (token && isTokenExpired(token)) {
 ### GPS Tracking
 
 **Get Current Location:**
+
 ```typescript
-import {getCurrentLocation} from './services/LocationService';
+import { getCurrentLocation } from "./services/LocationService";
 
 const location = await getCurrentLocation();
 // {latitude, longitude, accuracy, timestamp}
 ```
 
 **Watch Location:**
+
 ```typescript
-import {watchLocation, clearLocationWatch} from './services/LocationService';
+import { watchLocation, clearLocationWatch } from "./services/LocationService";
 
 const watchId = watchLocation((location) => {
-  console.log('Location updated:', location);
+  console.log("Location updated:", location);
 });
 
 // Stop watching
@@ -474,7 +480,7 @@ clearLocationWatch(watchId);
 import {
   initializeBackgroundGeolocation,
   startBackgroundGeolocation,
-} from './services/LocationService';
+} from "./services/LocationService";
 
 // Initialize
 await initializeBackgroundGeolocation();
@@ -486,18 +492,18 @@ await startBackgroundGeolocation();
 ### Geofencing
 
 ```typescript
-import {addGeofence, removeGeofence} from './services/LocationService';
+import { addGeofence, removeGeofence } from "./services/LocationService";
 
 // Add geofence
 await addGeofence(
-  'headquarters',
+  "headquarters",
   37.7749, // latitude
   -122.4194, // longitude
   100 // radius in meters
 );
 
 // Remove geofence
-await removeGeofence('headquarters');
+await removeGeofence("headquarters");
 ```
 
 ## Media Handling
@@ -505,11 +511,12 @@ await removeGeofence('headquarters');
 ### Camera Capture
 
 **Photo:**
+
 ```typescript
-import {launchCamera} from 'react-native-image-picker';
+import { launchCamera } from "react-native-image-picker";
 
 const result = await launchCamera({
-  mediaType: 'photo',
+  mediaType: "photo",
   quality: 0.8,
 });
 
@@ -520,10 +527,11 @@ if (result.assets) {
 ```
 
 **Video:**
+
 ```typescript
 const result = await launchCamera({
-  mediaType: 'video',
-  videoQuality: 'high',
+  mediaType: "video",
+  videoQuality: "high",
   durationLimit: 60,
 });
 ```
@@ -531,18 +539,18 @@ const result = await launchCamera({
 ### Media Upload
 
 ```typescript
-import {uploadMedia} from './services/MediaUpload';
+import { uploadMedia } from "./services/MediaUpload";
 
-const {id, url} = await uploadMedia(
+const { id, url } = await uploadMedia(
   {
     uri: file.uri,
-    type: 'photo',
+    type: "photo",
     name: file.fileName,
     size: file.fileSize,
     mimeType: file.type,
   },
   {
-    entityId: 'entity-123',
+    entityId: "entity-123",
     onProgress: (progress) => {
       console.log(`Upload progress: ${progress}%`);
     },
@@ -553,7 +561,7 @@ const {id, url} = await uploadMedia(
 ### Background Upload Queue
 
 ```typescript
-import {uploadQueuedMedia} from './services/MediaUpload';
+import { uploadQueuedMedia } from "./services/MediaUpload";
 
 // Upload queued media when online
 await uploadQueuedMedia();
@@ -564,15 +572,17 @@ await uploadQueuedMedia();
 ### Setup
 
 **Register Device:**
+
 ```typescript
-import {setupPushNotifications} from './services/NotificationService';
+import { setupPushNotifications } from "./services/NotificationService";
 
 await setupPushNotifications();
 ```
 
 **Get FCM Token:**
+
 ```typescript
-import {getFCMToken} from './services/NotificationService';
+import { getFCMToken } from "./services/NotificationService";
 
 const token = await getFCMToken();
 // Send token to server
@@ -581,8 +591,9 @@ const token = await getFCMToken();
 ### Handle Notifications
 
 **Foreground:**
+
 ```typescript
-import messaging from '@react-native-firebase/messaging';
+import messaging from "@react-native-firebase/messaging";
 
 messaging().onMessage(async (remoteMessage) => {
   // Display notification
@@ -591,21 +602,22 @@ messaging().onMessage(async (remoteMessage) => {
 ```
 
 **Background:**
+
 ```typescript
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-  console.log('Background message:', remoteMessage);
+  console.log("Background message:", remoteMessage);
 });
 ```
 
 ### Local Notifications
 
 ```typescript
-import {scheduleLocalNotification} from './services/NotificationService';
+import { scheduleLocalNotification } from "./services/NotificationService";
 
 await scheduleLocalNotification(
-  'Reminder',
-  'Review case ABC',
-  {caseId: 'abc'},
+  "Reminder",
+  "Review case ABC",
+  { caseId: "abc" },
   new Date(Date.now() + 3600000) // 1 hour from now
 );
 ```
@@ -615,6 +627,7 @@ await scheduleLocalNotification(
 ### Code Splitting
 
 **React Native:**
+
 ```typescript
 const LazyScreen = React.lazy(() => import('./screens/LazyScreen'));
 
@@ -624,6 +637,7 @@ const LazyScreen = React.lazy(() => import('./screens/LazyScreen'));
 ```
 
 **PWA (Next.js):**
+
 ```typescript
 import dynamic from 'next/dynamic';
 
@@ -636,6 +650,7 @@ const DynamicComponent = dynamic(() => import('./HeavyComponent'), {
 ### Image Optimization
 
 **React Native:**
+
 ```typescript
 import FastImage from 'react-native-fast-image';
 
@@ -649,6 +664,7 @@ import FastImage from 'react-native-fast-image';
 ```
 
 **PWA:**
+
 ```typescript
 import Image from 'next/image';
 
@@ -664,7 +680,7 @@ import Image from 'next/image';
 ### Memoization
 
 ```typescript
-import React, {useMemo, useCallback} from 'react';
+import React, { useMemo, useCallback } from "react";
 
 // Memoize expensive calculations
 const expensiveValue = useMemo(() => {
@@ -680,6 +696,7 @@ const handleClick = useCallback(() => {
 ### List Virtualization
 
 **React Native:**
+
 ```typescript
 import {FlatList} from 'react-native';
 
@@ -731,14 +748,15 @@ test('fetches and displays entities', async () => {
 ### E2E Tests
 
 **React Native (Detox):**
-```typescript
-describe('Authentication', () => {
-  it('should login successfully', async () => {
-    await element(by.id('email-input')).typeText('user@example.com');
-    await element(by.id('password-input')).typeText('password');
-    await element(by.id('login-button')).tap();
 
-    await expect(element(by.id('home-screen'))).toBeVisible();
+```typescript
+describe("Authentication", () => {
+  it("should login successfully", async () => {
+    await element(by.id("email-input")).typeText("user@example.com");
+    await element(by.id("password-input")).typeText("password");
+    await element(by.id("login-button")).tap();
+
+    await expect(element(by.id("home-screen"))).toBeVisible();
   });
 });
 ```
@@ -748,6 +766,7 @@ describe('Authentication', () => {
 ### React Native
 
 **iOS App Store:**
+
 ```bash
 # Build release
 cd ios
@@ -765,6 +784,7 @@ xcrun altool --upload-app \
 ```
 
 **Google Play Store:**
+
 ```bash
 # Build AAB
 cd android
@@ -820,6 +840,7 @@ pnpm electron:build --publish always
 ## Support
 
 For questions or issues:
+
 - GitHub Issues: https://github.com/intelgraph/summit/issues
 - Slack: #mobile-dev
 - Email: dev@intelgraph.com

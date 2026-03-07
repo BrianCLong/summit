@@ -1,6 +1,6 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { ExtensionManifest } from '../types.js';
+import * as fs from "fs/promises";
+import * as path from "path";
+import { ExtensionManifest } from "../types.js";
 
 export interface StaticPolicyOptions {
   dependencyAllowList?: string[];
@@ -37,9 +37,9 @@ export class StaticPolicyValidator {
   }
 
   private async validateLockfile(extensionPath: string): Promise<void> {
-    const lockfile = path.join(extensionPath, 'pnpm-lock.yaml');
-    const packageLock = path.join(extensionPath, 'package-lock.json');
-    const yarnLock = path.join(extensionPath, 'yarn.lock');
+    const lockfile = path.join(extensionPath, "pnpm-lock.yaml");
+    const packageLock = path.join(extensionPath, "package-lock.json");
+    const yarnLock = path.join(extensionPath, "yarn.lock");
 
     const exists = await Promise.all([
       this.exists(lockfile),
@@ -51,7 +51,7 @@ export class StaticPolicyValidator {
       return;
     }
 
-    throw new Error('Extension must include a lockfile for deterministic installs');
+    throw new Error("Extension must include a lockfile for deterministic installs");
   }
 
   private async exists(target: string): Promise<boolean> {

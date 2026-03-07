@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
 const fetch = global.fetch;
 
@@ -7,23 +7,28 @@ function fail(message) {
   console.error(`::error::${message}`);
 }
 
-const tierOrder = ['agent:tier-1', 'agent:tier-2', 'agent:tier-3'];
+const tierOrder = ["agent:tier-1", "agent:tier-2", "agent:tier-3"];
 const requiredLabelPrefixes = [
   {
-    prefix: 'area:',
-    message: 'Add at least one area:* label to describe the primary surface.'
-  }
+    prefix: "area:",
+    message: "Add at least one area:* label to describe the primary surface.",
+  },
 ];
 
 const pathTiers = [
   {
-    tier: 'agent:tier-3',
-    reason: 'Governance automation, workflows, or policy changes',
-    patterns: [/^\.github\/workflows\//i, /^\.github\/policies\//i, /^policy\//i, /^docs\/governance\//i]
+    tier: "agent:tier-3",
+    reason: "Governance automation, workflows, or policy changes",
+    patterns: [
+      /^\.github\/workflows\//i,
+      /^\.github\/policies\//i,
+      /^policy\//i,
+      /^docs\/governance\//i,
+    ],
   },
   {
-    tier: 'agent:tier-2',
-    reason: 'Infrastructure or runtime-impacting changes',
+    tier: "agent:tier-2",
+    reason: "Infrastructure or runtime-impacting changes",
     patterns: [
       /^infra\//i,
       /^k8s\//i,
@@ -34,9 +39,9 @@ const pathTiers = [
       /^packages\//i,
       /^server\//i,
       /^client\//i,
-      /^sdk\//i
-    ]
-  }
+      /^sdk\//i,
+    ],
+  },
 ];
 
 function tierRank(label) {
@@ -46,10 +51,10 @@ function tierRank(label) {
 async function fetchJson(url, token) {
   const res = await fetch(url, {
     headers: {
-      Accept: 'application/vnd.github+json',
+      Accept: "application/vnd.github+json",
       Authorization: `Bearer ${token}`,
-      'User-Agent': 'governance-check'
-    }
+      "User-Agent": "governance-check",
+    },
   });
 
   if (!res.ok) {
@@ -80,7 +85,7 @@ function requiredTierForPath(filePath) {
       return { tier: entry.tier, reason: entry.reason };
     }
   }
-  return { tier: 'agent:tier-1', reason: 'General changes' };
+  return { tier: "agent:tier-1", reason: "General changes" };
 }
 
 async function main() {
@@ -89,7 +94,7 @@ async function main() {
   const prNumber = process.env.PR_NUMBER;
 
   if (!repo || !token || !prNumber) {
-    throw new Error('Missing GITHUB_REPOSITORY, GITHUB_TOKEN, or PR_NUMBER environment variables.');
+    throw new Error("Missing GITHUB_REPOSITORY, GITHUB_TOKEN, or PR_NUMBER environment variables.");
   }
 
   const pr = await fetchJson(`https://api.github.com/repos/${repo}/pulls/${prNumber}`, token);
@@ -103,11 +108,13 @@ async function main() {
     }
   }
 
-  const tierLabels = labelNames.filter((name) => name.startsWith('agent:tier-'));
+  const tierLabels = labelNames.filter((name) => name.startsWith("agent:tier-"));
   if (tierLabels.length === 0) {
-    errors.push('Missing agent tier label. Add exactly one of: agent:tier-1, agent:tier-2, agent:tier-3.');
+    errors.push(
+      "Missing agent tier label. Add exactly one of: agent:tier-1, agent:tier-2, agent:tier-3."
+    );
   } else if (tierLabels.length > 1) {
-    errors.push(`Conflicting agent tier labels detected: ${tierLabels.join(', ')}`);
+    errors.push(`Conflicting agent tier labels detected: ${tierLabels.join(", ")}`);
   }
 
   const selectedTier = tierLabels[0];
@@ -128,18 +135,18 @@ async function main() {
   if (escalations.size) {
     const lines = [];
     for (const [tier, paths] of escalations.entries()) {
-      lines.push(`${tier} required for: ${Array.from(paths).join(', ')}`);
+      lines.push(`${tier} required for: ${Array.from(paths).join(", ")}`);
     }
-    errors.push(`Agent tier label is below required level. ${lines.join(' | ')}`);
+    errors.push(`Agent tier label is below required level. ${lines.join(" | ")}`);
   }
 
   if (errors.length) {
     errors.forEach((message) => fail(message));
-    console.log('Governance validation failed. Resolve errors above to continue.');
+    console.log("Governance validation failed. Resolve errors above to continue.");
     process.exit(1);
   }
 
-  console.log('Governance validation passed. All required labels and tier restrictions satisfied.');
+  console.log("Governance validation passed. All required labels and tier restrictions satisfied.");
 }
 
 main().catch((error) => {

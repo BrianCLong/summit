@@ -6,13 +6,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'client/**'
-      - 'apps/web/**'
-      - 'server/src/graphql/**'
-      - 'server/src/investigations/**'
-      - 'server/src/services/investigationWorkflowService.ts'
-      - 'e2e/golden-path*.spec.ts'
-      - 'flags/**'
+      - "client/**"
+      - "apps/web/**"
+      - "server/src/graphql/**"
+      - "server/src/investigations/**"
+      - "server/src/services/investigationWorkflowService.ts"
+      - "e2e/golden-path*.spec.ts"
+      - "flags/**"
   schedule:
     - cron: "0 2 * * *" # Nightly at 2 AM
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -50,7 +50,7 @@ jobs:
       - name: Run Investigation Golden Path
         env:
           BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
+          PLAYWRIGHT_USE_WEBSERVER: "true"
         run: pnpm test:e2e:investigations
 
       - name: Upload Playwright Report
@@ -83,7 +83,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -94,7 +94,7 @@ jobs:
       - name: Run Frontend Golden Path
         env:
           BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
+          PLAYWRIGHT_USE_WEBSERVER: "true"
         run: pnpm test:e2e:golden-path
 
       - name: Upload Playwright Report

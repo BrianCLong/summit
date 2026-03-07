@@ -85,7 +85,9 @@ export function MapView({
   // Convert lat/lng to SVG coordinates
   const latLngToXY = useCallback(
     (lat: number, lng: number) => {
-      if (!containerRef.current) {return { x: 0, y: 0 }}
+      if (!containerRef.current) {
+        return { x: 0, y: 0 }
+      }
       const { width, height } = containerRef.current.getBoundingClientRect()
 
       // Simple Mercator projection
@@ -114,14 +116,19 @@ export function MapView({
   }, [])
 
   // Handle mouse drag for panning
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsDragging(true)
-    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
-  }, [pan])
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      setIsDragging(true)
+      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
+    },
+    [pan]
+  )
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!isDragging) {return}
+      if (!isDragging) {
+        return
+      }
       setPan({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y,

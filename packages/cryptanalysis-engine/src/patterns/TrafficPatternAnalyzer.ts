@@ -7,7 +7,7 @@
  * Educational tool for understanding traffic analysis concepts.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface TrafficPattern {
   id: string;
@@ -44,7 +44,7 @@ export interface TrafficSession {
   packets: Array<{
     timestamp: Date;
     size: number;
-    direction: 'c2s' | 's2c';
+    direction: "c2s" | "s2c";
   }>;
   patterns: PatternMatch[];
   anomalies: string[];
@@ -61,112 +61,112 @@ export class TrafficPatternAnalyzer {
   private initializePatterns(): void {
     const patterns: TrafficPattern[] = [
       {
-        id: 'web-browsing',
-        name: 'Web Browsing',
-        description: 'Standard HTTP/HTTPS web browsing pattern',
+        id: "web-browsing",
+        name: "Web Browsing",
+        description: "Standard HTTP/HTTPS web browsing pattern",
         avgPacketSize: 800,
         packetSizeStdDev: 400,
         avgInterPacketTime: 100,
         interPacketTimeStdDev: 200,
         clientToServerRatio: 0.3,
         burstiness: 0.7,
-        category: 'web',
-        confidence: 0.8
+        category: "web",
+        confidence: 0.8,
       },
       {
-        id: 'video-streaming',
-        name: 'Video Streaming',
-        description: 'Continuous video stream (YouTube, Netflix)',
+        id: "video-streaming",
+        name: "Video Streaming",
+        description: "Continuous video stream (YouTube, Netflix)",
         avgPacketSize: 1300,
         packetSizeStdDev: 200,
         avgInterPacketTime: 10,
         interPacketTimeStdDev: 5,
         clientToServerRatio: 0.05,
         burstiness: 0.2,
-        category: 'streaming',
-        confidence: 0.85
+        category: "streaming",
+        confidence: 0.85,
       },
       {
-        id: 'voip-call',
-        name: 'VoIP Call',
-        description: 'Voice over IP communication',
+        id: "voip-call",
+        name: "VoIP Call",
+        description: "Voice over IP communication",
         avgPacketSize: 180,
         packetSizeStdDev: 30,
         avgInterPacketTime: 20,
         interPacketTimeStdDev: 5,
         clientToServerRatio: 0.5,
         burstiness: 0.1,
-        category: 'voip',
-        confidence: 0.9
+        category: "voip",
+        confidence: 0.9,
       },
       {
-        id: 'video-call',
-        name: 'Video Call',
-        description: 'Video conferencing (Zoom, Teams)',
+        id: "video-call",
+        name: "Video Call",
+        description: "Video conferencing (Zoom, Teams)",
         avgPacketSize: 900,
         packetSizeStdDev: 300,
         avgInterPacketTime: 15,
         interPacketTimeStdDev: 10,
         clientToServerRatio: 0.45,
         burstiness: 0.3,
-        category: 'voip',
-        confidence: 0.85
+        category: "voip",
+        confidence: 0.85,
       },
       {
-        id: 'file-download',
-        name: 'File Download',
-        description: 'Large file transfer (download)',
+        id: "file-download",
+        name: "File Download",
+        description: "Large file transfer (download)",
         avgPacketSize: 1400,
         packetSizeStdDev: 100,
         avgInterPacketTime: 2,
         interPacketTimeStdDev: 3,
         clientToServerRatio: 0.02,
         burstiness: 0.1,
-        category: 'file_transfer',
-        confidence: 0.8
+        category: "file_transfer",
+        confidence: 0.8,
       },
       {
-        id: 'file-upload',
-        name: 'File Upload',
-        description: 'Large file transfer (upload)',
+        id: "file-upload",
+        name: "File Upload",
+        description: "Large file transfer (upload)",
         avgPacketSize: 1400,
         packetSizeStdDev: 100,
         avgInterPacketTime: 2,
         interPacketTimeStdDev: 3,
         clientToServerRatio: 0.98,
         burstiness: 0.1,
-        category: 'file_transfer',
-        confidence: 0.8
+        category: "file_transfer",
+        confidence: 0.8,
       },
       {
-        id: 'instant-messaging',
-        name: 'Instant Messaging',
-        description: 'Chat applications (WhatsApp, Signal)',
+        id: "instant-messaging",
+        name: "Instant Messaging",
+        description: "Chat applications (WhatsApp, Signal)",
         avgPacketSize: 300,
         packetSizeStdDev: 200,
         avgInterPacketTime: 5000,
         interPacketTimeStdDev: 10000,
         clientToServerRatio: 0.4,
         burstiness: 0.9,
-        category: 'messaging',
-        confidence: 0.75
+        category: "messaging",
+        confidence: 0.75,
       },
       {
-        id: 'ssh-interactive',
-        name: 'SSH Interactive',
-        description: 'Interactive SSH session',
+        id: "ssh-interactive",
+        name: "SSH Interactive",
+        description: "Interactive SSH session",
         avgPacketSize: 100,
         packetSizeStdDev: 80,
         avgInterPacketTime: 500,
         interPacketTimeStdDev: 1000,
         clientToServerRatio: 0.6,
         burstiness: 0.8,
-        category: 'remote_access',
-        confidence: 0.7
-      }
+        category: "remote_access",
+        confidence: 0.7,
+      },
     ];
 
-    patterns.forEach(p => this.knownPatterns.set(p.id, p));
+    patterns.forEach((p) => this.knownPatterns.set(p.id, p));
   }
 
   /**
@@ -179,7 +179,7 @@ export class TrafficPatternAnalyzer {
       startTime: new Date(),
       packets: [],
       patterns: [],
-      anomalies: []
+      anomalies: [],
     });
     return id;
   }
@@ -189,7 +189,7 @@ export class TrafficPatternAnalyzer {
    */
   addPacket(
     sessionId: string,
-    packet: { timestamp: Date; size: number; direction: 'c2s' | 's2c' }
+    packet: { timestamp: Date; size: number; direction: "c2s" | "s2c" }
   ): void {
     const session = this.sessions.get(sessionId);
     if (!session) return;
@@ -220,7 +220,7 @@ export class TrafficPatternAnalyzer {
   /**
    * Match traffic against known patterns
    */
-  matchPatterns(packets: TrafficSession['packets']): PatternMatch[] {
+  matchPatterns(packets: TrafficSession["packets"]): PatternMatch[] {
     if (packets.length < 10) return [];
 
     const features = this.extractFeatures(packets);
@@ -232,16 +232,19 @@ export class TrafficPatternAnalyzer {
 
       // Check which features matched
       if (Math.abs(features.avgSize - pattern.avgPacketSize) < pattern.avgPacketSize * 0.3) {
-        matchedFeatures.push('packet_size');
+        matchedFeatures.push("packet_size");
       }
-      if (Math.abs(features.avgInterval - pattern.avgInterPacketTime) < pattern.avgInterPacketTime * 0.5) {
-        matchedFeatures.push('timing');
+      if (
+        Math.abs(features.avgInterval - pattern.avgInterPacketTime) <
+        pattern.avgInterPacketTime * 0.5
+      ) {
+        matchedFeatures.push("timing");
       }
       if (Math.abs(features.c2sRatio - pattern.clientToServerRatio) < 0.2) {
-        matchedFeatures.push('direction_ratio');
+        matchedFeatures.push("direction_ratio");
       }
       if (Math.abs(features.burstiness - pattern.burstiness) < 0.3) {
-        matchedFeatures.push('burstiness');
+        matchedFeatures.push("burstiness");
       }
 
       if (score > 0.5) {
@@ -250,7 +253,7 @@ export class TrafficPatternAnalyzer {
           patternName: pattern.name,
           score,
           confidence: score * pattern.confidence,
-          matchedFeatures
+          matchedFeatures,
         });
       }
     }
@@ -261,7 +264,7 @@ export class TrafficPatternAnalyzer {
   /**
    * Extract traffic features
    */
-  private extractFeatures(packets: TrafficSession['packets']): {
+  private extractFeatures(packets: TrafficSession["packets"]): {
     avgSize: number;
     sizeStd: number;
     avgInterval: number;
@@ -269,8 +272,8 @@ export class TrafficPatternAnalyzer {
     c2sRatio: number;
     burstiness: number;
   } {
-    const sizes = packets.map(p => p.size);
-    const c2sCount = packets.filter(p => p.direction === 'c2s').length;
+    const sizes = packets.map((p) => p.size);
+    const c2sCount = packets.filter((p) => p.direction === "c2s").length;
 
     // Calculate intervals
     const intervals: number[] = [];
@@ -280,9 +283,8 @@ export class TrafficPatternAnalyzer {
 
     const avgSize = sizes.reduce((a, b) => a + b, 0) / sizes.length;
     const sizeStd = this.stdDev(sizes);
-    const avgInterval = intervals.length > 0
-      ? intervals.reduce((a, b) => a + b, 0) / intervals.length
-      : 0;
+    const avgInterval =
+      intervals.length > 0 ? intervals.reduce((a, b) => a + b, 0) / intervals.length : 0;
     const intervalStd = this.stdDev(intervals);
 
     // Calculate burstiness (coefficient of variation of intervals)
@@ -294,7 +296,7 @@ export class TrafficPatternAnalyzer {
       avgInterval,
       intervalStd,
       c2sRatio: c2sCount / packets.length,
-      burstiness: Math.min(1, burstiness)
+      burstiness: Math.min(1, burstiness),
     };
   }
 
@@ -315,7 +317,8 @@ export class TrafficPatternAnalyzer {
 
     // Interval similarity (weight: 0.25)
     if (pattern.avgInterPacketTime > 0) {
-      const intervalDiff = Math.abs(features.avgInterval - pattern.avgInterPacketTime) / pattern.avgInterPacketTime;
+      const intervalDiff =
+        Math.abs(features.avgInterval - pattern.avgInterPacketTime) / pattern.avgInterPacketTime;
       score += (1 - Math.min(1, intervalDiff)) * 0.25;
     }
     weights += 0.25;
@@ -336,7 +339,7 @@ export class TrafficPatternAnalyzer {
   /**
    * Detect anomalies in traffic
    */
-  private detectAnomalies(packets: TrafficSession['packets']): string[] {
+  private detectAnomalies(packets: TrafficSession["packets"]): string[] {
     const anomalies: string[] = [];
 
     if (packets.length < 10) return anomalies;
@@ -345,19 +348,19 @@ export class TrafficPatternAnalyzer {
 
     // Check for unusual patterns
     if (features.c2sRatio > 0.95) {
-      anomalies.push('Highly asymmetric traffic (mostly outbound) - possible data exfiltration');
+      anomalies.push("Highly asymmetric traffic (mostly outbound) - possible data exfiltration");
     }
 
     if (features.c2sRatio < 0.05) {
-      anomalies.push('Highly asymmetric traffic (mostly inbound) - possible large download');
+      anomalies.push("Highly asymmetric traffic (mostly inbound) - possible large download");
     }
 
     if (features.burstiness > 0.9 && features.avgInterval > 10000) {
-      anomalies.push('Highly bursty traffic with long gaps - possible covert channel');
+      anomalies.push("Highly bursty traffic with long gaps - possible covert channel");
     }
 
     if (features.avgSize < 100 && features.sizeStd < 20) {
-      anomalies.push('Small fixed-size packets - possible beaconing');
+      anomalies.push("Small fixed-size packets - possible beaconing");
     }
 
     // Check for timing regularity (beaconing)
@@ -369,7 +372,9 @@ export class TrafficPatternAnalyzer {
     if (intervals.length > 10) {
       const cv = this.stdDev(intervals) / (features.avgInterval + 1);
       if (cv < 0.1 && features.avgInterval > 1000) {
-        anomalies.push(`Regular timing detected (CV=${cv.toFixed(3)}) - possible automated communication`);
+        anomalies.push(
+          `Regular timing detected (CV=${cv.toFixed(3)}) - possible automated communication`
+        );
       }
     }
 
@@ -379,7 +384,7 @@ export class TrafficPatternAnalyzer {
   private stdDev(values: number[]): number {
     if (values.length === 0) return 0;
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const sqDiffs = values.map(v => Math.pow(v - mean, 2));
+    const sqDiffs = values.map((v) => Math.pow(v - mean, 2));
     return Math.sqrt(sqDiffs.reduce((a, b) => a + b, 0) / values.length);
   }
 
@@ -403,18 +408,22 @@ export class TrafficPatternAnalyzer {
       const isC2S = Math.random() < pattern.clientToServerRatio;
 
       // Add some variance
-      const size = Math.max(64, Math.round(
-        pattern.avgPacketSize + (Math.random() - 0.5) * 2 * pattern.packetSizeStdDev
-      ));
+      const size = Math.max(
+        64,
+        Math.round(pattern.avgPacketSize + (Math.random() - 0.5) * 2 * pattern.packetSizeStdDev)
+      );
 
-      const interval = Math.max(1, Math.round(
-        pattern.avgInterPacketTime + (Math.random() - 0.5) * 2 * pattern.interPacketTimeStdDev
-      ));
+      const interval = Math.max(
+        1,
+        Math.round(
+          pattern.avgInterPacketTime + (Math.random() - 0.5) * 2 * pattern.interPacketTimeStdDev
+        )
+      );
 
       session.packets.push({
         timestamp: new Date(currentTime),
         size,
-        direction: isC2S ? 'c2s' : 's2c'
+        direction: isC2S ? "c2s" : "s2c",
       });
 
       currentTime += interval;

@@ -9,61 +9,61 @@
  * - DLA/NATO/Allied system integration
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // =============================================================================
 // ENUMS AND CONSTANTS
 // =============================================================================
 
 export const ContractStatusSchema = z.enum([
-  'draft',
-  'pending_approval',
-  'approved',
-  'active',
-  'completed',
-  'cancelled',
-  'expired',
+  "draft",
+  "pending_approval",
+  "approved",
+  "active",
+  "completed",
+  "cancelled",
+  "expired",
 ]);
 export type ContractStatus = z.infer<typeof ContractStatusSchema>;
 
 export const ProcurementPrioritySchema = z.enum([
-  'routine',
-  'priority',
-  'urgent',
-  'emergency',
-  'critical_defense',
+  "routine",
+  "priority",
+  "urgent",
+  "emergency",
+  "critical_defense",
 ]);
 export type ProcurementPriority = z.infer<typeof ProcurementPrioritySchema>;
 
 export const DeliveryStatusSchema = z.enum([
-  'pending',
-  'in_transit',
-  'customs_hold',
-  'at_staging',
-  'delivered',
-  'rejected',
-  'returned',
+  "pending",
+  "in_transit",
+  "customs_hold",
+  "at_staging",
+  "delivered",
+  "rejected",
+  "returned",
 ]);
 export type DeliveryStatus = z.infer<typeof DeliveryStatusSchema>;
 
 export const SupplySystemSchema = z.enum([
-  'DLA', // Defense Logistics Agency
-  'NATO_NSPA', // NATO Support and Procurement Agency
-  'FMS', // Foreign Military Sales
-  'ALLIED_LOGEX', // Allied Logistics Exchange
-  'GCSS_ARMY', // Global Combat Support System - Army
-  'NAVSUP', // Naval Supply Systems Command
-  'AFMC', // Air Force Materiel Command
+  "DLA", // Defense Logistics Agency
+  "NATO_NSPA", // NATO Support and Procurement Agency
+  "FMS", // Foreign Military Sales
+  "ALLIED_LOGEX", // Allied Logistics Exchange
+  "GCSS_ARMY", // Global Combat Support System - Army
+  "NAVSUP", // Naval Supply Systems Command
+  "AFMC", // Air Force Materiel Command
 ]);
 export type SupplySystem = z.infer<typeof SupplySystemSchema>;
 
 export const ForecastMethodSchema = z.enum([
-  'historical_trend',
-  'operational_tempo',
-  'mission_planning',
-  'consumption_rate',
-  'ml_predictive',
-  'ensemble',
+  "historical_trend",
+  "operational_tempo",
+  "mission_planning",
+  "consumption_rate",
+  "ml_predictive",
+  "ensemble",
 ]);
 export type ForecastMethod = z.infer<typeof ForecastMethodSchema>;
 
@@ -137,7 +137,7 @@ export const ContractTermsSchema = z.object({
   penaltyClause: z.string().optional(),
   qualityRequirements: z.array(z.string()),
   complianceRequirements: z.array(z.string()),
-  securityClassification: z.enum(['unclassified', 'cui', 'secret', 'top_secret']),
+  securityClassification: z.enum(["unclassified", "cui", "secret", "top_secret"]),
   exportControlled: z.boolean(),
   farClauses: z.array(z.string()), // Federal Acquisition Regulation clauses
   dfarsClauses: z.array(z.string()), // Defense FAR Supplement clauses
@@ -154,14 +154,14 @@ export const ProcurementContractSchema = z.object({
   vendorName: z.string(),
   vendorCage: z.string().optional(), // Commercial and Government Entity code
   contractType: z.enum([
-    'firm_fixed_price',
-    'cost_plus_fixed_fee',
-    'time_and_materials',
-    'indefinite_delivery',
-    'blanket_purchase',
+    "firm_fixed_price",
+    "cost_plus_fixed_fee",
+    "time_and_materials",
+    "indefinite_delivery",
+    "blanket_purchase",
   ]),
   totalValue: z.number().positive(),
-  currency: z.string().default('USD'),
+  currency: z.string().default("USD"),
   lineItems: z.array(ContractLineItemSchema),
   terms: ContractTermsSchema,
   effectiveDate: z.string().datetime(),
@@ -175,7 +175,7 @@ export const ProcurementContractSchema = z.object({
       approverName: z.string(),
       approvedAt: z.string().datetime(),
       level: z.number().int().positive(),
-    }),
+    })
   ),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -185,7 +185,7 @@ export type ProcurementContract = z.infer<typeof ProcurementContractSchema>;
 export const ContractGenerationRequestSchema = z.object({
   forecastIds: z.array(z.string().uuid()),
   preferredVendorIds: z.array(z.string()).optional(),
-  priority: ProcurementPrioritySchema.default('routine'),
+  priority: ProcurementPrioritySchema.default("routine"),
   consolidateItems: z.boolean().default(true),
   maxContractValue: z.number().positive().optional(),
   requiredDeliveryDate: z.string().datetime().optional(),
@@ -200,7 +200,7 @@ export const DeliveryMilestoneSchema = z.object({
   milestone: z.string(),
   location: z.string(),
   timestamp: z.string().datetime(),
-  status: z.enum(['completed', 'current', 'pending']),
+  status: z.enum(["completed", "current", "pending"]),
   notes: z.string().optional(),
 });
 export type DeliveryMilestone = z.infer<typeof DeliveryMilestoneSchema>;
@@ -219,9 +219,9 @@ export const DeliverySchema = z.object({
   actualDeliveryDate: z.string().datetime().optional(),
   quantity: z.number().positive(),
   weight: z.number().positive().optional(),
-  weightUnit: z.enum(['kg', 'lb']).optional(),
+  weightUnit: z.enum(["kg", "lb"]).optional(),
   milestones: z.array(DeliveryMilestoneSchema),
-  customsStatus: z.enum(['not_applicable', 'pending', 'cleared', 'held']).optional(),
+  customsStatus: z.enum(["not_applicable", "pending", "cleared", "held"]).optional(),
   hazmatClass: z.string().optional(),
   temperatureControlled: z.boolean().default(false),
   createdAt: z.string().datetime(),
@@ -257,11 +257,11 @@ export const ReplenishmentRecommendationSchema = z.object({
   recommendedQuantity: z.number().positive(),
   urgency: ProcurementPrioritySchema,
   reason: z.enum([
-    'below_safety_stock',
-    'forecast_demand',
-    'exercise_requirement',
-    'operational_surge',
-    'shelf_life_expiration',
+    "below_safety_stock",
+    "forecast_demand",
+    "exercise_requirement",
+    "operational_surge",
+    "shelf_life_expiration",
   ]),
   estimatedCost: z.number().positive(),
   suggestedVendorIds: z.array(z.string()),
@@ -289,10 +289,10 @@ export const DataExchangeRecordSchema = z.object({
   id: z.string().uuid(),
   sourceSystem: SupplySystemSchema,
   targetSystem: SupplySystemSchema.optional(),
-  direction: z.enum(['inbound', 'outbound']),
-  recordType: z.enum(['forecast', 'contract', 'delivery', 'inventory', 'requisition']),
+  direction: z.enum(["inbound", "outbound"]),
+  recordType: z.enum(["forecast", "contract", "delivery", "inventory", "requisition"]),
   recordId: z.string(),
-  status: z.enum(['pending', 'processing', 'completed', 'failed']),
+  status: z.enum(["pending", "processing", "completed", "failed"]),
   errorMessage: z.string().optional(),
   payload: z.record(z.unknown()),
   createdAt: z.string().datetime(),
@@ -307,15 +307,20 @@ export type DataExchangeRecord = z.infer<typeof DataExchangeRecordSchema>;
 export const NatoLogisticsMessageSchema = z.object({
   messageId: z.string(),
   messageType: z.enum([
-    'LOGASSESSREP', // Logistics Assessment Report
-    'LOGREQ', // Logistics Request
-    'LOGSITREP', // Logistics Situation Report
-    'MOVREQ', // Movement Request
-    'SUPPLY_STATUS',
+    "LOGASSESSREP", // Logistics Assessment Report
+    "LOGREQ", // Logistics Request
+    "LOGSITREP", // Logistics Situation Report
+    "MOVREQ", // Movement Request
+    "SUPPLY_STATUS",
   ]),
   originatingNation: z.string().length(3), // ISO 3166-1 alpha-3
   destinationNation: z.string().length(3).optional(),
-  classification: z.enum(['NATO_UNCLASSIFIED', 'NATO_RESTRICTED', 'NATO_CONFIDENTIAL', 'NATO_SECRET']),
+  classification: z.enum([
+    "NATO_UNCLASSIFIED",
+    "NATO_RESTRICTED",
+    "NATO_CONFIDENTIAL",
+    "NATO_SECRET",
+  ]),
   content: z.record(z.unknown()),
   validFrom: z.string().datetime(),
   validTo: z.string().datetime().optional(),

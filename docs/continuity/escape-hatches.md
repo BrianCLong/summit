@@ -5,6 +5,7 @@
 ## Overview
 
 All internal governance can fail:
+
 - Oversight board captured or coerced
 - Leadership actively betraying mission
 - Economic or political pressure overwhelming
@@ -12,6 +13,7 @@ All internal governance can fail:
 - Legal changes undermining protections
 
 **Escape hatches** are mechanisms that allow:
+
 - Mission-aligned staff to escalate beyond internal governance
 - External parties to intervene when internal accountability fails
 - Preservation or rebirth of the mission even if the organization is lost
@@ -20,6 +22,7 @@ All internal governance can fail:
 ## Core Thesis
 
 > The ultimate protection against mission betrayal is ensuring betrayal is:
+>
 > 1. Difficult
 > 2. Visible
 > 3. Reversible (or survivable)
@@ -31,21 +34,25 @@ All internal governance can fail:
 Escape hatches are **last resorts**. They should only be triggered when:
 
 ✅ **Internal governance has failed**
+
 - Oversight board is captured, coerced, or ineffective
 - Drift detection systems are being disabled or ignored
 - Remediation attempts have been blocked or subverted
 
 ✅ **Mission compromise is substantive and ongoing**
+
 - Core invariants are being systematically violated
 - Evidence discipline has collapsed
 - Scope violations are deliberate and unaddressed
 
 ✅ **Normal accountability mechanisms are exhausted**
+
 - Internal escalation has been attempted and failed
 - Public disclosure has not forced remediation
 - Stakeholder challenges have been dismissed
 
 ❌ **Do NOT trigger for**:
+
 - Disagreements about implementation details
 - Frustration with pace of change
 - Personal conflicts with leadership
@@ -62,6 +69,7 @@ Mission-aligned staff can escalate beyond internal governance to external author
 #### Legal Protections
 
 **Employment Contracts Include**:
+
 ```
 Mission Protection Whistleblower Clause:
 
@@ -89,11 +97,13 @@ Retaliation for protected disclosure:
 #### Whistleblower Channels
 
 **Internal Path** (first resort):
+
 - Direct to oversight board (bypasses management)
 - Anonymous submission supported
 - Protected from investigation of identity
 
 **External Path** (if internal fails):
+
 - Designated regulatory authorities
 - Independent mission protection organization (if exists)
 - Public disclosure (as last resort, with legal protection)
@@ -108,12 +118,14 @@ Retaliation for protected disclosure:
 ### Conditions for Activation
 
 **Required**:
+
 1. Internal escalation attempted and failed
 2. Good faith belief of substantive violation
 3. Documentation/evidence of concern
 4. Material impact on mission (not trivial)
 
 **Process**:
+
 1. Submit concern through protected channel
 2. Independent investigation triggered automatically
 3. Whistleblower identity protected during investigation
@@ -133,6 +145,7 @@ External stakeholders have enforceable rights to challenge and remediate mission
 #### Contractual Provisions
 
 **Partner Agreements Include**:
+
 ```
 Mission Continuity Enforcement Clause:
 
@@ -153,6 +166,7 @@ abandoned these commitments:
 ```
 
 **Customer/User Rights**:
+
 ```
 Service Terms Include Mission Commitments:
 
@@ -168,12 +182,14 @@ If [Organization] substantively violates these commitments:
 #### Regulatory Escalation
 
 **Proactive Regulatory Framework**:
+
 - Regular briefings to relevant regulators
 - Regulator understanding of mission and constraints
 - Clear process for escalation if internal governance fails
 - Regulatory authority to investigate mission violations
 
 **Trigger Conditions**:
+
 - Substantive drift detected by external audit
 - Whistleblower reports trigger regulatory review
 - Stakeholder challenges unresolved internally
@@ -192,6 +208,7 @@ If organization is irreversibly captured, mission can be continued by successor 
 #### Legal Structure
 
 **Charter Provision**:
+
 ```
 Article [X]: Mission Successor Rights
 
@@ -221,12 +238,14 @@ Successor Requirements:
 #### Asset Provisions
 
 **Mission-Critical Assets**:
+
 - Documentation, code, and IP related to mission
 - Licensed to successor under protective terms
 - Original organization retains ownership but cannot prevent mission use
 - Prevents mission being held hostage by captured organization
 
 **Staff Migration**:
+
 - Mission-aligned staff have right to join successor
 - Non-competes void for mission continuation
 - Benefits and seniority preserved where possible
@@ -258,6 +277,7 @@ If mission cannot be preserved, organization shuts down rather than operating in
 #### Shutdown Trigger
 
 **Oversight Board Authority**:
+
 ```
 The Mission Oversight Board may vote to wind down [Organization]
 operations if:
@@ -277,6 +297,7 @@ Requirements:
 #### Shutdown Process
 
 **Orderly Wind-Down**:
+
 1. Public announcement with full rationale
 2. Stakeholder notification and transition support
 3. Data return/deletion as appropriate
@@ -285,6 +306,7 @@ Requirements:
 6. Documentation preservation for historical record
 
 **Transparency**:
+
 - Detailed public post-mortem
 - Lessons learned documentation
 - Preservation of "what went wrong" record
@@ -305,16 +327,19 @@ Mission-aligned team forks the approach and competes with corrupted original.
 #### Open Source/Transparent Approach
 
 If Summit's approach is documented openly:
+
 - Anyone can implement the same principles
 - Mission-aligned team can create competing service
 - Market can choose the authentic vs. corrupted version
 
 **Advantages**:
+
 - Doesn't require permission
 - Competition disciplines the original
 - Mission survives even if organization fails
 
 **Requirements for Effectiveness**:
+
 - Sufficient documentation for reimplementation
 - Mission is portable (not locked to specific organization)
 - Stakeholders can distinguish authentic from corrupted
@@ -322,6 +347,7 @@ If Summit's approach is documented openly:
 #### Staff Mobility
 
 **Employment Agreement Provisions**:
+
 ```
 Mission Fork Rights:
 
@@ -353,6 +379,7 @@ If internal governance fails, comprehensive public disclosure of mission violati
 **Concept**: Oversight board or trusted staff must regularly confirm mission integrity; failure triggers disclosure.
 
 **Structure**:
+
 - Regular (quarterly) mission integrity attestation required
 - If not provided, automated disclosure triggered
 - Disclosure includes: evidence of drift, attempts at remediation, reasons for failure
@@ -362,12 +389,14 @@ If internal governance fails, comprehensive public disclosure of mission violati
 #### Public Evidence Repository
 
 **Implementation**:
+
 - Cryptographically secured evidence repository
 - Accessible to external parties if governance fails
 - Contains: decision logs, governance records, drift indicators
 - Released if internal accountability fails
 
 **Protections**:
+
 - Appropriately redacted for security
 - Legally defensible (truth defense against defamation)
 - Structured to maximize accountability, minimize harm
@@ -378,20 +407,21 @@ If internal governance fails, comprehensive public disclosure of mission violati
 
 ### Who Can Trigger?
 
-| Escape Hatch | Trigger Authority | Conditions |
-|--------------|------------------|------------|
-| Whistleblowing | Any mission-aligned staff | Good faith + evidence + exhausted internal |
-| Stakeholder Intervention | Partners, regulators, users | Contractual rights + substantive violation |
-| Mission Successor | Oversight board or external party | Irreversible drift + remediation failed |
-| Graceful Shutdown | Oversight board supermajority | Mission unsalvageable + disclosure required |
-| Fork and Compete | Mission-aligned team | Personal right (w/ protections) |
-| Transparency Bomb | Automated or oversight board | Dead man's switch failure |
+| Escape Hatch             | Trigger Authority                 | Conditions                                  |
+| ------------------------ | --------------------------------- | ------------------------------------------- |
+| Whistleblowing           | Any mission-aligned staff         | Good faith + evidence + exhausted internal  |
+| Stakeholder Intervention | Partners, regulators, users       | Contractual rights + substantive violation  |
+| Mission Successor        | Oversight board or external party | Irreversible drift + remediation failed     |
+| Graceful Shutdown        | Oversight board supermajority     | Mission unsalvageable + disclosure required |
+| Fork and Compete         | Mission-aligned team              | Personal right (w/ protections)             |
+| Transparency Bomb        | Automated or oversight board      | Dead man's switch failure                   |
 
 ### Abuse Prevention
 
 Escape hatches must be protected from abuse:
 
 **Safeguards**:
+
 - Good faith requirement (not for competitive advantage)
 - Substantive violation (not minor disagreements)
 - Exhaustion of internal remedies first
@@ -408,6 +438,7 @@ Escape hatches must be protected from abuse:
 ### Internal Communication (Before Escalation)
 
 **Required Steps**:
+
 1. Document specific mission violations with evidence
 2. Escalate through internal channels (oversight board)
 3. Provide opportunity for remediation
@@ -419,12 +450,14 @@ Escape hatches must be protected from abuse:
 ### External Communication (After Trigger)
 
 **For Whistleblowing**:
+
 - Structured disclosure to designated authorities
 - Appropriately abstracted to protect security
 - Focused on mission violation, not personal grievances
 - Evidence-based and verifiable
 
 **For Public Disclosure**:
+
 - Clear statement of what mission commitments were violated
 - Evidence provided (appropriately redacted)
 - Description of remediation attempts and failures
@@ -438,12 +471,14 @@ Escape hatches must be protected from abuse:
 ### Scenario 1: Acquisition-Driven Capture
 
 **Situation**:
+
 - Organization acquired by entity with conflicting interests
 - New owners pressure for evidence standard reduction
 - Oversight board members replaced or coerced
 - Mission continuity covenants ignored
 
 **Escape Hatch Response**:
+
 1. Staff whistleblow to regulatory authorities
 2. Partners invoke intervention rights and terminate contracts
 3. Mission successor provisions activated
@@ -457,6 +492,7 @@ Escape hatches must be protected from abuse:
 ### Scenario 2: Slow Internal Rot
 
 **Situation**:
+
 - No single dramatic event
 - Gradual drift over years
 - Leadership rationalizescompromises as "necessary"
@@ -464,6 +500,7 @@ Escape hatches must be protected from abuse:
 - External stakeholders unaware of degradation
 
 **Escape Hatch Response**:
+
 1. Drift detection systems flag degradation
 2. Internal whistleblower escalates to external audit
 3. Independent audit confirms substantive drift
@@ -477,12 +514,14 @@ Escape hatches must be protected from abuse:
 ### Scenario 3: Political Pressure
 
 **Situation**:
+
 - Government pressure to weaken constraints
 - Legal or regulatory threats
 - Organization leadership caves to demands
 - Oversight board unable or unwilling to resist
 
 **Escape Hatch Response**:
+
 1. Staff whistleblow to media and international parties
 2. Fork and compete: mission-aligned team launches alternative
 3. Public transparency reveals pressure campaign
@@ -498,6 +537,7 @@ Escape hatches must be protected from abuse:
 ### Simulation Exercises
 
 **Annually**:
+
 - Tabletop exercise: mission betrayal scenario
 - Test escalation pathways
 - Verify protections are enforceable
@@ -509,6 +549,7 @@ Escape hatches must be protected from abuse:
 ### Legal Review
 
 **Regularly verify**:
+
 - Employment protections are legally sound
 - Contractual provisions are enforceable
 - Regulatory relationships are active

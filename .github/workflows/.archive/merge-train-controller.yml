@@ -2,7 +2,7 @@ name: Merge Train Controller
 
 on:
   schedule:
-    - cron: '0 * * * *' # Run hourly
+    - cron: "0 * * * *" # Run hourly
   workflow_dispatch:
   push:
     branches:
@@ -30,7 +30,7 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 20
 
       - name: Setup Git Identity

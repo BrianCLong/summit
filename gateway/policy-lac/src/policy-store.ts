@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { evaluate, loadPolicy, Decision, Context } from './policy-engine';
+import fs from "fs";
+import path from "path";
+import { evaluate, loadPolicy, Decision, Context } from "./policy-engine";
 
 export type LoadedPolicy = {
   id: string;
@@ -14,12 +14,12 @@ export function discoverPolicies(policiesDir: string): LoadedPolicy[] {
   }
   return fs
     .readdirSync(policiesDir)
-    .filter((file) => file.endsWith('.json'))
+    .filter((file) => file.endsWith(".json"))
     .sort()
     .map((file) => {
       const full = path.join(policiesDir, file);
       return {
-        id: path.basename(file, '.json'),
+        id: path.basename(file, ".json"),
         path: full,
         policy: loadPolicy(full),
       };
@@ -27,7 +27,7 @@ export function discoverPolicies(policiesDir: string): LoadedPolicy[] {
 }
 
 export function mergePolicies(policies: LoadedPolicy[]) {
-  const combined = { version: 'v1', rules: [] as any[] };
+  const combined = { version: "v1", rules: [] as any[] };
   for (const { policy, id } of policies) {
     const rules = policy.rules.map((rule: any) => ({ ...rule, id: rule.id || id }));
     combined.rules.push(...rules);

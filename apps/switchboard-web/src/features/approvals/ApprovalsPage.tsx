@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchApprovals, approveApproval, rejectApproval } from './api';
-import { Approval } from './types';
-import { TaskDetailView } from './TaskDetailView';
+import React, { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchApprovals, approveApproval, rejectApproval } from "./api";
+import { Approval } from "./types";
+import { TaskDetailView } from "./TaskDetailView";
 
 export const ApprovalsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: approvals, isLoading } = useQuery({
-    queryKey: ['approvals', 'pending'],
-    queryFn: () => fetchApprovals('pending'),
+    queryKey: ["approvals", "pending"],
+    queryFn: () => fetchApprovals("pending"),
   });
 
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export const ApprovalsPage: React.FC = () => {
   const approveMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => approveApproval(id, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      queryClient.invalidateQueries({ queryKey: ["approvals"] });
       setProcessingId(null);
     },
   });
@@ -25,18 +25,18 @@ export const ApprovalsPage: React.FC = () => {
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => rejectApproval(id, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      queryClient.invalidateQueries({ queryKey: ["approvals"] });
       setProcessingId(null);
     },
   });
 
   const handleApprove = (id: string) => {
     setProcessingId(id);
-    approveMutation.mutate({ id, reason: 'Approved by human operator via Switchboard' });
+    approveMutation.mutate({ id, reason: "Approved by human operator via Switchboard" });
   };
 
   const handleReject = (id: string) => {
-    const reason = window.prompt('Enter rejection reason:');
+    const reason = window.prompt("Enter rejection reason:");
     if (reason !== null) {
       setProcessingId(id);
       rejectMutation.mutate({ id, reason });
@@ -47,7 +47,9 @@ export const ApprovalsPage: React.FC = () => {
     <div className="approvals-container">
       <div className="section-header">
         <h2>Task Inbox</h2>
-        <p className="description">Review and authorize high-risk agent actions requiring human-in-the-loop validation.</p>
+        <p className="description">
+          Review and authorize high-risk agent actions requiring human-in-the-loop validation.
+        </p>
       </div>
 
       {isLoading ? (
@@ -56,7 +58,10 @@ export const ApprovalsPage: React.FC = () => {
         <div className="empty-state">
           <div className="icon">🛡️</div>
           <h3>All Clear</h3>
-          <p>No agent tasks are currently awaiting approval. Your agents are operating within policy bounds.</p>
+          <p>
+            No agent tasks are currently awaiting approval. Your agents are operating within policy
+            bounds.
+          </p>
         </div>
       ) : (
         <div className="approvals-list">
@@ -72,7 +77,10 @@ export const ApprovalsPage: React.FC = () => {
             </thead>
             <tbody>
               {approvals?.map((approval) => (
-                <tr key={approval.id} className={processingId === approval.id ? 'row-processing' : ''}>
+                <tr
+                  key={approval.id}
+                  className={processingId === approval.id ? "row-processing" : ""}
+                >
                   <td>
                     <div className="requester-info">
                       <span className="agent-badge">Agent</span>
@@ -80,13 +88,14 @@ export const ApprovalsPage: React.FC = () => {
                     </div>
                   </td>
                   <td>
-                    <span className="action-tag">{approval.action?.replace('maestro_', '')}</span>
+                    <span className="action-tag">{approval.action?.replace("maestro_", "")}</span>
                   </td>
                   <td>
                     <div className="reason-text">{approval.reason}</div>
                     {approval.payload?.riskScore && (
                       <div className="risk-indicator">
-                        Risk Score: <span className="score">{approval.payload.riskScore.toFixed(2)}</span>
+                        Risk Score:{" "}
+                        <span className="score">{approval.payload.riskScore.toFixed(2)}</span>
                       </div>
                     )}
                   </td>
@@ -122,10 +131,7 @@ export const ApprovalsPage: React.FC = () => {
       )}
 
       {selectedApproval && (
-        <TaskDetailView
-          approval={selectedApproval}
-          onClose={() => setSelectedApproval(null)}
-        />
+        <TaskDetailView approval={selectedApproval} onClose={() => setSelectedApproval(null)} />
       )}
 
       <style>{`

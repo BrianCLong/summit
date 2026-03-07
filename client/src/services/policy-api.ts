@@ -9,7 +9,7 @@
  * @module services/policy-api
  */
 
-import { apiFetch, getAuthHeaders } from './api';
+import { apiFetch, getAuthHeaders } from "./api";
 
 // ============================================================================
 // Types
@@ -28,7 +28,7 @@ export interface DataEnvelope<T> {
 }
 
 export interface GovernanceVerdict {
-  result: 'ALLOW' | 'DENY' | 'FLAG' | 'REVIEW_REQUIRED';
+  result: "ALLOW" | "DENY" | "FLAG" | "REVIEW_REQUIRED";
   policyId: string;
   reason: string;
   evaluator: string;
@@ -36,13 +36,13 @@ export interface GovernanceVerdict {
 }
 
 export interface PolicyScope {
-  stages: ('data' | 'train' | 'alignment' | 'runtime')[];
+  stages: ("data" | "train" | "alignment" | "runtime")[];
   tenants: string[];
 }
 
 export interface PolicyRule {
   field: string;
-  operator: 'eq' | 'neq' | 'lt' | 'gt' | 'in' | 'not_in' | 'contains';
+  operator: "eq" | "neq" | "lt" | "gt" | "in" | "not_in" | "contains";
   value: unknown;
 }
 
@@ -51,12 +51,12 @@ export interface ManagedPolicy {
   name: string;
   displayName: string;
   description?: string;
-  category: 'access' | 'data' | 'export' | 'retention' | 'compliance' | 'operational' | 'safety';
+  category: "access" | "data" | "export" | "retention" | "compliance" | "operational" | "safety";
   priority: number;
   scope: PolicyScope;
   rules: PolicyRule[];
-  action: 'ALLOW' | 'DENY' | 'ESCALATE' | 'WARN';
-  status: 'draft' | 'pending_approval' | 'approved' | 'active' | 'deprecated' | 'archived';
+  action: "ALLOW" | "DENY" | "ESCALATE" | "WARN";
+  status: "draft" | "pending_approval" | "approved" | "active" | "deprecated" | "archived";
   version: number;
   tenantId: string;
   effectiveFrom?: string;
@@ -92,7 +92,7 @@ export interface PolicyApprovalRequest {
   requestedAt: string;
   reason?: string;
   changelog?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   reviewedBy?: string;
   reviewedAt?: string;
   reviewNotes?: string;
@@ -102,11 +102,11 @@ export interface CreatePolicyInput {
   name: string;
   displayName: string;
   description?: string;
-  category: ManagedPolicy['category'];
+  category: ManagedPolicy["category"];
   priority?: number;
   scope: PolicyScope;
   rules: PolicyRule[];
-  action: ManagedPolicy['action'];
+  action: ManagedPolicy["action"];
   effectiveFrom?: string;
   effectiveUntil?: string;
   metadata?: Record<string, unknown>;
@@ -115,11 +115,11 @@ export interface CreatePolicyInput {
 export interface UpdatePolicyInput {
   displayName?: string;
   description?: string;
-  category?: ManagedPolicy['category'];
+  category?: ManagedPolicy["category"];
   priority?: number;
   scope?: PolicyScope;
   rules?: PolicyRule[];
-  action?: ManagedPolicy['action'];
+  action?: ManagedPolicy["action"];
   effectiveFrom?: string;
   effectiveUntil?: string;
   metadata?: Record<string, unknown>;
@@ -129,8 +129,8 @@ export interface UpdatePolicyInput {
 export interface PolicyListFilters {
   page?: number;
   pageSize?: number;
-  status?: ManagedPolicy['status'];
-  category?: ManagedPolicy['category'];
+  status?: ManagedPolicy["status"];
+  category?: ManagedPolicy["category"];
   search?: string;
 }
 
@@ -146,7 +146,7 @@ export interface PolicyListResponse {
 
 // Simulation Types
 export interface SimulationContext {
-  stage: 'data' | 'train' | 'alignment' | 'runtime';
+  stage: "data" | "train" | "alignment" | "runtime";
   tenantId: string;
   region?: string;
   payload: Record<string, unknown>;
@@ -160,7 +160,7 @@ export interface SimulationRequest {
     description?: string;
     scope: PolicyScope;
     rules: PolicyRule[];
-    action: ManagedPolicy['action'];
+    action: ManagedPolicy["action"];
   };
   context: SimulationContext;
   compareWith?: {
@@ -168,7 +168,7 @@ export interface SimulationRequest {
     description?: string;
     scope: PolicyScope;
     rules: PolicyRule[];
-    action: ManagedPolicy['action'];
+    action: ManagedPolicy["action"];
   };
 }
 
@@ -182,7 +182,7 @@ export interface MatchedRule {
 export interface EvaluationStep {
   step: number;
   description: string;
-  result: 'passed' | 'failed' | 'skipped';
+  result: "passed" | "failed" | "skipped";
   details?: Record<string, unknown>;
 }
 
@@ -202,7 +202,7 @@ export interface PolicyDiff {
 }
 
 export interface SimulationVerdict {
-  action: 'ALLOW' | 'DENY' | 'ESCALATE' | 'WARN';
+  action: "ALLOW" | "DENY" | "ESCALATE" | "WARN";
   reasons: string[];
   policyIds: string[];
   metadata: {
@@ -237,7 +237,7 @@ export interface BatchSimulationResult {
 export interface ImpactAnalysis {
   estimatedAffectedUsers: number;
   estimatedAffectedResources: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   warnings: string[];
   recommendations: string[];
 }
@@ -246,7 +246,7 @@ export interface ImpactAnalysis {
 // API Client
 // ============================================================================
 
-const API_BASE = '/api/policies';
+const API_BASE = "/api/policies";
 
 /**
  * Policy Management API
@@ -257,11 +257,11 @@ export const PolicyManagementAPI = {
    */
   async listPolicies(filters: PolicyListFilters = {}): Promise<DataEnvelope<PolicyListResponse>> {
     const params = new URLSearchParams();
-    if (filters.page) params.set('page', String(filters.page));
-    if (filters.pageSize) params.set('pageSize', String(filters.pageSize));
-    if (filters.status) params.set('status', filters.status);
-    if (filters.category) params.set('category', filters.category);
-    if (filters.search) params.set('search', filters.search);
+    if (filters.page) params.set("page", String(filters.page));
+    if (filters.pageSize) params.set("pageSize", String(filters.pageSize));
+    if (filters.status) params.set("status", filters.status);
+    if (filters.category) params.set("category", filters.category);
+    if (filters.search) params.set("search", filters.search);
 
     const url = params.toString() ? `${API_BASE}?${params}` : API_BASE;
     return apiFetch(url, { headers: getAuthHeaders() });
@@ -277,10 +277,12 @@ export const PolicyManagementAPI = {
   /**
    * Create a new policy
    */
-  async createPolicy(input: CreatePolicyInput): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
+  async createPolicy(
+    input: CreatePolicyInput
+  ): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
     return apiFetch(API_BASE, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
   },
@@ -288,10 +290,13 @@ export const PolicyManagementAPI = {
   /**
    * Update an existing policy
    */
-  async updatePolicy(policyId: string, input: UpdatePolicyInput): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
+  async updatePolicy(
+    policyId: string,
+    input: UpdatePolicyInput
+  ): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
     return apiFetch(`${API_BASE}/${policyId}`, {
-      method: 'PATCH',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "PATCH",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
   },
@@ -301,7 +306,7 @@ export const PolicyManagementAPI = {
    */
   async deletePolicy(policyId: string): Promise<DataEnvelope<{ success: boolean }>> {
     return apiFetch(`${API_BASE}/${policyId}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: getAuthHeaders(),
     });
   },
@@ -316,10 +321,13 @@ export const PolicyManagementAPI = {
   /**
    * Rollback to a previous version
    */
-  async rollbackPolicy(policyId: string, targetVersion: number): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
+  async rollbackPolicy(
+    policyId: string,
+    targetVersion: number
+  ): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
     return apiFetch(`${API_BASE}/${policyId}/rollback`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ targetVersion }),
     });
   },
@@ -327,10 +335,13 @@ export const PolicyManagementAPI = {
   /**
    * Submit policy for approval
    */
-  async submitForApproval(policyId: string, reason?: string): Promise<DataEnvelope<{ success: boolean; request: PolicyApprovalRequest }>> {
+  async submitForApproval(
+    policyId: string,
+    reason?: string
+  ): Promise<DataEnvelope<{ success: boolean; request: PolicyApprovalRequest }>> {
     return apiFetch(`${API_BASE}/${policyId}/submit`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ reason }),
     });
   },
@@ -338,10 +349,13 @@ export const PolicyManagementAPI = {
   /**
    * Approve a policy
    */
-  async approvePolicy(policyId: string, notes?: string): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
+  async approvePolicy(
+    policyId: string,
+    notes?: string
+  ): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
     return apiFetch(`${API_BASE}/${policyId}/approve`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ notes }),
     });
   },
@@ -349,9 +363,11 @@ export const PolicyManagementAPI = {
   /**
    * Publish an approved policy
    */
-  async publishPolicy(policyId: string): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
+  async publishPolicy(
+    policyId: string
+  ): Promise<DataEnvelope<{ success: boolean; policy: ManagedPolicy }>> {
     return apiFetch(`${API_BASE}/${policyId}/publish`, {
-      method: 'POST',
+      method: "POST",
       headers: getAuthHeaders(),
     });
   },
@@ -366,8 +382,8 @@ export const PolicySimulatorAPI = {
    */
   async simulate(request: SimulationRequest): Promise<DataEnvelope<SimulationResult>> {
     return apiFetch(`${API_BASE}/simulate`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(request),
     });
   },
@@ -376,12 +392,12 @@ export const PolicySimulatorAPI = {
    * Batch simulate against multiple contexts
    */
   async batchSimulate(
-    policy: SimulationRequest['policy'],
+    policy: SimulationRequest["policy"],
     contexts: SimulationContext[]
   ): Promise<DataEnvelope<BatchSimulationResult>> {
     return apiFetch(`${API_BASE}/simulate/batch`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ policy, contexts }),
     });
   },
@@ -390,12 +406,12 @@ export const PolicySimulatorAPI = {
    * Analyze impact of a policy change
    */
   async analyzeImpact(
-    currentPolicy: SimulationRequest['policy'],
-    newPolicy: SimulationRequest['policy']
+    currentPolicy: SimulationRequest["policy"],
+    newPolicy: SimulationRequest["policy"]
   ): Promise<DataEnvelope<ImpactAnalysis>> {
     return apiFetch(`${API_BASE}/analyze-impact`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ currentPolicy, newPolicy }),
     });
   },

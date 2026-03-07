@@ -14,9 +14,9 @@
         "budget": {
           "type": "object",
           "properties": {
-            "gpu_hours": {"type": "number"},
-            "wall_clock_hours": {"type": "number"},
-            "cost_usd": {"type": "number"}
+            "gpu_hours": { "type": "number" },
+            "wall_clock_hours": { "type": "number" },
+            "cost_usd": { "type": "number" }
           },
           "additionalProperties": false
         },
@@ -47,10 +47,10 @@
     "preference_weights": {
       "type": "object",
       "properties": {
-        "quality": {"type": "number"},
-        "safety": {"type": "number"},
-        "latency": {"type": "number"},
-        "cost": {"type": "number"}
+        "quality": { "type": "number" },
+        "safety": { "type": "number" },
+        "latency": { "type": "number" },
+        "cost": { "type": "number" }
       },
       "additionalProperties": false
     },
@@ -71,9 +71,9 @@
         "type": "object",
         "required": ["config", "predicted_metrics"],
         "properties": {
-          "config": {"$ref": "./config.schema.json"},
-          "predicted_metrics": {"$ref": "./metrics.schema.json"},
-          "expected_utility": {"type": "number"}
+          "config": { "$ref": "./config.schema.json" },
+          "predicted_metrics": { "$ref": "./metrics.schema.json" },
+          "expected_utility": { "type": "number" }
         },
         "additionalProperties": false
       }
@@ -109,8 +109,8 @@
             "type": "object",
             "required": ["feature", "importance"],
             "properties": {
-              "feature": {"type": "string"},
-              "importance": {"type": "number"}
+              "feature": { "type": "string" },
+              "importance": { "type": "number" }
             },
             "additionalProperties": false
           }

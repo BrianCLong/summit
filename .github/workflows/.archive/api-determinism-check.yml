@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # API RESPONSE CONSISTENCY VERIFICATION
 # Verifies that API endpoints return deterministic responses.
 #

@@ -56,11 +56,11 @@ artifacts/dockeragent/
 
 ## Threat-Informed Requirements
 
-| Threat | Mitigation | Gate | Test Fixture |
-| --- | --- | --- | --- |
-| Malicious Dockerfile | Static lint | CI hard fail | `evil-root.Dockerfile` |
-| Privileged container | Compose scan | CI hard fail | `privileged.yml` |
-| CVE drift | SBOM scan | Metrics threshold | `test-cve.json` |
+| Threat               | Mitigation   | Gate              | Test Fixture           |
+| -------------------- | ------------ | ----------------- | ---------------------- |
+| Malicious Dockerfile | Static lint  | CI hard fail      | `evil-root.Dockerfile` |
+| Privileged container | Compose scan | CI hard fail      | `privileged.yml`       |
+| CVE drift            | SBOM scan    | Metrics threshold | `test-cve.json`        |
 
 Unknown directives follow deny-by-default behavior.
 

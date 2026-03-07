@@ -6,15 +6,15 @@
  * States: CLOSED -> OPEN -> HALF_OPEN -> CLOSED
  */
 
-import { EventEmitter } from 'events';
-import { createLogger } from '../utils/logger.js';
+import { EventEmitter } from "events";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('circuit-breaker');
+const logger = createLogger("circuit-breaker");
 
 export enum CircuitState {
-  CLOSED = 'CLOSED',
-  OPEN = 'OPEN',
-  HALF_OPEN = 'HALF_OPEN',
+  CLOSED = "CLOSED",
+  OPEN = "OPEN",
+  HALF_OPEN = "HALF_OPEN",
 }
 
 export interface CircuitBreakerConfig {
@@ -71,7 +71,7 @@ export class CircuitBreaker extends EventEmitter {
       this.transitionToClosed(serviceUrl, circuit);
     }
 
-    logger.debug('Circuit breaker success recorded', {
+    logger.debug("Circuit breaker success recorded", {
       serviceUrl,
       state: circuit.state,
       successes: circuit.successes,
@@ -90,7 +90,7 @@ export class CircuitBreaker extends EventEmitter {
       this.transitionToOpen(serviceUrl, circuit);
     }
 
-    logger.warn('Circuit breaker failure recorded', {
+    logger.warn("Circuit breaker failure recorded", {
       serviceUrl,
       state: circuit.state,
       failures: circuit.failures,
@@ -120,21 +120,21 @@ export class CircuitBreaker extends EventEmitter {
 
   private transitionToOpen(serviceUrl: string, circuit: CircuitStats): void {
     circuit.state = CircuitState.OPEN;
-    logger.error('Circuit breaker opened', { serviceUrl });
-    this.emit('circuit:open', { serviceUrl, circuit });
+    logger.error("Circuit breaker opened", { serviceUrl });
+    this.emit("circuit:open", { serviceUrl, circuit });
   }
 
   private transitionToHalfOpen(serviceUrl: string, circuit: CircuitStats): void {
     circuit.state = CircuitState.HALF_OPEN;
-    logger.info('Circuit breaker half-open', { serviceUrl });
-    this.emit('circuit:half-open', { serviceUrl, circuit });
+    logger.info("Circuit breaker half-open", { serviceUrl });
+    this.emit("circuit:half-open", { serviceUrl, circuit });
   }
 
   private transitionToClosed(serviceUrl: string, circuit: CircuitStats): void {
     circuit.state = CircuitState.CLOSED;
     circuit.failures = 0;
-    logger.info('Circuit breaker closed', { serviceUrl });
-    this.emit('circuit:closed', { serviceUrl, circuit });
+    logger.info("Circuit breaker closed", { serviceUrl });
+    this.emit("circuit:closed", { serviceUrl, circuit });
   }
 
   getStatus(serviceUrl?: string) {

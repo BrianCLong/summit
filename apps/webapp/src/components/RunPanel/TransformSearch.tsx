@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Box, TextField, List, ListItem, ListItemButton, ListItemText, Typography, Paper, CircularProgress } from '@mui/material';
+import {
+  Box,
+  TextField,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
+  Paper,
+  CircularProgress,
+} from '@mui/material';
 import { transformIndex, Transform } from '../../lib/search/transformIndex';
 
 export const TransformSearch = () => {
@@ -35,15 +45,25 @@ export const TransformSearch = () => {
   }, [query]);
 
   if (loading) {
-     return <Box display="flex" justifyContent="center" p={2}><CircularProgress /></Box>;
+    return (
+      <Box display="flex" justifyContent="center" p={2}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-      return <Box p={2}><Typography color="error">{error}</Typography></Box>;
+    return (
+      <Box p={2}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box
+      sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}
+    >
       <Typography variant="h6" gutterBottom>
         Run Transforms
       </Typography>
@@ -70,9 +90,9 @@ export const TransformSearch = () => {
             </ListItem>
           ))}
           {results.length === 0 && (
-             <Typography variant="body2" color="textSecondary" sx={{ p: 2 }}>
-               No transforms found.
-             </Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ p: 2 }}>
+              No transforms found.
+            </Typography>
           )}
         </List>
       </Paper>

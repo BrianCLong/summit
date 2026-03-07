@@ -10,7 +10,7 @@ version: "1.0"
 
 # Budget period
 period:
-  type: monthly          # Reset on 1st of each month
+  type: monthly # Reset on 1st of each month
   timezone: UTC
 
 # Monthly allocations
@@ -109,19 +109,19 @@ exhaustion_actions:
 threshold_adjustments:
   # Applied when tier is yellow
   yellow_tier:
-    redaction_warn_multiplier: 0.9    # 10% stricter
+    redaction_warn_multiplier: 0.9 # 10% stricter
     additional_review: false
 
   # Applied when tier is red
   red_tier:
-    redaction_warn_multiplier: 0.75   # 25% stricter
+    redaction_warn_multiplier: 0.75 # 25% stricter
     additional_review: true
     review_team: "@platform-engineering"
 
 # Budget carryover rules
 carryover:
-  enabled: false                       # No unused budget carries over
-  max_carryover_pct: 0                # Even if enabled, 0% max
+  enabled: false # No unused budget carries over
+  max_carryover_pct: 0 # Even if enabled, 0% max
 
 # Notifications
 notifications:
@@ -157,22 +157,22 @@ output:
 freeze_mode:
   # When to activate freeze
   trigger:
-    on_tier: RED                        # Activate when tier reaches RED
-    on_any_budget_exhausted: true       # Or when any budget hits 0
+    on_tier: RED # Activate when tier reaches RED
+    on_any_budget_exhausted: true # Or when any budget hits 0
 
   # What freeze blocks
   scope:
-    block_ga_promotion: true            # Block GA tag promotion
-    block_rc_promotion_to_ga: true      # Block RC->GA promotion
-    block_pages_publish_on_warn: false  # Optional: block WARN publishes
-    allow_hotfix_release: true          # Always allow hotfix path
+    block_ga_promotion: true # Block GA tag promotion
+    block_rc_promotion_to_ga: true # Block RC->GA promotion
+    block_pages_publish_on_warn: false # Optional: block WARN publishes
+    allow_hotfix_release: true # Always allow hotfix path
 
   # Override configuration
   override:
     require_environment: release-override
     require_justification: true
     require_ticket_url: true
-    max_override_hours: 24              # Override expires after 24h
+    max_override_hours: 24 # Override expires after 24h
 
   # State files
   state:

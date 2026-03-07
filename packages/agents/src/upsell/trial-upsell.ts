@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const SignalSchema = z.object({
-  type: z.literal('poc-upsell'),
+  type: z.literal("poc-upsell"),
   msg: z.string(),
   link: z.string(),
-  variant: z.enum(['A', 'B']),
+  variant: z.enum(["A", "B"]),
   metadata: z.record(z.any()).optional(),
 });
 
@@ -20,7 +20,7 @@ export interface TrialUsage {
 export async function getMetrics(tenantId: string): Promise<TrialUsage> {
   // Mocking usage based on tenantId for testing
   // In a real implementation, this would query a database
-  if (tenantId.includes('high-usage')) {
+  if (tenantId.includes("high-usage")) {
     return { scans: 15, driftFixes: 5, daysActive: 3 };
   }
   return { scans: 2, driftFixes: 0, daysActive: 1 };
@@ -56,12 +56,12 @@ export async function evaluateUpsell(tenantId: string): Promise<Signal | null> {
 
   if (usage.scans > threshold || usage.driftFixes > driftThreshold) {
     // A/B testing logic
-    const variant = Math.random() > 0.5 ? 'A' : 'B';
+    const variant = Math.random() > 0.5 ? "A" : "B";
 
-    let msg = '';
+    let msg = "";
     let metadata = { usage };
 
-    if (variant === 'A') {
+    if (variant === "A") {
       // Variant A: Price anchor
       msg = `You've performed ${usage.scans} scans. Unlock unlimited scans for just $499/mo!`;
     } else {
@@ -74,9 +74,9 @@ export async function evaluateUpsell(tenantId: string): Promise<Signal | null> {
     lastNudgeAt.set(tenantId, Date.now());
 
     return {
-      type: 'poc-upsell',
+      type: "poc-upsell",
       msg,
-      link: '/billing',
+      link: "/billing",
       variant,
       metadata,
     };
@@ -87,12 +87,14 @@ export async function evaluateUpsell(tenantId: string): Promise<Signal | null> {
 
 export async function trackUpsellConversion(
   tenantId: string,
-  variant: 'A' | 'B',
-  event: 'nudge_shown' | 'click' | 'signup'
+  variant: "A" | "B",
+  event: "nudge_shown" | "click" | "signup"
 ) {
-  console.log(`[Metrics] Tenant: ${tenantId}, Variant: ${variant}, Event: ${event}, Timestamp: ${new Date().toISOString()}`);
+  console.log(
+    `[Metrics] Tenant: ${tenantId}, Variant: ${variant}, Event: ${event}, Timestamp: ${new Date().toISOString()}`
+  );
 
-  if (event === 'click' || event === 'signup') {
+  if (event === "click" || event === "signup") {
     // If they interact, maybe we don't nudge them again too soon or we change the frequency?
     // For now, freq cap is handled by lastNudgeAt in evaluateUpsell
   }

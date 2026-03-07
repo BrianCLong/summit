@@ -13,20 +13,20 @@ Summit agents (Atlas, Antigravity, Jules, etc.) utilize the Knowledge Graph as a
 
 ### Node Types
 
-| Label | Description | Key Properties |
-| :--- | :--- | :--- |
-| **AgentDecision** | A high-level decision made by an agent. | `id`, `timestamp`, `agent_id`, `outcome`, `confidence` |
-| **ReasoningStep** | An atomic step in a chain-of-thought process. | `id`, `thought`, `action_taken`, `observation` |
-| **ContextSnapshot** | A reference to the GraphRAG context used for a decision. | `id`, `context_hash`, `evidence_ids` |
+| Label               | Description                                              | Key Properties                                         |
+| :------------------ | :------------------------------------------------------- | :----------------------------------------------------- |
+| **AgentDecision**   | A high-level decision made by an agent.                  | `id`, `timestamp`, `agent_id`, `outcome`, `confidence` |
+| **ReasoningStep**   | An atomic step in a chain-of-thought process.            | `id`, `thought`, `action_taken`, `observation`         |
+| **ContextSnapshot** | A reference to the GraphRAG context used for a decision. | `id`, `context_hash`, `evidence_ids`                   |
 
 ### Relationship Types
 
-| Relationship | Start Node | End Node | Description |
-| :--- | :--- | :--- | :--- |
-| `LED_TO` | ReasoningStep | AgentDecision | Connects reasoning steps to the final decision. |
-| `USED_CONTEXT` | AgentDecision | ContextSnapshot | Links a decision to the specific data it was based on. |
-| `SUPPORTED_BY` | AgentDecision | Evidence | Direct link from a decision to supporting evidence nodes. |
-| `SUBSEQUENT_TO` | AgentDecision | AgentDecision | Temporal link between decisions to maintain state. |
+| Relationship    | Start Node    | End Node        | Description                                               |
+| :-------------- | :------------ | :-------------- | :-------------------------------------------------------- |
+| `LED_TO`        | ReasoningStep | AgentDecision   | Connects reasoning steps to the final decision.           |
+| `USED_CONTEXT`  | AgentDecision | ContextSnapshot | Links a decision to the specific data it was based on.    |
+| `SUPPORTED_BY`  | AgentDecision | Evidence        | Direct link from a decision to supporting evidence nodes. |
+| `SUBSEQUENT_TO` | AgentDecision | AgentDecision   | Temporal link between decisions to maintain state.        |
 
 ## Governance Compliance
 

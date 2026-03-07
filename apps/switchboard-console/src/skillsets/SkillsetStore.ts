@@ -1,7 +1,7 @@
-import { readFile, readdir } from 'node:fs/promises';
-import path from 'node:path';
-import { parse } from 'yaml';
-import { Skillset } from '../types';
+import { readFile, readdir } from "node:fs/promises";
+import path from "node:path";
+import { parse } from "yaml";
+import { Skillset } from "../types";
 
 export interface SkillsetFile {
   skillset: Skillset;
@@ -16,7 +16,7 @@ export class SkillsetStore {
     const skillsets: Skillset[] = [];
 
     for (const entry of entries) {
-      if (!entry.endsWith('.yaml')) {
+      if (!entry.endsWith(".yaml")) {
         continue;
       }
       const skillsetFile = await this.load(path.join(this.baseDir, entry));
@@ -37,7 +37,7 @@ export class SkillsetStore {
   }
 
   private async load(filePath: string): Promise<SkillsetFile> {
-    const raw = await readFile(filePath, 'utf-8');
+    const raw = await readFile(filePath, "utf-8");
     const data = parse(raw) as {
       name?: string;
       description?: string;

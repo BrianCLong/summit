@@ -1,14 +1,14 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
-import { createLogger } from '@intelgraph/logger';
+import { createLogger } from "@intelgraph/logger";
 
 export const ErrorCategories = [
-  'auth',
-  'validation',
-  'rate-limit',
-  'internal',
-  'LLM',
-  'upstream',
+  "auth",
+  "validation",
+  "rate-limit",
+  "internal",
+  "LLM",
+  "upstream",
 ] as const;
 
 export type ErrorCategory = (typeof ErrorCategories)[number];
@@ -38,13 +38,13 @@ export interface ErrorFactoryInput {
 const categoryStatusMap: Record<ErrorCategory, number> = {
   auth: 401,
   validation: 422,
-  'rate-limit': 429,
+  "rate-limit": 429,
   internal: 500,
   LLM: 502,
   upstream: 502,
 };
 
-const logger = createLogger({ serviceName: process.env.SERVICE_NAME || 'platform-errors' });
+const logger = createLogger({ serviceName: process.env.SERVICE_NAME || "platform-errors" });
 
 export class SummitError extends Error {
   envelope: ErrorEnvelope;
@@ -52,7 +52,7 @@ export class SummitError extends Error {
 
   constructor(envelope: ErrorEnvelope, statusCode: number, cause?: unknown) {
     super(envelope.developer_message ?? envelope.human_message);
-    this.name = 'SummitError';
+    this.name = "SummitError";
     this.envelope = envelope;
     this.statusCode = statusCode;
 
@@ -64,7 +64,7 @@ export class SummitError extends Error {
 
 function normalizeCategory(category: string): ErrorCategory {
   const normalized = category as ErrorCategory;
-  return ErrorCategories.includes(normalized) ? normalized : 'internal';
+  return ErrorCategories.includes(normalized) ? normalized : "internal";
 }
 
 function toEnvelope(
@@ -97,7 +97,7 @@ function buildError(category: ErrorCategory, input: ErrorFactoryInput): SummitEr
 
   logger.error(
     {
-      event: 'platform.error',
+      event: "platform.error",
       error: envelope,
       statusCode,
     },
@@ -112,22 +112,22 @@ export function isSummitError(error: unknown): error is SummitError {
 }
 
 export const errorFactory = {
-  auth: (input: ErrorFactoryInput) => buildError('auth', input),
-  validation: (input: ErrorFactoryInput) => buildError('validation', input),
-  rateLimit: (input: ErrorFactoryInput) => buildError('rate-limit', input),
-  internal: (input: ErrorFactoryInput) => buildError('internal', input),
-  llm: (input: ErrorFactoryInput) => buildError('LLM', input),
-  upstream: (input: ErrorFactoryInput) => buildError('upstream', input),
+  auth: (input: ErrorFactoryInput) => buildError("auth", input),
+  validation: (input: ErrorFactoryInput) => buildError("validation", input),
+  rateLimit: (input: ErrorFactoryInput) => buildError("rate-limit", input),
+  internal: (input: ErrorFactoryInput) => buildError("internal", input),
+  llm: (input: ErrorFactoryInput) => buildError("LLM", input),
+  upstream: (input: ErrorFactoryInput) => buildError("upstream", input),
   fromUnknown: (
     error: unknown,
-    fallback: Omit<ErrorFactoryInput, 'developerMessage'> & { category?: ErrorCategory }
+    fallback: Omit<ErrorFactoryInput, "developerMessage"> & { category?: ErrorCategory }
   ): SummitError => {
     if (isSummitError(error)) {
       return error;
     }
 
-    const developerMessage = error instanceof Error ? error.message : 'Unknown error';
-    const category = normalizeCategory(fallback.category || 'internal');
+    const developerMessage = error instanceof Error ? error.message : "Unknown error";
+    const category = normalizeCategory(fallback.category || "internal");
 
     return buildError(category, {
       developerMessage,

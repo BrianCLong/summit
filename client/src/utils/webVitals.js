@@ -5,7 +5,7 @@
  * See: https://web.dev/vitals/
  */
 
-import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from "web-vitals";
 
 const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
@@ -17,10 +17,10 @@ function sendToBackend(metric) {
   if (!isProduction) return;
 
   try {
-    fetch('/monitoring/web-vitals', {
-      method: 'POST',
+    fetch("/monitoring/web-vitals", {
+      method: "POST",
       keepalive: true,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: metric.name,
         value: Math.round(metric.value),
@@ -45,8 +45,7 @@ function logToConsole(metric) {
   const { name, value, rating, delta } = metric;
 
   // Use emoji indicators for quick visual feedback
-  const emoji =
-    rating === 'good' ? '✅' : rating === 'needs-improvement' ? '⚠️' : '❌';
+  const emoji = rating === "good" ? "✅" : rating === "needs-improvement" ? "⚠️" : "❌";
 
   console.log(`${emoji} ${name}:`, {
     value: `${Math.round(value)}ms`,
@@ -69,16 +68,13 @@ function handleMetric(metric) {
 function logBundlePerformance() {
   if (!isDevelopment || !performance.getEntriesByType) return;
 
-  const resources = performance.getEntriesByType('resource');
-  const jsResources = resources.filter((r) => r.name.endsWith('.js'));
-  const cssResources = resources.filter((r) => r.name.endsWith('.css'));
+  const resources = performance.getEntriesByType("resource");
+  const jsResources = resources.filter((r) => r.name.endsWith(".js"));
+  const cssResources = resources.filter((r) => r.name.endsWith(".css"));
 
-  console.group('📦 Bundle Loading Performance');
+  console.group("📦 Bundle Loading Performance");
 
-  const jsTotalSize = jsResources.reduce(
-    (acc, r) => acc + (r.transferSize || 0),
-    0
-  );
+  const jsTotalSize = jsResources.reduce((acc, r) => acc + (r.transferSize || 0), 0);
   const jsTotalTime = jsResources.reduce((acc, r) => acc + r.duration, 0);
 
   console.log(`JavaScript bundles: ${jsResources.length}`);
@@ -86,10 +82,7 @@ function logBundlePerformance() {
   console.log(`Total JS load time: ${Math.round(jsTotalTime)}ms`);
 
   if (cssResources.length > 0) {
-    const cssTotalSize = cssResources.reduce(
-      (acc, r) => acc + (r.transferSize || 0),
-      0
-    );
+    const cssTotalSize = cssResources.reduce((acc, r) => acc + (r.transferSize || 0), 0);
     console.log(`\nCSS bundles: ${cssResources.length}`);
     console.log(`Total CSS size: ${Math.round(cssTotalSize / 1024)}KB`);
   }
@@ -110,10 +103,10 @@ export function initWebVitals() {
 
   // Log bundle performance after page load (development only)
   if (isDevelopment) {
-    if (document.readyState === 'complete') {
+    if (document.readyState === "complete") {
       logBundlePerformance();
     } else {
-      window.addEventListener('load', logBundlePerformance);
+      window.addEventListener("load", logBundlePerformance);
     }
   }
 }

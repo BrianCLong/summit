@@ -3,14 +3,14 @@
  * Integrates circuit breaker, retry, timeout, and graceful degradation
  */
 
-import pino from 'pino';
+import pino from "pino";
 import {
   CircuitBreaker,
   CircuitBreakerConfig,
   RetryHandler,
   RetryPolicy,
   TimeoutHandler,
-} from '@intelgraph/orchestration';
+} from "@intelgraph/orchestration";
 import {
   AppError,
   TimeoutError,
@@ -18,9 +18,9 @@ import {
   ExternalServiceError,
   DatabaseError,
   toAppError,
-} from './errors.js';
+} from "./errors.js";
 
-const logger = pino({ name: 'Resilience' });
+const logger = pino({ name: "Resilience" });
 
 /**
  * Circuit breakers registry
@@ -32,7 +32,7 @@ const circuitBreakers = new Map<string, CircuitBreaker>();
  */
 export function getCircuitBreaker(
   serviceName: string,
-  config?: Partial<CircuitBreakerConfig>,
+  config?: Partial<CircuitBreakerConfig>
 ): CircuitBreaker {
   if (circuitBreakers.has(serviceName)) {
     return circuitBreakers.get(serviceName)!;
@@ -51,16 +51,16 @@ export function getCircuitBreaker(
   });
 
   // Setup event listeners for logging
-  breaker.on('state.changed', ({ name, state }) => {
+  breaker.on("state.changed", ({ name, state }) => {
     logger.info({ service: name, state }, `Circuit breaker state changed: ${state}`);
   });
 
-  breaker.on('circuit.opened', ({ name, failures }) => {
-    logger.warn({ service: name, failures }, 'Circuit breaker opened');
+  breaker.on("circuit.opened", ({ name, failures }) => {
+    logger.warn({ service: name, failures }, "Circuit breaker opened");
   });
 
-  breaker.on('circuit.closed', ({ name }) => {
-    logger.info({ service: name }, 'Circuit breaker closed');
+  breaker.on("circuit.closed", ({ name }) => {
+    logger.info({ service: name }, "Circuit breaker closed");
   });
 
   circuitBreakers.set(serviceName, breaker);
@@ -73,14 +73,14 @@ export function getCircuitBreaker(
 export async function executeWithCircuitBreaker<T>(
   serviceName: string,
   fn: () => Promise<T>,
-  config?: Partial<CircuitBreakerConfig>,
+  config?: Partial<CircuitBreakerConfig>
 ): Promise<T> {
   const breaker = getCircuitBreaker(serviceName, config);
 
   try {
     return await breaker.execute(fn);
   } catch (error: any) {
-    if (error.message?.includes('Circuit breaker') && error.message?.includes('is OPEN')) {
+    if (error.message?.includes("Circuit breaker") && error.message?.includes("is OPEN")) {
       throw new CircuitBreakerError(serviceName, {
         state: breaker.getState(),
         metrics: breaker.getMetrics(),
@@ -113,10 +113,10 @@ export const RetryPolicies = {
     maxDelay: 5000,
     backoffMultiplier: 2,
     retryableErrors: [
-      'DATABASE_CONNECTION_FAILED',
-      'DATABASE_TIMEOUT',
-      'POSTGRES_ERROR',
-      'NEO4J_ERROR',
+      "DATABASE_CONNECTION_FAILED",
+      "DATABASE_TIMEOUT",
+      "POSTGRES_ERROR",
+      "NEO4J_ERROR",
     ],
   } as RetryPolicy,
 
@@ -129,10 +129,10 @@ export const RetryPolicies = {
     maxDelay: 30000,
     backoffMultiplier: 2,
     retryableErrors: [
-      'EXTERNAL_SERVICE_ERROR',
-      'OPERATION_TIMEOUT',
-      'GATEWAY_TIMEOUT',
-      'SERVICE_UNAVAILABLE',
+      "EXTERNAL_SERVICE_ERROR",
+      "OPERATION_TIMEOUT",
+      "GATEWAY_TIMEOUT",
+      "SERVICE_UNAVAILABLE",
     ],
   } as RetryPolicy,
 
@@ -163,7 +163,7 @@ export const RetryPolicies = {
 export async function executeWithRetry<T>(
   fn: () => Promise<T>,
   policy: RetryPolicy = RetryPolicies.default,
-  context?: { operation: string; service?: string },
+  context?: { operation: string; service?: string }
 ): Promise<T> {
   try {
     return await RetryHandler.executeWithRetry(fn, policy);
@@ -174,7 +174,7 @@ export async function executeWithRetry<T>(
         policy,
         context,
       },
-      'Retry attempts exhausted',
+      "Retry attempts exhausted"
     );
     throw toAppError(error);
   }
@@ -186,12 +186,12 @@ export async function executeWithRetry<T>(
 export async function executeWithTimeout<T>(
   fn: () => Promise<T>,
   timeoutMs: number,
-  operation: string,
+  operation: string
 ): Promise<T> {
   try {
     return await TimeoutHandler.executeWithTimeout(fn, timeoutMs);
   } catch (error: any) {
-    if (error.message?.includes('timeout')) {
+    if (error.message?.includes("timeout")) {
       throw new TimeoutError(operation, timeoutMs);
     }
     throw toAppError(error);
@@ -201,16 +201,14 @@ export async function executeWithTimeout<T>(
 /**
  * Execute with full resilience (circuit breaker + retry + timeout)
  */
-export async function executeWithResilience<T>(
-  options: {
-    serviceName: string;
-    operation: string;
-    fn: () => Promise<T>;
-    retryPolicy?: RetryPolicy;
-    timeoutMs?: number;
-    circuitBreakerConfig?: Partial<CircuitBreakerConfig>;
-  },
-): Promise<T> {
+export async function executeWithResilience<T>(options: {
+  serviceName: string;
+  operation: string;
+  fn: () => Promise<T>;
+  retryPolicy?: RetryPolicy;
+  timeoutMs?: number;
+  circuitBreakerConfig?: Partial<CircuitBreakerConfig>;
+}): Promise<T> {
   const {
     serviceName,
     operation,
@@ -222,8 +220,7 @@ export async function executeWithResilience<T>(
 
   const resilientFn = async () => {
     // Wrap with timeout
-    const fnWithTimeout = () =>
-      executeWithTimeout(fn, timeoutMs, `${serviceName}.${operation}`);
+    const fnWithTimeout = () => executeWithTimeout(fn, timeoutMs, `${serviceName}.${operation}`);
 
     // Wrap with retry
     const fnWithRetry = () =>
@@ -233,11 +230,7 @@ export async function executeWithResilience<T>(
       });
 
     // Execute with circuit breaker
-    return executeWithCircuitBreaker(
-      serviceName,
-      fnWithRetry,
-      circuitBreakerConfig,
-    );
+    return executeWithCircuitBreaker(serviceName, fnWithRetry, circuitBreakerConfig);
   };
 
   try {
@@ -249,7 +242,7 @@ export async function executeWithResilience<T>(
         operation,
         error: error instanceof AppError ? error.toJSON() : error,
       },
-      'Resilient execution failed',
+      "Resilient execution failed"
     );
     throw error;
   }
@@ -266,7 +259,7 @@ export async function withGracefulDegradation<T>(
     serviceName?: string;
     operation?: string;
     logError?: boolean;
-  },
+  }
 ): Promise<T> {
   try {
     return await fn();
@@ -279,7 +272,7 @@ export async function withGracefulDegradation<T>(
           error: error instanceof AppError ? error.toJSON() : error,
           fallback,
         },
-        'Operation failed, using fallback value',
+        "Operation failed, using fallback value"
       );
     }
     return fallback;
@@ -295,7 +288,7 @@ export async function executeOptional<T>(
   options?: {
     serviceName?: string;
     operation?: string;
-  },
+  }
 ): Promise<T | null> {
   return withGracefulDegradation(fn, null, {
     ...options,
@@ -330,7 +323,7 @@ export function getHealthStatus(): HealthStatus {
   });
 
   const allClosed = Array.from(circuitBreakers.values()).every(
-    (breaker) => breaker.getState() === 'closed',
+    (breaker) => breaker.getState() === "closed"
   );
 
   return {
@@ -346,7 +339,7 @@ export function getHealthStatus(): HealthStatus {
  */
 export function resetAllCircuitBreakers(): void {
   circuitBreakers.forEach((breaker) => breaker.reset());
-  logger.info('All circuit breakers reset');
+  logger.info("All circuit breakers reset");
 }
 
 /**

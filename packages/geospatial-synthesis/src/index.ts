@@ -51,7 +51,7 @@ export class GeospatialSynthesizer {
       traces.push({
         points,
         userId: `user_${i}`,
-        metadata: { synthetic: true }
+        metadata: { synthetic: true },
       });
     }
 
@@ -62,14 +62,14 @@ export class GeospatialSynthesizer {
    * Generate Points of Interest
    */
   generatePOIs(numPOIs: number): POI[] {
-    const categories = ['restaurant', 'shop', 'park', 'office', 'school', 'hospital'];
+    const categories = ["restaurant", "shop", "park", "office", "school", "hospital"];
 
     return Array.from({ length: numPOIs }, (_, i) => ({
       id: `poi_${i}`,
       name: `Location ${i}`,
       location: this.generateRandomPoint(),
       category: categories[Math.floor(Math.random() * categories.length)],
-      attributes: { capacity: Math.floor(Math.random() * 100) + 10 }
+      attributes: { capacity: Math.floor(Math.random() * 100) + 10 },
     }));
   }
 
@@ -83,10 +83,18 @@ export class GeospatialSynthesizer {
     const lonNoise = this.sampleLaplace(scale);
 
     return {
-      latitude: this.clamp(point.latitude + latNoise, this.config.bounds.minLat, this.config.bounds.maxLat),
-      longitude: this.clamp(point.longitude + lonNoise, this.config.bounds.minLon, this.config.bounds.maxLon),
+      latitude: this.clamp(
+        point.latitude + latNoise,
+        this.config.bounds.minLat,
+        this.config.bounds.maxLat
+      ),
+      longitude: this.clamp(
+        point.longitude + lonNoise,
+        this.config.bounds.minLon,
+        this.config.bounds.maxLon
+      ),
       timestamp: point.timestamp,
-      metadata: { ...point.metadata, privatized: true }
+      metadata: { ...point.metadata, privatized: true },
     };
   }
 
@@ -121,7 +129,7 @@ export class GeospatialSynthesizer {
     const points: GeoPoint[] = [];
     const clusterCenters = Array.from({ length: numClusters }, () => this.generateRandomPoint());
 
-    clusterCenters.forEach(center => {
+    clusterCenters.forEach((center) => {
       for (let i = 0; i < pointsPerCluster; i++) {
         // Generate point near cluster center
         const angle = Math.random() * 2 * Math.PI;
@@ -129,7 +137,7 @@ export class GeospatialSynthesizer {
 
         const point = {
           latitude: center.latitude + radius * Math.cos(angle),
-          longitude: center.longitude + radius * Math.sin(angle)
+          longitude: center.longitude + radius * Math.sin(angle),
         };
 
         points.push(point);
@@ -147,7 +155,7 @@ export class GeospatialSynthesizer {
     return {
       latitude: minLat + Math.random() * (maxLat - minLat),
       longitude: minLon + Math.random() * (maxLon - minLon),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -161,9 +169,17 @@ export class GeospatialSynthesizer {
       const lonDelta = (Math.random() - 0.5) * 0.01;
 
       current = {
-        latitude: this.clamp(current.latitude + latDelta, this.config.bounds.minLat, this.config.bounds.maxLat),
-        longitude: this.clamp(current.longitude + lonDelta, this.config.bounds.minLon, this.config.bounds.maxLon),
-        timestamp: new Date(current.timestamp!.getTime() + 60000) // 1 minute apart
+        latitude: this.clamp(
+          current.latitude + latDelta,
+          this.config.bounds.minLat,
+          this.config.bounds.maxLat
+        ),
+        longitude: this.clamp(
+          current.longitude + lonDelta,
+          this.config.bounds.minLon,
+          this.config.bounds.maxLon
+        ),
+        timestamp: new Date(current.timestamp!.getTime() + 60000), // 1 minute apart
       };
 
       points.push(current);
@@ -174,23 +190,25 @@ export class GeospatialSynthesizer {
 
   private movePoint(point: GeoPoint, distanceKm: number, bearing: number): GeoPoint {
     const R = 6371; // Earth radius in km
-    const lat1 = point.latitude * Math.PI / 180;
-    const lon1 = point.longitude * Math.PI / 180;
+    const lat1 = (point.latitude * Math.PI) / 180;
+    const lon1 = (point.longitude * Math.PI) / 180;
 
     const lat2 = Math.asin(
       Math.sin(lat1) * Math.cos(distanceKm / R) +
-      Math.cos(lat1) * Math.sin(distanceKm / R) * Math.cos(bearing)
+        Math.cos(lat1) * Math.sin(distanceKm / R) * Math.cos(bearing)
     );
 
-    const lon2 = lon1 + Math.atan2(
-      Math.sin(bearing) * Math.sin(distanceKm / R) * Math.cos(lat1),
-      Math.cos(distanceKm / R) - Math.sin(lat1) * Math.sin(lat2)
-    );
+    const lon2 =
+      lon1 +
+      Math.atan2(
+        Math.sin(bearing) * Math.sin(distanceKm / R) * Math.cos(lat1),
+        Math.cos(distanceKm / R) - Math.sin(lat1) * Math.sin(lat2)
+      );
 
     return {
-      latitude: lat2 * 180 / Math.PI,
-      longitude: lon2 * 180 / Math.PI,
-      timestamp: point.timestamp
+      latitude: (lat2 * 180) / Math.PI,
+      longitude: (lon2 * 180) / Math.PI,
+      timestamp: point.timestamp,
     };
   }
 

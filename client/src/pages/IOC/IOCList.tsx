@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -25,8 +25,8 @@ import {
   Badge,
   Paper,
   ChipProps,
-} from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+} from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   Add,
   Upload,
@@ -41,123 +41,113 @@ import {
   Search,
   Share,
   Timeline,
-} from '@mui/icons-material';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/icons-material";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
+import { useNavigate } from "react-router-dom";
 
 interface IOC {
   id: string;
-  type:
-    | 'IP'
-    | 'DOMAIN'
-    | 'URL'
-    | 'FILE_HASH'
-    | 'EMAIL'
-    | 'PHONE'
-    | 'REGISTRY'
-    | 'CERTIFICATE';
+  type: "IP" | "DOMAIN" | "URL" | "FILE_HASH" | "EMAIL" | "PHONE" | "REGISTRY" | "CERTIFICATE";
   value: string;
   risk: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'INVESTIGATING' | 'FALSE_POSITIVE';
+  status: "ACTIVE" | "INACTIVE" | "INVESTIGATING" | "FALSE_POSITIVE";
   source: string;
   firstSeen: string;
   lastSeen: string;
   hits: number;
   tags: string[];
   description?: string;
-  tlp: 'WHITE' | 'GREEN' | 'AMBER' | 'RED';
+  tlp: "WHITE" | "GREEN" | "AMBER" | "RED";
 }
 
-const getIOCIcon = (type: IOC['type']) => {
+const getIOCIcon = (type: IOC["type"]) => {
   switch (type) {
-    case 'IP':
+    case "IP":
       return <Language />;
-    case 'DOMAIN':
+    case "DOMAIN":
       return <Language />;
-    case 'URL':
+    case "URL":
       return <Language />;
-    case 'FILE_HASH':
+    case "FILE_HASH":
       return <Fingerprint />;
-    case 'EMAIL':
+    case "EMAIL":
       return <Email />;
-    case 'PHONE':
+    case "PHONE":
       return <Phone />;
-    case 'REGISTRY':
+    case "REGISTRY":
       return <Computer />;
-    case 'CERTIFICATE':
+    case "CERTIFICATE":
       return <Security />;
     default:
       return <Security />;
   }
 };
 
-const getRiskColor = (risk: number): ChipProps['color'] => {
-  if (risk >= 80) return 'error';
-  if (risk >= 60) return 'warning';
-  if (risk >= 40) return 'info';
-  return 'success';
+const getRiskColor = (risk: number): ChipProps["color"] => {
+  if (risk >= 80) return "error";
+  if (risk >= 60) return "warning";
+  if (risk >= 40) return "info";
+  return "success";
 };
 
-const getStatusColor = (status: IOC['status']): ChipProps['color'] => {
+const getStatusColor = (status: IOC["status"]): ChipProps["color"] => {
   switch (status) {
-    case 'ACTIVE':
-      return 'error';
-    case 'INACTIVE':
-      return 'default';
-    case 'INVESTIGATING':
-      return 'warning';
-    case 'FALSE_POSITIVE':
-      return 'success';
+    case "ACTIVE":
+      return "error";
+    case "INACTIVE":
+      return "default";
+    case "INVESTIGATING":
+      return "warning";
+    case "FALSE_POSITIVE":
+      return "success";
     default:
-      return 'default';
+      return "default";
   }
 };
 
-const getTLPColor = (tlp: IOC['tlp']) => {
+const getTLPColor = (tlp: IOC["tlp"]) => {
   switch (tlp) {
-    case 'RED':
-      return '#FF0000';
-    case 'AMBER':
-      return '#FFC000';
-    case 'GREEN':
-      return '#33FF00';
-    case 'WHITE':
-      return '#FFFFFF';
+    case "RED":
+      return "#FF0000";
+    case "AMBER":
+      return "#FFC000";
+    case "GREEN":
+      return "#33FF00";
+    case "WHITE":
+      return "#FFFFFF";
     default:
-      return '#FFFFFF';
+      return "#FFFFFF";
   }
 };
 
-const IOC_TYPES: IOC['type'][] = [
-  'IP',
-  'DOMAIN',
-  'URL',
-  'FILE_HASH',
-  'EMAIL',
-  'PHONE',
-  'REGISTRY',
-  'CERTIFICATE',
+const IOC_TYPES: IOC["type"][] = [
+  "IP",
+  "DOMAIN",
+  "URL",
+  "FILE_HASH",
+  "EMAIL",
+  "PHONE",
+  "REGISTRY",
+  "CERTIFICATE",
 ];
 
-const TLP_LEVELS: IOC['tlp'][] = ['WHITE', 'GREEN', 'AMBER', 'RED'];
+const TLP_LEVELS: IOC["tlp"][] = ["WHITE", "GREEN", "AMBER", "RED"];
 
-const normalizeType = (value?: string): IOC['type'] => {
-  const upper = (value || '').toUpperCase();
-  return IOC_TYPES.includes(upper as IOC['type']) ? (upper as IOC['type']) : 'IP';
+const normalizeType = (value?: string): IOC["type"] => {
+  const upper = (value || "").toUpperCase();
+  return IOC_TYPES.includes(upper as IOC["type"]) ? (upper as IOC["type"]) : "IP";
 };
 
-const normalizeTlp = (value?: string, fallback: IOC['tlp'] = 'GREEN') => {
-  const upper = (value || '').toUpperCase();
-  return TLP_LEVELS.includes(upper as IOC['tlp'])
-    ? (upper as IOC['tlp'])
-    : fallback;
+const normalizeTlp = (value?: string, fallback: IOC["tlp"] = "GREEN") => {
+  const upper = (value || "").toUpperCase();
+  return TLP_LEVELS.includes(upper as IOC["tlp"]) ? (upper as IOC["tlp"]) : fallback;
 };
 
 export default function IOCList() {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filterType, setFilterType] = useState('ALL');
-  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [filterType, setFilterType] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
 
@@ -165,106 +155,105 @@ export default function IOCList() {
     queryKey: `ioc_list_${filterType}_${filterStatus}`,
     mock: [
       {
-        id: 'ioc1',
-        type: 'IP',
-        value: '185.220.100.240',
+        id: "ioc1",
+        type: "IP",
+        value: "185.220.100.240",
         risk: 95,
-        status: 'ACTIVE',
-        source: 'ThreatConnect',
-        firstSeen: '2025-08-25T10:30:00Z',
-        lastSeen: '2025-08-27T02:15:00Z',
+        status: "ACTIVE",
+        source: "ThreatConnect",
+        firstSeen: "2025-08-25T10:30:00Z",
+        lastSeen: "2025-08-27T02:15:00Z",
         hits: 47,
-        tags: ['APT29', 'Cozy Bear', 'C2'],
-        description: 'Known C2 infrastructure for APT29 operations',
-        tlp: 'RED',
+        tags: ["APT29", "Cozy Bear", "C2"],
+        description: "Known C2 infrastructure for APT29 operations",
+        tlp: "RED",
       },
       {
-        id: 'ioc2',
-        type: 'DOMAIN',
-        value: 'secure-update-microsoft.com',
+        id: "ioc2",
+        type: "DOMAIN",
+        value: "secure-update-microsoft.com",
         risk: 88,
-        status: 'ACTIVE',
-        source: 'VirusTotal',
-        firstSeen: '2025-08-24T14:20:00Z',
-        lastSeen: '2025-08-27T01:45:00Z',
+        status: "ACTIVE",
+        source: "VirusTotal",
+        firstSeen: "2025-08-24T14:20:00Z",
+        lastSeen: "2025-08-27T01:45:00Z",
         hits: 23,
-        tags: ['Phishing', 'Microsoft Impersonation'],
-        description: 'Phishing domain impersonating Microsoft update service',
-        tlp: 'AMBER',
+        tags: ["Phishing", "Microsoft Impersonation"],
+        description: "Phishing domain impersonating Microsoft update service",
+        tlp: "AMBER",
       },
       {
-        id: 'ioc3',
-        type: 'FILE_HASH',
-        value: 'a4b35de71ca20fe776dc72d12fb2886edc3a0050',
+        id: "ioc3",
+        type: "FILE_HASH",
+        value: "a4b35de71ca20fe776dc72d12fb2886edc3a0050",
         risk: 72,
-        status: 'INVESTIGATING',
-        source: 'Internal Analysis',
-        firstSeen: '2025-08-26T09:10:00Z',
-        lastSeen: '2025-08-26T09:10:00Z',
+        status: "INVESTIGATING",
+        source: "Internal Analysis",
+        firstSeen: "2025-08-26T09:10:00Z",
+        lastSeen: "2025-08-26T09:10:00Z",
         hits: 1,
-        tags: ['Malware', 'Trojan'],
-        description: 'Suspicious executable detected in endpoint',
-        tlp: 'GREEN',
+        tags: ["Malware", "Trojan"],
+        description: "Suspicious executable detected in endpoint",
+        tlp: "GREEN",
       },
       {
-        id: 'ioc4',
-        type: 'EMAIL',
-        value: 'admin@secure-banking-alert.com',
+        id: "ioc4",
+        type: "EMAIL",
+        value: "admin@secure-banking-alert.com",
         risk: 65,
-        status: 'ACTIVE',
-        source: 'PhishTank',
-        firstSeen: '2025-08-25T16:00:00Z',
-        lastSeen: '2025-08-27T00:30:00Z',
+        status: "ACTIVE",
+        source: "PhishTank",
+        firstSeen: "2025-08-25T16:00:00Z",
+        lastSeen: "2025-08-27T00:30:00Z",
         hits: 12,
-        tags: ['Banking', 'Phishing', 'Social Engineering'],
-        description: 'Email address used in banking phishing campaigns',
-        tlp: 'AMBER',
+        tags: ["Banking", "Phishing", "Social Engineering"],
+        description: "Email address used in banking phishing campaigns",
+        tlp: "AMBER",
       },
       {
-        id: 'ioc5',
-        type: 'URL',
-        value: 'https://drive-google-docs.tk/download?id=malicious',
+        id: "ioc5",
+        type: "URL",
+        value: "https://drive-google-docs.tk/download?id=malicious",
         risk: 43,
-        status: 'FALSE_POSITIVE',
-        source: 'URLVoid',
-        firstSeen: '2025-08-20T11:25:00Z',
-        lastSeen: '2025-08-22T14:15:00Z',
+        status: "FALSE_POSITIVE",
+        source: "URLVoid",
+        firstSeen: "2025-08-20T11:25:00Z",
+        lastSeen: "2025-08-22T14:15:00Z",
         hits: 3,
-        tags: ['URL', 'False Positive'],
-        description: 'Initially flagged URL determined to be benign',
-        tlp: 'WHITE',
+        tags: ["URL", "False Positive"],
+        description: "Initially flagged URL determined to be benign",
+        tlp: "WHITE",
       },
       {
-        id: 'ioc6',
-        type: 'REGISTRY',
-         
-        value:
-          'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater',
+        id: "ioc6",
+        type: "REGISTRY",
+
+        value: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater",
         risk: 80,
-        status: 'ACTIVE',
-        source: 'YARA Rule',
-        firstSeen: '2025-08-26T20:45:00Z',
-        lastSeen: '2025-08-27T03:20:00Z',
+        status: "ACTIVE",
+        source: "YARA Rule",
+        firstSeen: "2025-08-26T20:45:00Z",
+        lastSeen: "2025-08-27T03:20:00Z",
         hits: 8,
-        tags: ['Persistence', 'Registry', 'AutoRun'],
-        description: 'Suspicious registry key for persistence mechanism',
-        tlp: 'RED',
+        tags: ["Persistence", "Registry", "AutoRun"],
+        description: "Suspicious registry key for persistence mechanism",
+        tlp: "RED",
       },
     ],
     deps: [filterType, filterStatus],
   });
 
   const [localIocs, setLocalIocs] = useState<IOC[]>([]);
-  const [importPayload, setImportPayload] = useState('');
-  const [importTlp, setImportTlp] = useState<IOC['tlp']>('GREEN');
+  const [importPayload, setImportPayload] = useState("");
+  const [importTlp, setImportTlp] = useState<IOC["tlp"]>("GREEN");
   const [importError, setImportError] = useState<string | null>(null);
   const [newIoc, setNewIoc] = useState({
-    type: 'IP' as IOC['type'],
-    value: '',
-    tlp: 'GREEN' as IOC['tlp'],
-    source: '',
-    tags: '',
-    description: '',
+    type: "IP" as IOC["type"],
+    value: "",
+    tlp: "GREEN" as IOC["tlp"],
+    source: "",
+    tags: "",
+    description: "",
   });
 
   useEffect(() => {
@@ -273,12 +262,12 @@ export default function IOCList() {
 
   const resetNewIoc = () =>
     setNewIoc({
-      type: 'IP',
-      value: '',
-      tlp: 'GREEN',
-      source: '',
-      tags: '',
-      description: '',
+      type: "IP",
+      value: "",
+      tlp: "GREEN",
+      source: "",
+      tags: "",
+      description: "",
     });
 
   const closeAddDialog = () => {
@@ -289,17 +278,17 @@ export default function IOCList() {
   const closeImportDialog = () => {
     setImportDialogOpen(false);
     setImportError(null);
-    setImportPayload('');
+    setImportPayload("");
   };
 
   const handleAddIoc = () => {
     const id =
-      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `ioc-${Date.now()}`;
     const now = new Date().toISOString();
     const tags = newIoc.tags
-      .split(',')
+      .split(",")
       .map((tag) => tag.trim())
       .filter(Boolean);
 
@@ -308,8 +297,8 @@ export default function IOCList() {
       type: newIoc.type,
       value: newIoc.value,
       risk: 50,
-      status: 'INVESTIGATING',
-      source: newIoc.source || 'Manual Entry',
+      status: "INVESTIGATING",
+      source: newIoc.source || "Manual Entry",
       firstSeen: now,
       lastSeen: now,
       hits: 0,
@@ -326,89 +315,73 @@ export default function IOCList() {
     setImportError(null);
     const raw = importPayload.trim();
     if (!raw) {
-      setImportError('Provide IOC data to import.');
+      setImportError("Provide IOC data to import.");
       return;
     }
 
     try {
       let incoming: IOC[] = [];
-      if (raw.startsWith('[') || raw.startsWith('{')) {
+      if (raw.startsWith("[") || raw.startsWith("{")) {
         const parsed: unknown = JSON.parse(raw);
         const list = Array.isArray(parsed) ? parsed : [parsed];
         incoming = list.map((entry) => {
-          const item =
-            entry && typeof entry === 'object'
-              ? (entry as Record<string, unknown>)
-              : {};
+          const item = entry && typeof entry === "object" ? (entry as Record<string, unknown>) : {};
           const status =
-            typeof item.status === 'string' &&
-            ['ACTIVE', 'INACTIVE', 'INVESTIGATING', 'FALSE_POSITIVE'].includes(
-              item.status,
-            )
-              ? (item.status as IOC['status'])
-              : 'INVESTIGATING';
+            typeof item.status === "string" &&
+            ["ACTIVE", "INACTIVE", "INVESTIGATING", "FALSE_POSITIVE"].includes(item.status)
+              ? (item.status as IOC["status"])
+              : "INVESTIGATING";
           const tags = Array.isArray(item.tags)
             ? item.tags.map((tag) => String(tag))
-            : String(item.tags || '')
-                .split(',')
+            : String(item.tags || "")
+                .split(",")
                 .map((tag) => tag.trim())
                 .filter(Boolean);
           return {
             id:
-              typeof crypto !== 'undefined' && 'randomUUID' in crypto
+              typeof crypto !== "undefined" && "randomUUID" in crypto
                 ? crypto.randomUUID()
                 : `ioc-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-            type: normalizeType(
-              typeof item.type === 'string' ? item.type : undefined,
-            ),
-            value: String(item.value || ''),
+            type: normalizeType(typeof item.type === "string" ? item.type : undefined),
+            value: String(item.value || ""),
             risk: Number(item.risk || 50),
             status,
-            source: typeof item.source === 'string' ? item.source : 'Imported',
+            source: typeof item.source === "string" ? item.source : "Imported",
             firstSeen:
-              typeof item.firstSeen === 'string'
-                ? item.firstSeen
-                : new Date().toISOString(),
-            lastSeen:
-              typeof item.lastSeen === 'string'
-                ? item.lastSeen
-                : new Date().toISOString(),
+              typeof item.firstSeen === "string" ? item.firstSeen : new Date().toISOString(),
+            lastSeen: typeof item.lastSeen === "string" ? item.lastSeen : new Date().toISOString(),
             hits: Number(item.hits || 0),
             tags,
-            description:
-              typeof item.description === 'string' ? item.description : undefined,
-            tlp: normalizeTlp(
-              typeof item.tlp === 'string' ? item.tlp : undefined,
-              importTlp,
-            ),
+            description: typeof item.description === "string" ? item.description : undefined,
+            tlp: normalizeTlp(typeof item.tlp === "string" ? item.tlp : undefined, importTlp),
           };
         });
       } else {
         const lines = raw.split(/\r?\n/).filter(Boolean);
-        const header = lines[0]?.toLowerCase().includes('type');
+        const header = lines[0]?.toLowerCase().includes("type");
         const dataLines = header ? lines.slice(1) : lines;
         incoming = dataLines.map((line) => {
           const [type, value, source, tlp, tags, description] = line
-            .split(',')
+            .split(",")
             .map((part) => part.trim());
           const now = new Date().toISOString();
           return {
             id:
-              typeof crypto !== 'undefined' && 'randomUUID' in crypto
+              typeof crypto !== "undefined" && "randomUUID" in crypto
                 ? crypto.randomUUID()
                 : `ioc-${Date.now()}-${Math.random().toString(16).slice(2)}`,
             type: normalizeType(type),
-            value: value || '',
+            value: value || "",
             risk: 50,
-            status: 'INVESTIGATING',
-            source: source || 'Imported',
+            status: "INVESTIGATING",
+            source: source || "Imported",
             firstSeen: now,
             lastSeen: now,
             hits: 0,
-            tags: (tags || '')
-              .split('|')
-              .flatMap((tag) => tag.split(';'))
-              .flatMap((tag) => tag.split(','))
+            tags: (tags || "")
+              .split("|")
+              .flatMap((tag) => tag.split(";"))
+              .flatMap((tag) => tag.split(","))
               .map((tag) => tag.trim())
               .filter(Boolean),
             description: description || undefined,
@@ -418,22 +391,20 @@ export default function IOCList() {
       }
 
       if (!incoming.length) {
-        setImportError('No valid IOC entries detected.');
+        setImportError("No valid IOC entries detected.");
         return;
       }
       setLocalIocs((prev) => [...incoming, ...prev]);
       closeImportDialog();
     } catch (err) {
-      setImportError(
-        err instanceof Error ? err.message : 'Failed to parse import payload.',
-      );
+      setImportError(err instanceof Error ? err.message : "Failed to parse import payload.");
     }
   };
 
   const columns: GridColDef<IOC>[] = [
     {
-      field: 'type',
-      headerName: 'Type',
+      field: "type",
+      headerName: "Type",
       width: 120,
       renderCell: (params) => (
         <Stack direction="row" alignItems="center" spacing={1}>
@@ -443,17 +414,17 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'value',
-      headerName: 'Indicator Value',
+      field: "value",
+      headerName: "Indicator Value",
       flex: 1,
       renderCell: (params) => (
         <Box>
           <Typography
             variant="body2"
             sx={{
-              fontFamily: 'monospace',
-              wordBreak: 'break-all',
-              fontSize: '0.85rem',
+              fontFamily: "monospace",
+              wordBreak: "break-all",
+              fontSize: "0.85rem",
             }}
           >
             {params.value}
@@ -467,26 +438,26 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'risk',
-      headerName: 'Risk Score',
+      field: "risk",
+      headerName: "Risk Score",
       width: 120,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <LinearProgress
             variant="determinate"
             value={params.value}
-            color={(getRiskColor(params.value) as any) ?? 'primary'}
+            color={(getRiskColor(params.value) as any) ?? "primary"}
             sx={{ width: 60, height: 8, borderRadius: 4 }}
           />
-          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
             {params.value}%
           </Typography>
         </Box>
       ),
     },
     {
-      field: 'status',
-      headerName: 'Status',
+      field: "status",
+      headerName: "Status",
       width: 130,
       renderCell: (params) => (
         <Chip
@@ -498,20 +469,14 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'hits',
-      headerName: 'Hits',
+      field: "hits",
+      headerName: "Hits",
       width: 80,
-      type: 'number',
+      type: "number",
       renderCell: (params) => (
         <Badge
           badgeContent={params.value}
-          color={
-            params.value > 10
-              ? 'error'
-              : params.value > 0
-                ? 'warning'
-                : 'default'
-          }
+          color={params.value > 10 ? "error" : params.value > 0 ? "warning" : "default"}
           showZero
         >
           <Timeline />
@@ -519,13 +484,13 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'source',
-      headerName: 'Source',
+      field: "source",
+      headerName: "Source",
       width: 140,
     },
     {
-      field: 'tlp',
-      headerName: 'TLP',
+      field: "tlp",
+      headerName: "TLP",
       width: 80,
       renderCell: (params) => (
         <Chip
@@ -533,25 +498,25 @@ export default function IOCList() {
           size="small"
           sx={{
             backgroundColor: getTLPColor(params.value),
-            color: params.value === 'WHITE' ? '#000' : '#fff',
-            fontWeight: 'bold',
+            color: params.value === "WHITE" ? "#000" : "#fff",
+            fontWeight: "bold",
           }}
         />
       ),
     },
     {
-      field: 'tags',
-      headerName: 'Tags',
+      field: "tags",
+      headerName: "Tags",
       width: 200,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           {params.value.slice(0, 2).map((tag: string) => (
             <Chip
               key={tag}
               label={tag}
               size="small"
               variant="outlined"
-              sx={{ fontSize: '0.7rem', height: 20 }}
+              sx={{ fontSize: "0.7rem", height: 20 }}
             />
           ))}
           {params.value.length > 2 && (
@@ -559,15 +524,15 @@ export default function IOCList() {
               label={`+${params.value.length - 2}`}
               size="small"
               variant="outlined"
-              sx={{ fontSize: '0.7rem', height: 20 }}
+              sx={{ fontSize: "0.7rem", height: 20 }}
             />
           )}
         </Box>
       ),
     },
     {
-      field: 'actions',
-      headerName: 'Actions',
+      field: "actions",
+      headerName: "Actions",
       width: 120,
       sortable: false,
       renderCell: () => (
@@ -589,18 +554,16 @@ export default function IOCList() {
 
   const filteredIOCs =
     localIocs?.filter((ioc) => {
-      if (selectedTab === 1 && ioc.status !== 'ACTIVE') return false;
+      if (selectedTab === 1 && ioc.status !== "ACTIVE") return false;
       if (selectedTab === 2 && ioc.risk < 70) return false;
-      if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') return false;
+      if (selectedTab === 3 && ioc.status !== "INVESTIGATING") return false;
       return true;
     }) || [];
 
-  const activeIOCs =
-    localIocs?.filter((i) => i.status === 'ACTIVE').length || 0;
+  const activeIOCs = localIocs?.filter((i) => i.status === "ACTIVE").length || 0;
   const highRiskIOCs = localIocs?.filter((i) => i.risk >= 70).length || 0;
   const totalHits = localIocs?.reduce((sum, ioc) => sum + ioc.hits, 0) || 0;
-  const investigatingIOCs =
-    localIocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
+  const investigatingIOCs = localIocs?.filter((i) => i.status === "INVESTIGATING").length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -671,15 +634,8 @@ export default function IOCList() {
       {/* Main IOC List */}
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 2 }}
-          >
-            <Typography variant="h6">
-              Indicators of Compromise (IOCs)
-            </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6">Indicators of Compromise (IOCs)</Typography>
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>IOC Type</InputLabel>
@@ -727,7 +683,7 @@ export default function IOCList() {
             </Stack>
           </Stack>
 
-          <Box sx={{ width: '100%' }}>
+          <Box sx={{ width: "100%" }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
               <Tab label={`All IOCs (${localIocs?.length || 0})`} />
               <Tab label={`Active (${activeIOCs})`} />
@@ -747,8 +703,8 @@ export default function IOCList() {
                 navigate(`/ioc/${params.row.id}`);
               }}
               sx={{
-                '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'action.hover',
+                "& .MuiDataGrid-row:hover": {
+                  backgroundColor: "action.hover",
                 },
               }}
             />
@@ -757,12 +713,7 @@ export default function IOCList() {
       </Card>
 
       {/* Add IOC Dialog */}
-      <Dialog
-        open={addDialogOpen}
-        onClose={closeAddDialog}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={addDialogOpen} onClose={closeAddDialog} maxWidth="md" fullWidth>
         <DialogTitle>Add New IOC</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
@@ -774,16 +725,14 @@ export default function IOCList() {
                 onChange={(e) =>
                   setNewIoc((prev) => ({
                     ...prev,
-                    type: e.target.value as IOC['type'],
+                    type: e.target.value as IOC["type"],
                   }))
                 }
               >
                 <MenuItem value="IP">IP Address</MenuItem>
                 <MenuItem value="DOMAIN">Domain Name</MenuItem>
                 <MenuItem value="URL">URL</MenuItem>
-                <MenuItem value="FILE_HASH">
-                  File Hash (MD5/SHA1/SHA256)
-                </MenuItem>
+                <MenuItem value="FILE_HASH">File Hash (MD5/SHA1/SHA256)</MenuItem>
                 <MenuItem value="EMAIL">Email Address</MenuItem>
                 <MenuItem value="PHONE">Phone Number</MenuItem>
                 <MenuItem value="REGISTRY">Registry Key</MenuItem>
@@ -795,9 +744,7 @@ export default function IOCList() {
               label="IOC Value"
               placeholder="Enter the indicator value..."
               value={newIoc.value}
-              onChange={(e) =>
-                setNewIoc((prev) => ({ ...prev, value: e.target.value }))
-              }
+              onChange={(e) => setNewIoc((prev) => ({ ...prev, value: e.target.value }))}
             />
             <FormControl fullWidth>
               <InputLabel>TLP Classification</InputLabel>
@@ -807,7 +754,7 @@ export default function IOCList() {
                 onChange={(e) =>
                   setNewIoc((prev) => ({
                     ...prev,
-                    tlp: e.target.value as IOC['tlp'],
+                    tlp: e.target.value as IOC["tlp"],
                   }))
                 }
               >
@@ -822,18 +769,14 @@ export default function IOCList() {
               label="Source"
               placeholder="e.g., VirusTotal, Internal Analysis, ThreatConnect"
               value={newIoc.source}
-              onChange={(e) =>
-                setNewIoc((prev) => ({ ...prev, source: e.target.value }))
-              }
+              onChange={(e) => setNewIoc((prev) => ({ ...prev, source: e.target.value }))}
             />
             <TextField
               fullWidth
               label="Tags"
               placeholder="e.g., APT29, Phishing, Malware (comma-separated)"
               value={newIoc.tags}
-              onChange={(e) =>
-                setNewIoc((prev) => ({ ...prev, tags: e.target.value }))
-              }
+              onChange={(e) => setNewIoc((prev) => ({ ...prev, tags: e.target.value }))}
             />
             <TextField
               fullWidth
@@ -842,53 +785,39 @@ export default function IOCList() {
               label="Description"
               placeholder="Describe the context and significance of this IOC..."
               value={newIoc.description}
-              onChange={(e) =>
-                setNewIoc((prev) => ({ ...prev, description: e.target.value }))
-              }
+              onChange={(e) => setNewIoc((prev) => ({ ...prev, description: e.target.value }))}
             />
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={closeAddDialog}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleAddIoc}
-            disabled={!newIoc.value.trim()}
-          >
+          <Button variant="contained" onClick={handleAddIoc} disabled={!newIoc.value.trim()}>
             Add IOC
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Import IOC Dialog */}
-      <Dialog
-        open={importDialogOpen}
-        onClose={closeImportDialog}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={importDialogOpen} onClose={closeImportDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Import IOCs</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <Alert severity="info">
-              Upload a CSV file with columns: type, value, source, tlp, tags,
-              description
+              Upload a CSV file with columns: type, value, source, tlp, tags, description
             </Alert>
             {importError && <Alert severity="error">{importError}</Alert>}
             <Paper
               variant="outlined"
               sx={{
                 p: 4,
-                textAlign: 'center',
-                border: '2px dashed',
-                borderColor: 'primary.main',
-                cursor: 'pointer',
+                textAlign: "center",
+                border: "2px dashed",
+                borderColor: "primary.main",
+                cursor: "pointer",
               }}
             >
-              <Upload sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h6">
-                Drop files here or click to browse
-              </Typography>
+              <Upload sx={{ fontSize: 48, color: "primary.main", mb: 1 }} />
+              <Typography variant="h6">Drop files here or click to browse</Typography>
               <Typography variant="body2" color="text.secondary">
                 Supported formats: CSV, JSON, STIX
               </Typography>
@@ -907,7 +836,7 @@ export default function IOCList() {
               select
               label="Default TLP Classification"
               value={importTlp}
-              onChange={(e) => setImportTlp(e.target.value as IOC['tlp'])}
+              onChange={(e) => setImportTlp(e.target.value as IOC["tlp"])}
             >
               <MenuItem value="WHITE">TLP:WHITE</MenuItem>
               <MenuItem value="GREEN">TLP:GREEN</MenuItem>
@@ -918,10 +847,7 @@ export default function IOCList() {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeImportDialog}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleImport}
-          >
+          <Button variant="contained" onClick={handleImport}>
             Import
           </Button>
         </DialogActions>

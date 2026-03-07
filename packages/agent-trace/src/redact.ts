@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export interface RedactionResult {
   redactedUrl: string;
@@ -16,14 +16,14 @@ export function redactUrl(url: string, allowlist: string[] = []): RedactionResul
 
     // Redact query and fragment
     const redactedUrl = `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
-    const urlHash = createHash('sha256').update(url).digest('hex');
+    const urlHash = createHash("sha256").update(url).digest("hex");
 
     return { redactedUrl, urlHash };
   } catch (err: any) {
     // If not a valid URL or other error, just return a hashed version of the original
     return {
-      redactedUrl: 'redacted://hidden',
-      urlHash: createHash('sha256').update(url).digest('hex')
+      redactedUrl: "redacted://hidden",
+      urlHash: createHash("sha256").update(url).digest("hex"),
     };
   }
 }

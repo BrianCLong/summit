@@ -7,8 +7,8 @@ import {
   LaunchDarklyProvider,
   RedisCache,
   PrometheusMetrics,
-} from '@intelgraph/feature-flags';
-import Redis from 'ioredis';
+} from "@intelgraph/feature-flags";
+import Redis from "ioredis";
 
 async function main() {
   // 1. Initialize provider
@@ -38,55 +38,47 @@ async function main() {
   await featureFlags.initialize();
 
   // 6. Use feature flags
-  const userId = 'user-123';
+  const userId = "user-123";
 
   // Boolean flag
-  const newDashboard = await featureFlags.getBooleanFlag(
-    'new-dashboard',
-    false,
-    { userId }
-  );
+  const newDashboard = await featureFlags.getBooleanFlag("new-dashboard", false, { userId });
 
   if (newDashboard) {
-    console.log('Show new dashboard');
+    console.log("Show new dashboard");
   }
 
   // String flag
-  const theme = await featureFlags.getStringFlag(
-    'ui-theme',
-    'light',
-    { userId }
-  );
+  const theme = await featureFlags.getStringFlag("ui-theme", "light", { userId });
 
   console.log(`User theme: ${theme}`);
 
   // Number flag
-  const maxItems = await featureFlags.getNumberFlag(
-    'max-items-per-page',
-    50,
-    { userId }
-  );
+  const maxItems = await featureFlags.getNumberFlag("max-items-per-page", 50, { userId });
 
   console.log(`Show ${maxItems} items per page`);
 
   // JSON flag
   const config = await featureFlags.getJSONFlag(
-    'ui-config',
-    { color: 'blue', size: 'medium' },
+    "ui-config",
+    { color: "blue", size: "medium" },
     { userId }
   );
 
-  console.log('UI Config:', config);
+  console.log("UI Config:", config);
 
   // Get all flags
   const allFlags = await featureFlags.getAllFlags({ userId });
-  console.log('All flags:', allFlags);
+  console.log("All flags:", allFlags);
 
   // Track event
-  await featureFlags.track('feature-used', { userId }, {
-    feature: 'new-dashboard',
-    timestamp: Date.now(),
-  });
+  await featureFlags.track(
+    "feature-used",
+    { userId },
+    {
+      feature: "new-dashboard",
+      timestamp: Date.now(),
+    }
+  );
 
   // 7. Cleanup
   await featureFlags.close();

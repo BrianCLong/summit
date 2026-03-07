@@ -1,4 +1,4 @@
-import type { KeyObject } from 'crypto';
+import type { KeyObject } from "crypto";
 
 export type Certificate = {
   id: string;
@@ -32,7 +32,7 @@ export type MtlsValidationResult = {
   reasons: string[];
 };
 
-export type AgentStatus = 'provisioned' | 'active' | 'suspended' | 'retired';
+export type AgentStatus = "provisioned" | "active" | "suspended" | "retired";
 
 export type AgentBlueprint = {
   name: string;

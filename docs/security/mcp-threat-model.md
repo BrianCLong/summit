@@ -14,37 +14,41 @@ The adoption of the Model Context Protocol (MCP) introduces a new paradigm where
 ## Attack Vectors & Trees
 
 ### 1. Malicious Tool Execution (RCE)
+
 - **Threat:** An agent is tricked (via prompt injection) into calling a tool with malicious arguments (e.g., `execute_shell("rm -rf /")`).
 - **Mitigation:**
-    - **No Shell Access:** Avoid generic "run command" tools.
-    - **Input Validation:** Strict Zod schemas for all tool arguments.
-    - **Human Approval:** Require explicit user confirmation for side-effecting tools.
+  - **No Shell Access:** Avoid generic "run command" tools.
+  - **Input Validation:** Strict Zod schemas for all tool arguments.
+  - **Human Approval:** Require explicit user confirmation for side-effecting tools.
 
 ### 2. Data Exfiltration via Context
+
 - **Threat:** A compromised MCP server returns sensitive data (PII, secrets) in the context, which the agent then sends to an external attacker.
 - **Mitigation:**
-    - **Secret Redaction:** Runtime must scan context for regex patterns of known secrets.
-    - **Egress filtering:** Agents should not have arbitrary internet access.
-    - **Least Privilege:** Servers only expose data required for the specific task.
+  - **Secret Redaction:** Runtime must scan context for regex patterns of known secrets.
+  - **Egress filtering:** Agents should not have arbitrary internet access.
+  - **Least Privilege:** Servers only expose data required for the specific task.
 
 ### 3. Server Impersonation
+
 - **Threat:** A malicious process registers as a valid MCP server (e.g., "auth-service") to steal credentials.
 - **Mitigation:**
-    - **Registry Allowlist:** Only signed/approved servers can register with the runtime.
-    - **PID verification:** Runtime verifies the process identity of local servers.
+  - **Registry Allowlist:** Only signed/approved servers can register with the runtime.
+  - **PID verification:** Runtime verifies the process identity of local servers.
 
 ## Security Controls
 
-| ID | Control | Description | Owner |
-|---|---|---|---|
-| MCP-SEC-01 | **Schema Validation** | All inputs/outputs must match strict JSON schemas. | Runtime |
-| MCP-SEC-02 | **Approval Prompts** | "High Risk" tools must trigger a blocking user prompt. | Runtime |
-| MCP-SEC-03 | **Audit Logging** | All tool calls (inputs+outputs) are logged to a tamper-evident stream. | Security |
-| MCP-SEC-04 | **Context Sanitization** | Automatic redaction of API keys/tokens from context. | Context Kit |
+| ID         | Control                  | Description                                                            | Owner       |
+| ---------- | ------------------------ | ---------------------------------------------------------------------- | ----------- |
+| MCP-SEC-01 | **Schema Validation**    | All inputs/outputs must match strict JSON schemas.                     | Runtime     |
+| MCP-SEC-02 | **Approval Prompts**     | "High Risk" tools must trigger a blocking user prompt.                 | Runtime     |
+| MCP-SEC-03 | **Audit Logging**        | All tool calls (inputs+outputs) are logged to a tamper-evident stream. | Security    |
+| MCP-SEC-04 | **Context Sanitization** | Automatic redaction of API keys/tokens from context.                   | Context Kit |
 
 ## Required Logging
 
 For every interaction, the following must be logged:
+
 - `timestamp`
 - `actor_id`
 - `server_name`

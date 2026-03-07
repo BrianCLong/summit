@@ -104,12 +104,12 @@
 
 ```js
 export async function meter(req, res, next) {
-  res.on('finish', () => {
-    if (req.path.startsWith('/verify') && res.statusCode === 200) {
-      queue.publish('usage', {
+  res.on("finish", () => {
+    if (req.path.startsWith("/verify") && res.statusCode === 200) {
+      queue.publish("usage", {
         ts: new Date().toISOString(),
         tenant: req.tenant.id,
-        event: 'attestation.verify',
+        event: "attestation.verify",
         units: 1,
       });
     }
@@ -121,13 +121,13 @@ export async function meter(req, res, next) {
 **Invoice simulator** `services/billing/run.mjs`
 
 ```js
-import { sumBy } from 'lodash-es';
+import { sumBy } from "lodash-es";
 export function bill(usages, plan) {
   const price = { Starter: 0.01, Pro: 0.005, Enterprise: 0.0025 }[plan];
   const total =
     sumBy(
-      usages.filter((u) => u.event === 'attestation.verify'),
-      'units',
+      usages.filter((u) => u.event === "attestation.verify"),
+      "units"
     ) * price;
   return { plan, total: Number(total.toFixed(2)) };
 }
@@ -171,15 +171,14 @@ policy_sign:
 
 ```js
 #!/usr/bin/env node
-import { execSync as sh } from 'node:child_process';
-const name = process.argv[2] || 'tenant-portal';
-sh(`npm create trust-portal ${name}`, { stdio: 'inherit' });
-console.log('Testing webhook delivery...');
-sh(
-  `curl -fsS -X POST $WEBHOOK_URL -H 'X-Topicality-Signature: test' -d '{"ping":true}'`,
-  { stdio: 'inherit' },
-);
-console.log('Next: run npm run verify:pack');
+import { execSync as sh } from "node:child_process";
+const name = process.argv[2] || "tenant-portal";
+sh(`npm create trust-portal ${name}`, { stdio: "inherit" });
+console.log("Testing webhook delivery...");
+sh(`curl -fsS -X POST $WEBHOOK_URL -H 'X-Topicality-Signature: test' -d '{"ping":true}'`, {
+  stdio: "inherit",
+});
+console.log("Next: run npm run verify:pack");
 ```
 
 **Portal wizard route** `tools/trust-portal/pages/onboard.tsx`
@@ -210,9 +209,7 @@ export default function Onboard() {
 export function SlaBadge({ p95, uptime }: { p95: number; uptime: number }) {
   const ok = p95 <= 300 && uptime >= 99.95;
   return (
-    <span
-      className={`px-2 py-1 rounded-2xl ${ok ? 'bg-green-100' : 'bg-yellow-100'}`}
-    >
+    <span className={`px-2 py-1 rounded-2xl ${ok ? "bg-green-100" : "bg-yellow-100"}`}>
       p95 {p95}ms • {uptime}%
     </span>
   );
@@ -222,11 +219,7 @@ export function SlaBadge({ p95, uptime }: { p95: number; uptime: number }) {
 **Usage panel** `components/UsagePanel.tsx`
 
 ```tsx
-export function UsagePanel({
-  rows,
-}: {
-  rows: { ts: string; event: string; units: number }[];
-}) {
+export function UsagePanel({ rows }: { rows: { ts: string; event: string; units: number }[] }) {
   return (
     <table className="w-full text-sm">
       <tbody>

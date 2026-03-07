@@ -43,12 +43,12 @@ export interface TemporalEvolutionResult {
   trends: {
     nodeGrowthRate: number;
     edgeGrowthRate: number;
-    densityTrend: 'increasing' | 'decreasing' | 'stable';
+    densityTrend: "increasing" | "decreasing" | "stable";
     volatility: number;
   };
   changeEvents: Array<{
     timestamp: Date;
-    type: 'node-burst' | 'edge-burst' | 'community-shift' | 'structural-change';
+    type: "node-burst" | "edge-burst" | "community-shift" | "structural-change";
     magnitude: number;
     description: string;
   }>;
@@ -64,7 +64,11 @@ export interface TemporalCentralityResult {
   /**
    * Nodes with highest centrality variance over time
    */
-  volatileNodes: Array<{ node: string; variance: number; trend: 'rising' | 'falling' | 'fluctuating' }>;
+  volatileNodes: Array<{
+    node: string;
+    variance: number;
+    trend: "rising" | "falling" | "fluctuating";
+  }>;
 
   /**
    * Nodes that emerged as central
@@ -111,7 +115,7 @@ export function analyzeTemporalEvolution(
     numSnapshots?: number;
     detectBursts?: boolean;
     burstThreshold?: number;
-  } = {},
+  } = {}
 ): TemporalEvolutionResult {
   const startTime = performance.now();
 
@@ -130,7 +134,7 @@ export function analyzeTemporalEvolution(
       trends: {
         nodeGrowthRate: 0,
         edgeGrowthRate: 0,
-        densityTrend: 'stable',
+        densityTrend: "stable",
         volatility: 0,
       },
       changeEvents: [],
@@ -160,15 +164,14 @@ export function analyzeTemporalEvolution(
       (e) =>
         e.timestamp <= snapshotTime &&
         activeNodes.includes(e.source) &&
-        activeNodes.includes(e.target),
+        activeNodes.includes(e.target)
     );
 
     const nodeCount = activeNodes.length;
     const edgeCount = activeEdges.length;
 
     // Calculate density
-    const density =
-      nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
+    const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
 
     // Calculate average degree
     const degrees = new Map<string, number>();
@@ -182,9 +185,7 @@ export function analyzeTemporalEvolution(
     }
 
     const avgDegree =
-      nodeCount > 0
-        ? Array.from(degrees.values()).reduce((sum, d) => sum + d, 0) / nodeCount
-        : 0;
+      nodeCount > 0 ? Array.from(degrees.values()).reduce((sum, d) => sum + d, 0) / nodeCount : 0;
 
     // Estimate components (simplified - would need proper algorithm)
     const components = nodeCount > 0 ? 1 : 0;
@@ -212,17 +213,21 @@ export function analyzeTemporalEvolution(
   const edgeGrowthRate = calculateGrowthRate(edgeCounts);
   const densitySlope = calculateSlope(densities);
 
-  let densityTrend: 'increasing' | 'decreasing' | 'stable';
-  if (densitySlope > 0.01) {densityTrend = 'increasing';}
-  else if (densitySlope < -0.01) {densityTrend = 'decreasing';}
-  else {densityTrend = 'stable';}
+  let densityTrend: "increasing" | "decreasing" | "stable";
+  if (densitySlope > 0.01) {
+    densityTrend = "increasing";
+  } else if (densitySlope < -0.01) {
+    densityTrend = "decreasing";
+  } else {
+    densityTrend = "stable";
+  }
 
   const volatility = calculateVolatility([...nodeCounts, ...edgeCounts]);
 
   // Detect change events
   const changeEvents: Array<{
     timestamp: Date;
-    type: 'node-burst' | 'edge-burst' | 'community-shift' | 'structural-change';
+    type: "node-burst" | "edge-burst" | "community-shift" | "structural-change";
     magnitude: number;
     description: string;
   }> = [];
@@ -237,9 +242,9 @@ export function analyzeTemporalEvolution(
       if (growth > burstThreshold) {
         changeEvents.push({
           timestamp: snapshots[i].timestamp,
-          type: 'node-burst',
+          type: "node-burst",
           magnitude: growth,
-          description: `${((growth * 100).toFixed(1))}% increase in nodes (${prevCount} → ${currCount})`,
+          description: `${(growth * 100).toFixed(1)}% increase in nodes (${prevCount} → ${currCount})`,
         });
       }
     }
@@ -253,9 +258,9 @@ export function analyzeTemporalEvolution(
       if (growth > burstThreshold) {
         changeEvents.push({
           timestamp: snapshots[i].timestamp,
-          type: 'edge-burst',
+          type: "edge-burst",
           magnitude: growth,
-          description: `${((growth * 100).toFixed(1))}% increase in edges (${prevCount} → ${currCount})`,
+          description: `${(growth * 100).toFixed(1)}% increase in edges (${prevCount} → ${currCount})`,
         });
       }
     }
@@ -269,7 +274,7 @@ export function analyzeTemporalEvolution(
       if (change > 0.1) {
         changeEvents.push({
           timestamp: snapshots[i].timestamp,
-          type: 'structural-change',
+          type: "structural-change",
           magnitude: change,
           description: `Significant density change: ${prevDensity.toFixed(3)} → ${currDensity.toFixed(3)}`,
         });
@@ -307,12 +312,12 @@ export function analyzeTemporalCentrality(
   temporalGraph: TemporalGraph,
   options: {
     numSnapshots?: number;
-    centralityType?: 'degree' | 'betweenness' | 'closeness';
-  } = {},
+    centralityType?: "degree" | "betweenness" | "closeness";
+  } = {}
 ): TemporalCentralityResult {
   const startTime = performance.now();
 
-  const { numSnapshots = 20, centralityType = 'degree' } = options;
+  const { numSnapshots = 20, centralityType = "degree" } = options;
 
   // Get time range
   const allTimestamps = [
@@ -339,7 +344,7 @@ export function analyzeTemporalCentrality(
       (e) =>
         e.timestamp <= snapshotTime &&
         activeNodes.includes(e.source) &&
-        activeNodes.includes(e.target),
+        activeNodes.includes(e.target)
     );
 
     // Calculate degree centrality (simplified - could add other types)
@@ -373,7 +378,7 @@ export function analyzeTemporalCentrality(
   const volatileNodes: Array<{
     node: string;
     variance: number;
-    trend: 'rising' | 'falling' | 'fluctuating';
+    trend: "rising" | "falling" | "fluctuating";
   }> = [];
 
   const emergingNodes: Array<{
@@ -383,7 +388,9 @@ export function analyzeTemporalCentrality(
   }> = [];
 
   for (const [node, scores] of nodeCentrality) {
-    if (scores.length < 2) {continue;}
+    if (scores.length < 2) {
+      continue;
+    }
 
     const values = scores.map((s) => s.score);
     const variance = calculateVariance(values);
@@ -427,7 +434,7 @@ export function analyzeEventSequences(
     minSupport?: number;
     maxTimeGap?: number; // milliseconds
     burstWindowSize?: number; // milliseconds
-  } = {},
+  } = {}
 ): EventSequenceResult {
   const startTime = performance.now();
 
@@ -440,7 +447,7 @@ export function analyzeEventSequences(
   // Extract event types from edge properties
   const events = temporalGraph.edges
     .map((e) => ({
-      type: e.properties?.eventType || 'connection',
+      type: e.properties?.eventType || "connection",
       timestamp: e.timestamp,
       source: e.source,
       target: e.target,
@@ -468,15 +475,13 @@ export function analyzeEventSequences(
     // Move window start forward
     while (
       windowStart < i &&
-      events[i].timestamp.getTime() - events[windowStart].timestamp.getTime() >
-        burstWindowSize
+      events[i].timestamp.getTime() - events[windowStart].timestamp.getTime() > burstWindowSize
     ) {
       windowStart++;
     }
 
     const windowSize = i - windowStart + 1;
-    const windowDuration =
-      events[i].timestamp.getTime() - events[windowStart].timestamp.getTime();
+    const windowDuration = events[i].timestamp.getTime() - events[windowStart].timestamp.getTime();
 
     // Calculate expected rate
     const totalDuration =
@@ -513,14 +518,18 @@ export function analyzeEventSequences(
 // Helper functions
 
 function calculateGrowthRate(values: number[]): number {
-  if (values.length < 2) {return 0;}
+  if (values.length < 2) {
+    return 0;
+  }
   const first = values[0] || 1;
   const last = values[values.length - 1];
   return (last - first) / first;
 }
 
 function calculateSlope(values: number[]): number {
-  if (values.length < 2) {return 0;}
+  if (values.length < 2) {
+    return 0;
+  }
 
   const n = values.length;
   let sumX = 0;
@@ -540,7 +549,9 @@ function calculateSlope(values: number[]): number {
 }
 
 function calculateVolatility(values: number[]): number {
-  if (values.length < 2) {return 0;}
+  if (values.length < 2) {
+    return 0;
+  }
 
   const changes = [];
   for (let i = 1; i < values.length; i++) {
@@ -553,10 +564,11 @@ function calculateVolatility(values: number[]): number {
 }
 
 function calculateVariance(values: number[]): number {
-  if (values.length === 0) {return 0;}
+  if (values.length === 0) {
+    return 0;
+  }
   const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-  const variance =
-    values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+  const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
   return variance;
 }
 
@@ -564,12 +576,18 @@ function calculateStdDev(values: number[]): number {
   return Math.sqrt(calculateVariance(values));
 }
 
-function detectTrend(values: number[]): 'rising' | 'falling' | 'fluctuating' {
-  if (values.length < 3) {return 'fluctuating';}
+function detectTrend(values: number[]): "rising" | "falling" | "fluctuating" {
+  if (values.length < 3) {
+    return "fluctuating";
+  }
 
   const slope = calculateSlope(values);
 
-  if (slope > 0.01) {return 'rising';}
-  if (slope < -0.01) {return 'falling';}
-  return 'fluctuating';
+  if (slope > 0.01) {
+    return "rising";
+  }
+  if (slope < -0.01) {
+    return "falling";
+  }
+  return "fluctuating";
 }

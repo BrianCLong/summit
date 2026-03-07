@@ -11,6 +11,7 @@ Summit has been internationalized to support multiple languages across all front
 The i18n infrastructure is built on React hooks and dynamic imports, supporting 33 NATO member country locales.
 
 **Key Components:**
+
 - `client/src/hooks/useI18n.ts` - Core i18n hook with locale management
 - `client/src/components/i18n/LocaleSelector.tsx` - UI component for language selection
 - `client/src/locales/*.json` - Message catalogs for each language
@@ -27,6 +28,7 @@ The system currently supports 33 locales covering all NATO member countries:
 ### Current Translations
 
 Fully implemented translations:
+
 - **English (en-US)** - Complete
 - **Spanish (es-ES)** - Complete
 
@@ -36,7 +38,7 @@ All other locales fall back to English until translations are added.
 
 ### Basic Usage
 
-```tsx
+````tsx
 import { useI18n } from '../../hooks/useI18n';
 
 function MyComponent() {
@@ -411,14 +413,16 @@ Check:
 1. **Import the hook:**
    ```tsx
    import { useI18n } from '../../hooks/useI18n';
-   ```
+````
 
 2. **Use in component:**
+
    ```tsx
    const { t } = useI18n();
    ```
 
 3. **Add strings to catalogs:**
+
    ```json
    {
      "myFeature": {
@@ -430,12 +434,13 @@ Check:
 
 4. **Use translations:**
    ```tsx
-   <h1>{t('myFeature.title')}</h1>
+   <h1>{t("myFeature.title")}</h1>
    ```
 
 ## Future Enhancements
 
 Planned improvements:
+
 - [ ] Right-to-left (RTL) language support (Arabic, Hebrew)
 - [ ] Pluralization rules for complex languages
 - [ ] Translation management platform integration
@@ -447,6 +452,7 @@ Planned improvements:
 ## Support
 
 For questions or issues:
+
 - File an issue in the repository
 - Check existing translations for examples
 - Review component implementations in `client/src/components/`

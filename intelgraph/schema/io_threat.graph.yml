@@ -5,7 +5,8 @@ nodes:
     props: [actor_id, kind, handle, org, credibility_tier, tags, actor_type]
   Campaign:
     key: campaign_id
-    props: [campaign_id, name, description, start_date, end_date, tags, target_environment, ttp_class]
+    props:
+      [campaign_id, name, description, start_date, end_date, tags, target_environment, ttp_class]
   Narrative:
     key: narrative_id
     props: [narrative_id, title, state, tags]
@@ -39,7 +40,9 @@ edges:
   EXFILTRATED: { from: [Actor, IntelligenceService], to: Infra, props: [method] }
   IMPERSONATED: { from: Campaign, to: MediaBrand, props: [confidence] }
   PLACED_CONTENT_IN: { from: Campaign, to: MediaBrand, props: [method] }
-  COORDINATED_WITH: { from: [Actor, IntelligenceService], to: [Actor, IntelligenceService], props: [level] }
+  COORDINATED_WITH:
+    { from: [Actor, IntelligenceService], to: [Actor, IntelligenceService], props: [level] }
   SUPPORTS: { from: [Event, Campaign], to: Narrative, props: [weight] }
   TRIGGERED_BY: { from: Campaign, to: Event, props: [weight] }
-  ASSOCIATED_WITH: { from: [Actor, Case, Person], to: [IntelligenceService, Org, Platform], props: [] }
+  ASSOCIATED_WITH:
+    { from: [Actor, Case, Person], to: [IntelligenceService, Org, Platform], props: [] }

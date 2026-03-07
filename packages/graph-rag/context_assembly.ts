@@ -1,4 +1,4 @@
-import neo4j, { Driver, Session } from 'neo4j-driver';
+import neo4j, { Driver, Session } from "neo4j-driver";
 
 export interface GraphNode {
   id: string;
@@ -30,30 +30,30 @@ export class ContextAssembler {
   static serialize(context: GraphContext): string {
     const lines: string[] = [];
 
-    lines.push('### Knowledge Graph Context');
+    lines.push("### Knowledge Graph Context");
 
     // Sort nodes by ID for determinism
     const sortedNodes = [...context.nodes].sort((a, b) => a.id.localeCompare(b.id));
 
-    lines.push('#### Entities');
+    lines.push("#### Entities");
     for (const node of sortedNodes) {
-      const labels = node.labels.join(', ');
-      const evidenceId = node.properties.evidence_id || 'N/A';
+      const labels = node.labels.join(", ");
+      const evidenceId = node.properties.evidence_id || "N/A";
       lines.push(`- **[${node.id}]** (${labels})`);
       lines.push(`  - Evidence ID: \`${evidenceId}\``);
 
       // Filter out internal properties
       const props = Object.entries(node.properties)
-        .filter(([key]) => !['id', 'evidence_id'].includes(key))
+        .filter(([key]) => !["id", "evidence_id"].includes(key))
         .map(([key, val]) => `${key}: ${JSON.stringify(val)}`)
-        .join(', ');
+        .join(", ");
 
       if (props) {
         lines.push(`  - Attributes: ${props}`);
       }
     }
 
-    lines.push('\n#### Relationships');
+    lines.push("\n#### Relationships");
     // Sort relationships by startNodeId then endNodeId
     const sortedRels = [...context.relationships].sort((a, b) => {
       const startComp = a.startNodeId.localeCompare(b.startNodeId);
@@ -65,7 +65,7 @@ export class ContextAssembler {
       lines.push(`- **[${rel.startNodeId}]** --[:${rel.type}]--> **[${rel.endNodeId}]**`);
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
@@ -78,22 +78,22 @@ export class ContextAssembler {
     for (const record of records) {
       // Logic to extract nodes and relationships from Neo4j Record
       // Supporting results from common Summit Cypher patterns
-      const keys = ['seed', 'relatedEntities', 'control', 'evidence', 'narrative', 'e'];
+      const keys = ["seed", "relatedEntities", "control", "evidence", "narrative", "e"];
 
       for (const key of keys) {
         if (record.has(key)) {
           const val = record.get(key);
           if (Array.isArray(val)) {
-            val.forEach(item => this.addNodeToMap(item, nodesMap));
+            val.forEach((item) => this.addNodeToMap(item, nodesMap));
           } else {
             this.addNodeToMap(val, nodesMap);
           }
         }
       }
 
-      const paths = record.get('paths');
+      const paths = record.get("paths");
       if (paths && Array.isArray(paths)) {
-        paths.forEach(path => {
+        paths.forEach((path) => {
           path.segments.forEach((seg: any) => {
             this.addNodeToMap(seg.start, nodesMap);
             this.addNodeToMap(seg.end, nodesMap);
@@ -104,7 +104,7 @@ export class ContextAssembler {
                 type: seg.relationship.type,
                 startNodeId: seg.start.properties.id,
                 endNodeId: seg.end.properties.id,
-                properties: seg.relationship.properties
+                properties: seg.relationship.properties,
               });
             }
           });
@@ -114,7 +114,7 @@ export class ContextAssembler {
 
     return {
       nodes: Array.from(nodesMap.values()),
-      relationships: Array.from(relationshipsMap.values())
+      relationships: Array.from(relationshipsMap.values()),
     };
   }
 
@@ -125,7 +125,7 @@ export class ContextAssembler {
       map.set(id, {
         id,
         labels: node.labels,
-        properties: node.properties
+        properties: node.properties,
       });
     }
   }

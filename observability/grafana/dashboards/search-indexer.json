@@ -18,7 +18,12 @@
       "title": "Operations Rate",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "targets": [{ "expr": "sum(rate(indexer_ops_total[5m])) by (op, status)", "legendFormat": "{{op}} - {{status}}" }]
+      "targets": [
+        {
+          "expr": "sum(rate(indexer_ops_total[5m])) by (op, status)",
+          "legendFormat": "{{op}} - {{status}}"
+        }
+      ]
     }
   ]
 }

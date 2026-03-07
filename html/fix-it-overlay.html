@@ -21,11 +21,11 @@
     </div>
     <script>
       $(function () {
-        $('#rename').on('click', function () {
-          $.post('/api/fixit/rename', { from: 'foo', to: 'bar' });
+        $("#rename").on("click", function () {
+          $.post("/api/fixit/rename", { from: "foo", to: "bar" });
         });
-        $('#docs').on('click', function () {
-          $.post('/api/fixit/docs', { id: 'PR-1' });
+        $("#docs").on("click", function () {
+          $.post("/api/fixit/docs", { id: "PR-1" });
         });
       });
     </script>

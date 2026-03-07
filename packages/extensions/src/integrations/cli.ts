@@ -4,8 +4,8 @@
  * Exposes extension commands to the CLI.
  */
 
-import { ExtensionRegistry } from '../registry.js';
-import { Extension } from '../types.js';
+import { ExtensionRegistry } from "../registry.js";
+import { Extension } from "../types.js";
 
 export interface CLICommand {
   name: string;
@@ -20,14 +20,14 @@ export interface CLIArgument {
   name: string;
   description: string;
   required?: boolean;
-  type?: 'string' | 'number' | 'boolean';
+  type?: "string" | "number" | "boolean";
 }
 
 export interface CLIOption {
   name: string;
   alias?: string;
   description: string;
-  type?: 'string' | 'number' | 'boolean';
+  type?: "string" | "number" | "boolean";
   default?: any;
 }
 
@@ -109,7 +109,7 @@ export class CLIIntegration {
       throw new Error(`Extension ${ext.manifest.name} not loaded`);
     }
 
-    const exportName = entrypoint.export || 'default';
+    const exportName = entrypoint.export || "default";
     const exported = module[exportName];
 
     if (!exported) {
@@ -118,13 +118,13 @@ export class CLIIntegration {
 
     if (entrypoint.handler) {
       const handler = exported[entrypoint.handler];
-      if (typeof handler !== 'function') {
+      if (typeof handler !== "function") {
         throw new Error(`Handler ${entrypoint.handler} is not a function`);
       }
       return handler.bind(exported);
     }
 
-    if (typeof exported !== 'function') {
+    if (typeof exported !== "function") {
       throw new Error(`Export ${exportName} is not a function`);
     }
 
@@ -175,21 +175,21 @@ export class CLIIntegration {
     let help = `${cmd.name} - ${cmd.description}\n\n`;
 
     if (cmd.arguments && cmd.arguments.length > 0) {
-      help += 'Arguments:\n';
+      help += "Arguments:\n";
       for (const arg of cmd.arguments) {
-        const required = arg.required ? '(required)' : '(optional)';
-        const type = arg.type ? `<${arg.type}>` : '';
+        const required = arg.required ? "(required)" : "(optional)";
+        const type = arg.type ? `<${arg.type}>` : "";
         help += `  ${arg.name} ${type} ${required}\n    ${arg.description}\n`;
       }
-      help += '\n';
+      help += "\n";
     }
 
     if (cmd.options && cmd.options.length > 0) {
-      help += 'Options:\n';
+      help += "Options:\n";
       for (const opt of cmd.options) {
-        const alias = opt.alias ? `, -${opt.alias}` : '';
-        const type = opt.type ? `<${opt.type}>` : '';
-        const defaultVal = opt.default !== undefined ? `(default: ${opt.default})` : '';
+        const alias = opt.alias ? `, -${opt.alias}` : "";
+        const type = opt.type ? `<${opt.type}>` : "";
+        const defaultVal = opt.default !== undefined ? `(default: ${opt.default})` : "";
         help += `  --${opt.name}${alias} ${type} ${defaultVal}\n    ${opt.description}\n`;
       }
     }

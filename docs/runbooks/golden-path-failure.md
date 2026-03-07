@@ -54,6 +54,7 @@ node scripts/smoke-test.js
 **Dependencies**: PostgreSQL, Neo4j, auth service
 
 **Quick Checks**:
+
 ```bash
 # Check database connectivity
 kubectl exec -it graphql-gateway-0 -- curl http://postgresql:5432
@@ -64,11 +65,13 @@ curl http://localhost:4000/auth/health
 ```
 
 **Common Issues**:
+
 - Database connection pool exhausted
 - Auth service down
 - Validation failing (duplicate names, invalid input)
 
 **Mitigation**:
+
 ```bash
 # Scale up databases if connection limits reached
 kubectl scale statefulset postgresql --replicas=2
@@ -86,6 +89,7 @@ git log --oneline --since="1 day ago" -- server/src/graphql/schema.graphql
 **Dependencies**: Neo4j, entity service
 
 **Quick Checks**:
+
 ```bash
 # Neo4j query performance
 curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(neo4j_query_duration_ms_bucket[5m]))by(le))'
@@ -96,11 +100,13 @@ kubectl logs -l app=entity-service --tail=50
 ```
 
 **Common Issues**:
+
 - Neo4j slow or down
 - Entity type validation failing
 - Duplicate entity detection issue
 
 **Mitigation**:
+
 ```bash
 # Check Neo4j health
 kubectl exec -it neo4j-0 -- cypher-shell "CALL dbms.ping();"
@@ -118,6 +124,7 @@ kubectl exec -it neo4j-0 -- cypher-shell "CALL db.indexes();"
 **Dependencies**: Neo4j, relationship service
 
 **Quick Checks**:
+
 ```bash
 # Check relationship service
 kubectl get pods -l app=relationship-service
@@ -128,11 +135,13 @@ kubectl logs -l app=graphql-gateway | grep "CREATE.*RELATIONSHIP.*error"
 ```
 
 **Common Issues**:
+
 - Entities not found (invalid IDs)
 - Relationship type validation failing
 - Constraint violations in Neo4j
 
 **Mitigation**:
+
 ```bash
 # Check Neo4j constraints
 kubectl exec -it neo4j-0 -- cypher-shell "CALL db.constraints();"
@@ -147,6 +156,7 @@ kubectl exec -it neo4j-0 -- cypher-shell "CALL db.constraints();"
 **Dependencies**: Copilot service, LLM API, vector database
 
 **Quick Checks**:
+
 ```bash
 # Copilot service health
 kubectl get pods -l app=copilot
@@ -160,11 +170,13 @@ kubectl get pods -l app=vector-db
 ```
 
 **Common Issues**:
+
 - LLM API rate limits or quota exceeded
 - Vector database slow or down
 - Copilot service OOM or crash loop
 
 **Mitigation**:
+
 ```bash
 # Check API quota
 curl https://api.openai.com/v1/usage
@@ -182,6 +194,7 @@ kubectl rollout restart statefulset/vector-db
 **Dependencies**: Neo4j, cache (Redis)
 
 **Quick Checks**:
+
 ```bash
 # Redis health
 kubectl exec -it redis-0 -- redis-cli ping
@@ -194,11 +207,13 @@ kubectl exec -it neo4j-0 -- cypher-shell "CALL dbms.listQueries() YIELD query, e
 ```
 
 **Common Issues**:
+
 - Cache miss storm (Redis down or eviction)
 - Complex graph query timing out
 - Missing data from previous steps
 
 **Mitigation**:
+
 ```bash
 # Warm cache
 redis-cli FLUSHDB  # Only in emergency, loses data
@@ -215,11 +230,14 @@ kubectl rollout restart deployment/graphql-gateway  # Restarts with fresh cache
 ### Issue: Recent Deployment Broke Golden Path
 
 **Indicators**:
+
 - All steps showing increased errors
 - Deployment annotation in Grafana matches error spike
 
 **Actions**:
+
 1. Immediate rollback:
+
    ```bash
    kubectl rollout undo deployment/graphql-gateway
    kubectl rollout undo deployment/entity-service
@@ -232,11 +250,13 @@ kubectl rollout restart deployment/graphql-gateway  # Restarts with fresh cache
 ### Issue: Database Connection Pool Exhaustion
 
 **Indicators**:
+
 - Connection timeout errors
 - Multiple services affected
 - `max_connections` reached
 
 **Actions**:
+
 ```bash
 # PostgreSQL
 kubectl exec -it postgresql-0 -- psql -U postgres -c "SELECT count(*) FROM pg_stat_activity;"
@@ -247,6 +267,7 @@ kubectl exec -it postgresql-0 -- psql -U postgres -c "SELECT pg_terminate_backen
 ```
 
 **Mitigation**:
+
 - Increase `max_connections` in PostgreSQL config
 - Add connection pooling (PgBouncer)
 - Fix connection leaks in application code
@@ -254,10 +275,12 @@ kubectl exec -it postgresql-0 -- psql -U postgres -c "SELECT pg_terminate_backen
 ### Issue: Authentication/Authorization Failing
 
 **Indicators**:
+
 - All steps showing `UNAUTHENTICATED` or `FORBIDDEN` errors
 - Auth service errors
 
 **Actions**:
+
 ```bash
 # Check auth service health
 kubectl get pods -l app=auth-service
@@ -271,6 +294,7 @@ curl https://<oidc-provider>/.well-known/openid-configuration
 ```
 
 **Mitigation**:
+
 - Restart auth service if unhealthy
 - Verify JWT secrets match between services
 - Check OIDC provider status page

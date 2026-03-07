@@ -3,12 +3,12 @@
  * Unified interface for dimensional modeling operations
  */
 
-import { Pool } from 'pg';
-import { StarSchema } from './schemas/star-schema';
-import { SnowflakeSchema } from './schemas/snowflake-schema';
-import { SCDHandler } from './scd/scd-handler';
-import { DimensionManager } from './dimensions/dimension-manager';
-import { FactTableManager } from './facts/fact-table-manager';
+import { Pool } from "pg";
+import { StarSchema } from "./schemas/star-schema";
+import { SnowflakeSchema } from "./schemas/snowflake-schema";
+import { SCDHandler } from "./scd/scd-handler";
+import { DimensionManager } from "./dimensions/dimension-manager";
+import { FactTableManager } from "./facts/fact-table-manager";
 
 export class ModelingManager {
   public starSchema: StarSchema;

@@ -5,7 +5,7 @@
  * with support for Claude 3.5 Sonnet, Claude 3 Opus, and Claude 3 Haiku.
  */
 
-import { BaseLLMProvider } from './BaseLLMProvider.js';
+import { BaseLLMProvider } from "./BaseLLMProvider.js";
 import {
   LLMProvider,
   LLMModel,
@@ -14,18 +14,18 @@ import {
   LLMProviderConfig,
   TokenUsage,
   LLMMessage,
-} from '../types/index.js';
+} from "../types/index.js";
 
 // Pricing per 1K tokens (as of 2024)
 const CLAUDE_PRICING: Record<string, { input: number; output: number }> = {
-  'claude-3-5-sonnet-20241022': { input: 0.003, output: 0.015 },
-  'claude-3-opus-20240229': { input: 0.015, output: 0.075 },
-  'claude-3-haiku-20240307': { input: 0.00025, output: 0.00125 },
+  "claude-3-5-sonnet-20241022": { input: 0.003, output: 0.015 },
+  "claude-3-opus-20240229": { input: 0.015, output: 0.075 },
+  "claude-3-haiku-20240307": { input: 0.00025, output: 0.00125 },
 };
 
 export interface ClaudeProviderConfig extends LLMProviderConfig {
-  provider: 'claude';
-  model: 'claude-3-5-sonnet-20241022' | 'claude-3-opus-20240229' | 'claude-3-haiku-20240307';
+  provider: "claude";
+  model: "claude-3-5-sonnet-20241022" | "claude-3-opus-20240229" | "claude-3-haiku-20240307";
 }
 
 export class ClaudeProvider extends BaseLLMProvider {
@@ -36,11 +36,11 @@ export class ClaudeProvider extends BaseLLMProvider {
   }
 
   get provider(): LLMProvider {
-    return 'claude';
+    return "claude";
   }
 
   get supportedModels(): LLMModel[] {
-    return ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'];
+    return ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-haiku-20240307"];
   }
 
   async complete(request: LLMRequest): Promise<LLMResponse> {
@@ -82,7 +82,7 @@ export class ClaudeProvider extends BaseLLMProvider {
       return {
         id: this.generateResponseId(),
         model: model as LLMModel,
-        provider: 'claude',
+        provider: "claude",
         content: this.extractContent(response),
         toolCalls: this.extractToolCalls(response),
         usage,
@@ -92,7 +92,12 @@ export class ClaudeProvider extends BaseLLMProvider {
       };
     } catch (error) {
       const latencyMs = Date.now() - startTime;
-      this.updateMetrics(false, latencyMs, { promptTokens: 0, completionTokens: 0, totalTokens: 0, estimatedCostUSD: 0 });
+      this.updateMetrics(false, latencyMs, {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        estimatedCostUSD: 0,
+      });
       throw error;
     }
   }
@@ -100,7 +105,7 @@ export class ClaudeProvider extends BaseLLMProvider {
   async healthCheck(): Promise<boolean> {
     try {
       await this.complete({
-        messages: [{ role: 'user', content: 'Hello' }],
+        messages: [{ role: "user", content: "Hello" }],
         maxTokens: 5,
       });
       return true;
@@ -110,23 +115,24 @@ export class ClaudeProvider extends BaseLLMProvider {
   }
 
   estimateCost(promptTokens: number, completionTokens: number): number {
-    const pricing = CLAUDE_PRICING[this.config.model] || CLAUDE_PRICING['claude-3-5-sonnet-20241022'];
+    const pricing =
+      CLAUDE_PRICING[this.config.model] || CLAUDE_PRICING["claude-3-5-sonnet-20241022"];
     return (promptTokens / 1000) * pricing.input + (completionTokens / 1000) * pricing.output;
   }
 
   private transformMessages(messages: LLMMessage[]): { systemPrompt: string; messages: any[] } {
-    let systemPrompt = '';
+    let systemPrompt = "";
     const transformedMessages: any[] = [];
 
     for (const msg of messages) {
-      if (msg.role === 'system') {
-        systemPrompt += (systemPrompt ? '\n\n' : '') + msg.content;
-      } else if (msg.role === 'tool') {
+      if (msg.role === "system") {
+        systemPrompt += (systemPrompt ? "\n\n" : "") + msg.content;
+      } else if (msg.role === "tool") {
         transformedMessages.push({
-          role: 'user',
+          role: "user",
           content: [
             {
-              type: 'tool_result',
+              type: "tool_result",
               tool_use_id: msg.toolCallId,
               content: msg.content,
             },
@@ -134,7 +140,7 @@ export class ClaudeProvider extends BaseLLMProvider {
         });
       } else {
         transformedMessages.push({
-          role: msg.role === 'assistant' ? 'assistant' : 'user',
+          role: msg.role === "assistant" ? "assistant" : "user",
           content: msg.content,
         });
       }
@@ -145,18 +151,18 @@ export class ClaudeProvider extends BaseLLMProvider {
 
   private async callClaudeAPI(requestBody: any): Promise<any> {
     const apiKey = this.config.apiKey || process.env.ANTHROPIC_API_KEY;
-    const baseUrl = this.config.baseUrl || 'https://api.anthropic.com';
+    const baseUrl = this.config.baseUrl || "https://api.anthropic.com";
 
     if (!apiKey) {
-      throw new Error('Anthropic API key not configured');
+      throw new Error("Anthropic API key not configured");
     }
 
     const response = await fetch(`${baseUrl}/v1/messages`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify(requestBody),
     });
@@ -171,25 +177,25 @@ export class ClaudeProvider extends BaseLLMProvider {
 
   private extractContent(response: any): string {
     if (!response.content || response.content.length === 0) {
-      return '';
+      return "";
     }
 
     return response.content
-      .filter((block: any) => block.type === 'text')
+      .filter((block: any) => block.type === "text")
       .map((block: any) => block.text)
-      .join('\n');
+      .join("\n");
   }
 
   private extractToolCalls(response: any): any[] | undefined {
     if (!response.content) return undefined;
 
-    const toolUseBlocks = response.content.filter((block: any) => block.type === 'tool_use');
+    const toolUseBlocks = response.content.filter((block: any) => block.type === "tool_use");
 
     if (toolUseBlocks.length === 0) return undefined;
 
     return toolUseBlocks.map((block: any) => ({
       id: block.id,
-      type: 'function' as const,
+      type: "function" as const,
       function: {
         name: block.name,
         arguments: JSON.stringify(block.input),

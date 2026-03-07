@@ -11,6 +11,7 @@ GET /health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",
@@ -61,6 +62,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "language": "fr",
@@ -90,6 +92,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "entities": [
@@ -132,14 +135,13 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "sentiment": "positive",
   "score": 0.92,
   "confidence": 0.95,
-  "emotions": [
-    { "emotion": "joy", "score": 0.85, "confidence": 0.9 }
-  ]
+  "emotions": [{ "emotion": "joy", "score": 0.85, "confidence": 0.9 }]
 }
 ```
 

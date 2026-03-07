@@ -3,23 +3,28 @@
 ## Conductor Summary
 
 ### Goal
+
 Ship a minimal, IntelGraph-compatible "DeepAgent-style" service that keeps thinking, tool discovery, and tool execution in a single reasoning loop, adds memory folding (episodic, working, and tool memories), and logs provenance behind the GraphQL gateway and organizational guardrails. The deliverable must align with the paper's core ideas of dynamic tool retrieval, memory folding, and an end-to-end loop.
 
 ### Non-Goals
+
 - Reproducing ToolPO reinforcement learning training or the benchmarking suite at this stage.
 - Anything outside the MVP surface described below, though hooks for future enhancements should be designed.
 
 ### Constraints
+
 - Honor IntelGraph defaults: SLOs, ABAC/OPA, provenance, and cost guardrails.
 - Technical stack: Node.js 20 with TypeScript, Apollo GraphQL, PostgreSQL, Neo4j, OpenTelemetry.
 - Provide deterministic testability.
 
 ### Risks & Mitigations
+
 - **Tool sprawl** → enforce allow/deny-lists and guardrails.
 - **Prompt injection via tool manifests** → validate manifests with OPA and sanitization.
 - **Context bloat** → implement folding thresholds and redaction routines.
 
 ### Definition of Done
+
 - Running service with GraphQL API and Socket.IO streaming.
 - Dynamic tool registry and retriever service.
 - Single-loop agent integrating reasoning, tool discovery, and execution with memory folding.
@@ -27,6 +32,7 @@ Ship a minimal, IntelGraph-compatible "DeepAgent-style" service that keeps think
 - Automated tests, k6 smoke script, Docker Compose environment, Helm chart stub, CI pipeline, and acceptance pack.
 
 ### Key References
+
 - MarkTechPost DeepAgent coverage (2025-11-01).
 - DeepAgent arXiv publication.
 - Official DeepAgent GitHub repository.
@@ -182,8 +188,10 @@ Stretch (scaffold only, behind feature flags)
 ```
 
 ## Optional Add-On
+
 - Offer to supply a slim agent system prompt that reinforces the single loop, private scratchpad, and memory folding requirements when integrating an external LLM.
 
 ## Usage Notes
+
 - Paste the Codex prompt into the IntelGraph code generation workflow to scaffold the MVP repository.
 - Align implementation decisions with IntelGraph Engineering Standard v4 and existing OPA guardrails.

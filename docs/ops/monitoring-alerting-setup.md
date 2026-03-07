@@ -9,8 +9,8 @@
 
 ```ts
 // server/src/telemetry/otel.ts
-import * as otel from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import * as otel from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 export const sdk = new otel.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
 });
@@ -43,6 +43,6 @@ spec:
   for: 10m
   labels: { severity: page }
   annotations:
-    summary: 'p95 GraphQL latency high'
-    runbook_url: 'https://git.example.com/docs/runbooks/performance-troubleshooting.md'
+    summary: "p95 GraphQL latency high"
+    runbook_url: "https://git.example.com/docs/runbooks/performance-troubleshooting.md"
 ```

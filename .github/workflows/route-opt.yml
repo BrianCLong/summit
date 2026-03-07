@@ -3,15 +3,15 @@ name: route-opt
 on:
   pull_request:
     paths:
-      - 'agents/route_opt/**'
-      - 'scripts/ci/check_route_schema.py'
-      - 'scripts/ci/check_determinism_hash.py'
-      - 'scripts/profile_route_opt.py'
-      - 'scripts/monitoring/route-opt-drift.py'
-      - '.github/workflows/route-opt.yml'
+      - "agents/route_opt/**"
+      - "scripts/ci/check_route_schema.py"
+      - "scripts/ci/check_determinism_hash.py"
+      - "scripts/profile_route_opt.py"
+      - "scripts/monitoring/route-opt-drift.py"
+      - ".github/workflows/route-opt.yml"
   workflow_dispatch:
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: "0 6 * * 1"
 
 jobs:
   check-route-schema:
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

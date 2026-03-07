@@ -257,8 +257,7 @@
 // License/Authority guard (query gate) — MVP‑2
 export async function guardQuery(ctx, queryPlan) {
   const { purpose, legalBasis, licenseTags } = ctx;
-  if (!purpose || !legalBasis)
-    throw new Error('Blocked: missing purpose/legal basis');
+  if (!purpose || !legalBasis) throw new Error("Blocked: missing purpose/legal basis");
   for (const step of queryPlan.steps) {
     if (step.usesDisallowedSelector(licenseTags)) {
       throw new Error(`Blocked: license ${step.blockedBy} at ${step.path}`);

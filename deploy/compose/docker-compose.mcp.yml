@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:15
@@ -7,11 +7,11 @@ services:
       POSTGRES_PASSWORD: maestro
       POSTGRES_DB: maestro
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U maestro']
+      test: ["CMD-SHELL", "pg_isready -U maestro"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,9 +19,9 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,8 +39,8 @@ services:
       POSTGRES_USER: maestro
       POSTGRES_PASSWORD: maestro
       REDIS_URL: redis://redis:6379/0
-      MAESTRO_MCP_ENABLED: 'true'
-      MCP_SESSIONS_PERSIST: 'true'
+      MAESTRO_MCP_ENABLED: "true"
+      MCP_SESSIONS_PERSIST: "true"
       SESSION_SECRET: change-me-in-prod
       SESSION_TTL_SECONDS: 3600
       CORS_ORIGIN: http://localhost:3000
@@ -48,7 +48,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OPA_BASE_URL: http://opa:8181
     ports:
-      - '4000:4000'
+      - "4000:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,18 +62,18 @@ services:
     environment:
       VITE_API_BASE: http://localhost:4000
     ports:
-      - '3000:3000'
+      - "3000:3000"
     depends_on:
       - server
 
   otel-collector:
     image: otel/opentelemetry-collector:0.97.0
-    command: ['--config=/etc/otel/config.yaml']
+    command: ["--config=/etc/otel/config.yaml"]
     volumes:
       - ./deploy/otel/config.yaml:/etc/otel/config.yaml:ro
     ports:
-      - '4317:4317' # OTLP gRPC
-      - '4318:4318' # OTLP HTTP
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
     depends_on:
       - server
 
@@ -83,14 +83,14 @@ services:
       - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./docs/observability/alerts/mcp-rules.yaml:/etc/prometheus/alerts/mcp-rules.yaml:ro
     ports:
-      - '9090:9090'
+      - "9090:9090"
     depends_on:
       - server
 
   grafana:
     image: grafana/grafana:11.1.0
     ports:
-      - '3001:3000'
+      - "3001:3000"
     volumes:
       - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./docs/observability/grafana/mcp-dashboard.json:/var/lib/grafana/dashboards/mcp-dashboard.json:ro
@@ -101,9 +101,9 @@ services:
 
   opa:
     image: openpolicyagent/opa:latest
-    command: ['run', '--server', '/policies']
+    command: ["run", "--server", "/policies"]
     ports:
-      - '8181:8181'
+      - "8181:8181"
     volumes:
       - ./deploy/opa/policies:/policies:ro
 
@@ -117,7 +117,7 @@ services:
     volumes:
       - ./server/src/db/migrations/postgres:/migrations:ro
       - ./deploy/db/seed.sql:/seed/seed.sql:ro
-    entrypoint: ['/bin/sh', '-c']
+    entrypoint: ["/bin/sh", "-c"]
     command: >
       "for f in /migrations/*.sql; do echo Applying $f; psql -h postgres -U maestro -d maestro -f \"$f\"; done;
       if [ -f /seed/seed.sql ]; then echo Seeding; psql -h postgres -U maestro -d maestro -f /seed/seed.sql; fi; echo Migrations complete; sleep 2"

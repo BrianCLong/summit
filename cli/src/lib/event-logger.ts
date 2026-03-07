@@ -9,21 +9,21 @@
  * - Automatic redaction of sensitive data
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 /**
  * Event types
  */
 export type EventType =
-  | 'run_start'
-  | 'step_start'
-  | 'action'
-  | 'provider_call'
-  | 'tool_exec'
-  | 'policy_decision'
-  | 'run_end'
-  | 'error';
+  | "run_start"
+  | "step_start"
+  | "action"
+  | "provider_call"
+  | "tool_exec"
+  | "policy_decision"
+  | "run_end"
+  | "error";
 
 /**
  * Base event structure
@@ -63,7 +63,7 @@ export interface StepStartData {
  * Action event data
  */
 export interface ActionData {
-  action_type: 'read' | 'write' | 'patch' | 'delete';
+  action_type: "read" | "write" | "patch" | "delete";
   affected_files: string[];
   diff_bytes?: number;
 }
@@ -78,7 +78,7 @@ export interface ProviderCallData {
   latency_ms: number | null;
   input_tokens?: number;
   output_tokens?: number;
-  status: 'success' | 'error' | 'timeout';
+  status: "success" | "error" | "timeout";
 }
 
 /**
@@ -96,7 +96,7 @@ export interface ToolExecData {
  * Run end event data
  */
 export interface RunEndData {
-  status: 'completed' | 'failed' | 'cancelled';
+  status: "completed" | "failed" | "cancelled";
   duration_ms: number | null;
   diagnostics: {
     total_operations: number;
@@ -173,7 +173,7 @@ const REDACTION_PATTERNS = [
 export function redactSensitive(input: string): string {
   let result = input;
   for (const pattern of REDACTION_PATTERNS) {
-    result = result.replace(pattern, '[REDACTED]');
+    result = result.replace(pattern, "[REDACTED]");
   }
   return result;
 }
@@ -182,20 +182,20 @@ export function redactSensitive(input: string): string {
  * Redact sensitive data from an object recursively
  */
 export function redactObject(obj: unknown): unknown {
-  if (typeof obj === 'string') {
+  if (typeof obj === "string") {
     return redactSensitive(obj);
   }
   if (Array.isArray(obj)) {
     return obj.map(redactObject);
   }
-  if (obj !== null && typeof obj === 'object') {
+  if (obj !== null && typeof obj === "object") {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       // Redact values for sensitive keys
-      const sensitiveKeys = ['password', 'secret', 'token', 'key', 'auth', 'credential', 'bearer'];
-      const isSensitiveKey = sensitiveKeys.some(k => key.toLowerCase().includes(k));
-      if (isSensitiveKey && typeof value === 'string') {
-        result[key] = '[REDACTED]';
+      const sensitiveKeys = ["password", "secret", "token", "key", "auth", "credential", "bearer"];
+      const isSensitiveKey = sensitiveKeys.some((k) => key.toLowerCase().includes(k));
+      if (isSensitiveKey && typeof value === "string") {
+        result[key] = "[REDACTED]";
       } else {
         result[key] = redactObject(value);
       }
@@ -212,7 +212,7 @@ export function sortObjectKeys(obj: unknown): unknown {
   if (Array.isArray(obj)) {
     return obj.map(sortObjectKeys);
   }
-  if (obj !== null && typeof obj === 'object') {
+  if (obj !== null && typeof obj === "object") {
     const sorted: Record<string, unknown> = {};
     const keys = Object.keys(obj as Record<string, unknown>).sort();
     for (const key of keys) {
@@ -249,7 +249,7 @@ export class EventLogger {
       fs.mkdirSync(sessionPath, { recursive: true });
     }
 
-    this.eventFile = path.join(sessionPath, 'events.jsonl');
+    this.eventFile = path.join(sessionPath, "events.jsonl");
   }
 
   /**
@@ -275,7 +275,7 @@ export class EventLogger {
     // Redact sensitive data unless unsafe mode
     const safeData = this.options.unsafeLogPrompts
       ? data
-      : redactObject(data) as Record<string, unknown>;
+      : (redactObject(data) as Record<string, unknown>);
 
     // Sort data keys for determinism
     const sortedData = sortObjectKeys(safeData) as Record<string, unknown>;
@@ -291,7 +291,7 @@ export class EventLogger {
 
     // Sort top-level keys
     const sortedEvent = sortObjectKeys(event);
-    const line = JSON.stringify(sortedEvent) + '\n';
+    const line = JSON.stringify(sortedEvent) + "\n";
 
     fs.appendFileSync(this.eventFile, line);
   }
@@ -300,7 +300,7 @@ export class EventLogger {
    * Log run start event
    */
   logRunStart(data: RunStartData): void {
-    this.writeEvent('run_start', {
+    this.writeEvent("run_start", {
       ...data,
       args: stableSortStrings(data.args),
       normalized_env: sortObjectKeys(data.normalized_env),
@@ -311,14 +311,14 @@ export class EventLogger {
    * Log step start event
    */
   logStepStart(data: StepStartData): void {
-    this.writeEvent('step_start', data as unknown as Record<string, unknown>);
+    this.writeEvent("step_start", data as unknown as Record<string, unknown>);
   }
 
   /**
    * Log action event
    */
   logAction(data: ActionData): void {
-    this.writeEvent('action', {
+    this.writeEvent("action", {
       ...data,
       affected_files: stableSortStrings(data.affected_files),
     } as unknown as Record<string, unknown>);
@@ -327,31 +327,33 @@ export class EventLogger {
   /**
    * Log provider call event
    */
-  logProviderCall(data: Omit<ProviderCallData, 'latency_ms'> & { latency_ms?: number }): void {
-    this.writeEvent('provider_call', {
+  logProviderCall(data: Omit<ProviderCallData, "latency_ms"> & { latency_ms?: number }): void {
+    this.writeEvent("provider_call", {
       ...data,
-      latency_ms: this.options.includeTimestamps ? data.latency_ms ?? null : null,
+      latency_ms: this.options.includeTimestamps ? (data.latency_ms ?? null) : null,
     } as unknown as Record<string, unknown>);
   }
 
   /**
    * Log tool execution event
    */
-  logToolExec(data: Omit<ToolExecData, 'duration_ms'> & { duration_ms?: number }): void {
-    this.writeEvent('tool_exec', {
+  logToolExec(data: Omit<ToolExecData, "duration_ms"> & { duration_ms?: number }): void {
+    this.writeEvent("tool_exec", {
       ...data,
       args: stableSortStrings(data.args),
-      duration_ms: this.options.includeTimestamps ? data.duration_ms ?? null : null,
+      duration_ms: this.options.includeTimestamps ? (data.duration_ms ?? null) : null,
     } as unknown as Record<string, unknown>);
   }
 
   /**
    * Log run end event
    */
-  logRunEnd(data: Omit<RunEndData, 'duration_ms'> & { duration_ms?: number }): void {
-    this.writeEvent('run_end', {
+  logRunEnd(data: Omit<RunEndData, "duration_ms"> & { duration_ms?: number }): void {
+    this.writeEvent("run_end", {
       ...data,
-      duration_ms: this.options.includeTimestamps ? data.duration_ms ?? this.getElapsedMs() : null,
+      duration_ms: this.options.includeTimestamps
+        ? (data.duration_ms ?? this.getElapsedMs())
+        : null,
       diagnostics: sortObjectKeys(data.diagnostics),
     } as unknown as Record<string, unknown>);
   }
@@ -360,7 +362,7 @@ export class EventLogger {
    * Log error event
    */
   logError(data: ErrorData): void {
-    this.writeEvent('error', {
+    this.writeEvent("error", {
       ...data,
       message: this.options.unsafeLogPrompts ? data.message : redactSensitive(data.message),
       deny_reasons: stableSortStrings(data.deny_reasons),
@@ -371,7 +373,7 @@ export class EventLogger {
    * Log policy decision event
    */
   logPolicyDecision(data: PolicyDecisionData): void {
-    this.writeEvent('policy_decision', {
+    this.writeEvent("policy_decision", {
       ...data,
       deny_reasons: stableSortStrings(data.deny_reasons),
       limits: sortObjectKeys(data.limits),
@@ -401,10 +403,13 @@ export function readEvents(eventFile: string): BaseEvent[] {
     return [];
   }
 
-  const content = fs.readFileSync(eventFile, 'utf-8');
-  const lines = content.trim().split('\n').filter(line => line.length > 0);
+  const content = fs.readFileSync(eventFile, "utf-8");
+  const lines = content
+    .trim()
+    .split("\n")
+    .filter((line) => line.length > 0);
 
-  return lines.map(line => JSON.parse(line) as BaseEvent);
+  return lines.map((line) => JSON.parse(line) as BaseEvent);
 }
 
 /**

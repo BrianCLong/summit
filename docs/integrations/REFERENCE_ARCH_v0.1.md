@@ -301,6 +301,7 @@ packages/
 **MAESTRO Layers:** Foundation, Data, Agents, Tools, Infra, Observability, Security.
 
 **Threats Considered:**
+
 - Webhook spoofing
 - Connector token theft
 - Policy bypass attempts
@@ -309,6 +310,7 @@ packages/
 - Audit log tampering
 
 **Mitigations:**
+
 - mTLS + signed webhooks + tenant scoping
 - Workload identity + scoped tokens (no user keys)
 - OPA deny‑by‑default + HITL obligations

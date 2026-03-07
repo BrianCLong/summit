@@ -157,7 +157,7 @@ deny[{"code":"SUBREGION"}] { input.context.subregion != data.tenants[input.tenan
 
 ```ts
 const sub = detectSubregion(req);
-res.headers.set('x-subregion', sub);
+res.headers.set("x-subregion", sub);
 ```
 
 **StorageClass Labels (K8s)**
@@ -201,7 +201,7 @@ export function AnomalyExplain({ a }: { a: any }) {
       <div className="text-xs">
         baseline: {a.baselineRange} · window: {a.window}
       </div>
-      <div className="text-xs">top contributors: {a.features.join(', ')}</div>
+      <div className="text-xs">top contributors: {a.features.join(", ")}</div>
       <div className="text-xs">
         counterfactual: reduce {a.features[0]} by {a.delta}%
       </div>

@@ -1,8 +1,8 @@
-import process from 'node:process';
+import process from "node:process";
 
-const sourceUrl = process.env.SOURCE_URL || 'https://jsonplaceholder.typicode.com/posts?_limit=5';
-const graphqlUrl = process.env.GRAPHQL_URL || 'http://localhost:4000/graphql';
-const token = process.env.GRAPHQL_TOKEN || 'dev-token';
+const sourceUrl = process.env.SOURCE_URL || "https://jsonplaceholder.typicode.com/posts?_limit=5";
+const graphqlUrl = process.env.GRAPHQL_URL || "http://localhost:4000/graphql";
+const token = process.env.GRAPHQL_TOKEN || "dev-token";
 
 const mutation = `
 mutation UpsertExternalEntities($input: [ExternalEntityInput!]!) {
@@ -26,20 +26,23 @@ async function fetchPage() {
 function toEntityInput(records) {
   return records.map((record) => ({
     externalId: `json-api-${record.id}`,
-    name: record.title ?? 'untitled',
-    description: record.body ?? '',
-    attributes: [{ key: 'source', value: sourceUrl }, { key: 'topic', value: 'demo' }]
+    name: record.title ?? "untitled",
+    description: record.body ?? "",
+    attributes: [
+      { key: "source", value: sourceUrl },
+      { key: "topic", value: "demo" },
+    ],
   }));
 }
 
 async function sendBatch(entities) {
   const response = await fetch(graphqlUrl, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ query: mutation, variables: { input: entities } })
+    body: JSON.stringify({ query: mutation, variables: { input: entities } }),
   });
 
   if (!response.ok) {
@@ -49,7 +52,7 @@ async function sendBatch(entities) {
   const body = await response.json();
   if (body.errors) {
     console.error(body.errors);
-    throw new Error('GraphQL reported errors');
+    throw new Error("GraphQL reported errors");
   }
 
   return body.data.upsertExternalEntities;

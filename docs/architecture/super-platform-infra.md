@@ -2,11 +2,11 @@
 
 ## Layer Mapping
 
-| Adidas layer | CDK concept | Terraform Cloud concept | Backstage concept |
-|---|---|---|---|
-| module | construct library | module registry | template skeleton |
-| stack | stack | workspace/run plan | generated component |
-| consumption config | App/stack instance | workspace vars | template input + catalog |
+| Adidas layer       | CDK concept        | Terraform Cloud concept | Backstage concept        |
+| ------------------ | ------------------ | ----------------------- | ------------------------ |
+| module             | construct library  | module registry         | template skeleton        |
+| stack              | stack              | workspace/run plan      | generated component      |
+| consumption config | App/stack instance | workspace vars          | template input + catalog |
 
 ## 10 Summit Rules
 

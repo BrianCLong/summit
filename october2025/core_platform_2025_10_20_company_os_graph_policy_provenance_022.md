@@ -121,14 +121,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GraphQuery'
+              $ref: "#/components/schemas/GraphQuery"
       responses:
-        '200': { $ref: '#/components/schemas/GraphResult' }
+        "200": { $ref: "#/components/schemas/GraphResult" }
   /policy/preflight:
     post:
       summary: Simulate policy decision
       responses:
-        '200': { description: Decision with rationale }
+        "200": { description: Decision with rationale }
   /provenance/receipts/{id}:
     get:
       summary: Fetch signed receipt (selective disclosure)
@@ -137,16 +137,8 @@ paths:
       summary: Ingest metering events (idempotent)
 components:
   schemas:
-    GraphQuery:
-      {
-        type: object,
-        properties: { query: { type: string }, vars: { type: object } },
-      }
-    GraphResult:
-      {
-        type: object,
-        properties: { nodes: { type: array }, edges: { type: array } },
-      }
+    GraphQuery: { type: object, properties: { query: { type: string }, vars: { type: object } } }
+    GraphResult: { type: object, properties: { nodes: { type: array }, edges: { type: array } } }
 ```
 
 ### 3.3 Protobuf — Receipt Envelope (v1)
@@ -227,7 +219,7 @@ provenance:
   signingKeyRef: companyos-receipts-key
 metering:
   kafka:
-    brokers: ['kafka-1:9092', 'kafka-2:9092']
+    brokers: ["kafka-1:9092", "kafka-2:9092"]
 ```
 
 ### 3.8 Terraform (module stubs)
@@ -261,9 +253,7 @@ module "notary" {
     {
       "type": "stat",
       "title": "Error Rate p99",
-      "targets": [
-        { "expr": "sum(rate(http_5xx_total[5m])) / sum(rate(http_total[5m]))" }
-      ]
+      "targets": [{ "expr": "sum(rate(http_5xx_total[5m])) / sum(rate(http_total[5m]))" }]
     },
     {
       "type": "graph",

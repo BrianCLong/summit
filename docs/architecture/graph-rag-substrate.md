@@ -28,11 +28,11 @@ graph TD
 
 ## Threat Model & Mitigations
 
-| Threat | Mitigation | Evidence |
-|---|---|---|
-| **PII Leakage** | Ingest gates check PII classification before embedding. | `policy.json` (decision trace) |
-| **Cross-Tenant Access** | Execution gates enforce tenancy scope in the plan. | `plan.json` (constraints) |
-| **Graph Poisoning** | Source provenance is hashed and linked. | `sources.json` (hashes) |
+| Threat                       | Mitigation                                                | Evidence                          |
+| ---------------------------- | --------------------------------------------------------- | --------------------------------- |
+| **PII Leakage**              | Ingest gates check PII classification before embedding.   | `policy.json` (decision trace)    |
+| **Cross-Tenant Access**      | Execution gates enforce tenancy scope in the plan.        | `plan.json` (constraints)         |
+| **Graph Poisoning**          | Source provenance is hashed and linked.                   | `sources.json` (hashes)           |
 | **Non-Deterministic Output** | Canonicalization of all artifacts + fixed seeds (future). | `retrieval.json` (content hashes) |
 
 ## Usage

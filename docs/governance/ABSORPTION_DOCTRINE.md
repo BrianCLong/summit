@@ -3,7 +3,6 @@
 > Evidence-IDs: GOV-005, GOV-006, AUD-001
 > Status: active
 
-
 # Summit Absorption, Convergence & Anti-Fragmentation Doctrine
 
 **"Everything that joins Summit conforms, or it does not join."**

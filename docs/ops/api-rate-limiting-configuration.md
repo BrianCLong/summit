@@ -8,9 +8,9 @@
 ```yaml
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/limit-connections: '50'
-    nginx.ingress.kubernetes.io/limit-rps: '20'
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: '5'
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    nginx.ingress.kubernetes.io/limit-rps: "20"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
 ```
 
 ### Envoy Global Rate Limit (Redis)
@@ -22,8 +22,8 @@ metadata:
 
 ```ts
 // server/src/middleware/rateLimit.ts
-import { createClient } from 'redis';
-import type { Request, Response, NextFunction } from 'express';
+import { createClient } from "redis";
+import type { Request, Response, NextFunction } from "express";
 
 const redis = createClient({ url: process.env.REDIS_URL });
 redis.connect();
@@ -36,7 +36,7 @@ export function tokenBucket({
   refillPerSec: number;
 }) {
   return async function (req: Request, res: Response, next: NextFunction) {
-    const tenant = (req as any).tenantId || 'anon';
+    const tenant = (req as any).tenantId || "anon";
     const key = `rl:${tenant}:${req.ip}`;
     const now = Date.now();
     const lua = `
@@ -61,7 +61,7 @@ export function tokenBucket({
     })) as [number, number];
     if (r[0] === 1) return next();
     res.status(429).json({
-      error: 'rate_limited',
+      error: "rate_limited",
       retryAfterSec: Math.ceil((1 - r[1]) / refillPerSec),
     });
   };
@@ -71,13 +71,13 @@ export function tokenBucket({
 ### GraphQL Complexity Guard (Apollo Plugin)
 
 ```ts
-import { PluginDefinition } from 'apollo-server-plugin-base';
+import { PluginDefinition } from "apollo-server-plugin-base";
 export const costGuard: PluginDefinition = {
   requestDidStart() {
     return {
       didResolveOperation({ request, document }) {
         const cost = estimateCost(document);
-        if (cost > 2000) throw new Error('Query too costly');
+        if (cost > 2000) throw new Error("Query too costly");
       },
     };
   },
@@ -87,10 +87,9 @@ export const costGuard: PluginDefinition = {
 ### Tests (Jest + Supertest)
 
 ```ts
-it('enforces 429 when bursting', async () => {
-  for (let i = 0; i < 100; i++)
-    await request(app).get('/graphql').send({ query: '{ ping }' });
-  const res = await request(app).get('/graphql').send({ query: '{ ping }' });
+it("enforces 429 when bursting", async () => {
+  for (let i = 0; i < 100; i++) await request(app).get("/graphql").send({ query: "{ ping }" });
+  const res = await request(app).get("/graphql").send({ query: "{ ping }" });
   expect([429, 200]).toContain(res.status); // flake‑tolerant while tuning
 });
 ```

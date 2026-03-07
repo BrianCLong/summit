@@ -4,9 +4,7 @@ export type PolicyAction =
   | { kind: "browser.navigate"; url: string }
   | { kind: "browser.click"; selector: string };
 
-export type PolicyDecision =
-  | { allow: true }
-  | { allow: false; reason: string };
+export type PolicyDecision = { allow: true } | { allow: false; reason: string };
 
 export interface PolicyContext {
   principalId: string;

@@ -117,18 +117,18 @@ export function register(t: Tool) {
 }
 
 register({
-  name: 'searchEntities',
-  schema: { q: 'string', limit: 'number' },
+  name: "searchEntities",
+  schema: { q: "string", limit: "number" },
   async run(args, ctx) {
     return ctx.driver.executeQuery(
-      'MATCH (n) WHERE n.name CONTAINS $q RETURN n LIMIT $limit',
-      args,
+      "MATCH (n) WHERE n.name CONTAINS $q RETURN n LIMIT $limit",
+      args
     );
   },
 });
 register({
-  name: 'path',
-  schema: { a: 'string', b: 'string', k: 'number' },
+  name: "path",
+  schema: { a: "string", b: "string", k: "number" },
   async run(args, ctx) {
     /* call k‑paths */
   },
@@ -147,14 +147,14 @@ export function plan(prompt: string): Plan {
     return {
       steps: [
         {
-          tool: 'path',
-          args: { a: 'A', b: 'B', k: 3 },
+          tool: "path",
+          args: { a: "A", b: "B", k: 3 },
           budget: { rows: 10000, ms: 800 },
         },
       ],
     };
   return {
-    steps: [{ tool: 'searchEntities', args: { q: prompt, limit: 20 } }],
+    steps: [{ tool: "searchEntities", args: { q: prompt, limit: 20 } }],
   };
 }
 ```
@@ -167,14 +167,10 @@ export async function runSandbox(step: any, ctx: any) {
   const t0 = Date.now();
   const res = await registry[step.tool].run(step.args, ctx);
   const ms = Date.now() - t0;
-  if (step.budget && ms > step.budget.ms)
-    throw new Error('BudgetExceeded:time');
+  if (step.budget && ms > step.budget.ms) throw new Error("BudgetExceeded:time");
   // row budget check (pseudo)
-  const rows = Array.isArray(res.records)
-    ? res.records.length
-    : res.records?.length || 0;
-  if (step.budget && rows > step.budget.rows)
-    throw new Error('BudgetExceeded:rows');
+  const rows = Array.isArray(res.records) ? res.records.length : res.records?.length || 0;
+  if (step.budget && rows > step.budget.rows) throw new Error("BudgetExceeded:rows");
   return { ms, rows, res };
 }
 ```
@@ -183,7 +179,7 @@ export async function runSandbox(step: any, ctx: any) {
 
 ```ts
 // server/src/prompts/store.ts
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from "fs";
 export type PromptSet = {
   id: string;
   name: string;
@@ -196,7 +192,7 @@ export function save(ps: PromptSet) {
   writeFileSync(`prompts/${ps.id}.json`, JSON.stringify(ps, null, 2));
 }
 export function load(id: string) {
-  return JSON.parse(readFileSync(`prompts/${id}.json`, 'utf8'));
+  return JSON.parse(readFileSync(`prompts/${id}.json`, "utf8"));
 }
 export function diff(a: PromptSet, b: PromptSet) {
   return {
@@ -213,20 +209,14 @@ export function diff(a: PromptSet, b: PromptSet) {
 export type RT = {
   id: string;
   prompt: string;
-  expect: 'deny' | 'allow';
+  expect: "deny" | "allow";
   reason?: string;
 };
-export async function runRedTeam(
-  setId: string,
-  tests: RT[],
-  exec: (p: string) => Promise<any>,
-) {
+export async function runRedTeam(setId: string, tests: RT[], exec: (p: string) => Promise<any>) {
   const results = [];
   for (const t of tests) {
     const out = await exec(t.prompt);
-    const passed =
-      (t.expect === 'deny' && out.denied) ||
-      (t.expect === 'allow' && !out.denied);
+    const passed = (t.expect === "deny" && out.denied) || (t.expect === "allow" && !out.denied);
     results.push({ id: t.id, passed, reason: out.reason });
   }
   return results;
@@ -281,23 +271,23 @@ type Mutation {
 ```js
 // apps/web/src/features/copilot/jquery-copilot.js
 $(function () {
-  $('#ask').on('click', function () {
-    const prompt = $('#prompt').val();
+  $("#ask").on("click", function () {
+    const prompt = $("#prompt").val();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `{ copilotPlan(input:{ prompt:"${prompt}" }){ steps costMs reason } }`,
       }),
     });
   });
-  $(document).on('click', '.approve-step', function () {
-    const plan = $(this).data('plan');
+  $(document).on("click", ".approve-step", function () {
+    const plan = $(this).data("plan");
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation{ copilotExecute(plan:"${plan}"){ ok, rows, ms } }`,
       }),
@@ -355,20 +345,19 @@ panels:
 ### 4.10 k6 — Copilot Load
 
 ```js
-import http from 'k6/http';
+import http from "k6/http";
 export const options = {
   vus: 40,
-  duration: '3m',
-  thresholds: { http_req_duration: ['p(95)<1200'] },
+  duration: "3m",
+  thresholds: { http_req_duration: ["p(95)<1200"] },
 };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
-      query:
-        '{ copilotPlan(input:{ prompt:"find connections between acme and bob" }){ steps } }',
+      query: '{ copilotPlan(input:{ prompt:"find connections between acme and bob" }){ steps } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

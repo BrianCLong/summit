@@ -2,10 +2,10 @@
 
 ## SLO Definitions
 
-| Objective | Target | Measurement Window |
-|-----------|--------|--------------------|
-| **Latency** | p95 < 1500ms | 5 minutes |
-| **Availability** | 99.9% Success Rate | 30 days |
+| Objective        | Target             | Measurement Window |
+| ---------------- | ------------------ | ------------------ |
+| **Latency**      | p95 < 1500ms       | 5 minutes          |
+| **Availability** | 99.9% Success Rate | 30 days            |
 
 ## Enforcement
 

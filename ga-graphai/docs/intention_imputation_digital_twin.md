@@ -43,15 +43,15 @@ This document formalizes a production-grade capability that infers multi-step ac
 
 ### Service Backlog
 
-| Sprint | Deliverable | Owner Squad | Exit Criteria |
-|--------|-------------|-------------|---------------|
-| 0 | Foundational schemas (`Observation`, `IntentHypothesis`, `TwinScenarioRun`) and shared TypeScript types | Common Types | Schema definitions merged, JSON Schema + Zod validators published, API mocks available |
-| 1 | Observation Collector service (ingestion adapters, normalization pipeline) | Signals | Kafka topics live, 2 ingestion adapters operational, unit + contract tests ≥85% |
-| 1 | Goal Hypothesizer microservice with Bayesian/RAG hybrid engine | Intelligence | Hypothesis P95 latency ≤ 6s, supports 3 mission ontologies, baseline accuracy report produced |
-| 2 | Digital Twin Orchestrator workcell extension | Twin Ops | Deterministic replay verified across 5 seeds, autoscaling tuned, telemetry exported |
-| 2 | Provenance Ledger pipeline (writer + Merkle signer + retention jobs) | ProvLedger | Ledger entries queryable via API, SBOM signing automated, retention jobs dry-run completed |
-| 3 | Analyst overlay UI surfaces branch visualizations & mitigation workflow | Investigations | UX review signed off, SOC webhook integration validated, accessibility audit passed |
-| 3 | Policy automation hooks + REST webhooks | Policy | Policy engine consumes advisories end-to-end, audit trail stored in compliance vault |
+| Sprint | Deliverable                                                                                             | Owner Squad    | Exit Criteria                                                                                 |
+| ------ | ------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| 0      | Foundational schemas (`Observation`, `IntentHypothesis`, `TwinScenarioRun`) and shared TypeScript types | Common Types   | Schema definitions merged, JSON Schema + Zod validators published, API mocks available        |
+| 1      | Observation Collector service (ingestion adapters, normalization pipeline)                              | Signals        | Kafka topics live, 2 ingestion adapters operational, unit + contract tests ≥85%               |
+| 1      | Goal Hypothesizer microservice with Bayesian/RAG hybrid engine                                          | Intelligence   | Hypothesis P95 latency ≤ 6s, supports 3 mission ontologies, baseline accuracy report produced |
+| 2      | Digital Twin Orchestrator workcell extension                                                            | Twin Ops       | Deterministic replay verified across 5 seeds, autoscaling tuned, telemetry exported           |
+| 2      | Provenance Ledger pipeline (writer + Merkle signer + retention jobs)                                    | ProvLedger     | Ledger entries queryable via API, SBOM signing automated, retention jobs dry-run completed    |
+| 3      | Analyst overlay UI surfaces branch visualizations & mitigation workflow                                 | Investigations | UX review signed off, SOC webhook integration validated, accessibility audit passed           |
+| 3      | Policy automation hooks + REST webhooks                                                                 | Policy         | Policy engine consumes advisories end-to-end, audit trail stored in compliance vault          |
 
 ### Delivery Milestones
 
@@ -112,13 +112,13 @@ This document formalizes a production-grade capability that infers multi-step ac
 
 A Zero-Trust mesh connects the tiers. Each boundary enforces mutual TLS, per-mission authorization, and event-level provenance tagging. High-level data flow:
 
-| Step | Producer | Consumer | Artifact | Notes |
-|------|----------|----------|----------|-------|
-| 1 | Observation Collector | Goal Hypothesizer | `Observation` | JSON schema, includes source, sensitivity, policy tags |
-| 2 | Goal Hypothesizer | Twin Orchestrator | `IntentHypothesisBatch` | Ranked list with priors, time horizon, guardrail metadata |
-| 3 | Twin Orchestrator | Provenance Ledger Writer | `TwinScenarioRun` | Branch tree, metrics, per-branch evidence references |
-| 4 | Ledger Writer | Analyst Overlay | `ProvenanceBundle` | Ledger entry IDs, SBOM signature, compliance classification |
-| 5 | Overlay | External Consumers | `IntentionAdvisory` | GraphQL types, includes recommended mitigations and audit link |
+| Step | Producer              | Consumer                 | Artifact                | Notes                                                          |
+| ---- | --------------------- | ------------------------ | ----------------------- | -------------------------------------------------------------- |
+| 1    | Observation Collector | Goal Hypothesizer        | `Observation`           | JSON schema, includes source, sensitivity, policy tags         |
+| 2    | Goal Hypothesizer     | Twin Orchestrator        | `IntentHypothesisBatch` | Ranked list with priors, time horizon, guardrail metadata      |
+| 3    | Twin Orchestrator     | Provenance Ledger Writer | `TwinScenarioRun`       | Branch tree, metrics, per-branch evidence references           |
+| 4    | Ledger Writer         | Analyst Overlay          | `ProvenanceBundle`      | Ledger entry IDs, SBOM signature, compliance classification    |
+| 5    | Overlay               | External Consumers       | `IntentionAdvisory`     | GraphQL types, includes recommended mitigations and audit link |
 
 ### Deployment Topology
 
@@ -132,36 +132,36 @@ A Zero-Trust mesh connects the tiers. Each boundary enforces mutual TLS, per-mis
 
 ### Observation
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `observationId` | UUID | Unique identifier for correlation and replay |
-| `timestamp` | ISO 8601 | Event time in UTC |
-| `actorRef` | String | Actor or entity identifier in GraphAI ontology |
-| `signals` | Array<Object> | Structured or unstructured features, each with provenance reference |
-| `sensitivity` | Enum | `PUBLIC`, `CONFIDENTIAL`, `RESTRICTED`, `SECRET` |
-| `sourceProvenance` | Object | Hashes, ingestion adapter metadata, signature |
+| Field              | Type          | Description                                                         |
+| ------------------ | ------------- | ------------------------------------------------------------------- |
+| `observationId`    | UUID          | Unique identifier for correlation and replay                        |
+| `timestamp`        | ISO 8601      | Event time in UTC                                                   |
+| `actorRef`         | String        | Actor or entity identifier in GraphAI ontology                      |
+| `signals`          | Array<Object> | Structured or unstructured features, each with provenance reference |
+| `sensitivity`      | Enum          | `PUBLIC`, `CONFIDENTIAL`, `RESTRICTED`, `SECRET`                    |
+| `sourceProvenance` | Object        | Hashes, ingestion adapter metadata, signature                       |
 
 ### IntentHypothesis
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `hypothesisId` | UUID | Primary key linked to ledger |
-| `goal` | OntologyRef | Canonical goal identifier |
-| `confidence` | Float | Posterior probability (0-1) |
-| `supportingEvidence` | Array<ObservationRef> | Observations and precedent cases |
-| `counterfactualScore` | Float | Divergence between actual and best-fit simulated path |
-| `governanceState` | Enum | `DRAFT`, `REVIEW`, `APPROVED`, `REJECTED` |
+| Field                 | Type                  | Description                                           |
+| --------------------- | --------------------- | ----------------------------------------------------- |
+| `hypothesisId`        | UUID                  | Primary key linked to ledger                          |
+| `goal`                | OntologyRef           | Canonical goal identifier                             |
+| `confidence`          | Float                 | Posterior probability (0-1)                           |
+| `supportingEvidence`  | Array<ObservationRef> | Observations and precedent cases                      |
+| `counterfactualScore` | Float                 | Divergence between actual and best-fit simulated path |
+| `governanceState`     | Enum                  | `DRAFT`, `REVIEW`, `APPROVED`, `REJECTED`             |
 
 ### TwinScenarioRun
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `scenarioId` | UUID | Run identifier |
-| `seed` | Integer | Deterministic seed for repeatability |
-| `branchTree` | JSON | Nested structure capturing decisions, transitions, and metrics |
-| `resourceLedger` | Object | Compute, storage, API credits consumed |
-| `riskScores` | Map<String, Float> | Impact, likelihood, collateral metrics |
-| `mitigationHooks` | Array<PolicyRef> | Automation triggers mapped to policy engine |
+| Field             | Type               | Description                                                    |
+| ----------------- | ------------------ | -------------------------------------------------------------- |
+| `scenarioId`      | UUID               | Run identifier                                                 |
+| `seed`            | Integer            | Deterministic seed for repeatability                           |
+| `branchTree`      | JSON               | Nested structure capturing decisions, transitions, and metrics |
+| `resourceLedger`  | Object             | Compute, storage, API credits consumed                         |
+| `riskScores`      | Map<String, Float> | Impact, likelihood, collateral metrics                         |
+| `mitigationHooks` | Array<PolicyRef>   | Automation triggers mapped to policy engine                    |
 
 ### IntentionAdvisory (GraphQL)
 
@@ -319,12 +319,12 @@ type MitigationHook {
 
 ### Incident Response
 
-| Scenario | Primary Signals | Response Actions |
-|----------|-----------------|------------------|
-| Hypothesis backlog spike | Kafka lag, queue depth alerts | Invoke backlog playbook: increase orchestrator replicas, adjust pruning threshold, notify mission commanders |
-| Ledger signing failure | Alert from ProvLedger signer, failed SBOM attestation | Fail closed; pause advisory publication, rotate HSM keys, rerun signing job with audit trail |
-| Twin drift detected | Drift metrics exceeding thresholds, fairness dashboard alert | Trigger calibration workflow: retrain models, update twin parameters, document review |
-| Automation webhook failure | HTTP 5xx from policy engine, retry exhaustion | Switch to manual mitigation approval, open incident ticket, run webhook replay tool |
+| Scenario                   | Primary Signals                                              | Response Actions                                                                                             |
+| -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Hypothesis backlog spike   | Kafka lag, queue depth alerts                                | Invoke backlog playbook: increase orchestrator replicas, adjust pruning threshold, notify mission commanders |
+| Ledger signing failure     | Alert from ProvLedger signer, failed SBOM attestation        | Fail closed; pause advisory publication, rotate HSM keys, rerun signing job with audit trail                 |
+| Twin drift detected        | Drift metrics exceeding thresholds, fairness dashboard alert | Trigger calibration workflow: retrain models, update twin parameters, document review                        |
+| Automation webhook failure | HTTP 5xx from policy engine, retry exhaustion                | Switch to manual mitigation approval, open incident ticket, run webhook replay tool                          |
 
 ### Adoption & Change Management
 

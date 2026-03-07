@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from '@apollo/client'
 
 export const GET_STRATEGIC_PLANS = gql`
   query GetStrategicPlans($filter: StrategicPlanFilter) {
@@ -20,7 +20,7 @@ export const GET_STRATEGIC_PLANS = gql`
       }
     }
   }
-`;
+`
 
 export const GET_STRATEGIC_PLAN_DETAILS = gql`
   query GetStrategicPlanDetails($id: String!) {
@@ -41,10 +41,10 @@ export const GET_STRATEGIC_PLAN_DETAILS = gql`
         startDate
         targetDate
         milestones {
-            id
-            name
-            dueDate
-            status
+          id
+          name
+          dueDate
+          status
         }
       }
       initiatives {
@@ -67,12 +67,12 @@ export const GET_STRATEGIC_PLAN_DETAILS = gql`
         status
         owner
         mitigationStrategies {
-             id
-             description
-             type
-             owner
-             deadline
-             status
+          id
+          description
+          type
+          owner
+          deadline
+          status
         }
       }
       kpis {
@@ -136,4 +136,4 @@ export const GET_STRATEGIC_PLAN_DETAILS = gql`
       }
     }
   }
-`;
+`

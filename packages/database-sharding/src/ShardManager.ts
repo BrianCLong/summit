@@ -1,11 +1,11 @@
-import { Pool } from 'pg';
-import { trace, context } from '@opentelemetry/api';
-import pino from 'pino';
-import { ShardConfig, ShardingConfig, ShardMetrics } from './types';
-import { ShardConnectionPool } from './ShardConnectionPool';
+import { Pool } from "pg";
+import { trace, context } from "@opentelemetry/api";
+import pino from "pino";
+import { ShardConfig, ShardingConfig, ShardMetrics } from "./types";
+import { ShardConnectionPool } from "./ShardConnectionPool";
 
-const logger = pino({ name: 'ShardManager' });
-const tracer = trace.getTracer('database-sharding');
+const logger = pino({ name: "ShardManager" });
+const tracer = trace.getTracer("database-sharding");
 
 /**
  * Manages database shards, connection pools, and health monitoring
@@ -22,7 +22,7 @@ export class ShardManager {
   }
 
   private initializeShards(): void {
-    const span = tracer.startSpan('ShardManager.initializeShards');
+    const span = tracer.startSpan("ShardManager.initializeShards");
 
     try {
       for (const shard of this.config.shards) {
@@ -42,12 +42,12 @@ export class ShardManager {
           queuedQueries: 0,
         });
 
-        logger.info({ shardId: shard.id, name: shard.name }, 'Shard initialized');
+        logger.info({ shardId: shard.id, name: shard.name }, "Shard initialized");
       }
 
       span.setAttributes({
-        'shard.count': this.shards.size,
-        'strategy': this.config.strategy,
+        "shard.count": this.shards.size,
+        strategy: this.config.strategy,
       });
     } catch (error) {
       span.recordException(error as Error);
@@ -106,7 +106,7 @@ export class ShardManager {
    * Add a new shard dynamically
    */
   async addShard(shard: ShardConfig): Promise<void> {
-    const span = tracer.startSpan('ShardManager.addShard');
+    const span = tracer.startSpan("ShardManager.addShard");
 
     try {
       if (this.shards.has(shard.id)) {
@@ -130,8 +130,8 @@ export class ShardManager {
         queuedQueries: 0,
       });
 
-      logger.info({ shardId: shard.id, name: shard.name }, 'Shard added dynamically');
-      span.setAttributes({ 'shard.id': shard.id });
+      logger.info({ shardId: shard.id, name: shard.name }, "Shard added dynamically");
+      span.setAttributes({ "shard.id": shard.id });
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -144,7 +144,7 @@ export class ShardManager {
    * Remove a shard (drain connections first)
    */
   async removeShard(shardId: string): Promise<void> {
-    const span = tracer.startSpan('ShardManager.removeShard');
+    const span = tracer.startSpan("ShardManager.removeShard");
 
     try {
       const pool = this.connectionPools.get(shardId);
@@ -156,8 +156,8 @@ export class ShardManager {
       this.shards.delete(shardId);
       this.metrics.delete(shardId);
 
-      logger.info({ shardId }, 'Shard removed');
-      span.setAttributes({ 'shard.id': shardId });
+      logger.info({ shardId }, "Shard removed");
+      span.setAttributes({ "shard.id": shardId });
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -170,20 +170,18 @@ export class ShardManager {
    * Health check for all shards
    */
   private async checkHealth(): Promise<void> {
-    const checks = Array.from(this.connectionPools.entries()).map(
-      async ([shardId, pool]) => {
-        try {
-          const isHealthy = await pool.healthCheck();
-          if (!isHealthy) {
-            logger.warn({ shardId }, 'Shard health check failed');
-          }
-          return { shardId, healthy: isHealthy };
-        } catch (error) {
-          logger.error({ shardId, error }, 'Health check error');
-          return { shardId, healthy: false };
+    const checks = Array.from(this.connectionPools.entries()).map(async ([shardId, pool]) => {
+      try {
+        const isHealthy = await pool.healthCheck();
+        if (!isHealthy) {
+          logger.warn({ shardId }, "Shard health check failed");
         }
+        return { shardId, healthy: isHealthy };
+      } catch (error) {
+        logger.error({ shardId, error }, "Health check error");
+        return { shardId, healthy: false };
       }
-    );
+    });
 
     await Promise.all(checks);
   }
@@ -194,7 +192,7 @@ export class ShardManager {
   private startHealthChecks(): void {
     this.healthCheckInterval = setInterval(() => {
       this.checkHealth().catch((error) => {
-        logger.error({ error }, 'Health check interval error');
+        logger.error({ error }, "Health check interval error");
       });
     }, 30000); // Every 30 seconds
   }
@@ -203,20 +201,18 @@ export class ShardManager {
    * Stop health checks and close all connections
    */
   async shutdown(): Promise<void> {
-    const span = tracer.startSpan('ShardManager.shutdown');
+    const span = tracer.startSpan("ShardManager.shutdown");
 
     try {
       if (this.healthCheckInterval) {
         clearInterval(this.healthCheckInterval);
       }
 
-      const drainPromises = Array.from(this.connectionPools.values()).map(
-        (pool) => pool.drain()
-      );
+      const drainPromises = Array.from(this.connectionPools.values()).map((pool) => pool.drain());
 
       await Promise.all(drainPromises);
 
-      logger.info('ShardManager shutdown complete');
+      logger.info("ShardManager shutdown complete");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -229,18 +225,18 @@ export class ShardManager {
    * Rebalance data across shards (for range-based sharding)
    */
   async rebalance(): Promise<void> {
-    const span = tracer.startSpan('ShardManager.rebalance');
+    const span = tracer.startSpan("ShardManager.rebalance");
 
     try {
       // Implementation would depend on strategy
       // This is a placeholder for rebalancing logic
-      logger.info('Starting shard rebalancing');
+      logger.info("Starting shard rebalancing");
 
       // For hash-based: add consistent hashing virtual nodes
       // For range-based: split ranges and migrate data
       // For geographic: redistribute based on load
 
-      logger.info('Shard rebalancing complete');
+      logger.info("Shard rebalancing complete");
     } catch (error) {
       span.recordException(error as Error);
       throw error;

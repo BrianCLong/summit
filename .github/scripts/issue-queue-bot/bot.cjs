@@ -1,6 +1,6 @@
-const { classifyIssue, normalizeLabels } = require('./classifier.cjs');
+const { classifyIssue, normalizeLabels } = require("./classifier.cjs");
 
-const BOT_MARKER = '<!-- queue-bot:v1 -->';
+const BOT_MARKER = "<!-- queue-bot:v1 -->";
 
 function buildPayload(issue, classification) {
   return {
@@ -35,14 +35,14 @@ function diffLabels(currentLabels, desiredLabels) {
   const desired = new Set(desiredLabels);
   const add = [...desired].filter((label) => !current.has(label));
   const remove = [...current].filter(
-    (label) => (label === 'needs-triage' || label.startsWith('prio:')) && !desired.has(label),
+    (label) => (label === "needs-triage" || label.startsWith("prio:")) && !desired.has(label)
   );
   return { add, remove };
 }
 
 async function applyLabels({ github, owner, repo, issueNumber, add, remove, dryRun }) {
   if (dryRun) {
-    console.log('[dry-run] label add:', add, 'label remove:', remove);
+    console.log("[dry-run] label add:", add, "label remove:", remove);
     return;
   }
 
@@ -70,7 +70,7 @@ async function upsertPayloadComment({ github, owner, repo, issueNumber, payload,
   }
 
   if (dryRun) {
-    console.log('[dry-run] upsert comment payload:', JSON.stringify(payload));
+    console.log("[dry-run] upsert comment payload:", JSON.stringify(payload));
     return;
   }
 
@@ -103,7 +103,7 @@ async function processIssue({ github, context, issue, dryRun = false }) {
 
   const classification = classifyIssue(issue);
 
-  if (!classification.isCandidate && !currentLabels.includes('queue:deterministic')) {
+  if (!classification.isCandidate && !currentLabels.includes("queue:deterministic")) {
     return;
   }
 

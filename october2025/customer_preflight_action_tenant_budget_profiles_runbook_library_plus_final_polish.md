@@ -55,27 +55,19 @@ name: customer-preflight
 on:
   workflow_call:
     inputs:
-      kubeconfig:
-        { description: 'Base64 kubeconfig', required: false, type: string }
-      cluster_url:
-        {
-          description: 'API server URL (for OIDC login)',
-          required: false,
-          type: string,
-        }
+      kubeconfig: { description: "Base64 kubeconfig", required: false, type: string }
+      cluster_url: { description: "API server URL (for OIDC login)", required: false, type: string }
       oidc_sa_token:
         {
-          description: 'ServiceAccount token (if not using kubeconfig)',
+          description: "ServiceAccount token (if not using kubeconfig)",
           required: false,
           type: string,
         }
-      keycloak_issuer:
-        { description: 'OIDC issuer URL', required: true, type: string }
-      hostname:
-        { description: 'Ingress hostname', required: true, type: string }
+      keycloak_issuer: { description: "OIDC issuer URL", required: true, type: string }
+      hostname: { description: "Ingress hostname", required: true, type: string }
       verify_oci:
         {
-          description: 'Run Helm OCI + cosign checks',
+          description: "Run Helm OCI + cosign checks",
           required: false,
           default: true,
           type: boolean,
@@ -349,58 +341,44 @@ EOF
 
 ```ts
 // bootstrap/seed-tenant.ts
-import fs from 'fs';
-import fetch from 'node-fetch';
-const TENANT = process.env.TENANT || 'pilot';
-const BUDGET = process.env.BUDGET_URL || 'http://localhost:7009';
-const RUNBOOK = process.env.RUNBOOK_URL || 'http://localhost:7008';
-const WALLET = process.env.WALLET_URL || 'http://localhost:7014';
-const REPORT = process.env.REPORT_URL || 'http://localhost:7007';
+import fs from "fs";
+import fetch from "node-fetch";
+const TENANT = process.env.TENANT || "pilot";
+const BUDGET = process.env.BUDGET_URL || "http://localhost:7009";
+const RUNBOOK = process.env.RUNBOOK_URL || "http://localhost:7008";
+const WALLET = process.env.WALLET_URL || "http://localhost:7014";
+const REPORT = process.env.REPORT_URL || "http://localhost:7007";
 (async () => {
   // budgets
-  const prof = JSON.parse(
-    fs.readFileSync('bootstrap/budgets/profiles.yaml', 'utf8'),
-  ); // assume loader or pre‑converted JSON
+  const prof = JSON.parse(fs.readFileSync("bootstrap/budgets/profiles.yaml", "utf8")); // assume loader or pre‑converted JSON
   await fetch(`${BUDGET}/init`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ tenant: TENANT, profile: 'pilot' }),
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ tenant: TENANT, profile: "pilot" }),
   });
   // runbooks
-  for (const id of [
-    'R1_community',
-    'R2_fanin',
-    'R3_cotravel',
-    'R4_bridge_broker',
-    'R5_anomaly',
-  ]) {
-    const j = JSON.parse(
-      fs.readFileSync(`bootstrap/runbooks/${id}.json`, 'utf8'),
-    );
+  for (const id of ["R1_community", "R2_fanin", "R3_cotravel", "R4_bridge_broker", "R5_anomaly"]) {
+    const j = JSON.parse(fs.readFileSync(`bootstrap/runbooks/${id}.json`, "utf8"));
     await fetch(`${RUNBOOK}/library`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ tenant: TENANT, runbook: j }),
     });
   }
   // redactions & wallet profiles
-  const reds = JSON.parse(
-    fs.readFileSync('bootstrap/redactions/profiles.json', 'utf8'),
-  );
-  const wals = JSON.parse(
-    fs.readFileSync('bootstrap/wallets/profiles.json', 'utf8'),
-  );
+  const reds = JSON.parse(fs.readFileSync("bootstrap/redactions/profiles.json", "utf8"));
+  const wals = JSON.parse(fs.readFileSync("bootstrap/wallets/profiles.json", "utf8"));
   await fetch(`${REPORT}/redactions`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ tenant: TENANT, profiles: reds }),
   });
   await fetch(`${WALLET}/profiles`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ tenant: TENANT, profiles: wals }),
   });
-  console.log('Seeded tenant', TENANT);
+  console.log("Seeded tenant", TENANT);
 })();
 ```
 
@@ -426,22 +404,22 @@ tenant-seed:
 Gateway snippet:
 
 ```ts
-import helmet from 'helmet';
+import helmet from "helmet";
 app.use(
   helmet({
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
-        'default-src': ["'none'"],
-        'connect-src': ["'self'", process.env.KEYCLOAK_ISSUER],
-        'img-src': ["'self'", 'data:'],
-        'script-src': ["'self'"],
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'frame-ancestors': ["'none'"],
+        "default-src": ["'none'"],
+        "connect-src": ["'self'", process.env.KEYCLOAK_ISSUER],
+        "img-src": ["'self'", "data:"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "frame-ancestors": ["'none'"],
       },
     },
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-  }),
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  })
 );
 ```
 
@@ -469,11 +447,7 @@ services:
 // ops/dashboards/provisioning.json
 {
   "folders": {
-    "IntelGraph GA": [
-      "cost-per-insight.json",
-      "neo4j-gds-health.json",
-      "audit.json"
-    ]
+    "IntelGraph GA": ["cost-per-insight.json", "neo4j-gds-health.json", "audit.json"]
   }
 }
 ```

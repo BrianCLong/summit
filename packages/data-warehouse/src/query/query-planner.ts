@@ -9,14 +9,14 @@
  * - Partition pruning
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   QueryPlan,
   ExecutionStage,
   StageType,
   ShuffleStrategy,
   Predicate,
-} from './distributed-executor';
+} from "./distributed-executor";
 
 export interface QueryRequest {
   sql: string;
@@ -90,7 +90,7 @@ export class QueryPlanner {
    * Parse SQL into query structure
    */
   private parseSQL(sql: string): {
-    type: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE';
+    type: "SELECT" | "INSERT" | "UPDATE" | "DELETE";
     tables: string[];
     columns: string[];
     predicates: Predicate[];
@@ -108,13 +108,13 @@ export class QueryPlanner {
     const joins = this.extractJoins(sql);
 
     return {
-      type: normalized.startsWith('select')
-        ? 'SELECT'
-        : normalized.startsWith('insert')
-          ? 'INSERT'
-          : normalized.startsWith('update')
-            ? 'UPDATE'
-            : 'DELETE',
+      type: normalized.startsWith("select")
+        ? "SELECT"
+        : normalized.startsWith("insert")
+          ? "INSERT"
+          : normalized.startsWith("update")
+            ? "UPDATE"
+            : "DELETE",
       tables,
       columns,
       predicates,
@@ -151,17 +151,14 @@ export class QueryPlanner {
    * Collect statistics for a single table
    */
   private async collectTableStats(tableName: string): Promise<TableStats> {
-    const rowCountResult = await this.pool.query(
-      `SELECT COUNT(*) as count FROM ${tableName}`,
-    );
+    const rowCountResult = await this.pool.query(`SELECT COUNT(*) as count FROM ${tableName}`);
 
-    const sizeResult = await this.pool.query(
-      `SELECT pg_total_relation_size($1) as size`,
-      [tableName],
-    );
+    const sizeResult = await this.pool.query(`SELECT pg_total_relation_size($1) as size`, [
+      tableName,
+    ]);
 
-    const rowCount = parseInt(rowCountResult.rows[0]?.count || '0');
-    const totalSize = parseInt(sizeResult.rows[0]?.size || '0');
+    const rowCount = parseInt(rowCountResult.rows[0]?.count || "0");
+    const totalSize = parseInt(sizeResult.rows[0]?.size || "0");
     const avgRowSize = rowCount > 0 ? totalSize / rowCount : 0;
 
     return {
@@ -178,10 +175,7 @@ export class QueryPlanner {
   /**
    * Generate logical query plan
    */
-  private generateLogicalPlan(
-    parsed: any,
-    stats: Map<string, TableStats>,
-  ): ExecutionStage[] {
+  private generateLogicalPlan(parsed: any, stats: Map<string, TableStats>): ExecutionStage[] {
     const stages: ExecutionStage[] = [];
     let stageCounter = 0;
 
@@ -202,9 +196,9 @@ export class QueryPlanner {
       stages.push({
         stageId: `stage_${stageCounter++}`,
         type: StageType.FILTER,
-        operation: 'FILTER',
+        operation: "FILTER",
         inputs: stages[stages.length - 1].outputs,
-        outputs: ['filtered'],
+        outputs: ["filtered"],
         parallelism: 8,
         predicates: parsed.predicates,
       });
@@ -227,9 +221,9 @@ export class QueryPlanner {
       stages.push({
         stageId: `stage_${stageCounter++}`,
         type: StageType.AGGREGATE,
-        operation: `GROUP BY ${parsed.groupBy.join(', ')}`,
+        operation: `GROUP BY ${parsed.groupBy.join(", ")}`,
         inputs: stages[stages.length - 1].outputs,
-        outputs: ['aggregated'],
+        outputs: ["aggregated"],
         parallelism: 8,
       });
     }
@@ -239,9 +233,9 @@ export class QueryPlanner {
       stages.push({
         stageId: `stage_${stageCounter++}`,
         type: StageType.SORT,
-        operation: `ORDER BY ${parsed.orderBy.join(', ')}`,
+        operation: `ORDER BY ${parsed.orderBy.join(", ")}`,
         inputs: stages[stages.length - 1].outputs,
-        outputs: ['sorted'],
+        outputs: ["sorted"],
         parallelism: 8,
       });
     }
@@ -253,7 +247,7 @@ export class QueryPlanner {
         type: StageType.LIMIT,
         operation: parsed.limit.toString(),
         inputs: stages[stages.length - 1].outputs,
-        outputs: ['limited'],
+        outputs: ["limited"],
         parallelism: 1,
       });
     }
@@ -264,10 +258,7 @@ export class QueryPlanner {
   /**
    * Optimize query plan
    */
-  private optimizePlan(
-    stages: ExecutionStage[],
-    stats: Map<string, TableStats>,
-  ): ExecutionStage[] {
+  private optimizePlan(stages: ExecutionStage[], stats: Map<string, TableStats>): ExecutionStage[] {
     let optimized = [...stages];
 
     // Apply optimization rules
@@ -305,7 +296,7 @@ export class QueryPlanner {
    */
   private optimizeJoinOrder(
     stages: ExecutionStage[],
-    stats: Map<string, TableStats>,
+    stats: Map<string, TableStats>
   ): ExecutionStage[] {
     // Simplified join ordering - in production, use dynamic programming
     return stages;
@@ -316,7 +307,7 @@ export class QueryPlanner {
    */
   private prunePartitions(
     stages: ExecutionStage[],
-    stats: Map<string, TableStats>,
+    stats: Map<string, TableStats>
   ): ExecutionStage[] {
     // Implement partition pruning logic
     return stages;
@@ -335,7 +326,7 @@ export class QueryPlanner {
    */
   private generatePhysicalPlan(
     logicalPlan: ExecutionStage[],
-    options?: QueryRequest['options'],
+    options?: QueryRequest["options"]
   ): QueryPlan {
     const maxParallelism = options?.maxParallelism || 32;
 
@@ -351,7 +342,7 @@ export class QueryPlanner {
 
     return {
       queryId: this.generateQueryId(JSON.stringify(logicalPlan)),
-      sql: '',
+      sql: "",
       stages: physicalStages,
       parallelism: maxParallelism,
       estimatedCost,
@@ -417,17 +408,21 @@ export class QueryPlanner {
 
   private extractColumns(sql: string): string[] {
     const selectMatch = sql.match(/SELECT\s+(.*?)\s+FROM/i);
-    if (!selectMatch) {return ['*'];}
+    if (!selectMatch) {
+      return ["*"];
+    }
 
     return selectMatch[1]
-      .split(',')
+      .split(",")
       .map((c) => c.trim())
       .filter(Boolean);
   }
 
   private extractPredicates(sql: string): Predicate[] {
     const whereMatch = sql.match(/WHERE\s+(.*?)(\s+GROUP|\s+ORDER|\s+LIMIT|$)/i);
-    if (!whereMatch) {return [];}
+    if (!whereMatch) {
+      return [];
+    }
 
     // Simplified predicate extraction
     return [];
@@ -446,7 +441,7 @@ export class QueryPlanner {
     const groupMatch = sql.match(/GROUP\s+BY\s+(.*?)(\s+ORDER|\s+LIMIT|$)/i);
     return groupMatch
       ? groupMatch[1]
-          .split(',')
+          .split(",")
           .map((c) => c.trim())
           .filter(Boolean)
       : undefined;
@@ -456,7 +451,7 @@ export class QueryPlanner {
     const orderMatch = sql.match(/ORDER\s+BY\s+(.*?)(\s+LIMIT|$)/i);
     return orderMatch
       ? orderMatch[1]
-          .split(',')
+          .split(",")
           .map((c) => c.trim())
           .filter(Boolean)
       : undefined;

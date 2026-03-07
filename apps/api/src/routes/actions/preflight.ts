@@ -1,19 +1,19 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type Request, type Response } from "express";
 
 import {
   type PreflightDecisionContract,
-  type PreflightRequestContract
-} from '../../contracts/actions.js';
+  type PreflightRequestContract,
+} from "../../contracts/actions.js";
 import {
   PolicyDecisionStore,
-  type PolicyDecisionRecord
-} from '../../db/models/policy_decisions.js';
+  type PolicyDecisionRecord,
+} from "../../db/models/policy_decisions.js";
 import {
   type PolicyDecisionResult,
-  type PolicySimulationService
-} from '../../services/policyService.js';
-import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
-import { requirePermission } from '../../middleware/security.js';
+  type PolicySimulationService,
+} from "../../services/policyService.js";
+import { RBACManager } from "../../../../../packages/authentication/src/rbac/rbac-manager.js";
+import { requirePermission } from "../../middleware/security.js";
 
 interface PreflightRouterDeps {
   policyService: PolicySimulationService;
@@ -29,7 +29,7 @@ function normalizeRequest(body: Partial<PreflightRequestContract>): {
   if (!body.subject?.id || !body.action?.name) {
     return {
       valid: false,
-      error: 'subject.id and action.name are required'
+      error: "subject.id and action.name are required",
     };
   }
 
@@ -39,16 +39,16 @@ function normalizeRequest(body: Partial<PreflightRequestContract>): {
       subject: {
         id: body.subject.id,
         roles: body.subject.roles || [],
-        tenantId: body.subject.tenantId
+        tenantId: body.subject.tenantId,
       },
       action: {
         name: body.action.name,
         scope: body.action.scope,
-        attributes: body.action.attributes || {}
+        attributes: body.action.attributes || {},
       },
       resource: body.resource,
-      context: body.context
-    }
+      context: body.context,
+    },
   };
 }
 
@@ -59,27 +59,25 @@ function normalizeRequest(body: Partial<PreflightRequestContract>): {
 function extractPolicyId(record: PolicyDecisionRecord): string | undefined {
   // Check for policy_id in the raw decision metadata
   const rawDecision = record.rawDecision as Record<string, unknown> | undefined;
-  if (rawDecision?.policy_id && typeof rawDecision.policy_id === 'string') {
+  if (rawDecision?.policy_id && typeof rawDecision.policy_id === "string") {
     return rawDecision.policy_id;
   }
   // Check for policy path in OPA result structure
-  if (rawDecision?.policy_path && typeof rawDecision.policy_path === 'string') {
+  if (rawDecision?.policy_path && typeof rawDecision.policy_path === "string") {
     return rawDecision.policy_path;
   }
   return undefined;
 }
 
-function toResponsePayload(
-  record: PolicyDecisionRecord
-): PreflightDecisionContract {
+function toResponsePayload(record: PolicyDecisionRecord): PreflightDecisionContract {
   return {
     decisionId: record.id,
     preflight_id: record.id,
     policy_id: extractPolicyId(record),
-    decision: record.allow ? 'allow' : 'deny',
+    decision: record.allow ? "allow" : "deny",
     reason: record.reason,
     obligations: record.obligations,
-    redactions: record.redactions
+    redactions: record.redactions,
   };
 }
 
@@ -87,56 +85,47 @@ function mergeRedactions(decision: PolicyDecisionResult): PolicyDecisionResult {
   const merged = new Set(decision.redactions);
 
   decision.obligations.forEach((obligation) => {
-    if (
-      (obligation.code === 'redact' || obligation.code === 'mask') &&
-      obligation.targets
-    ) {
+    if ((obligation.code === "redact" || obligation.code === "mask") && obligation.targets) {
       obligation.targets.forEach((target) => merged.add(target));
     }
   });
 
   return {
     ...decision,
-    redactions: [...merged]
+    redactions: [...merged],
   };
 }
 
 export function createPreflightRouter({
   decisionStore,
   policyService,
-  rbacManager
+  rbacManager,
 }: PreflightRouterDeps): Router {
   const router = Router();
 
   router.post(
-    '/preflight',
-    requirePermission(rbacManager, 'actions:preflight', 'evaluate'),
-    async (
-      req: Request<unknown, unknown, Partial<PreflightRequestContract>>,
-      res: Response
-    ) => {
+    "/preflight",
+    requirePermission(rbacManager, "actions:preflight", "evaluate"),
+    async (req: Request<unknown, unknown, Partial<PreflightRequestContract>>, res: Response) => {
       const normalized = normalizeRequest(req.body || {});
 
       if (!normalized.valid || !normalized.request) {
         return res.status(400).json({
-          error: normalized.error || 'invalid_request'
+          error: normalized.error || "invalid_request",
         });
       }
 
       try {
         const decision = await policyService.simulate(normalized.request);
         const mergedDecision = mergeRedactions(decision);
-        const record = await decisionStore.insert(
-          normalized.request,
-          mergedDecision
-        );
+        const record = await decisionStore.insert(normalized.request, mergedDecision);
 
         return res.status(200).json(toResponsePayload(record));
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message = error instanceof Error ? error.message : "Unknown error";
         return res.status(502).json({
-          error: 'policy_simulation_failed',
-          message
+          error: "policy_simulation_failed",
+          message,
         });
       }
     }

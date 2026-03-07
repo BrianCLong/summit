@@ -1,7 +1,5 @@
 export async function run(ctx: { endpoint: string; token?: string }) {
-  const headers = ctx.token
-    ? { Authorization: `Bearer ${ctx.token}` }
-    : undefined;
+  const headers = ctx.token ? { Authorization: `Bearer ${ctx.token}` } : undefined;
   try {
     const [toolsRes, resourcesRes, promptsRes] = await Promise.all([
       fetch(`${ctx.endpoint}/.well-known/mcp-tools`, { headers }),
@@ -19,7 +17,7 @@ export async function run(ctx: { endpoint: string; token?: string }) {
       : null;
 
     return {
-      name: 'discovery',
+      name: "discovery",
       pass,
       status: {
         tools: toolsRes.status,
@@ -29,6 +27,6 @@ export async function run(ctx: { endpoint: string; token?: string }) {
       data,
     };
   } catch (error) {
-    return { name: 'discovery', pass: false, error: String(error) };
+    return { name: "discovery", pass: false, error: String(error) };
   }
 }

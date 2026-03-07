@@ -3,9 +3,9 @@
  * Core Blockchain implementation - Private Permissioned Blockchain
  */
 
-import EventEmitter from 'eventemitter3';
-import { Logger } from 'pino';
-import { BlockImpl } from './Block.js';
+import EventEmitter from "eventemitter3";
+import { Logger } from "pino";
+import { BlockImpl } from "./Block.js";
 import {
   Block,
   Transaction,
@@ -13,10 +13,10 @@ import {
   ValidatorInfo,
   ChainConfig,
   ProofOfExistence,
-} from './types.js';
-import { BlockStorage } from '../storage/BlockStorage.js';
-import { TransactionPool } from './TransactionPool.js';
-import { ConsensusEngine } from '../consensus/ConsensusEngine.js';
+} from "./types.js";
+import { BlockStorage } from "../storage/BlockStorage.js";
+import { TransactionPool } from "./TransactionPool.js";
+import { ConsensusEngine } from "../consensus/ConsensusEngine.js";
 
 export class Blockchain extends EventEmitter {
   private chain: Block[] = [];
@@ -56,19 +56,19 @@ export class Blockchain extends EventEmitter {
       const lastBlock = await this.storage.getLastBlock();
 
       if (lastBlock) {
-        this.logger.info({ height: lastBlock.header.height }, 'Loaded existing blockchain');
+        this.logger.info({ height: lastBlock.header.height }, "Loaded existing blockchain");
         this.chain = await this.loadChain();
       } else {
         // Create genesis block
         const genesisBlock = this.createGenesisBlock();
         await this.storage.saveBlock(genesisBlock);
         this.chain.push(genesisBlock);
-        this.logger.info('Created genesis block');
+        this.logger.info("Created genesis block");
       }
 
-      this.emit('initialized');
+      this.emit("initialized");
     } catch (error) {
-      this.logger.error({ error }, 'Failed to initialize blockchain');
+      this.logger.error({ error }, "Failed to initialize blockchain");
       throw error;
     }
   }
@@ -79,10 +79,10 @@ export class Blockchain extends EventEmitter {
   private createGenesisBlock(): Block {
     const genesisBlock = new BlockImpl(
       0,
-      '0'.repeat(64),
+      "0".repeat(64),
       [],
       this.config.genesis.initialValidators[0].address,
-      this.config.genesis.initialValidators.map(v => v.address)
+      this.config.genesis.initialValidators.map((v) => v.address)
     );
 
     genesisBlock.header.timestamp = Date.now();
@@ -98,16 +98,16 @@ export class Blockchain extends EventEmitter {
     try {
       // Validate transaction
       if (!this.validateTransaction(tx)) {
-        throw new Error('Invalid transaction');
+        throw new Error("Invalid transaction");
       }
 
       // Add to pool
       await this.txPool.addTransaction(tx);
 
-      this.emit('transactionAdded', tx);
-      this.logger.debug({ txId: tx.id }, 'Transaction added to pool');
+      this.emit("transactionAdded", tx);
+      this.logger.debug({ txId: tx.id }, "Transaction added to pool");
     } catch (error) {
-      this.logger.error({ error, txId: tx.id }, 'Failed to add transaction');
+      this.logger.error({ error, txId: tx.id }, "Failed to add transaction");
       throw error;
     }
   }
@@ -117,7 +117,7 @@ export class Blockchain extends EventEmitter {
    */
   async proposeBlock(): Promise<Block | null> {
     if (!this.isValidator || !this.validatorInfo) {
-      throw new Error('Only validators can propose blocks');
+      throw new Error("Only validators can propose blocks");
     }
 
     try {
@@ -136,17 +136,17 @@ export class Blockchain extends EventEmitter {
         lastBlock.hash,
         transactions,
         this.validatorInfo.address,
-        this.config.genesis.initialValidators.map(v => v.address)
+        this.config.genesis.initialValidators.map((v) => v.address)
       );
 
       this.logger.info(
         { height: newBlock.header.height, txCount: transactions.length },
-        'Proposed new block'
+        "Proposed new block"
       );
 
       return newBlock;
     } catch (error) {
-      this.logger.error({ error }, 'Failed to propose block');
+      this.logger.error({ error }, "Failed to propose block");
       return null;
     }
   }
@@ -159,31 +159,30 @@ export class Blockchain extends EventEmitter {
       // Validate block
       const validation = block.validate();
       if (!validation.valid) {
-        this.logger.warn({ errors: validation.errors }, 'Block validation failed');
+        this.logger.warn({ errors: validation.errors }, "Block validation failed");
         return false;
       }
 
       // Verify block connects to chain
       const lastBlock = this.getLastBlock();
       if (block.header.previousHash !== lastBlock.hash) {
-        this.logger.warn('Block does not connect to chain');
+        this.logger.warn("Block does not connect to chain");
         return false;
       }
 
       if (block.header.height !== lastBlock.header.height + 1) {
-        this.logger.warn('Invalid block height');
+        this.logger.warn("Invalid block height");
         return false;
       }
 
       // Check consensus
-      const requiredSignatures = Math.floor(
-        (this.config.genesis.initialValidators.length * 2) / 3
-      ) + 1;
+      const requiredSignatures =
+        Math.floor((this.config.genesis.initialValidators.length * 2) / 3) + 1;
 
       if (!block.hasConsensus(requiredSignatures)) {
         this.logger.warn(
           { signatures: block.signatures.length, required: requiredSignatures },
-          'Insufficient signatures'
+          "Insufficient signatures"
         );
         return false;
       }
@@ -197,15 +196,12 @@ export class Blockchain extends EventEmitter {
         await this.txPool.removeTransaction(tx.id);
       }
 
-      this.emit('blockAdded', block);
-      this.logger.info(
-        { height: block.header.height, hash: block.hash },
-        'Block added to chain'
-      );
+      this.emit("blockAdded", block);
+      this.logger.info({ height: block.header.height, hash: block.hash }, "Block added to chain");
 
       return true;
     } catch (error) {
-      this.logger.error({ error }, 'Failed to add block');
+      this.logger.error({ error }, "Failed to add block");
       return false;
     }
   }
@@ -232,7 +228,7 @@ export class Blockchain extends EventEmitter {
     try {
       return await this.storage.getBlockByHeight(height);
     } catch (error) {
-      this.logger.error({ error, height }, 'Failed to get block by height');
+      this.logger.error({ error, height }, "Failed to get block by height");
       return null;
     }
   }
@@ -244,7 +240,7 @@ export class Blockchain extends EventEmitter {
     try {
       return await this.storage.getBlockByHash(hash);
     } catch (error) {
-      this.logger.error({ error, hash }, 'Failed to get block by hash');
+      this.logger.error({ error, hash }, "Failed to get block by hash");
       return null;
     }
   }
@@ -261,7 +257,7 @@ export class Blockchain extends EventEmitter {
       // Search blocks
       return await this.storage.getTransaction(txId);
     } catch (error) {
-      this.logger.error({ error, txId }, 'Failed to get transaction');
+      this.logger.error({ error, txId }, "Failed to get transaction");
       return null;
     }
   }
@@ -286,7 +282,7 @@ export class Blockchain extends EventEmitter {
         transactionId: txId,
       };
     } catch (error) {
-      this.logger.error({ error, txId }, 'Failed to generate proof of existence');
+      this.logger.error({ error, txId }, "Failed to generate proof of existence");
       return null;
     }
   }
@@ -303,7 +299,7 @@ export class Blockchain extends EventEmitter {
 
       return block.verifyTransaction(proof.transactionId, proof.merkleProof);
     } catch (error) {
-      this.logger.error({ error }, 'Failed to verify proof of existence');
+      this.logger.error({ error }, "Failed to verify proof of existence");
       return false;
     }
   }
@@ -347,7 +343,7 @@ export class Blockchain extends EventEmitter {
         const validation = currentBlock.validate();
         if (!validation.valid) {
           invalidBlocks.push(i);
-          errors.push(`Block ${i}: ${validation.errors.join(', ')}`);
+          errors.push(`Block ${i}: ${validation.errors.join(", ")}`);
         }
       }
 
@@ -357,7 +353,7 @@ export class Blockchain extends EventEmitter {
         errors,
       };
     } catch (error) {
-      this.logger.error({ error }, 'Failed to verify chain integrity');
+      this.logger.error({ error }, "Failed to verify chain integrity");
       return {
         valid: false,
         invalidBlocks: [],

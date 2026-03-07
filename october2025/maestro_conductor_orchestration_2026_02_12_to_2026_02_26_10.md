@@ -166,10 +166,7 @@ flowchart TD
 **GraphQL Directive**
 
 ```graphql
-directive @mask(
-  fields: [String!]!
-  strategy: String = "hash"
-) on FIELD_DEFINITION
+directive @mask(fields: [String!]!, strategy: String = "hash") on FIELD_DEFINITION
 ```
 
 **Residency Proof (JSON)**
@@ -227,11 +224,10 @@ directive @mask(
 function maskFields(obj, fields) {
   /* hash/null/partial */
 }
-export const withMask =
-  (fields: string[]) => (resolver) => async (p, a, c, i) => {
-    const r = await resolver(p, a, c, i);
-    return maskFields(r, fields);
-  };
+export const withMask = (fields: string[]) => (resolver) => async (p, a, c, i) => {
+  const r = await resolver(p, a, c, i);
+  return maskFields(r, fields);
+};
 ```
 
 **Residency Probe (Node)**

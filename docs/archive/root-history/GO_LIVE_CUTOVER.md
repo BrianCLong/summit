@@ -482,13 +482,13 @@ ingress:
 
     # Health checks
     alb.ingress.kubernetes.io/healthcheck-path: /api/health
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
-    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
-    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
-    alb.ingress.kubernetes.io/unhealthy-threshold-count: '3'
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
 
     # Security
-    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID
 ```
 

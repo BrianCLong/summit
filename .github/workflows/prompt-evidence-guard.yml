@@ -2,10 +2,10 @@ name: Prompt/Evidence Guard
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'prompts/**'
-      - 'evidence/**'
+      - "prompts/**"
+      - "evidence/**"
 
 jobs:
   guard:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install
         run: pnpm install --frozen-lockfile

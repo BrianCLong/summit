@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page } from "@playwright/test";
 
 export interface FocusStep {
   label: string;
@@ -15,13 +15,14 @@ const MAX_STEPS = 75;
 async function getActiveDescriptor(page: Page): Promise<FocusStep> {
   const descriptor = await page.evaluate(() => {
     const active = document.activeElement as HTMLElement | null;
-    if (!active) return { label: 'none', selector: 'document' };
-    const name = active.getAttribute('aria-label') || active.innerText?.trim() || active.id || active.tagName;
+    if (!active) return { label: "none", selector: "document" };
+    const name =
+      active.getAttribute("aria-label") || active.innerText?.trim() || active.id || active.tagName;
     let selector = active.id ? `#${active.id}` : active.tagName.toLowerCase();
     if (active.className) {
-      selector += `.${active.className.toString().split(/\s+/).filter(Boolean).join('.')}`;
+      selector += `.${active.className.toString().split(/\s+/).filter(Boolean).join(".")}`;
     }
-    return { label: name || 'unnamed', selector };
+    return { label: name || "unnamed", selector };
   });
   return descriptor;
 }
@@ -32,7 +33,7 @@ export async function walkFocusOrder(page: Page): Promise<FocusMapResult> {
   let trapped = false;
 
   for (let i = 0; i < MAX_STEPS; i += 1) {
-    await page.keyboard.press('Tab');
+    await page.keyboard.press("Tab");
     const descriptor = await getActiveDescriptor(page);
     steps.push(descriptor);
 

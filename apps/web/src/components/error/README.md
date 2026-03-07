@@ -6,23 +6,23 @@ A comprehensive, production-grade error boundary system for the Summit web clien
 
 ```tsx
 // For dashboards and data views
-import { DataFetchErrorBoundary } from '@/components/error';
+import { DataFetchErrorBoundary } from '@/components/error'
 
-<DataFetchErrorBoundary dataSourceName="Command Center">
+;<DataFetchErrorBoundary dataSourceName="Command Center">
   <CommandCenterDashboard />
 </DataFetchErrorBoundary>
 
 // For admin panels and mutations
-import { MutationErrorBoundary } from '@/components/error';
+import { MutationErrorBoundary } from '@/components/error'
 
-<MutationErrorBoundary operationName="user update">
+;<MutationErrorBoundary operationName="user update">
   <AdminPanel />
 </MutationErrorBoundary>
 
 // For custom scenarios
-import { ErrorBoundary } from '@/components/error';
+import { ErrorBoundary } from '@/components/error'
 
-<ErrorBoundary
+;<ErrorBoundary
   enableRetry={true}
   maxRetries={3}
   severity="high"
@@ -39,6 +39,7 @@ import { ErrorBoundary } from '@/components/error';
 The base error boundary with retry logic, telemetry, and feature flag integration.
 
 **Props:**
+
 - `children` - Component tree to protect
 - `enableRetry` - Enable automatic retry (default: false)
 - `maxRetries` - Max retry attempts (default: 3)
@@ -55,12 +56,14 @@ The base error boundary with retry logic, telemetry, and feature flag integratio
 Specialized boundary for data-loading views (dashboards, analytics, graphs).
 
 **Features:**
+
 - Auto-retry enabled (3 attempts with exponential backoff)
 - Medium severity (non-critical)
 - User-friendly "data loading" fallback UI
 - Network troubleshooting guidance
 
 **Props:**
+
 - `dataSourceName` - Name of the data source (e.g., "Command Center")
 - `onError` - Optional error callback
 - `context` - Additional telemetry context
@@ -70,12 +73,14 @@ Specialized boundary for data-loading views (dashboards, analytics, graphs).
 Specialized boundary for data-modification operations (admin, bulk actions).
 
 **Features:**
+
 - No auto-retry (prevents duplicate mutations)
 - High severity (critical operations)
 - Data consistency warnings
 - Safe "Back to Safety" navigation
 
 **Props:**
+
 - `operationName` - Name of the operation (e.g., "bulk user update")
 - `onError` - Optional error callback
 - `context` - Additional telemetry context
@@ -85,6 +90,7 @@ Specialized boundary for data-modification operations (admin, bulk actions).
 Feature-flag-aware wrapper for gradual rollout.
 
 **Feature Flags:**
+
 - `error_boundaries.retry_enabled` - Enable/disable retry
 - `error_boundaries.max_retries` - Number of retry attempts
 - `error_boundaries.telemetry_enhanced` - Enhanced telemetry
@@ -102,6 +108,7 @@ Feature-flag-aware wrapper for gradual rollout.
 ### Error Fingerprinting
 
 Each error gets a stable 8-character hex fingerprint for grouping:
+
 - Normalizes line/column numbers
 - Normalizes numeric values in messages
 - Uses first 3 stack frames
@@ -109,6 +116,7 @@ Each error gets a stable 8-character hex fingerprint for grouping:
 ### Error Categorization
 
 Automatic categorization:
+
 - `render` - React rendering errors
 - `network` - Fetch/network failures
 - `data_fetch` - GraphQL/API data loading
@@ -120,6 +128,7 @@ Automatic categorization:
 ### Telemetry Payload
 
 Every error includes:
+
 - Error fingerprint and category
 - Session and device IDs
 - Component stack trace
@@ -129,6 +138,7 @@ Every error includes:
 ## Current Implementation
 
 ### Top-Level (App.tsx)
+
 ```tsx
 <ErrorBoundary
   enableRetry={true}
@@ -141,24 +151,29 @@ Every error includes:
 ### Route-Level
 
 **Dashboards (DataFetchErrorBoundary):**
+
 - Command Center, Supply Chain, Advanced, Usage/Cost
 - Internal Command, Mission Control
 
 **Analytics (DataFetchErrorBoundary):**
+
 - Tri-Pane, GeoInt, Narrative Intelligence, Explore
 
 **Admin (MutationErrorBoundary):**
+
 - Admin panel, Consistency dashboard, Feature flags
 
 ## Testing
 
 Run tests:
+
 ```bash
 npm run test -- error
 npm run test -- integration/error-boundaries
 ```
 
 Test files:
+
 - `ErrorBoundary.test.tsx` - Core boundary
 - `DataFetchErrorBoundary.test.tsx` - Data loading
 - `MutationErrorBoundary.test.tsx` - Mutations
@@ -168,6 +183,7 @@ Test files:
 ## Best Practices
 
 ### ✅ Do
+
 - Use DataFetchErrorBoundary for read-only views
 - Use MutationErrorBoundary for write operations
 - Provide descriptive names for observability
@@ -176,6 +192,7 @@ Test files:
 - Enable retry for idempotent operations
 
 ### ❌ Don't
+
 - Enable retry for mutations (risk of duplicates)
 - Nest boundaries unnecessarily
 - Ignore errors without reporting
@@ -192,16 +209,19 @@ Test files:
 ## Troubleshooting
 
 **Error not caught:**
+
 - Error in async callback or event handler (not in React lifecycle)
 - Error in error boundary itself
 - Error in Suspense fallback
 
 **Retry not working:**
+
 - Check `enableRetry={true}`
 - Verify max retries not exceeded
 - Reset external state in `onReset`
 
 **Telemetry not reporting:**
+
 - Check network requests to `/api/monitoring/telemetry/events`
 - Verify telemetry service health
 - Check for ad blockers

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { X, Lightbulb } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import React, { useState, useEffect } from 'react'
+import { X, Lightbulb } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
 
 interface ContextualNudgeProps {
-  stepId: string;
-  title: string;
-  description: string;
-  actionLabel?: string;
-  onAction?: () => void;
+  stepId: string
+  title: string
+  description: string
+  actionLabel?: string
+  onAction?: () => void
 }
 
 export const ContextualNudge: React.FC<ContextualNudgeProps> = ({
@@ -18,22 +18,24 @@ export const ContextualNudge: React.FC<ContextualNudgeProps> = ({
   actionLabel,
   onAction,
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     // Check if this step is already completed
-    const progress = JSON.parse(localStorage.getItem('activation_progress') || '{}');
+    const progress = JSON.parse(
+      localStorage.getItem('activation_progress') || '{}'
+    )
     if (!progress[stepId]) {
-      setIsVisible(true);
+      setIsVisible(true)
     }
-  }, [stepId]);
+  }, [stepId])
 
   const handleDismiss = () => {
-    setIsVisible(false);
+    setIsVisible(false)
     // Optionally save dismissal state so it doesn't reappear immediately
-  };
+  }
 
-  if (!isVisible) return null;
+  if (!isVisible) return null
 
   return (
     <div className="fixed bottom-6 right-6 z-50 max-w-sm animate-in slide-in-from-bottom-5 fade-in duration-300">
@@ -55,12 +57,17 @@ export const ContextualNudge: React.FC<ContextualNudgeProps> = ({
             {description}
           </p>
           {actionLabel && onAction && (
-            <Button size="sm" variant="outline" className="w-full" onClick={onAction}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={onAction}
+            >
               {actionLabel}
             </Button>
           )}
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}

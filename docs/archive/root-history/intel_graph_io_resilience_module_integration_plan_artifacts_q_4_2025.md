@@ -174,12 +174,7 @@ type ClusterRollup {
 
 type Query {
   ioEvent(id: ID!): IOEvent
-  ioEvents(
-    limit: Int = 100
-    topic: String
-    story_id: String
-    severityGte: Int
-  ): [IOEvent!]!
+  ioEvents(limit: Int = 100, topic: String, story_id: String, severityGte: Int): [IOEvent!]!
   ioTTDTTM(hours: Int = 24): [TTDTTMPoint!]!
   ioTakedownAging: [TakedownAging!]!
   ioClusterRollup(hours: Int = 72): [ClusterRollup!]!
@@ -222,11 +217,10 @@ type Mutation {
 **Resolver outline** → `server/graphql/io/resolvers.ts`
 
 ```ts
-import { sql } from '../../db';
+import { sql } from "../../db";
 export const resolvers = {
   Query: {
-    ioEvent: async (_: any, { id }) =>
-      (await sql`SELECT * FROM "IOEvents" WHERE id = ${id}`)[0],
+    ioEvent: async (_: any, { id }) => (await sql`SELECT * FROM "IOEvents" WHERE id = ${id}`)[0],
     ioEvents: async (_: any, args) => {
       const { limit = 100, topic, story_id, severityGte } = args;
       return await sql`
@@ -281,8 +275,7 @@ export const resolvers = {
       ORDER BY reach DESC;`,
   },
   IOEvent: {
-    media: async (e: any) =>
-      await sql`SELECT * FROM "IOMedia" WHERE event_id=${e.id}`,
+    media: async (e: any) => await sql`SELECT * FROM "IOMedia" WHERE event_id=${e.id}`,
     actions: async (e: any) =>
       await sql`SELECT * FROM "IOActions" WHERE event_id=${e.id} ORDER BY initiated_at ASC`,
   },
@@ -313,19 +306,17 @@ export const resolvers = {
 **URL/Domain similarity** → `server/services/io/urlSimilarity.ts`
 
 ```ts
-import levenshtein from 'fast-levenshtein';
+import levenshtein from "fast-levenshtein";
 const homoglyphs = {
-  '0': 'o',
-  '1': 'l',
-  '3': 'e',
-  '5': 's',
-  '@': 'a',
-  '¡': 'i',
+  "0": "o",
+  "1": "l",
+  "3": "e",
+  "5": "s",
+  "@": "a",
+  "¡": "i",
 };
 export function normalizeHost(h: string) {
-  return h
-    .toLowerCase()
-    .replace(/[\u00A1@015]/g, (c) => (homoglyphs as any)[c] || c);
+  return h.toLowerCase().replace(/[\u00A1@015]/g, (c) => (homoglyphs as any)[c] || c);
 }
 export function similarity(a: string, b: string) {
   const na = normalizeHost(a),
@@ -334,11 +325,7 @@ export function similarity(a: string, b: string) {
   const m = Math.max(na.length, nb.length);
   return 1 - d / m;
 }
-export function isLookalike(
-  candidate: string,
-  canon: string,
-  threshold = 0.82,
-) {
+export function isLookalike(candidate: string, canon: string, threshold = 0.82) {
   try {
     return similarity(candidate, canon) >= threshold;
   } catch {

@@ -33,6 +33,7 @@ graph TD
 ```
 
 ## Description
+
 The stack is designed with a closed feedback loop. Unlike traditional pipelines where the dataset is fixed, the **Curriculum Engine** dynamically adjusts the sampling weights of the **Streaming DataLoader** based on real-time signals from the **Telemetry Collector**.
 
 - **Data Layer:** Ingests diverse sources. The key innovation is the `Curriculum Engine` which modulates the mix.

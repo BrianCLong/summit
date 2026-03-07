@@ -18,9 +18,9 @@ spec:
         app.kubernetes.io/name: synthetic-monitoring
         app.kubernetes.io/component: monitoring
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '3000'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: synthetic-monitoring-sa
       containers:
@@ -28,7 +28,7 @@ spec:
           image: node:18-alpine
           imagePullPolicy: IfNotPresent
           workingDir: /app
-          command: ['/bin/sh', '-c']
+          command: ["/bin/sh", "-c"]
           args:
             - |
               # Install dependencies
@@ -95,21 +95,21 @@ spec:
               node synthetic-monitor.js
           env:
             - name: ENVIRONMENT
-              value: 'production'
+              value: "production"
             - name: BASE_URL
-              value: 'http://intelgraph-server.intelgraph-production.svc.cluster.local:3000'
+              value: "http://intelgraph-server.intelgraph-production.svc.cluster.local:3000"
             - name: API_URL
-              value: 'http://intelgraph-server.intelgraph-production.svc.cluster.local:3000'
+              value: "http://intelgraph-server.intelgraph-production.svc.cluster.local:3000"
             - name: INTERVAL
-              value: '60000' # 1 minute
+              value: "60000" # 1 minute
             - name: TIMEOUT
-              value: '30000' # 30 seconds
+              value: "30000" # 30 seconds
             - name: SLA_RESPONSE_TIME
-              value: '2000' # 2 seconds
+              value: "2000" # 2 seconds
             - name: SLA_PAGE_LOAD_TIME
-              value: '3000' # 3 seconds
+              value: "3000" # 3 seconds
             - name: PROMETHEUS_PUSHGATEWAY
-              value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+              value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
             - name: SLACK_WEBHOOK_URL
               valueFrom:
                 secretKeyRef:
@@ -130,9 +130,9 @@ spec:
                   optional: true
             # Playwright environment variables
             - name: PLAYWRIGHT_BROWSERS_PATH
-              value: '/usr/lib/chromium'
+              value: "/usr/lib/chromium"
             - name: PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-              value: '/usr/bin/chromium-browser'
+              value: "/usr/bin/chromium-browser"
           ports:
             - name: metrics
               containerPort: 3000
@@ -211,13 +211,13 @@ metadata:
     app.kubernetes.io/component: monitoring
 rules:
   # Allow reading pods for health checks
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
   # Allow reading services
-  - apiGroups: ['']
-    resources: ['services']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -245,8 +245,8 @@ metadata:
     app.kubernetes.io/component: monitoring
 type: Opaque
 stringData:
-  test-user-email: 'synthetic-test@intelgraph.ai'
-  test-user-password: 'synthetic-test-password-123'
+  test-user-email: "synthetic-test@intelgraph.ai"
+  test-user-password: "synthetic-test-password-123"
 
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -288,8 +288,8 @@ spec:
             severity: warning
             component: synthetic-monitoring
           annotations:
-            summary: 'API response time is slow'
-            description: '95th percentile API response time is {{ $value }}s, above SLA threshold of 2s'
+            summary: "API response time is slow"
+            description: "95th percentile API response time is {{ $value }}s, above SLA threshold of 2s"
 
         # API Failure Rate
         - alert: SyntheticAPIFailureRate
@@ -299,8 +299,8 @@ spec:
             severity: critical
             component: synthetic-monitoring
           annotations:
-            summary: 'High API failure rate detected'
-            description: 'API failure rate is {{ $value | humanizePercentage }}, above threshold of 1%'
+            summary: "High API failure rate detected"
+            description: "API failure rate is {{ $value | humanizePercentage }}, above threshold of 1%"
 
         # User Journey Failures
         - alert: SyntheticUserJourneyFailure
@@ -310,8 +310,8 @@ spec:
             severity: critical
             component: synthetic-monitoring
           annotations:
-            summary: 'User journey failure detected'
-            description: 'User journey {{ $labels.journey }} is failing'
+            summary: "User journey failure detected"
+            description: "User journey {{ $labels.journey }} is failing"
 
         # User Journey Duration SLA Violations
         - alert: SyntheticUserJourneyDurationSlow
@@ -321,8 +321,8 @@ spec:
             severity: warning
             component: synthetic-monitoring
           annotations:
-            summary: 'User journey duration is slow'
-            description: '95th percentile user journey duration is {{ $value }}s for journey {{ $labels.journey }}'
+            summary: "User journey duration is slow"
+            description: "95th percentile user journey duration is {{ $value }}s for journey {{ $labels.journey }}"
 
         # SLA Violation Rate
         - alert: SyntheticSLAViolationRate
@@ -332,8 +332,8 @@ spec:
             severity: warning
             component: synthetic-monitoring
           annotations:
-            summary: 'High SLA violation rate'
-            description: 'SLA violations are occurring at {{ $value }} per second'
+            summary: "High SLA violation rate"
+            description: "SLA violations are occurring at {{ $value }} per second"
 
         # Synthetic Monitor Down
         - alert: SyntheticMonitorDown
@@ -343,8 +343,8 @@ spec:
             severity: critical
             component: synthetic-monitoring
           annotations:
-            summary: 'Synthetic monitor is down'
-            description: 'Synthetic monitoring service is not responding'
+            summary: "Synthetic monitor is down"
+            description: "Synthetic monitoring service is not responding"
 
         # No Recent Metrics
         - alert: SyntheticMonitorStale
@@ -354,5 +354,5 @@ spec:
             severity: warning
             component: synthetic-monitoring
           annotations:
-            summary: 'Synthetic monitor metrics are stale'
-            description: 'No synthetic monitoring metrics received in the last 5 minutes'
+            summary: "Synthetic monitor metrics are stale"
+            description: "No synthetic monitoring metrics received in the last 5 minutes"

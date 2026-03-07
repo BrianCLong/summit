@@ -1,5 +1,5 @@
-import PuLP from 'PuLP';
-import statsmodels from 'statsmodels';
+import PuLP from "PuLP";
+import statsmodels from "statsmodels";
 
 export function dynamicCoordination(config) {
   const workflow = PuLP.optimize({ intensity: config.collaborationIntensity });

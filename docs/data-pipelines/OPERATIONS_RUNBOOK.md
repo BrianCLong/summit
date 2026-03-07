@@ -112,11 +112,13 @@ WHERE pipeline_id = 'your-pipeline';
 #### Steps
 
 1. **Identify failed pipeline**
+
    ```bash
    curl http://localhost:4020/pipelines/{pipeline-id}/runs | jq '.[0]'
    ```
 
 2. **Review error logs**
+
    ```bash
    # Check pipeline errors
    curl http://localhost:4020/pipelines/{pipeline-id}/runs/{run-id} | jq '.errors[]'
@@ -131,6 +133,7 @@ WHERE pipeline_id = 'your-pipeline';
    - Timeout → Check query performance
 
 4. **Apply fix and retry**
+
    ```bash
    # Retry failed pipeline
    curl -X POST http://localhost:4020/pipelines/{pipeline-id}/execute
@@ -148,6 +151,7 @@ WHERE pipeline_id = 'your-pipeline';
 #### Steps
 
 1. **Check current lag**
+
    ```sql
    SELECT
      source_table,
@@ -179,16 +183,19 @@ WHERE pipeline_id = 'your-pipeline';
 #### Steps
 
 1. **Get quality report**
+
    ```bash
    curl http://localhost:4020/quality/reports/{run-id} | jq
    ```
 
 2. **Identify affected dimensions**
+
    ```bash
    curl http://localhost:4020/quality/reports/{run-id} | jq '.dimensions'
    ```
 
 3. **Review issues**
+
    ```bash
    curl http://localhost:4020/quality/reports/{run-id} | jq '.issues[] | select(.severity == "critical")'
    ```

@@ -4,34 +4,34 @@
  */
 
 export enum DeploymentEnvironment {
-  DEV = 'dev',
-  STAGING = 'staging',
-  PREVIEW = 'preview',
-  PRODUCTION = 'production',
-  CANARY = 'canary',
+  DEV = "dev",
+  STAGING = "staging",
+  PREVIEW = "preview",
+  PRODUCTION = "production",
+  CANARY = "canary",
 }
 
 export enum DeploymentStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  SUCCEEDED = 'succeeded',
-  FAILED = 'failed',
-  ROLLED_BACK = 'rolled_back',
-  CANCELLED = 'cancelled',
+  PENDING = "pending",
+  IN_PROGRESS = "in_progress",
+  SUCCEEDED = "succeeded",
+  FAILED = "failed",
+  ROLLED_BACK = "rolled_back",
+  CANCELLED = "cancelled",
 }
 
 export enum DeploymentType {
-  STANDARD = 'standard',
-  CANARY = 'canary',
-  BLUE_GREEN = 'blue_green',
-  ROLLING = 'rolling',
-  HOTFIX = 'hotfix',
+  STANDARD = "standard",
+  CANARY = "canary",
+  BLUE_GREEN = "blue_green",
+  ROLLING = "rolling",
+  HOTFIX = "hotfix",
 }
 
 export enum HealthCheckStatus {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  SKIPPED = 'skipped',
+  PASSED = "passed",
+  FAILED = "failed",
+  SKIPPED = "skipped",
 }
 
 export interface Deployment {

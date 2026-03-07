@@ -3,8 +3,8 @@
  * Shows live token count and cost estimates for prompt editors
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { debounce } from 'lodash';
+import React, { useEffect, useState, useMemo } from "react";
+import { debounce } from "lodash";
 
 interface TokenMeterProps {
   provider?: string;
@@ -14,7 +14,7 @@ interface TokenMeterProps {
   showCost?: boolean;
   showWarnings?: boolean;
   className?: string;
-  onBudgetChange?: (status: 'proceed' | 'warn' | 'block') => void;
+  onBudgetChange?: (status: "proceed" | "warn" | "block") => void;
 }
 
 interface TokenCountResult {
@@ -27,7 +27,7 @@ interface TokenCountResult {
     limit: number;
     withinBudget: boolean;
     percentUsed: number;
-    recommendAction: 'proceed' | 'warn' | 'block';
+    recommendAction: "proceed" | "warn" | "block";
   };
 }
 
@@ -38,7 +38,7 @@ export function TokenMeter({
   completion,
   showCost = true,
   showWarnings = true,
-  className = '',
+  className = "",
   onBudgetChange,
 }: TokenMeterProps) {
   const [count, setCount] = useState<TokenCountResult | null>(null);
@@ -49,12 +49,7 @@ export function TokenMeter({
   const debouncedCount = useMemo(
     () =>
       debounce(
-        async (
-          provider: string | undefined,
-          model: string,
-          text: string,
-          completion?: string,
-        ) => {
+        async (provider: string | undefined, model: string, text: string, completion?: string) => {
           if (!model || !text.trim()) {
             setCount(null);
             setLoading(false);
@@ -65,10 +60,10 @@ export function TokenMeter({
             setLoading(true);
             setError(null);
 
-            const response = await fetch('/api/tokcount', {
-              method: 'POST',
+            const response = await fetch("/api/tokcount", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 provider,
@@ -90,27 +85,23 @@ export function TokenMeter({
               onBudgetChange(result.budget.recommendAction);
             }
           } catch (err) {
-            setError(err instanceof Error ? err.message : 'Unknown error');
+            setError(err instanceof Error ? err.message : "Unknown error");
             // Fallback estimation
             const estimatedTokens = Math.max(1, Math.round(text.length / 4));
             setCount({
               model,
               prompt: estimatedTokens,
-              completion: completion
-                ? Math.round(completion.length / 4)
-                : undefined,
-              total:
-                estimatedTokens +
-                (completion ? Math.round(completion.length / 4) : 0),
+              completion: completion ? Math.round(completion.length / 4) : undefined,
+              total: estimatedTokens + (completion ? Math.round(completion.length / 4) : 0),
               estimatedCostUSD: 0,
             });
           } finally {
             setLoading(false);
           }
         },
-        500,
+        500
       ),
-    [onBudgetChange],
+    [onBudgetChange]
   );
 
   useEffect(() => {
@@ -123,40 +114,36 @@ export function TokenMeter({
 
   if (!count) {
     return loading ? (
-      <div className={`text-xs opacity-60 ${className}`}>
-        Counting tokens...
-      </div>
+      <div className={`text-xs opacity-60 ${className}`}>Counting tokens...</div>
     ) : null;
   }
 
   const getBudgetColor = () => {
-    if (!count.budget) return 'text-gray-500';
+    if (!count.budget) return "text-gray-500";
     switch (count.budget.recommendAction) {
-      case 'block':
-        return 'text-red-600';
-      case 'warn':
-        return 'text-yellow-600';
+      case "block":
+        return "text-red-600";
+      case "warn":
+        return "text-yellow-600";
       default:
-        return 'text-green-600';
+        return "text-green-600";
     }
   };
 
   const getBudgetIcon = () => {
     if (!count.budget) return null;
     switch (count.budget.recommendAction) {
-      case 'block':
-        return '🚫';
-      case 'warn':
-        return '⚠️';
+      case "block":
+        return "🚫";
+      case "warn":
+        return "⚠️";
       default:
-        return '✅';
+        return "✅";
     }
   };
 
   return (
-    <div
-      className={`flex items-center gap-2 text-xs ${getBudgetColor()} ${className}`}
-    >
+    <div className={`flex items-center gap-2 text-xs ${getBudgetColor()} ${className}`}>
       {loading && <span className="animate-pulse">⏳</span>}
 
       {getBudgetIcon() && <span>{getBudgetIcon()}</span>}
@@ -165,21 +152,16 @@ export function TokenMeter({
 
       {count.completion && (
         <span className="opacity-75">
-          ({count.prompt.toLocaleString()} + {count.completion.toLocaleString()}
-          )
+          ({count.prompt.toLocaleString()} + {count.completion.toLocaleString()})
         </span>
       )}
 
       {showCost && count.estimatedCostUSD && count.estimatedCostUSD > 0 && (
-        <span className="opacity-75">
-          ≈ ${count.estimatedCostUSD.toFixed(4)}
-        </span>
+        <span className="opacity-75">≈ ${count.estimatedCostUSD.toFixed(4)}</span>
       )}
 
       {showWarnings && count.budget && count.budget.percentUsed > 0 && (
-        <span className="opacity-75">
-          ({count.budget.percentUsed.toFixed(1)}% of budget)
-        </span>
+        <span className="opacity-75">({count.budget.percentUsed.toFixed(1)}% of budget)</span>
       )}
 
       {error && (
@@ -196,7 +178,7 @@ export function TokenMeter({
  */
 export function SimpleTokenMeter({
   text,
-  model = 'gpt-4o-mini',
+  model = "gpt-4o-mini",
 }: {
   text: string;
   model?: string;
@@ -231,7 +213,7 @@ export function TokenMeterWithEnforcement({
       showCost={true}
       showWarnings={true}
       onBudgetChange={(status) => {
-        if (status === 'block' && onBlock) {
+        if (status === "block" && onBlock) {
           onBlock();
         }
       }}

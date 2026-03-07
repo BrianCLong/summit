@@ -49,79 +49,79 @@ Every agent execution creates a **run record** with complete context.
 ```typescript
 interface AgentRunAudit {
   // Identification
-  id: string;                      // UUID - unique run ID
-  agent_id: string;                // Agent identity
-  agent_version: string;           // Agent version at execution time
-  trace_id: string;                // Distributed trace ID
-  span_id: string;                 // Span ID for correlation
+  id: string; // UUID - unique run ID
+  agent_id: string; // Agent identity
+  agent_version: string; // Agent version at execution time
+  trace_id: string; // Distributed trace ID
+  span_id: string; // Span ID for correlation
 
   // Context
-  tenant_id: string;               // Tenant context
-  project_id?: string;             // Project context
-  user_id?: string;                // Triggering user (if applicable)
-  organization_id: string;         // Organization context
+  tenant_id: string; // Tenant context
+  project_id?: string; // Project context
+  user_id?: string; // Triggering user (if applicable)
+  organization_id: string; // Organization context
 
   // Trigger Information
-  trigger_type: TriggerType;       // What initiated the run
-  trigger_source: string;          // Source identifier
-  trigger_payload_hash: string;    // SHA-256 of trigger payload
+  trigger_type: TriggerType; // What initiated the run
+  trigger_source: string; // Source identifier
+  trigger_payload_hash: string; // SHA-256 of trigger payload
 
   // Operation Mode
-  operation_mode: OperationMode;   // SIMULATION | DRY_RUN | ENFORCED
+  operation_mode: OperationMode; // SIMULATION | DRY_RUN | ENFORCED
 
   // Timing
-  started_at: Date;                // Run start time
-  completed_at?: Date;             // Run completion time
-  duration_ms: number;             // Total duration
+  started_at: Date; // Run start time
+  completed_at?: Date; // Run completion time
+  duration_ms: number; // Total duration
 
   // Actions
   actions_proposed: ActionSummary[]; // All actions agent proposed
   actions_executed: ActionSummary[]; // Actions actually executed
-  actions_denied: ActionSummary[];   // Actions denied by policy
+  actions_denied: ActionSummary[]; // Actions denied by policy
 
   // Outcome
-  status: RunStatus;               // Final status
-  outcome: RunOutcome;             // Structured outcome
-  error?: ErrorDetails;            // Error details if failed
+  status: RunStatus; // Final status
+  outcome: RunOutcome; // Structured outcome
+  error?: ErrorDetails; // Error details if failed
 
   // Resource Usage
-  tokens_consumed: number;         // Total tokens used
-  api_calls_made: number;          // API calls made
-  cost_usd: number;                // Estimated cost
-  memory_peak_mb: number;          // Peak memory usage
+  tokens_consumed: number; // Total tokens used
+  api_calls_made: number; // API calls made
+  cost_usd: number; // Estimated cost
+  memory_peak_mb: number; // Peak memory usage
 
   // Capabilities Used
   capabilities_declared: string[]; // Capabilities from registry
-  capabilities_used: string[];     // Capabilities actually invoked
+  capabilities_used: string[]; // Capabilities actually invoked
 
   // Policy Decisions
   policy_evaluations: PolicyEvaluationSummary[];
   policy_violations: PolicyViolation[];
 
   // Provenance
-  input_hash: string;              // SHA-256 of inputs (redacted)
-  output_hash: string;             // SHA-256 of outputs (redacted)
+  input_hash: string; // SHA-256 of inputs (redacted)
+  output_hash: string; // SHA-256 of outputs (redacted)
   artifact_signatures: ArtifactSignature[]; // SLSA/cosign signatures
 }
 
 enum TriggerType {
-  MANUAL = 'manual',               // User-initiated
-  SCHEDULED = 'scheduled',         // Cron/schedule
-  EVENT = 'event',                 // Event-driven
-  API = 'api',                     // API call
-  WEBHOOK = 'webhook',             // Webhook trigger
-  AGENT_TO_AGENT = 'agent_to_agent' // Inter-agent delegation
+  MANUAL = "manual", // User-initiated
+  SCHEDULED = "scheduled", // Cron/schedule
+  EVENT = "event", // Event-driven
+  API = "api", // API call
+  WEBHOOK = "webhook", // Webhook trigger
+  AGENT_TO_AGENT = "agent_to_agent", // Inter-agent delegation
 }
 
 enum RunStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout',
-  LIMIT_EXCEEDED = 'limit_exceeded',
-  POLICY_DENIED = 'policy_denied'
+  PENDING = "pending",
+  RUNNING = "running",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+  TIMEOUT = "timeout",
+  LIMIT_EXCEEDED = "limit_exceeded",
+  POLICY_DENIED = "policy_denied",
 }
 
 interface RunOutcome {
@@ -161,19 +161,39 @@ interface ActionSummary {
   "completed_at": "2025-12-31T10:02:30Z",
   "duration_ms": 150000,
   "actions_proposed": [
-    {"action_type": "code:analyze", "action_target": "pr-456", "risk_level": "low", "timestamp": "2025-12-31T10:00:05Z"},
-    {"action_type": "comment:create", "action_target": "pr-456", "risk_level": "low", "timestamp": "2025-12-31T10:02:20Z"}
+    {
+      "action_type": "code:analyze",
+      "action_target": "pr-456",
+      "risk_level": "low",
+      "timestamp": "2025-12-31T10:00:05Z"
+    },
+    {
+      "action_type": "comment:create",
+      "action_target": "pr-456",
+      "risk_level": "low",
+      "timestamp": "2025-12-31T10:02:20Z"
+    }
   ],
   "actions_executed": [
-    {"action_type": "code:analyze", "action_target": "pr-456", "risk_level": "low", "timestamp": "2025-12-31T10:00:05Z"},
-    {"action_type": "comment:create", "action_target": "pr-456", "risk_level": "low", "timestamp": "2025-12-31T10:02:20Z"}
+    {
+      "action_type": "code:analyze",
+      "action_target": "pr-456",
+      "risk_level": "low",
+      "timestamp": "2025-12-31T10:00:05Z"
+    },
+    {
+      "action_type": "comment:create",
+      "action_target": "pr-456",
+      "risk_level": "low",
+      "timestamp": "2025-12-31T10:02:20Z"
+    }
   ],
   "actions_denied": [],
   "status": "completed",
   "outcome": {
     "success": true,
     "result_summary": "Code review completed. 3 suggestions provided.",
-    "metrics": {"lines_reviewed": 450, "issues_found": 3},
+    "metrics": { "lines_reviewed": 450, "issues_found": 3 },
     "recommendations": ["Consider adding unit tests for error handling"]
   },
   "tokens_consumed": 12500,
@@ -183,7 +203,11 @@ interface ActionSummary {
   "capabilities_declared": ["repository:read", "comment:write"],
   "capabilities_used": ["repository:read", "comment:write"],
   "policy_evaluations": [
-    {"policy": "agents/governance/action", "decision": "allow", "timestamp": "2025-12-31T10:00:01Z"}
+    {
+      "policy": "agents/governance/action",
+      "decision": "allow",
+      "timestamp": "2025-12-31T10:00:01Z"
+    }
   ],
   "policy_violations": [],
   "input_hash": "sha256:a1b2c3d4...",
@@ -203,49 +227,49 @@ Every action (proposed or executed) creates an **action record**.
 ```typescript
 interface AgentActionAudit {
   // Identification
-  id: string;                      // UUID - unique action ID
-  run_id: string;                  // Parent run
-  agent_id: string;                // Agent identity
-  sequence_number: number;         // Order within run
+  id: string; // UUID - unique action ID
+  run_id: string; // Parent run
+  agent_id: string; // Agent identity
+  sequence_number: number; // Order within run
 
   // Action Details
-  action_type: string;             // Type of action (e.g., "database:write")
-  action_target: string;           // Target resource
-  action_payload: unknown;         // Action parameters (may be redacted)
-  action_payload_hash: string;     // SHA-256 of full payload
+  action_type: string; // Type of action (e.g., "database:write")
+  action_target: string; // Target resource
+  action_payload: unknown; // Action parameters (may be redacted)
+  action_payload_hash: string; // SHA-256 of full payload
 
   // Risk Assessment
-  risk_level: RiskLevel;           // Computed risk level
-  risk_factors: string[];          // Why this risk level
-  risk_score: number;              // Numeric risk score (0-100)
+  risk_level: RiskLevel; // Computed risk level
+  risk_factors: string[]; // Why this risk level
+  risk_score: number; // Numeric risk score (0-100)
 
   // Policy Decision
   policy_decision: PolicyDecisionRecord;
-  policy_path: string;             // OPA policy path evaluated
-  policy_version: string;          // Policy version
-  policy_input_hash: string;       // SHA-256 of policy input
+  policy_path: string; // OPA policy path evaluated
+  policy_version: string; // Policy version
+  policy_input_hash: string; // SHA-256 of policy input
 
   // Authorization
   authorization_status: AuthorizationStatus;
   authorization_reason: string;
   capabilities_required: string[]; // Capabilities needed
-  capabilities_matched: boolean;   // Whether agent has capabilities
+  capabilities_matched: boolean; // Whether agent has capabilities
 
   // Approval Workflow
   requires_approval: boolean;
-  approval_id?: string;            // Link to approval record
-  approved_by?: string;            // Approver user ID
-  approved_at?: Date;              // Approval timestamp
-  approval_reason?: string;        // Approval justification
+  approval_id?: string; // Link to approval record
+  approved_by?: string; // Approver user ID
+  approved_at?: Date; // Approval timestamp
+  approval_reason?: string; // Approval justification
 
   // Execution
-  executed: boolean;               // Whether action was executed
-  execution_started_at?: Date;     // Execution start
-  execution_completed_at?: Date;   // Execution completion
-  execution_duration_ms?: number;  // Execution duration
-  execution_result?: unknown;      // Execution result (may be redacted)
-  execution_result_hash?: string;  // SHA-256 of result
-  execution_error?: ErrorDetails;  // Error if failed
+  executed: boolean; // Whether action was executed
+  execution_started_at?: Date; // Execution start
+  execution_completed_at?: Date; // Execution completion
+  execution_duration_ms?: number; // Execution duration
+  execution_result?: unknown; // Execution result (may be redacted)
+  execution_result_hash?: string; // SHA-256 of result
+  execution_error?: ErrorDetails; // Error if failed
 
   // Audit Trail
   created_at: Date;
@@ -253,18 +277,18 @@ interface AgentActionAudit {
 }
 
 interface PolicyDecisionRecord {
-  decision: PolicyDecision;        // allow | deny | conditional
-  obligations: Obligation[];       // Required obligations
-  reason: string;                  // Human-readable reason
-  evaluation_time_ms: number;      // Policy evaluation time
+  decision: PolicyDecision; // allow | deny | conditional
+  obligations: Obligation[]; // Required obligations
+  reason: string; // Human-readable reason
+  evaluation_time_ms: number; // Policy evaluation time
 }
 
 enum AuthorizationStatus {
-  PENDING = 'pending',
-  AUTHORIZED = 'authorized',
-  DENIED = 'denied',
-  EXPIRED = 'expired',
-  REVOKED = 'revoked'
+  PENDING = "pending",
+  AUTHORIZED = "authorized",
+  DENIED = "denied",
+  EXPIRED = "expired",
+  REVOKED = "revoked",
 }
 ```
 
@@ -289,7 +313,7 @@ enum AuthorizationStatus {
   "risk_score": 15,
   "policy_decision": {
     "decision": "allow",
-    "obligations": [{"type": "audit_enhanced"}],
+    "obligations": [{ "type": "audit_enhanced" }],
     "reason": "Agent has 'comment:write' capability within scope",
     "evaluation_time_ms": 12
   },
@@ -305,7 +329,7 @@ enum AuthorizationStatus {
   "execution_started_at": "2025-12-31T10:02:20Z",
   "execution_completed_at": "2025-12-31T10:02:21Z",
   "execution_duration_ms": 1000,
-  "execution_result": {"comment_id": "comment-999"},
+  "execution_result": { "comment_id": "comment-999" },
   "execution_result_hash": "sha256:9i0j1k2l...",
   "created_at": "2025-12-31T10:02:19Z",
   "updated_at": "2025-12-31T10:02:21Z"
@@ -323,8 +347,8 @@ All agent configuration and administrative changes are logged.
 ```typescript
 interface AgentLifecycleAudit {
   // Identification
-  id: string;                      // UUID
-  agent_id: string;                // Agent affected
+  id: string; // UUID
+  agent_id: string; // Agent affected
 
   // Event Classification
   event_type: LifecycleEventType;
@@ -332,14 +356,14 @@ interface AgentLifecycleAudit {
   event_severity: EventSeverity;
 
   // Actor Information
-  actor_id: string;                // Who made the change
-  actor_type: ActorType;           // User, system, or agent
-  actor_context: ActorContext;     // Additional context
+  actor_id: string; // Who made the change
+  actor_type: ActorType; // User, system, or agent
+  actor_context: ActorContext; // Additional context
 
   // Change Details
-  changes: ChangeRecord;           // Before/after state
-  change_reason?: string;          // Justification
-  change_request_id?: string;      // Link to change request
+  changes: ChangeRecord; // Before/after state
+  change_reason?: string; // Justification
+  change_request_id?: string; // Link to change request
 
   // Context
   metadata: Record<string, unknown>;
@@ -350,69 +374,69 @@ interface AgentLifecycleAudit {
   timestamp: Date;
 
   // Cryptographic Integrity
-  previous_record_hash?: string;   // Hash chain for tamper detection
-  record_signature?: string;       // HMAC signature
+  previous_record_hash?: string; // Hash chain for tamper detection
+  record_signature?: string; // HMAC signature
 }
 
 enum LifecycleEventType {
   // Agent Lifecycle
-  AGENT_CREATED = 'agent_created',
-  AGENT_UPDATED = 'agent_updated',
-  AGENT_DELETED = 'agent_deleted',
-  STATUS_CHANGED = 'status_changed',
-  VERSION_DEPLOYED = 'version_deployed',
+  AGENT_CREATED = "agent_created",
+  AGENT_UPDATED = "agent_updated",
+  AGENT_DELETED = "agent_deleted",
+  STATUS_CHANGED = "status_changed",
+  VERSION_DEPLOYED = "version_deployed",
 
   // Capabilities
-  CAPABILITY_ADDED = 'capability_added',
-  CAPABILITY_REMOVED = 'capability_removed',
-  CAPABILITY_MODIFIED = 'capability_modified',
+  CAPABILITY_ADDED = "capability_added",
+  CAPABILITY_REMOVED = "capability_removed",
+  CAPABILITY_MODIFIED = "capability_modified",
 
   // Credentials
-  CREDENTIAL_CREATED = 'credential_created',
-  CREDENTIAL_ROTATED = 'credential_rotated',
-  CREDENTIAL_REVOKED = 'credential_revoked',
-  CREDENTIAL_EXPIRED = 'credential_expired',
+  CREDENTIAL_CREATED = "credential_created",
+  CREDENTIAL_ROTATED = "credential_rotated",
+  CREDENTIAL_REVOKED = "credential_revoked",
+  CREDENTIAL_EXPIRED = "credential_expired",
 
   // Scope Changes
-  SCOPE_EXPANDED = 'scope_expanded',
-  SCOPE_RESTRICTED = 'scope_restricted',
-  TENANT_ADDED = 'tenant_added',
-  TENANT_REMOVED = 'tenant_removed',
+  SCOPE_EXPANDED = "scope_expanded",
+  SCOPE_RESTRICTED = "scope_restricted",
+  TENANT_ADDED = "tenant_added",
+  TENANT_REMOVED = "tenant_removed",
 
   // Security Events
-  CERTIFICATION_GRANTED = 'certification_granted',
-  CERTIFICATION_REVOKED = 'certification_revoked',
-  SECURITY_VIOLATION = 'security_violation',
-  MISUSE_DETECTED = 'misuse_detected',
+  CERTIFICATION_GRANTED = "certification_granted",
+  CERTIFICATION_REVOKED = "certification_revoked",
+  SECURITY_VIOLATION = "security_violation",
+  MISUSE_DETECTED = "misuse_detected",
 
   // Administrative
-  QUOTA_MODIFIED = 'quota_modified',
-  POLICY_ATTACHED = 'policy_attached',
-  POLICY_DETACHED = 'policy_detached',
-  APPROVAL_REQUIRED = 'approval_required',
-  EMERGENCY_SHUTDOWN = 'emergency_shutdown'
+  QUOTA_MODIFIED = "quota_modified",
+  POLICY_ATTACHED = "policy_attached",
+  POLICY_DETACHED = "policy_detached",
+  APPROVAL_REQUIRED = "approval_required",
+  EMERGENCY_SHUTDOWN = "emergency_shutdown",
 }
 
 enum EventCategory {
-  LIFECYCLE = 'lifecycle',
-  SECURITY = 'security',
-  ACCESS = 'access',
-  CONFIGURATION = 'configuration',
-  EXECUTION = 'execution',
-  COMPLIANCE = 'compliance'
+  LIFECYCLE = "lifecycle",
+  SECURITY = "security",
+  ACCESS = "access",
+  CONFIGURATION = "configuration",
+  EXECUTION = "execution",
+  COMPLIANCE = "compliance",
 }
 
 enum EventSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  CRITICAL = 'critical'
+  INFO = "info",
+  WARNING = "warning",
+  CRITICAL = "critical",
 }
 
 enum ActorType {
-  USER = 'user',
-  SYSTEM = 'system',
-  AGENT = 'agent',
-  API = 'api'
+  USER = "user",
+  SYSTEM = "system",
+  AGENT = "agent",
+  API = "api",
 }
 
 interface ActorContext {
@@ -423,10 +447,10 @@ interface ActorContext {
 }
 
 interface ChangeRecord {
-  before?: unknown;                // State before change
-  after?: unknown;                 // State after change
-  fields_changed: string[];        // Which fields changed
-  diff?: string;                   // Human-readable diff
+  before?: unknown; // State before change
+  after?: unknown; // State after change
+  fields_changed: string[]; // Which fields changed
+  diff?: string; // Human-readable diff
 }
 ```
 
@@ -475,13 +499,13 @@ interface ChangeRecord {
 
 ### Retention Policies
 
-| Record Type | Retention Period | Archive Strategy |
-|-------------|-----------------|------------------|
-| Run Audit | 90 days (hot), 7 years (cold) | TimescaleDB compression |
-| Action Audit | 90 days (hot), 7 years (cold) | TimescaleDB compression |
-| Lifecycle Audit | Indefinite | Append-only with compression |
-| Policy Evaluations | 30 days (hot), 2 years (cold) | Aggregated summaries |
-| Error Logs | 180 days | Full retention |
+| Record Type        | Retention Period              | Archive Strategy             |
+| ------------------ | ----------------------------- | ---------------------------- |
+| Run Audit          | 90 days (hot), 7 years (cold) | TimescaleDB compression      |
+| Action Audit       | 90 days (hot), 7 years (cold) | TimescaleDB compression      |
+| Lifecycle Audit    | Indefinite                    | Append-only with compression |
+| Policy Evaluations | 30 days (hot), 2 years (cold) | Aggregated summaries         |
+| Error Logs         | 180 days                      | Full retention               |
 
 ### Compliance Mappings
 
@@ -500,22 +524,22 @@ interface ChangeRecord {
 interface AuditIntegrity {
   // Hash Chain
   record_id: string;
-  record_hash: string;             // SHA-256 of record content
-  previous_record_hash: string;    // Hash chain link
-  chain_sequence: number;          // Sequence in chain
+  record_hash: string; // SHA-256 of record content
+  previous_record_hash: string; // Hash chain link
+  chain_sequence: number; // Sequence in chain
 
   // Signature
-  signature: string;               // HMAC-SHA256 signature
-  signature_algorithm: string;     // Algorithm used
-  signing_key_id: string;          // Key ID (not key itself)
+  signature: string; // HMAC-SHA256 signature
+  signature_algorithm: string; // Algorithm used
+  signing_key_id: string; // Key ID (not key itself)
 
   // Merkle Tree (for batch verification)
-  merkle_root?: string;            // Merkle root hash
-  merkle_proof?: string[];         // Merkle proof path
+  merkle_root?: string; // Merkle root hash
+  merkle_proof?: string[]; // Merkle proof path
 
   // Timestamp
-  signed_at: Date;                 // Signature timestamp
-  notary_witness?: string;         // Optional timestamp authority
+  signed_at: Date; // Signature timestamp
+  notary_witness?: string; // Optional timestamp authority
 }
 ```
 
@@ -564,12 +588,12 @@ interface AuditQuery {
   offset: number;
 
   // Sorting
-  sort_by: 'timestamp' | 'severity' | 'event_type';
-  sort_order: 'asc' | 'desc';
+  sort_by: "timestamp" | "severity" | "event_type";
+  sort_order: "asc" | "desc";
 
   // Filters
-  include_redacted?: boolean;      // Include redacted payloads
-  include_signatures?: boolean;    // Include crypto signatures
+  include_redacted?: boolean; // Include redacted payloads
+  include_signatures?: boolean; // Include crypto signatures
 }
 
 interface AuditQueryResponse {
@@ -673,15 +697,15 @@ GET /api/v1/audit/forensic/anomalies?agent_id=agent-xyz
 
 ```typescript
 // Subscribe to audit events
-const auditStream = subscribe('/audit/stream', {
+const auditStream = subscribe("/audit/stream", {
   filters: {
-    event_category: ['security', 'execution'],
-    event_severity: ['warning', 'critical']
-  }
+    event_category: ["security", "execution"],
+    event_severity: ["warning", "critical"],
+  },
 });
 
-auditStream.on('event', (event: AuditEvent) => {
-  console.log('Audit event:', event);
+auditStream.on("event", (event: AuditEvent) => {
+  console.log("Audit event:", event);
 });
 ```
 
@@ -710,19 +734,19 @@ webhook:
 ```typescript
 interface RedactionPolicy {
   // Always Redacted
-  credentials: 'REDACTED',         // API keys, passwords
-  pii: 'HASHED',                   // Personal information
-  secrets: 'REDACTED',             // Secret manager contents
+  credentials: "REDACTED"; // API keys, passwords
+  pii: "HASHED"; // Personal information
+  secrets: "REDACTED"; // Secret manager contents
 
   // Conditionally Redacted
-  payload_size_threshold: 10000,   // Redact payloads > 10KB
-  retain_hash: true,               // Always keep SHA-256 hash
-  retain_schema: true,             // Keep structure, redact values
+  payload_size_threshold: 10000; // Redact payloads > 10KB
+  retain_hash: true; // Always keep SHA-256 hash
+  retain_schema: true; // Keep structure, redact values
 
   // Never Redacted
-  metadata: 'FULL',                // Metadata always kept
-  timing: 'FULL',                  // Timestamps always kept
-  identifiers: 'FULL'              // IDs always kept
+  metadata: "FULL"; // Metadata always kept
+  timing: "FULL"; // Timestamps always kept
+  identifiers: "FULL"; // IDs always kept
 }
 ```
 

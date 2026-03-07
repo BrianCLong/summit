@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 export default function ReleasePlan() {
   const [rows, setRows] = useState<string[]>([]);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/release/plan', { signal: controller.signal })
+    fetch("/api/release/plan", { signal: controller.signal })
       .then((r) => r.json())
       .then((x) => setRows(x.queue || []))
       .catch((err) => {
-        if (err.name !== 'AbortError') {
-          console.error('Fetch error:', err);
+        if (err.name !== "AbortError") {
+          console.error("Fetch error:", err);
         }
       });
     return () => controller.abort();

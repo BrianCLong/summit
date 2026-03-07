@@ -53,23 +53,27 @@ Successfully implemented a comprehensive autotriage engine for Summit's issues a
 ## Key Features
 
 ### ✅ Multi-Source Data Collection
+
 - ✓ Parses local backlog items from JSON
 - ✓ Parses bug-bash results from markdown (P0/P1/P2)
 - ✓ Optionally fetches GitHub issues via API
 
 ### ✅ Intelligent Classification
+
 - ✓ 8 predefined areas (copilot, ingestion, graph, UI, infra, API, observability, security)
 - ✓ 4 impact levels (blocker/high/medium/low) with scoring
 - ✓ 4 types (bug/tech-debt/feature/enhancement)
 - ✓ Keyword and regex pattern matching
 
 ### ✅ Issue Clustering
+
 - ✓ TF-IDF vectorization for similarity computation
 - ✓ Hierarchical clustering algorithm
 - ✓ Automatic theme extraction
 - ✓ Configurable similarity thresholds
 
 ### ✅ Report Generation
+
 - ✓ Markdown format for human readability
 - ✓ JSON format for API integration
 - ✓ Summary statistics (by source, area, impact, type)
@@ -78,6 +82,7 @@ Successfully implemented a comprehensive autotriage engine for Summit's issues a
 - ✓ Actionable recommendations
 
 ### ✅ Automation Helpers
+
 - ✓ GitHub label suggestions with confidence scores
 - ✓ Comment drafts for deduplication
 - ✓ Good first issue detection
@@ -85,22 +90,26 @@ Successfully implemented a comprehensive autotriage engine for Summit's issues a
 ## Usage Examples
 
 ### Basic Triage (Backlog + Bug-Bash)
+
 ```bash
 ./scripts/autotriage.sh triage
 ```
 
 ### With GitHub Issues
+
 ```bash
 export GITHUB_TOKEN=your_token_here
 ./scripts/autotriage.sh triage --github --output weekly-report.md
 ```
 
 ### Generate Everything (Report + Labels + Comments)
+
 ```bash
 ./scripts/autotriage.sh triage --all --output triage-report.md
 ```
 
 ### JSON Output for Processing
+
 ```bash
 ./scripts/autotriage.sh triage --json --output triage-data.json
 ```
@@ -108,6 +117,7 @@ export GITHUB_TOKEN=your_token_here
 ## Sample Output
 
 The engine successfully processed:
+
 - **9 backlog items** from `backlog/backlog.json`
 - **3 bug-bash items** from markdown templates
 - **Total: 12 items** classified and analyzed
@@ -115,17 +125,20 @@ The engine successfully processed:
 ### Report Highlights
 
 **Summary Statistics:**
+
 - 7 BLOCKER issues requiring immediate attention
 - 42% of issues in "security" area → recommendation for dedicated sprint
 - 3 good first issues identified for new contributors
 
 **Top Areas:**
+
 1. Security (5 issues)
 2. UI (5 issues)
 3. Copilot (4 issues)
 4. Observability (3 issues)
 
 **Top Priority Issues:**
+
 1. Policy Fuzzer (blocker, observability/security)
 2. Firecracker pooler (blocker, copilot)
 3. Deterministic sandboxing (blocker)
@@ -135,16 +148,19 @@ The engine successfully processed:
 ## Acceptance Criteria Met
 
 ✅ **Can generate weekly triage report with single command**
+
 ```bash
 ./scripts/autotriage.sh triage --output weekly-triage.md
 ```
 
 ✅ **Report clearly shows top 10 blocking themes**
+
 - Clustered issues by theme
 - Average impact scores
 - Related issues with links
 
 ✅ **New issues get auto-labeled reasonably well**
+
 - Label suggestions with confidence scores
 - Area, priority, and type labels
 - Output to `triage-labels.json`
@@ -152,20 +168,24 @@ The engine successfully processed:
 ## Architecture Benefits
 
 ### Modular Design
+
 - Each component has a single responsibility
 - Easy to extend with new areas, rules, or data sources
 - TypeScript for type safety
 
 ### Configurable
+
 - Edit `config.ts` to adjust areas, impact rules, clustering
 - No code changes needed for common customizations
 
 ### Scalable
+
 - TF-IDF clustering handles 1000s of issues
 - GitHub API pagination for large repos
 - Incremental processing possible
 
 ### Maintainable
+
 - Comprehensive documentation
 - Clear code structure
 - TypeScript type definitions
@@ -173,12 +193,14 @@ The engine successfully processed:
 ## Next Steps
 
 ### Immediate Usage
+
 1. Run weekly triage: `./scripts/autotriage.sh triage --github`
 2. Review top blocking themes
 3. Assign owners to high-priority items
 4. Create epics for recurring themes
 
 ### Future Enhancements
+
 - ML-based classification with fine-tuned embeddings
 - Historical trend analysis
 - Auto-assignment based on ownership patterns
@@ -193,6 +215,7 @@ The engine successfully processed:
 - No existing files modified
 
 ### Key Directories
+
 ```
 assistant/autotriage/
 ├── cli.ts (395 lines)
@@ -227,10 +250,12 @@ assistant/autotriage/
 ## Deployment
 
 All code has been committed and pushed to:
+
 - **Branch:** `claude/autotriage-engine-018oYP8WQvDfqcSt48C9ahfc`
 - **Commit:** `9f7f1dc0` - "feat(autotriage): implement automated issue triage engine"
 
 Ready for:
+
 - Code review
 - Integration testing with full GitHub data
 - Weekly triage automation setup

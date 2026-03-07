@@ -1,5 +1,12 @@
 import React, { useState } from 'react'
-import { Github, Rocket, Shield, Globe, Clock, CheckCircle2 } from 'lucide-react'
+import {
+  Github,
+  Rocket,
+  Shield,
+  Globe,
+  Clock,
+  CheckCircle2,
+} from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -11,7 +18,9 @@ import {
 import { Button } from '@/components/ui/Button'
 
 export default function TrialSignup() {
-  const [step, setStep] = useState<'start' | 'provisioning' | 'scanning' | 'ready'>('start')
+  const [step, setStep] = useState<
+    'start' | 'provisioning' | 'scanning' | 'ready'
+  >('start')
   const [progress, setProgress] = useState(0)
 
   const handleStartTrial = () => {
@@ -47,7 +56,9 @@ export default function TrialSignup() {
       <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="flex flex-col justify-center space-y-6">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Start Your Summit Trial</h1>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Start Your Summit Trial
+            </h1>
             <p className="text-slate-400 text-lg">
               Get full access to the intelligence graph for 7 days.
             </p>
@@ -57,22 +68,30 @@ export default function TrialSignup() {
             <div className="flex items-start space-x-3">
               <Shield className="h-6 w-6 text-blue-500 mt-1" />
               <div>
-                <h3 className="text-white font-semibold">1 Organization Limit</h3>
-                <p className="text-slate-500 text-sm">Perfect for testing your core mesh.</p>
+                <h3 className="text-white font-semibold">
+                  1 Organization Limit
+                </h3>
+                <p className="text-slate-500 text-sm">
+                  Perfect for testing your core mesh.
+                </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <Clock className="h-6 w-6 text-blue-500 mt-1" />
               <div>
                 <h3 className="text-white font-semibold">7 Day Duration</h3>
-                <p className="text-slate-500 text-sm">Full feature access during the trial period.</p>
+                <p className="text-slate-500 text-sm">
+                  Full feature access during the trial period.
+                </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <Globe className="h-6 w-6 text-blue-500 mt-1" />
               <div>
                 <h3 className="text-white font-semibold">Watermarked Graphs</h3>
-                <p className="text-slate-500 text-sm">Exportable insights with trial attribution.</p>
+                <p className="text-slate-500 text-sm">
+                  Exportable insights with trial attribution.
+                </p>
               </div>
             </div>
           </div>
@@ -82,7 +101,8 @@ export default function TrialSignup() {
           <CardHeader>
             <CardTitle>Register via GitHub</CardTitle>
             <CardDescription className="text-slate-400">
-              We'll use your GitHub identity to provision your trial environment.
+              We'll use your GitHub identity to provision your trial
+              environment.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -101,7 +121,9 @@ export default function TrialSignup() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                 <div>
                   <h3 className="text-lg font-medium">
-                    {step === 'provisioning' ? 'Provisioning Tenant...' : 'Org Mesh Quickstart Scan...'}
+                    {step === 'provisioning'
+                      ? 'Provisioning Tenant...'
+                      : 'Org Mesh Quickstart Scan...'}
                   </h3>
                   <div className="w-full bg-slate-800 rounded-full h-2 mt-4">
                     <div
@@ -119,14 +141,16 @@ export default function TrialSignup() {
                   <CheckCircle2 className="h-10 w-10 text-green-500" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">Your Environment is Ready!</h3>
+                  <h3 className="text-xl font-bold">
+                    Your Environment is Ready!
+                  </h3>
                   <p className="text-slate-400 mt-2">
                     Your trial environment has been successfully provisioned.
                   </p>
                 </div>
                 <Button
                   className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => (window.location.href = '/')}
                 >
                   <Rocket className="h-4 w-4 mr-2" />
                   Enter Workspace

@@ -1,6 +1,7 @@
 # Adoption Brief (Template)
 
 ## Metadata
+
 - Evidence ID:
 - Owner:
 - Date:
@@ -11,6 +12,7 @@
 - Never-log fields:
 
 ## 1) Problem Definition (Workflow Framing)
+
 - Workflow step:
 - User persona:
 - Current bottleneck:
@@ -19,6 +21,7 @@
 - Constraints (regulatory, policy, reliability):
 
 ## 2) Solution Evaluation (Options + Acceptance)
+
 - Candidate solutions:
   - Option A:
   - Option B:
@@ -29,6 +32,7 @@
 - Risks and failure modes:
 
 ## 3) Rapid Experimentation (Hypotheses + Tests)
+
 - Hypothesis:
 - Experiment design:
 - Dataset scope and sources:
@@ -38,6 +42,7 @@
 - Evidence artifacts (report.json, metrics.json, stamp.json):
 
 ## 4) Sustainable Integration (Operationalization)
+
 - Integration plan:
 - Monitoring plan:
 - Access controls:
@@ -46,17 +51,20 @@
 - Maintenance owner:
 
 ## Rollout / Rollback
+
 - Rollout stages:
 - Rollback trigger(s):
 - Rollback steps:
 
 ## Dependencies & Approvals
+
 - Stakeholders:
 - Security review:
 - Governance review:
 - Related policies:
 
 ## References
+
 - Experiment Plan:
 - Integration Checklist:
 - Evidence pack location:

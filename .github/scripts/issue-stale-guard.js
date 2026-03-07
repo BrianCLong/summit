@@ -1,9 +1,9 @@
-const { LABEL_DEFINITIONS } = require('./issue-triage-lib');
+const { LABEL_DEFINITIONS } = require("./issue-triage-lib");
 
 const STALE_DAYS = 45;
-const TRIAGE_LABEL = 'triage:needs-info';
-const SKIP_LABEL_PREFIXES = ['ga:'];
-const SKIP_LABELS = new Set(['priority:P0']);
+const TRIAGE_LABEL = "triage:needs-info";
+const SKIP_LABEL_PREFIXES = ["ga:"];
+const SKIP_LABELS = new Set(["priority:P0"]);
 
 async function ensureLabels({ github, owner, repo }) {
   const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {
@@ -33,7 +33,7 @@ function shouldSkip(labels) {
 }
 
 function collectLabelNames(labels) {
-  return new Set((labels || []).map((label) => (typeof label === 'string' ? label : label.name)));
+  return new Set((labels || []).map((label) => (typeof label === "string" ? label : label.name)));
 }
 
 module.exports = async function run({ github, context }) {
@@ -47,10 +47,10 @@ module.exports = async function run({ github, context }) {
   for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, {
     owner,
     repo,
-    state: 'open',
+    state: "open",
     per_page: 100,
-    sort: 'updated',
-    direction: 'asc',
+    sort: "updated",
+    direction: "asc",
   })) {
     for (const issue of response.data) {
       if (issue.pull_request) {

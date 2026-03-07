@@ -28,16 +28,19 @@ Traditional predictive analytics represent uncertainty through point estimates (
 ### Use Cases
 
 **Intelligence Analysis**:
+
 - Identify geopolitical scenarios with highest predictive uncertainty
 - Map confidence degradation over forecast horizon
 - Detect events that create uncertainty cascades
 
 **Risk Assessment**:
+
 - Visualize uncertainty propagation through causal networks
 - Identify critical uncertainty nodes in multi-factor predictions
 - Track uncertainty evolution as situations develop
 
 **Decision Support**:
+
 - Compare uncertainty profiles across alternative scenarios
 - Identify "fog of war" zones requiring additional intelligence collection
 - Optimize resource allocation for uncertainty reduction
@@ -88,17 +91,17 @@ interface UncertaintyField {
 
 interface FieldDimension {
   name: string;
-  type: 'temporal' | 'spatial' | 'categorical' | 'continuous';
+  type: "temporal" | "spatial" | "categorical" | "continuous";
   range: [number, number] | string[];
   unit?: string;
 }
 
 interface FieldPoint {
   coordinates: Record<string, number>;
-  uncertainty: number;        // 0-1 normalized
-  source: 'measured' | 'interpolated' | 'extrapolated';
-  confidence: number;         // Confidence in uncertainty estimate
-  contributors: string[];     // Contributing prediction IDs
+  uncertainty: number; // 0-1 normalized
+  source: "measured" | "interpolated" | "extrapolated";
+  confidence: number; // Confidence in uncertainty estimate
+  contributors: string[]; // Contributing prediction IDs
 }
 ```
 
@@ -110,7 +113,7 @@ interface FieldPoint {
 interface UncertaintySurface {
   id: string;
   fieldId: string;
-  dimensions: [string, string, string?];  // X, Y, Z (optional)
+  dimensions: [string, string, string?]; // X, Y, Z (optional)
   grid: SurfaceGrid;
   contours: ContourLevel[];
   gradients: GradientVector[];
@@ -139,18 +142,18 @@ interface TurbulentZone {
   id: string;
   fieldId: string;
   bounds: ZoneBounds;
-  intensity: number;          // Peak uncertainty in zone
-  volume: number;             // Multi-dimensional volume
-  persistence: number;        // Temporal stability
+  intensity: number; // Peak uncertainty in zone
+  volume: number; // Multi-dimensional volume
+  persistence: number; // Temporal stability
   drivers: UncertaintyDriver[];
   recommendations: StabilizationStrategy[];
 }
 
 interface UncertaintyDriver {
   factor: string;
-  contribution: number;       // % of total uncertainty
-  trend: 'increasing' | 'decreasing' | 'stable';
-  source: string;             // Entity or relationship ID
+  contribution: number; // % of total uncertainty
+  trend: "increasing" | "decreasing" | "stable";
+  source: string; // Entity or relationship ID
 }
 ```
 
@@ -162,16 +165,16 @@ Actionable recommendation to reduce uncertainty.
 interface StabilizationStrategy {
   id: string;
   zoneId: string;
-  type: 'data_collection' | 'model_refinement' | 'constraint_addition' | 'scenario_pruning';
-  priority: number;           // 0-1, higher = more impactful
-  expectedReduction: number;  // Estimated uncertainty reduction
-  effort: 'low' | 'medium' | 'high';
+  type: "data_collection" | "model_refinement" | "constraint_addition" | "scenario_pruning";
+  priority: number; // 0-1, higher = more impactful
+  expectedReduction: number; // Estimated uncertainty reduction
+  effort: "low" | "medium" | "high";
   actions: StabilizationAction[];
 }
 
 interface StabilizationAction {
   description: string;
-  target: string;             // Entity/relationship/model ID
+  target: string; // Entity/relationship/model ID
   method: string;
   estimatedImpact: number;
 }
@@ -232,6 +235,7 @@ where:
 ```
 
 Components include:
+
 - **Epistemic uncertainty**: Model uncertainty (reducible)
 - **Aleatoric uncertainty**: Inherent randomness (irreducible)
 - **Data uncertainty**: Measurement and sampling error
@@ -287,25 +291,20 @@ where:
 **Algorithm**: Density-Based Clustering + Threshold Detection
 
 ```typescript
-function identifyTurbulentZones(
-  field: UncertaintyField,
-  threshold: number = 0.7
-): TurbulentZone[] {
+function identifyTurbulentZones(field: UncertaintyField, threshold: number = 0.7): TurbulentZone[] {
   // 1. Filter high-uncertainty points
-  const highUncertaintyPoints = field.points.filter(
-    p => p.uncertainty > threshold
-  );
+  const highUncertaintyPoints = field.points.filter((p) => p.uncertainty > threshold);
 
   // 2. Cluster using DBSCAN
   const clusters = dbscan(highUncertaintyPoints, {
     epsilon: calculateAdaptiveEpsilon(field),
-    minPoints: 3
+    minPoints: 3,
   });
 
   // 3. Analyze each cluster
-  return clusters.map(cluster => {
+  return clusters.map((cluster) => {
     const bounds = calculateBounds(cluster);
-    const intensity = max(cluster.map(p => p.uncertainty));
+    const intensity = max(cluster.map((p) => p.uncertainty));
     const volume = calculateVolume(bounds, field.dimensions);
     const drivers = identifyDrivers(cluster, field);
 
@@ -315,7 +314,7 @@ function identifyTurbulentZones(
       intensity,
       volume,
       drivers,
-      persistence: calculatePersistence(cluster, field)
+      persistence: calculatePersistence(cluster, field),
     };
   });
 }
@@ -345,9 +344,7 @@ function recommendStabilization(
   field: UncertaintyField
 ): StabilizationStrategy[] {
   // 1. Identify uncertainty drivers
-  const drivers = zone.drivers.sort((a, b) =>
-    b.contribution - a.contribution
-  );
+  const drivers = zone.drivers.sort((a, b) => b.contribution - a.contribution);
 
   // 2. Generate candidate strategies
   const strategies = [];
@@ -368,7 +365,7 @@ function recommendStabilization(
   }
 
   // 3. Score strategies
-  strategies.forEach(s => {
+  strategies.forEach((s) => {
     s.priority = scoreStrategy(s, zone);
     s.expectedReduction = estimateReduction(s, zone);
   });
@@ -505,10 +502,7 @@ Use Three.js or similar for interactive 3D uncertainty field exploration:
 
 ```typescript
 // Render uncertainty field as point cloud
-const pointCloud = new THREE.Points(
-  createPointGeometry(field),
-  createUncertaintyMaterial()
-);
+const pointCloud = new THREE.Points(createPointGeometry(field), createUncertaintyMaterial());
 
 // Color by uncertainty: blue (low) → red (high)
 material.vertexColors = true;
@@ -520,16 +514,19 @@ material.size = 2;
 For 2D surfaces, use D3.js contour plots:
 
 ```typescript
-const contours = d3.contours()
+const contours = d3
+  .contours()
   .size([width, height])
   .thresholds(d3.range(0, 1, 0.1));
 
-svg.append("g")
+svg
+  .append("g")
   .selectAll("path")
   .data(contours(uncertaintyGrid))
-  .enter().append("path")
+  .enter()
+  .append("path")
   .attr("d", d3.geoPath())
-  .attr("fill", d => colorScale(d.value));
+  .attr("fill", (d) => colorScale(d.value));
 ```
 
 ### Time-Series Animation
@@ -538,7 +535,7 @@ Animate uncertainty evolution over temporal dimension:
 
 ```typescript
 function animateUncertaintyEvolution(field: UncertaintyField) {
-  const temporalDim = field.dimensions.find(d => d.type === 'temporal');
+  const temporalDim = field.dimensions.find((d) => d.type === "temporal");
   const frames = generateTemporalFrames(field, temporalDim);
 
   frames.forEach((frame, i) => {
@@ -575,6 +572,7 @@ function animateUncertaintyEvolution(field: UncertaintyField) {
 ### Audit Logging
 
 All operations logged to `audit_svc`:
+
 - Field generation requests
 - Zone identification
 - Stabilization strategy application
@@ -583,6 +581,7 @@ All operations logged to `audit_svc`:
 ### Data Classification
 
 Uncertainty fields inherit classification from source predictions:
+
 - `UNCLASSIFIED`
 - `CONFIDENTIAL`
 - `SECRET`

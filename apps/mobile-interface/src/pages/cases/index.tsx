@@ -1,29 +1,35 @@
 // @ts-nocheck - Placeholder components and API client compatibility
-import { useState } from 'react';
-import { NextPage } from 'next';
-import Head from 'next/head';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { PlusIcon, FunnelIcon, EllipsisVerticalIcon, ClockIcon, FolderIcon } from '@heroicons/react/24/outline';
-import { MobileLayout } from '@/components/layouts/MobileLayout';
-import { SearchBar } from '@/components/SearchBar';
-import { FilterPanel } from '@/components/FilterPanel';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { EmptyState } from '@/components/EmptyState';
-import { Badge } from '@/components/Badge';
-import { Avatar } from '@/components/Avatar';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/services/api';
-import { useAuth } from '@/hooks/useAuth';
-import { useOffline } from '@/hooks/useOffline';
-import { formatDistanceToNow } from 'date-fns';
+import { useState } from "react";
+import { NextPage } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  PlusIcon,
+  FunnelIcon,
+  EllipsisVerticalIcon,
+  ClockIcon,
+  FolderIcon,
+} from "@heroicons/react/24/outline";
+import { MobileLayout } from "@/components/layouts/MobileLayout";
+import { SearchBar } from "@/components/SearchBar";
+import { FilterPanel } from "@/components/FilterPanel";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { EmptyState } from "@/components/EmptyState";
+import { Badge } from "@/components/Badge";
+import { Avatar } from "@/components/Avatar";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
+import { useOffline } from "@/hooks/useOffline";
+import { formatDistanceToNow } from "date-fns";
 
 interface Case {
   id: string;
   title: string;
   description: string;
-  status: 'active' | 'pending' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "active" | "pending" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "critical";
   assignee: {
     id: string;
     name: string;
@@ -38,7 +44,7 @@ interface Case {
 const CasesPage: NextPage = () => {
   const { user } = useAuth();
   const { isOffline } = useOffline();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     status: [] as string[],
@@ -46,11 +52,8 @@ const CasesPage: NextPage = () => {
     assignee: [] as string[],
   });
 
-  const {
-    data: cases = [],
-    isLoading,
-  } = useQuery({
-    queryKey: ['cases', searchQuery, filters],
+  const { data: cases = [], isLoading } = useQuery({
+    queryKey: ["cases", searchQuery, filters],
     queryFn: () => apiClient.getCases({ search: searchQuery, ...filters }),
     enabled: !!user && !isOffline,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -59,36 +62,36 @@ const CasesPage: NextPage = () => {
   const filteredCases = cases.filter(
     (case_: Case) =>
       case_.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      case_.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      case_.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'resolved':
-        return 'primary';
-      case 'closed':
-        return 'intel';
+      case "active":
+        return "success";
+      case "pending":
+        return "warning";
+      case "resolved":
+        return "primary";
+      case "closed":
+        return "intel";
       default:
-        return 'intel';
+        return "intel";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical':
-        return 'danger';
-      case 'high':
-        return 'warning';
-      case 'medium':
-        return 'primary';
-      case 'low':
-        return 'intel';
+      case "critical":
+        return "danger";
+      case "high":
+        return "warning";
+      case "medium":
+        return "primary";
+      case "low":
+        return "intel";
       default:
-        return 'intel';
+        return "intel";
     }
   };
 
@@ -114,9 +117,7 @@ const CasesPage: NextPage = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-intel-900 dark:text-white">
-                Cases
-              </h1>
+              <h1 className="text-2xl font-bold text-intel-900 dark:text-white">Cases</h1>
               <p className="text-intel-600 dark:text-intel-400 mt-1">
                 {filteredCases.length} of {cases.length} cases
               </p>
@@ -132,11 +133,7 @@ const CasesPage: NextPage = () => {
 
           {/* Search and Filter */}
           <div className="space-y-4">
-            <SearchBar
-              placeholder="Search cases..."
-              onSearch={setSearchQuery}
-              showVoiceSearch
-            />
+            <SearchBar placeholder="Search cases..." onSearch={setSearchQuery} showVoiceSearch />
 
             <div className="flex items-center space-x-3">
               <button
@@ -145,21 +142,16 @@ const CasesPage: NextPage = () => {
                   flex items-center space-x-2 px-4 py-2 rounded-xl border transition-colors
                   ${
                     showFilters
-                      ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
-                      : 'bg-white dark:bg-intel-800 border-intel-200 dark:border-intel-700 text-intel-700 dark:text-intel-300'
+                      ? "bg-primary-100 dark:bg-primary-900/50 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300"
+                      : "bg-white dark:bg-intel-800 border-intel-200 dark:border-intel-700 text-intel-700 dark:text-intel-300"
                   }
                 `}
               >
                 <FunnelIcon className="w-5 h-5" />
                 <span className="text-sm font-medium">Filters</span>
-                {filters.status.length +
-                  filters.priority.length +
-                  filters.assignee.length >
-                  0 && (
+                {filters.status.length + filters.priority.length + filters.assignee.length > 0 && (
                   <Badge variant="primary" size="sm">
-                    {filters.status.length +
-                      filters.priority.length +
-                      filters.assignee.length}
+                    {filters.status.length + filters.priority.length + filters.assignee.length}
                   </Badge>
                 )}
               </button>
@@ -169,31 +161,31 @@ const CasesPage: NextPage = () => {
             {showFilters && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className="bg-white dark:bg-intel-800 rounded-xl p-4 border border-intel-200 dark:border-intel-700"
               >
                 <FilterPanel
                   filters={[
                     {
-                      key: 'status',
-                      label: 'Status',
+                      key: "status",
+                      label: "Status",
                       options: [
-                        { value: 'active', label: 'Active' },
-                        { value: 'pending', label: 'Pending' },
-                        { value: 'resolved', label: 'Resolved' },
-                        { value: 'closed', label: 'Closed' },
+                        { value: "active", label: "Active" },
+                        { value: "pending", label: "Pending" },
+                        { value: "resolved", label: "Resolved" },
+                        { value: "closed", label: "Closed" },
                       ],
                       selected: filters.status,
                     },
                     {
-                      key: 'priority',
-                      label: 'Priority',
+                      key: "priority",
+                      label: "Priority",
                       options: [
-                        { value: 'critical', label: 'Critical' },
-                        { value: 'high', label: 'High' },
-                        { value: 'medium', label: 'Medium' },
-                        { value: 'low', label: 'Low' },
+                        { value: "critical", label: "Critical" },
+                        { value: "high", label: "High" },
+                        { value: "medium", label: "Medium" },
+                        { value: "low", label: "Low" },
                       ],
                       selected: filters.priority,
                     },
@@ -216,8 +208,8 @@ const CasesPage: NextPage = () => {
               title="No cases found"
               description={
                 searchQuery
-                  ? 'Try adjusting your search or filters'
-                  : 'Create your first case to get started'
+                  ? "Try adjusting your search or filters"
+                  : "Create your first case to get started"
               }
               action={
                 <Link
@@ -257,16 +249,10 @@ const CasesPage: NextPage = () => {
 
                       {/* Status and Priority */}
                       <div className="flex items-center space-x-2 mb-3">
-                        <Badge
-                          variant={getStatusColor(case_.status) as any}
-                          size="sm"
-                        >
+                        <Badge variant={getStatusColor(case_.status) as any} size="sm">
                           {case_.status}
                         </Badge>
-                        <Badge
-                          variant={getPriorityColor(case_.priority) as any}
-                          size="sm"
-                        >
+                        <Badge variant={getPriorityColor(case_.priority) as any} size="sm">
                           {case_.priority}
                         </Badge>
                         {case_.entityCount > 0 && (

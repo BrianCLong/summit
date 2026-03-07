@@ -2,7 +2,7 @@ import type {
   AssignmentPlan,
   ManualControlPlan,
   WorkParcelPlan,
-} from '../../common-types/src/index.js';
+} from "../../common-types/src/index.js";
 
 type ControlToggle = {
   readonly label: string;
@@ -17,9 +17,9 @@ export interface ControlMatrixRow {
 
 function togglesFromPlan(plan: ManualControlPlan): readonly ControlToggle[] {
   return [
-    { label: 'Pause before navigation', enabled: plan.pauseBeforeNavigation },
-    { label: 'Pause before prompt', enabled: plan.pauseBeforePrompt },
-    { label: 'Pause before capture', enabled: plan.pauseBeforeCapture },
+    { label: "Pause before navigation", enabled: plan.pauseBeforeNavigation },
+    { label: "Pause before prompt", enabled: plan.pauseBeforePrompt },
+    { label: "Pause before capture", enabled: plan.pauseBeforeCapture },
   ];
 }
 
@@ -31,9 +31,7 @@ function rowFromParcel(parcel: WorkParcelPlan): ControlMatrixRow {
   };
 }
 
-export function buildControlMatrix(
-  plan: AssignmentPlan,
-): readonly ControlMatrixRow[] {
+export function buildControlMatrix(plan: AssignmentPlan): readonly ControlMatrixRow[] {
   return plan.parcels.map(rowFromParcel);
 }
 

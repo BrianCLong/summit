@@ -48,11 +48,11 @@ Supported failure modes are intentionally narrow to keep blast radius small:
 
 ## Usage Summary
 
-| Control | Purpose | Example |
-| --- | --- | --- |
-| `CHAOS_ENABLED` | Master toggle (default off) | `CHAOS_ENABLED=true` |
-| `CHAOS_LATENCY_MS` | Inject delay before backend calls | `CHAOS_LATENCY_MS=150` |
-| `CHAOS_ERROR_RATE` | Random failure probability (0–1) | `CHAOS_ERROR_RATE=0.05` |
-| `CHAOS_DISABLE_SERVICE` | Disable one or more services | `CHAOS_DISABLE_SERVICE=llm,neo4j` |
+| Control                 | Purpose                           | Example                           |
+| ----------------------- | --------------------------------- | --------------------------------- |
+| `CHAOS_ENABLED`         | Master toggle (default off)       | `CHAOS_ENABLED=true`              |
+| `CHAOS_LATENCY_MS`      | Inject delay before backend calls | `CHAOS_LATENCY_MS=150`            |
+| `CHAOS_ERROR_RATE`      | Random failure probability (0–1)  | `CHAOS_ERROR_RATE=0.05`           |
+| `CHAOS_DISABLE_SERVICE` | Disable one or more services      | `CHAOS_DISABLE_SERVICE=llm,neo4j` |
 
 Use the internal `/internal/chaos` endpoint to read/adjust live configuration in safe environments; it returns the active guardrails, counters, and enabled status.

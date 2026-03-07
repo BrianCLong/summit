@@ -6,8 +6,8 @@
     "type": "object",
     "required": ["files", "description"],
     "properties": {
-      "files": {"type": "array", "items": {"type": "string"}},
-      "description": {"type": "string"}
+      "files": { "type": "array", "items": { "type": "string" } },
+      "description": { "type": "string" }
     }
   }
 }

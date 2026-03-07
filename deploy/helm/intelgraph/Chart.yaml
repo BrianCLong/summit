@@ -2,7 +2,7 @@ apiVersion: v2
 name: intelgraph
 description: IntelGraph MLFP – production deployment
 version: 0.2.0
-appVersion: '2025.08.21'
+appVersion: "2025.08.21"
 type: application
 keywords:
   - intelgraph
@@ -18,11 +18,11 @@ maintainers:
     email: team@intelgraph.com
 dependencies:
   - name: postgresql
-    version: '12.12.10'
+    version: "12.12.10"
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: redis
-    version: '18.6.4'
+    version: "18.6.4"
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
 annotations:

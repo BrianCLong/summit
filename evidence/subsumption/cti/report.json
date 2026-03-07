@@ -108,9 +108,7 @@
         "retrieved_at": "2026-01-31_20-29-10_UTC",
         "content_hash": "1d36a2e16cba4f7102cd25d3ac788a4bf9c23595dc9de26e5e4ab43450718499",
         "extract_hash": "197cbfeb298c23b5c156151753c7ea118f14950d3ff76b27ba149c1c7b734218",
-        "claims": [
-          "Attribution automation research trend: Multi-agent RAG"
-        ],
+        "claims": ["Attribution automation research trend: Multi-agent RAG"],
         "citation_offsets": []
       },
       "mapping": {
@@ -125,9 +123,7 @@
         "retrieved_at": "2026-01-31_20-29-10_UTC",
         "content_hash": "6695e2e253d44f0e7511db2fd5d0664ec92081043c4a0569372856de11ad0103",
         "extract_hash": "2f3b90963a21abbab3f9b7c856e23c7bae7295d61f5ecafd7dd4711e23daeed8",
-        "claims": [
-          "Typosquatting is a recognized supply-chain technique"
-        ],
+        "claims": ["Typosquatting is a recognized supply-chain technique"],
         "citation_offsets": []
       },
       "mapping": {

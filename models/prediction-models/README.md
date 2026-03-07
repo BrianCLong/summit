@@ -19,7 +19,7 @@ models/prediction-models/
 ### Survival Analysis (Kaplan-Meier)
 
 ```typescript
-import { KaplanMeierEstimator } from './survival/kaplan-meier-estimator.js';
+import { KaplanMeierEstimator } from "./survival/kaplan-meier-estimator.js";
 
 const estimator = new KaplanMeierEstimator();
 estimator.fit([
@@ -35,7 +35,7 @@ const medianTime = estimator.getMedianSurvivalTime();
 ### Churn Prediction
 
 ```typescript
-import { ChurnPredictor } from './churn/churn-predictor.js';
+import { ChurnPredictor } from "./churn/churn-predictor.js";
 
 const predictor = new ChurnPredictor();
 
@@ -43,12 +43,12 @@ const predictor = new ChurnPredictor();
 predictor.fit(trainingFeatures, trainingLabels);
 
 // Predict
-const prediction = predictor.predict('customer_123', {
+const prediction = predictor.predict("customer_123", {
   tenure: 24,
   monthlyCharges: 65.0,
   totalCharges: 1560.0,
-  contractType: 'month-to-month',
-  paymentMethod: 'credit-card',
+  contractType: "month-to-month",
+  paymentMethod: "credit-card",
   numServices: 3,
   supportTickets: 2,
   lastActivity: 15,
@@ -61,34 +61,40 @@ console.log(prediction.retentionActions); // ['Send re-engagement campaign']
 ## Model Types
 
 ### 1. Time Series Models
+
 - ARIMA forecasters
 - Seasonal decomposition
 - Prophet-style models
 - LSTM networks
 
 ### 2. Classification Models
+
 - Random Forest
 - Gradient Boosting
 - Logistic Regression
 - Neural Networks
 
 ### 3. Regression Models
+
 - Linear Regression
 - Ridge/Lasso
 - Polynomial Regression
 - Support Vector Regression
 
 ### 4. Survival Models
+
 - Kaplan-Meier Estimator
 - Cox Proportional Hazards
 - AFT Models
 
 ### 5. Risk Models
+
 - Credit Risk Scoring
 - Fraud Detection
 - Threat Assessment
 
 ### 6. Churn Models
+
 - Customer Churn Prediction
 - Cohort Analysis
 - CLV Estimation

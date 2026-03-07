@@ -33,13 +33,13 @@ export default defineConfig({
       '/api/rag': {
         target: 'http://localhost:8001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/rag/, '')
+        rewrite: path => path.replace(/^\/api\/rag/, ''),
       },
       '/api/graphrag': {
         target: 'http://localhost:8002',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/graphrag/, '')
-      }
+        rewrite: path => path.replace(/^\/api\/graphrag/, ''),
+      },
     },
     port: 3000,
     host: true,

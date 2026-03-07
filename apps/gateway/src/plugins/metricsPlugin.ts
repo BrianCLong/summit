@@ -3,7 +3,7 @@
  * Captures GraphQL operation metrics and sends to Prometheus/OpenTelemetry
  */
 
-import type { ApolloServerPlugin, GraphQLRequestContext } from '@apollo/server';
+import type { ApolloServerPlugin, GraphQLRequestContext } from "@apollo/server";
 import {
   recordQueryDuration,
   recordError,
@@ -11,50 +11,44 @@ import {
   recordGoldenPathSuccess,
   recordGoldenPathError,
   getOperationInfo,
-} from '../metrics';
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+} from "../metrics";
+import { trace, context, SpanStatusCode } from "@opentelemetry/api";
 
-const tracer = trace.getTracer('graphql-gateway', '1.0.0');
+const tracer = trace.getTracer("graphql-gateway", "1.0.0");
 
 const GOLDEN_PATH_STEPS = [
-  'create_investigation',
-  'add_entity',
-  'add_relationship',
-  'copilot_query',
-  'view_results',
+  "create_investigation",
+  "add_entity",
+  "add_relationship",
+  "copilot_query",
+  "view_results",
 ];
 
 interface MetricsPluginOptions {
   enableComplexityTracking?: boolean;
 }
 
-export function metricsPlugin(
-  options: MetricsPluginOptions = {}
-): ApolloServerPlugin {
+export function metricsPlugin(options: MetricsPluginOptions = {}): ApolloServerPlugin {
   const { enableComplexityTracking = false } = options;
 
   return {
-    async requestDidStart(
-      requestContext: GraphQLRequestContext<any>
-    ): Promise<any> {
+    async requestDidStart(requestContext: GraphQLRequestContext<any>): Promise<any> {
       const startTime = Date.now();
       const { operationName, operationType } = getOperationInfo(requestContext);
 
       // Start a span for this GraphQL request
-      const span = tracer.startSpan('graphql.query', {
+      const span = tracer.startSpan("graphql.query", {
         attributes: {
-          'graphql.operation.name': operationName || 'anonymous',
-          'graphql.operation.type': operationType,
+          "graphql.operation.name": operationName || "anonymous",
+          "graphql.operation.type": operationType,
         },
       });
 
       return {
-        async willSendResponse(
-          responseContext: GraphQLRequestContext<any>
-        ): Promise<void> {
+        async willSendResponse(responseContext: GraphQLRequestContext<any>): Promise<void> {
           const durationMs = Date.now() - startTime;
           const hasErrors = responseContext.errors && responseContext.errors.length > 0;
-          const status = hasErrors ? 'error' : 'success';
+          const status = hasErrors ? "error" : "success";
 
           // Record metrics
           recordQueryDuration(operationName, operationType, durationMs, status);
@@ -64,8 +58,7 @@ export function metricsPlugin(
             if (hasErrors) {
               // We just take the first error type for now
               const errorType =
-                responseContext.errors![0].extensions?.code ||
-                'INTERNAL_SERVER_ERROR';
+                responseContext.errors![0].extensions?.code || "INTERNAL_SERVER_ERROR";
               recordGoldenPathError(operationName, errorType as string);
             } else {
               recordGoldenPathSuccess(operationName, durationMs);
@@ -75,14 +68,9 @@ export function metricsPlugin(
           // Record errors
           if (hasErrors) {
             for (const error of responseContext.errors) {
-              const errorType =
-                error.extensions?.code || 'INTERNAL_SERVER_ERROR';
+              const errorType = error.extensions?.code || "INTERNAL_SERVER_ERROR";
               const errorCode = error.extensions?.errorCode;
-              recordError(
-                operationName,
-                errorType as string,
-                errorCode as string
-              );
+              recordError(operationName, errorType as string, errorCode as string);
 
               // Add error to span
               span.recordException(error);
@@ -96,24 +84,20 @@ export function metricsPlugin(
           }
 
           // Add span attributes
-          span.setAttribute('graphql.response.status', status);
-          span.setAttribute('graphql.response.duration_ms', durationMs);
+          span.setAttribute("graphql.response.status", status);
+          span.setAttribute("graphql.response.duration_ms", durationMs);
 
           // End span
           span.end();
         },
 
-        async didResolveOperation(
-          operationContext: GraphQLRequestContext<any>
-        ): Promise<void> {
+        async didResolveOperation(operationContext: GraphQLRequestContext<any>): Promise<void> {
           // Track query complexity if enabled
           if (enableComplexityTracking) {
             const complexity = calculateComplexity(operationContext);
             if (complexity !== null) {
               recordQueryComplexity(operationName, complexity);
-              trace
-                .getActiveSpan()
-                ?.setAttribute('graphql.query.complexity', complexity);
+              trace.getActiveSpan()?.setAttribute("graphql.query.complexity", complexity);
             }
           }
         },
@@ -130,20 +114,17 @@ export function metricsPlugin(
               const fieldName = info.fieldName;
 
               // Start resolver span
-              const resolverSpan = tracer.startSpan(
-                `graphql.resolve.${typeName}.${fieldName}`,
-                {
-                  attributes: {
-                    'graphql.field.path': info.path.key,
-                    'graphql.field.type': typeName,
-                    'graphql.field.name': fieldName,
-                  },
-                }
-              );
+              const resolverSpan = tracer.startSpan(`graphql.resolve.${typeName}.${fieldName}`, {
+                attributes: {
+                  "graphql.field.path": info.path.key,
+                  "graphql.field.type": typeName,
+                  "graphql.field.name": fieldName,
+                },
+              });
 
               return (error: Error | null) => {
                 const durationMs = Date.now() - startTime;
-                const status = error ? 'error' : 'success';
+                const status = error ? "error" : "success";
 
                 // Record resolver metrics (only for slow resolvers > 10ms to reduce cardinality)
                 if (durationMs > 10) {
@@ -151,7 +132,7 @@ export function metricsPlugin(
                 }
 
                 // Update resolver span
-                resolverSpan.setAttribute('graphql.resolver.duration_ms', durationMs);
+                resolverSpan.setAttribute("graphql.resolver.duration_ms", durationMs);
                 if (error) {
                   resolverSpan.recordException(error);
                   resolverSpan.setStatus({
@@ -173,9 +154,7 @@ export function metricsPlugin(
 }
 
 // Simple complexity calculator (count fields)
-function calculateComplexity(
-  requestContext: GraphQLRequestContext<any>
-): number | null {
+function calculateComplexity(requestContext: GraphQLRequestContext<any>): number | null {
   try {
     const operation = requestContext.operation;
     if (!operation) return null;

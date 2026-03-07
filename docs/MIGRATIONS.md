@@ -5,6 +5,7 @@ This document outlines the migration system, versioning strategy, and best pract
 ## Architecture
 
 We use a custom migration framework located in `server/src/db/migrations/versioning.ts`. It provides:
+
 - **Timestamp-based Versioning**: Ensuring migrations run in a deterministic order.
 - **Transactional Migrations**: All migrations run within a transaction. If any step fails, the entire migration rolls back.
 - **Idempotency**: Migrations are tracked in a `migration_history` table and only applied once.
@@ -53,11 +54,12 @@ To ensure zero downtime, all migrations must be "online-safe". This means avoidi
 
 For breaking changes (e.g., renaming a column, changing a type), use the **Expand-Contract** pattern:
 
-1.  **Expand**: Add the new column/table. Make it optional (nullable) or with a default. The application should write to *both* old and new columns (dual-write) or be updated to read from new if present.
+1.  **Expand**: Add the new column/table. Make it optional (nullable) or with a default. The application should write to _both_ old and new columns (dual-write) or be updated to read from new if present.
 2.  **Migrate**: Backfill data from old to new column.
 3.  **Contract**: Once all code is using the new column, remove the old column.
 
 ### Prohibited Operations (in standard mode)
+
 - `DROP TABLE`
 - `DROP COLUMN`
 - `ALTER TABLE ... RENAME`
@@ -68,6 +70,7 @@ To bypass these checks (e.g., for dev or maintenance windows), set `ALLOW_BREAKI
 ## CI/CD Pipeline
 
 The migration pipeline includes:
+
 1.  **Linting**: SQL files are checked for syntax and style.
 2.  **Safety Check**: Validates that pending migrations do not contain risky operations.
 3.  **Dry Run**: Applies pending migrations in a transaction and rolls them back to verify SQL validity.
@@ -76,6 +79,7 @@ The migration pipeline includes:
 ## Monitoring
 
 Migration metrics are exported via Prometheus:
+
 - `db_migration_duration_seconds`: Histogram of migration execution time.
 - `db_migration_status`: Gauge (1 for success, 0 for failure).
 - `db_migration_total`: Counter of applied migrations.

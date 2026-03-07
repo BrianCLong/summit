@@ -32,58 +32,58 @@ import {
   JiraIntegrationService,
   JiraApiClient,
   InMemoryAuditLogger,
-} from '@intelgraph/jira-integration';
+} from "@intelgraph/jira-integration";
 
 const config = {
-  baseUrl: 'https://your-domain.atlassian.net',
+  baseUrl: "https://your-domain.atlassian.net",
   email: process.env.JIRA_EMAIL!,
   apiToken: process.env.JIRA_TOKEN!,
-  projectKey: 'PERF',
-  issueTypeId: '12345',
+  projectKey: "PERF",
+  issueTypeId: "12345",
   customFieldMap: {
-    environment: 'customfield_10100',
-    regressionWindow: 'customfield_10101',
-    owners: 'customfield_10102',
-    perfMetric: 'customfield_10103',
-    baselineValue: 'customfield_10104',
-    currentValue: 'customfield_10105',
+    environment: "customfield_10100",
+    regressionWindow: "customfield_10101",
+    owners: "customfield_10102",
+    perfMetric: "customfield_10103",
+    baselineValue: "customfield_10104",
+    currentValue: "customfield_10105",
   },
   priorityMapping: {
     blocker: {
-      priorityId: '1',
-      severityFieldId: 'customfield_10200',
-      severityValue: 'Blocker',
+      priorityId: "1",
+      severityFieldId: "customfield_10200",
+      severityValue: "Blocker",
     },
     critical: {
-      priorityId: '2',
-      severityFieldId: 'customfield_10200',
-      severityValue: 'Critical',
+      priorityId: "2",
+      severityFieldId: "customfield_10200",
+      severityValue: "Critical",
     },
     high: {
-      priorityId: '3',
-      severityFieldId: 'customfield_10200',
-      severityValue: 'High',
+      priorityId: "3",
+      severityFieldId: "customfield_10200",
+      severityValue: "High",
     },
     medium: {
-      priorityId: '4',
-      severityFieldId: 'customfield_10200',
-      severityValue: 'Medium',
+      priorityId: "4",
+      severityFieldId: "customfield_10200",
+      severityValue: "Medium",
     },
     low: {
-      priorityId: '5',
-      severityFieldId: 'customfield_10200',
-      severityValue: 'Low',
+      priorityId: "5",
+      severityFieldId: "customfield_10200",
+      severityValue: "Low",
     },
     info: {
-      priorityId: '6',
-      severityFieldId: 'customfield_10200',
-      severityValue: 'Informational',
+      priorityId: "6",
+      severityFieldId: "customfield_10200",
+      severityValue: "Informational",
     },
   },
   workflowTransitions: {
-    Triaged: 'In Progress',
-    'Ready for QA': 'QA In Progress',
-    Resolved: 'Validation',
+    Triaged: "In Progress",
+    "Ready for QA": "QA In Progress",
+    Resolved: "Validation",
   },
 };
 
@@ -96,17 +96,17 @@ const integration = new JiraIntegrationService(config, client, auditLogger);
 
 ```ts
 await integration.createPerfTraceTicket({
-  summary: 'Perf regression detected in checkout latency',
-  description: 'p95 response time exceeded baseline for 5 consecutive minutes.',
-  severity: 'critical',
-  environment: 'prod',
-  regressionWindow: '24h',
-  owners: ['account-id-1'],
-  perfMetric: 'checkout_latency_p95',
+  summary: "Perf regression detected in checkout latency",
+  description: "p95 response time exceeded baseline for 5 consecutive minutes.",
+  severity: "critical",
+  environment: "prod",
+  regressionWindow: "24h",
+  owners: ["account-id-1"],
+  perfMetric: "checkout_latency_p95",
   baselineValue: 120,
   currentValue: 210,
-  labels: ['perftrace'],
-  relatedIssueKeys: ['PLAT-21'],
+  labels: ["perftrace"],
+  relatedIssueKeys: ["PLAT-21"],
 });
 ```
 

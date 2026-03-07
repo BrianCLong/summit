@@ -21,31 +21,32 @@ curl -I -sS https://api.github.com/repos/BrianCLong/summit/pulls/19016 | head -n
 ## A) Verified frontier matrix (execution-constrained)
 
 Legend:
+
 - Scope size: XS/S/M/L/XL
 - Mergeability/checks/reviews/conflicts: `unverified` = blocked by network policy
 - Confidence reflects decision quality **under constrained evidence**
 
-| PR | title (hypothesis) | cluster | likely scope size | mergeability | required checks | reviews/approvals | conflicts | overlap/dependency | recommended action | confidence |
-|---:|---|---|---|---|---|---|---|---|---|---|
-| 19011 | accessibility | independent fix | S | unverified | unverified | unverified | unverified | likely isolated | fast-track verify; queue if green | 0.55 |
-| 19012 | tenant-scoping SQLi fix | independent fix | S | unverified | unverified | unverified | unverified | security-sensitive; isolate | fast-track verify with security lens; merge early if green | 0.70 |
-| 19013 | array-processing optimization | independent fix | S | unverified | unverified | unverified | unverified | perf-only likely | fast-track verify; merge | 0.52 |
-| 19014 | StrategicPlanRepo batch-loading | independent fix | S/M | unverified | unverified | unverified | unverified | possible data-path overlap | verify benchmarks/tests; merge if bounded | 0.50 |
-| 19015 | admin/operational route hardening | independent fix | M | unverified | unverified | unverified | unverified | authz/policy adjacency | verify policy checks first; then queue | 0.63 |
-| 19016 | final GA readiness umbrella | GA/CI/evidence | XL | unverified | unverified | unverified | unverified | overlaps 19018-19024 surfaces | do **not** force-merge; narrow/restack after bounded PRs | 0.78 |
-| 19017 | cloud GA readiness spec/artifacts | GA/CI/evidence | S | unverified | unverified | unverified | unverified | likely doc/spec + artifacts | prioritize first in GA stack | 0.74 |
-| 19018 | CI run metadata collector + telemetry rollup | GA/CI/evidence | M | unverified | unverified | unverified | unverified | overlaps 19019/19023/19024 | assign single-owner boundaries before merge | 0.80 |
-| 19019 | OTel → OpenLineage + PROV mapper | GA/CI/evidence | M/L | unverified | unverified | unverified | unverified | overlaps 19024 normalization | stack after ownership split with 19024 | 0.77 |
-| 19020 | governance badge + deterministic artifact | GA/CI/evidence | S | unverified | unverified | unverified | unverified | may overlap 19021/19023 artifact names | fast-track if artifact naming is unique | 0.71 |
-| 19021 | reversible supply-chain PR bundle | GA/CI/evidence | M | unverified | unverified | unverified | unverified | may touch same evidence + workflows | merge after 19020/19022 guardrails | 0.65 |
-| 19022 | path-based filters + fast-track workflows | GA/CI/evidence | S/M | unverified | unverified | unverified | unverified | workflow trigger ownership | prioritize early to reduce CI churn | 0.83 |
-| 19023 | evidence pack to GitHub PRs | GA/CI/evidence | S/M | unverified | unverified | unverified | unverified | overlaps 19018/19020/19021 | fast-track with strict artifact contract | 0.82 |
-| 19024 | telemetry lineage normalizer + CI gates | GA/CI/evidence | M | unverified | unverified | unverified | unverified | overlaps 19018/19019 | merge after ownership boundary decision | 0.81 |
-| 19025 | idempotent Neo4j reconciliation | agent/intel | M | unverified | unverified | unverified | unverified | possible dependency for intent graph | verify if foundational for 19027 | 0.60 |
-| 19026 | SHAP-IQ explainability pipeline | agent/intel | M/L | unverified | unverified | unverified | unverified | likely overlaps 19028 | stack with 19028 (scaffold first) | 0.73 |
-| 19027 | Intent Engineering MWS | agent/intel | L | unverified | unverified | unverified | unverified | likely depends on skills + graph stability | sequence after 19029 + possibly 19025 | 0.76 |
-| 19028 | deterministic SHAPIQ estimator scaffold | agent/intel | S/M | unverified | unverified | unverified | unverified | complements 19026 | merge before 19026 | 0.79 |
-| 19029 | Agent Skills architectural scaffold | agent/intel | M | unverified | unverified | unverified | unverified | likely base for 19027 | merge before 19027 | 0.84 |
+|    PR | title (hypothesis)                           | cluster         | likely scope size | mergeability | required checks | reviews/approvals | conflicts  | overlap/dependency                         | recommended action                                         | confidence |
+| ----: | -------------------------------------------- | --------------- | ----------------- | ------------ | --------------- | ----------------- | ---------- | ------------------------------------------ | ---------------------------------------------------------- | ---------- |
+| 19011 | accessibility                                | independent fix | S                 | unverified   | unverified      | unverified        | unverified | likely isolated                            | fast-track verify; queue if green                          | 0.55       |
+| 19012 | tenant-scoping SQLi fix                      | independent fix | S                 | unverified   | unverified      | unverified        | unverified | security-sensitive; isolate                | fast-track verify with security lens; merge early if green | 0.70       |
+| 19013 | array-processing optimization                | independent fix | S                 | unverified   | unverified      | unverified        | unverified | perf-only likely                           | fast-track verify; merge                                   | 0.52       |
+| 19014 | StrategicPlanRepo batch-loading              | independent fix | S/M               | unverified   | unverified      | unverified        | unverified | possible data-path overlap                 | verify benchmarks/tests; merge if bounded                  | 0.50       |
+| 19015 | admin/operational route hardening            | independent fix | M                 | unverified   | unverified      | unverified        | unverified | authz/policy adjacency                     | verify policy checks first; then queue                     | 0.63       |
+| 19016 | final GA readiness umbrella                  | GA/CI/evidence  | XL                | unverified   | unverified      | unverified        | unverified | overlaps 19018-19024 surfaces              | do **not** force-merge; narrow/restack after bounded PRs   | 0.78       |
+| 19017 | cloud GA readiness spec/artifacts            | GA/CI/evidence  | S                 | unverified   | unverified      | unverified        | unverified | likely doc/spec + artifacts                | prioritize first in GA stack                               | 0.74       |
+| 19018 | CI run metadata collector + telemetry rollup | GA/CI/evidence  | M                 | unverified   | unverified      | unverified        | unverified | overlaps 19019/19023/19024                 | assign single-owner boundaries before merge                | 0.80       |
+| 19019 | OTel → OpenLineage + PROV mapper             | GA/CI/evidence  | M/L               | unverified   | unverified      | unverified        | unverified | overlaps 19024 normalization               | stack after ownership split with 19024                     | 0.77       |
+| 19020 | governance badge + deterministic artifact    | GA/CI/evidence  | S                 | unverified   | unverified      | unverified        | unverified | may overlap 19021/19023 artifact names     | fast-track if artifact naming is unique                    | 0.71       |
+| 19021 | reversible supply-chain PR bundle            | GA/CI/evidence  | M                 | unverified   | unverified      | unverified        | unverified | may touch same evidence + workflows        | merge after 19020/19022 guardrails                         | 0.65       |
+| 19022 | path-based filters + fast-track workflows    | GA/CI/evidence  | S/M               | unverified   | unverified      | unverified        | unverified | workflow trigger ownership                 | prioritize early to reduce CI churn                        | 0.83       |
+| 19023 | evidence pack to GitHub PRs                  | GA/CI/evidence  | S/M               | unverified   | unverified      | unverified        | unverified | overlaps 19018/19020/19021                 | fast-track with strict artifact contract                   | 0.82       |
+| 19024 | telemetry lineage normalizer + CI gates      | GA/CI/evidence  | M                 | unverified   | unverified      | unverified        | unverified | overlaps 19018/19019                       | merge after ownership boundary decision                    | 0.81       |
+| 19025 | idempotent Neo4j reconciliation              | agent/intel     | M                 | unverified   | unverified      | unverified        | unverified | possible dependency for intent graph       | verify if foundational for 19027                           | 0.60       |
+| 19026 | SHAP-IQ explainability pipeline              | agent/intel     | M/L               | unverified   | unverified      | unverified        | unverified | likely overlaps 19028                      | stack with 19028 (scaffold first)                          | 0.73       |
+| 19027 | Intent Engineering MWS                       | agent/intel     | L                 | unverified   | unverified      | unverified        | unverified | likely depends on skills + graph stability | sequence after 19029 + possibly 19025                      | 0.76       |
+| 19028 | deterministic SHAPIQ estimator scaffold      | agent/intel     | S/M               | unverified   | unverified      | unverified        | unverified | complements 19026                          | merge before 19026                                         | 0.79       |
+| 19029 | Agent Skills architectural scaffold          | agent/intel     | M                 | unverified   | unverified      | unverified        | unverified | likely base for 19027                      | merge before 19027                                         | 0.84       |
 
 ---
 
@@ -56,6 +57,7 @@ Legend:
 Primary risk: multiple PRs may co-own workflow/check/artifact surfaces and protected-branch gate naming.
 
 Potential collision surfaces to explicitly diff before merge:
+
 - Workflow triggers (`on.pull_request.paths`, `paths-ignore`, `workflow_run`).
 - Required check names consumed by branch protection.
 - Evidence artifact names/paths (deterministic generation, provenance/SBOM/OpenLineage outputs).
@@ -66,6 +68,7 @@ Potential collision surfaces to explicitly diff before merge:
 Primary risk: architectural scaffolds merged after implementation PRs, causing restack churn.
 
 Dependency hypothesis:
+
 - `#19029` (skills architecture scaffold) should precede `#19027` (Intent MWS).
 - `#19028` (deterministic SHAPIQ scaffold) should precede `#19026` (full explainability pipeline).
 - `#19025` may need to precede `#19027` if intent flows depend on reconciled graph state.

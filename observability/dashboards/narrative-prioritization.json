@@ -152,9 +152,7 @@
       "id": 4,
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
+          "calcs": ["mean"],
           "fields": "",
           "values": false
         },

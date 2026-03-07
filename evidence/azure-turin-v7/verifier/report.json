@@ -1,10 +1,5 @@
 {
-  "claims": [
-    "ITEM:CLAIM-01",
-    "ITEM:API-02",
-    "ITEM:API-03",
-    "ITEM:API-04"
-  ],
+  "claims": ["ITEM:CLAIM-01", "ITEM:API-02", "ITEM:API-03", "ITEM:API-04"],
   "decisions": [],
   "errors": [],
   "evidence_id": "EVD-AZURETURINV7-GATE-001",

@@ -4,15 +4,15 @@
   "type": "object",
   "required": ["run_id", "todos", "decisions"],
   "properties": {
-    "run_id": {"type": "string", "minLength": 1},
+    "run_id": { "type": "string", "minLength": 1 },
     "todos": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["value", "evidence_id"],
         "properties": {
-          "value": {"type": "string"},
-          "evidence_id": {"type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$"}
+          "value": { "type": "string" },
+          "evidence_id": { "type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$" }
         },
         "additionalProperties": false
       }
@@ -23,8 +23,8 @@
         "type": "object",
         "required": ["value", "evidence_id"],
         "properties": {
-          "value": {"type": "string"},
-          "evidence_id": {"type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$"}
+          "value": { "type": "string" },
+          "evidence_id": { "type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$" }
         },
         "additionalProperties": false
       }

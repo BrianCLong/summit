@@ -2,7 +2,7 @@
  * TrendAnalyzer - Trend Analysis and Extrapolation
  */
 
-import { TrendAnalysis, TrendDataPoint, TrendProjection } from './types.js';
+import { TrendAnalysis, TrendDataPoint, TrendProjection } from "./types.js";
 
 export class TrendAnalyzer {
   private trends: Map<string, TrendAnalysis> = new Map();
@@ -10,7 +10,11 @@ export class TrendAnalyzer {
   /**
    * Analyze trend
    */
-  async analyzeTrend(trend: string, category: string, dataPoints: TrendDataPoint[]): Promise<TrendAnalysis> {
+  async analyzeTrend(
+    trend: string,
+    category: string,
+    dataPoints: TrendDataPoint[]
+  ): Promise<TrendAnalysis> {
     const analysis: TrendAnalysis = {
       id: `trend-${Date.now()}`,
       trend,
@@ -35,23 +39,29 @@ export class TrendAnalyzer {
   async projectTrend(dataPoints: TrendDataPoint[]): Promise<TrendProjection> {
     // TODO: Implement trend projection algorithms
     return {
-      methodology: 'linear-regression',
+      methodology: "linear-regression",
       projectedValues: [],
       assumptions: [],
       limitingFactors: [],
     };
   }
 
-  private assessStrength(dataPoints: TrendDataPoint[]): 'weak' | 'emerging' | 'strong' | 'dominant' {
-    return 'emerging';
+  private assessStrength(
+    dataPoints: TrendDataPoint[]
+  ): "weak" | "emerging" | "strong" | "dominant" {
+    return "emerging";
   }
 
-  private determineDirection(dataPoints: TrendDataPoint[]): 'ascending' | 'descending' | 'stable' | 'cyclical' {
-    return 'ascending';
+  private determineDirection(
+    dataPoints: TrendDataPoint[]
+  ): "ascending" | "descending" | "stable" | "cyclical" {
+    return "ascending";
   }
 
-  private calculateVelocity(dataPoints: TrendDataPoint[]): 'slow' | 'moderate' | 'fast' | 'accelerating' {
-    return 'moderate';
+  private calculateVelocity(
+    dataPoints: TrendDataPoint[]
+  ): "slow" | "moderate" | "fast" | "accelerating" {
+    return "moderate";
   }
 
   private identifyInflectionPoints(dataPoints: TrendDataPoint[]): any[] {

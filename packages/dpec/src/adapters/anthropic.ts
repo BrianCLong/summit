@@ -1,9 +1,9 @@
-import { DeterministicPromptExecutionCache } from '../cache.js';
-import { canonicalDigest, sha256, stableStringify } from '../hash.js';
-import type { AdapterResolution, CacheKeyComponents } from '../types.js';
+import { DeterministicPromptExecutionCache } from "../cache.js";
+import { canonicalDigest, sha256, stableStringify } from "../hash.js";
+import type { AdapterResolution, CacheKeyComponents } from "../types.js";
 
 export interface AnthropicMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  role: "system" | "user" | "assistant" | "tool";
   content: unknown;
 }
 
@@ -56,21 +56,21 @@ function defaultKey(request: AnthropicMessagesRequest): CacheKeyComponents {
     promptHash: sha256(
       stableStringify({
         system: request.system ?? null,
-        messages: request.messages
+        messages: request.messages,
       })
-    )
+    ),
   };
 }
 
 function buildParams(request: AnthropicMessagesRequest): Record<string, unknown> {
   const params: Record<string, unknown> = {
-    max_tokens: request.max_tokens
+    max_tokens: request.max_tokens,
   };
   const candidate: Array<[keyof AnthropicMessagesRequest, string]> = [
-    ['temperature', 'temperature'],
-    ['top_k', 'top_k'],
-    ['top_p', 'top_p'],
-    ['stop_sequences', 'stop_sequences']
+    ["temperature", "temperature"],
+    ["top_k", "top_k"],
+    ["top_p", "top_p"],
+    ["stop_sequences", "stop_sequences"],
   ];
   for (const [key, alias] of candidate) {
     const value = request[key];
@@ -92,18 +92,18 @@ export function createAnthropicMessagesAdapter(
       return {
         artifact: JSON.stringify(response),
         metadata: {
-          adapter: 'anthropic.messages.create',
-          requestDigest: canonicalDigest(request)
-        }
+          adapter: "anthropic.messages.create",
+          requestDigest: canonicalDigest(request),
+        },
       };
     });
-    const response = JSON.parse(result.artifact.toString('utf8')) as AnthropicMessageResponse;
-    if (result.type === 'hit') {
+    const response = JSON.parse(result.artifact.toString("utf8")) as AnthropicMessageResponse;
+    if (result.type === "hit") {
       return {
         response,
         hit: true,
         proof: result.proof,
-        entry: result.entry
+        entry: result.entry,
       };
     }
     return {
@@ -111,7 +111,7 @@ export function createAnthropicMessagesAdapter(
       hit: false,
       trace: result.trace,
       evictionProofs: result.evictionProofs,
-      entry: result.entry
+      entry: result.entry,
     };
   };
 }

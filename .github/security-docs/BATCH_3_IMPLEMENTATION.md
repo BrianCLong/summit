@@ -20,6 +20,7 @@ Rust ecosystem generally has fewer critical vulnerabilities, but memory safety i
 **Cargo.toml Files:** 34 total
 
 **Workspace Structure:**
+
 - Main workspace: `ibrs`, `bindings/ibrs-node`, `rust/summit_enterprise`
 - AGQL workspace: `agql-cli`, `agql-core`, `agql-server`
 
@@ -30,17 +31,20 @@ Rust ecosystem generally has fewer critical vulnerabilities, but memory safety i
 ### Implementation Steps
 
 1. **Run cargo audit:**
+
    ```bash
    cargo audit
    ```
 
 2. **Update vulnerable dependencies:**
+
    ```bash
    cargo update
    cargo audit fix
    ```
 
 3. **Review unsafe code:**
+
    ```bash
    cargo clippy -- -W clippy::undocumented_unsafe_blocks
    ```
@@ -75,6 +79,7 @@ Deep dependency trees increase vulnerability exposure. Transitive dependencies n
 ### Current Status
 
 **npm Workspaces:**
+
 - Root package.json (869 files)
 - server/package.json
 - client/package.json
@@ -85,17 +90,20 @@ Deep dependency trees increase vulnerability exposure. Transitive dependencies n
 ### Implementation Steps
 
 1. **Run npm audit:**
+
    ```bash
    npm audit
    pnpm audit
    ```
 
 2. **Identify vulnerable transitive dependencies:**
+
    ```bash
    npm audit --json | jq '.vulnerabilities[] | select(.via[].source != .name)'
    ```
 
 3. **Update dependencies:**
+
    ```bash
    npm update
    pnpm update
@@ -104,6 +112,7 @@ Deep dependency trees increase vulnerability exposure. Transitive dependencies n
    ```
 
 4. **Review package-lock.json changes:**
+
    ```bash
    git diff package-lock.json | head -100
    ```
@@ -140,6 +149,7 @@ Deep dependency trees increase vulnerability exposure. Transitive dependencies n
 **Requirements Files:** 58 total
 
 **Key Directories:**
+
 - adversarial-misinfo-defense-platform/
 - ai/cdis/
 - airflow/
@@ -153,6 +163,7 @@ Deep dependency trees increase vulnerability exposure. Transitive dependencies n
 ### Implementation Steps
 
 1. **Audit all requirements files:**
+
    ```bash
    for file in $(find . -name "requirements*.txt"); do
      echo "=== $file ==="
@@ -161,17 +172,20 @@ Deep dependency trees increase vulnerability exposure. Transitive dependencies n
    ```
 
 2. **Identify common dependencies:**
+
    ```bash
    grep -h "^[a-zA-Z]" $(find . -name "requirements*.txt") | sort | uniq -c | sort -rn | head -20
    ```
 
 3. **Create consolidated requirements:**
+
    ```bash
    # Create root requirements.txt with common dependencies
    # Create specific requirements files for each module
    ```
 
 4. **Update versions:**
+
    ```bash
    pip-audit --fix
    ```
@@ -208,15 +222,15 @@ Ensure patched code is covered by tests to prevent regressions.
 
 ```javascript
 // Test: Verify axios doesn't send sensitive data in URLs
-describe('axios security', () => {
-  it('should not expose sensitive data in URLs', async () => {
+describe("axios security", () => {
+  it("should not expose sensitive data in URLs", async () => {
     // Test implementation
   });
 });
 
 // Test: Verify express middleware security
-describe('express middleware security', () => {
-  it('should enforce CORS restrictions', async () => {
+describe("express middleware security", () => {
+  it("should enforce CORS restrictions", async () => {
     // Test implementation
   });
 });
@@ -301,15 +315,18 @@ func TestGoSecurityFixes(t *testing.T) {
 **Title:** `security(batch-3a): audit Rust dependencies and address RUSTSEC advisories`
 
 **Description:**
+
 - Runs cargo audit and addresses all RUSTSEC advisories
 - Reviews and documents unsafe code
 - Includes comprehensive Rust testing
 
 **Files Changed:**
+
 - All Cargo.toml files (34 total)
 - Related Cargo.lock files
 
 **Tests:**
+
 - `cargo audit` passes
 - `cargo test` passes
 - `cargo clippy` passes
@@ -319,16 +336,19 @@ func TestGoSecurityFixes(t *testing.T) {
 **Title:** `security(batch-3b): resolve npm transitive dependency vulnerabilities`
 
 **Description:**
+
 - Identifies and updates vulnerable transitive dependencies
 - Cleans up dependency tree
 - Includes full test suite
 
 **Files Changed:**
+
 - package.json
 - package-lock.json
 - pnpm-lock.yaml
 
 **Tests:**
+
 - npm audit passes
 - All unit tests pass
 - All integration tests pass
@@ -338,15 +358,18 @@ func TestGoSecurityFixes(t *testing.T) {
 **Title:** `security(batch-3c): consolidate Python dependencies and add security tests`
 
 **Description:**
+
 - Consolidates 58 requirements files
 - Updates to secure versions
 - Adds comprehensive security tests
 
 **Files Changed:**
+
 - All requirements.txt files (58 total)
 - New test files
 
 **Tests:**
+
 - pip-audit passes
 - All Python tests pass
 - Security tests pass
@@ -356,6 +379,7 @@ func TestGoSecurityFixes(t *testing.T) {
 ## Implementation Checklist
 
 ### Phase 1: Rust Audit
+
 - [ ] Run `cargo audit` for all crates
 - [ ] Identify RUSTSEC advisories
 - [ ] Update vulnerable dependencies
@@ -364,6 +388,7 @@ func TestGoSecurityFixes(t *testing.T) {
 - [ ] Create PR 3a
 
 ### Phase 2: npm Cleanup
+
 - [ ] Run `npm audit` for all workspaces
 - [ ] Identify transitive vulnerabilities
 - [ ] Update dependencies
@@ -371,6 +396,7 @@ func TestGoSecurityFixes(t *testing.T) {
 - [ ] Create PR 3b
 
 ### Phase 3: Python Consolidation
+
 - [ ] Audit all requirements files
 - [ ] Identify common dependencies
 - [ ] Consolidate versions
@@ -378,6 +404,7 @@ func TestGoSecurityFixes(t *testing.T) {
 - [ ] Create PR 3c
 
 ### Phase 4: Security Tests
+
 - [ ] Write npm security tests
 - [ ] Write Python security tests
 - [ ] Write Rust security tests
@@ -412,13 +439,13 @@ func TestGoSecurityFixes(t *testing.T) {
 
 ## Timeline
 
-| Week | Task | Status |
-|------|------|--------|
-| 3 | Rust audit | Not Started |
-| 3 | npm cleanup | Not Started |
-| 3-4 | Python consolidation | Not Started |
-| 4 | Security tests | Not Started |
-| 4 | PR review and merge | Not Started |
+| Week | Task                 | Status      |
+| ---- | -------------------- | ----------- |
+| 3    | Rust audit           | Not Started |
+| 3    | npm cleanup          | Not Started |
+| 3-4  | Python consolidation | Not Started |
+| 4    | Security tests       | Not Started |
+| 4    | PR review and merge  | Not Started |
 
 ---
 

@@ -3,7 +3,6 @@
 > Evidence-IDs: controlevidenceindex
 > Status: active
 
-
 # Control → Evidence Index
 
 ## Purpose

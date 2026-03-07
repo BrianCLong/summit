@@ -8,22 +8,22 @@ export interface DisclosurePack {
 
 export const disclosurePacks: DisclosurePack[] = [
   {
-    id: 'pack_us',
-    name: 'US Customer Export',
-    tenant_id: 'tenant_demo',
-    residency_region: 'us',
+    id: "pack_us",
+    name: "US Customer Export",
+    tenant_id: "tenant_demo",
+    residency_region: "us",
     contents: {
-      summary: 'US customer disclosure pack',
+      summary: "US customer disclosure pack",
       records: 120,
     },
   },
   {
-    id: 'pack_eu',
-    name: 'EU Vendor Export',
-    tenant_id: 'tenant_demo',
-    residency_region: 'eu',
+    id: "pack_eu",
+    name: "EU Vendor Export",
+    tenant_id: "tenant_demo",
+    residency_region: "eu",
     contents: {
-      summary: 'EU vendor disclosure pack',
+      summary: "EU vendor disclosure pack",
       records: 75,
     },
   },

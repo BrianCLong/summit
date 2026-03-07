@@ -4,24 +4,24 @@
  */
 
 export enum AlertSource {
-  PROMETHEUS = 'prometheus',
-  ALERTMANAGER = 'alertmanager',
-  GRAFANA = 'grafana',
-  CUSTOM = 'custom',
-  GITHUB_ACTIONS = 'github_actions',
+  PROMETHEUS = "prometheus",
+  ALERTMANAGER = "alertmanager",
+  GRAFANA = "grafana",
+  CUSTOM = "custom",
+  GITHUB_ACTIONS = "github_actions",
 }
 
 export enum AlertSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  CRITICAL = 'critical',
+  INFO = "info",
+  WARNING = "warning",
+  CRITICAL = "critical",
 }
 
 export enum AlertStatus {
-  FIRING = 'firing',
-  ACKNOWLEDGED = 'acknowledged',
-  RESOLVED = 'resolved',
-  SILENCED = 'silenced',
+  FIRING = "firing",
+  ACKNOWLEDGED = "acknowledged",
+  RESOLVED = "resolved",
+  SILENCED = "silenced",
 }
 
 export interface Alert {

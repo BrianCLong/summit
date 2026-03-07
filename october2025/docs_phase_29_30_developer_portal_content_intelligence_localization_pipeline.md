@@ -28,19 +28,19 @@ summary: Pick your SDK, get keys, and follow a 5‑minute guided setup.
 owner: docs
 ---
 
-import SdkPicker from '@site/src/components/SdkPicker';
-import IntegrationsGrid from '@site/src/components/IntegrationsGrid';
+import SdkPicker from "@site/src/components/SdkPicker";
+import IntegrationsGrid from "@site/src/components/IntegrationsGrid";
 
 <SdkPicker
   sdks={[
-    { id: 'js', label: 'JavaScript' },
-    { id: 'py', label: 'Python' },
+    { id: "js", label: "JavaScript" },
+    { id: "py", label: "Python" },
   ]}
 />
 <IntegrationsGrid
   items={[
-    { slug: '/tutorials/first-ingest', label: 'Ingest' },
-    { slug: '/how-to/zip-export', label: 'ZIP Export' },
+    { slug: "/tutorials/first-ingest", label: "Ingest" },
+    { slug: "/how-to/zip-export", label: "ZIP Export" },
   ]}
 />
 ```
@@ -48,15 +48,11 @@ import IntegrationsGrid from '@site/src/components/IntegrationsGrid';
 **`src/components/SdkPicker.tsx`**
 
 ```tsx
-import React, { useState, useEffect } from 'react';
-export default function SdkPicker({
-  sdks,
-}: {
-  sdks: { id: string; label: string }[];
-}) {
-  const [sdk, setSdk] = useState(localStorage.getItem('sdk') || sdks[0].id);
+import React, { useState, useEffect } from "react";
+export default function SdkPicker({ sdks }: { sdks: { id: string; label: string }[] }) {
+  const [sdk, setSdk] = useState(localStorage.getItem("sdk") || sdks[0].id);
   useEffect(() => {
-    localStorage.setItem('sdk', sdk);
+    localStorage.setItem("sdk", sdk);
   }, [sdk]);
   return (
     <div className="card padding--md">
@@ -64,7 +60,7 @@ export default function SdkPicker({
       {sdks.map((s) => (
         <button
           key={s.id}
-          className={`button button--sm margin-left--sm ${sdk === s.id ? 'button--primary' : ''}`}
+          className={`button button--sm margin-left--sm ${sdk === s.id ? "button--primary" : ""}`}
           onClick={() => setSdk(s.id)}
         >
           {s.label}
@@ -80,10 +76,10 @@ export default function SdkPicker({
 **`src/components/ConfigGen.tsx`**
 
 ```tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 export default function ConfigGen() {
-  const [apiKey, setApiKey] = useState('IG_API_KEY');
-  const [endpoint, setEndpoint] = useState('https://api.intelgraph.example');
+  const [apiKey, setApiKey] = useState("IG_API_KEY");
+  const [endpoint, setEndpoint] = useState("https://api.intelgraph.example");
   const env = `INTELGRAPH_API_KEY=${apiKey}\nINTELGRAPH_ENDPOINT=${endpoint}`;
   const yaml = `intelgraph:\n  apiKey: ${apiKey}\n  endpoint: ${endpoint}\n`;
   return (
@@ -126,10 +122,10 @@ export default function ConfigGen() {
 **`scripts/docs/auto-tag.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const { TfIdf } = require('natural');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const { TfIdf } = require("natural");
 const tfidf = new TfIdf();
 const files = [];
 (function walk(d) {
@@ -138,10 +134,8 @@ const files = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && files.push(p);
   }
-})('docs');
-files.forEach((f) =>
-  tfidf.addDocument(fs.readFileSync(f, 'utf8').replace(/```[\s\S]*?```/g, '')),
-);
+})("docs");
+files.forEach((f) => tfidf.addDocument(fs.readFileSync(f, "utf8").replace(/```[\s\S]*?```/g, "")));
 const keywords = (i) =>
   tfidf
     .listTerms(i)
@@ -174,9 +168,9 @@ jobs:
 **`scripts/docs/decay-score.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const now = Date.now();
 const rows = [];
 (function walk(d) {
@@ -185,23 +179,23 @@ const rows = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && rows.push(p);
   }
-})('docs');
+})("docs");
 const out = rows.map((p) => {
   const g = matter.read(p);
   const days = Math.max(
     1,
-    (now - new Date(g.data.lastUpdated || 0).getTime()) / (1000 * 60 * 60 * 24),
+    (now - new Date(g.data.lastUpdated || 0).getTime()) / (1000 * 60 * 60 * 24)
   );
   const score = Math.min(1, days / 180);
   return { path: p, days, score: Number(score.toFixed(2)) };
 });
 fs.writeFileSync(
-  'docs/ops/decay-report.json',
+  "docs/ops/decay-report.json",
   JSON.stringify(
     out.sort((a, b) => b.score - a.score),
     null,
-    2,
-  ),
+    2
+  )
 );
 ```
 
@@ -218,10 +212,10 @@ fs.writeFileSync(
 **`scripts/i18n/export-xliff.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const strip = (s) => s.replace(/```[\s\S]*?```/g, '').replace(/<[^>]+>/g, '');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const strip = (s) => s.replace(/```[\s\S]*?```/g, "").replace(/<[^>]+>/g, "");
 const entries = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -229,16 +223,16 @@ const entries = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && entries.push(p);
   }
-})('docs');
+})("docs");
 let body = `<?xml version="1.0"?><xliff version="1.2"><file source-language="en" datatype="plaintext"><body>`;
 entries.forEach((p) => {
   const g = matter.read(p);
-  const id = p.replace(/^docs\//, '');
-  body += `<trans-unit id="${id}"><source>${(g.content ? strip(g.content) : '').substring(0, 5000).replace(/&/g, '&amp;')}</source></trans-unit>`;
+  const id = p.replace(/^docs\//, "");
+  body += `<trans-unit id="${id}"><source>${(g.content ? strip(g.content) : "").substring(0, 5000).replace(/&/g, "&amp;")}</source></trans-unit>`;
 });
 body += `</body></file></xliff>`;
-fs.mkdirSync('i18n/export', { recursive: true });
-fs.writeFileSync('i18n/export/docs-en.xliff', body);
+fs.mkdirSync("i18n/export", { recursive: true });
+fs.writeFileSync("i18n/export/docs-en.xliff", body);
 ````
 
 ## C2) Import translations
@@ -246,11 +240,11 @@ fs.writeFileSync('i18n/export/docs-en.xliff', body);
 **`scripts/i18n/import-json.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const map = JSON.parse(fs.readFileSync('i18n/import/es.json', 'utf8')); // { slug: translatedContent }
+const fs = require("fs");
+const path = require("path");
+const map = JSON.parse(fs.readFileSync("i18n/import/es.json", "utf8")); // { slug: translatedContent }
 for (const [slug, md] of Object.entries(map)) {
-  const out = path.join('i18n/es', slug);
+  const out = path.join("i18n/es", slug);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, md);
 }
@@ -263,13 +257,13 @@ for (const [slug, md] of Object.entries(map)) {
 **`scripts/i18n/qa.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const baseDir = 'docs';
-const trDir = 'i18n/es';
+const fs = require("fs");
+const path = require("path");
+const baseDir = "docs";
+const trDir = "i18n/es";
 let fail = 0;
 function get(d) {
-  return fs.existsSync(d) ? fs.readFileSync(d, 'utf8') : '';
+  return fs.existsSync(d) ? fs.readFileSync(d, "utf8") : "";
 }
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -277,16 +271,16 @@ function get(d) {
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && check(p);
   }
-})('docs');
+})("docs");
 function check(src) {
-  const slug = src.replace(/^docs\//, '');
+  const slug = src.replace(/^docs\//, "");
   const tr = path.join(trDir, slug);
   const a = get(src);
   const b = get(tr);
   if (!b) return;
   const lenDelta = Math.abs(b.length - a.length) / Math.max(1, a.length);
   if (lenDelta > 1.5) {
-    console.error('Large length delta for', slug);
+    console.error("Large length delta for", slug);
     fail = 1;
   }
 }

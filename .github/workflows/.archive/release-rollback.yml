@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # EMERGENCY RELEASE ROLLBACK WORKFLOW
 # Safely rolls back a failed GA release with full audit trail.
 #

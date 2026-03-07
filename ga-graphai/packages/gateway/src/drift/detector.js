@@ -3,42 +3,40 @@ export function classifyDrift(desired, runtime) {
   for (const [key, desiredVal] of Object.entries(desired)) {
     const runtimeVal = runtime[key];
     if (runtimeVal === undefined) {
-      diff.push({ key, type: 'missing', severity: 'critical' });
+      diff.push({ key, type: "missing", severity: "critical" });
     } else if (runtimeVal !== desiredVal) {
-      diff.push({ key, type: 'changed', severity: severityForKey(key, desiredVal, runtimeVal) });
+      diff.push({ key, type: "changed", severity: severityForKey(key, desiredVal, runtimeVal) });
     }
   }
   for (const key of Object.keys(runtime)) {
     if (!(key in desired)) {
-      diff.push({ key, type: 'unexpected', severity: 'warn' });
+      diff.push({ key, type: "unexpected", severity: "warn" });
     }
   }
   return diff;
 }
 
 function severityForKey(key, desiredVal, runtimeVal) {
-  if (key.toLowerCase().includes('security') && desiredVal !== runtimeVal) {
-    return 'critical';
+  if (key.toLowerCase().includes("security") && desiredVal !== runtimeVal) {
+    return "critical";
   }
-  if (key.toLowerCase().includes('replica')) {
-    return 'warn';
+  if (key.toLowerCase().includes("replica")) {
+    return "warn";
   }
-  return 'info';
+  return "info";
 }
 
 export function summarizeDrift(diff) {
   const summary = {
-    critical: diff.filter((d) => d.severity === 'critical'),
-    warn: diff.filter((d) => d.severity === 'warn'),
-    info: diff.filter((d) => d.severity === 'info'),
+    critical: diff.filter((d) => d.severity === "critical"),
+    warn: diff.filter((d) => d.severity === "warn"),
+    info: diff.filter((d) => d.severity === "info"),
   };
   const hasCritical = summary.critical.length > 0;
   return {
     summary,
     alert: hasCritical,
-    message: hasCritical
-      ? 'Critical drift detected; trigger PagerDuty'
-      : 'Drift within tolerance',
+    message: hasCritical ? "Critical drift detected; trigger PagerDuty" : "Drift within tolerance",
   };
 }
 

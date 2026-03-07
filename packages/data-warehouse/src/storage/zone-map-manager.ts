@@ -9,7 +9,7 @@
  * Similar to Snowflake's pruning but with more granular control
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export interface ZoneMap {
   minValue: any;
@@ -54,17 +54,14 @@ export class ZoneMapManager {
 
     // Create bloom filter for high-cardinality columns
     const bloomFilter =
-      distinctValues.size > 100
-        ? this.createBloomFilter(distinctValues)
-        : undefined;
+      distinctValues.size > 100 ? this.createBloomFilter(distinctValues) : undefined;
 
     return {
       minValue: min,
       maxValue: max,
       nullCount: data.length - nonNull.length,
       rowCount: data.length,
-      distinctValues:
-        distinctValues.size <= 100 ? distinctValues : undefined,
+      distinctValues: distinctValues.size <= 100 ? distinctValues : undefined,
       bloomFilter,
     };
   }
@@ -72,11 +69,7 @@ export class ZoneMapManager {
   /**
    * Create zone maps table for a table
    */
-  async createZoneMaps(
-    pool: Pool,
-    tableName: string,
-    columns: string[],
-  ): Promise<void> {
+  async createZoneMaps(pool: Pool, tableName: string, columns: string[]): Promise<void> {
     const zoneMapTableSQL = `
       CREATE TABLE IF NOT EXISTS ${tableName}_zone_maps (
         id SERIAL PRIMARY KEY,
@@ -137,45 +130,45 @@ export class ZoneMapManager {
     tableName: string,
     columnName: string,
     predicate: {
-      operator: '=' | '>' | '>=' | '<' | '<=' | '!=' | 'IN' | 'BETWEEN';
+      operator: "=" | ">" | ">=" | "<" | "<=" | "!=" | "IN" | "BETWEEN";
       value: any;
       value2?: any;
-    },
+    }
   ): Promise<string[]> {
-    let whereClause = '';
+    let whereClause = "";
 
     switch (predicate.operator) {
-      case '=':
+      case "=":
         whereClause = `min_value <= $1 AND max_value >= $1`;
         break;
 
-      case '>':
+      case ">":
         whereClause = `max_value > $1`;
         break;
 
-      case '>=':
+      case ">=":
         whereClause = `max_value >= $1`;
         break;
 
-      case '<':
+      case "<":
         whereClause = `min_value < $1`;
         break;
 
-      case '<=':
+      case "<=":
         whereClause = `min_value <= $1`;
         break;
 
-      case '!=':
+      case "!=":
         // Can't prune for inequality
-        whereClause = 'TRUE';
+        whereClause = "TRUE";
         break;
 
-      case 'BETWEEN':
+      case "BETWEEN":
         whereClause = `max_value >= $1 AND min_value <= $2`;
         break;
 
       default:
-        whereClause = 'TRUE';
+        whereClause = "TRUE";
     }
 
     const query = `
@@ -186,9 +179,7 @@ export class ZoneMapManager {
     `;
 
     const params =
-      predicate.operator === 'BETWEEN'
-        ? [predicate.value, predicate.value2]
-        : [predicate.value];
+      predicate.operator === "BETWEEN" ? [predicate.value, predicate.value2] : [predicate.value];
 
     const result = await pool.query(query, params);
     return result.rows.map((row) => row.block_id);
@@ -200,7 +191,7 @@ export class ZoneMapManager {
   async getPruningStats(
     pool: Pool,
     tableName: string,
-    columnName: string,
+    columnName: string
   ): Promise<{
     totalBlocks: number;
     avgRowsPerBlock: number;
@@ -217,7 +208,7 @@ export class ZoneMapManager {
       FROM ${tableName}_zone_maps
       WHERE column_name = $1
     `,
-      [columnName],
+      [columnName]
     );
 
     const row = result.rows[0];
@@ -315,14 +306,8 @@ export class ZoneMapManager {
     const nonNullMaps = zoneMaps.filter((zm) => zm.minValue !== null);
 
     return {
-      minValue:
-        nonNullMaps.length > 0
-          ? this.getMin(nonNullMaps.map((zm) => zm.minValue))
-          : null,
-      maxValue:
-        nonNullMaps.length > 0
-          ? this.getMax(nonNullMaps.map((zm) => zm.maxValue))
-          : null,
+      minValue: nonNullMaps.length > 0 ? this.getMin(nonNullMaps.map((zm) => zm.minValue)) : null,
+      maxValue: nonNullMaps.length > 0 ? this.getMax(nonNullMaps.map((zm) => zm.maxValue)) : null,
       nullCount: zoneMaps.reduce((sum, zm) => sum + zm.nullCount, 0),
       rowCount: zoneMaps.reduce((sum, zm) => sum + zm.rowCount, 0),
     };
@@ -333,7 +318,7 @@ export class ZoneMapManager {
    */
   calculatePruningEfficiency(
     totalBlocks: number,
-    prunedBlocks: number,
+    prunedBlocks: number
   ): {
     blocksScanned: number;
     blocksPruned: number;

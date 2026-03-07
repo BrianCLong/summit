@@ -11,18 +11,18 @@ import { ToolGovernance, ToolResponse } from "./types.js";
 
 export class SummitMCPServer {
   private server: Server;
-  private tools: Map<string, {
-    description: string;
-    schema: z.ZodObject<any>;
-    handler: (args: any) => Promise<ToolResponse>;
-    governance: ToolGovernance;
-  }> = new Map();
+  private tools: Map<
+    string,
+    {
+      description: string;
+      schema: z.ZodObject<any>;
+      handler: (args: any) => Promise<ToolResponse>;
+      governance: ToolGovernance;
+    }
+  > = new Map();
 
   constructor(name: string, version: string) {
-    this.server = new Server(
-      { name, version },
-      { capabilities: { tools: {} } }
-    );
+    this.server = new Server({ name, version }, { capabilities: { tools: {} } });
     this.setupHandlers();
   }
 
@@ -39,7 +39,9 @@ export class SummitMCPServer {
   ) {
     // Enforce naming convention: service_action_resource
     if (!/^[a-z0-9]+_[a-z0-9]+_[a-z0-9_]+$/.test(name)) {
-      console.warn(`Warning: Tool name "${name}" does not follow the Summit naming convention {service}_{action}_{resource}`);
+      console.warn(
+        `Warning: Tool name "${name}" does not follow the Summit naming convention {service}_{action}_{resource}`
+      );
     }
 
     const schema = z.object(shape);
@@ -75,29 +77,37 @@ export class SummitMCPServer {
         const payloadSize = JSON.stringify(result).length;
 
         // Telemetry Logging
-        console.error(`[Telemetry] Tool: ${toolName} | Status: success | Latency: ${duration}ms | Payload: ${payloadSize} bytes`);
+        console.error(
+          `[Telemetry] Tool: ${toolName} | Status: success | Latency: ${duration}ms | Payload: ${payloadSize} bytes`
+        );
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
         const duration = Date.now() - startTime;
-        console.error(`[Telemetry] Tool: ${toolName} | Status: error | Latency: ${duration}ms | Error: ${error instanceof Error ? error.message : "unknown"}`);
+        console.error(
+          `[Telemetry] Tool: ${toolName} | Status: error | Latency: ${duration}ms | Error: ${error instanceof Error ? error.message : "unknown"}`
+        );
         if (error instanceof z.ZodError) {
           return {
             isError: true,
-            content: [{
-              type: "text",
-              text: `Invalid arguments: ${error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}. Please provide the correct flat typed arguments.`
-            }],
+            content: [
+              {
+                type: "text",
+                text: `Invalid arguments: ${error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}. Please provide the correct flat typed arguments.`,
+              },
+            ],
           };
         }
         return {
           isError: true,
-          content: [{
-            type: "text",
-            text: `Error executing tool: ${error instanceof Error ? error.message : String(error)}. If this persists, try a different approach.`
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error executing tool: ${error instanceof Error ? error.message : String(error)}. If this persists, try a different approach.`,
+            },
+          ],
         };
       }
     });
@@ -109,7 +119,9 @@ export class SummitMCPServer {
    */
   private evaluatePolicy(name: string, governance: ToolGovernance) {
     if (governance.destructive && process.env.SUMMIT_SAFE_MODE === "1") {
-      throw new Error(`Execution of destructive tool "${name}" is blocked in SAFE_MODE. Ensure you have explicit authorization.`);
+      throw new Error(
+        `Execution of destructive tool "${name}" is blocked in SAFE_MODE. Ensure you have explicit authorization.`
+      );
     }
     // Placeholder for more advanced policy evaluation
   }

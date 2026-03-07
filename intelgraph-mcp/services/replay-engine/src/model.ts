@@ -1,8 +1,8 @@
-export type IOChannel = 'jsonrpc' | 'sse' | 'stdio' | 'net' | 'env';
+export type IOChannel = "jsonrpc" | "sse" | "stdio" | "net" | "env";
 
 export type IOEvent = {
   t: number;
-  dir: 'in' | 'out';
+  dir: "in" | "out";
   channel: IOChannel;
   payload: unknown;
   hash: string;

@@ -19,22 +19,22 @@ The market exhibits behavior functionally indistinguishable from regulatory capt
 
 We will:
 
-* Treat capture as an **environmental constraint**
-* Exploit the **downstream rigidity** it creates
-* Convert regulation into **infrastructure**, not friction
-* Maintain a provable clean-hands posture
+- Treat capture as an **environmental constraint**
+- Exploit the **downstream rigidity** it creates
+- Convert regulation into **infrastructure**, not friction
+- Maintain a provable clean-hands posture
 
 ## Board Commitments
 
-* Zero tolerance for improper influence
-* Investment in anticipatory compliance and standards leadership
-* Transparency as a strategic asset
+- Zero tolerance for improper influence
+- Investment in anticipatory compliance and standards leadership
+- Transparency as a strategic asset
 
 ## Expected Outcomes
 
-* Faster time-to-compliance than competitors
-* Reduced regulatory variance
-* Market share gains following regulatory change
+- Faster time-to-compliance than competitors
+- Reduced regulatory variance
+- Market share gains following regulatory change
 
 ---
 
@@ -42,23 +42,23 @@ We will:
 
 ## Non-Negotiable Principles
 
-* No quid-pro-quo
-* No private rule drafting
-* No undisclosed relationships
-* No revolving-door violations
+- No quid-pro-quo
+- No private rule drafting
+- No undisclosed relationships
+- No revolving-door violations
 
 ## Required Practices
 
-* Written records of all regulator interactions
-* Legal and ethics pre-clearance
-* Public-channel preference
-* Annual independent ethics audit
+- Written records of all regulator interactions
+- Legal and ethics pre-clearance
+- Public-channel preference
+- Annual independent ethics audit
 
 ## Enforcement
 
-* Absolute veto authority by Ethics Board
-* Mandatory escalation on ambiguity
-* Zero retaliation for whistleblowing
+- Absolute veto authority by Ethics Board
+- Mandatory escalation on ambiguity
+- Zero retaliation for whistleblowing
 
 ---
 
@@ -70,29 +70,29 @@ Observe, model, and prepare for regulatory developments—never persuade imprope
 
 ## Scope
 
-* Regulatory intelligence
-* Standards participation
-* Anticipatory compliance design
-* Capture-shadow modeling
+- Regulatory intelligence
+- Standards participation
+- Anticipatory compliance design
+- Capture-shadow modeling
 
 ## Explicit Exclusions
 
-* Lobbying
-* Political contributions
-* Backchannel advocacy
+- Lobbying
+- Political contributions
+- Backchannel advocacy
 
 ## Composition
 
-* Policy analysts
-* Systems architects
-* Compliance engineers
-* Legal counsel
+- Policy analysts
+- Systems architects
+- Compliance engineers
+- Legal counsel
 
 ## Outputs
 
-* Quarterly regulatory forecasts
-* Compliance readiness assessments
-* Competitor rigidity analyses
+- Quarterly regulatory forecasts
+- Compliance readiness assessments
+- Competitor rigidity analyses
 
 ---
 
@@ -104,22 +104,22 @@ Ensure emerging regulation converges on architectures compatible with ours.
 
 ## Target Venues
 
-* Formal standards bodies
-* Industry technical consortia
-* Academic and NGO frameworks
+- Formal standards bodies
+- Industry technical consortia
+- Academic and NGO frameworks
 
 ## Tactics
 
-* Publish reference schemas
-* Release neutral technical papers
-* Contribute implementation guides
-* Avoid brand-centric positioning
+- Publish reference schemas
+- Release neutral technical papers
+- Contribute implementation guides
+- Avoid brand-centric positioning
 
 ## Success Indicators
 
-* Language reuse in regulatory drafts
-* Adoption of our abstractions
-* Regulator citations of standards, not firms
+- Language reuse in regulatory drafts
+- Adoption of our abstractions
+- Regulator citations of standards, not firms
 
 ---
 
@@ -127,27 +127,27 @@ Ensure emerging regulation converges on architectures compatible with ours.
 
 ## Mandatory Capabilities
 
-* Policy-as-code
-* Jurisdictional toggles
-* Immutable audit logs
-* Deterministic replay
-* Provenance graphs
-* Explainability hooks
+- Policy-as-code
+- Jurisdictional toggles
+- Immutable audit logs
+- Deterministic replay
+- Provenance graphs
+- Explainability hooks
 
 ## Design Rule
 
 Compliance must be:
 
-* Native
-* Automated
-* Cheap for us
-* Structurally expensive for others
+- Native
+- Automated
+- Cheap for us
+- Structurally expensive for others
 
 ## Deployment Model
 
-* Feature-flagged
-* Region-aware
-* Backward-compatible
+- Feature-flagged
+- Region-aware
+- Backward-compatible
 
 ---
 
@@ -155,21 +155,21 @@ Compliance must be:
 
 ## Inputs
 
-* Public regulatory wins by competitors
-* Standards participation asymmetry
-* Compliance opacity indicators
+- Public regulatory wins by competitors
+- Standards participation asymmetry
+- Compliance opacity indicators
 
 ## Modeling Dimensions
 
-* Architectural rigidity induced by regulation
-* Cost of regulatory change
-* Speed of compliance adaptation
+- Architectural rigidity induced by regulation
+- Cost of regulatory change
+- Speed of compliance adaptation
 
 ## Outputs
 
-* “Frozen Surface” maps
-* Regulatory brittleness scores
-* Exploitable latency windows
+- “Frozen Surface” maps
+- Regulatory brittleness scores
+- Exploitable latency windows
 
 ## Use
 
@@ -189,9 +189,9 @@ Feed directly into product and go-to-market prioritization.
 
 ## Distribution
 
-* Board
-* Executive team
-* Architecture leads
+- Board
+- Executive team
+- Architecture leads
 
 ---
 
@@ -199,10 +199,10 @@ Feed directly into product and go-to-market prioritization.
 
 ## Red Lines
 
-* Any request for private drafting
-* Any implied exchange of favors
-* Any undocumented regulator interaction
-* Any ambiguity around influence intent
+- Any request for private drafting
+- Any implied exchange of favors
+- Any undocumented regulator interaction
+- Any ambiguity around influence intent
 
 ## Escalation Path
 
@@ -217,22 +217,22 @@ Feed directly into product and go-to-market prioritization.
 
 ## Allowed Interaction Modes
 
-* Educational briefings
-* Public comment submissions
-* Standards-based technical explanations
+- Educational briefings
+- Public comment submissions
+- Standards-based technical explanations
 
 ## Required Language Patterns
 
-* Neutral
-* Non-comparative
-* Non-advocacy
-* Evidence-based
+- Neutral
+- Non-comparative
+- Non-advocacy
+- Evidence-based
 
 ## Prohibited Language
 
-* “We recommend you…”
-* “Others are doing…”
-* “This would help us…”
+- “We recommend you…”
+- “Others are doing…”
+- “This would help us…”
 
 ---
 
@@ -240,15 +240,15 @@ Feed directly into product and go-to-market prioritization.
 
 ## Leading Indicators
 
-* Time-to-compliance vs market
-* Cost of compliance per revenue dollar
-* Regulatory response latency
+- Time-to-compliance vs market
+- Cost of compliance per revenue dollar
+- Regulatory response latency
 
 ## Lagging Indicators
 
-* Market share change post-regulation
-* Competitor exits or consolidations
-* Reduction in regulatory friction incidents
+- Market share change post-regulation
+- Competitor exits or consolidations
+- Reduction in regulatory friction incidents
 
 ## Board KPI
 
@@ -260,28 +260,28 @@ Feed directly into product and go-to-market prioritization.
 
 ### 0–90 Days
 
-* Stand up RAF and Ethics Board
-* Publish governance artifacts
-* Begin standards participation
-* Build first regulatory forecast
+- Stand up RAF and Ethics Board
+- Publish governance artifacts
+- Begin standards participation
+- Build first regulatory forecast
 
 ### 3–9 Months
 
-* Ship compliance automation
-* Release reference schemas
-* Establish academic/NGO validation
+- Ship compliance automation
+- Release reference schemas
+- Establish academic/NGO validation
 
 ### 9–18 Months
 
-* Achieve citation and exemplar status
-* Reduce marginal compliance cost to near zero
-* Observe competitor slowdown
+- Achieve citation and exemplar status
+- Reduce marginal compliance cost to near zero
+- Observe competitor slowdown
 
 ### 18–36 Months
 
-* Regulation structurally favors your operating model
-* Capture becomes a liability for others
-* You become the default “safe” option
+- Regulation structurally favors your operating model
+- Capture becomes a liability for others
+- You become the default “safe” option
 
 ---
 

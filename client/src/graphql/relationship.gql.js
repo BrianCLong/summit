@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const RELATIONSHIP_BY_ID = gql`
   query RelationshipById($id: ID!) {

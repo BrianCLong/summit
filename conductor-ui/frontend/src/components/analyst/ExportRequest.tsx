@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Alert, AlertDescription } from '../ui/alert';
-import { ExplainabilityPanel } from './ExplainabilityPanel';
+import React, { useState } from "react";
+import { Alert, AlertDescription } from "../ui/alert";
+import { ExplainabilityPanel } from "./ExplainabilityPanel";
 
 interface ExportFormat {
-  format: 'json' | 'csv' | 'graphml' | 'pdf';
+  format: "json" | "csv" | "graphml" | "pdf";
   includeProvenance: boolean;
   includeMetadata: boolean;
 }
 
 interface PolicyOutcome {
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   reason: string;
   rule_id: string;
   evidence?: string[];
@@ -18,7 +18,7 @@ interface PolicyOutcome {
 
 export const ExportRequest: React.FC = () => {
   const [exportFormat, setExportFormat] = useState<ExportFormat>({
-    format: 'json',
+    format: "json",
     includeProvenance: true,
     includeMetadata: true,
   });
@@ -31,13 +31,13 @@ export const ExportRequest: React.FC = () => {
     setIsChecking(true);
 
     try {
-      const response = await fetch('/api/export/policy-check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/export/policy-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           format: exportFormat.format,
           includeProvenance: exportFormat.includeProvenance,
-          stepUpToken: localStorage.getItem('stepUpToken'),
+          stepUpToken: localStorage.getItem("stepUpToken"),
         }),
       });
 
@@ -46,9 +46,9 @@ export const ExportRequest: React.FC = () => {
       setStepUpRequired(result.requiresStepUp || false);
     } catch (error) {
       setPolicyCheck({
-        decision: 'deny',
-        reason: 'Error checking export policy: ' + error,
-        rule_id: 'error',
+        decision: "deny",
+        reason: "Error checking export policy: " + error,
+        rule_id: "error",
       });
     } finally {
       setIsChecking(false);
@@ -58,28 +58,26 @@ export const ExportRequest: React.FC = () => {
   const requestStepUp = async () => {
     // Trigger step-up authentication
     window.dispatchEvent(
-      new CustomEvent('request-stepup', {
-        detail: { reason: 'Export requires additional authentication' },
-      }),
+      new CustomEvent("request-stepup", {
+        detail: { reason: "Export requires additional authentication" },
+      })
     );
   };
 
   const executeExport = async () => {
-    if (policyCheck?.decision !== 'allow') {
-      alert(
-        'Export is not allowed by policy. Please check the policy outcome.',
-      );
+    if (policyCheck?.decision !== "allow") {
+      alert("Export is not allowed by policy. Please check the policy outcome.");
       return;
     }
 
     setIsExporting(true);
 
     try {
-      const response = await fetch('/api/export', {
-        method: 'POST',
+      const response = await fetch("/api/export", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Step-Up-Token': localStorage.getItem('stepUpToken') || '',
+          "Content-Type": "application/json",
+          "X-Step-Up-Token": localStorage.getItem("stepUpToken") || "",
         },
         body: JSON.stringify(exportFormat),
       });
@@ -90,7 +88,7 @@ export const ExportRequest: React.FC = () => {
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `export.${exportFormat.format}`;
       document.body.appendChild(a);
@@ -98,9 +96,9 @@ export const ExportRequest: React.FC = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      alert('Export completed successfully!');
+      alert("Export completed successfully!");
     } catch (error) {
-      alert('Export failed: ' + error);
+      alert("Export failed: " + error);
     } finally {
       setIsExporting(false);
     }
@@ -112,9 +110,7 @@ export const ExportRequest: React.FC = () => {
 
       <div className="format-options space-y-3">
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Export Format
-          </label>
+          <label className="block text-sm font-medium mb-1">Export Format</label>
           <select
             value={exportFormat.format}
             onChange={(e) =>
@@ -169,20 +165,20 @@ export const ExportRequest: React.FC = () => {
           disabled={isChecking}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
         >
-          {isChecking ? 'Checking Policy...' : 'Check Export Policy'}
+          {isChecking ? "Checking Policy..." : "Check Export Policy"}
         </button>
 
-        {policyCheck?.decision === 'allow' && (
+        {policyCheck?.decision === "allow" && (
           <button
             onClick={executeExport}
             disabled={isExporting}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
           >
-            {isExporting ? 'Exporting...' : 'Execute Export'}
+            {isExporting ? "Exporting..." : "Execute Export"}
           </button>
         )}
 
-        {stepUpRequired && policyCheck?.decision === 'deny' && (
+        {stepUpRequired && policyCheck?.decision === "deny" && (
           <button
             onClick={requestStepUp}
             className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600"
@@ -193,16 +189,11 @@ export const ExportRequest: React.FC = () => {
       </div>
 
       {policyCheck && (
-        <ExplainabilityPanel
-          policyOutcome={policyCheck}
-          queryContext={{ exportFormat }}
-        />
+        <ExplainabilityPanel policyOutcome={policyCheck} queryContext={{ exportFormat }} />
       )}
 
       <div className="info-box mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-        <h4 className="font-semibold text-sm text-blue-800 mb-2">
-          Export Policy Preview
-        </h4>
+        <h4 className="font-semibold text-sm text-blue-800 mb-2">Export Policy Preview</h4>
         <div className="text-sm text-blue-700 space-y-1">
           <p>• Exports are subject to OPA policy evaluation</p>
           <p>• High-classification data may require step-up authentication</p>

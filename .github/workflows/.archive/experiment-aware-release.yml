@@ -3,10 +3,10 @@ name: Experiment Aware Release
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     types: [opened, synchronize]
 
 concurrency:
@@ -22,8 +22,8 @@ jobs:
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
 
       # In a real scenario, this would install dependencies and run a script using the new package
       # Here we simulate the check

@@ -1,10 +1,14 @@
-import { BaseConnector } from './base-connector';
-import { Connector, ConnectorContext, ToolDefinition } from './types';
+import { BaseConnector } from "./base-connector";
+import { Connector, ConnectorContext, ToolDefinition } from "./types";
 
 export abstract class ActionConnector extends BaseConnector implements Connector {
   abstract getTools(): Promise<ToolDefinition[]>;
 
-  protected abstract implementExecute(toolName: string, args: any, context: ConnectorContext): Promise<any>;
+  protected abstract implementExecute(
+    toolName: string,
+    args: any,
+    context: ConnectorContext
+  ): Promise<any>;
 
   async execute(toolName: string, args: any, context: ConnectorContext): Promise<any> {
     this.ensureInitialized();
@@ -17,7 +21,7 @@ export abstract class ActionConnector extends BaseConnector implements Connector
     return {
       description: `[Dry Run] Would execute tool '${toolName}' on connector '${this.manifest.name}'`,
       args,
-      estimatedImpact: 'unknown'
+      estimatedImpact: "unknown",
     };
   }
 }

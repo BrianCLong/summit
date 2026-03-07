@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -9,18 +9,18 @@ import {
   Stack,
   Tooltip,
   Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import PauseCircleIcon from '@mui/icons-material/PauseCircle';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import WarningIcon from '@mui/icons-material/Warning';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import WarningIcon from "@mui/icons-material/Warning";
 
 export interface AgentFleetStatus {
   id: string;
   name: string;
-  status: 'active' | 'paused' | 'error' | 'contained';
+  status: "active" | "paused" | "error" | "contained";
   policyCompliance: number;
   lastHeartbeat: Date;
   incidentsToday: number;
@@ -47,48 +47,48 @@ const mockMetrics: GovernanceMetrics = {
 
 const mockFleet: AgentFleetStatus[] = [
   {
-    id: 'agent-001',
-    name: 'Entity Extraction Fleet',
-    status: 'active',
+    id: "agent-001",
+    name: "Entity Extraction Fleet",
+    status: "active",
     policyCompliance: 98,
     lastHeartbeat: new Date(),
     incidentsToday: 0,
   },
   {
-    id: 'agent-002',
-    name: 'Relationship Inference Fleet',
-    status: 'active',
+    id: "agent-002",
+    name: "Relationship Inference Fleet",
+    status: "active",
     policyCompliance: 92,
     lastHeartbeat: new Date(),
     incidentsToday: 1,
   },
   {
-    id: 'agent-003',
-    name: 'Anomaly Detection Fleet',
-    status: 'paused',
+    id: "agent-003",
+    name: "Anomaly Detection Fleet",
+    status: "paused",
     policyCompliance: 100,
     lastHeartbeat: new Date(Date.now() - 300000),
     incidentsToday: 0,
   },
   {
-    id: 'agent-004',
-    name: 'OSINT Collector Fleet',
-    status: 'contained',
+    id: "agent-004",
+    name: "OSINT Collector Fleet",
+    status: "contained",
     policyCompliance: 67,
     lastHeartbeat: new Date(Date.now() - 600000),
     incidentsToday: 3,
   },
 ];
 
-function getStatusIcon(status: AgentFleetStatus['status']) {
+function getStatusIcon(status: AgentFleetStatus["status"]) {
   switch (status) {
-    case 'active':
+    case "active":
       return <CheckCircleIcon color="success" fontSize="small" />;
-    case 'paused':
+    case "paused":
       return <PauseCircleIcon color="warning" fontSize="small" />;
-    case 'error':
+    case "error":
       return <ErrorIcon color="error" fontSize="small" />;
-    case 'contained':
+    case "contained":
       return <WarningIcon color="error" fontSize="small" />;
     default:
       return null;
@@ -96,25 +96,29 @@ function getStatusIcon(status: AgentFleetStatus['status']) {
 }
 
 function getStatusColor(
-  status: AgentFleetStatus['status'],
-): 'success' | 'warning' | 'error' | 'default' {
+  status: AgentFleetStatus["status"]
+): "success" | "warning" | "error" | "default" {
   switch (status) {
-    case 'active':
-      return 'success';
-    case 'paused':
-      return 'warning';
-    case 'error':
-    case 'contained':
-      return 'error';
+    case "active":
+      return "success";
+    case "paused":
+      return "warning";
+    case "error":
+    case "contained":
+      return "error";
     default:
-      return 'default';
+      return "default";
   }
 }
 
 function getComplianceColor(compliance: number): string {
-  if (compliance >= 90) {return '#4caf50';}
-  if (compliance >= 70) {return '#ff9800';}
-  return '#f44336';
+  if (compliance >= 90) {
+    return "#4caf50";
+  }
+  if (compliance >= 70) {
+    return "#ff9800";
+  }
+  return "#f44336";
 }
 
 interface MetricCardProps {
@@ -130,10 +134,7 @@ function MetricCard({ title, value, subtitle, color }: MetricCardProps) {
       <Typography variant="caption" color="text.secondary">
         {title}
       </Typography>
-      <Typography
-        variant="h4"
-        sx={{ color: color || 'text.primary', fontWeight: 600 }}
-      >
+      <Typography variant="h4" sx={{ color: color || "text.primary", fontWeight: 600 }}>
         {value}
       </Typography>
       {subtitle && (
@@ -159,12 +160,7 @@ export default function AIGovernanceWidget() {
   return (
     <Card elevation={1} sx={{ borderRadius: 3 }}>
       <CardContent>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={2}
-        >
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6">AI Governance & Agent Fleet</Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Chip
@@ -174,18 +170,14 @@ export default function AIGovernanceWidget() {
               sx={{ fontWeight: 600 }}
             />
             <Tooltip title="Refresh metrics">
-              <IconButton
-                size="small"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-              >
+              <IconButton size="small" onClick={handleRefresh} disabled={isRefreshing}>
                 <RefreshIcon
                   fontSize="small"
                   sx={{
-                    animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
-                    '@keyframes spin': {
-                      '0%': { transform: 'rotate(0deg)' },
-                      '100%': { transform: 'rotate(360deg)' },
+                    animation: isRefreshing ? "spin 1s linear infinite" : "none",
+                    "@keyframes spin": {
+                      "0%": { transform: "rotate(0deg)" },
+                      "100%": { transform: "rotate(360deg)" },
                     },
                   }}
                 />
@@ -216,7 +208,7 @@ export default function AIGovernanceWidget() {
               title="Active Agents"
               value={metrics.activeAgents}
               subtitle={`${metrics.containedAgents} contained`}
-              color={metrics.containedAgents > 0 ? '#ff9800' : '#4caf50'}
+              color={metrics.containedAgents > 0 ? "#ff9800" : "#4caf50"}
             />
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
@@ -238,12 +230,12 @@ export default function AIGovernanceWidget() {
             <Box
               key={agent.id}
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 p: 1.5,
                 borderRadius: 2,
-                bgcolor: 'action.hover',
+                bgcolor: "action.hover",
               }}
             >
               <Stack direction="row" spacing={1.5} alignItems="center">
@@ -253,8 +245,7 @@ export default function AIGovernanceWidget() {
                     {agent.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Last heartbeat:{' '}
-                    {agent.lastHeartbeat.toLocaleTimeString()}
+                    Last heartbeat: {agent.lastHeartbeat.toLocaleTimeString()}
                   </Typography>
                 </Box>
               </Stack>
@@ -276,8 +267,8 @@ export default function AIGovernanceWidget() {
                       sx={{
                         height: 4,
                         borderRadius: 2,
-                        bgcolor: 'action.selected',
-                        '& .MuiLinearProgress-bar': {
+                        bgcolor: "action.selected",
+                        "& .MuiLinearProgress-bar": {
                           bgcolor: getComplianceColor(agent.policyCompliance),
                         },
                       }}
@@ -288,7 +279,7 @@ export default function AIGovernanceWidget() {
                   label={agent.status.toUpperCase()}
                   size="small"
                   color={getStatusColor(agent.status)}
-                  variant={agent.status === 'contained' ? 'filled' : 'outlined'}
+                  variant={agent.status === "contained" ? "filled" : "outlined"}
                 />
                 {agent.incidentsToday > 0 && (
                   <Tooltip title={`${agent.incidentsToday} incidents today`}>
@@ -310,17 +301,16 @@ export default function AIGovernanceWidget() {
             mt={2}
             p={1.5}
             sx={{
-              bgcolor: 'warning.light',
+              bgcolor: "warning.light",
               borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'warning.main',
+              border: "1px solid",
+              borderColor: "warning.main",
             }}
           >
             <Stack direction="row" spacing={1} alignItems="center">
               <WarningIcon color="warning" fontSize="small" />
               <Typography variant="body2" fontWeight={500}>
-                {metrics.containedAgents} agent(s) automatically contained due
-                to policy violations
+                {metrics.containedAgents} agent(s) automatically contained due to policy violations
               </Typography>
             </Stack>
             <Typography variant="caption" color="text.secondary" mt={0.5}>

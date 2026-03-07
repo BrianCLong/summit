@@ -41,14 +41,14 @@ All schema changes are tracked through the Schema Registry located in `graphql/v
 ### Registering a New Version
 
 ```typescript
-import { schemaRegistry } from './graphql/schema-registry';
+import { schemaRegistry } from "./graphql/schema-registry";
 
 // Register new schema version
 await schemaRegistry.registerSchema(
   schema,
-  'v1.2.0',
-  'developer@example.com',
-  'Added entity filtering capabilities'
+  "v1.2.0",
+  "developer@example.com",
+  "Added entity filtering capabilities"
 );
 ```
 
@@ -128,9 +128,8 @@ Example:
 ```graphql
 type User {
   id: ID!
-  name: String! @deprecated(
-    reason: "Use firstName and lastName instead. Will be removed on 2025-12-31."
-  )
+  name: String!
+    @deprecated(reason: "Use firstName and lastName instead. Will be removed on 2025-12-31.")
   firstName: String!
   lastName: String!
 }
@@ -216,26 +215,25 @@ Query Complexity = Sum of:
 ### Custom Complexity Configuration
 
 ```typescript
-import { defaultComplexityConfig } from './graphql/complexity-calculator';
+import { defaultComplexityConfig } from "./graphql/complexity-calculator";
 
 // Define custom complexity for expensive fields
-defaultComplexityConfig.customComplexity.set(
-  'Query.semanticSearch',
-  (args, childComplexity) => {
-    const multiplier = args.fuzzy ? 2 : 1;
-    return (10 + childComplexity) * multiplier;
-  }
-);
+defaultComplexityConfig.customComplexity.set("Query.semanticSearch", (args, childComplexity) => {
+  const multiplier = args.fuzzy ? 2 : 1;
+  return (10 + childComplexity) * multiplier;
+});
 ```
 
 ### Example Query Analysis
 
 ```graphql
 query ComplexQuery {
-  entities(limit: 50) {           # 50 × (1 + childComplexity)
+  entities(limit: 50) {
+    # 50 × (1 + childComplexity)
     id
     type
-    relationships(limit: 20) {    # 50 × 20 × (1 + childComplexity)
+    relationships(limit: 20) {
+      # 50 × 20 × (1 + childComplexity)
       id
       type
       to {
@@ -268,14 +266,14 @@ query ComplexQuery {
 ### Accessing Performance Data
 
 ```typescript
-import { globalPerformanceMonitor } from './graphql/performance-monitor';
+import { globalPerformanceMonitor } from "./graphql/performance-monitor";
 
 // Get performance report
 const report = globalPerformanceMonitor.generateReport();
 
 // Check for N+1 queries
 if (report.nPlusOneQueries.length > 0) {
-  console.warn('N+1 queries detected:', report.nPlusOneQueries);
+  console.warn("N+1 queries detected:", report.nPlusOneQueries);
 }
 ```
 
@@ -284,7 +282,7 @@ if (report.nPlusOneQueries.length > 0) {
 Prevent N+1 queries using DataLoader:
 
 ```typescript
-import { createDataLoaderContext } from './graphql/performance-monitor';
+import { createDataLoaderContext } from "./graphql/performance-monitor";
 
 const context = createDataLoaderContext({
   user: req.user,
@@ -321,7 +319,7 @@ const entity = await context.loaders.entity.load(entityId);
 ### Creating a Subgraph
 
 ```typescript
-import { createSubgraphSchema } from './graphql/federation/subgraph';
+import { createSubgraphSchema } from "./graphql/federation/subgraph";
 
 const schema = createSubgraphSchema(typeDefs, resolvers);
 ```
@@ -365,11 +363,12 @@ type Entity {
   id: ID!
 
   # Old field (deprecated)
-  data: JSON @deprecated(
-    reason: "Use structured fields instead. The 'data' field will be removed on 2025-12-31. Migrate to using specific typed fields."
-    removeBy: "2025-12-31"
-    replaceWith: "Use specific typed fields based on entity type"
-  )
+  data: JSON
+    @deprecated(
+      reason: "Use structured fields instead. The 'data' field will be removed on 2025-12-31. Migrate to using specific typed fields."
+      removeBy: "2025-12-31"
+      replaceWith: "Use specific typed fields based on entity type"
+    )
 
   # New structured fields
   properties: EntityProperties!
@@ -444,10 +443,7 @@ Always paginate list fields:
 ```graphql
 type Query {
   # ✅ Good: Includes pagination
-  entities(
-    limit: Int = 25
-    offset: Int = 0
-  ): EntitiesConnection!
+  entities(limit: Int = 25, offset: Int = 0): EntitiesConnection!
 
   # ❌ Bad: No pagination
   allEntities: [Entity!]!
@@ -484,8 +480,8 @@ type Mutation {
     investigationId: ID!
     source: String
     confidence: Float
-    # ... many more
-  ): Entity!
+  ): # ... many more
+  Entity!
 }
 ```
 
@@ -516,11 +512,11 @@ Be explicit about nullability:
 
 ```graphql
 type Entity {
-  id: ID!                    # Required
-  type: String!              # Required
-  description: String        # Optional
-  tags: [String!]!           # Required list of required strings
-  metadata: JSON             # Optional
+  id: ID! # Required
+  type: String! # Required
+  description: String # Optional
+  tags: [String!]! # Required list of required strings
+  metadata: JSON # Optional
 }
 ```
 
@@ -534,7 +530,9 @@ An entity in the knowledge graph.
 Entities represent people, organizations, locations, or other objects of interest.
 """
 type Entity {
-  """The unique identifier for this entity."""
+  """
+  The unique identifier for this entity.
+  """
   id: ID!
 
   """

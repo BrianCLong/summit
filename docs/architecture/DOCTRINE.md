@@ -30,13 +30,13 @@ Summit standardizes on the following primitives.
 
 A charter defines:
 
-* scope (what the agent may do)
-* allowed tools + tool constraints
-* data access boundaries
-* stop conditions
-* budget envelope
-* escalation rules
-* evidence requirements (what must be logged and why)
+- scope (what the agent may do)
+- allowed tools + tool constraints
+- data access boundaries
+- stop conditions
+- budget envelope
+- escalation rules
+- evidence requirements (what must be logged and why)
 
 A charter is machine-enforceable and versioned.
 
@@ -44,21 +44,21 @@ A charter is machine-enforceable and versioned.
 
 Agents support:
 
-* spawn, suspend, resume, terminate
-* preemption (budget/time cutoff)
-* priority and queueing
-* concurrency limits
-* isolation boundaries (memory, tools, data domains)
+- spawn, suspend, resume, terminate
+- preemption (budget/time cutoff)
+- priority and queueing
+- concurrency limits
+- isolation boundaries (memory, tools, data domains)
 
 ### C. Budget Model (Unified Resource Accounting)
 
 Budgets are explicit and enforced:
 
-* token budget
-* wall-clock time budget
-* tool-call budget (by tool class)
-* monetary budget (FinOps)
-* risk budget (policy-defined)
+- token budget
+- wall-clock time budget
+- tool-call budget (by tool class)
+- monetary budget (FinOps)
+- risk budget (policy-defined)
 
 Budgets are inputs to planning, not merely tracked outputs.
 
@@ -75,34 +75,34 @@ Tool calls are auditable and replayable.
 
 ### E. Memory Model (Separation and Sealing)
 
-* short-term working memory is scoped to a run
-* long-term memory is explicitly written via governed APIs
-* cross-agent memory sharing is explicit, permissioned, and logged
-* “sealed memory” states enable replay and forensics
+- short-term working memory is scoped to a run
+- long-term memory is explicitly written via governed APIs
+- cross-agent memory sharing is explicit, permissioned, and logged
+- “sealed memory” states enable replay and forensics
 
 ### F. Evidence and Replay (Deterministic Accountability)
 
 Summit produces:
 
-* immutable execution log (append-only)
-* run manifest (models, prompts, tools, versions, budgets)
-* artifact hashes
-* deterministic run IDs and trace IDs
-* replay mode (same inputs, same policies, reproduce behavior within defined tolerances)
+- immutable execution log (append-only)
+- run manifest (models, prompts, tools, versions, budgets)
+- artifact hashes
+- deterministic run IDs and trace IDs
+- replay mode (same inputs, same policies, reproduce behavior within defined tolerances)
 
 ## 1.5 Planning and Execution Doctrine
 
 Summit decomposes autonomy into two modes:
 
-* **Explore mode**: cheap models, broad search, speculation allowed within strict budget
-* **Commit mode**: expensive models, verified actions, tighter policy gates, stronger evidence
+- **Explore mode**: cheap models, broad search, speculation allowed within strict budget
+- **Commit mode**: expensive models, verified actions, tighter policy gates, stronger evidence
 
 Planning must:
 
-* estimate cost before branching
-* choose models dynamically based on confidence and budget
-* escalate when uncertainty meets policy-defined thresholds
-* prefer rollbackable actions
+- estimate cost before branching
+- choose models dynamically based on confidence and budget
+- escalate when uncertainty meets policy-defined thresholds
+- prefer rollbackable actions
 
 ## 1.6 System-Level Evaluation Doctrine
 
@@ -110,42 +110,42 @@ Summit’s evaluation unit is the **system trajectory**, not the prompt.
 
 Required metrics:
 
-* outcome success rate over time (not single runs)
-* trajectory stability / variance
-* convergence time and retries
-* rollback frequency
-* human escalation rate and reasons
-* cost per successful outcome
-* policy violation attempts prevented vs allowed
-* “unknown unknowns” captured via incident taxonomy
+- outcome success rate over time (not single runs)
+- trajectory stability / variance
+- convergence time and retries
+- rollback frequency
+- human escalation rate and reasons
+- cost per successful outcome
+- policy violation attempts prevented vs allowed
+- “unknown unknowns” captured via incident taxonomy
 
 Operational discipline:
 
-* **Agent Incident Reviews (AIRs)**: postmortems with action items, like SRE
-* regression gates on system-level metrics, not only unit tests
+- **Agent Incident Reviews (AIRs)**: postmortems with action items, like SRE
+- regression gates on system-level metrics, not only unit tests
 
 ## 1.7 Human Oversight Doctrine
 
 Summit avoids “approval everywhere.” Oversight is designed as:
 
-* budget-bounded autonomy
-* confidence-weighted escalation
-* exception-driven synchronous approvals
-* after-action review for low-risk operations
-* clear operator controls (pause/resume/kill/replay)
+- budget-bounded autonomy
+- confidence-weighted escalation
+- exception-driven synchronous approvals
+- after-action review for low-risk operations
+- clear operator controls (pause/resume/kill/replay)
 
 ## 1.8 Product Boundaries (What Summit Refuses To Be)
 
 Summit will not be:
 
-* a prompt marketplace
-* a template-only workflow builder
-* a chat UI pretending to be production automation
-* governance bolted on after the fact
+- a prompt marketplace
+- a template-only workflow builder
+- a chat UI pretending to be production automation
+- governance bolted on after the fact
 
 Summit is:
 
-* a runtime
-* a policy engine
-* an evidence system
-* an operational platform
+- a runtime
+- a policy engine
+- an evidence system
+- an operational platform

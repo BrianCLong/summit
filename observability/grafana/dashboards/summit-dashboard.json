@@ -304,34 +304,34 @@
   "tags": [],
   "templating": {
     "list": [
-        {
-            "allValue": ".*",
-            "current": {
-                "selected": true,
-                "text": "All",
-                "value": "$__all"
-            },
-            "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-            },
-            "definition": "label_values(service)",
-            "hide": 0,
-            "includeAll": true,
-            "label": "Service",
-            "multi": true,
-            "name": "service",
-            "options": [],
-            "query": {
-                "query": "label_values(service)",
-                "refId": "StandardVariableQuery"
-            },
-            "refresh": 1,
-            "regex": "",
-            "skipUrlSync": false,
-            "sort": 0,
-            "type": "query"
-        }
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(service)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": {
+          "query": "label_values(service)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
     ]
   },
   "time": {

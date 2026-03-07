@@ -39,7 +39,7 @@ For when you're ready to un-quarantine the tests:
 // at top of the flaky spec
 beforeAll(() => {
   jest.useFakeTimers();
-  jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+  jest.setSystemTime(new Date("2025-01-01T00:00:00Z"));
 });
 afterAll(() => jest.useRealTimers());
 
@@ -51,7 +51,7 @@ await jest.advanceTimersByTimeAsync(1000);
 
 ```js
 // ensure uuid is stable even if test imports directly
-jest.mock('uuid', () => ({ v4: () => '00000000-0000-4000-8000-000000000000' }));
+jest.mock("uuid", () => ({ v4: () => "00000000-0000-4000-8000-000000000000" }));
 
 const realRandom = Math.random;
 beforeAll(() => {
@@ -74,7 +74,7 @@ afterEach(() => {
 // pin env that toggles behavior
 const OLD_ENV = process.env;
 beforeAll(() => {
-  process.env = { ...OLD_ENV, PLUGIN_REGISTRY_MODE: 'test' };
+  process.env = { ...OLD_ENV, PLUGIN_REGISTRY_MODE: "test" };
 });
 afterAll(() => {
   process.env = OLD_ENV;
@@ -86,8 +86,8 @@ afterAll(() => {
 If a thin client leaks through, stub it:
 
 ```js
-jest.mock('@server/plugin/registryClient', () => ({
-  list: jest.fn(async () => [{ id: 'p1', active: true }]),
+jest.mock("@server/plugin/registryClient", () => ({
+  list: jest.fn(async () => [{ id: "p1", active: true }]),
   fetchById: jest.fn(async (id) => ({ id, active: true })),
 }));
 ```

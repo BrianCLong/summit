@@ -35,4 +35,4 @@ ReconstructionKey:
 ## Failure Cases
 
 - **Non-Deterministic Models:** LLMs or probabilistic models that cannot perfectly reproduce output from inputs.
-  - *Mitigation:* Capture seed, temperature, and full prompt context. Accept "Probabilistic Reconstruction" with confidence intervals, but strictly log the *inputs*.
+  - _Mitigation:_ Capture seed, temperature, and full prompt context. Accept "Probabilistic Reconstruction" with confidence intervals, but strictly log the _inputs_.

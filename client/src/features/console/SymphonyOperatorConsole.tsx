@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
 import {
   AlertCircle,
   Activity,
@@ -22,7 +22,7 @@ import {
   Square,
   Triangle,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Line,
   LineChart,
@@ -34,9 +34,9 @@ import {
   AreaChart,
   Bar,
   BarChart,
-} from 'recharts';
-import { motion } from 'framer-motion';
-import mermaid from 'mermaid';
+} from "recharts";
+import { motion } from "framer-motion";
+import mermaid from "mermaid";
 
 /**
  * Symphony Operator Console — single-file preview component
@@ -59,17 +59,14 @@ import mermaid from 'mermaid';
 
 // ---------- Utilities ----------
 const getProxyBase = () => {
-  const ls =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('symphony:proxyBase')
-      : null;
-  return ls || 'http://127.0.0.1:8787';
+  const ls = typeof window !== "undefined" ? localStorage.getItem("symphony:proxyBase") : null;
+  return ls || "http://127.0.0.1:8787";
 };
 
 async function getJSON<T = any>(path: string, init?: RequestInit): Promise<T> {
   const base = getProxyBase();
   const r = await fetch(`${base}${path}`, {
-    headers: { 'content-type': 'application/json' },
+    headers: { "content-type": "application/json" },
     ...init,
   });
   if (!r.ok) throw new Error(`${path} ${r.status}`);
@@ -112,14 +109,14 @@ function useSSE(paths: string[]) {
       closed = true;
       es?.close();
     };
-  }, [paths.join(',')]);
+  }, [paths.join(",")]);
   return lines;
 }
 
 // ---------- Types (lightweight) ----------
 interface HealthService {
   name: string;
-  status: 'ok' | 'warn' | 'error';
+  status: "ok" | "warn" | "error";
   details?: any;
 }
 interface Health {
@@ -150,9 +147,9 @@ function Stat({
   return (
     <div className="flex flex-col">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className={`text-xl font-semibold ${warn ? 'text-amber-600' : ''}`}>
+      <span className={`text-xl font-semibold ${warn ? "text-amber-600" : ""}`}>
         {value}
-        {suffix || ''}
+        {suffix || ""}
       </span>
     </div>
   );
@@ -165,10 +162,10 @@ function KPIBar() {
 
   const refresh = async () => {
     try {
-      setBd(await getJSON<Burndown>('/status/burndown.json'));
+      setBd(await getJSON<Burndown>("/status/burndown.json"));
     } catch {}
     try {
-      setHl(await getJSON<Health>('/status/health.json'));
+      setHl(await getJSON<Health>("/status/health.json"));
     } catch {}
   };
 
@@ -177,8 +174,7 @@ function KPIBar() {
   }, []);
   useInterval(refresh, 10_000);
 
-  const p95 =
-    bd?.windows?.m1?.latency_ms_p95 ?? bd?.windows?.h1?.latency_ms_p95 ?? 0;
+  const p95 = bd?.windows?.m1?.latency_ms_p95 ?? bd?.windows?.h1?.latency_ms_p95 ?? 0;
   const errRate = useMemo(() => {
     if (!bd) return 0;
     const w = bd.windows.m1 || bd.windows.h1;
@@ -188,34 +184,21 @@ function KPIBar() {
   }, [bd]);
 
   const avail = useMemo(() => {
-    const ok =
-      hl && Object.values(hl.services || {}).every((s) => s.status === 'ok');
+    const ok = hl && Object.values(hl.services || {}).every((s) => s.status === "ok");
     return ok ? 99.99 : 99.0;
   }, [hl]);
 
   return (
     <Card className="col-span-12">
       <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Stat
-          label="p95 route/execute"
-          value={Math.round(p95)}
-          suffix=" ms"
-          warn={p95 > 2500}
-        />
-        <Stat
-          label="error rate (m1)"
-          value={errRate.toFixed(2)}
-          suffix="%"
-          warn={errRate > 1}
-        />
+        <Stat label="p95 route/execute" value={Math.round(p95)} suffix=" ms" warn={p95 > 2500} />
+        <Stat label="error rate (m1)" value={errRate.toFixed(2)} suffix="%" warn={errRate > 1} />
         <Stat label="availability" value={avail.toFixed(2)} suffix="%" />
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="flex items-center gap-1">
             <Activity className="w-3 h-3" /> live
           </Badge>
-          <span className="text-xs text-muted-foreground">
-            proxy: {getProxyBase()}
-          </span>
+          <span className="text-xs text-muted-foreground">proxy: {getProxyBase()}</span>
         </div>
       </CardContent>
     </Card>
@@ -229,15 +212,12 @@ function useBurndownSeries() {
   >([]);
   const tick = async () => {
     try {
-      const bd = await getJSON<Burndown>('/status/burndown.json');
+      const bd = await getJSON<Burndown>("/status/burndown.json");
       const w = bd.windows.m1 || bd.windows.h1;
       const p95 = w?.latency_ms_p95 || 0;
       const errors = w?.errors || 0;
       const count = w?.count || 0;
-      setSeries((s) => [
-        ...s.slice(-120),
-        { time: Date.now(), p95, errors, count },
-      ]);
+      setSeries((s) => [...s.slice(-120), { time: Date.now(), p95, errors, count }]);
     } catch {}
   };
   useEffect(() => {
@@ -259,10 +239,7 @@ function LatencyChart() {
       </CardHeader>
       <CardContent className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
-          >
+          <AreaChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
             <XAxis
               dataKey="time"
               tickFormatter={(t: any) => new Date(t).toLocaleTimeString()}
@@ -294,10 +271,7 @@ function ErrorChart() {
       </CardHeader>
       <CardContent className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
-          >
+          <BarChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
             <XAxis
               dataKey="time"
               tickFormatter={(t: any) => new Date(t).toLocaleTimeString()}
@@ -330,7 +304,7 @@ function RoutingMatrix() {
 
   const load = async () => {
     try {
-      const current = await getJSON<{ items: { id: string }[] }>('/models');
+      const current = await getJSON<{ items: { id: string }[] }>("/models");
       const base = (current.items || []).map((m) => ({
         name: m.id,
         weight: 1,
@@ -338,12 +312,8 @@ function RoutingMatrix() {
       }));
       // Merge from /route/policy if present
       try {
-        const pol = await getJSON<{ models: RoutePolicyModel[] }>(
-          '/route/policy',
-        );
-        const merged = base.map(
-          (b) => pol.models.find((p) => p.name === b.name) || b,
-        );
+        const pol = await getJSON<{ models: RoutePolicyModel[] }>("/route/policy");
+        const merged = base.map((b) => pol.models.find((p) => p.name === b.name) || b);
         setModels(merged);
       } catch {
         setModels(base);
@@ -357,8 +327,8 @@ function RoutingMatrix() {
   const save = async () => {
     setSaving(true);
     try {
-      await getJSON('/route/policy', {
-        method: 'PUT',
+      await getJSON("/route/policy", {
+        method: "PUT",
         body: JSON.stringify({ models }),
       });
     } catch {}
@@ -384,11 +354,7 @@ function RoutingMatrix() {
               <Slider
                 value={[m.weight]}
                 onValueChange={(v: any) =>
-                  setModels((arr) =>
-                    arr.map((x, idx) =>
-                      idx === i ? { ...x, weight: v[0] } : x,
-                    ),
-                  )
+                  setModels((arr) => arr.map((x, idx) => (idx === i ? { ...x, weight: v[0] } : x)))
                 }
                 min={0}
                 max={10}
@@ -402,23 +368,19 @@ function RoutingMatrix() {
               <Switch
                 checked={m.allow}
                 onCheckedChange={(v: any) =>
-                  setModels((arr) =>
-                    arr.map((x, idx) => (idx === i ? { ...x, allow: v } : x)),
-                  )
+                  setModels((arr) => arr.map((x, idx) => (idx === i ? { ...x, allow: v } : x)))
                 }
               />
             </div>
             <div className="col-span-6 md:col-span-2">
               <Input
                 placeholder="rpm cap"
-                value={m.rpm_cap ?? ''}
+                value={m.rpm_cap ?? ""}
                 onChange={(e: any) =>
                   setModels((arr) =>
                     arr.map((x, idx) =>
-                      idx === i
-                        ? { ...x, rpm_cap: Number(e.target.value) || undefined }
-                        : x,
-                    ),
+                      idx === i ? { ...x, rpm_cap: Number(e.target.value) || undefined } : x
+                    )
                   )
                 }
               />
@@ -426,14 +388,12 @@ function RoutingMatrix() {
             <div className="col-span-6 md:col-span-2">
               <Input
                 placeholder="tpm cap"
-                value={m.tpm_cap ?? ''}
+                value={m.tpm_cap ?? ""}
                 onChange={(e: any) =>
                   setModels((arr) =>
                     arr.map((x, idx) =>
-                      idx === i
-                        ? { ...x, tpm_cap: Number(e.target.value) || undefined }
-                        : x,
-                    ),
+                      idx === i ? { ...x, tpm_cap: Number(e.target.value) || undefined } : x
+                    )
                   )
                 }
               />
@@ -456,15 +416,15 @@ function RoutingMatrix() {
 
 // ---------- Model Usage Windows (scheduler) ----------
 function UsageWindows() {
-  const [rows, setRows] = useState<
-    Array<{ name: string; window: string; overflow_to?: string }>
-  >([]);
+  const [rows, setRows] = useState<Array<{ name: string; window: string; overflow_to?: string }>>(
+    []
+  );
   const [saving, setSaving] = useState(false);
   const load = async () => {
     try {
       const pol = await getJSON<{
         windows: Array<{ name: string; window: string; overflow_to?: string }>;
-      }>('/route/schedule');
+      }>("/route/schedule");
       setRows(pol.windows);
     } catch {
       setRows([]);
@@ -476,8 +436,8 @@ function UsageWindows() {
   const save = async () => {
     setSaving(true);
     try {
-      await getJSON('/route/schedule', {
-        method: 'PUT',
+      await getJSON("/route/schedule", {
+        method: "PUT",
         body: JSON.stringify({ windows: rows }),
       });
     } catch {}
@@ -493,9 +453,8 @@ function UsageWindows() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Define daily/weekly time windows (CRON or iCal syntax) when costly
-          models are eligible. Outside windows, requests overflow to
-          local/cheaper models.
+          Define daily/weekly time windows (CRON or iCal syntax) when costly models are eligible.
+          Outside windows, requests overflow to local/cheaper models.
         </p>
         {rows.map((r, i) => (
           <div key={i} className="grid grid-cols-12 gap-2 items-center">
@@ -505,9 +464,7 @@ function UsageWindows() {
               value={r.name}
               onChange={(e: any) =>
                 setRows((arr) =>
-                  arr.map((x, idx) =>
-                    idx === i ? { ...x, name: e.target.value } : x,
-                  ),
+                  arr.map((x, idx) => (idx === i ? { ...x, name: e.target.value } : x))
                 )
               }
             />
@@ -517,21 +474,17 @@ function UsageWindows() {
               value={r.window}
               onChange={(e: any) =>
                 setRows((arr) =>
-                  arr.map((x, idx) =>
-                    idx === i ? { ...x, window: e.target.value } : x,
-                  ),
+                  arr.map((x, idx) => (idx === i ? { ...x, window: e.target.value } : x))
                 )
               }
             />
             <Input
               className="col-span-12 md:col-span-2"
               placeholder="overflow→"
-              value={r.overflow_to || ''}
+              value={r.overflow_to || ""}
               onChange={(e: any) =>
                 setRows((arr) =>
-                  arr.map((x, idx) =>
-                    idx === i ? { ...x, overflow_to: e.target.value } : x,
-                  ),
+                  arr.map((x, idx) => (idx === i ? { ...x, overflow_to: e.target.value } : x))
                 )
               }
             />
@@ -540,10 +493,7 @@ function UsageWindows() {
         <div className="flex gap-2">
           <Button
             onClick={() =>
-              setRows((r) => [
-                ...r,
-                { name: '', window: '', overflow_to: 'local/ollama' },
-              ])
+              setRows((r) => [...r, { name: "", window: "", overflow_to: "local/ollama" }])
             }
           >
             Add Window
@@ -563,18 +513,18 @@ function UsageWindows() {
 
 // ---------- Request Composer (token/context meter) ----------
 function RequestComposer() {
-  const [task, setTask] = useState('qa');
-  const [input, setInput] = useState('say hello');
-  const [model, setModel] = useState('');
+  const [task, setTask] = useState("qa");
+  const [input, setInput] = useState("say hello");
+  const [model, setModel] = useState("");
   const [result, setResult] = useState<any>(null);
   const [lat, setLat] = useState<number | null>(null);
 
   const send = async () => {
     const t0 = performance.now();
     try {
-      const r = await getJSON('/route/execute', {
-        method: 'POST',
-        body: JSON.stringify({ task, input, env: 'dev', loa: 1, model }),
+      const r = await getJSON("/route/execute", {
+        method: "POST",
+        body: JSON.stringify({ task, input, env: "dev", loa: 1, model }),
       });
       setResult(r);
     } catch (e: any) {
@@ -617,9 +567,7 @@ function RequestComposer() {
             <Triangle className="w-4 h-4 mr-2" />
             Execute
           </Button>
-          {lat !== null && (
-            <Badge variant="secondary">TTFB ~ {Math.round(lat)} ms</Badge>
-          )}
+          {lat !== null && <Badge variant="secondary">TTFB ~ {Math.round(lat)} ms</Badge>}
         </div>
         {result && (
           <pre className="p-3 bg-muted rounded-lg overflow-auto text-xs max-h-64">
@@ -633,7 +581,7 @@ function RequestComposer() {
 
 // ---------- Live Logs (SSE) ----------
 function LiveLogs() {
-  const lines = useSSE(['/logs/stream', '/status/events']);
+  const lines = useSSE(["/logs/stream", "/status/events"]);
   return (
     <Card className="col-span-12">
       <CardHeader>
@@ -661,12 +609,12 @@ function MermaidTrace({ spec }: { spec: string }) {
   useEffect(() => {
     mermaid.initialize({
       startOnLoad: false,
-      securityLevel: 'strict',
-      theme: 'neutral',
+      securityLevel: "strict",
+      theme: "neutral",
     });
   }, []);
   useEffect(() => {
-    if (ref.current) mermaid.run({ querySelector: '.mermaid' });
+    if (ref.current) mermaid.run({ querySelector: ".mermaid" });
   }, [spec]);
   return (
     <Card className="col-span-12">
@@ -682,8 +630,7 @@ function MermaidTrace({ spec }: { spec: string }) {
             {spec}
           </div>
           <figcaption className="text-xs text-muted-foreground mt-2">
-            Route plan → decision → execute (securityLevel=strict; sanitized
-            spec)
+            Route plan → decision → execute (securityLevel=strict; sanitized spec)
           </figcaption>
         </figure>
       </CardContent>
@@ -694,31 +641,28 @@ function MermaidTrace({ spec }: { spec: string }) {
 // ---------- GitHub Pane (simple) ----------
 function GitHubPane() {
   const [token, setToken] = useState<string>(
-    typeof window !== 'undefined' ? localStorage.getItem('gh:token') || '' : '',
+    typeof window !== "undefined" ? localStorage.getItem("gh:token") || "" : ""
   );
   const [owner, setOwner] = useState<string>(
-    typeof window !== 'undefined' ? localStorage.getItem('gh:owner') || '' : '',
+    typeof window !== "undefined" ? localStorage.getItem("gh:owner") || "" : ""
   );
   const [repo, setRepo] = useState<string>(
-    typeof window !== 'undefined' ? localStorage.getItem('gh:repo') || '' : '',
+    typeof window !== "undefined" ? localStorage.getItem("gh:repo") || "" : ""
   );
   const [issues, setIssues] = useState<any[]>([]);
   const save = () => {
-    localStorage.setItem('gh:token', token);
-    localStorage.setItem('gh:owner', owner);
-    localStorage.setItem('gh:repo', repo);
+    localStorage.setItem("gh:token", token);
+    localStorage.setItem("gh:owner", owner);
+    localStorage.setItem("gh:repo", repo);
   };
   const load = async () => {
     if (!token || !owner || !repo) return;
-    const r = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/issues?per_page=20`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github+json',
-        },
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues?per_page=20`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
       },
-    );
+    });
     if (r.ok) setIssues(await r.json());
   };
   useEffect(() => {
@@ -773,8 +717,7 @@ function GitHubPane() {
                 </a>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {it.user?.login} • {it.state} •{' '}
-                {it.labels?.map((l: any) => l.name).join(', ')}
+                {it.user?.login} • {it.state} • {it.labels?.map((l: any) => l.name).join(", ")}
               </div>
             </div>
           ))}
@@ -786,38 +729,33 @@ function GitHubPane() {
 
 // ---------- Ticket Board (lightweight, local) ----------
 function TicketBoard() {
-  type T = { id: string; title: string; status: 'todo' | 'doing' | 'done' };
+  type T = { id: string; title: string; status: "todo" | "doing" | "done" };
   const [items, setItems] = useState<T[]>(() => {
-    const raw =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('symphony:tickets')
-        : null;
+    const raw = typeof window !== "undefined" ? localStorage.getItem("symphony:tickets") : null;
     return raw ? JSON.parse(raw) : [];
   });
   useEffect(() => {
-    localStorage.setItem('symphony:tickets', JSON.stringify(items));
+    localStorage.setItem("symphony:tickets", JSON.stringify(items));
   }, [items]);
   const add = () =>
     setItems((arr) => [
       ...arr,
       {
         id: Math.random().toString(36).slice(2, 7),
-        title: 'New ticket',
-        status: 'todo',
+        title: "New ticket",
+        status: "todo",
       },
     ]);
-  const move = (id: string, status: T['status']) =>
+  const move = (id: string, status: T["status"]) =>
     setItems((arr) => arr.map((t: any) => (t.id === id ? { ...t, status } : t)));
   return (
     <Card className="col-span-12">
       <CardHeader>
-        <CardTitle>
-          Tickets (local demo; integrate with Jira/ServiceNow if desired)
-        </CardTitle>
+        <CardTitle>Tickets (local demo; integrate with Jira/ServiceNow if desired)</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-3">
-          {['todo', 'doing', 'done'].map((col) => (
+          {["todo", "doing", "done"].map((col) => (
             <div key={col} className="rounded-2xl border p-2">
               <div className="text-sm font-medium capitalize mb-2">{col}</div>
               <div className="space-y-2">
@@ -829,39 +767,23 @@ function TicketBoard() {
                         value={t.title}
                         onChange={(e: any) =>
                           setItems((arr) =>
-                            arr.map((x) =>
-                              x.id === t.id
-                                ? { ...x, title: e.target.value }
-                                : x,
-                            ),
+                            arr.map((x) => (x.id === t.id ? { ...x, title: e.target.value } : x))
                           )
                         }
                       />
                       <div className="flex gap-2 mt-2">
-                        {col !== 'todo' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => move(t.id, 'todo')}
-                          >
+                        {col !== "todo" && (
+                          <Button size="sm" variant="outline" onClick={() => move(t.id, "todo")}>
                             To Do
                           </Button>
                         )}
-                        {col !== 'doing' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => move(t.id, 'doing')}
-                          >
+                        {col !== "doing" && (
+                          <Button size="sm" variant="outline" onClick={() => move(t.id, "doing")}>
                             Doing
                           </Button>
                         )}
-                        {col !== 'done' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => move(t.id, 'done')}
-                          >
+                        {col !== "done" && (
+                          <Button size="sm" variant="outline" onClick={() => move(t.id, "done")}>
                             Done
                           </Button>
                         )}
@@ -882,7 +804,7 @@ function TicketBoard() {
 
 // ---------- Main ----------
 export default function SymphonyOperatorConsole() {
-  const [activeTab, setActiveTab] = useState('observe');
+  const [activeTab, setActiveTab] = useState("observe");
   const [proxyBase, setProxyBase] = useState(getProxyBase());
   const [traceSpec, setTraceSpec] = useState(`sequenceDiagram
   autonumber
@@ -900,17 +822,14 @@ export default function SymphonyOperatorConsole() {
 
   // persist proxy base
   useEffect(() => {
-    if (typeof window !== 'undefined')
-      localStorage.setItem('symphony:proxyBase', proxyBase);
+    if (typeof window !== "undefined") localStorage.setItem("symphony:proxyBase", proxyBase);
   }, [proxyBase]);
 
   return (
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-xl font-semibold">
-            Symphony Operator Console
-          </span>
+          <span className="text-xl font-semibold">Symphony Operator Console</span>
           <Badge variant="secondary" className="rounded-full">
             pro
           </Badge>
@@ -928,11 +847,7 @@ export default function SymphonyOperatorConsole() {
         </div>
       </div>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-4"
-      >
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid grid-cols-5 w-full">
           <TabsTrigger value="observe">Observe</TabsTrigger>
           <TabsTrigger value="route">Route</TabsTrigger>
@@ -967,9 +882,8 @@ export default function SymphonyOperatorConsole() {
                 rows={6}
               />
               <p className="text-xs text-muted-foreground mt-2">
-                Security: Mermaid initialized with{' '}
-                <code>securityLevel="strict"</code>. Do not paste untrusted
-                content without sanitization.
+                Security: Mermaid initialized with <code>securityLevel="strict"</code>. Do not paste
+                untrusted content without sanitization.
               </p>
             </CardContent>
           </Card>
@@ -999,24 +913,18 @@ export default function SymphonyOperatorConsole() {
         <CardContent className="text-sm text-muted-foreground space-y-2">
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              Wire alerts from <code>/status/burndown.json</code> and{' '}
-              <code>/status/health.json</code>. This console polls every 5–10s;
-              add SSE to <code>/status/events</code> for immediate updates.
+              Wire alerts from <code>/status/burndown.json</code> and{" "}
+              <code>/status/health.json</code>. This console polls every 5–10s; add SSE to{" "}
+              <code>/status/events</code> for immediate updates.
             </li>
             <li>
-              Enable CORS only for known origins; set CSP:{' '}
-              <code>
-                default-src 'self'; script-src 'self'; style-src 'self'
-                'unsafe-inline'
-              </code>
-              ; add your Mermaid CDN if used.
+              Enable CORS only for known origins; set CSP:{" "}
+              <code>default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'</code>;
+              add your Mermaid CDN if used.
             </li>
+            <li>LOA/kill enforcement must be server-side; UI toggles are UX only.</li>
             <li>
-              LOA/kill enforcement must be server-side; UI toggles are UX only.
-            </li>
-            <li>
-              For GitHub pane, paste a short-lived token (repo scope). Nothing
-              leaves the browser.
+              For GitHub pane, paste a short-lived token (repo scope). Nothing leaves the browser.
             </li>
           </ul>
         </CardContent>

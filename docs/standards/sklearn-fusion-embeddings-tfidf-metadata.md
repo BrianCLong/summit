@@ -5,9 +5,11 @@
 **Owner:** ML Platform Team
 
 ## Overview
+
 Based on "How to Combine LLM Embeddings + TF-IDF + Metadata in One Scikit-learn Pipeline", Summit implements a generic feature-fusion vectorization primitive. This allows creating deterministic, testable, and cached fused representations (sparse lexical + dense semantic + structured signals) in a single pipeline.
 
 ## Contracts
+
 - **Input Matrix**: JSONL rows with `{id, text, metadata?, label?}`
 - **Output Artifacts**:
   - `report.json`: Overall pipeline report with hash signatures.
@@ -15,12 +17,15 @@ Based on "How to Combine LLM Embeddings + TF-IDF + Metadata in One Scikit-learn 
   - `stamp.json`: Deterministic timestamp / proof of execution.
 
 ## Non-goals
+
 - No online dataset fetching in CI.
 - No GPU requirement.
 - No replacing existing Summit retrieval stack (this is an optional baseline utility).
 
 ## Integration
+
 To build a fusion pipeline:
+
 ```python
 from summit_fusion.fusion import build_fusion_pipeline
 

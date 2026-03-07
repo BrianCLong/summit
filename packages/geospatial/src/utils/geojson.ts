@@ -5,8 +5,13 @@ import type {
   IntelFeature,
   IntelFeatureCollection,
   GeoPoint,
-} from '../types/geospatial.js';
-import { boundingBoxFromGeometry, boundingBoxFromPoints, centroidOfGeometry, simplifyRing } from './geometry.js';
+} from "../types/geospatial.js";
+import {
+  boundingBoxFromGeometry,
+  boundingBoxFromPoints,
+  centroidOfGeometry,
+  simplifyRing,
+} from "./geometry.js";
 
 export const computeBoundingBox = (collection: FeatureCollection): BoundingBox => {
   const bounds = collection.features
@@ -14,7 +19,7 @@ export const computeBoundingBox = (collection: FeatureCollection): BoundingBox =
     .filter((bbox): bbox is BoundingBox => Boolean(bbox));
 
   if (!bounds.length) {
-    throw new Error('Unable to compute bounding box for empty collection');
+    throw new Error("Unable to compute bounding box for empty collection");
   }
 
   const minLon = Math.min(...bounds.map((b) => b.minLon));
@@ -55,16 +60,20 @@ export const simplifyFeatures = (
   tolerance: number = 0.0001
 ): IntelFeatureCollection => {
   const simplified = collection.features.map((feature) => {
-    if (!feature.geometry || feature.geometry.type === 'Point') {
+    if (!feature.geometry || feature.geometry.type === "Point") {
       return feature;
     }
 
-    if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
-      const coordinates = feature.geometry.type === 'Polygon' ? feature.geometry.coordinates : feature.geometry.coordinates.flat();
+    if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
+      const coordinates =
+        feature.geometry.type === "Polygon"
+          ? feature.geometry.coordinates
+          : feature.geometry.coordinates.flat();
       const simplifiedRings = coordinates.map((ring) => simplifyRing(ring, tolerance));
-      const geometry: Geometry = feature.geometry.type === 'Polygon'
-        ? { type: 'Polygon', coordinates: simplifiedRings }
-        : { type: 'MultiPolygon', coordinates: [simplifiedRings] };
+      const geometry: Geometry =
+        feature.geometry.type === "Polygon"
+          ? { type: "Polygon", coordinates: simplifiedRings }
+          : { type: "MultiPolygon", coordinates: [simplifiedRings] };
       return { ...feature, geometry };
     }
 
@@ -76,11 +85,11 @@ export const simplifyFeatures = (
 
 export const toFeatureCollection = (points: GeoPoint[]): IntelFeatureCollection => {
   return {
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
     features: points.map((p, idx) => ({
-      type: 'Feature',
+      type: "Feature",
       geometry: {
-        type: 'Point',
+        type: "Point",
         coordinates: [p.longitude, p.latitude, p.elevation ?? 0],
       },
       properties: {
@@ -91,7 +100,7 @@ export const toFeatureCollection = (points: GeoPoint[]): IntelFeatureCollection 
       },
     })),
     metadata: {
-      source: 'generated',
+      source: "generated",
       collectionDate: new Date().toISOString(),
       bbox: points.length ? boundingBoxFromPoints(points) : undefined,
     },
@@ -100,10 +109,10 @@ export const toFeatureCollection = (points: GeoPoint[]): IntelFeatureCollection 
 
 export const mergeCollections = (collections: IntelFeatureCollection[]): IntelFeatureCollection => {
   const merged: IntelFeatureCollection = {
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
     features: collections.flatMap((c) => c.features),
     metadata: {
-      source: 'merged',
+      source: "merged",
       collectionDate: new Date().toISOString(),
     },
   };

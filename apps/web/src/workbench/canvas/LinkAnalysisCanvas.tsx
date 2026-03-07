@@ -25,7 +25,10 @@ interface LinkAnalysisCanvasProps {
   onNodeContextMenu?: (entity: Entity, x: number, y: number) => void
 }
 
-export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }: LinkAnalysisCanvasProps) {
+export function LinkAnalysisCanvas({
+  nodes: initialNodes,
+  edges: initialEdges,
+}: LinkAnalysisCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -43,7 +46,8 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
     const width = wrapperRef.current.clientWidth
     const height = wrapperRef.current.clientHeight
 
-    const svg = d3.select(svgRef.current)
+    const svg = d3
+      .select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', [0, 0, width, height])
@@ -54,9 +58,10 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
     const g = svg.append('g')
 
     // Zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
+      .on('zoom', event => {
         g.attr('transform', event.transform)
         transformRef.current = event.transform
       })
@@ -65,11 +70,23 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
 
     // Data preparation
     const nodes: Node[] = initialNodes.map(n => ({ ...n, entity: n }))
-    const links: Link[] = initialEdges.map(e => ({ ...e, relationship: e, source: e.sourceId, target: e.targetId }))
+    const links: Link[] = initialEdges.map(e => ({
+      ...e,
+      relationship: e,
+      source: e.sourceId,
+      target: e.targetId,
+    }))
 
     // Simulation
-    const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id((d: any) => d.id).distance(100))
+    const simulation = d3
+      .forceSimulation(nodes)
+      .force(
+        'link',
+        d3
+          .forceLink(links)
+          .id((d: any) => d.id)
+          .distance(100)
+      )
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collide', d3.forceCollide(30))
@@ -77,7 +94,8 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
     simulationRef.current = simulation
 
     // Render Links
-    const link = g.append('g')
+    const link = g
+      .append('g')
       .selectAll('line')
       .data(links)
       .join('line')
@@ -86,26 +104,31 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
       .attr('stroke-width', 2)
 
     // Render Nodes
-    const node = g.append('g')
+    const node = g
+      .append('g')
       .selectAll<SVGGElement, Node>('g')
       .data(nodes)
       .join('g')
       .attr('class', 'node')
-      .call(d3.drag<SVGGElement, Node>()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended)
+      .call(
+        d3
+          .drag<SVGGElement, Node>()
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended)
       )
 
     // Node circles
-    node.append('circle')
+    node
+      .append('circle')
       .attr('r', 20)
       .attr('fill', d => getTypeColor(d.entity.type))
       .attr('stroke', '#fff')
       .attr('stroke-width', 1.5)
 
     // Node labels
-    node.append('text')
+    node
+      .append('text')
       .text(d => d.entity.name.substring(0, 10))
       .attr('x', 22)
       .attr('y', 5)
@@ -114,9 +137,9 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
 
     // Click handler
     node.on('click', (event, d) => {
-        if (event.defaultPrevented) return // Dragged
-        const multi = event.shiftKey || event.metaKey
-        selectEntity(d.id, multi)
+      if (event.defaultPrevented) return // Dragged
+      const multi = event.shiftKey || event.metaKey
+      selectEntity(d.id, multi)
     })
 
     // Selection styling update
@@ -127,8 +150,7 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
         .attr('x2', d => (d.target as Node).x!)
         .attr('y2', d => (d.target as Node).y!)
 
-      node
-        .attr('transform', d => `translate(${d.x},${d.y})`)
+      node.attr('transform', d => `translate(${d.x},${d.y})`)
     })
 
     function dragstarted(event: any, d: Node) {
@@ -158,9 +180,14 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
     if (!svgRef.current) return
     const svg = d3.select(svgRef.current)
 
-    svg.selectAll('.node circle')
-      .attr('stroke', (d: any) => selectedEntityIds.includes(d.id) ? '#fbbf24' : '#fff') // Yellow selection
-      .attr('stroke-width', (d: any) => selectedEntityIds.includes(d.id) ? 3 : 1.5)
+    svg
+      .selectAll('.node circle')
+      .attr('stroke', (d: any) =>
+        selectedEntityIds.includes(d.id) ? '#fbbf24' : '#fff'
+      ) // Yellow selection
+      .attr('stroke-width', (d: any) =>
+        selectedEntityIds.includes(d.id) ? 3 : 1.5
+      )
   }, [selectedEntityIds])
 
   function getTypeColor(type: string) {
@@ -168,13 +195,16 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
       PERSON: '#3b82f6',
       ORGANIZATION: '#8b5cf6',
       LOCATION: '#10b981',
-      default: '#6b7280'
+      default: '#6b7280',
     }
     return colors[type] || colors.default
   }
 
   return (
-    <div ref={wrapperRef} className="w-full h-full bg-slate-50 relative overflow-hidden">
+    <div
+      ref={wrapperRef}
+      className="w-full h-full bg-slate-50 relative overflow-hidden"
+    >
       <svg ref={svgRef} className="w-full h-full block" />
       {/* Context Menu implementation would go here using Radix Primitives wrapping the SVG or specific nodes */}
     </div>

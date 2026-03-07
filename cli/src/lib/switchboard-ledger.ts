@@ -4,9 +4,9 @@
  * Append-only JSONL ledger with hash chaining.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
 
 export interface LedgerEntry<T = Record<string, unknown>> {
   seq: number;
@@ -25,20 +25,20 @@ export interface LedgerVerificationResult {
 
 function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
-    return `[${value.map((item) => stableStringify(item)).join(',')}]`;
+    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, val]) => `"${key}":${stableStringify(val)}`);
-    return `{${entries.join(',')}}`;
+    return `{${entries.join(",")}}`;
   }
   return JSON.stringify(value);
 }
 
 export function computeEntryHash(payload: Record<string, unknown>): string {
   const data = stableStringify(payload);
-  return crypto.createHash('sha256').update(data).digest('hex');
+  return crypto.createHash("sha256").update(data).digest("hex");
 }
 
 export class CapsuleLedger {
@@ -48,8 +48,8 @@ export class CapsuleLedger {
   private sessionId: string;
 
   constructor(sessionDir: string, sessionId: string) {
-    this.ledgerPath = path.join(sessionDir, 'ledger.jsonl');
-    this.lastHash = 'GENESIS';
+    this.ledgerPath = path.join(sessionDir, "ledger.jsonl");
+    this.lastHash = "GENESIS";
     this.seq = 0;
     this.sessionId = sessionId;
     fs.mkdirSync(sessionDir, { recursive: true });
@@ -74,7 +74,7 @@ export class CapsuleLedger {
       ...entryBase,
       entry_hash: entryHash,
     };
-    fs.appendFileSync(this.ledgerPath, `${JSON.stringify(entry)}\n`, 'utf8');
+    fs.appendFileSync(this.ledgerPath, `${JSON.stringify(entry)}\n`, "utf8");
     this.lastHash = entryHash;
     this.seq += 1;
     return entry;
@@ -85,14 +85,14 @@ export function readLedgerEntries(ledgerPath: string): LedgerEntry[] {
   if (!fs.existsSync(ledgerPath)) {
     return [];
   }
-  const lines = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter(Boolean);
+  const lines = fs.readFileSync(ledgerPath, "utf8").split("\n").filter(Boolean);
   return lines.map((line) => JSON.parse(line) as LedgerEntry);
 }
 
 export function verifyLedger(ledgerPath: string): LedgerVerificationResult {
   const entries = readLedgerEntries(ledgerPath);
   const errors: string[] = [];
-  let prevHash = 'GENESIS';
+  let prevHash = "GENESIS";
 
   for (const entry of entries) {
     const { entry_hash, ...rest } = entry;

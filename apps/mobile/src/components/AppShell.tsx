@@ -15,14 +15,7 @@ import {
   Chip,
   Badge,
 } from '@mui/material';
-import {
-  NotificationsActive,
-  Folder,
-  Person,
-  CloudOff,
-  Sync,
-  Settings,
-} from '@mui/icons-material';
+import { NotificationsActive, Folder, Person, CloudOff, Sync, Settings } from '@mui/icons-material';
 import { useNetwork } from '@/contexts/NetworkContext';
 import { useAlerts } from '@/hooks/useAlerts';
 import { syncEngine } from '@/lib/syncEngine';
@@ -49,9 +42,7 @@ export function AppShell() {
 
   // Find current nav index
   const currentNavIndex = navItems.findIndex(
-    (item) =>
-      location.pathname === item.path ||
-      location.pathname.startsWith(item.path + '/')
+    (item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/'),
   );
 
   const handleNavChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -81,15 +72,19 @@ export function AppShell() {
             </>
           ) : syncState.isSyncing ? (
             <>
-              <Sync fontSize="small" sx={{ animation: 'spin 1s linear infinite', '@keyframes spin': { '100%': { transform: 'rotate(360deg)' } } }} />
+              <Sync
+                fontSize="small"
+                sx={{
+                  animation: 'spin 1s linear infinite',
+                  '@keyframes spin': { '100%': { transform: 'rotate(360deg)' } },
+                }}
+              />
               <Typography variant="caption">Syncing...</Typography>
             </>
           ) : (
             <>
               <Sync fontSize="small" />
-              <Typography variant="caption">
-                {syncState.pendingCount} pending changes
-              </Typography>
+              <Typography variant="caption">{syncState.pendingCount} pending changes</Typography>
             </>
           )}
         </Box>

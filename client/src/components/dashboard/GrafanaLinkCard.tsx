@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, CardContent, Typography, Button, Stack } from '@mui/material';
-import { getGrafanaUrl, getJaegerUrl } from '../../config/urls';
+import React from "react";
+import { Card, CardContent, Typography, Button, Stack } from "@mui/material";
+import { getGrafanaUrl, getJaegerUrl } from "../../config/urls";
 
 export default function GrafanaLinkCard() {
   const isDev = import.meta.env.DEV;
@@ -17,22 +17,12 @@ export default function GrafanaLinkCard() {
         </Typography>
         <Stack direction="row" spacing={2}>
           {grafana && (
-            <Button
-              href={grafana}
-              target="_blank"
-              rel="noreferrer"
-              variant="contained"
-            >
+            <Button href={grafana} target="_blank" rel="noreferrer" variant="contained">
               Open Grafana
             </Button>
           )}
           {jaeger && (
-            <Button
-              href={jaeger}
-              target="_blank"
-              rel="noreferrer"
-              variant="outlined"
-            >
+            <Button href={jaeger} target="_blank" rel="noreferrer" variant="outlined">
               Open Jaeger
             </Button>
           )}

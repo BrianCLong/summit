@@ -3,24 +3,24 @@
  */
 
 export type EntityType =
-  | 'PERSON'
-  | 'ORGANIZATION'
-  | 'LOCATION'
-  | 'DATE'
-  | 'TIME'
-  | 'MONEY'
-  | 'PERCENT'
-  | 'PRODUCT'
-  | 'EVENT'
-  | 'WEAPON'
-  | 'VEHICLE'
-  | 'FACILITY'
-  | 'GPE' // Geo-Political Entity
-  | 'NORP' // Nationalities, Religious or Political groups
-  | 'LAW'
-  | 'LANGUAGE'
-  | 'WORK_OF_ART'
-  | 'CUSTOM';
+  | "PERSON"
+  | "ORGANIZATION"
+  | "LOCATION"
+  | "DATE"
+  | "TIME"
+  | "MONEY"
+  | "PERCENT"
+  | "PRODUCT"
+  | "EVENT"
+  | "WEAPON"
+  | "VEHICLE"
+  | "FACILITY"
+  | "GPE" // Geo-Political Entity
+  | "NORP" // Nationalities, Religious or Political groups
+  | "LAW"
+  | "LANGUAGE"
+  | "WORK_OF_ART"
+  | "CUSTOM";
 
 export interface Entity {
   text: string;

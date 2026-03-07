@@ -25,6 +25,7 @@
 **In progress:**
 
 **Blocked by:**
+
 - Waiting for Prompt 1 (Minimal training stack)
 
 **Next 1–2 steps:**
@@ -58,6 +59,7 @@
 **In progress:**
 
 **Blocked by:**
+
 - Waiting for Prompt 3 (IntelGraph schema v1)
 
 **Next 1–2 steps:**
@@ -91,6 +93,7 @@
 **In progress:**
 
 **Blocked by:**
+
 - Waiting for Prompt 5 (Green CI + merge train)
 
 **Next 1–2 steps:**
@@ -108,6 +111,7 @@
 **In progress:**
 
 **Blocked by:**
+
 - Waiting for Prompt 4 (Maestro pipeline + cost meter)
 
 **Next 1–2 steps:**
@@ -121,6 +125,7 @@
 **Status:** merged
 
 **Done:**
+
 - Created `docs/engineering/sprint-status-train-and-orchestrate.md`.
 - Created `docs/engineering/sprint-notes-train-and-orchestrate.md`.
 - Created `docs/dev/agent-roles.yaml`.
@@ -131,4 +136,5 @@
 **Blocked by:**
 
 **Next 1–2 steps:**
+
 - Hand off to other agents for parallel execution.

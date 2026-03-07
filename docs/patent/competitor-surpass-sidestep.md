@@ -10,8 +10,8 @@
 
 ### Epic alignment and notes
 
-| Epic (link)                                                                                                      | Alignment check | Notes                                                                      |
-| ---------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
+| Epic (link)                                       | Alignment check | Notes                                                                      |
+| ------------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
 | Epic 1 – Air-gapped deployable baseline           | [x]             | Offline deployable bundles and sealed attestations reused across methods.  |
 | Epic 2 – Secure LLM copilot and retrieval layer   | [x]             | Graph-aware copilots with policy traces and governed traversal budgets.    |
 | Epic 3 – Federation + cross-domain ingestion mesh | [x]             | Federation-aware routing for knowledge bases and cross-tenant graph joins. |

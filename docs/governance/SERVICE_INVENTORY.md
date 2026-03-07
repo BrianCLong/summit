@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Service Inventory & Governance Integration Matrix
 
 ## Overview

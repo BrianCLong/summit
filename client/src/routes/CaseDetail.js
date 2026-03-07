@@ -1,6 +1,6 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import {
   Container,
   Typography,
@@ -12,11 +12,11 @@ import {
   ListItem,
   ListItemText,
   Paper,
-} from '@mui/material';
-import { SuggestionsPanel } from '../components/predictive/SuggestionsPanel';
-import { attachSuggestionHover } from '../graph/hooks/jquery-hover-preview';
-import { AlertsPanel } from '../components/alerts/AlertsPanel';
-import { attachAlertHighlight } from '../graph/hooks/jquery-alert-highlight';
+} from "@mui/material";
+import { SuggestionsPanel } from "../components/predictive/SuggestionsPanel";
+import { attachSuggestionHover } from "../graph/hooks/jquery-hover-preview";
+import { AlertsPanel } from "../components/alerts/AlertsPanel";
+import { attachAlertHighlight } from "../graph/hooks/jquery-alert-highlight";
 
 const GET_CASE_DETAILS = gql`
   query Case($id: ID!) {
@@ -104,13 +104,12 @@ function CaseDetail() {
 
   if (loading) return <CircularProgress />;
   if (error) return <Alert severity="error">Error: {error.message}</Alert>;
-  if (!data || !data.case)
-    return <Alert severity="info">Case not found.</Alert>;
+  if (!data || !data.case) return <Alert severity="info">Case not found.</Alert>;
 
   const { case: caseData } = data;
 
   const handleAddNote = async () => {
-    const body = prompt('Enter note content:');
+    const body = prompt("Enter note content:");
     if (body) {
       await addNote({ variables: { caseId: id, body } });
       refetch();
@@ -118,7 +117,7 @@ function CaseDetail() {
   };
 
   const handleUpdateStatus = async () => {
-    const newStatus = prompt('Enter new status (OPEN/CLOSED):');
+    const newStatus = prompt("Enter new status (OPEN/CLOSED):");
     if (newStatus) {
       await updateCase({ variables: { id, status: newStatus } });
       refetch();
@@ -133,7 +132,7 @@ function CaseDetail() {
       if (data && data.exportCaseBundle) {
         alert(`Export successful! Download link: ${data.exportCaseBundle}`);
         // Optionally, trigger download directly
-        window.open(data.exportCaseBundle, '_blank');
+        window.open(data.exportCaseBundle, "_blank");
       }
     } catch (e) {
       alert(`Export failed: ${e.message}`);
@@ -141,9 +140,7 @@ function CaseDetail() {
   };
 
   const handleRemoveItem = async (itemId) => {
-    if (
-      window.confirm('Are you sure you want to remove this item from the case?')
-    ) {
+    if (window.confirm("Are you sure you want to remove this item from the case?")) {
       await removeCaseItem({ variables: { caseId: id, itemId } });
       refetch();
     }
@@ -154,7 +151,7 @@ function CaseDetail() {
       <Typography variant="h4" component="h1" gutterBottom>
         Case: {caseData.name}
       </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h6">
           Status: {caseData.status} | Priority: {caseData.priority}
         </Typography>
@@ -162,28 +159,16 @@ function CaseDetail() {
           <Button variant="outlined" onClick={handleAddNote} sx={{ mr: 1 }}>
             Add Note
           </Button>
-          <Button
-            variant="outlined"
-            onClick={handleUpdateStatus}
-            sx={{ mr: 1 }}
-          >
+          <Button variant="outlined" onClick={handleUpdateStatus} sx={{ mr: 1 }}>
             Update Status
           </Button>
-          <Button
-            variant="outlined"
-            onClick={() => handleExport('PDF')}
-            sx={{ mr: 1 }}
-          >
+          <Button variant="outlined" onClick={() => handleExport("PDF")} sx={{ mr: 1 }}>
             Export PDF
           </Button>
-          <Button
-            variant="outlined"
-            onClick={() => handleExport('HTML')}
-            sx={{ mr: 1 }}
-          >
+          <Button variant="outlined" onClick={() => handleExport("HTML")} sx={{ mr: 1 }}>
             Export HTML
           </Button>
-          <Button variant="outlined" onClick={() => handleExport('ZIP')}>
+          <Button variant="outlined" onClick={() => handleExport("ZIP")}>
             Export ZIP
           </Button>
         </Box>
@@ -192,9 +177,7 @@ function CaseDetail() {
         <Typography variant="h5" gutterBottom>
           Summary
         </Typography>
-        <Typography variant="body1">
-          {caseData.summary || 'No summary provided.'}
-        </Typography>
+        <Typography variant="body1">{caseData.summary || "No summary provided."}</Typography>
       </Paper>
       <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
         <Typography variant="h5" gutterBottom>
@@ -205,18 +188,14 @@ function CaseDetail() {
             <ListItem
               key={item.id}
               secondaryAction={
-                <Button
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleRemoveItem(item.id)}
-                >
+                <Button edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id)}>
                   Remove
                 </Button>
               }
             >
               <ListItemText
                 primary={`${item.kind}: ${item.ref_id}`}
-                secondary={`Added by: ${item.added_by} on ${new Date(item.added_at).toLocaleString()} | Tags: ${item.tags.join(', ')}`}
+                secondary={`Added by: ${item.added_by} on ${new Date(item.added_at).toLocaleString()} | Tags: ${item.tags.join(", ")}`}
               />
             </ListItem>
           ))}
@@ -237,8 +216,7 @@ function CaseDetail() {
           ))}
         </List>
       </Paper>
-      <SuggestionsPanel caseId={caseData.id} seeds={[caseData.id]} />{' '}
-      {/* Add SuggestionsPanel */}
+      <SuggestionsPanel caseId={caseData.id} seeds={[caseData.id]} /> {/* Add SuggestionsPanel */}
       <AlertsPanel caseId={caseData.id} /> {/* Add AlertsPanel */}
       <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
         <Typography variant="h5" gutterBottom>

@@ -11,7 +11,7 @@ grain:
 source: analytics.orders
 filters:
   - column: order_status
-    operator: '='
+    operator: "="
     value: completed
 measures:
   - name: total_revenue

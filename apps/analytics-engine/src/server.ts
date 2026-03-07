@@ -1,20 +1,16 @@
-import express, { Express } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
-import compression from 'compression';
-import { Pool } from 'pg';
-import neo4j, { type Driver } from 'neo4j-driver';
-import { createClient } from 'redis';
-import { DashboardService } from './services/DashboardService';
-import { ChartService } from './services/ChartService';
-import { logger } from './utils/logger';
-import { config } from './config';
-import {
-  authenticate,
-  authorize,
-  AuthenticatedRequest,
-} from './middleware/auth';
+import express, { Express } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+import compression from "compression";
+import { Pool } from "pg";
+import neo4j, { type Driver } from "neo4j-driver";
+import { createClient } from "redis";
+import { DashboardService } from "./services/DashboardService";
+import { ChartService } from "./services/ChartService";
+import { logger } from "./utils/logger";
+import { config } from "./config";
+import { authenticate, authorize, AuthenticatedRequest } from "./middleware/auth";
 
 const app: Express = express();
 const PORT = config.server.port || 4004;
@@ -25,29 +21,29 @@ app.use(
   cors({
     origin: config.server.allowedOrigins,
     credentials: true,
-  }),
+  })
 );
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limit each IP to 1000 requests per windowMs
-  message: 'Too many requests from this IP, please try again later',
+  message: "Too many requests from this IP, please try again later",
 });
-app.use('/api/', limiter);
+app.use("/api/", limiter);
 
 // Body parsing middleware
 app.use(compression() as unknown as express.RequestHandler);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
-    status: 'healthy',
+    status: "healthy",
     timestamp: new Date().toISOString(),
-    service: 'analytics-engine',
-    version: process.env.npm_package_version || '1.0.0',
+    service: "analytics-engine",
+    version: process.env.npm_package_version || "1.0.0",
   });
 });
 
@@ -58,20 +54,15 @@ let redisClient: any;
 let dashboardService: DashboardService;
 let chartService: ChartService;
 
-const DASHBOARD_SORT_FIELDS = ['name', 'created_at', 'updated_at'] as const;
+const DASHBOARD_SORT_FIELDS = ["name", "created_at", "updated_at"] as const;
 type DashboardSortField = (typeof DASHBOARD_SORT_FIELDS)[number];
-type DashboardListOptions = Parameters<
-  DashboardService['listDashboards']
->[1];
+type DashboardListOptions = Parameters<DashboardService["listDashboards"]>[1];
 
 const normalizeSortBy = (value: unknown): DashboardSortField => {
-  if (
-    typeof value === 'string' &&
-    (DASHBOARD_SORT_FIELDS as readonly string[]).includes(value)
-  ) {
+  if (typeof value === "string" && (DASHBOARD_SORT_FIELDS as readonly string[]).includes(value)) {
     return value as DashboardSortField;
   }
-  return 'updated_at';
+  return "updated_at";
 };
 
 async function initializeServices() {
@@ -90,23 +81,20 @@ async function initializeServices() {
     });
 
     // Test PostgreSQL connection
-    await pgPool.query('SELECT NOW()');
-    logger.info('PostgreSQL connected successfully');
+    await pgPool.query("SELECT NOW()");
+    logger.info("PostgreSQL connected successfully");
 
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(
-        config.database.neo4j.user,
-        config.database.neo4j.password,
-      ),
+      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password)
     );
 
     // Test Neo4j connection
     const session = neo4jDriver.session();
-    await session.run('RETURN 1');
+    await session.run("RETURN 1");
     await session.close();
-    logger.info('Neo4j connected successfully');
+    logger.info("Neo4j connected successfully");
 
     // Redis connection
     redisClient = createClient({
@@ -119,381 +107,286 @@ async function initializeServices() {
     });
 
     await redisClient.connect();
-    logger.info('Redis connected successfully');
+    logger.info("Redis connected successfully");
 
     // Initialize services
     dashboardService = new DashboardService(pgPool, neo4jDriver, redisClient);
     chartService = new ChartService(pgPool, neo4jDriver);
 
-    logger.info('Analytics services initialized successfully');
+    logger.info("Analytics services initialized successfully");
   } catch (error) {
-    logger.error('Failed to initialize services:', error);
+    logger.error("Failed to initialize services:", error);
     process.exit(1);
   }
 }
 
 // Authentication middleware
-app.use('/api', authenticate);
+app.use("/api", authenticate);
 
 // Dashboard API Routes
-app.post(
-  '/api/dashboards',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const userId = authReq.user.id;
-      const dashboard = await dashboardService.createDashboard(
-        req.body,
-        userId,
-      );
-      res.status(201).json(dashboard);
-    } catch (error) {
-      logger.error('Error creating dashboard:', error);
-      res.status(500).json({ error: 'Failed to create dashboard' });
-    }
-  },
-);
+app.post("/api/dashboards", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const userId = authReq.user.id;
+    const dashboard = await dashboardService.createDashboard(req.body, userId);
+    res.status(201).json(dashboard);
+  } catch (error) {
+    logger.error("Error creating dashboard:", error);
+    res.status(500).json({ error: "Failed to create dashboard" });
+  }
+});
 
-app.get(
-  '/api/dashboards',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const {
-        page = '1',
-        limit = '20',
-        search,
-        tags,
-        sortBy = 'updated_at',
-        sortOrder = 'desc',
-      } = req.query;
+app.get("/api/dashboards", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const {
+      page = "1",
+      limit = "20",
+      search,
+      tags,
+      sortBy = "updated_at",
+      sortOrder = "desc",
+    } = req.query;
 
-      const parsedLimit = parseInt(limit as string, 10);
-      const parsedPage = parseInt(page as string, 10);
-      const normalizedSortBy = normalizeSortBy(sortBy);
-      const normalizedSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
+    const parsedLimit = parseInt(limit as string, 10);
+    const parsedPage = parseInt(page as string, 10);
+    const normalizedSortBy = normalizeSortBy(sortBy);
+    const normalizedSortOrder = sortOrder === "asc" ? "asc" : "desc";
 
-      const options: DashboardListOptions = {
+    const options: DashboardListOptions = {
+      limit: parsedLimit,
+      offset: (parsedPage - 1) * parsedLimit,
+      search: typeof search === "string" ? search : undefined,
+      tags: typeof tags === "string" ? tags.split(",") : undefined,
+      sortBy: normalizedSortBy,
+      sortOrder: normalizedSortOrder,
+    };
+
+    const result = await dashboardService.listDashboards(authReq.user.id, options);
+
+    res.json({
+      dashboards: result.dashboards,
+      pagination: {
+        total: result.total,
+        page: parsedPage,
         limit: parsedLimit,
-        offset: (parsedPage - 1) * parsedLimit,
-        search: typeof search === 'string' ? search : undefined,
-        tags: typeof tags === 'string' ? tags.split(',') : undefined,
-        sortBy: normalizedSortBy,
-        sortOrder: normalizedSortOrder,
-      };
+        pages: Math.ceil(result.total / parsedLimit),
+      },
+    });
+  } catch (error) {
+    logger.error("Error listing dashboards:", error);
+    res.status(500).json({ error: "Failed to list dashboards" });
+  }
+});
 
-      const result = await dashboardService.listDashboards(
-        authReq.user.id,
-        options,
-      );
+app.get("/api/dashboards/:id", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const dashboard = await dashboardService.getDashboard(id, authReq.user.id);
 
-      res.json({
-        dashboards: result.dashboards,
-        pagination: {
-          total: result.total,
-          page: parsedPage,
-          limit: parsedLimit,
-          pages: Math.ceil(result.total / parsedLimit),
-        },
-      });
-    } catch (error) {
-      logger.error('Error listing dashboards:', error);
-      res.status(500).json({ error: 'Failed to list dashboards' });
+    if (!dashboard) {
+      return res.status(404).json({ error: "Dashboard not found" });
     }
-  },
-);
 
-app.get(
-  '/api/dashboards/:id',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const dashboard = await dashboardService.getDashboard(
-        id,
-        authReq.user.id,
-      );
+    res.json(dashboard);
+  } catch (error) {
+    logger.error("Error getting dashboard:", error);
+    res.status(500).json({ error: "Failed to get dashboard" });
+  }
+});
 
-      if (!dashboard) {
-        return res.status(404).json({ error: 'Dashboard not found' });
-      }
+app.put("/api/dashboards/:id", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const dashboard = await dashboardService.updateDashboard(id, req.body, authReq.user.id);
 
-      res.json(dashboard);
-    } catch (error) {
-      logger.error('Error getting dashboard:', error);
-      res.status(500).json({ error: 'Failed to get dashboard' });
-    }
-  },
-);
+    res.json(dashboard);
+  } catch (error) {
+    logger.error("Error updating dashboard:", error);
+    res.status(500).json({ error: "Failed to update dashboard" });
+  }
+});
 
-app.put(
-  '/api/dashboards/:id',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const dashboard = await dashboardService.updateDashboard(
-        id,
-        req.body,
-        authReq.user.id,
-      );
-
-      res.json(dashboard);
-    } catch (error) {
-      logger.error('Error updating dashboard:', error);
-      res.status(500).json({ error: 'Failed to update dashboard' });
-    }
-  },
-);
-
-app.delete(
-  '/api/dashboards/:id',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      await dashboardService.deleteDashboard(id, authReq.user.id);
-      res.status(204).send();
-    } catch (error) {
-      logger.error('Error deleting dashboard:', error);
-      res.status(500).json({ error: 'Failed to delete dashboard' });
-    }
-  },
-);
+app.delete("/api/dashboards/:id", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await dashboardService.deleteDashboard(id, authReq.user.id);
+    res.status(204).send();
+  } catch (error) {
+    logger.error("Error deleting dashboard:", error);
+    res.status(500).json({ error: "Failed to delete dashboard" });
+  }
+});
 
 // Widget data endpoint
-app.get(
-  '/api/widgets/:id/data',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const data = await dashboardService.getWidgetData(
-        id,
-        authReq.user.id,
-      );
-      res.json({ data, timestamp: new Date().toISOString() });
-    } catch (error) {
-      logger.error('Error getting widget data:', error);
-      res.status(500).json({ error: 'Failed to get widget data' });
-    }
-  },
-);
+app.get("/api/widgets/:id/data", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const data = await dashboardService.getWidgetData(id, authReq.user.id);
+    res.json({ data, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error("Error getting widget data:", error);
+    res.status(500).json({ error: "Failed to get widget data" });
+  }
+});
 
 // Chart generation endpoints
-app.post(
-  '/api/charts/generate',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const chartData = await chartService.generateChartData(req.body);
-      res.json(chartData);
-    } catch (error) {
-      logger.error('Error generating chart:', error);
-      res.status(500).json({ error: 'Failed to generate chart' });
-    }
-  },
-);
+app.post("/api/charts/generate", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const chartData = await chartService.generateChartData(req.body);
+    res.json(chartData);
+  } catch (error) {
+    logger.error("Error generating chart:", error);
+    res.status(500).json({ error: "Failed to generate chart" });
+  }
+});
 
 // Predefined chart endpoints
-app.get(
-  '/api/charts/entity-growth',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const { start, end } = req.query;
+app.get("/api/charts/entity-growth", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const { start, end } = req.query;
 
-      const timeRange = {
-        start: new Date(
-          (start as string) || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        ),
-        end: new Date((end as string) || new Date()),
-      };
+    const timeRange = {
+      start: new Date((start as string) || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+      end: new Date((end as string) || new Date()),
+    };
 
-      const chartData = await chartService.getEntityGrowthChart(timeRange);
-      res.json(chartData);
-    } catch (error) {
-      logger.error('Error getting entity growth chart:', error);
-      res.status(500).json({ error: 'Failed to generate entity growth chart' });
-    }
-  },
-);
+    const chartData = await chartService.getEntityGrowthChart(timeRange);
+    res.json(chartData);
+  } catch (error) {
+    logger.error("Error getting entity growth chart:", error);
+    res.status(500).json({ error: "Failed to generate entity growth chart" });
+  }
+});
 
-app.get(
-  '/api/charts/entity-types',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const chartData = await chartService.getEntityTypeDistribution();
-      res.json(chartData);
-    } catch (error) {
-      logger.error('Error getting entity type distribution:', error);
-      res
-        .status(500)
-        .json({ error: 'Failed to generate entity type distribution' });
-    }
-  },
-);
+app.get("/api/charts/entity-types", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const chartData = await chartService.getEntityTypeDistribution();
+    res.json(chartData);
+  } catch (error) {
+    logger.error("Error getting entity type distribution:", error);
+    res.status(500).json({ error: "Failed to generate entity type distribution" });
+  }
+});
 
-app.get(
-  '/api/charts/case-status',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const chartData = await chartService.getCaseStatusComparison();
-      res.json(chartData);
-    } catch (error) {
-      logger.error('Error getting case status comparison:', error);
-      res
-        .status(500)
-        .json({ error: 'Failed to generate case status comparison' });
-    }
-  },
-);
+app.get("/api/charts/case-status", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const chartData = await chartService.getCaseStatusComparison();
+    res.json(chartData);
+  } catch (error) {
+    logger.error("Error getting case status comparison:", error);
+    res.status(500).json({ error: "Failed to generate case status comparison" });
+  }
+});
 
-app.get(
-  '/api/charts/activity-heatmap',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const { days = '30' } = req.query;
-      const heatmapData = await chartService.getActivityHeatmapData(
-        parseInt(days as string),
-      );
-      res.json(heatmapData);
-    } catch (error) {
-      logger.error('Error getting activity heatmap:', error);
-      res.status(500).json({ error: 'Failed to generate activity heatmap' });
-    }
-  },
-);
+app.get("/api/charts/activity-heatmap", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const { days = "30" } = req.query;
+    const heatmapData = await chartService.getActivityHeatmapData(parseInt(days as string));
+    res.json(heatmapData);
+  } catch (error) {
+    logger.error("Error getting activity heatmap:", error);
+    res.status(500).json({ error: "Failed to generate activity heatmap" });
+  }
+});
 
 // Dashboard templates endpoints
-app.get(
-  '/api/dashboard-templates',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const { category } = req.query;
-      const templates = await dashboardService.getDashboardTemplates(
-        category as string,
-      );
-      res.json(templates);
-    } catch (error) {
-      logger.error('Error getting dashboard templates:', error);
-      res.status(500).json({ error: 'Failed to get dashboard templates' });
+app.get("/api/dashboard-templates", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const { category } = req.query;
+    const templates = await dashboardService.getDashboardTemplates(category as string);
+    res.json(templates);
+  } catch (error) {
+    logger.error("Error getting dashboard templates:", error);
+    res.status(500).json({ error: "Failed to get dashboard templates" });
+  }
+});
+
+app.post("/api/dashboard-templates/:id/create", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const { name, customizations } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: "Dashboard name is required" });
     }
-  },
-);
 
-app.post(
-  '/api/dashboard-templates/:id/create',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const { name, customizations } = req.body;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const dashboard = await dashboardService.createDashboardFromTemplate(
+      id,
+      name,
+      authReq.user.id,
+      customizations
+    );
 
-      if (!name) {
-        return res.status(400).json({ error: 'Dashboard name is required' });
-      }
-
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const dashboard = await dashboardService.createDashboardFromTemplate(
-        id,
-        name,
-        authReq.user.id,
-        customizations,
-      );
-
-      res.status(201).json(dashboard);
-    } catch (error) {
-      logger.error('Error creating dashboard from template:', error);
-      res
-        .status(500)
-        .json({ error: 'Failed to create dashboard from template' });
-    }
-  },
-);
+    res.status(201).json(dashboard);
+  } catch (error) {
+    logger.error("Error creating dashboard from template:", error);
+    res.status(500).json({ error: "Failed to create dashboard from template" });
+  }
+});
 
 // Analytics insights endpoints
-app.get(
-  '/api/insights/overview',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const insights = await generateOverviewInsights(authReq.user.id);
-      res.json(insights);
-    } catch (error) {
-      logger.error('Error generating overview insights:', error);
-      res.status(500).json({ error: 'Failed to generate insights' });
-    }
-  },
-);
+app.get("/api/insights/overview", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const insights = await generateOverviewInsights(authReq.user.id);
+    res.json(insights);
+  } catch (error) {
+    logger.error("Error generating overview insights:", error);
+    res.status(500).json({ error: "Failed to generate insights" });
+  }
+});
 
-app.get(
-  '/api/insights/trends',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const { period = '7d' } = req.query;
-      const trends = await generateTrendInsights(authReq.user.id, period as string);
-      res.json(trends);
-    } catch (error) {
-      logger.error('Error generating trend insights:', error);
-      res.status(500).json({ error: 'Failed to generate trend insights' });
-    }
-  },
-);
+app.get("/api/insights/trends", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const { period = "7d" } = req.query;
+    const trends = await generateTrendInsights(authReq.user.id, period as string);
+    res.json(trends);
+  } catch (error) {
+    logger.error("Error generating trend insights:", error);
+    res.status(500).json({ error: "Failed to generate trend insights" });
+  }
+});
 
 // Export endpoints
-app.post(
-  '/api/dashboards/:id/export',
-  authorize(['user', 'admin']),
-  async (req, res) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const { format = 'json' } = req.body;
+app.post("/api/dashboards/:id/export", authorize(["user", "admin"]), async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const { format = "json" } = req.body;
 
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const dashboard = await dashboardService.getDashboard(
-        id,
-        authReq.user.id,
-      );
-      if (!dashboard) {
-        return res.status(404).json({ error: 'Dashboard not found' });
-      }
-
-      if (format === 'json') {
-        res.json(dashboard);
-      } else if (format === 'pdf') {
-        // TODO: Implement PDF export
-        res.status(501).json({ error: 'PDF export not implemented yet' });
-      } else {
-        res.status(400).json({ error: 'Unsupported export format' });
-      }
-    } catch (error) {
-      logger.error('Error exporting dashboard:', error);
-      res.status(500).json({ error: 'Failed to export dashboard' });
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const dashboard = await dashboardService.getDashboard(id, authReq.user.id);
+    if (!dashboard) {
+      return res.status(404).json({ error: "Dashboard not found" });
     }
-  },
-);
+
+    if (format === "json") {
+      res.json(dashboard);
+    } else if (format === "pdf") {
+      // TODO: Implement PDF export
+      res.status(501).json({ error: "PDF export not implemented yet" });
+    } else {
+      res.status(400).json({ error: "Unsupported export format" });
+    }
+  } catch (error) {
+    logger.error("Error exporting dashboard:", error);
+    res.status(500).json({ error: "Failed to export dashboard" });
+  }
+});
 
 // Helper functions for insights
 async function generateOverviewInsights(userId: string): Promise<any> {
   const queries = [
-    'SELECT COUNT(*) as total_entities FROM entities',
-    'SELECT COUNT(*) as total_cases FROM cases',
-    'SELECT COUNT(*) as total_relationships FROM relationships',
-    'SELECT COUNT(*) as total_dashboards FROM dashboards WHERE created_by = $1',
+    "SELECT COUNT(*) as total_entities FROM entities",
+    "SELECT COUNT(*) as total_cases FROM cases",
+    "SELECT COUNT(*) as total_relationships FROM relationships",
+    "SELECT COUNT(*) as total_dashboards FROM dashboards WHERE created_by = $1",
   ];
 
   const results = await Promise.all([
@@ -512,11 +405,8 @@ async function generateOverviewInsights(userId: string): Promise<any> {
   };
 }
 
-async function generateTrendInsights(
-  userId: string,
-  period: string,
-): Promise<any> {
-  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+async function generateTrendInsights(userId: string, period: string): Promise<any> {
+  const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
 
   const query = `
     SELECT 
@@ -550,26 +440,18 @@ async function generateTrendInsights(
 }
 
 // Error handling middleware
-app.use(
-  (
-    error: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) => {
-    logger.error('Unhandled error:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message:
-        process.env.NODE_ENV === 'development' ? error.message : undefined,
-    });
-  },
-);
+app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  logger.error("Unhandled error:", error);
+  res.status(500).json({
+    error: "Internal server error",
+    message: process.env.NODE_ENV === "development" ? error.message : undefined,
+  });
+});
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use("*", (req, res) => {
   res.status(404).json({
-    error: 'Not found',
+    error: "Not found",
     path: req.originalUrl,
   });
 });
@@ -585,29 +467,29 @@ async function startServer() {
     });
 
     // Graceful shutdown
-    process.on('SIGTERM', async () => {
-      logger.info('SIGTERM received, shutting down gracefully');
+    process.on("SIGTERM", async () => {
+      logger.info("SIGTERM received, shutting down gracefully");
       server.close(async () => {
         await pgPool.end();
         await neo4jDriver.close();
         await redisClient.quit();
-        logger.info('Server closed');
+        logger.info("Server closed");
         process.exit(0);
       });
     });
 
-    process.on('SIGINT', async () => {
-      logger.info('SIGINT received, shutting down gracefully');
+    process.on("SIGINT", async () => {
+      logger.info("SIGINT received, shutting down gracefully");
       server.close(async () => {
         await pgPool.end();
         await neo4jDriver.close();
         await redisClient.quit();
-        logger.info('Server closed');
+        logger.info("Server closed");
         process.exit(0);
       });
     });
   } catch (error) {
-    logger.error('Failed to start server:', error);
+    logger.error("Failed to start server:", error);
     process.exit(1);
   }
 }

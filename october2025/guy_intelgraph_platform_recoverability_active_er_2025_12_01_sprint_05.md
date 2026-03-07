@@ -115,19 +115,18 @@ Federation: Read‑Through Resolvers → Remote Neo4j/PG (Policy Projection + Ca
 
 ```ts
 // server/src/graph/unmerge.ts
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 /** Unmerge two previously merged nodes by provenance claim or ids. */
 export async function unmergeByClaim(session: neo4j.Session, claimId: string) {
   return session.writeTransaction(async (tx) => {
     // Lookup merge details recorded during applyMergeDecision
-    const res = await tx.run(
-      'MATCH (c:Claim {id:$claimId})-[:AFFECTED]->(m:Merged) RETURN m',
-      { claimId },
-    );
-    if (res.records.length === 0) throw new Error('Claim not found');
+    const res = await tx.run("MATCH (c:Claim {id:$claimId})-[:AFFECTED]->(m:Merged) RETURN m", {
+      claimId,
+    });
+    if (res.records.length === 0) throw new Error("Claim not found");
     // Example: assume c stores original node ids
-    const rec = res.records[0].get('m').properties;
-    await tx.run('CALL apoc.refactor.splitNode($id, $originalIds)', {
+    const rec = res.records[0].get("m").properties;
+    await tx.run("CALL apoc.refactor.splitNode($id, $originalIds)", {
       id: rec.mergedId,
       originalIds: rec.originalIds,
     });
@@ -140,14 +139,14 @@ export async function unmergeByClaim(session: neo4j.Session, claimId: string) {
 
 ```ts
 // server/src/provenance/rewind.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export async function rewindBundle(bundleId: string, toTs?: string) {
   const r = await fetch(process.env.PROV_LEDGER_URL + `/api/v1/rewind`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ bundleId, toTs }),
   });
-  if (!r.ok) throw new Error('Rewind failed');
+  if (!r.ok) throw new Error("Rewind failed");
   return r.json();
 }
 ```
@@ -156,21 +155,21 @@ export async function rewindBundle(bundleId: string, toTs?: string) {
 
 ```tsx
 // apps/web/src/features/er-queue/feedback.tsx
-import React from 'react';
-import $ from 'jquery';
+import React from "react";
+import $ from "jquery";
 export function FeedbackButtons({ id, pair }: { id: string; pair: any }) {
-  function send(decision: 'accept' | 'decline') {
+  function send(decision: "accept" | "decline") {
     $.ajax({
-      url: '/api/er/feedback',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/api/er/feedback",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({ id, pair, decision }),
     });
   }
   return (
     <div className="space-x-2">
-      <button onClick={() => send('accept')}>Accept (label)</button>
-      <button onClick={() => send('decline')}>Decline (label)</button>
+      <button onClick={() => send("accept")}>Accept (label)</button>
+      <button onClick={() => send("decline")}>Decline (label)</button>
     </div>
   );
 }
@@ -201,15 +200,11 @@ if p >= float(os.getenv('PROMOTE_P', '0.92')) and r >= float(os.getenv('PROMOTE_
 
 ```ts
 // server/src/marketplace/index.ts
-import crypto from 'crypto';
-import vm from 'node:vm';
-export async function verifyBundle(
-  buf: Buffer,
-  sig: Buffer,
-  pubKeyPem: string,
-) {
-  const v = crypto.verify('rsa-sha256', buf, pubKeyPem, sig);
-  if (!v) throw new Error('Signature verification failed');
+import crypto from "crypto";
+import vm from "node:vm";
+export async function verifyBundle(buf: Buffer, sig: Buffer, pubKeyPem: string) {
+  const v = crypto.verify("rsa-sha256", buf, pubKeyPem, sig);
+  if (!v) throw new Error("Signature verification failed");
 }
 export function runSandboxed(code: string, env: Record<string, string>) {
   const context = vm.createContext({
@@ -225,15 +220,12 @@ export function runSandboxed(code: string, env: Record<string, string>) {
 
 ```ts
 // server/src/federation/readthrough/index.ts
-import neo4j from 'neo4j-driver';
-export async function fetchRemotePeople(
-  driver: neo4j.Driver,
-  policy: (row: any) => any,
-) {
+import neo4j from "neo4j-driver";
+export async function fetchRemotePeople(driver: neo4j.Driver, policy: (row: any) => any) {
   const s = driver.session();
-  const res = await s.run('MATCH (p:Person) RETURN p LIMIT 200');
+  const res = await s.run("MATCH (p:Person) RETURN p LIMIT 200");
   await s.close();
-  return res.records.map((r) => policy(r.get('p').properties));
+  return res.records.map((r) => policy(r.get("p").properties));
 }
 ```
 
@@ -294,14 +286,14 @@ reason[msg] {
 name: active-er
 on: [push, pull_request, schedule]
 schedule:
-  - cron: '0 6 * * *' # nightly UTC
+  - cron: "0 6 * * *" # nightly UTC
 jobs:
   train:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - run: pip install -r er-service/requirements.txt
       - run: python er-service/train/nightly.py
       - name: Promote

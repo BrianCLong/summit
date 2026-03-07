@@ -11,7 +11,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 on:
   # Triggered after Pages publish
   workflow_run:

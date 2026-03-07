@@ -8,7 +8,7 @@
  * @module pages/Policies/PolicySimulator
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -38,7 +38,7 @@ import {
   Tab,
   Tooltip,
   IconButton,
-} from '@mui/material';
+} from "@mui/material";
 import {
   PlayArrow as RunIcon,
   Check as PassIcon,
@@ -48,14 +48,14 @@ import {
   ContentCopy as CopyIcon,
   Refresh as RefreshIcon,
   CompareArrows as CompareIcon,
-} from '@mui/icons-material';
-import { usePolicySimulator, usePolicies } from '../../hooks/usePolicies';
+} from "@mui/icons-material";
+import { usePolicySimulator, usePolicies } from "../../hooks/usePolicies";
 import {
   SimulationRequest,
   SimulationContext,
   PolicyRule,
   ManagedPolicy,
-} from '../../services/policy-api';
+} from "../../services/policy-api";
 
 // ============================================================================
 // Types
@@ -78,13 +78,18 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 );
 
 const VerdictChip: React.FC<{ action: string }> = ({ action }) => {
-  const getColor = (): 'success' | 'error' | 'warning' | 'info' => {
+  const getColor = (): "success" | "error" | "warning" | "info" => {
     switch (action) {
-      case 'ALLOW': return 'success';
-      case 'DENY': return 'error';
-      case 'ESCALATE': return 'warning';
-      case 'WARN': return 'info';
-      default: return 'info';
+      case "ALLOW":
+        return "success";
+      case "DENY":
+        return "error";
+      case "ESCALATE":
+        return "warning";
+      case "WARN":
+        return "info";
+      default:
+        return "info";
     }
   };
 
@@ -92,13 +97,18 @@ const VerdictChip: React.FC<{ action: string }> = ({ action }) => {
 };
 
 const RiskLevelChip: React.FC<{ level: string }> = ({ level }) => {
-  const getColor = (): 'success' | 'warning' | 'error' | 'default' => {
+  const getColor = (): "success" | "warning" | "error" | "default" => {
     switch (level) {
-      case 'low': return 'success';
-      case 'medium': return 'warning';
-      case 'high': return 'error';
-      case 'critical': return 'error';
-      default: return 'default';
+      case "low":
+        return "success";
+      case "medium":
+        return "warning";
+      case "high":
+        return "error";
+      case "critical":
+        return "error";
+      default:
+        return "default";
     }
   };
 
@@ -110,20 +120,20 @@ const RiskLevelChip: React.FC<{ level: string }> = ({ level }) => {
 // ============================================================================
 
 const defaultPolicy = {
-  id: 'test-policy',
-  description: 'Test policy for simulation',
+  id: "test-policy",
+  description: "Test policy for simulation",
   scope: {
-    stages: ['runtime'] as ('data' | 'train' | 'alignment' | 'runtime')[],
-    tenants: ['*'],
+    stages: ["runtime"] as ("data" | "train" | "alignment" | "runtime")[],
+    tenants: ["*"],
   },
   rules: [] as PolicyRule[],
-  action: 'ALLOW' as const,
+  action: "ALLOW" as const,
 };
 
 const defaultContext: SimulationContext = {
-  stage: 'runtime',
-  tenantId: 'default-tenant',
-  region: 'us-east-1',
+  stage: "runtime",
+  tenantId: "default-tenant",
+  region: "us-east-1",
   payload: {},
   metadata: {},
   simulation: true,
@@ -131,7 +141,7 @@ const defaultContext: SimulationContext = {
 
 const getErrorMessage = (err: unknown): string => {
   if (err instanceof Error) return err.message;
-  return 'Invalid JSON';
+  return "Invalid JSON";
 };
 
 // ============================================================================
@@ -144,8 +154,12 @@ const PolicySimulator: React.FC = () => {
   const [policyJson, setPolicyJson] = useState(JSON.stringify(defaultPolicy, null, 2));
   const [contextJson, setContextJson] = useState(JSON.stringify(defaultContext, null, 2));
   const [comparePolicy, setComparePolicy] = useState<string | null>(null);
-  const [comparePolicyJson, setComparePolicyJson] = useState('');
-  const [jsonErrors, setJsonErrors] = useState<{ policy?: string; context?: string; compare?: string }>({});
+  const [comparePolicyJson, setComparePolicyJson] = useState("");
+  const [jsonErrors, setJsonErrors] = useState<{
+    policy?: string;
+    context?: string;
+    compare?: string;
+  }>({});
 
   // Hooks
   const simulator = usePolicySimulator();
@@ -153,7 +167,7 @@ const PolicySimulator: React.FC = () => {
 
   // Memoized values
   const activePolicies = useMemo(
-    () => policies.filter((p) => p.status === 'active' || p.status === 'approved'),
+    () => policies.filter((p) => p.status === "active" || p.status === "approved"),
     [policies]
   );
 
@@ -162,21 +176,24 @@ const PolicySimulator: React.FC = () => {
     setTab(newValue);
   }, []);
 
-  const validateJson = useCallback((json: string, field: 'policy' | 'context' | 'compare'): boolean => {
-    try {
-      JSON.parse(json);
-      setJsonErrors((prev) => ({ ...prev, [field]: undefined }));
-      return true;
-    } catch (err) {
-      setJsonErrors((prev) => ({ ...prev, [field]: getErrorMessage(err) }));
-      return false;
-    }
-  }, []);
+  const validateJson = useCallback(
+    (json: string, field: "policy" | "context" | "compare"): boolean => {
+      try {
+        JSON.parse(json);
+        setJsonErrors((prev) => ({ ...prev, [field]: undefined }));
+        return true;
+      } catch (err) {
+        setJsonErrors((prev) => ({ ...prev, [field]: getErrorMessage(err) }));
+        return false;
+      }
+    },
+    []
+  );
 
   const handleRunSimulation = useCallback(async () => {
     // Validate inputs
-    const policyValid = validateJson(policyJson, 'policy');
-    const contextValid = validateJson(contextJson, 'context');
+    const policyValid = validateJson(policyJson, "policy");
+    const contextValid = validateJson(contextJson, "context");
 
     if (!policyValid || !contextValid) return;
 
@@ -191,7 +208,7 @@ const PolicySimulator: React.FC = () => {
 
       // Add comparison if enabled
       if (comparePolicy && comparePolicyJson) {
-        const compareValid = validateJson(comparePolicyJson, 'compare');
+        const compareValid = validateJson(comparePolicyJson, "compare");
         if (compareValid) {
           request.compareWith = JSON.parse(comparePolicyJson);
         }
@@ -199,13 +216,13 @@ const PolicySimulator: React.FC = () => {
 
       await simulator.simulate(request);
     } catch (err) {
-      console.error('Simulation error:', err);
+      console.error("Simulation error:", err);
     }
   }, [policyJson, contextJson, comparePolicy, comparePolicyJson, validateJson, simulator]);
 
   const handleAnalyzeImpact = useCallback(async () => {
-    const currentValid = validateJson(policyJson, 'policy');
-    const newValid = validateJson(comparePolicyJson, 'compare');
+    const currentValid = validateJson(policyJson, "policy");
+    const newValid = validateJson(comparePolicyJson, "compare");
 
     if (!currentValid || !newValid) return;
 
@@ -214,11 +231,11 @@ const PolicySimulator: React.FC = () => {
       const newPolicy = JSON.parse(comparePolicyJson);
       await simulator.analyzeImpact(currentPolicy, newPolicy);
     } catch (err) {
-      console.error('Impact analysis error:', err);
+      console.error("Impact analysis error:", err);
     }
   }, [policyJson, comparePolicyJson, validateJson, simulator]);
 
-  const handleLoadPolicy = useCallback((policy: ManagedPolicy, target: 'main' | 'compare') => {
+  const handleLoadPolicy = useCallback((policy: ManagedPolicy, target: "main" | "compare") => {
     const policyData = {
       id: policy.id,
       description: policy.description,
@@ -228,7 +245,7 @@ const PolicySimulator: React.FC = () => {
     };
     const json = JSON.stringify(policyData, null, 2);
 
-    if (target === 'main') {
+    if (target === "main") {
       setPolicyJson(json);
       setJsonErrors((prev) => ({ ...prev, policy: undefined }));
     } else {
@@ -248,7 +265,7 @@ const PolicySimulator: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4" component="h1">
           Policy Simulator
         </Typography>
@@ -282,7 +299,14 @@ const PolicySimulator: React.FC = () => {
             {/* Simulate Tab */}
             <TabPanel value={tab} index={0}>
               <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="subtitle2">Policy Definition</Typography>
                   <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>Load from...</InputLabel>
@@ -290,7 +314,7 @@ const PolicySimulator: React.FC = () => {
                       value=""
                       onChange={(e) => {
                         const policy = activePolicies.find((p) => p.id === e.target.value);
-                        if (policy) handleLoadPolicy(policy, 'main');
+                        if (policy) handleLoadPolicy(policy, "main");
                       }}
                       label="Load from..."
                     >
@@ -309,11 +333,11 @@ const PolicySimulator: React.FC = () => {
                   value={policyJson}
                   onChange={(e) => {
                     setPolicyJson(e.target.value);
-                    validateJson(e.target.value, 'policy');
+                    validateJson(e.target.value, "policy");
                   }}
                   error={Boolean(jsonErrors.policy)}
                   helperText={jsonErrors.policy}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
@@ -330,11 +354,11 @@ const PolicySimulator: React.FC = () => {
                   value={contextJson}
                   onChange={(e) => {
                     setContextJson(e.target.value);
-                    validateJson(e.target.value, 'context');
+                    validateJson(e.target.value, "context");
                   }}
                   error={Boolean(jsonErrors.context)}
                   helperText={jsonErrors.context}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
@@ -343,7 +367,9 @@ const PolicySimulator: React.FC = () => {
                 variant="contained"
                 startIcon={simulator.loading ? <CircularProgress size={20} /> : <RunIcon />}
                 onClick={handleRunSimulation}
-                disabled={simulator.loading || Boolean(jsonErrors.policy) || Boolean(jsonErrors.context)}
+                disabled={
+                  simulator.loading || Boolean(jsonErrors.policy) || Boolean(jsonErrors.context)
+                }
               >
                 Run Simulation
               </Button>
@@ -366,24 +392,31 @@ const PolicySimulator: React.FC = () => {
                   value={policyJson}
                   onChange={(e) => {
                     setPolicyJson(e.target.value);
-                    validateJson(e.target.value, 'policy');
+                    validateJson(e.target.value, "policy");
                   }}
                   error={Boolean(jsonErrors.policy)}
                   helperText={jsonErrors.policy}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
               <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="subtitle2">Compare With</Typography>
                   <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>Load from...</InputLabel>
                     <Select
-                      value={comparePolicy || ''}
+                      value={comparePolicy || ""}
                       onChange={(e) => {
                         const policy = activePolicies.find((p) => p.id === e.target.value);
-                        if (policy) handleLoadPolicy(policy, 'compare');
+                        if (policy) handleLoadPolicy(policy, "compare");
                       }}
                       label="Load from..."
                     >
@@ -402,11 +435,11 @@ const PolicySimulator: React.FC = () => {
                   value={comparePolicyJson}
                   onChange={(e) => {
                     setComparePolicyJson(e.target.value);
-                    validateJson(e.target.value, 'compare');
+                    validateJson(e.target.value, "compare");
                   }}
                   error={Boolean(jsonErrors.compare)}
                   helperText={jsonErrors.compare}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
@@ -421,11 +454,11 @@ const PolicySimulator: React.FC = () => {
                   value={contextJson}
                   onChange={(e) => {
                     setContextJson(e.target.value);
-                    validateJson(e.target.value, 'context');
+                    validateJson(e.target.value, "context");
                   }}
                   error={Boolean(jsonErrors.context)}
                   helperText={jsonErrors.context}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
@@ -457,10 +490,10 @@ const PolicySimulator: React.FC = () => {
                   value={policyJson}
                   onChange={(e) => {
                     setPolicyJson(e.target.value);
-                    validateJson(e.target.value, 'policy');
+                    validateJson(e.target.value, "policy");
                   }}
                   error={Boolean(jsonErrors.policy)}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
@@ -475,10 +508,10 @@ const PolicySimulator: React.FC = () => {
                   value={comparePolicyJson}
                   onChange={(e) => {
                     setComparePolicyJson(e.target.value);
-                    validateJson(e.target.value, 'compare');
+                    validateJson(e.target.value, "compare");
                   }}
                   error={Boolean(jsonErrors.compare)}
-                  sx={{ fontFamily: 'monospace' }}
+                  sx={{ fontFamily: "monospace" }}
                 />
               </Box>
 
@@ -512,7 +545,7 @@ const PolicySimulator: React.FC = () => {
                 }
               />
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
                   <Typography variant="subtitle1">Verdict:</Typography>
                   <VerdictChip action={simulator.result.verdict.action} />
                   <Typography variant="body2" color="text.secondary">
@@ -538,16 +571,18 @@ const PolicySimulator: React.FC = () => {
                 {/* Evaluation Path */}
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>Evaluation Path ({simulator.result.evaluationPath.length} steps)</Typography>
+                    <Typography>
+                      Evaluation Path ({simulator.result.evaluationPath.length} steps)
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <List dense>
                       {simulator.result.evaluationPath.map((step) => (
                         <ListItem key={step.step}>
                           <ListItemIcon>
-                            {step.result === 'passed' ? (
+                            {step.result === "passed" ? (
                               <PassIcon color="success" />
-                            ) : step.result === 'failed' ? (
+                            ) : step.result === "failed" ? (
                               <FailIcon color="error" />
                             ) : (
                               <WarnIcon color="disabled" />
@@ -577,7 +612,11 @@ const PolicySimulator: React.FC = () => {
                         {simulator.result.matchedRules.map((match, i) => (
                           <ListItem key={i}>
                             <ListItemIcon>
-                              {match.matched ? <PassIcon color="success" /> : <FailIcon color="error" />}
+                              {match.matched ? (
+                                <PassIcon color="success" />
+                              ) : (
+                                <FailIcon color="error" />
+                              )}
                             </ListItemIcon>
                             <ListItemText
                               primary={`${match.rule.field} ${match.rule.operator} ${JSON.stringify(match.rule.value)}`}
@@ -601,7 +640,8 @@ const PolicySimulator: React.FC = () => {
                         {simulator.result.comparisonDiff.actionChanged && (
                           <Grid item xs={12}>
                             <Alert severity="warning">
-                              Action changed: {simulator.result.comparisonDiff.beforeAction} → {simulator.result.comparisonDiff.afterAction}
+                              Action changed: {simulator.result.comparisonDiff.beforeAction} →{" "}
+                              {simulator.result.comparisonDiff.afterAction}
                             </Alert>
                           </Grid>
                         )}
@@ -650,14 +690,14 @@ const PolicySimulator: React.FC = () => {
             <Card>
               <CardHeader title="Impact Analysis" />
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
                   <Typography variant="subtitle1">Risk Level:</Typography>
                   <RiskLevelChip level={simulator.impactAnalysis.riskLevel} />
                 </Box>
 
                 <Grid container spacing={2} sx={{ mb: 2 }}>
                   <Grid item xs={6}>
-                    <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
+                    <Paper variant="outlined" sx={{ p: 2, textAlign: "center" }}>
                       <Typography variant="h4">
                         {simulator.impactAnalysis.estimatedAffectedUsers}
                       </Typography>
@@ -667,7 +707,7 @@ const PolicySimulator: React.FC = () => {
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
-                    <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
+                    <Paper variant="outlined" sx={{ p: 2, textAlign: "center" }}>
                       <Typography variant="h4">
                         {simulator.impactAnalysis.estimatedAffectedResources}
                       </Typography>
@@ -714,16 +754,14 @@ const PolicySimulator: React.FC = () => {
 
           {/* No Results */}
           {!simulator.result && !simulator.impactAnalysis && !simulator.loading && (
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                Run a simulation to see results here.
-              </Typography>
+            <Paper sx={{ p: 4, textAlign: "center" }}>
+              <Typography color="text.secondary">Run a simulation to see results here.</Typography>
             </Paper>
           )}
 
           {/* Loading */}
           {simulator.loading && (
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Paper sx={{ p: 4, textAlign: "center" }}>
               <CircularProgress />
               <Typography sx={{ mt: 2 }}>Running simulation...</Typography>
             </Paper>

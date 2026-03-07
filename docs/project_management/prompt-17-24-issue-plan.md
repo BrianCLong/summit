@@ -3,6 +3,7 @@
 The following GitHub issue scaffolds assume independent, feature-flagged delivery with no shared databases. Each issue includes a suggested branch, scope notes, and CI requirements keyed to the acceptance criteria. Conventional branch pattern: `feature/<short-name>`.
 
 ## 23rd-Order Extrapolated Delivery Implications (applies to all prompts)
+
 1. **Feature-flag-first rollout:** every capability defaults to off, with per-tenant overrides and audit logging for toggles.
 2. **Append-only decision records:** RFCs, architecture decisions, and schema changes are stored immutably with signer identity.
 3. **Determinism guarantees:** seeded randomness for fixtures, simulations, and load tests to make failures reproducible.
@@ -28,6 +29,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
 23. **Rollback playbooks:** auto-generated rollback plans per migration/feature with data safety checks and verification steps.
 
 ### Maximal-ideal 23rd-order assurance grid (applies to all prompts)
+
 - **Scope hygiene:** explicit in-/out-of-scope tables, upstream/downstream dependency matrices, and failure domains mapped to ownership.
 - **Defense in depth:** layered controls (authn → authz → policy → data guardrails → transport hardening → runtime sandboxing) verified by CI checklists.
 - **Data classification:** every payload and artifact tagged with sensitivity levels; CI blocks misclassified flows and unsafe logging sinks.
@@ -40,6 +42,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
 - **Customer assurances:** tenant-level toggles, privacy posture statements, and exportable compliance evidence packs for audits.
 
 ## #17 Schema Registry & Evolution (SRE)
+
 - **Branch:** `feature/schema-registry`
 - **Issue focus:** Versioned schema registry service with publish/diff/promote/rollback APIs; Cypher and GraphQL SDL diff emitters; append-only, signed releases; safety constraints on destructive changes; UI diff viewer.
 - **Feature flag:** `SRE_ENABLED`.
@@ -58,6 +61,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Align schema evolution with consumer readiness matrices, protect against cross-environment drift, and script dry-run rollbacks validated on seeded previews before production promotion.
 
 ## #18 Risk Scoring & Anomaly Engine
+
 - **Branch:** `feature/risk-engine`
 - **Issue focus:** FastAPI + Redis streams scoring service with weighted rules, z-score/EWMA detectors, temporal decay, path rationales, and Kafka `risk.updated` events; UI badges/tooltips.
 - **Feature flag:** `RISK_ENGINE_ENABLED`.
@@ -75,6 +79,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Calibrate decay/weight parameters with governance-approved change windows, bake reproducibility proofs into CI artifacts, and stage blue/green scoring rollouts with shadow-mode comparisons and automatic rollback triggers.
 
 ## #19 Live Presence & Session Capture
+
 - **Branch:** `feature/presence`
 - **Issue focus:** Socket.IO presence service with rate limits; WebRTC huddles with opt-in transcript capture; React + jQuery overlays for cursors/selections/@mentions; signed session export.
 - **Feature flag:** `PRESENCE_ENABLED`.
@@ -92,6 +97,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Validate multi-region relay failover, prove transcript consent lineage in audit reports, and pre-stage bandwidth/codec fallback ladders to preserve continuity without violating consent banners.
 
 ## #20 Redaction & Differential Privacy Toolkit
+
 - **Branch:** `feature/redact-dp`
 - **Issue focus:** Shared redaction + DP library with regex/NER/image masks, DP mechanisms with per-tenant ε budgets, export hooks, and preview diff panel.
 - **Feature flag:** `REDACT_DP_ENABLED`.
@@ -109,6 +115,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Precompute DP privacy-loss accounting across chained exports, exercise irreversible vs. reversible mask paths in golden fixtures, and gate releases on peer-reviewed threat models for new detectors.
 
 ## #21 Synthetic Data Forge & Scenario Benchmarks
+
 - **Branch:** `feature/synth-forge`
 - **Issue focus:** Python CLI generators for graph scenarios (communities, chains, bursts), ATT&CK-like playbooks, seeds/manifests, fixtures for dependent teams.
 - **Feature flag:** `SYNTH_FORGE_ENABLED`.
@@ -126,6 +133,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Stamp fixtures with deterministic seeds + lineage chains, validate license/synthetic tags in downstream consumers, and preflight large-scale runs (100k+/1M nodes) with resource budget forecasts and abort thresholds.
 
 ## #22 Federated Discovery via PSI/Bloom
+
 - **Branch:** `feature/fed-discovery`
 - **Issue focus:** PSI adapter + Bloom mode with tenancy/consent registry, replay/rate protections, audit trail; APIs for handshake/init/complete and overlap retrieval; LAC policy checks.
 - **Feature flag:** `FED_DISCOVERY_ENABLED`.
@@ -142,6 +150,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Enforce cryptographic agility with versioned protocol suites, stage red/blue tenant rehearsals for consent denial/timeout paths, and wire fallback to Bloom-only mode with explicit accuracy caveats and audit evidence.
 
 ## #23 Materialized Subgraphs & Query Cache Manager
+
 - **Branch:** `feature/subgraph-cache`
 - **Issue focus:** Node service with Redis/Postgres backing for subgraph materialization, cost/size planner, LRU-by-cost cache, event-driven invalidation, and UI pin/usage stats.
 - **Feature flag:** `SUBGRAPH_CACHE_ENABLED`.
@@ -158,6 +167,7 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Simulate cache-poisoning attempts, verify policy/time-scoped keys under daylight savings/timezone shifts, and run steady-state + burst benchmarks with automatic rollback to live graph on anomaly detection.
 
 ## #24 Multimodal Enrichment Pipeline (OCR/ASR/EXIF)
+
 - **Branch:** `feature/enrich-mm`
 - **Issue focus:** Celery-based enrichment for OCR/ASR/EXIF with safety constraints (no biometrics), Redis backpressure, manifesting, and UI previews with redaction overlays.
 - **Feature flag:** `ENRICH_MM_ENABLED`.
@@ -174,4 +184,5 @@ The following GitHub issue scaffolds assume independent, feature-flagged deliver
   - **23rd-order checks:** Validate GPU/CPU parity paths, pre-compute fallback models for constrained environments, and attest manifests with content hashes plus non-biometric guarantees before exposing UI previews or exports.
 
 ## Cross-track Parallelization Notes
+
 - #17 gates via CI only; others are event/API isolated with no shared DBs; align manifests and feature flags per acceptance criteria.

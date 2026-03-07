@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export class AccessEventEmitter {
   constructor() {
@@ -129,9 +129,9 @@ export function buildPrivacyEnforcement({ tracker, logger, thresholds } = {}) {
   const budgetTracker = tracker ?? new PrivacyBudgetTracker({ defaults: thresholds });
   const accessLogger = logger ?? new AccessLogger();
   return {
-    enforce(req, dataset = 'search') {
+    enforce(req, dataset = "search") {
       const tenantId = req.query.tenant_id;
-      const userId = req.header('x-user') ?? 'unknown-user';
+      const userId = req.header("x-user") ?? "unknown-user";
       const volume = Math.min(Number(req.query.page_size ?? 20), 100);
       const decision = budgetTracker.consume({
         tenantId,
@@ -143,9 +143,9 @@ export function buildPrivacyEnforcement({ tracker, logger, thresholds } = {}) {
         who: userId,
         tenant: tenantId,
         dataset,
-        purpose: req.header('x-purpose') ?? 'unspecified',
+        purpose: req.header("x-purpose") ?? "unspecified",
         volume,
-        decision: decision.alert ? 'blocked' : 'allowed',
+        decision: decision.alert ? "blocked" : "allowed",
         timestamp: new Date().toISOString(),
       });
       return { decision, event };

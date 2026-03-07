@@ -30,7 +30,7 @@ pnpm run docker:dev
 
 ### 3. **Verify**
 
-*   **Frontend**: http://localhost:3000
-*   **API**: http://localhost:4000/graphql
+- **Frontend**: http://localhost:3000
+- **API**: http://localhost:4000/graphql
 
 For full details, see the **[Enablement Pack](../planning/enablement-pack/README.md)**.

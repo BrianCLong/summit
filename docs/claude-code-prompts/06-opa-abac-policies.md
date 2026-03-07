@@ -1,10 +1,13 @@
 # Prompt 6: OPA/Rego ABAC Policies + Purpose/Retention
 
 ## Role
+
 Policy Engineer
 
 ## Context
+
 IntelGraph is a multi-tenant platform requiring fine-grained access control based on:
+
 - **Tenant isolation** - Users only access their tenant's data
 - **OIDC claims** - User attributes from SSO provider
 - **Purpose tags** - Data access restricted by investigation purpose
@@ -14,16 +17,20 @@ IntelGraph is a multi-tenant platform requiring fine-grained access control base
 Open Policy Agent (OPA) provides declarative policy enforcement across all services.
 
 ## Task
+
 Author Rego policies and supporting infrastructure:
 
 ### 1. ABAC Policies
+
 - Tenant scoping (multi-tenancy enforcement)
 - OIDC claim-based authorization
 - Purpose-based access control
 - Retention tier policies
 
 ### 2. Retention Tiers
+
 Define and implement:
+
 - **Ephemeral**: 7 days
 - **Short**: 30 days
 - **Standard**: 365 days
@@ -31,6 +38,7 @@ Define and implement:
 - **Legal Hold**: Indefinite (until released)
 
 ### 3. Privacy Helpers
+
 - PII redaction functions
 - k-anonymity helpers
 - Data minimization utilities
@@ -38,11 +46,13 @@ Define and implement:
 ## Guardrails
 
 ### Security
+
 - **Deny-by-default** - All policies start with deny
 - **Explicit allow** - Access requires positive policy match
 - **No policy bypass** - All mutations go through OPA
 
 ### Testing
+
 - Policy simulation in CI
 - Test coverage for all decision paths
 - Performance testing (policy evaluation < 10ms p95)
@@ -50,6 +60,7 @@ Define and implement:
 ## Deliverables
 
 ### 1. Policy Files
+
 - [ ] `policy/` directory with Rego policies:
   - [ ] `tenant-isolation.rego` - Multi-tenant scoping
   - [ ] `oidc-claims.rego` - OIDC-based authorization
@@ -59,28 +70,33 @@ Define and implement:
   - [ ] `rbac.rego` - Role-based access control (baseline)
 
 ### 2. Test Cases
+
 - [ ] `policy/tests/` with OPA test files:
   - [ ] Positive test cases (allow scenarios)
   - [ ] Negative test cases (deny scenarios)
   - [ ] Edge cases (missing claims, expired tokens, etc.)
 
 ### 3. Policy Simulation
+
 - [ ] CLI script for policy simulation
 - [ ] CI integration (`opa test`)
 - [ ] Example policy traces with explanations
 
 ### 4. SCIM Integration
+
 - [ ] SCIM user/group mapping stubs
 - [ ] Attribute mapping documentation
 - [ ] Example SCIM payloads
 
 ### 5. Documentation
+
 - [ ] Policy architecture overview
 - [ ] Rego policy guide for developers
 - [ ] Testing and debugging guide
 - [ ] Performance tuning notes
 
 ## Acceptance Criteria
+
 - ✅ `opa test` passes all test cases
 - ✅ Simulated traces show correct allow/deny decisions
 - ✅ Purpose and retention enforcement validated
@@ -91,6 +107,7 @@ Define and implement:
 ## Example Policy Structure
 
 ### Tenant Isolation
+
 ```rego
 package intelgraph.tenant
 
@@ -111,6 +128,7 @@ deny["Tenant mismatch"] if {
 ```
 
 ### Purpose-Based Access
+
 ```rego
 package intelgraph.purpose
 
@@ -137,6 +155,7 @@ deny["Purpose not authorized"] if {
 ```
 
 ### Retention Policy
+
 ```rego
 package intelgraph.retention
 
@@ -169,6 +188,7 @@ should_purge(data) = false if {
 ```
 
 ### PII Redaction
+
 ```rego
 package intelgraph.privacy
 
@@ -206,21 +226,21 @@ interface PolicyInput {
   user: {
     userId: string;
     tenantId: string;
-    permissions: string[];         // e.g., ["entity:read", "pii:read"]
-    activePurposes: string[];      // e.g., ["investigation-123"]
+    permissions: string[]; // e.g., ["entity:read", "pii:read"]
+    activePurposes: string[]; // e.g., ["investigation-123"]
     oidcClaims: Record<string, unknown>;
   };
 
   resource: {
     resourceId: string;
-    resourceType: string;          // "Entity", "Relationship", etc.
+    resourceType: string; // "Entity", "Relationship", etc.
     tenantId: string;
-    purpose: string;               // Purpose tag
-    retentionTier: 'ephemeral' | 'short' | 'standard' | 'long' | 'legal-hold';
-    classification?: string;       // Data classification
+    purpose: string; // Purpose tag
+    retentionTier: "ephemeral" | "short" | "standard" | "long" | "legal-hold";
+    classification?: string; // Data classification
   };
 
-  operation: 'READ' | 'WRITE' | 'DELETE' | 'EXPORT';
+  operation: "READ" | "WRITE" | "DELETE" | "EXPORT";
 }
 ```
 
@@ -250,6 +270,7 @@ opa bench policy/ \
 ```
 
 ## Related Files
+
 - `/home/user/summit/policy/` - Existing OPA policies
 - `/home/user/summit/docs/privacy.md` - Privacy requirements
 - `/home/user/summit/services/policy/` - OPA service integration
@@ -265,6 +286,7 @@ claude "Execute prompt 6: OPA ABAC policies implementation"
 ```
 
 ## Notes
+
 - Use OPA v0.60+ with Rego v1 syntax (`future.keywords`)
 - Integrate with API gateway for request-time authorization
 - Cache policy decisions in Redis (with TTL)

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GRAPH_QUERY_PREVIEW_SUBSCRIPTION = gql`
   subscription GraphQueryPreview($cypher: String!, $parameters: JSON, $limit: Int!) {

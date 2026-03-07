@@ -4,13 +4,13 @@ This registry defines the specialized agents available within the Summit Intelli
 
 ## 1. Agent Swarm Overview
 
-| Agent ID | Role | Key Capabilities | Risk Level | Governance Policy |
-| :--- | :--- | :--- | :--- | :--- |
-| `osint-collector` | Collection & Ingestion | Social, Dark Web, Media ingestion. Evidence capture. | **High** | `collection.rego` |
-| `osint-enricher` | Resolution & Fusion | Entity resolution, IntelGraph mutation. | **Medium** | `enrichment.rego` |
-| `osint-reasoner` | Reasoning & Hypothesis | GraphRAG, Path-finding, Trend analysis. | **Medium** | `reasoning.rego` |
-| `osint-risk-monitor` | Risk & Early-Warning | Event detection, Multilingual monitoring. | **Medium** | `monitoring.rego` |
-| `osint-copilot` | Analyst Copilot | Guided investigation, Case management. | **Low** | `analyst_assist.rego` |
+| Agent ID             | Role                   | Key Capabilities                                     | Risk Level | Governance Policy     |
+| :------------------- | :--------------------- | :--------------------------------------------------- | :--------- | :-------------------- |
+| `osint-collector`    | Collection & Ingestion | Social, Dark Web, Media ingestion. Evidence capture. | **High**   | `collection.rego`     |
+| `osint-enricher`     | Resolution & Fusion    | Entity resolution, IntelGraph mutation.              | **Medium** | `enrichment.rego`     |
+| `osint-reasoner`     | Reasoning & Hypothesis | GraphRAG, Path-finding, Trend analysis.              | **Medium** | `reasoning.rego`      |
+| `osint-risk-monitor` | Risk & Early-Warning   | Event detection, Multilingual monitoring.            | **Medium** | `monitoring.rego`     |
+| `osint-copilot`      | Analyst Copilot        | Guided investigation, Case management.               | **Low**    | `analyst_assist.rego` |
 
 ## 2. Shared Governance Directives
 
@@ -30,6 +30,7 @@ Agents are deployed as immutable manifests. Any update to instructions (prompts)
 - **Registry Source**: `agents/registry.yaml` (Synchronized via CI)
 
 ---
+
 **Status:** ACTIVE
 **Last Reviewed:** 2026-01-27
 **Owner:** @intelgraph/osint-team

@@ -30,9 +30,9 @@ export function useAlerts(): UseAlertsResult {
   const loadFromCache = useCallback(async () => {
     try {
       const cached = await offlineCache.alerts.getAll();
-      setAlerts(cached.sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
+      setAlerts(
+        cached.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+      );
     } catch (err) {
       console.error('Failed to load alerts from cache:', err);
     }
@@ -55,9 +55,11 @@ export function useAlerts(): UseAlertsResult {
 
       const data = await response.json();
       await offlineCache.alerts.setMany(data);
-      setAlerts(data.sort((a: Alert, b: Alert) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
+      setAlerts(
+        data.sort(
+          (a: Alert, b: Alert) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+      );
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch alerts');
@@ -84,9 +86,7 @@ export function useAlerts(): UseAlertsResult {
   const markAsRead = useCallback(async (id: string) => {
     // Optimistic update
     setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === id ? { ...alert, isRead: true } : alert
-      )
+      prev.map((alert) => (alert.id === id ? { ...alert, isRead: true } : alert)),
     );
 
     // Update cache
@@ -107,10 +107,8 @@ export function useAlerts(): UseAlertsResult {
     // Optimistic update
     setAlerts((prev) =>
       prev.map((alert) =>
-        alert.id === id
-          ? { ...alert, isRead: true, acknowledgedAt: now }
-          : alert
-      )
+        alert.id === id ? { ...alert, isRead: true, acknowledgedAt: now } : alert,
+      ),
     );
 
     // Update cache

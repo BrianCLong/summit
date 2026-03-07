@@ -98,9 +98,7 @@
       "id": 3,
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -163,10 +161,7 @@
   ],
   "schemaVersion": 36,
   "style": "dark",
-  "tags": [
-    "maestro",
-    "summit"
-  ],
+  "tags": ["maestro", "summit"],
   "templating": {
     "list": []
   },

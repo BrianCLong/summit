@@ -83,21 +83,21 @@ Each alert includes:
 
 ```yaml
 route:
-  group_by: ['alertname', 'severity', 'slo']
+  group_by: ["alertname", "severity", "slo"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 12h
-  receiver: 'default'
+  receiver: "default"
   routes:
     - match:
         severity: critical
-      receiver: 'critical-alerts'
+      receiver: "critical-alerts"
     - match:
         severity: warning
-      receiver: 'warning-alerts'
+      receiver: "warning-alerts"
     - match:
         slo: opa_latency
-      receiver: 'opa-slo-alerts'
+      receiver: "opa-slo-alerts"
 ```
 
 ### Inhibit Rules

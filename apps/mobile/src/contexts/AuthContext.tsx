@@ -15,13 +15,7 @@ import React, {
   useMemo,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  User,
-  AuthState,
-  DeviceInfo,
-  SecurityConfig,
-  DeviceToken,
-} from '@/types';
+import type { User, AuthState, DeviceInfo, SecurityConfig, DeviceToken } from '@/types';
 import { secureStorage } from '@/lib/secureStorage';
 import { deviceManager } from '@/lib/deviceManager';
 
@@ -262,7 +256,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${state.accessToken}`,
+            Authorization: `Bearer ${state.accessToken}`,
             'X-Device-Id': deviceInfo?.deviceId || '',
           },
         });
@@ -317,34 +311,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [state.refreshToken]);
 
   // PIN verification
-  const verifyPin = useCallback(async (pin: string): Promise<boolean> => {
-    if (isLocked) {
-      throw new Error('Account locked. Please wait.');
-    }
+  const verifyPin = useCallback(
+    async (pin: string): Promise<boolean> => {
+      if (isLocked) {
+        throw new Error('Account locked. Please wait.');
+      }
 
-    try {
-      const isValid = await secureStorage.verifyPin(pin);
+      try {
+        const isValid = await secureStorage.verifyPin(pin);
 
-      if (isValid) {
-        setPinAttempts(0);
-        dispatch({ type: 'PIN_VERIFIED' });
-        return true;
-      } else {
-        const newAttempts = pinAttempts + 1;
-        setPinAttempts(newAttempts);
+        if (isValid) {
+          setPinAttempts(0);
+          dispatch({ type: 'PIN_VERIFIED' });
+          return true;
+        } else {
+          const newAttempts = pinAttempts + 1;
+          setPinAttempts(newAttempts);
 
-        if (newAttempts >= MAX_PIN_ATTEMPTS) {
-          setLockoutUntil(Date.now() + PIN_LOCKOUT_MS);
+          if (newAttempts >= MAX_PIN_ATTEMPTS) {
+            setLockoutUntil(Date.now() + PIN_LOCKOUT_MS);
+          }
+
+          dispatch({ type: 'PIN_FAILED' });
+          return false;
         }
-
-        dispatch({ type: 'PIN_FAILED' });
+      } catch (error) {
+        console.error('PIN verification error:', error);
         return false;
       }
-    } catch (error) {
-      console.error('PIN verification error:', error);
-      return false;
-    }
-  }, [isLocked, pinAttempts]);
+    },
+    [isLocked, pinAttempts],
+  );
 
   // Set PIN
   const setPin = useCallback(async (pin: string) => {
@@ -434,7 +431,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${state.accessToken}`,
+          Authorization: `Bearer ${state.accessToken}`,
         },
         body: JSON.stringify({ deviceId: deviceInfo.deviceId }),
       });
@@ -454,7 +451,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch(`/api/devices/${deviceInfo.deviceId}/status`, {
         headers: {
-          'Authorization': `Bearer ${state.accessToken}`,
+          Authorization: `Bearer ${state.accessToken}`,
         },
       });
 
@@ -516,9 +513,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLocked,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
 
 // Hook

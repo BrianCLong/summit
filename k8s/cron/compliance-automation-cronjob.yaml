@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/name: intelgraph
     app.kubernetes.io/component: compliance
 spec:
-  schedule: '0 2 * * *' # Daily at 2 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 2 * * *" # Daily at 2 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 7
   concurrencyPolicy: Forbid
@@ -26,7 +26,7 @@ spec:
             - name: compliance-assessor
               image: curlimages/curl:latest
               imagePullPolicy: IfNotPresent
-              command: ['/bin/sh']
+              command: ["/bin/sh"]
               args:
                 - -c
                 - |
@@ -171,7 +171,7 @@ spec:
                   echo "✅ Daily compliance assessment completed"
               env:
                 - name: PROMETHEUS_GATEWAY
-                  value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+                  value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
                 - name: SLACK_WEBHOOK_URL
                   valueFrom:
                     secretKeyRef:
@@ -191,7 +191,7 @@ spec:
                 readOnlyRootFilesystem: true
                 allowPrivilegeEscalation: false
                 capabilities:
-                  drop: ['ALL']
+                  drop: ["ALL"]
 
 ---
 apiVersion: batch/v1
@@ -203,8 +203,8 @@ metadata:
     app.kubernetes.io/name: intelgraph
     app.kubernetes.io/component: compliance
 spec:
-  schedule: '0 1 * * 0' # Weekly on Sunday at 1 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 1 * * 0" # Weekly on Sunday at 1 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 4
   failedJobsHistoryLimit: 4
   concurrencyPolicy: Forbid
@@ -222,7 +222,7 @@ spec:
             - name: compliance-reporter
               image: curlimages/curl:latest
               imagePullPolicy: IfNotPresent
-              command: ['/bin/sh']
+              command: ["/bin/sh"]
               args:
                 - -c
                 - |
@@ -295,7 +295,7 @@ spec:
                 readOnlyRootFilesystem: true
                 allowPrivilegeEscalation: false
                 capabilities:
-                  drop: ['ALL']
+                  drop: ["ALL"]
 
 ---
 apiVersion: v1
@@ -318,9 +318,9 @@ metadata:
     app.kubernetes.io/component: compliance
 rules:
   # Allow reading service account tokens for API authentication
-  - apiGroups: ['']
-    resources: ['serviceaccounts/token']
-    verbs: ['create']
+  - apiGroups: [""]
+    resources: ["serviceaccounts/token"]
+    verbs: ["create"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -357,8 +357,8 @@ spec:
             severity: warning
             component: compliance
           annotations:
-            summary: 'Compliance score is low for framework {{ $labels.framework }}'
-            description: 'Compliance score for {{ $labels.framework }} is {{ $value }}%, below threshold of 70%'
+            summary: "Compliance score is low for framework {{ $labels.framework }}"
+            description: "Compliance score for {{ $labels.framework }} is {{ $value }}%, below threshold of 70%"
 
         - alert: ComplianceFrameworkNonCompliant
           expr: compliance_framework_status == 0
@@ -367,8 +367,8 @@ spec:
             severity: critical
             component: compliance
           annotations:
-            summary: 'Compliance framework {{ $labels.framework }} is non-compliant'
-            description: 'Framework {{ $labels.framework }} has failed compliance assessment'
+            summary: "Compliance framework {{ $labels.framework }} is non-compliant"
+            description: "Framework {{ $labels.framework }} has failed compliance assessment"
 
         - alert: ComplianceAssessmentOverdue
           expr: (time() - compliance_assessment_timestamp) > 86400 * 2 # 2 days
@@ -377,8 +377,8 @@ spec:
             severity: warning
             component: compliance
           annotations:
-            summary: 'Compliance assessment overdue for {{ $labels.framework }}'
-            description: 'Framework {{ $labels.framework }} has not been assessed in over 2 days'
+            summary: "Compliance assessment overdue for {{ $labels.framework }}"
+            description: "Framework {{ $labels.framework }} has not been assessed in over 2 days"
 
         - alert: ComplianceAssessmentFailed
           expr: kube_job_status_failed{job_name=~"compliance-assessment-.*"} > 0
@@ -387,8 +387,8 @@ spec:
             severity: critical
             component: compliance
           annotations:
-            summary: 'Compliance assessment job failed'
-            description: 'Compliance assessment job {{ $labels.job_name }} has failed'
+            summary: "Compliance assessment job failed"
+            description: "Compliance assessment job {{ $labels.job_name }} has failed"
 
         - alert: ComplianceServiceDown
           expr: up{job="intelgraph-server"} == 0 and on() compliance_enabled == 1
@@ -397,5 +397,5 @@ spec:
             severity: critical
             component: compliance
           annotations:
-            summary: 'Compliance service is down'
-            description: 'Compliance service monitoring indicates the service is unreachable'
+            summary: "Compliance service is down"
+            description: "Compliance service monitoring indicates the service is unreachable"

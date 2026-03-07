@@ -1,11 +1,13 @@
 # Customer Deployment Lanes
 
 ## Lane Structure
+
 - Lane definition lives at `lanes/<customer>/config.yaml` with sections: `tenant_id`, `features`, `rollout`, `canary`, `policies`, `contacts`.
 - Namespaces: each lane maps to dedicated Kubernetes namespace + ArgoCD app instance to isolate RBAC and secrets.
 - Feature flags: toggles per lane; defaults inherit from `lanes/default/config.yaml` then overridden safely.
 
 ## Guardrails
+
 - Configs validated by policy engine (OPA) before apply. Disallowed:
   - Disabling audit/event streams
   - Lowering auth strength (MFA/SSO) below baseline
@@ -13,13 +15,16 @@
 - Violations produce actionable error message and block deploy.
 
 ## Canary & Rollback
+
 - `canary.weight` controls traffic slice; `success_threshold` requires <1% error increase and stable latency for 30m.
 - Automatic rollback triggers on SLO burn or healthcheck failure; audit log records decision and metrics.
 
 ## Audit Trail
+
 - Each promotion writes entry to `lanes/<customer>/audit.log` with build SHA, approvers, timing, and metrics snapshot.
 
 ## Examples
+
 ```yaml
 # lanes/acme/config.yaml
 tenant_id: acme

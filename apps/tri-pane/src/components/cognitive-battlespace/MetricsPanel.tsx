@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 type NarrativeRow = {
   id: string;
@@ -27,7 +27,9 @@ export function MetricsPanel(props: {
             <div key={narrative.id} className="rounded-lg border border-sand/20 p-3">
               <div className="flex items-center justify-between">
                 <strong>{narrative.label}</strong>
-                <span className="text-xs opacity-70">v={narrative.metrics.velocity.toFixed(2)}</span>
+                <span className="text-xs opacity-70">
+                  v={narrative.metrics.velocity.toFixed(2)}
+                </span>
               </div>
               <p className="mt-1 text-sm text-sand/80">{narrative.summary}</p>
               <button
@@ -49,7 +51,8 @@ export function MetricsPanel(props: {
               key={`${row.narrativeId}-${row.claimId}`}
               className="rounded-lg border border-sand/20 p-3 text-xs"
             >
-              narrative={row.narrativeId} → claim={row.claimId} · score={row.divergenceScore.toFixed(2)}
+              narrative={row.narrativeId} → claim={row.claimId} · score=
+              {row.divergenceScore.toFixed(2)}
             </div>
           ))}
         </div>

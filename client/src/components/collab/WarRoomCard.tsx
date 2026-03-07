@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   Button,
   Avatar,
   AvatarGroup,
-} from '@mui/material';
+} from "@mui/material";
 
 // Assuming WarRoom and User types are available
 interface WarRoom {

@@ -26,9 +26,9 @@ export class AgentSignalCollector {
         timestamp: new Date().toISOString(),
         metadata: {
           reason: "Batch creation detected",
-          velocity: "high"
-        }
-      }
+          velocity: "high",
+        },
+      },
     ];
   }
 }

@@ -1,14 +1,10 @@
-import {
-  CooperationArtifact,
-  EvidenceLink,
-  TaskSpec,
-} from '@ga-graphai/common-types';
+import { CooperationArtifact, EvidenceLink, TaskSpec } from "@ga-graphai/common-types";
 
-import { GenerationInput, ResourceAdapter } from '../capabilityRegistry.js';
-import { GuardedGenerator } from '../promptOps.js';
+import { GenerationInput, ResourceAdapter } from "../capabilityRegistry.js";
+import { GuardedGenerator } from "../promptOps.js";
 
 export interface StrandDraft {
-  strand: 'spec' | 'risks' | 'tests' | 'implementation';
+  strand: "spec" | "risks" | "tests" | "implementation";
   content: string;
   evidence: EvidenceLink[];
 }
@@ -19,21 +15,16 @@ export interface BraidResult {
   drafts: StrandDraft[];
 }
 
-const STRANDS: StrandDraft['strand'][] = [
-  'spec',
-  'risks',
-  'tests',
-  'implementation',
-];
+const STRANDS: StrandDraft["strand"][] = ["spec", "risks", "tests", "implementation"];
 
 function extractDeclaredApis(specDraft: string): Set<string> {
   const matches = specDraft.match(/`([A-Za-z0-9_.-]+)`/g) ?? [];
-  return new Set(matches.map((match) => match.replace(/`/g, '')));
+  return new Set(matches.map((match) => match.replace(/`/g, "")));
 }
 
 function extractReferencedApis(testsDraft: string): Set<string> {
   const matches = testsDraft.match(/API:([A-Za-z0-9_.-]+)/g) ?? [];
-  return new Set(matches.map((match) => match.split(':')[1] ?? ''));
+  return new Set(matches.map((match) => match.split(":")[1] ?? ""));
 }
 
 export class SemanticBraidCoordinator {
@@ -41,7 +32,7 @@ export class SemanticBraidCoordinator {
 
   async weave(
     task: TaskSpec,
-    assignments: Map<StrandDraft['strand'], ResourceAdapter>,
+    assignments: Map<StrandDraft["strand"], ResourceAdapter>
   ): Promise<BraidResult> {
     const drafts: StrandDraft[] = [];
     for (const strand of STRANDS) {
@@ -61,33 +52,24 @@ export class SemanticBraidCoordinator {
         evidence: output.evidence ?? [],
       });
     }
-    const specDraft =
-      drafts.find((draft) => draft.strand === 'spec')?.content ?? '';
-    const testsDraft =
-      drafts.find((draft) => draft.strand === 'tests')?.content ?? '';
+    const specDraft = drafts.find((draft) => draft.strand === "spec")?.content ?? "";
+    const testsDraft = drafts.find((draft) => draft.strand === "tests")?.content ?? "";
     const declaredApis = extractDeclaredApis(specDraft);
     const referencedApis = extractReferencedApis(testsDraft);
     const inconsistencies: string[] = [];
     referencedApis.forEach((api) => {
       if (!declaredApis.has(api)) {
-        inconsistencies.push(
-          `Test references ${api} which is missing in spec strand.`,
-        );
+        inconsistencies.push(`Test references ${api} which is missing in spec strand.`);
       }
     });
 
     const combined = drafts
       .map((draft) => `[#${draft.strand.toUpperCase()}]\n${draft.content}`)
-      .join('\n\n');
+      .join("\n\n");
 
     const aggregatedEvidence = drafts.flatMap((draft) => draft.evidence);
 
-    const { artifact } = this.guard.enforce(
-      'semantic-braid',
-      combined,
-      [],
-      aggregatedEvidence,
-    );
+    const { artifact } = this.guard.enforce("semantic-braid", combined, [], aggregatedEvidence);
 
     return {
       artifact,
@@ -96,17 +78,17 @@ export class SemanticBraidCoordinator {
     };
   }
 
-  private buildPrompt(task: TaskSpec, strand: StrandDraft['strand']): string {
+  private buildPrompt(task: TaskSpec, strand: StrandDraft["strand"]): string {
     switch (strand) {
-      case 'spec':
+      case "spec":
         return `Draft a precise specification for task ${task.title} focusing on goal ${task.goal}. Declare APIs using backticks.`;
-      case 'risks':
+      case "risks":
         return `Enumerate operational and safety risks for ${task.title}. Include mitigations referencing acceptance criteria IDs.`;
-      case 'tests':
+      case "tests":
         return `Propose validation steps referencing declared APIs as API:Name. Cover acceptance criteria ${task.acceptanceCriteria
           .map((ac) => ac.id)
-          .join(', ')}.`;
-      case 'implementation':
+          .join(", ")}.`;
+      case "implementation":
       default:
         return `Outline implementation plan referencing the spec strand outputs and acceptance criteria.`;
     }

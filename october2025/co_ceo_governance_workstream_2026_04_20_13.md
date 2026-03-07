@@ -64,12 +64,12 @@
 **Invoice generator** `services/billing/invoice.mjs`
 
 ```js
-import fs from 'fs';
+import fs from "fs";
 export function generate(usages, plan) {
   const price = { Starter: 0.01, Pro: 0.005, Enterprise: 0.0025 }[plan];
   const total = usages.reduce(
-    (s, u) => s + (u.event === 'attestation.verify' ? u.units * price : 0),
-    0,
+    (s, u) => s + (u.event === "attestation.verify" ? u.units * price : 0),
+    0
   );
   const inv = {
     id: `inv_${Date.now()}`,
@@ -122,11 +122,10 @@ export function AuditTracker({
   status,
   notes,
 }: {
-  status: 'scheduled' | 'in_progress' | 'accepted';
+  status: "scheduled" | "in_progress" | "accepted";
   notes: number;
 }) {
-  const color =
-    status === 'accepted' && notes <= 2 ? 'bg-green-100' : 'bg-yellow-100';
+  const color = status === "accepted" && notes <= 2 ? "bg-green-100" : "bg-yellow-100";
   return (
     <div className={`p-3 rounded-2xl ${color}`}>
       Audit: {status} • notes: {notes}
@@ -190,14 +189,14 @@ steps:
 ```tsx
 export default function Billing({ rows }: { rows: any[] }) {
   const total = rows.reduce(
-    (s, r) => s + (r.event === 'attestation.verify' ? r.units * r.price : 0),
-    0,
+    (s, r) => s + (r.event === "attestation.verify" ? r.units * r.price : 0),
+    0
   );
   return (
     <div className="grid gap-4">
       <h1>Billing</h1>
       <div>
-        Total: ${'{'}total.toFixed(2){'}'}
+        Total: ${"{"}total.toFixed(2){"}"}
       </div>
     </div>
   );
@@ -209,9 +208,7 @@ export default function Billing({ rows }: { rows: any[] }) {
 ```tsx
 export function SlsaChip({ level }: { level: 2 | 3 }) {
   return (
-    <span
-      className={`px-2 py-1 rounded-2xl ${level === 3 ? 'bg-green-100' : 'bg-gray-100'}`}
-    >
+    <span className={`px-2 py-1 rounded-2xl ${level === 3 ? "bg-green-100" : "bg-gray-100"}`}>
       SLSA L{level}
     </span>
   );

@@ -3,8 +3,8 @@ name: "grounding-bench"
 on:
   pull_request:
     paths:
-      - 'bench/grounding/**'
-      - '.github/workflows/grounding-bench.yml'
+      - "bench/grounding/**"
+      - ".github/workflows/grounding-bench.yml"
   workflow_dispatch:
 
 concurrency:
@@ -21,7 +21,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |

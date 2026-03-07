@@ -18,7 +18,9 @@ test.describe('Cross-pane integration', () => {
       }),
     );
 
-    await expect(page.getByTestId('selected-node-label')).toContainText('node-2');
+    await expect(page.getByTestId('selected-node-label')).toContainText(
+      'node-2',
+    );
     const stubState = await page.evaluate(() => window.__MAPBOX_STATE__);
     expect(stubState?.focused).toBe('node-2');
     const markerCoords = (stubState?.markers as [number, number][])[0];
@@ -63,10 +65,9 @@ test.describe('Cross-pane integration', () => {
     await expect(page.getByTestId('selected-node-label')).toContainText(
       'node-1',
     );
-    await expect.poll(() => page.evaluate(() => window.__MAPBOX_STATE__)).toHaveProperty(
-      'focused',
-      'node-1',
-    );
+    await expect
+      .poll(() => page.evaluate(() => window.__MAPBOX_STATE__))
+      .toHaveProperty('focused', 'node-1');
     const coords = (await page.evaluate(
       () => window.__MAPBOX_STATE__?.markers,
     )) as [number, number][];

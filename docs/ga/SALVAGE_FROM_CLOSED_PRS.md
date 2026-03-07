@@ -5,13 +5,13 @@
 
 ## Summary
 
-| Category | Count |
-|----------|-------|
-| RECREATE NOW | 2 |
-| RECREATE LATER | 3 |
-| IN PROGRESS | 3 |
-| COMPLETED | 0 |
-| BLOCKED | 1 |
+| Category       | Count |
+| -------------- | ----- |
+| RECREATE NOW   | 2     |
+| RECREATE LATER | 3     |
+| IN PROGRESS    | 3     |
+| COMPLETED      | 0     |
+| BLOCKED        | 1     |
 
 ---
 
@@ -191,43 +191,52 @@ Items that require more design work or have dependencies on other changes.
 
 **Problem Statement**:
 Current storage layer lacks:
+
 - Cluster mode for Redis failover
 - Cross-region DR backup capabilities
 - Automated recovery testing
 
 **Proposed Approach**:
+
 1. Option A: Redis Sentinel for HA (simpler, less resource intensive)
 2. Option B: Redis Cluster with sharding (higher throughput, more complex)
 
 **Acceptance Criteria**:
+
 - [ ] Redis failover completes in <30s
 - [ ] DR backup runs daily with verification
 - [ ] Recovery drill documented and executed quarterly
 - [ ] SLO: 99.9% cache availability
 
 **Risks**:
+
 - Migration from single Redis to cluster may require maintenance window
 - DR testing requires dedicated test environment
 
 **GA Relevance**: Required for production reliability SLO.
 
 **Issue Template**:
+
 ```markdown
 ## Storage/DR Infrastructure Enhancement
 
 ### Problem
+
 Production Redis lacks HA/failover capability. No automated DR testing.
 
 ### Proposed Solution
+
 Implement Redis Sentinel for automatic failover with daily backup verification.
 
 ### Acceptance Criteria
+
 - [ ] Failover time <30s (measured)
 - [ ] Daily backup with SHA256 verification
 - [ ] Quarterly DR drill documented
 - [ ] 99.9% cache availability SLO met
 
 ### Dependencies
+
 - #16667 (Redis cluster mode) - MERGED
 - Ops team coordination for maintenance window
 ```
@@ -238,46 +247,56 @@ Implement Redis Sentinel for automatic failover with daily backup verification.
 
 **Problem Statement**:
 Need in-memory caching layer with:
+
 - LRU eviction
 - TTL support
 - Size-bounded storage
 
 **Proposed Approach**:
+
 1. Option A: Thin wrapper around lru-cache (recommended)
 2. Option B: Custom implementation with observability hooks
 
 **Acceptance Criteria**:
+
 - [ ] Memory bounded to configured max
 - [ ] Hit/miss metrics exported via prom-client
 - [ ] TTL eviction works correctly
 - [ ] No memory leaks under load (verified with --inspect)
 
 **Risks**:
+
 - Memory profiling needed to validate bounds
 - Must not impact critical path latency (<1ms overhead)
 
 **GA Relevance**: Performance optimization, not blocking GA.
 
 **Issue Template**:
+
 ```markdown
 ## Memory Layer Package
 
 ### Problem
+
 Services need lightweight in-memory caching with bounded memory and TTL support.
 
 ### Proposed Solution
+
 Create `@intelgraph/memory-cache` package wrapping lru-cache with:
+
 - Prometheus metrics (hits, misses, evictions)
 - Configurable max size and TTL
 - TypeScript-first API
 
 ### Acceptance Criteria
+
 - [ ] Memory stays within configured bounds under load
 - [ ] Metrics exported for observability
 - [ ] TTL eviction functional
 - [ ] <1ms overhead per operation
 
 ### Dependencies
+
 - packages/ layout decision from #15380 disposition
 ```
 
@@ -288,14 +307,17 @@ Create `@intelgraph/memory-cache` package wrapping lru-cache with:
 ### PR Naming Convention
 
 All salvage PRs must follow this naming:
+
 ```
 salvage/pr-<source-number>-<short-slug>
 ```
+
 Example: `salvage/pr-15366-express-validation`
 
 ### Required Checks
 
 Before merge, every salvage PR must pass:
+
 - [ ] `pnpm typecheck` - TypeScript compilation
 - [ ] `pnpm lint` - ESLint/Prettier
 - [ ] `pnpm test` - Unit tests
@@ -304,6 +326,7 @@ Before merge, every salvage PR must pass:
 ### Required Ledger Updates
 
 When creating a salvage PR, update this document:
+
 1. Move item from RECREATE NOW to IN PROGRESS
 2. Add `branch` name
 3. Add `files_changed` list
@@ -314,6 +337,7 @@ When creating a salvage PR, update this document:
 ### Definition of Done
 
 A salvage PR is complete when:
+
 - [ ] Source PR cited in description: "Recreates #XXXX"
 - [ ] Minimal diff - one concern only
 - [ ] All required checks pass
@@ -342,10 +366,11 @@ _(PRs that fix blocking gates, not feature work)_
 **Symptom**: Dependency resolution failures, 503 errors from registries
 **Root Cause Hypothesis**: External registry issues (sheetjs CDN, npm timeouts)
 **Immediate Containment**:
+
 - Retry with exponential backoff
 - Use `--prefer-offline` if possible
 - Check registry status pages
-**Longer-term Fix**:
+  **Longer-term Fix**:
 - Add registry mirrors to .npmrc
 - Cache dependencies in CI artifacts
 - Document known flaky packages
@@ -373,11 +398,11 @@ The next 3 closed PRs to recreate after current batch:
 
 ### Branches Created This Session
 
-| Branch | Source PR | Status | Files Changed |
-|--------|-----------|--------|---------------|
-| `salvage/pr-15368-auto-label` | #15368 | Ready for review | `.github/workflows/pr-labeler.yml` |
-| `salvage/pr-15365-coverage-gate` | #15365 | Ready for review | `.github/workflows/coverage-gate.yml`, `.github/workflows/api-fuzz.yml` |
-| `salvage/pr-15370-turbo-config` | #15370 | Ready for review | `turbo.json` |
+| Branch                           | Source PR | Status           | Files Changed                                                           |
+| -------------------------------- | --------- | ---------------- | ----------------------------------------------------------------------- |
+| `salvage/pr-15368-auto-label`    | #15368    | Ready for review | `.github/workflows/pr-labeler.yml`                                      |
+| `salvage/pr-15365-coverage-gate` | #15365    | Ready for review | `.github/workflows/coverage-gate.yml`, `.github/workflows/api-fuzz.yml` |
+| `salvage/pr-15370-turbo-config`  | #15370    | Ready for review | `turbo.json`                                                            |
 
 ### Commands Run
 

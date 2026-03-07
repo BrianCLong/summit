@@ -2,11 +2,11 @@
 
 ## Domain Mapping
 
-| Domain | Import | Export | Non-goal |
-| --- | --- | --- | --- |
-| Business Plan JSON | User-provided plan payload | Validated structure and completeness score | Drafting plan content |
-| Legal Structure | Enumerated choice (`sole_proprietorship`, `llc`, `corporation`) | Liability/tax risk tier mapping | Tax calculation |
-| Financial Projection | Structured startup cost + projections | Deterministic readiness completeness score | Forecasting engine |
+| Domain               | Import                                                          | Export                                     | Non-goal              |
+| -------------------- | --------------------------------------------------------------- | ------------------------------------------ | --------------------- |
+| Business Plan JSON   | User-provided plan payload                                      | Validated structure and completeness score | Drafting plan content |
+| Legal Structure      | Enumerated choice (`sole_proprietorship`, `llc`, `corporation`) | Liability/tax risk tier mapping            | Tax calculation       |
+| Financial Projection | Structured startup cost + projections                           | Deterministic readiness completeness score | Forecasting engine    |
 
 ## Deterministic Controls
 

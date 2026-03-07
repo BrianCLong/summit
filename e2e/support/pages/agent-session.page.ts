@@ -1,5 +1,5 @@
-import { Page, Locator, expect } from '@playwright/test';
-import { BasePage } from './base.page';
+import { Page, Locator, expect } from "@playwright/test";
+import { BasePage } from "./base.page";
 
 export class AgentSessionPage extends BasePage {
   readonly runInput: Locator;
@@ -12,15 +12,15 @@ export class AgentSessionPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.runInput = page.locator('textarea[placeholder*="Describe what you want Maestro to do"]');
-    this.runButton = page.getByRole('button', { name: /Run with Maestro/i });
-    this.clearButton = page.getByRole('button', { name: /Clear/i });
-    this.runSummaryCard = page.locator('.card', { hasText: 'Run Summary' });
-    this.tasksCard = page.locator('.card', { hasText: 'Tasks' });
-    this.outputsCard = page.locator('.card', { hasText: 'Outputs' });
+    this.runButton = page.getByRole("button", { name: /Run with Maestro/i });
+    this.clearButton = page.getByRole("button", { name: /Clear/i });
+    this.runSummaryCard = page.locator(".card", { hasText: "Run Summary" });
+    this.tasksCard = page.locator(".card", { hasText: "Tasks" });
+    this.outputsCard = page.locator(".card", { hasText: "Outputs" });
   }
 
   async navigate() {
-    await this.goto('/maestro/runs');
+    await this.goto("/maestro/runs");
   }
 
   async startSession(prompt: string) {
@@ -30,11 +30,14 @@ export class AgentSessionPage extends BasePage {
 
   async waitForRunCompletion() {
     // Wait for the button to go back to "Run with Maestro" from "Running..."
-    await expect(this.runButton).toContainText('Run with Maestro', { timeout: 30000 });
+    await expect(this.runButton).toContainText("Run with Maestro", { timeout: 30000 });
   }
 
-  async verifyTaskStatus(description: string, status: 'Queued' | 'Running' | 'Succeeded' | 'Failed') {
-    const taskRow = this.tasksCard.locator('.p-4', { hasText: description });
+  async verifyTaskStatus(
+    description: string,
+    status: "Queued" | "Running" | "Succeeded" | "Failed"
+  ) {
+    const taskRow = this.tasksCard.locator(".p-4", { hasText: description });
     await expect(taskRow).toContainText(status);
   }
 
@@ -43,7 +46,7 @@ export class AgentSessionPage extends BasePage {
   }
 
   async verifyCostSummaryVisible() {
-    await expect(this.runSummaryCard).toContainText('Estimated Cost');
-    await expect(this.runSummaryCard).toContainText('Input tokens');
+    await expect(this.runSummaryCard).toContainText("Estimated Cost");
+    await expect(this.runSummaryCard).toContainText("Input tokens");
   }
 }

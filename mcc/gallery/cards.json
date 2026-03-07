@@ -16,9 +16,6 @@
         "value": 0.918
       }
     ],
-    "intendedUse": [
-      "support_triage",
-      "escalation_detection"
-    ]
+    "intendedUse": ["support_triage", "escalation_detection"]
   }
 ]

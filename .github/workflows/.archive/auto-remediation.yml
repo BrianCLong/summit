@@ -115,7 +115,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
 
       - name: Run Auto-Remediation

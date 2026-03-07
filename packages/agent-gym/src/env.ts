@@ -1,10 +1,10 @@
-import { GymEnvironment, Observation, Action, StepResult } from './types.js';
-import { v4 as uuidv4 } from 'uuid';
+import { GymEnvironment, Observation, Action, StepResult } from "./types.js";
+import { v4 as uuidv4 } from "uuid";
 
 export abstract class BaseEnvironment implements GymEnvironment {
   public abstract name: string;
   protected _seed: number = Date.now();
-  protected _episodeId: string = '';
+  protected _episodeId: string = "";
 
   constructor(seed?: number) {
     if (seed !== undefined) {

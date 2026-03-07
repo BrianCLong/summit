@@ -8,25 +8,25 @@ on:
   workflow_dispatch:
     inputs:
       smoke_url:
-        description: 'URL for smoke test (optional)'
+        description: "URL for smoke test (optional)"
         required: false
         type: string
 
   workflow_call:
     inputs:
       smoke_url:
-        description: 'URL for smoke test (optional)'
+        description: "URL for smoke test (optional)"
         required: false
         type: string
     outputs:
       passed:
-        description: 'True if all checks passed'
+        description: "True if all checks passed"
         value: ${{ jobs.go-live-gate.outputs.passed }}
       sha:
-        description: 'The commit SHA that was verified'
+        description: "The commit SHA that was verified"
         value: ${{ jobs.go-live-gate.outputs.sha }}
       evidence_path:
-        description: 'Path to evidence bundle'
+        description: "Path to evidence bundle"
         value: ${{ jobs.go-live-gate.outputs.evidence_path }}
 
   # Optionally run on pushes to main for continuous verification
@@ -34,11 +34,11 @@ on:
     branches:
       - main
     paths:
-      - 'server/**'
-      - 'packages/**'
-      - 'scripts/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
+      - "server/**"
+      - "packages/**"
+      - "scripts/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -75,7 +75,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Get pnpm store directory
         shell: bash
@@ -95,9 +95,9 @@ jobs:
       - name: Generate Evidence Bundle
         id: generate
         env:
-          GA_VERIFY_MODE: 'true'
+          GA_VERIFY_MODE: "true"
           SMOKE_URL: ${{ inputs.smoke_url }}
-          CI: 'true'
+          CI: "true"
         run: |
           # Run evidence generator (runs lint, build, test, smoke)
           pnpm evidence:go-live:gen || true

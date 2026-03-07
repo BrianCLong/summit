@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Summit Convergence Scorecard
 
 **Executive Oversight Dashboard**

@@ -2,7 +2,7 @@ export interface Approval {
   id: string;
   requester_id: string;
   approver_id?: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   action?: string | null;
   payload?: any | null;
   reason?: string | null;
@@ -13,7 +13,7 @@ export interface Approval {
   resolved_at?: string | null;
 }
 
-const API_BASE = '/api/approvals';
+const API_BASE = "/api/approvals";
 
 export async function getPendingApprovals(): Promise<Approval[]> {
   const response = await fetch(`${API_BASE}?status=pending`);
@@ -26,8 +26,8 @@ export async function getPendingApprovals(): Promise<Approval[]> {
 
 export async function approveRequest(id: string, reason?: string): Promise<Approval> {
   const response = await fetch(`${API_BASE}/${id}/approve`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ reason }),
   });
   if (!response.ok) {
@@ -39,8 +39,8 @@ export async function approveRequest(id: string, reason?: string): Promise<Appro
 
 export async function rejectRequest(id: string, reason?: string): Promise<Approval> {
   const response = await fetch(`${API_BASE}/${id}/reject`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ reason }),
   });
   if (!response.ok) {

@@ -1,12 +1,8 @@
-import { randomUUID } from 'crypto';
-import { ComplianceValidator } from './compliance.js';
-import { PkiManager } from './pki.js';
-import { RoiDashboard } from './roi-dashboard.js';
-import {
-  SecurityControlPlane,
-  computeAssurance,
-  enforceLifecycle,
-} from './security.js';
+import { randomUUID } from "crypto";
+import { ComplianceValidator } from "./compliance.js";
+import { PkiManager } from "./pki.js";
+import { RoiDashboard } from "./roi-dashboard.js";
+import { SecurityControlPlane, computeAssurance, enforceLifecycle } from "./security.js";
 import {
   type ActionOutcome,
   type AgentActionInput,
@@ -16,46 +12,46 @@ import {
   type AgentStatus,
   type ComplianceReport,
   type IdentityMaterial,
-} from './types.js';
+} from "./types.js";
 
 export class AgentInstance {
   readonly id: string;
 
   readonly identity: AgentIdentity;
 
-  private status: AgentStatus = 'provisioned';
+  private status: AgentStatus = "provisioned";
 
   private readonly lifecycle: AgentLifecycleEvent[] = [];
 
   constructor(
     id: string,
     identity: AgentIdentity,
-    private readonly factory: AgentFactory,
+    private readonly factory: AgentFactory
   ) {
     this.id = id;
     this.identity = identity;
     this.lifecycle.push({
-      status: 'provisioned',
+      status: "provisioned",
       timestamp: new Date().toISOString(),
-      reason: 'created',
+      reason: "created",
     });
   }
 
-  activate(reason = 'activated'): void {
-    const event = enforceLifecycle(this.status, 'active');
-    this.status = 'active';
+  activate(reason = "activated"): void {
+    const event = enforceLifecycle(this.status, "active");
+    this.status = "active";
     this.lifecycle.push({ ...event, reason });
   }
 
-  suspend(reason = 'suspended'): void {
-    const event = enforceLifecycle(this.status, 'suspended');
-    this.status = 'suspended';
+  suspend(reason = "suspended"): void {
+    const event = enforceLifecycle(this.status, "suspended");
+    this.status = "suspended";
     this.lifecycle.push({ ...event, reason });
   }
 
-  retire(reason = 'retired'): void {
-    const event = enforceLifecycle(this.status, 'retired');
-    this.status = 'retired';
+  retire(reason = "retired"): void {
+    const event = enforceLifecycle(this.status, "retired");
+    this.status = "retired";
     this.lifecycle.push({ ...event, reason });
   }
 
@@ -68,10 +64,10 @@ export class AgentInstance {
   }
 
   performAction(action: AgentActionInput): ActionOutcome {
-    if (this.status === 'provisioned') {
-      this.activate('first-action');
+    if (this.status === "provisioned") {
+      this.activate("first-action");
     }
-    if (this.status !== 'active') {
+    if (this.status !== "active") {
       return {
         action,
         allowed: false,
@@ -111,7 +107,7 @@ export class AgentFactory {
 
   private readonly agents = new Map<string, AgentInstance>();
 
-  constructor(subject = 'summit-qaf-factory') {
+  constructor(subject = "summit-qaf-factory") {
     this.pki = new PkiManager(subject);
     this.security = new SecurityControlPlane();
     SecurityControlPlane.buildDefaultControls().forEach((control) => {
@@ -120,31 +116,27 @@ export class AgentFactory {
     this.roiDashboard = new RoiDashboard();
     this.compliance = new ComplianceValidator();
     this.factoryIdentity = this.pki.issueCertificate(subject, 24 * 60, {
-      role: 'factory',
+      role: "factory",
     });
   }
 
   spawnAgent(blueprint: AgentBlueprint): AgentInstance {
-    const identityMaterial = this.pki.issueCertificate(
-      blueprint.name,
-      12 * 60,
-      {
-        role: blueprint.role,
-        tenantId: blueprint.tenantId,
-        region: blueprint.region,
-      },
-    );
+    const identityMaterial = this.pki.issueCertificate(blueprint.name, 12 * 60, {
+      role: blueprint.role,
+      tenantId: blueprint.tenantId,
+      region: blueprint.region,
+    });
 
     const assurance = Math.max(
       blueprint.minimumAssurance ?? 0.8,
       computeAssurance({
-        id: '',
+        id: "",
         role: blueprint.role,
         tenantId: blueprint.tenantId,
         certificate: identityMaterial.certificate,
         assurance: 0,
         allowedActions: blueprint.allowedActions,
-      }),
+      })
     );
 
     const identity: AgentIdentity = {
@@ -166,10 +158,7 @@ export class AgentFactory {
   }
 
   validateMtls(agentCertificate = this.factoryIdentity.certificate) {
-    return this.pki.mutualTlsHandshake(
-      agentCertificate,
-      this.factoryIdentity.certificate,
-    );
+    return this.pki.mutualTlsHandshake(agentCertificate, this.factoryIdentity.certificate);
   }
 
   recordRoi(agentId: string, action: AgentActionInput): void {
@@ -205,9 +194,7 @@ export class AgentFactory {
       return this.validateMtls();
     }
 
-    const results = agents.map((agent) =>
-      this.validateMtls(agent.identity.certificate),
-    );
+    const results = agents.map((agent) => this.validateMtls(agent.identity.certificate));
     const allowed = results.every((result) => result.allowed);
     const reasons = results.flatMap((result) => result.reasons);
     return {

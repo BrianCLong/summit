@@ -18,7 +18,7 @@ endpoints:
   summary: https://en.wikipedia.org/w/api.php
 mappings:
   entity:
-    id: 'wiki:{pageid}'
+    id: "wiki:{pageid}"
     type: infer(person|org|place)
     props: [title, fullurl, extract]
   rels: []

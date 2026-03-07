@@ -38,7 +38,7 @@ initiatives: [
     patterns: [/comet.?v2/i, /atomic.?pr/i],
   },
   // ...
-]
+];
 ```
 
 ## Development

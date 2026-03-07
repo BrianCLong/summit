@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface SensorPosition {
   id: string;
@@ -36,7 +36,7 @@ export interface GeolocationResult {
       orientation: number;
     };
   };
-  method: 'TDOA' | 'AOA' | 'RSSI' | 'HYBRID';
+  method: "TDOA" | "AOA" | "RSSI" | "HYBRID";
   timestamp: Date;
   measurements: TDOAMeasurement[];
   dop: { hdop: number; vdop: number; pdop: number }; // Dilution of precision
@@ -67,23 +67,23 @@ export class TDOALocator {
    */
   calculatePosition(measurements: TDOAMeasurement[]): GeolocationResult | null {
     if (measurements.length < 3) {
-      console.warn('[TDOA] Need at least 3 measurements for 2D location');
+      console.warn("[TDOA] Need at least 3 measurements for 2D location");
       return null;
     }
 
     // Get sensor positions for measurements
     const sensorMeasurements = measurements
-      .map(m => ({
+      .map((m) => ({
         measurement: m,
-        sensor: this.sensors.get(m.sensorId)
+        sensor: this.sensors.get(m.sensorId),
       }))
-      .filter(sm => sm.sensor !== undefined) as Array<{
-        measurement: TDOAMeasurement;
-        sensor: SensorPosition;
-      }>;
+      .filter((sm) => sm.sensor !== undefined) as Array<{
+      measurement: TDOAMeasurement;
+      sensor: SensorPosition;
+    }>;
 
     if (sensorMeasurements.length < 3) {
-      console.warn('[TDOA] Not enough valid sensor measurements');
+      console.warn("[TDOA] Not enough valid sensor measurements");
       return null;
     }
 
@@ -91,16 +91,19 @@ export class TDOALocator {
     const reference = sensorMeasurements[0];
 
     // Calculate time differences relative to reference
-    const tdoaPairs = sensorMeasurements.slice(1).map(sm => ({
+    const tdoaPairs = sensorMeasurements.slice(1).map((sm) => ({
       sensor: sm.sensor,
-      tdoa: (sm.measurement.arrivalTime - reference.measurement.arrivalTime) * 1e-9 // Convert to seconds
+      tdoa: (sm.measurement.arrivalTime - reference.measurement.arrivalTime) * 1e-9, // Convert to seconds
     }));
 
     // Solve using Taylor series linearization (simplified for training)
     const position = this.solveTDOA(reference.sensor, tdoaPairs);
 
     // Calculate accuracy metrics
-    const dop = this.calculateDOP(sensorMeasurements.map(sm => sm.sensor), position);
+    const dop = this.calculateDOP(
+      sensorMeasurements.map((sm) => sm.sensor),
+      position
+    );
     const accuracy = this.estimateAccuracy(measurements, dop);
 
     return {
@@ -109,12 +112,12 @@ export class TDOALocator {
       longitude: position.lon,
       altitude: position.alt,
       accuracy,
-      method: 'TDOA',
+      method: "TDOA",
       timestamp: new Date(),
       measurements,
       dop,
       confidence: this.calculateConfidence(measurements, accuracy),
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -136,15 +139,15 @@ export class TDOALocator {
       alt += pair.sensor.altitude;
     }
 
-    lat /= (tdoaPairs.length + 1);
-    lon /= (tdoaPairs.length + 1);
-    alt /= (tdoaPairs.length + 1);
+    lat /= tdoaPairs.length + 1;
+    lon /= tdoaPairs.length + 1;
+    alt /= tdoaPairs.length + 1;
 
     // Iterative refinement (simplified Newton-Raphson)
     const iterations = 10;
     for (let i = 0; i < iterations; i++) {
-      const gradLat = this.calculateGradient('lat', lat, lon, alt, reference, tdoaPairs);
-      const gradLon = this.calculateGradient('lon', lat, lon, alt, reference, tdoaPairs);
+      const gradLat = this.calculateGradient("lat", lat, lon, alt, reference, tdoaPairs);
+      const gradLon = this.calculateGradient("lon", lat, lon, alt, reference, tdoaPairs);
 
       // Step size with damping
       const step = 0.5 / (i + 1);
@@ -161,7 +164,7 @@ export class TDOALocator {
   }
 
   private calculateGradient(
-    dimension: 'lat' | 'lon',
+    dimension: "lat" | "lon",
     lat: number,
     lon: number,
     alt: number,
@@ -179,7 +182,7 @@ export class TDOALocator {
       const error = predicted - measured;
 
       let d1Plus: number, d2Plus: number;
-      if (dimension === 'lat') {
+      if (dimension === "lat") {
         d1Plus = this.distance(lat + delta, lon, alt, reference);
         d2Plus = this.distance(lat + delta, lon, alt, pair.sensor);
       } else {
@@ -200,12 +203,15 @@ export class TDOALocator {
    */
   private distance(lat: number, lon: number, alt: number, sensor: SensorPosition): number {
     const R = 6371000; // Earth radius in meters
-    const dLat = (sensor.latitude - lat) * Math.PI / 180;
-    const dLon = (sensor.longitude - lon) * Math.PI / 180;
+    const dLat = ((sensor.latitude - lat) * Math.PI) / 180;
+    const dLon = ((sensor.longitude - lon) * Math.PI) / 180;
 
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat * Math.PI / 180) * Math.cos(sensor.latitude * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat * Math.PI) / 180) *
+        Math.cos((sensor.latitude * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const horizontalDist = R * c;
@@ -227,18 +233,13 @@ export class TDOALocator {
 
     for (let i = 0; i < sensors.length; i++) {
       for (let j = i + 1; j < sensors.length; j++) {
-        const angle = this.angleBetweenSensors(
-          position,
-          sensors[i],
-          sensors[j]
-        );
+        const angle = this.angleBetweenSensors(position, sensors[i], sensors[j]);
         sumAngles += Math.abs(Math.sin(angle));
       }
     }
 
-    const geometryFactor = sensors.length > 2
-      ? sumAngles / (sensors.length * (sensors.length - 1) / 2)
-      : 1;
+    const geometryFactor =
+      sensors.length > 2 ? sumAngles / ((sensors.length * (sensors.length - 1)) / 2) : 1;
 
     // Lower is better
     const hdop = 1 / (geometryFactor + 0.1);
@@ -253,14 +254,8 @@ export class TDOALocator {
     sensor1: SensorPosition,
     sensor2: SensorPosition
   ): number {
-    const bearing1 = Math.atan2(
-      sensor1.longitude - position.lon,
-      sensor1.latitude - position.lat
-    );
-    const bearing2 = Math.atan2(
-      sensor2.longitude - position.lon,
-      sensor2.latitude - position.lat
-    );
+    const bearing1 = Math.atan2(sensor1.longitude - position.lon, sensor1.latitude - position.lat);
+    const bearing2 = Math.atan2(sensor2.longitude - position.lon, sensor2.latitude - position.lat);
     return bearing2 - bearing1;
   }
 
@@ -270,12 +265,13 @@ export class TDOALocator {
   private estimateAccuracy(
     measurements: TDOAMeasurement[],
     dop: { hdop: number; vdop: number }
-  ): GeolocationResult['accuracy'] {
+  ): GeolocationResult["accuracy"] {
     // Base accuracy from timing uncertainty
-    const avgTimingError = measurements.reduce(
-      (sum, m) => sum + (this.sensors.get(m.sensorId)?.timestampAccuracy || 100),
-      0
-    ) / measurements.length;
+    const avgTimingError =
+      measurements.reduce(
+        (sum, m) => sum + (this.sensors.get(m.sensorId)?.timestampAccuracy || 100),
+        0
+      ) / measurements.length;
 
     const timingAccuracy = avgTimingError * 1e-9 * this.speedOfLight;
 
@@ -291,20 +287,18 @@ export class TDOALocator {
       ellipse: {
         semiMajor: horizontal * 1.2,
         semiMinor: horizontal * 0.8,
-        orientation: Math.random() * 180
-      }
+        orientation: Math.random() * 180,
+      },
     };
   }
 
   private calculateConfidence(
     measurements: TDOAMeasurement[],
-    accuracy: GeolocationResult['accuracy']
+    accuracy: GeolocationResult["accuracy"]
   ): number {
     // Base confidence on measurement quality and accuracy
-    const avgMeasurementConfidence = measurements.reduce(
-      (sum, m) => sum + m.confidence,
-      0
-    ) / measurements.length;
+    const avgMeasurementConfidence =
+      measurements.reduce((sum, m) => sum + m.confidence, 0) / measurements.length;
 
     // Penalize poor accuracy
     const accuracyPenalty = Math.min(1, accuracy.horizontal / 1000);

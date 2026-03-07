@@ -1,4 +1,4 @@
-export type ContributorType = 'human' | 'ai' | 'mixed' | 'unknown';
+export type ContributorType = "human" | "ai" | "mixed" | "unknown";
 
 export interface Contributor {
   type: ContributorType;
@@ -29,7 +29,7 @@ export interface TraceRecord {
   id: string; // uuid
   timestamp: string; // RFC 3339
   vcs?: {
-    type: 'git' | 'jj' | 'hg' | 'svn';
+    type: "git" | "jj" | "hg" | "svn";
     revision: string;
   };
   tool?: {

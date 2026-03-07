@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from "react";
 import {
   registerServiceWorker,
   initializeBeforeInstallPrompt,
@@ -9,7 +9,7 @@ import {
   skipWaiting,
   isOnline as checkIsOnline,
   onNetworkStatusChange,
-} from '../lib/pwa-utils';
+} from "../lib/pwa-utils";
 
 export function PWAManager() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -41,12 +41,12 @@ export function PWAManager() {
       setIsOnline(online);
     });
 
-    window.addEventListener('sw-update-available', handleUpdateAvailable);
-    window.addEventListener('pwa-installable', handleInstallable);
+    window.addEventListener("sw-update-available", handleUpdateAvailable);
+    window.addEventListener("pwa-installable", handleInstallable);
 
     return () => {
-      window.removeEventListener('sw-update-available', handleUpdateAvailable);
-      window.removeEventListener('pwa-installable', handleInstallable);
+      window.removeEventListener("sw-update-available", handleUpdateAvailable);
+      window.removeEventListener("pwa-installable", handleInstallable);
       cleanupNetworkListener();
     };
   }, []);
@@ -75,7 +75,8 @@ export function PWAManager() {
             </div>
             <button
               onClick={handleUpdate}
-              className="ml-4 rounded bg-white px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50">
+              className="ml-4 rounded bg-white px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50"
+            >
               Update
             </button>
           </div>
@@ -94,7 +95,8 @@ export function PWAManager() {
             </div>
             <button
               onClick={handleInstall}
-              className="ml-4 rounded bg-white px-3 py-1 text-sm font-medium text-purple-600 hover:bg-purple-50">
+              className="ml-4 rounded bg-white px-3 py-1 text-sm font-medium text-purple-600 hover:bg-purple-50"
+            >
               Install
             </button>
           </div>
@@ -105,11 +107,7 @@ export function PWAManager() {
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 px-4 py-2 text-center text-sm font-medium text-white">
           <div className="flex items-center justify-center">
-            <svg
-              className="mr-2 h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24">
+            <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

@@ -3,7 +3,7 @@ name: Narrative Governance Gate
 on:
   pull_request:
     paths:
-      - 'packages/narrative-engine/src/schema.graphql'
+      - "packages/narrative-engine/src/schema.graphql"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

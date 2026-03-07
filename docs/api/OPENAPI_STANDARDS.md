@@ -5,16 +5,19 @@ This document outlines the standards for OpenAPI specifications within the Intel
 ## Standards
 
 ### 1. Operation IDs
+
 - **Requirement**: Every operation (GET, POST, etc.) must have an `operationId`.
 - **Format**: `camelCase`.
 - **Example**: `getUserProfile`, `createMaestroRun`.
 - **Reasoning**: Ensures consistent naming for code generation and documentation.
 
 ### 2. Error Handling
+
 - **Requirement**: All error responses (4xx, 5xx) must have a defined schema.
 - **Reasoning**: Clients need to know the structure of error responses to handle them gracefully.
 
 ### 3. Response Codes
+
 - **Requirement**: At least one success response (2xx) is required.
 - **Standard**:
   - `200`: Success.
@@ -25,6 +28,7 @@ This document outlines the standards for OpenAPI specifications within the Intel
   - `500`: Internal Server Error.
 
 ### 4. Naming Conventions
+
 - **Path Segments**: `kebab-case` (e.g., `/api/maestro/run-console`).
 - **Schema Names**: `PascalCase` (e.g., `UserProfile`, `RunConfig`).
 

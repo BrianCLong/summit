@@ -4,9 +4,9 @@ export function installStreamingFetchMock(chunks: string[]) {
   const mock = jest.fn().mockResolvedValue({
     ok: true,
     status: 200,
-    headers: new Headers({ 'Content-Type': 'text/plain' }),
+    headers: new Headers({ "Content-Type": "text/plain" }),
     // For code paths that call response.text()
-    text: async () => chunks.join(''),
+    text: async () => chunks.join(""),
     // For code paths that stream with getReader()
     body: {
       getReader() {
@@ -16,7 +16,7 @@ export function installStreamingFetchMock(chunks: string[]) {
             Promise.resolve(
               i < chunks.length
                 ? { value: encoder.encode(chunks[i++]), done: false }
-                : { value: undefined, done: true },
+                : { value: undefined, done: true }
             ),
           releaseLock() {},
         };

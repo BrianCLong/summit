@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 interface MarketplaceItem {
   name: string;
@@ -10,15 +10,15 @@ interface MarketplaceItem {
 export default function Marketplace() {
   const [items, setItems] = useState<MarketplaceItem[]>([]);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [msg, setMsg] = useState("");
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/plugins/registry.json', { signal: controller.signal })
+    fetch("/plugins/registry.json", { signal: controller.signal })
       .then((r) => r.json())
       .then((j) => setItems(j.steps || []))
       .catch((err) => {
-        if (err.name !== 'AbortError') {
-          console.error('Fetch error:', err);
+        if (err.name !== "AbortError") {
+          console.error("Fetch error:", err);
           setItems([]);
         }
       });
@@ -26,11 +26,11 @@ export default function Marketplace() {
   }, []);
   async function install(n: string, v: string) {
     setBusy(true);
-    setMsg('');
+    setMsg("");
     try {
       await fetch(
         `/api/plugins/install?name=${encodeURIComponent(n)}&version=${encodeURIComponent(v)}`,
-        { method: 'POST' },
+        { method: "POST" }
       );
       setMsg(`Installed ${n}@${v}`);
     } catch (e: unknown) {
@@ -59,7 +59,7 @@ export default function Marketplace() {
               <td className="font-mono">{s.name}</td>
               <td>{s.type}</td>
               <td>{s.version}</td>
-              <td>{(s.residency || []).join(',')}</td>
+              <td>{(s.residency || []).join(",")}</td>
               <td>
                 <button
                   disabled={busy}

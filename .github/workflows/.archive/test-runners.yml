@@ -3,15 +3,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Manual trigger for testing runners
 on:
   workflow_dispatch:
     inputs:
       runner_count:
-        description: 'Expected number of runners'
+        description: "Expected number of runners"
         required: false
-        default: '5'
+        default: "5"
         type: string
 
 jobs:
@@ -90,7 +89,7 @@ jobs:
   test-ubuntu-runners:
     name: Test Ubuntu Runners (when available)
     runs-on: self-hosted
-    if: false  # Enable after Ubuntu runners are configured
+    if: false # Enable after Ubuntu runners are configured
     strategy:
       matrix:
         test: [1, 2, 3]

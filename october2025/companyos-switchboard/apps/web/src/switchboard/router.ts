@@ -1,6 +1,12 @@
-import { SwitchboardRoute, SwitchboardContext } from './types';
-import { z } from 'zod';
-import { ConsoleLogger, getErrorMessage, Logger, MetricsClient, NoopMetrics } from './observability';
+import { SwitchboardRoute, SwitchboardContext } from "./types";
+import { z } from "zod";
+import {
+  ConsoleLogger,
+  getErrorMessage,
+  Logger,
+  MetricsClient,
+  NoopMetrics,
+} from "./observability";
 
 interface RouterOptions {
   defaultTimeout?: number;
@@ -20,7 +26,7 @@ export class SwitchboardRouter {
       // Defaults are console/no-op; supply real implementations in production.
       logger: options.logger || new ConsoleLogger(),
       metrics: options.metrics || new NoopMetrics(),
-      ...options
+      ...options,
     };
   }
 
@@ -44,7 +50,7 @@ export class SwitchboardRouter {
       throw new Error(`Route not found: ${routeId}`);
     }
 
-    this.options.metrics.increment('switchboard.request', {
+    this.options.metrics.increment("switchboard.request", {
       routeId,
       source: context.source,
     });
@@ -56,7 +62,7 @@ export class SwitchboardRouter {
         error: validationResult.error,
         context,
       });
-      this.options.metrics.increment('switchboard.error', { routeId, type: 'validation' });
+      this.options.metrics.increment("switchboard.error", { routeId, type: "validation" });
       throw new Error(`Invalid input for route ${routeId}: ${validationResult.error.message}`);
     }
 
@@ -66,21 +72,25 @@ export class SwitchboardRouter {
       const result = await this.executeWithRetry(route, validatedPayload, context);
 
       const duration = performance.now() - start;
-      this.options.metrics.histogram('switchboard.latency', duration, { routeId });
+      this.options.metrics.histogram("switchboard.latency", duration, { routeId });
       this.options.logger.info(`Route ${routeId} completed`, { routeId, duration, context });
 
       return result;
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       const duration = performance.now() - start;
-      this.options.metrics.histogram('switchboard.latency', duration, { routeId, status: 'error' });
-      this.options.metrics.increment('switchboard.error', { routeId, type: 'execution' });
+      this.options.metrics.histogram("switchboard.latency", duration, { routeId, status: "error" });
+      this.options.metrics.increment("switchboard.error", { routeId, type: "execution" });
       this.options.logger.error(`Route ${routeId} failed`, { error: errorMessage, context });
       throw error;
     }
   }
 
-  private async executeWithRetry(route: SwitchboardRoute, payload: any, context: SwitchboardContext) {
+  private async executeWithRetry(
+    route: SwitchboardRoute,
+    payload: any,
+    context: SwitchboardContext
+  ) {
     let attempt = 0;
     const maxRetries = this.options.defaultRetries;
 
@@ -100,24 +110,33 @@ export class SwitchboardRouter {
             error: errorMessage,
             context,
           });
-          throw new Error(`Route ${route.id} failed after ${attempt} attempts. Last error: ${errorMessage}`);
+          throw new Error(
+            `Route ${route.id} failed after ${attempt} attempts. Last error: ${errorMessage}`
+          );
         }
 
         // Simple backoff: 100ms * 2^attempt
         const delay = 100 * Math.pow(2, attempt);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
 
-  private async executeWithTimeout(route: SwitchboardRoute, payload: any, context: SwitchboardContext) {
+  private async executeWithTimeout(
+    route: SwitchboardRoute,
+    payload: any,
+    context: SwitchboardContext
+  ) {
     const timeout = this.options.defaultTimeout;
 
     return Promise.race([
       route.handler(payload, context),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Route ${route.id} timed out after ${timeout}ms`)), timeout)
-      )
+        setTimeout(
+          () => reject(new Error(`Route ${route.id} timed out after ${timeout}ms`)),
+          timeout
+        )
+      ),
     ]).then(async (result) => {
       // Validate output
       const outputValidation = route.outputSchema.safeParse(result);

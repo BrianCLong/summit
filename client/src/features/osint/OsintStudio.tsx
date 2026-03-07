@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import React, { useState } from "react";
+import { gql, useMutation } from "@apollo/client";
 
 const START_OSINT_SCAN = gql`
   mutation StartOsintScan($target: String!) {
@@ -13,7 +12,7 @@ const START_OSINT_SCAN = gql`
 `;
 
 const OsintStudio = () => {
-  const [target, setTarget] = useState('');
+  const [target, setTarget] = useState("");
   const [startOsintScan, { data, loading, error }] = useMutation(START_OSINT_SCAN);
 
   const handleScan = () => {
@@ -30,7 +29,7 @@ const OsintStudio = () => {
         placeholder="Enter target (e.g., domain, IP)"
       />
       <button onClick={handleScan} disabled={loading}>
-        {loading ? 'Starting Scan...' : 'Start Scan'}
+        {loading ? "Starting Scan..." : "Start Scan"}
       </button>
 
       {data && (

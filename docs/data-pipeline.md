@@ -27,25 +27,30 @@ import {
   TransformationPipeline,
   coerceTypes,
   normalizeKeys,
-} from '../src/data-pipeline/index.js';
+} from "../src/data-pipeline/index.js";
 
 const registry = new SchemaRegistry();
-registry.register({ version: '1.0.0', schema: {/* JSON schema */} });
+registry.register({
+  version: "1.0.0",
+  schema: {
+    /* JSON schema */
+  },
+});
 
 const transforms = new TransformationPipeline();
 transforms.register(normalizeKeys);
-transforms.register((record) => coerceTypes(record, { value: 'number' }));
+transforms.register((record) => coerceTypes(record, { value: "number" }));
 
 const pipeline = new DataPipeline(
-  [new CsvSource('csv', 'id,value\n1,10'), new ApiSource('api', 'https://example.test/data')],
+  [new CsvSource("csv", "id,value\n1,10"), new ApiSource("api", "https://example.test/data")],
   registry,
   transforms,
   new DataQualityChecker(),
   {
-    schemaVersion: '1.0.0',
-    deduplicationKey: 'id',
-    watermarkField: 'updated_at',
-    qualityRules: { ranges: [{ field: 'value', min: 0 }] },
+    schemaVersion: "1.0.0",
+    deduplicationKey: "id",
+    watermarkField: "updated_at",
+    qualityRules: { ranges: [{ field: "value", min: 0 }] },
     initialWatermark: 0,
     maxPagesPerSource: 10,
   }
@@ -69,11 +74,11 @@ console.log(outcome.metrics); // per-source metrics including ingestionErrors
 Example:
 
 ```ts
-const api = new ApiSource('api', 'https://example.test/data', {
-  cursorParam: 'cursor',
-  cursorPath: 'pagination.next',
-  recordsPath: 'items',
-  pageSizeParam: 'limit',
+const api = new ApiSource("api", "https://example.test/data", {
+  cursorParam: "cursor",
+  cursorPath: "pagination.next",
+  recordsPath: "items",
+  pageSizeParam: "limit",
   pageSize: 100,
 });
 ```

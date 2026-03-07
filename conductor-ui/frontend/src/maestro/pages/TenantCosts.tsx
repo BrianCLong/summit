@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import TenantSLO from '../components/TenantSLO';
-import TenantSLOChart from '../components/TenantSLOChart';
-import TenantCost from '../components/TenantCost';
-import TenantBudgetForecast from '../components/TenantBudgetForecast';
-import TenantCostAnomalies from '../components/TenantCostAnomalies';
-import { api } from '../api';
-import GrafanaPanel from '../components/GrafanaPanel';
-import ModelAnomalyPanels from '../components/ModelAnomalyPanels';
+import React, { useState, useEffect } from "react";
+import TenantSLO from "../components/TenantSLO";
+import TenantSLOChart from "../components/TenantSLOChart";
+import TenantCost from "../components/TenantCost";
+import TenantBudgetForecast from "../components/TenantBudgetForecast";
+import TenantCostAnomalies from "../components/TenantCostAnomalies";
+import { api } from "../api";
+import GrafanaPanel from "../components/GrafanaPanel";
+import ModelAnomalyPanels from "../components/ModelAnomalyPanels";
 
 export default function TenantCosts() {
-  const [tenant, setTenant] = useState('acme');
-  const cfg: any =
-    (window as any).__MAESTRO_CFG__ || (window as any).MAESTRO_CFG || {};
+  const [tenant, setTenant] = useState("acme");
+  const cfg: any = (window as any).__MAESTRO_CFG__ || (window as any).MAESTRO_CFG || {};
   const {
     listAlertRoutes,
     createAlertRoute,
@@ -21,14 +20,14 @@ export default function TenantCosts() {
     billingExport,
   } = api();
   const [routes, setRoutes] = React.useState<any[]>([]);
-  const [receiver, setReceiver] = React.useState<'email' | 'webhook'>('email');
-  const [severity, setSeverity] = React.useState<'warn' | 'page'>('page');
-  const [endpoint, setEndpoint] = React.useState('');
+  const [receiver, setReceiver] = React.useState<"email" | "webhook">("email");
+  const [severity, setSeverity] = React.useState<"warn" | "page">("page");
+  const [endpoint, setEndpoint] = React.useState("");
   const [budgetPolicy, setBudgetPolicy] = useState<any>(null);
 
   const refreshRoutes = React.useCallback(
     () => listAlertRoutes().then((r) => setRoutes(r.routes || [])),
-    [listAlertRoutes],
+    [listAlertRoutes]
   );
 
   useEffect(() => {
@@ -41,26 +40,26 @@ export default function TenantCosts() {
         const policy = await getTenantBudgetPolicy(tenant);
         setBudgetPolicy(policy);
       } catch (error) {
-        console.error('Failed to fetch budget policy:', error);
+        console.error("Failed to fetch budget policy:", error);
         setBudgetPolicy(null);
       }
     };
     fetchBudgetPolicy();
   }, [tenant, getTenantBudgetPolicy]);
 
-  const handleDownloadExport = async (format: 'csv' | 'json') => {
+  const handleDownloadExport = async (format: "csv" | "json") => {
     try {
       const now = new Date();
-      const month = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+      const month = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}`;
       const result = await billingExport(tenant, month, format);
-      const url = format === 'csv' ? result.csvUrl : result.jsonUrl;
+      const url = format === "csv" ? result.csvUrl : result.jsonUrl;
       if (url) {
-        window.open(url, '_blank');
+        window.open(url, "_blank");
       } else {
         alert(`Failed to get download URL for ${format} format.`);
       }
     } catch (error) {
-      console.error('Failed to download export:', error);
+      console.error("Failed to download export:", error);
       alert(`Error downloading export: ${error.message}`);
     }
   };
@@ -78,25 +77,24 @@ export default function TenantCosts() {
         {budgetPolicy && (
           <span
             className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${
-              budgetPolicy.type === 'hard'
-                ? 'bg-red-100 text-red-800'
-                : 'bg-yellow-100 text-yellow-800'
+              budgetPolicy.type === "hard"
+                ? "bg-red-100 text-red-800"
+                : "bg-yellow-100 text-yellow-800"
             }`}
           >
             Budget: {budgetPolicy.type.toUpperCase()} Cap ${budgetPolicy.limit}
-            {budgetPolicy.type === 'soft' &&
-              ` (Grace: ${budgetPolicy.grace * 100}%)`}
+            {budgetPolicy.type === "soft" && ` (Grace: ${budgetPolicy.grace * 100}%)`}
           </span>
         )}
         <button
           className="rounded border px-2 py-1 text-sm"
-          onClick={() => handleDownloadExport('csv')}
+          onClick={() => handleDownloadExport("csv")}
         >
           Download Usage (CSV)
         </button>
         <button
           className="rounded border px-2 py-1 text-sm"
-          onClick={() => handleDownloadExport('json')}
+          onClick={() => handleDownloadExport("json")}
         >
           Download Usage (JSON)
         </button>
@@ -106,10 +104,7 @@ export default function TenantCosts() {
       <TenantCost tenant={tenant} />
       <TenantBudgetForecast tenant={tenant} />
       <TenantCostAnomalies tenant={tenant} />
-      <section
-        className="space-y-2 rounded-2xl border p-4"
-        aria-label="Alert routes"
-      >
+      <section className="space-y-2 rounded-2xl border p-4" aria-label="Alert routes">
         <div className="text-sm font-medium">Forecast alert routes</div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <label className="flex items-center gap-2">
@@ -136,7 +131,7 @@ export default function TenantCosts() {
           </label>
           <input
             className="w-72 rounded border px-2 py-1"
-            placeholder={receiver === 'email' ? 'Email' : 'Webhook URL'}
+            placeholder={receiver === "email" ? "Email" : "Webhook URL"}
             value={endpoint}
             onChange={(e) => setEndpoint(e.target.value)}
           />
@@ -144,22 +139,19 @@ export default function TenantCosts() {
             className="rounded bg-blue-600 px-3 py-2 text-white"
             onClick={async () => {
               await createAlertRoute({
-                type: 'forecast',
+                type: "forecast",
                 tenant,
                 severity,
                 receiver,
                 meta: { endpoint },
               });
-              setEndpoint('');
+              setEndpoint("");
               refreshRoutes();
             }}
           >
             Create route
           </button>
-          <button
-            className="rounded border px-3 py-2"
-            onClick={() => testAlertEvent({ tenant })}
-          >
+          <button className="rounded border px-3 py-2" onClick={() => testAlertEvent({ tenant })}>
             Test alert
           </button>
         </div>
@@ -175,7 +167,7 @@ export default function TenantCosts() {
             </thead>
             <tbody>
               {routes
-                .filter((r) => r.tenant === tenant && r.type === 'forecast')
+                .filter((r) => r.tenant === tenant && r.type === "forecast")
                 .map((r) => (
                   <tr key={r.id}>
                     <td>{r.id}</td>
@@ -184,9 +176,7 @@ export default function TenantCosts() {
                     <td>
                       <button
                         className="text-red-600 underline"
-                        onClick={() =>
-                          deleteAlertRoute(r.id).then(refreshRoutes)
-                        }
+                        onClick={() => deleteAlertRoute(r.id).then(refreshRoutes)}
                       >
                         Delete
                       </button>
@@ -205,18 +195,12 @@ export default function TenantCosts() {
         </div>
       </section>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <GrafanaPanel uid={cfg?.grafanaDashboards?.cost || "maestro-cost"} vars={{ tenant }} />
         <GrafanaPanel
-          uid={cfg?.grafanaDashboards?.cost || 'maestro-cost'}
+          uid={cfg?.grafanaDashboards?.overview || "maestro-overview"}
           vars={{ tenant }}
         />
-        <GrafanaPanel
-          uid={cfg?.grafanaDashboards?.overview || 'maestro-overview'}
-          vars={{ tenant }}
-        />
-        <GrafanaPanel
-          uid={cfg?.grafanaDashboards?.slo || 'maestro-slo'}
-          vars={{ tenant }}
-        />
+        <GrafanaPanel uid={cfg?.grafanaDashboards?.slo || "maestro-slo"} vars={{ tenant }} />
       </div>
       <ModelAnomalyPanels tenant={tenant} />
     </section>

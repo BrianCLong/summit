@@ -5,9 +5,9 @@
  * Discovers and loads extensions from configured directories.
  */
 
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { glob } from 'glob';
+import * as fs from "fs/promises";
+import * as path from "path";
+import { glob } from "glob";
 import {
   ExtensionManifest,
   ExtensionManifestSchema,
@@ -15,14 +15,14 @@ import {
   ExtensionContext,
   ExtensionLogger,
   ExtensionAPI,
-} from './types.js';
-import { ExtensionRegistry } from './registry.js';
-import { PolicyEnforcer } from './policy/enforcer.js';
-import { CompatibilityChecker } from './compatibility.js';
-import { StaticPolicyValidator } from './policy/static-validator.js';
-import { SandboxRunner, SandboxActivationHandle } from './sandbox/sandbox-runner.js';
-import { ExtensionObservability } from './observability.js';
-import { ExtensionHealthMonitor } from './health.js';
+} from "./types.js";
+import { ExtensionRegistry } from "./registry.js";
+import { PolicyEnforcer } from "./policy/enforcer.js";
+import { CompatibilityChecker } from "./compatibility.js";
+import { StaticPolicyValidator } from "./policy/static-validator.js";
+import { SandboxRunner, SandboxActivationHandle } from "./sandbox/sandbox-runner.js";
+import { ExtensionObservability } from "./observability.js";
+import { ExtensionHealthMonitor } from "./health.js";
 
 export interface LoaderOptions {
   extensionDirs: string[];
@@ -38,7 +38,7 @@ export interface LoaderOptions {
 
 export class ExtensionLoader {
   private registry: ExtensionRegistry;
-  private options: Required<Omit<LoaderOptions, 'api' | 'policyEnforcer'>> & {
+  private options: Required<Omit<LoaderOptions, "api" | "policyEnforcer">> & {
     api?: Partial<ExtensionAPI>;
     policyEnforcer?: PolicyEnforcer;
   };
@@ -53,7 +53,7 @@ export class ExtensionLoader {
     this.registry = new ExtensionRegistry();
     this.observability = new ExtensionObservability();
     this.compatibility = new CompatibilityChecker({
-      platformVersion: options.platformVersion || process.env.SUMMIT_VERSION || '1.0.0',
+      platformVersion: options.platformVersion || process.env.SUMMIT_VERSION || "1.0.0",
       supportedBackwardsMajorVersions: 1,
     });
     this.staticValidator = new StaticPolicyValidator({
@@ -62,8 +62,8 @@ export class ExtensionLoader {
     });
     this.options = {
       extensionDirs: options.extensionDirs,
-      configPath: options.configPath || path.join(process.cwd(), '.summit/extensions/config'),
-      storagePath: options.storagePath || path.join(process.cwd(), '.summit/extensions/storage'),
+      configPath: options.configPath || path.join(process.cwd(), ".summit/extensions/config"),
+      storagePath: options.storagePath || path.join(process.cwd(), ".summit/extensions/storage"),
       autoLoad: options.autoLoad ?? true,
       api: options.api,
       policyEnforcer: options.policyEnforcer,
@@ -81,7 +81,7 @@ export class ExtensionLoader {
     for (const dir of this.options.extensionDirs) {
       try {
         // Find all extension.json files
-        const pattern = path.join(dir, '**/extension.json');
+        const pattern = path.join(dir, "**/extension.json");
         const files = await glob(pattern, { absolute: true });
 
         for (const file of files) {
@@ -108,7 +108,7 @@ export class ExtensionLoader {
    * Load and validate an extension manifest
    */
   private async loadManifest(manifestPath: string): Promise<ExtensionManifest> {
-    const content = await fs.readFile(manifestPath, 'utf-8');
+    const content = await fs.readFile(manifestPath, "utf-8");
     const data = JSON.parse(content);
 
     // Validate against schema
@@ -117,8 +117,8 @@ export class ExtensionLoader {
     if (!result.success) {
       throw new Error(
         `Invalid extension manifest: ${result.error.errors
-          .map((e) => `${e.path.join('.')}: ${e.message}`)
-          .join(', ')}`
+          .map((e) => `${e.path.join(".")}: ${e.message}`)
+          .join(", ")}`
       );
     }
 
@@ -144,9 +144,7 @@ export class ExtensionLoader {
     }
 
     const stats = this.registry.getStats();
-    console.info(
-      `Loaded ${stats.loaded}/${stats.total} extensions (${stats.failed} failed)`
-    );
+    console.info(`Loaded ${stats.loaded}/${stats.total} extensions (${stats.failed} failed)`);
   }
 
   /**
@@ -186,7 +184,7 @@ export class ExtensionLoader {
     }
 
     const modulePath = path.join(extensionPath, mainEntrypoint.path);
-    const exportName = mainEntrypoint.export || 'default';
+    const exportName = mainEntrypoint.export || "default";
     const activation = await this.sandbox.run(manifest, modulePath, exportName, context);
 
     // Store activation and mark as loaded
@@ -198,10 +196,7 @@ export class ExtensionLoader {
    * Create extension context
    */
   private createContext(extensionPath: string, config: Record<string, any>): ExtensionContext {
-    const storagePath = path.join(
-      this.options.storagePath,
-      path.basename(extensionPath)
-    );
+    const storagePath = path.join(this.options.storagePath, path.basename(extensionPath));
 
     // Ensure storage directory exists
     fs.mkdir(storagePath, { recursive: true }).catch(console.error);
@@ -223,20 +218,20 @@ export class ExtensionLoader {
 
     return {
       info: (msg, ...args) => {
-        this.observability.recordLog(extensionName, 'info', msg, ...args);
+        this.observability.recordLog(extensionName, "info", msg, ...args);
         console.info(prefix, msg, ...args);
       },
       warn: (msg, ...args) => {
-        this.observability.recordLog(extensionName, 'warn', msg, ...args);
+        this.observability.recordLog(extensionName, "warn", msg, ...args);
         console.warn(prefix, msg, ...args);
       },
       error: (msg, ...args) => {
-        this.observability.recordLog(extensionName, 'error', msg, ...args);
+        this.observability.recordLog(extensionName, "error", msg, ...args);
         console.error(prefix, msg, ...args);
         this.healthMonitor.recordFailure(extensionName);
       },
       debug: (msg, ...args) => {
-        this.observability.recordLog(extensionName, 'debug', msg, ...args);
+        this.observability.recordLog(extensionName, "debug", msg, ...args);
         console.debug(prefix, msg, ...args);
       },
     };
@@ -250,42 +245,42 @@ export class ExtensionLoader {
     const defaultAPI: ExtensionAPI = {
       entities: {
         create: async (entity) => {
-          throw new Error('entities.create not implemented');
+          throw new Error("entities.create not implemented");
         },
         update: async (id, data) => {
-          throw new Error('entities.update not implemented');
+          throw new Error("entities.update not implemented");
         },
         delete: async (id) => {
-          throw new Error('entities.delete not implemented');
+          throw new Error("entities.delete not implemented");
         },
         query: async (filter) => {
-          throw new Error('entities.query not implemented');
+          throw new Error("entities.query not implemented");
         },
       },
       relationships: {
         create: async (rel) => {
-          throw new Error('relationships.create not implemented');
+          throw new Error("relationships.create not implemented");
         },
         query: async (filter) => {
-          throw new Error('relationships.query not implemented');
+          throw new Error("relationships.query not implemented");
         },
       },
       investigations: {
         create: async (inv) => {
-          throw new Error('investigations.create not implemented');
+          throw new Error("investigations.create not implemented");
         },
         get: async (id) => {
-          throw new Error('investigations.get not implemented');
+          throw new Error("investigations.get not implemented");
         },
         update: async (id, data) => {
-          throw new Error('investigations.update not implemented');
+          throw new Error("investigations.update not implemented");
         },
       },
       storage: {
         get: async (key) => {
           const file = path.join(storagePath, `${key}.json`);
           try {
-            const data = await fs.readFile(file, 'utf-8');
+            const data = await fs.readFile(file, "utf-8");
             return JSON.parse(data);
           } catch {
             return undefined;
@@ -317,7 +312,7 @@ export class ExtensionLoader {
     const configFile = path.join(this.options.configPath, `${extensionName}.json`);
 
     try {
-      const content = await fs.readFile(configFile, 'utf-8');
+      const content = await fs.readFile(configFile, "utf-8");
       return JSON.parse(content);
     } catch {
       // No config file, return empty config
